@@ -7,6 +7,7 @@ import { remarkGlossary } from "./lib/remark-glossary";
 const withNextra = nextra({
   defaultShowCopyCode: true,
   codeHighlight: true,
+  search: false,
   mdxOptions: {
     remarkPlugins: [
       [
@@ -23,6 +24,28 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Dissolved guides/security section
+        {
+          source: "/:locale/guides/security/security-research-program",
+          destination: "/:locale/resources/security-research-program",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security/securing-arcade-mcp",
+          destination: "/:locale/guides/create-tools/secure-your-server",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security/secure-your-mcp-server",
+          destination:
+            "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security",
+          destination: "/:locale/guides/create-tools/secure-your-server",
+          permanent: true,
+        },
         // Auto-added redirects for deleted pages
         {
           source: "/:locale/references/mcp/python/transports",
@@ -164,13 +187,6 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/resources/integrations/productivity/jira/reference",
           destination: "/:locale/resources/integrations/productivity/jira",
-          permanent: true,
-        },
-        {
-          source:
-            "/:locale/resources/integrations/productivity/outlook-mail/reference",
-          destination:
-            "/:locale/resources/integrations/productivity/outlook-mail",
           permanent: true,
         },
         {
@@ -396,7 +412,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/build-tools/secure-your-mcp-server",
-          destination: "/:locale/guides/security/secure-your-mcp-server",
+          destination:
+            "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
           permanent: true,
         },
         {
@@ -617,6 +634,11 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/mcp-clients/claude-desktop",
           destination: "/:locale/get-started/mcp-clients/claude-desktop",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/mcp-clients/claude-code",
+          destination: "/:locale/get-started/mcp-clients/claude-code",
           permanent: true,
         },
         {
@@ -863,6 +885,26 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/tool-calling/mcp-clients/:path*",
           destination: "/:locale/get-started/mcp-clients/:path*",
+          permanent: true,
+        },
+        // Deprecated toolkit renames (microsoft_* prefix, ArcadeAI/monorepo#601)
+        {
+          source: "/:locale/resources/integrations/productivity/sharepoint",
+          destination:
+            "/:locale/resources/integrations/productivity/microsoft-sharepoint",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/outlook-mail",
+          destination:
+            "/:locale/resources/integrations/productivity/microsoft-outlook-mail",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/outlook-calendar",
+          destination:
+            "/:locale/resources/integrations/productivity/microsoft-outlook-calendar",
           permanent: true,
         },
       ];

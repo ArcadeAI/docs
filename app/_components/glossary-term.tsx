@@ -13,7 +13,7 @@ const MAX_DEFINITION_LENGTH = 200;
 type GlossaryTermProps = {
   term: string;
   definition: string;
-  link: string;
+  link?: string;
   children?: React.ReactNode;
 };
 
@@ -60,13 +60,15 @@ export function GlossaryTerm({
           <p className="text-gray-600 text-xs leading-relaxed dark:text-gray-400">
             {truncatedDef}
           </p>
-          <Link
-            className="inline-block text-blue-600 text-xs hover:underline dark:text-blue-400"
-            href={link}
-            onClick={() => setOpen(false)}
-          >
-            View in glossary →
-          </Link>
+          {link && (
+            <Link
+              className="inline-block text-blue-600 text-xs hover:underline dark:text-blue-400"
+              href={link}
+              onClick={() => setOpen(false)}
+            >
+              View in glossary →
+            </Link>
+          )}
         </div>
       </PopoverContent>
     </Popover>

@@ -18,7 +18,8 @@ export type DocumentationChunkType =
   | "code"
   | "warning"
   | "info"
-  | "tip";
+  | "tip"
+  | "section";
 
 /**
  * Location where the chunk should be injected
@@ -197,6 +198,12 @@ export type ToolMetadataBehavior = {
   openWorld?: boolean;
 };
 
+export type BehaviorFlagKey =
+  | "readOnly"
+  | "destructive"
+  | "idempotent"
+  | "openWorld";
+
 export type ToolMetadata = {
   classification: ToolMetadataClassification;
   behavior: ToolMetadataBehavior;
@@ -337,8 +344,12 @@ export type ToolkitData = {
   documentationChunks?: DocumentationChunk[];
   /** Custom imports for MDX */
   customImports: string[];
-  /** Sub-pages that exist for this toolkit */
-  subPages: string[];
+  /**
+   * Sub-pages that exist for this toolkit.
+   * Each entry is either a string (legacy slug) or a rich object with
+   * { type, content, relativePath } for inline MDX sub-page content.
+   */
+  subPages: (string | Record<string, unknown>)[];
   /** Optional pip package name override */
   pipPackageName?: string;
   /** Generation timestamp */
@@ -367,8 +378,6 @@ export type DocumentationChunkRendererProps = {
  * Props for ToolkitHeader component
  */
 export type ToolkitHeaderProps = {
-  /** Toolkit ID for icon lookup */
-  id: string;
   /** Display label */
   label: string;
   /** Toolkit description */
@@ -449,6 +458,7 @@ export type AvailableToolsTableProps = {
     secrets?: string[];
     secretsInfo?: ToolSecret[];
     scopes?: string[];
+    metadata?: ToolMetadata | null;
   }>;
   /** Optional label for the secrets column */
   secretsColumnLabel?: string;

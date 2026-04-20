@@ -114,7 +114,7 @@
       "secretsInfo": [
         {
           "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
-          "type": "unknown"
+          "type": "password"
         }
       ],
       "output": {
@@ -250,17 +250,17 @@
         "toolName": "Clickhouse.ExecuteSelectQuery",
         "parameters": {
           "select_clause": {
-            "value": "users.id, users.email, orders.order_id, orders.total_amount, orders.created_at",
+            "value": "e.event_id, e.user_id, lower(trim(e.event_type)) AS event_type, e.event_time, lower(trim(u.country)) AS country",
             "type": "string",
             "required": true
           },
           "from_clause": {
-            "value": "users",
+            "value": "analytics.events AS e",
             "type": "string",
             "required": true
           },
           "limit": {
-            "value": 50,
+            "value": 100,
             "type": "integer",
             "required": false
           },
@@ -270,12 +270,12 @@
             "required": false
           },
           "join_clause": {
-            "value": "INNER JOIN orders ON users.id = orders.user_id",
+            "value": "analytics.users AS u ON e.user_id = u.id",
             "type": "string",
             "required": false
           },
           "where_clause": {
-            "value": "lower(trim(users.email)) LIKE '%@example.com' AND orders.created_at >= '2025-01-01'",
+            "value": "lower(trim(e.event_type)) LIKE 'purchase%' AND lower(trim(u.country)) = 'us' AND e.event_time >= toDateTime('2026-01-01 00:00:00')",
             "type": "string",
             "required": false
           },
@@ -290,7 +290,7 @@
             "required": false
           },
           "order_by_clause": {
-            "value": "users.id ASC, orders.created_at DESC",
+            "value": "e.event_time DESC, e.event_id ASC",
             "type": "string",
             "required": false
           },
@@ -361,12 +361,12 @@
         "toolName": "Clickhouse.GetTableSchema",
         "parameters": {
           "schema_name": {
-            "value": "default",
+            "value": "analytics",
             "type": "string",
             "required": true
           },
           "table_name": {
-            "value": "events",
+            "value": "user_events",
             "type": "string",
             "required": true
           }
@@ -394,6 +394,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-28T11:11:37.453Z",
-  "summary": "ClickHouse toolkit provides tools to explore and query a ClickHouse database, enabling safe schema discovery and read-only SELECT execution. It helps discover databases and tables, inspect table schemas, and run constrained SELECT queries that follow ClickHouse best practices.\n\n**Capabilities**\n- Discover database and table topology and surface a default schema name.\n- Retrieve precise table schemas to drive safe query construction.\n- Execute read-only SELECTs with enforced rules (explicit columns, ordering, indexed joins, case sensitivity).\n- Surface query guidance to avoid common ClickHouse pitfalls.\n\n**Secrets**\nSecret types: password, unknown. Example: CLICKHOUSE_DATABASE_CONNECTION_STRING — a connection string containing host, port, database and credentials (including password)."
+  "generatedAt": "2026-03-01T11:12:22.108Z",
+  "summary": "Arcade ClickHouse toolkit provides programmatic access to ClickHouse databases, enabling discovery, schema inspection, and safe read-only querying. It helps explore databases and tables, load table schemas, and execute SELECT queries while enforcing rules that reduce errors and preserve performance.\n\n**Capabilities**\n- Discover databases and tables and load table schemas to support safe query construction.\n- Execute read-only, parameterized SELECT queries with guidance on joins, ordering, and string handling.\n- Enforce best practices (no SELECT *, careful case-sensitive identifiers, indexed joins, explicit column selection) to minimize errors and improve performance.\n\n**Secrets**\n- Accepts connection secrets (password, unknown) via CLICKHOUSE_DATABASE_CONNECTION_STRING — typically a DSN containing host, port, database, user, and password."
 }

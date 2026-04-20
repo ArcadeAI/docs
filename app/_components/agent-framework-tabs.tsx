@@ -3,9 +3,19 @@ import { PlatformCard } from "@/app/_components/platform-card";
 
 export function AgentFrameworkTabs() {
   return (
-    <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+    <Tabs
+      items={["Python", "JavaScript", "Java"]}
+      storageKey="preferredLanguage"
+    >
       <Tabs.Tab>
         <div className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
+          <PlatformCard
+            icon="/images/icons/ag2.svg"
+            invertInDark
+            link="/en/get-started/agent-frameworks/ag2/use-arcade-tools"
+            name="AG2"
+            type="Agent Framework"
+          />
           <PlatformCard
             icon="https://avatars.githubusercontent.com/u/170677839?s=200&v=4"
             link="/en/get-started/agent-frameworks/crewai/use-arcade-tools"
@@ -72,6 +82,16 @@ export function AgentFrameworkTabs() {
             icon="https://avatars.githubusercontent.com/u/72518640?s=200&v=4"
             link="/en/get-started/agent-frameworks/tanstack-ai"
             name="TanStack AI"
+            type="Agent Framework"
+          />
+        </div>
+      </Tabs.Tab>
+      <Tabs.Tab>
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
+          <PlatformCard
+            icon="/images/icons/spring-ai.svg"
+            link="/en/get-started/agent-frameworks/springai"
+            name="Spring AI"
             type="Agent Framework"
           />
         </div>

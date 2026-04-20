@@ -11,6 +11,10 @@ export {
 export { DynamicCodeBlock } from "./dynamic-code-block";
 export { ParametersTable } from "./parameters-table";
 export { ScopesDisplay } from "./scopes-display";
+export {
+  buildBehaviorRows,
+  ToolMetadataSection,
+} from "./tool-metadata-section";
 export { ToolSection } from "./tool-section";
 export { ToolkitHeader } from "./toolkit-header";
 export { ToolkitPage } from "./toolkit-page";

@@ -1,6 +1,10 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
+  },
   imgflip: {
     title: "Imgflip",
     href: "/en/resources/integrations/entertainment/imgflip",

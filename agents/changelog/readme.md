@@ -1,11 +1,20 @@
-# Changelog Agent
+# Changelog Generator
 
-This agent is used to generate a changelog for the Arcade.dev software projects.
+Generates a weekly changelog entry from merged PRs across ArcadeAI repos.
+
+## Requirements
+
+- [Bun](https://bun.sh)
+- `GITHUB_TOKEN` — GitHub personal access token with repo access
+- `OPENAI_API_KEY` — OpenAI API key
 
 ## Usage
 
 ```bash
 bun install
-cp .env.example .env # and fill in the values
-bun run agent
+GITHUB_TOKEN=... OPENAI_API_KEY=... bun run generate
 ```
+
+Or set the env vars in a `.env` file (Bun loads it automatically).
+
+Optionally set `OPENAI_MODEL` to override the default (`gpt-4o-mini`).

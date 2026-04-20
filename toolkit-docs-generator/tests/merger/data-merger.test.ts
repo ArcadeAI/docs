@@ -9,7 +9,6 @@ import {
   computeAllScopes,
   DataMerger,
   determineAuthType,
-  extractVersion,
   getProviderId,
   groupToolsByToolkit,
   mergeToolkit,
@@ -32,6 +31,7 @@ import type {
   ToolDefinition,
   ToolkitMetadata,
 } from "../../src/types/index.js";
+import { extractVersion } from "../../src/utils/index.js";
 
 // ============================================================================
 // Test Fixtures - Realistic data matching production schema
@@ -1185,6 +1185,221 @@ describe("DataMerger", () => {
       expect(result.toolkit.summary).toBeUndefined();
     });
 
+    it("preserves previous summary when no LLM generator is available and the signature changed", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Hand-authored summary";
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.tools).toHaveLength(2);
+      expect(result.toolkit.summary).toBe("Hand-authored summary");
+      expect(result.toolkit.summaryStale).toBe(true);
+      expect(result.toolkit.summaryStaleReason).toBe(
+        "llm_generator_unavailable"
+      );
+      expect(
+        result.warnings.some((warning) =>
+          warning.includes("Summary is stale for Github")
+        )
+      ).toBe(true);
+    });
+
+    it("preserves previous summary when the LLM generator throws", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Hand-authored summary";
+
+      const failingSummary: ToolkitSummaryGenerator = {
+        generate: async () => {
+          throw new Error("rate limited");
+        },
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: failingSummary,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Hand-authored summary");
+      expect(
+        result.warnings.some((warning) =>
+          warning.includes("Summary generation failed for Github")
+        )
+      ).toBe(true);
+      expect(result.toolkit.summaryStale).toBe(true);
+      expect(result.toolkit.summaryStaleReason).toBe("llm_generation_failed");
+    });
+
+    it("clears the stale flag when the generator succeeds on the next run", async () => {
+      // A toolkit whose summary was stale on a prior run should come back
+      // clean once the generator actually produces a new summary. This
+      // proves the CI gate will stop flagging the toolkit once fixed.
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Older summary";
+      previousResult.toolkit.summaryStale = true;
+      previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Fresh summary"),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Fresh summary (Github)");
+      expect(result.toolkit.summaryStale).toBeUndefined();
+      expect(result.toolkit.summaryStaleReason).toBeUndefined();
+    });
+
+    it("does not flag stale when the signature matches a fresh previous summary", async () => {
+      // Baseline: if previous.summaryStale is falsy, signature match is a
+      // valid proof of freshness and the reuse path should keep the
+      // summary and stay clean.
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Cached summary";
+
+      const countingSummary = createCountingSummaryGenerator();
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: countingSummary.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Cached summary");
+      expect(result.toolkit.summaryStale).toBeUndefined();
+      expect(result.toolkit.summaryStaleReason).toBeUndefined();
+      expect(countingSummary.getCalls()).toBe(0);
+    });
+
+    it("regenerates when signature matches but the previous summary was already stale", async () => {
+      // If the previous summary was already flagged stale, a matching
+      // signature does NOT prove freshness — the stale summary was
+      // carried forward from an earlier toolset. The reuse fast path
+      // must skip, and the LLM must actually regenerate.
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Stale carried-forward summary";
+      previousResult.toolkit.summaryStale = true;
+      previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Fresh"),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Fresh (Github)");
+      expect(result.toolkit.summaryStale).toBeUndefined();
+      expect(result.toolkit.summaryStaleReason).toBeUndefined();
+    });
+
+    it("keeps the stale flag when previous was stale, signature matches, and no generator is available", async () => {
+      // Same as above, but the regen attempt is not possible. The carried-
+      // forward summary remains, and the stale flag must persist so CI
+      // keeps flagging the toolkit until a working LLM run produces a
+      // fresh one.
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Stale carried-forward summary";
+      previousResult.toolkit.summaryStale = true;
+      previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Stale carried-forward summary");
+      expect(result.toolkit.summaryStale).toBe(true);
+      expect(result.toolkit.summaryStaleReason).toBe(
+        "llm_generator_unavailable"
+      );
+    });
+
     it("reuses previous examples when the tool is unchanged", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),
@@ -1381,6 +1596,87 @@ describe("DataMerger", () => {
 
       expect(result.toolkit.id).toBe("github");
       expect(result.toolkit.label).toBe("GitHub");
+    });
+  });
+
+  describe("error handling preserves previous custom sections", () => {
+    // buildMergeErrorResult is invoked by mergeToolkitEntry (called from
+    // mergeAllToolkits). We trigger it by making the customSectionsSource throw,
+    // which is caught by mergeToolkitEntry's try/catch.
+    const makeFailingCustomSectionsSource = () => ({
+      getCustomSections: async () => {
+        throw new Error("Custom sections source unavailable");
+      },
+    });
+
+    it("preserves documentationChunks and customImports from previous toolkit when merge throws", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections({
+          documentationChunks: [
+            {
+              type: "warning",
+              location: "description",
+              position: "after",
+              content: "Critical: GitHub Apps only.",
+            },
+          ],
+          customImports: ['import { Callout } from "nextra/components";'],
+          subPages: ["setup-guide"],
+        }),
+        createStubGenerator()
+      );
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: makeFailingCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const results = await merger.mergeAllToolkits();
+      const result = results[0];
+
+      // Error result must preserve previous custom sections, not return empty arrays
+      expect(result?.toolkit.documentationChunks).toHaveLength(1);
+      expect(result?.toolkit.documentationChunks[0]?.content).toBe(
+        "Critical: GitHub Apps only."
+      );
+      expect(result?.toolkit.customImports).toHaveLength(1);
+      expect(result?.toolkit.subPages).toEqual(["setup-guide"]);
+      expect(result?.warnings[0]).toContain(
+        "Custom sections source unavailable"
+      );
+    });
+
+    it("returns empty custom sections in error result when no previous toolkit exists", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: makeFailingCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+      });
+
+      const results = await merger.mergeAllToolkits();
+      const result = results[0];
+
+      expect(result?.toolkit.documentationChunks).toHaveLength(0);
+      expect(result?.toolkit.customImports).toHaveLength(0);
+      expect(result?.toolkit.subPages).toHaveLength(0);
+      expect(result?.warnings[0]).toContain(
+        "Custom sections source unavailable"
+      );
     });
   });
 

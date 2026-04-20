@@ -20,7 +20,7 @@ Arcade's error handling is designed to provide you with as much information as p
 
 Here's how to handle different types of output errors when executing tools with Arcade's client libraries:
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 ```python
 """
@@ -152,6 +152,95 @@ const response = await client.tools.execute({
 });
 if (response.output.error) {
   handleToolError(response.output.error);
+}
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```java
+package dev.arcade.example.docs;
+
+import dev.arcade.client.ArcadeClient;
+import dev.arcade.client.okhttp.ArcadeOkHttpClient;
+import dev.arcade.models.AuthorizationResponse;
+import dev.arcade.models.tools.AuthorizeToolRequest;
+import dev.arcade.models.tools.ExecuteToolRequest;
+import dev.arcade.models.tools.ExecuteToolResponse;
+import dev.arcade.models.tools.ExecuteToolResponse.Output.Error.Kind;
+import java.time.Duration;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+  /**
+  * This example demonstrates how to handle different kinds of output errors when executing a tool.
+  */
+  public class HandlingErrors {
+
+  private static final Logger logger = LoggerFactory.getLogger(HandlingErrors.class);
+
+  static void handleToolError(ExecuteToolResponse.Output.Error error) {
+    Kind errorKind = error.kind();
+    if (errorKind == Kind.TOOL_RUNTIME_BAD_INPUT_VALUE) {
+    // You provided the executed tool with an invalid input value
+    logger.error(error.message());
+  } else if (errorKind == Kind.TOOL_RUNTIME_RETRY) {
+    // The tool returned a retryable error. Provide the additional
+    // prompt content to the LLM and retry the tool call
+    error.additionalPromptContent().ifPresent(logger::error);
+  } else if (errorKind == Kind.TOOL_RUNTIME_CONTEXT_REQUIRED) {
+    // The tool requires extra context from the user or orchestrator.
+    // Provide the additional prompt content to them and then retry the
+    // tool call with the new context
+    error.additionalPromptContent().ifPresent(logger::error);
+  } else if (errorKind == Kind.TOOL_RUNTIME_FATAL) {
+    // The tool encountered a fatal error during execution
+    logger.error(error.message());
+  } else if (errorKind == Kind.UPSTREAM_RUNTIME_RATE_LIMIT) {
+    // The tool encountered a rate limit error from an upstream service
+    // Wait for the specified amount of time and then retry the tool call
+    Duration timeToWait = error.retryAfterMs().map(Duration::ofMillis).orElse(Duration.ofMillis(500));
+    logger.error("Wait for {} before retrying the tool call", timeToWait);
+  } else if (errorKind.asString().startsWith("UPSTREAM_")) {
+    // The tool encountered an error from an upstream service
+    logger.error(error.message());
+  }
+}
+
+  public static void main(String[] args) {
+
+    ArcadeClient client = ArcadeOkHttpClient.fromEnv(); // Automatically finds the `ARCADE_API_KEY` env variable
+    String userId = "{arcade_user_id}";
+    String toolName = "Reddit.GetPostsInSubreddit";
+
+    // Go through the OAuth flow for the tool
+    AuthorizationResponse authResponse = client.tools()
+      .authorize(AuthorizeToolRequest.builder()
+      .toolName(toolName)
+      .userId(userId)
+      .build());
+
+    authResponse
+      .status()
+      .filter(status -> status != AuthorizationResponse.Status.COMPLETED)
+      .flatMap(status -> authResponse.url())
+      .ifPresent(url -> logger.info("Click this link to authorize: {}", url));
+
+    logger.debug("Authorization response: {}", authResponse.status());
+    client.auth().waitForCompletion(authResponse);
+
+    // Execute the tool
+    ExecuteToolResponse toolResponse = client.tools()
+      .execute(ExecuteToolRequest.builder()
+        .toolName(toolName)
+        .input(Map.of("subreddit", "programming", "limit", 1))
+      .userId(userId)
+      .includeErrorStacktrace(true)
+      .build());
+
+    toolResponse.output()
+      .flatMap(ExecuteToolResponse.Output::error)
+      .ifPresent(HandlingErrors::handleToolError);
+  }
 }
 ```
 </Tabs.Tab>

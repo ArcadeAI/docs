@@ -276,8 +276,27 @@ const buildFallbackToolkit = (
   const authResult = MergedToolkitAuthSchema.safeParse(record.auth);
   const summary =
     typeof record.summary === "string" ? record.summary : undefined;
+  const summaryStale =
+    typeof record.summaryStale === "boolean" ? record.summaryStale : undefined;
+  const summaryStaleReason =
+    typeof record.summaryStaleReason === "string"
+      ? record.summaryStaleReason
+      : undefined;
   const generatedAt =
     typeof record.generatedAt === "string" ? record.generatedAt : undefined;
+
+  // Carry forward custom sections even when strict schema parse fails.
+  // These are hand-authored fields — losing them silently on any schema
+  // mismatch would permanently wipe content on the next write.
+  const documentationChunks = Array.isArray(record.documentationChunks)
+    ? (record.documentationChunks as MergedToolkit["documentationChunks"])
+    : [];
+  const customImports = Array.isArray(record.customImports)
+    ? (record.customImports as MergedToolkit["customImports"])
+    : [];
+  const subPages = Array.isArray(record.subPages)
+    ? (record.subPages as MergedToolkit["subPages"])
+    : [];
 
   return {
     toolkit: {
@@ -286,6 +305,8 @@ const buildFallbackToolkit = (
       version,
       description,
       ...(summary ? { summary } : {}),
+      ...(summaryStale !== undefined ? { summaryStale } : {}),
+      ...(summaryStaleReason !== undefined ? { summaryStaleReason } : {}),
       metadata: metadataResult.success
         ? metadataResult.data
         : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
@@ -295,9 +316,9 @@ const buildFallbackToolkit = (
         secretsInfo: [],
         documentationChunks: [],
       })),
-      documentationChunks: [],
-      customImports: [],
-      subPages: [],
+      documentationChunks,
+      customImports,
+      subPages,
       ...(generatedAt ? { generatedAt } : {}),
     },
     droppedToolCount,

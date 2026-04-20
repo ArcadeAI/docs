@@ -1,0 +1,360 @@
+---
+title: "Resources - Arcade MCP Python reference"
+description: "Reference documentation for registering and serving MCP resources with MCPApp"
+---
+
+import { Callout } from "nextra/components";
+
+# Resources
+
+MCP resources expose data to clients through URI-addressable endpoints. `MCPApp` provides
+build-time methods to register static resources, file-backed resources, and dynamic resource
+handlers -- including URI templates with parameters.
+
+## Basic usage
+
+```python
+import json
+
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+@app.resource(
+    "config://app/settings",
+    name="App Settings",
+    description="Current application settings",
+    mime_type="application/json",
+)
+def app_settings(uri: str) -> str:
+    return json.dumps({"debug": False, "version": "1.0.0"})
+
+if __name__ == "__main__":
+    app.run()
+```
+
+## Registration methods
+
+### `resource`
+
+```python
+@app.resource(
+    uri,
+    name=None,
+    title=None,
+    description=None,
+    mime_type=None,
+    annotations=None,
+    meta=None,
+)
+def handler(uri: str) -> str:
+    ...
+```
+
+Decorator for registering a resource handler. If the URI contains template parameters
+(e.g., `{slug}`), the resource is registered as a `ResourceTemplate` and the handler
+receives the extracted parameters as keyword arguments.
+
+If `name` is not provided, it defaults to the function name.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+|------|------|-------------|---------|
+| `uri` | `str` | Resource URI or URI template | _required_ |
+| `name` | `str \| None` | Display name for the resource | Function name |
+| `title` | `str \| None` | Human-readable title | `None` |
+| `description` | `str \| None` | Resource description | `None` |
+| `mime_type` | `str \| None` | MIME type of the resource content | `None` |
+| `annotations` | `Annotations \| None` | Resource annotations (audience, priority) | `None` |
+| `meta` | `dict[str, Any] \| None` | Arbitrary metadata exposed to clients in `_meta` | `None` |
+
+### `add_resource`
+
+```python
+app.add_resource(
+    uri,
+    name=None,
+    title=None,
+    description=None,
+    mime_type=None,
+    handler=None,
+    annotations=None,
+    meta=None,
+)
+```
+
+Imperative form of `@app.resource`. Registers a resource or resource template at build time.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+|------|------|-------------|---------|
+| `uri` | `str` | Resource URI or URI template | _required_ |
+| `name` | `str \| None` | Display name for the resource | `None` |
+| `title` | `str \| None` | Human-readable title | `None` |
+| `description` | `str \| None` | Resource description | `None` |
+| `mime_type` | `str \| None` | MIME type of the resource content | `None` |
+| `handler` | `Callable[..., Any] \| None` | Function that returns the resource content | `None` |
+| `annotations` | `Annotations \| None` | Resource annotations (audience, priority) | `None` |
+| `meta` | `dict[str, Any] \| None` | Arbitrary metadata exposed to clients in `_meta` | `None` |
+
+### `add_text_resource`
+
+```python
+app.add_text_resource(
+    uri,
+    text="...",
+    name=None,
+    title=None,
+    description=None,
+    mime_type="text/plain",
+)
+```
+
+Convenience method for registering a static text resource. No handler function is needed.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+|------|------|-------------|---------|
+| `uri` | `str` | Resource URI (must not be a template) | _required_ |
+| `text` | `str` | The static text content | _required_ |
+| `name` | `str \| None` | Display name for the resource | `None` |
+| `title` | `str \| None` | Human-readable title | `None` |
+| `description` | `str \| None` | Resource description | `None` |
+| `mime_type` | `str` | MIME type of the content | `'text/plain'` |
+
+<Callout type="warning">
+  Raises `ValueError` if `uri` contains template parameters (e.g., `{slug}`). Use `@app.resource` or `add_resource` for dynamic resources.
+</Callout>
+
+### `add_file_resource`
+
+```python
+app.add_file_resource(
+    uri,
+    path="...",
+    name=None,
+    title=None,
+    description=None,
+    mime_type=None,
+)
+```
+
+Convenience method for registering a file-backed resource. Text files are served as
+`TextResourceContents`. Binary files (detected via `UnicodeDecodeError`) are served as
+`BlobResourceContents` with base64 encoding.
+
+**Parameters:**
+
+| Name | Type | Description | Default |
+|------|------|-------------|---------|
+| `uri` | `str` | Resource URI (must not be a template) | _required_ |
+| `path` | `str \| Path` | Path to the file on disk | _required_ |
+| `name` | `str \| None` | Display name for the resource | `None` |
+| `title` | `str \| None` | Human-readable title | `None` |
+| `description` | `str \| None` | Resource description | `None` |
+| `mime_type` | `str \| None` | MIME type (auto-detected if not provided) | `None` |
+
+<Callout type="warning">
+  Raises `ValueError` if `uri` contains template parameters (e.g., `{slug}`). Use `@app.resource` or `add_resource` for dynamic resources.
+</Callout>
+
+## URI templates
+
+URIs that contain `{param}` or `{param*}` are registered as resource templates. When a
+client reads a URI that matches the template, the server extracts the parameters and passes
+them to the handler as keyword arguments.
+
+### Syntax
+
+| Pattern | Matches | Example URI | Extracted value |
+|---------|---------|-------------|-----------------|
+| `{param}` | A single path segment (no `/`) | `kb://articles/{slug}` matching `kb://articles/hello` | `slug="hello"` |
+| `{param*}` | One or more segments (greedy, crosses `/`) | `kb://docs/{path*}` matching `kb://docs/guides/setup` | `path="guides/setup"` |
+
+### Template handler signatures
+
+Template handlers receive the full URI as the first argument and the extracted parameters as
+keyword arguments:
+
+```python
+@app.resource("kb://articles/{slug}")
+def article_by_slug(uri: str, slug: str) -> str:
+    ...
+
+@app.resource("kb://{category}/{slug}")
+def article_by_category(uri: str, category: str, slug: str) -> str:
+    ...
+
+@app.resource("kb://docs/{path*}")
+def docs_tree(uri: str, path: str) -> str:
+    ...
+```
+
+## Handler return types
+
+Resource handlers can return several types. The server coerces them into the appropriate
+MCP content type:
+
+| Return type | Result |
+|-------------|--------|
+| `str` | `TextResourceContents` |
+| `bytes` | `BlobResourceContents` (base64-encoded) |
+| `dict` with `"text"` key | `TextResourceContents` |
+| `dict` with `"blob"` key | `BlobResourceContents` |
+| `list` | Passed through as-is (for multiple content items) |
+| Other | `TextResourceContents` via `str()` |
+
+Async handlers are fully supported:
+
+```python
+@app.resource("data://users", mime_type="application/json")
+async def list_users(uri: str) -> str:
+    users = await fetch_users()
+    return json.dumps(users)
+```
+
+## Annotations
+
+Use the `Annotations` class to attach audience and priority metadata to a resource:
+
+```python
+from arcade_mcp_server import Annotations, MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+@app.resource(
+    "kb://announcements/pinned",
+    name="Pinned Announcement",
+    annotations=Annotations(audience=["user"], priority=1.0),
+)
+def pinned_announcement(uri: str) -> str:
+    return "All-hands meeting this Friday at 3 PM."
+```
+
+## Examples
+
+### Static text resource
+
+```python
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+app.add_text_resource(
+    "kb://readme",
+    text="Welcome to the Knowledge Base.",
+    name="README",
+    description="Welcome text for the knowledge base",
+)
+```
+
+### File-backed resource
+
+```python
+from pathlib import Path
+
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+app.add_file_resource(
+    "config://pyproject",
+    path=Path("pyproject.toml"),
+    name="Project Config",
+    description="The pyproject.toml for this project",
+    mime_type="text/plain",
+)
+```
+
+### Dynamic resource with URI template
+
+```python
+import json
+
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+ARTICLES = {
+    "hello-world": {"title": "Hello World", "body": "Welcome!"},
+    "getting-started": {"title": "Getting Started", "body": "Let's begin."},
+}
+
+@app.resource(
+    "kb://articles/index",
+    name="Article Index",
+    description="List of all articles",
+    mime_type="application/json",
+)
+def article_index(uri: str) -> str:
+    return json.dumps(list(ARTICLES.keys()))
+
+@app.resource(
+    "kb://articles/{slug}",
+    name="Article by Slug",
+    description="Retrieve an article by its slug",
+    mime_type="application/json",
+)
+def article_by_slug(uri: str, slug: str) -> str:
+    article = ARTICLES.get(slug)
+    if not article:
+        return json.dumps({"error": "Not found"})
+    return json.dumps(article, indent=2)
+
+if __name__ == "__main__":
+    app.run()
+```
+
+### Resource with custom metadata
+
+```python
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+@app.resource(
+    "kb://articles/api-guidelines/metadata",
+    name="API Guidelines Metadata",
+    meta={"tags": ["api", "engineering"], "version": 2, "reviewed": True},
+)
+def article_metadata(uri: str) -> str:
+    return "API guidelines metadata"
+```
+
+### Combining tools and resources
+
+```python
+import json
+from typing import Annotated
+
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+ARTICLES = {
+    "hello": {"title": "Hello", "body": "Hello World!"},
+}
+
+@app.resource(
+    "kb://articles/{slug}",
+    name="Article by Slug",
+    mime_type="application/json",
+)
+def get_article_resource(uri: str, slug: str) -> str:
+    return json.dumps(ARTICLES.get(slug, {}))
+
+@app.tool
+def search_articles(query: Annotated[str, "Search query"]) -> str:
+    """Search articles by title."""
+    matches = [
+        slug for slug, article in ARTICLES.items()
+        if query.lower() in article["title"].lower()
+    ]
+    return json.dumps(matches)
+
+if __name__ == "__main__":
+    app.run()
+```

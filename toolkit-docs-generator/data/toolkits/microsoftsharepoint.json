@@ -1,0 +1,3302 @@
+{
+  "id": "MicrosoftSharepoint",
+  "label": "Microsoft SharePoint",
+  "version": "0.1.0",
+  "description": "Arcade.dev LLM tools for Microsoft SharePoint",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/microsoft-sharepoint.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/microsoft-sharepoint",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "Sites.Read.All",
+      "Sites.ReadWrite.All",
+      "User.Read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddWorksheet",
+      "qualifiedName": "MicrosoftSharepoint.AddWorksheet",
+      "fullyQualifiedName": "MicrosoftSharepoint.AddWorksheet@0.1.0",
+      "description": "Add a new worksheet to a SharePoint Excel workbook.\n\nNote: The new worksheet name may not be immediately visible to other\ntools due to a brief Graph API propagation delay (up to ~10 s). Pass\nthe returned ``session_id`` to subsequent calls that reference the new\nworksheet to mitigate this.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Name for the new worksheet. If omitted, Excel generates a default name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created worksheet info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.AddWorksheet",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1b2c3d4-e5f6-7890-ab12-cd34ef56gh78",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ABCD2345EF67890!123",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Q2 2026 Financials",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "9f8e7d6c-5b4a-3210-ffe0-1234567890ab",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CopyItem",
+      "qualifiedName": "MicrosoftSharepoint.CopyItem",
+      "fullyQualifiedName": "MicrosoftSharepoint.CopyItem@0.1.0",
+      "description": "Copy a file or folder. Returns a completed item or an operation id.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the item lives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the item to copy.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "destination_folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional destination folder ID. If omitted, the item is copied to the same folder.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": false,
+          "description": "Optional new name for the copied item.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Copy status and result."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.CopyItem",
+        "parameters": {
+          "drive_id": {
+            "value": "b!A1B2C3D4E5F6G7H8I9J0K_LmNoPqR",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01AB23CD45EF6789!678",
+            "type": "string",
+            "required": true
+          },
+          "destination_folder_id": {
+            "value": "01XY9Z8W7V6U5T4S3R2",
+            "type": "string",
+            "required": false
+          },
+          "new_name": {
+            "value": "Project Plan - Copy.docx",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateFolder",
+      "qualifiedName": "MicrosoftSharepoint.CreateFolder",
+      "fullyQualifiedName": "MicrosoftSharepoint.CreateFolder@0.1.0",
+      "description": "Create a new folder in a SharePoint drive.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the folder will be created.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the new folder.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional parent folder ID. If omitted, creates in the drive root.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created folder metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.CreateFolder",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8i9J0k",
+            "type": "string",
+            "required": true
+          },
+          "folder_name": {
+            "value": "Project Phoenix",
+            "type": "string",
+            "required": true
+          },
+          "parent_folder_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreatePresentation",
+      "qualifiedName": "MicrosoftSharepoint.CreatePresentation",
+      "fullyQualifiedName": "MicrosoftSharepoint.CreatePresentation@0.1.0",
+      "description": "Create a new PowerPoint presentation in a SharePoint drive.\n\nThe presentation will be created with a title slide containing the specified title.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive to create the presentation in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title for the new presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the folder to create the presentation in. If not provided, the presentation will be created in the root of the drive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created presentation details."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.CreatePresentation",
+        "parameters": {
+          "drive_id": {
+            "value": "b9f8e7d6-1234-4abc-9def-0a1b2c3d4e5f",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Quarterly Business Review - Q2 2026",
+            "type": "string",
+            "required": true
+          },
+          "folder_id": {
+            "value": "f1e2d3c4-b5a6-7d8e-9f0a-b1c2d3e4f5a6",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateShareLink",
+      "qualifiedName": "MicrosoftSharepoint.CreateShareLink",
+      "fullyQualifiedName": "MicrosoftSharepoint.CreateShareLink@0.1.0",
+      "description": "Create a share link for a SharePoint drive item.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the item lives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the file or folder to share.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Sharing link information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.CreateShareLink",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a3f9e5c2-4d6b-4f7a-9c1e-2b3d4f5a6b7c",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ABCDEF-1234-5678-9ABC-DEF012345678",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateSlide",
+      "qualifiedName": "MicrosoftSharepoint.CreateSlide",
+      "fullyQualifiedName": "MicrosoftSharepoint.CreateSlide@0.1.0",
+      "description": "Append a new slide to the end of an existing PowerPoint presentation in a SharePoint drive.\n\nThe slide will be added at the end of the presentation. Both title and body\nare optional to support layouts like BLANK or TITLE_ONLY.\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to add a slide to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_title",
+          "type": "string",
+          "required": false,
+          "description": "The title for the new slide. Optional for layouts like BLANK.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_body",
+          "type": "string",
+          "required": false,
+          "description": "The body content for the new slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting). Optional for layouts like TITLE_ONLY or BLANK.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "layout",
+          "type": "string",
+          "required": false,
+          "description": "The layout to use for the slide. For TWO_CONTENT layout, use create_two_content_slide.",
+          "enum": [
+            "TITLE",
+            "TITLE_AND_CONTENT",
+            "SECTION_HEADER",
+            "TITLE_ONLY",
+            "BLANK",
+            "CONTENT_WITH_CAPTION",
+            "PICTURE_WITH_CAPTION",
+            "TITLE_AND_VERTICAL_TEXT",
+            "VERTICAL_TITLE_AND_TEXT"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated presentation details with new slide info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.CreateSlide",
+        "parameters": {
+          "drive_id": {
+            "value": "b!4f8c9d2a3e6b7f0a1c2d3e4f5g6h7i8",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "slide_title": {
+            "value": "Project Update — Q2 2026",
+            "type": "string",
+            "required": false
+          },
+          "slide_body": {
+            "value": "**Summary**\n\n*Key points:*\n- Overview\n- Details\n  - __Important__: review metrics\n- Next steps\n\nFor more info, visit: https://example.com",
+            "type": "string",
+            "required": false
+          },
+          "layout": {
+            "value": "TITLE_AND_CONTENT",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateTwoContentSlide",
+      "qualifiedName": "MicrosoftSharepoint.CreateTwoContentSlide",
+      "fullyQualifiedName": "MicrosoftSharepoint.CreateTwoContentSlide@0.1.0",
+      "description": "Append a TWO_CONTENT slide with side-by-side content areas to the end of a SharePoint PowerPoint.\n\nThis layout is useful for comparisons, pros/cons lists, or any content that\nbenefits from a two-column layout.\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to add a slide to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_title",
+          "type": "string",
+          "required": false,
+          "description": "The title for the new slide.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "left_body",
+          "type": "string",
+          "required": false,
+          "description": "Content for the left side of the slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "right_body",
+          "type": "string",
+          "required": false,
+          "description": "Content for the right side of the slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated presentation details with new slide info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.CreateTwoContentSlide",
+        "parameters": {
+          "drive_id": {
+            "value": "b1a2c3d4-e5f6-47a8-9b0c-123456789abc",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "0f1e2d3c-4b5a-6789-0abc-def123456789",
+            "type": "string",
+            "required": true
+          },
+          "slide_title": {
+            "value": "Product Comparison: Basic vs Pro",
+            "type": "string",
+            "required": false
+          },
+          "left_body": {
+            "value": "- **Basic Plan**\n  - Price: $0/month\n  - Storage: 5 GB\n  - Support: Community\n\n- **Use case**\n  - Personal projects\n  - Learning",
+            "type": "string",
+            "required": false
+          },
+          "right_body": {
+            "value": "- **Pro Plan**\n  - Price: $9.99/month\n  - Storage: 1 TB\n  - Support: 24/7\n\n- **Use case**\n  - Small businesses\n  - Professional projects",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateWordDocument",
+      "qualifiedName": "MicrosoftSharepoint.CreateWordDocument",
+      "fullyQualifiedName": "MicrosoftSharepoint.CreateWordDocument@0.1.0",
+      "description": "Create a new Word document in a SharePoint drive (4MB upload limit). Optionally include text content.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive to create the document in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "File name without extension, or with .docx. The .docx extension is normalized.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": false,
+          "description": "Optional text content to include in the new document. If omitted, an empty document is created.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional parent folder DriveItem ID. If omitted, the document is created in the root.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conflict_behavior",
+          "type": "string",
+          "required": false,
+          "description": "Optional conflict behavior when a file with the same name exists. One of: fail, rename, replace.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created Word document metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.CreateWordDocument",
+        "parameters": {
+          "drive_id": {
+            "value": "b!e3f1c2d-4a5b-6c7d-8e9f-0123456789ab",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Project Plan.docx",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "Project Plan\n\nOverview:\n- Objectives\n- Timeline\n\nAction Items:\n1. Define scope\n2. Assign tasks\n3. Review milestones",
+            "type": "string",
+            "required": false
+          },
+          "folder_id": {
+            "value": "01abcdef234567890ghijklmnopqrstuv",
+            "type": "string",
+            "required": false
+          },
+          "conflict_behavior": {
+            "value": "rename",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateWorkbook",
+      "qualifiedName": "MicrosoftSharepoint.CreateWorkbook",
+      "fullyQualifiedName": "MicrosoftSharepoint.CreateWorkbook@0.1.0",
+      "description": "Create a new Excel workbook (.xlsx) in a SharePoint drive.\n\nOnly .xlsx files are supported.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive to create the workbook in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filename",
+          "type": "string",
+          "required": true,
+          "description": "File name for the new workbook. The .xlsx extension is added automatically if not provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Parent folder ID. If omitted, the workbook is created in the root of the drive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "initial_data",
+          "type": "string",
+          "required": false,
+          "description": "Optional JSON string for initial data in the first worksheet. Format: data[ROW][COL] = VALUE where ROW is a row number as string, COL is a column letter (uppercase), VALUE is string/number/boolean/null. Type: dict[str, dict[str, str | int | float | bool | None]].",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created Excel workbook metadata with session ID."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.CreateWorkbook",
+        "parameters": {
+          "drive_id": {
+            "value": "b!qZx7Yv9u1Lk2P3m",
+            "type": "string",
+            "required": true
+          },
+          "filename": {
+            "value": "Employees",
+            "type": "string",
+            "required": true
+          },
+          "parent_folder_id": {
+            "value": "01A2B3C4D5E6F7G8H9I",
+            "type": "string",
+            "required": false
+          },
+          "initial_data": {
+            "value": "{\"1\":{\"A\":\"Name\",\"B\":\"Age\",\"C\":\"Active\"},\"2\":{\"A\":\"Alice\",\"B\":30,\"C\":true},\"3\":{\"A\":\"Bob\",\"B\":25,\"C\":false},\"4\":{\"A\":\"Eve\",\"B\":null,\"C\":false}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteItem",
+      "qualifiedName": "MicrosoftSharepoint.DeleteItem",
+      "fullyQualifiedName": "MicrosoftSharepoint.DeleteItem@0.1.0",
+      "description": "Delete a file or folder from a SharePoint drive.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the item lives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the file or folder to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Deletion confirmation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.DeleteItem",
+        "parameters": {
+          "drive_id": {
+            "value": "b!7a8f9c2d3e4f5a6b7c8d9e0f12345678",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "3f2504e0-4f89-11d3-9a0c-0305e82c3301",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteWorksheet",
+      "qualifiedName": "MicrosoftSharepoint.DeleteWorksheet",
+      "fullyQualifiedName": "MicrosoftSharepoint.DeleteWorksheet@0.1.0",
+      "description": "Delete a worksheet from a SharePoint Excel workbook.\n\nCannot delete the last worksheet in a workbook.\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": true,
+          "description": "Name of the worksheet to delete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the worksheet deletion."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.DeleteWorksheet",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8i9J0kLmNoPqRsTuV",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ab23cd-45ef-67gh-89ij-0123klmnopqr",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Expenses Q1 2026",
+            "type": "string",
+            "required": true
+          },
+          "session_id": {
+            "value": "b6f7e8d9-0123-4567-89ab-cdef01234567",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetAllSlideNotes",
+      "qualifiedName": "MicrosoftSharepoint.GetAllSlideNotes",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetAllSlideNotes@0.1.0",
+      "description": "Get all speaker notes from every slide in a SharePoint PowerPoint presentation.\n\nReturns notes for all slides in one call, which is more efficient than\ncalling get_slide_notes for each slide individually. Notes are returned\nin markdown format.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "All speaker notes from the presentation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetAllSlideNotes",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01A23B45-C67D-890E-F123-4567890ABCD",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCopyStatus",
+      "qualifiedName": "MicrosoftSharepoint.GetCopyStatus",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetCopyStatus@0.1.0",
+      "description": "Check status of an async copy operation using the token returned by copy_item.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the copy operation runs.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "operation_url",
+          "type": "string",
+          "required": true,
+          "description": "The opaque operation token returned by copy_item. Pass it exactly as received.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Copy operation status."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetCopyStatus",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6G7H8I9J0K",
+            "type": "string",
+            "required": true
+          },
+          "operation_url": {
+            "value": "https://graph.microsoft.com/v1.0/drives/b!a1B2c3D4e5F6G7H8I9J0K/items/0123456789abcdef/copy/copy-operations/3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetDrivesFromSite",
+      "qualifiedName": "MicrosoftSharepoint.GetDrivesFromSite",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetDrivesFromSite@0.1.0",
+      "description": "Retrieve drives / document libraries from a SharePoint site.\n\nIf you have a site name, it is not necessary to call Sharepoint.SearchSites first. You can simply\ncall this tool with the site name / keywords.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to get drives from. Prefer using a site ID whenever available for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The drives from the SharePoint site."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetDrivesFromSite",
+        "parameters": {
+          "site": {
+            "value": "contoso.sharepoint.com,12345678-90ab-cdef-1234-567890abcdef,abcdef12-3456-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetItemsFromList",
+      "qualifiedName": "MicrosoftSharepoint.GetItemsFromList",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetItemsFromList@0.1.0",
+      "description": "Retrieve items from a list in a SharePoint site.\n\nNote: The Microsoft Graph API does not offer endpoints to retrieve list item attachments.\nBecause of that, the only information we can get is whether the item has attachments or not.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to get lists from. Prefer using a site ID whenever available for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the list to get items from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint list items."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetItemsFromList",
+        "parameters": {
+          "site": {
+            "value": "d87b6f3e-8a1b-4c2d-9f3a-7e2b1c4a5d6f",
+            "type": "string",
+            "required": true
+          },
+          "list_id": {
+            "value": "a3f1b2c4-5d6e-7f80-1234-9abcde0f1234",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetListsFromSite",
+      "qualifiedName": "MicrosoftSharepoint.GetListsFromSite",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetListsFromSite@0.1.0",
+      "description": "Retrieve lists from a SharePoint site.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to get lists from. Prefer using a site ID whenever available for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint site lists."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetListsFromSite",
+        "parameters": {
+          "site": {
+            "value": "https://contoso.sharepoint.com/sites/Marketing",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetPage",
+      "qualifiedName": "MicrosoftSharepoint.GetPage",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetPage@0.1.0",
+      "description": "Retrieve metadata and the contents of a page in a SharePoint site.\n\nPage content is a list of Microsoft Sharepoint web part objects, such as text, images, banners,\nbuttons, etc.\n\nIf `include_page_content` is set to False, the tool will return only the page metadata.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to retrieve base pages from. Prefer using a site ID whenever available for optimal performance",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the page to retrieve.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_page_content",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include the page content in the response. Defaults to True. If set to False, the tool will return only the page metadata.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The page from the SharePoint site."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetPage",
+        "parameters": {
+          "site": {
+            "value": "https://contoso.sharepoint.com/sites/Marketing",
+            "type": "string",
+            "required": true
+          },
+          "page_id": {
+            "value": "3b4f6a2e-9c1b-4a6b-8c3d-2e5b7f9a1d0f",
+            "type": "string",
+            "required": true
+          },
+          "include_page_content": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetPresentationAsMarkdown",
+      "qualifiedName": "MicrosoftSharepoint.GetPresentationAsMarkdown",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetPresentationAsMarkdown@0.1.0",
+      "description": "Get the content of a PowerPoint presentation stored in a SharePoint drive as markdown.\n\nThis tool downloads the presentation and converts it to a markdown representation,\npreserving text content, tables, and chart data. Images and other media are\nrepresented as placeholders.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to read.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The presentation content as markdown."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetPresentationAsMarkdown",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8i9J0kLmNoPqR",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetSite",
+      "qualifiedName": "MicrosoftSharepoint.GetSite",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetSite@0.1.0",
+      "description": "Retrieve information about a specific SharePoint site by its ID, URL, or name.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to search for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint site information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetSite",
+        "parameters": {
+          "site": {
+            "value": "https://contoso.sharepoint.com/sites/Marketing",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetSlideNotes",
+      "qualifiedName": "MicrosoftSharepoint.GetSlideNotes",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetSlideNotes@0.1.0",
+      "description": "Get the speaker notes from a specific slide in a SharePoint PowerPoint presentation.\n\nSpeaker notes are returned in markdown format, preserving basic formatting\nlike bold, italic, and bullet points.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_index",
+          "type": "integer",
+          "required": true,
+          "description": "The 1-based index of the slide to get notes from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The speaker notes for the specified slide."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetSlideNotes",
+        "parameters": {
+          "drive_id": {
+            "value": "b!3a9f8d2e5c4b7a6f9e0d1c2b",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ABCD2345efGHijKLMnOpQRstuVwxYZ",
+            "type": "string",
+            "required": true
+          },
+          "slide_index": {
+            "value": 3,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetWordDocument",
+      "qualifiedName": "MicrosoftSharepoint.GetWordDocument",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetWordDocument@0.1.0",
+      "description": "Get a Word document's metadata and content from a SharePoint drive (supports only `.docx`). Returns the document content as Markdown by default, or just metadata when metadata_only is True.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The DriveItem ID of the Word document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "metadata_only",
+          "type": "boolean",
+          "required": false,
+          "description": "If True, return only the document metadata without downloading the content. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The Word document metadata and optionally its content."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetWordDocument",
+        "parameters": {
+          "drive_id": {
+            "value": "b!1a2B3c4D5e6F7g8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01a23b45-c67d-89e0-fa12-3456789abcde",
+            "type": "string",
+            "required": true
+          },
+          "metadata_only": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetWorkbookMetadata",
+      "qualifiedName": "MicrosoftSharepoint.GetWorkbookMetadata",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetWorkbookMetadata@0.1.0",
+      "description": "Get metadata about an Excel workbook in a SharePoint drive, including worksheet list.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Workbook metadata including worksheet list."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetWorkbookMetadata",
+        "parameters": {
+          "drive_id": {
+            "value": "b!xYz12AbC3dEfGhIJKlMnOpQRstuVwXyZ",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01a2b3c4-5d6e-7f89-0abc-def123456789",
+            "type": "string",
+            "required": true
+          },
+          "session_id": {
+            "value": "session-9f1b2c3d-4e5f-6789-abcd-0123456789ab",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetWorksheetData",
+      "qualifiedName": "MicrosoftSharepoint.GetWorksheetData",
+      "fullyQualifiedName": "MicrosoftSharepoint.GetWorksheetData@0.1.0",
+      "description": "Read cell values from a worksheet in a SharePoint Excel workbook.\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": false,
+          "description": "Worksheet name to read from. If omitted, reads from the first worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_row",
+          "type": "integer",
+          "required": false,
+          "description": "Starting row number (1-indexed). Defaults to 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_col",
+          "type": "string",
+          "required": false,
+          "description": "Starting column letter. Defaults to A.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_rows",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum rows to return. Defaults to 1000, maximum allowed is 1000.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_cols",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum columns to return. Defaults to 100, maximum allowed is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Worksheet data in sparse dict format with pagination."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.GetWorksheetData",
+        "parameters": {
+          "drive_id": {
+            "value": "b!7d9f2a3b-4c6d-11ec-9d26-0242ac120002",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Sales Q1 2026",
+            "type": "string",
+            "required": false
+          },
+          "start_row": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "start_col": {
+            "value": "B",
+            "type": "string",
+            "required": false
+          },
+          "max_rows": {
+            "value": 500,
+            "type": "integer",
+            "required": false
+          },
+          "max_cols": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "session_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "InsertTextAtEndOfWordDocument",
+      "qualifiedName": "MicrosoftSharepoint.InsertTextAtEndOfWordDocument",
+      "fullyQualifiedName": "MicrosoftSharepoint.InsertTextAtEndOfWordDocument@0.1.0",
+      "description": "Append text to the end of an existing Word document.\n\nThis tool only supports files with the `.docx` extension and enforces the 4MB limit.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The DriveItem ID of the Word document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": true,
+          "description": "The text content to append to the document.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated Word document metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.InsertTextAtEndOfWordDocument",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2cD3EfG4hIJ5kLmN6oP7q8r9sT0",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ABCD2EFGH345IJKL678MNOP9QRS",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "Please append the following: This document was updated on 2026-03-24. Please review the changes and provide any feedback by end of week.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListItemsInFolder",
+      "qualifiedName": "MicrosoftSharepoint.ListItemsInFolder",
+      "fullyQualifiedName": "MicrosoftSharepoint.ListItemsInFolder@0.1.0",
+      "description": "Retrieve items from a folder in a drive in a SharePoint site.\n\nNote: Due to how the Microsoft Graph API is designed, we have to retrieve all items, including the ones\nskipped by offset. For this reason, the tool execution time tends to increase with the offset value.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive to get items from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the folder to get items from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of items to get. Defaults to 100, max is 500.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of items to skip.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The items from the folder in the drive."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.ListItemsInFolder",
+        "parameters": {
+          "drive_id": {
+            "value": "b7f5a6c2-3d9e-4a1b-9f0c-123456789abc",
+            "type": "string",
+            "required": true
+          },
+          "folder_id": {
+            "value": "3d9e8f6a-1b2c-4d5e-9f0a-abcdef123456",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 200,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPages",
+      "qualifiedName": "MicrosoftSharepoint.ListPages",
+      "fullyQualifiedName": "MicrosoftSharepoint.ListPages@0.1.0",
+      "description": "Retrieve pages from a SharePoint site.\n\nThe Microsoft Graph API does not support pagination on this endpoint.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to retrieve base pages from. Prefer using a site ID whenever available for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of pages to return. Defaults to 10, max is 200.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The pages from the SharePoint site."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.ListPages",
+        "parameters": {
+          "site": {
+            "value": "https://contoso.sharepoint.com/sites/Marketing",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListRootItemsInDrive",
+      "qualifiedName": "MicrosoftSharepoint.ListRootItemsInDrive",
+      "fullyQualifiedName": "MicrosoftSharepoint.ListRootItemsInDrive@0.1.0",
+      "description": "Retrieve items from the root of a drive in a SharePoint site.\n\nNote: Due to how the Microsoft Graph API is designed, we have to retrieve all items, including the ones\nskipped by offset. For this reason, the tool execution time tends to increase with the offset value.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive to get items from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of items to get. Defaults to 100, max is 500.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of items to skip.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The items from the root of a drive in a SharePoint site."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.ListRootItemsInDrive",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4E5f6G7h8I9j0KlmnoPQrsTUv",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 200,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListSites",
+      "qualifiedName": "MicrosoftSharepoint.ListSites",
+      "fullyQualifiedName": "MicrosoftSharepoint.ListSites@0.1.0",
+      "description": "List all SharePoint sites accessible to the current user.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of sites to return. Defaults to 10, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint sites matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.ListSites",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "MoveItem",
+      "qualifiedName": "MicrosoftSharepoint.MoveItem",
+      "fullyQualifiedName": "MicrosoftSharepoint.MoveItem@0.1.0",
+      "description": "Move a file or folder to a new location in a SharePoint drive.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the item lives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the item to move.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_parent_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the destination folder.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated item metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.MoveItem",
+        "parameters": {
+          "drive_id": {
+            "value": "b!5f6e7d8c9b0a1234567890abcdef1234",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01A3B2C4D5E6F7890GHIJ",
+            "type": "string",
+            "required": true
+          },
+          "new_parent_id": {
+            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RenameWorksheet",
+      "qualifiedName": "MicrosoftSharepoint.RenameWorksheet",
+      "fullyQualifiedName": "MicrosoftSharepoint.RenameWorksheet@0.1.0",
+      "description": "Rename an existing worksheet in a SharePoint Excel workbook.\n\nNote: The new name may not be immediately visible to other tools due\nto a brief Graph API propagation delay (up to ~10 s). Pass the returned\n``session_id`` to subsequent calls that reference the renamed worksheet\nto mitigate this. If referencing a recently added worksheet as the source,\nthe same delay applies; retry with the ``session_id`` if a\nWorksheetNotFoundError occurs.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": true,
+          "description": "Current name of the worksheet to rename.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": true,
+          "description": "New name for the worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The renamed worksheet info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.RenameWorksheet",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8i9J0K_lMnOpQrSt",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ABCDXYZlmnopQRstuVwxyZ1234567890",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Sheet1",
+            "type": "string",
+            "required": true
+          },
+          "new_name": {
+            "value": "Quarterly Report 2026",
+            "type": "string",
+            "required": true
+          },
+          "session_id": {
+            "value": "session_9f8e7d6c5b4a3f2e1d0c",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchDriveItems",
+      "qualifiedName": "MicrosoftSharepoint.SearchDriveItems",
+      "fullyQualifiedName": "MicrosoftSharepoint.SearchDriveItems@0.1.0",
+      "description": "Search for items in one or more Sharepoint drives.\n\nNote: when searching within a single Drive and/or Folder, due to how the Microsoft Graph API is designed,\nwe have to retrieve all items, including the ones skipped by offset. For this reason, the tool execution\ntime tends to increase with the offset value.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The keywords to search for files in the drive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optionally, the ID of the drive to search items in. If not provided, the search will be performed in all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optionally narrow the search within a specific folder by its ID. If not provided, the search will be performed in the whole drive. If a folder_id is provided, it is required to provide a drive_id as well.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of files to get. Defaults to 50, max is 500.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of files to skip.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The items from the drive(s)."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.SearchDriveItems",
+        "parameters": {
+          "keywords": {
+            "value": "quarterly report Q1 2026",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "d9b9e9b0-3e5f-4f33-9a0b-1c2d3e4f5a6b",
+            "type": "string",
+            "required": false
+          },
+          "folder_id": {
+            "value": "3f1a2b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 200,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchSites",
+      "qualifiedName": "MicrosoftSharepoint.SearchSites",
+      "fullyQualifiedName": "MicrosoftSharepoint.SearchSites@0.1.0",
+      "description": "Search for SharePoint sites by name or description.\n\nIn case you need to retrieve a specific site by its name, ID or SharePoint URL, use the\n`Sharepoint.GetSite` tool instead, passing the ID, name or SharePoint URL to it. If you use\nthe `Sharepoint.SearchSites` tool to retrieve a single site by its name, too much CO2 will be\nreleased in the atmosphere and you will contribute to catastrophic climate change.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The search term to find sites by name or description.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of sites to return. Defaults to 10, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint sites matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.SearchSites",
+        "parameters": {
+          "keywords": {
+            "value": "employee onboarding",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SetSlideNotes",
+      "qualifiedName": "MicrosoftSharepoint.SetSlideNotes",
+      "fullyQualifiedName": "MicrosoftSharepoint.SetSlideNotes@0.1.0",
+      "description": "Set or update the speaker notes on a specific slide in a SharePoint PowerPoint.\n\nNotes can be formatted using markdown:\n- **bold** for bold text\n- *italic* for italic text\n- __underline__ for underlined text\n- Lines starting with - or * become bullet points\n- Indent with spaces for nested bullets\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_index",
+          "type": "integer",
+          "required": true,
+          "description": "The 1-based index of the slide to set notes on.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "required": true,
+          "description": "The speaker notes in markdown format. Supports **bold**, *italic*, __underline__, and bullet points (- or *).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the notes update."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.SetSlideNotes",
+        "parameters": {
+          "drive_id": {
+            "value": "b!d3f0a9c2-4b6e-4e72-9f45-1a2b3c4d5e6f",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01A2B3C4-5D6E-7F80-9A1B-2C3D4E5F6A7B",
+            "type": "string",
+            "required": true
+          },
+          "slide_index": {
+            "value": 3,
+            "type": "integer",
+            "required": true
+          },
+          "notes": {
+            "value": "**Speaker:** *Welcome everyone*\n\n__Agenda__:\n- Introduction\n- Project Overview\n  - Background\n  - Objectives\n- Timeline\n\nPlease hold questions until the end.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateCell",
+      "qualifiedName": "MicrosoftSharepoint.UpdateCell",
+      "fullyQualifiedName": "MicrosoftSharepoint.UpdateCell@0.1.0",
+      "description": "Update a single cell value in a SharePoint Excel workbook.\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "required": true,
+          "description": "Column letter or letters (e.g., 'A', 'BC').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "row",
+          "type": "integer",
+          "required": true,
+          "description": "Row number (1-indexed).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "The value to set. Supports strings, numbers, booleans, and formulas (e.g., '=SUM(A1:A10)').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": false,
+          "description": "Worksheet name to update. If omitted, updates the first worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the cell update."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.UpdateCell",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4eF5g6H7I8J9K0lmnOPQRstUV",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01A2BC3D4EFGH5IJKL6MNOP7QRST8UVW9",
+            "type": "string",
+            "required": true
+          },
+          "column": {
+            "value": "BC",
+            "type": "string",
+            "required": true
+          },
+          "row": {
+            "value": 12,
+            "type": "integer",
+            "required": true
+          },
+          "value": {
+            "value": "=SUM(BC1:BC10)",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Sales Data",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "session_3f5b9f8a-9d3e-4c2a-b6f7-1e2d3c4b5a6f",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateRange",
+      "qualifiedName": "MicrosoftSharepoint.UpdateRange",
+      "fullyQualifiedName": "MicrosoftSharepoint.UpdateRange@0.1.0",
+      "description": "Update multiple cells in a SharePoint Excel worksheet using sparse dict format.\n\nOnly specified cells are updated; unspecified cells remain unchanged.\n\nInternally, a single PATCH request is sent covering the bounding box\nof all specified cells.  Cells within the box that are not in the\ninput are sent as ``null``, which the Graph API treats as \"skip\".\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "required": true,
+          "description": "JSON string where data[ROW][COL] = VALUE. ROW is a row number as string, COL is a column letter (uppercase), VALUE is string/number/boolean/null. Type: dict[str, dict[str, str | int | float | bool | None]].",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": false,
+          "description": "Worksheet name to update. If omitted, updates the first worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the range update with cell count."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.UpdateRange",
+        "parameters": {
+          "drive_id": {
+            "value": "b0a1c2d3-e4f5-6789-abcd-ef0123456789",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "f1e2d3c4-b5a6-7890-cdef-0123456789ab",
+            "type": "string",
+            "required": true
+          },
+          "data": {
+            "value": "{\"1\": {\"A\": \"Name\", \"B\": \"Age\", \"C\": \"Active\"}, \"2\": {\"A\": \"Alice\", \"B\": 30, \"C\": true}, \"3\": {\"A\": \"Bob\", \"B\": null, \"C\": false}, \"10\": {\"D\": 123.45, \"E\": \"Notes\"}}",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Employees",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "MicrosoftSharepoint.WhoAmI",
+      "fullyQualifiedName": "MicrosoftSharepoint.WhoAmI@0.1.0",
+      "description": "Get information about the current user and their SharePoint environment.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and SharePoint environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftSharepoint.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage",
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-03-24T11:25:19.840Z",
+  "summary": "Microsoft SharePoint toolkit provides Arcade.dev LLM tools for interacting with SharePoint via Microsoft Graph. It enables programmatic creation, retrieval, modification, and orchestration of sites, drives, files, documents (Word/PowerPoint), and Excel workbooks from LLM workflows.\n\n**Capabilities**\n\n- Create, read, update, and delete drive items, folders, pages, lists, and site metadata at scale.\n- Manage Office files: create and append slides, edit Word documents, create workbooks, and render content to Markdown.\n- Fine-grained Excel and worksheet operations including cell/range updates, worksheet lifecycle, and session-aware handling for Graph propagation delays.\n- Search, list, share, copy, move, and monitor asynchronous operations across sites and drives with pagination and status checks.\n\n**OAuth**\n\nProvider: microsoft\n\nScopes: Sites.Read.All, Sites.ReadWrite.All, User.Read"
+}

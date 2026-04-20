@@ -1,4 +1,5 @@
 import { getDictionary } from "@/_dictionaries/get-dictionary";
+import { AlgoliaSearch } from "@/app/_components/algolia-search";
 import { SignupLink } from "@/app/_components/analytics";
 import CustomLayout from "@/app/_components/custom-layout";
 import { getDashboardUrl } from "@/app/_components/dashboard-link";
@@ -23,20 +24,27 @@ import {
 
 const REGEX_LOCALE = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/;
 
-function getMarkdownAlternatePath(pathname: string): string {
-  // Handle root paths
-  if (pathname === "/" || pathname === "") {
-    return "/index.md";
-  }
-  // Remove trailing slash if present, then add .md extension
-  const cleanPath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  return `${cleanPath}.md`;
+/**
+ * Nextra's active-state detection only checks `item.route`, never `item.href`.
+ * Toolkit sidebar entries use `href` (required so Nextra doesn't fail validation
+ * for keys with no matching page on disk), but get no `route`. Copy `href` →
+ * `route` so the sidebar highlights correctly when you're on a toolkit page.
+ */
+function addRoutesToHrefItems(items: object[]): object[] {
+  return items.map((item) => {
+    const i = item as Record<string, unknown>;
+    const withRoute = i.href && !i.route ? { ...i, route: i.href } : i;
+    if (Array.isArray(withRoute.children)) {
+      return {
+        ...withRoute,
+        children: addRoutesToHrefItems(withRoute.children as object[]),
+      };
+    }
+    return withRoute;
+  });
 }
 
-export async function generateMetadata() {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "/";
-
+export function generateMetadata() {
   return {
     title: {
       default: "Arcade Docs",
@@ -77,11 +85,6 @@ export async function generateMetadata() {
     appleWebApp: {
       title: "Arcade Documentation",
     },
-    alternates: {
-      types: {
-        "text/markdown": getMarkdownAlternatePath(pathname),
-      },
-    },
     other: {
       "apple-mobile-web-app-title": "Arcade Documentation",
       "twitter:url": "https://docs.arcade.dev",
@@ -105,7 +108,8 @@ export default async function RootLayout({
   const lang = getLocaleFromPathname(pathname);
 
   const dictionary = await getDictionary(lang);
-  const pageMap = await getPageMap(`/${lang}`);
+  const rawPageMap = await getPageMap(`/${lang}`);
+  const pageMap = addRoutesToHrefItems(rawPageMap) as typeof rawPageMap;
 
   return (
     <html dir="ltr" lang={lang} suppressHydrationWarning>
@@ -171,6 +175,7 @@ export default async function RootLayout({
           }
           nextThemes={{ defaultTheme: "dark" }}
           pageMap={pageMap}
+          search={<AlgoliaSearch />}
           sidebar={{
             defaultMenuCollapseLevel: 2,
             autoCollapse: true,

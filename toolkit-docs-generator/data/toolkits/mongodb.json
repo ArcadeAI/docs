@@ -74,7 +74,7 @@
         "toolName": "Mongodb.AggregateDocuments",
         "parameters": {
           "database_name": {
-            "value": "sales_db",
+            "value": "shopDB",
             "type": "string",
             "required": true
           },
@@ -85,10 +85,11 @@
           },
           "pipeline": {
             "value": [
-              "{\"$match\": {\"status\": \"completed\", \"total\": {\"$gt\": 100}}}",
-              "{\"$group\": {\"_id\": \"$customerId\", \"ordersCount\": {\"$sum\": 1}, \"totalSpent\": {\"$sum\": \"$total\"}}}",
-              "{\"$project\": {\"customerId\": \"$_id\", \"ordersCount\": 1, \"totalSpent\": 1, \"_id\": 0}}",
-              "{\"$sort\": {\"totalSpent\": -1}}"
+              "{\"$match\": {\"status\": \"completed\"}}",
+              "{\"$unwind\": \"$items\"}",
+              "{\"$group\": {\"_id\": \"$items.productId\", \"totalQuantity\": {\"$sum\": \"$items.quantity\"}, \"totalSales\": {\"$sum\": {\"$multiply\": [\"$items.quantity\", \"$items.price\"]}}, \"productName\": {\"$first\": \"$items.name\"}}}",
+              "{\"$project\": {\"_id\": 0, \"productId\": \"$_id\", \"productName\": 1, \"totalQuantity\": 1, \"totalSales\": 1}}",
+              "{\"$sort\": {\"totalSales\": -1}}"
             ],
             "type": "array",
             "required": true
@@ -168,17 +169,17 @@
         "toolName": "Mongodb.CountDocuments",
         "parameters": {
           "database_name": {
-            "value": "sales_db",
+            "value": "app_db",
             "type": "string",
             "required": true
           },
           "collection_name": {
-            "value": "customers",
+            "value": "users",
             "type": "string",
             "required": true
           },
           "filter_dict": {
-            "value": "{\"status\": \"active\", \"signup_date\": {\"$gte\": \"2023-01-01\"}}",
+            "value": "{\"status\": \"active\"}",
             "type": "string",
             "required": false
           }
@@ -236,7 +237,7 @@
         "toolName": "Mongodb.DiscoverCollections",
         "parameters": {
           "database_name": {
-            "value": "inventory_db",
+            "value": "example_database",
             "type": "string",
             "required": true
           }
@@ -386,29 +387,29 @@
         "toolName": "Mongodb.FindDocuments",
         "parameters": {
           "database_name": {
-            "value": "app_db",
+            "value": "ecommerce",
             "type": "string",
             "required": true
           },
           "collection_name": {
-            "value": "users",
+            "value": "orders",
             "type": "string",
             "required": true
           },
           "filter_dict": {
-            "value": "{\"status\": \"active\", \"age\": {\"$gte\": 18}, \"roles\": {\"$in\": [\"user\", \"admin\"]}}",
+            "value": "{\"status\": \"shipped\", \"total\": {\"$gte\": 100}}",
             "type": "string",
             "required": false
           },
           "projection": {
-            "value": "{\"name\": 1, \"email\": 1, \"roles\": 1, \"created_at\": 1, \"_id\": 0}",
+            "value": "{\"order_id\": 1, \"customer_id\": 1, \"total\": 1, \"status\": 1, \"created_at\": 1, \"_id\": 0}",
             "type": "string",
             "required": false
           },
           "sort": {
             "value": [
               "{\"field\": \"created_at\", \"direction\": -1}",
-              "{\"field\": \"_id\", \"direction\": 1}"
+              "{\"field\": \"total\", \"direction\": -1}"
             ],
             "type": "array",
             "required": false
@@ -531,6 +532,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-28T11:11:57.983Z",
-  "summary": "MongoDB provider: This toolkit enables discovery, schema sampling, and programmatic querying of MongoDB instances. It supports aggregation pipelines, filtered finds, and counts to extract and transform data.\n\n**Capabilities**\n\n- Discover databases and collections and infer schemas by sampling documents (required before collection queries).\n- Execute complex aggregation pipelines for joins, grouping, projection, sorting, and limits.\n- Perform targeted queries with projections, sorting, operators, and counting; results are returned as JSON strings ready for processing.\n- Emphasize using indexes and explicit projections to optimize queries and avoid errors.\n\n**Secrets**\n\n- Type: password — typically a full MongoDB connection string. Example variable: MONGODB_CONNECTION_STRING. Store securely (env or secrets manager)."
+  "generatedAt": "2026-03-01T11:12:23.245Z",
+  "summary": "Arcade's MongoDB toolkit provides tools to query and explore MongoDB instances. It enables schema sampling, collection discovery, filtered reads, counts, and aggregation pipelines for data exploration and analytics.\n\n**Capabilities**\n- Discover databases/collections and sample documents to infer schema structure before querying.\n- Perform efficient reads with projection, sorting and complex filtering to limit payloads and improve performance.\n- Execute aggregation pipelines for transformations, joins, grouping and analytics workflows.\n- Follow operational best practices: always discover collections first, fetch collection schema before queries, use indexes and limit returned fields.\n\n**Secrets**\n- password: MONGODB_CONNECTION_STRING — a connection string/credentials (e.g., mongodb+srv://user:password@cluster.example.com/db). Store securely and supply at runtime."
 }

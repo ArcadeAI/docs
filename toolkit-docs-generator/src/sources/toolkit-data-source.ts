@@ -9,6 +9,7 @@
 import { join } from "path";
 import type { ToolDefinition, ToolkitMetadata } from "../types/index.js";
 import { normalizeId } from "../utils/fp.js";
+import { filterToolsByHighestVersion } from "../utils/version-coherence.js";
 import {
   type ArcadeApiSourceConfig,
   createArcadeApiSource,
@@ -107,36 +108,54 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     this.metadataSource = config.metadataSource;
   }
 
+  /**
+   * Apply the "*Api" provider-id fallback when the direct metadata lookup
+   * missed. Used by both `fetchToolkitData` and `fetchAllToolkitsData` so
+   * they resolve metadata the same way.
+   */
+  private async resolveProviderMetadata(
+    toolkitId: string,
+    tools: readonly ToolDefinition[],
+    directMetadata: ToolkitMetadata | null
+  ): Promise<ToolkitMetadata | null> {
+    if (directMetadata || !normalizeId(toolkitId).endsWith("api")) {
+      return directMetadata;
+    }
+
+    const providerId = tools.find((t) => t.auth?.providerId)?.auth?.providerId;
+    if (!providerId) {
+      return null;
+    }
+
+    return (
+      (await this.metadataSource.getToolkitMetadata(`${providerId}Api`)) ??
+      (await this.metadataSource.getToolkitMetadata(providerId))
+    );
+  }
+
   async fetchToolkitData(
     toolkitId: string,
     version?: string
   ): Promise<ToolkitData> {
     // Fetch tools and metadata in parallel
-    const [tools, fetchedMetadata] = await Promise.all([
+    const [tools, directMetadata] = await Promise.all([
       this.toolSource.fetchToolsByToolkit(toolkitId),
       this.metadataSource.getToolkitMetadata(toolkitId),
     ]);
+    const metadata = await this.resolveProviderMetadata(
+      toolkitId,
+      tools,
+      directMetadata
+    );
 
-    // If the toolkit isn't in the Design System under its exact ID, try to match
-    // based on the auth provider for "*Api" toolkits (e.g. MailchimpMarketingApi -> MailchimpApi).
-    let metadata = fetchedMetadata;
-    if (!metadata && normalizeId(toolkitId).endsWith("api")) {
-      const providerId = tools.find((t) => t.auth?.providerId)?.auth
-        ?.providerId;
-      if (providerId) {
-        metadata =
-          (await this.metadataSource.getToolkitMetadata(`${providerId}Api`)) ??
-          (await this.metadataSource.getToolkitMetadata(providerId));
-      }
-    }
-
-    // Filter tools by version if specified
+    // Filter tools by version if specified, otherwise keep only the highest
+    // version to drop stale tools from older releases that Engine still serves.
     const filteredTools = version
       ? tools.filter((tool) => {
           const toolVersion = tool.fullyQualifiedName.split("@")[1];
           return toolVersion === version;
         })
-      : tools;
+      : filterToolsByHighestVersion(tools);
 
     return {
       tools: filteredTools,
@@ -167,16 +186,31 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
       metadataMap.set(metadata.id, metadata);
     }
 
+    // Filter each toolkit to its highest version to drop stale
+    // tools from older releases that Engine still serves.
+    for (const [toolkitId, tools] of toolkitGroups) {
+      const filtered = filterToolsByHighestVersion(tools);
+      if (filtered !== tools) {
+        toolkitGroups.set(toolkitId, filtered as ToolDefinition[]);
+      }
+    }
+
     // Combine into ToolkitData map.
     // Use getToolkitMetadata for toolkits without a direct match so that
     // fallback logic (e.g. "WeaviateApi" → "Weaviate") is applied consistently,
     // matching the behaviour of fetchToolkitData.
     const result = new Map<string, ToolkitData>();
     for (const [toolkitId, tools] of toolkitGroups) {
-      const directMetadata = metadataMap.get(toolkitId) ?? null;
-      const metadata =
-        directMetadata ??
+      // Prefer the batch lookup; only fall back to per-toolkit lookup
+      // (and then the provider-id fallback) when the map misses.
+      const directMetadata =
+        metadataMap.get(toolkitId) ??
         (await this.metadataSource.getToolkitMetadata(toolkitId));
+      const metadata = await this.resolveProviderMetadata(
+        toolkitId,
+        tools,
+        directMetadata
+      );
       result.set(toolkitId, { tools, metadata });
     }
 

@@ -133,6 +133,129 @@ describe("parsePreviousToolkitForDiff", () => {
     });
   });
 
+  it("preserves documentationChunks, customImports, and subPages on schema fallback", () => {
+    // Simulates the regression: a toolkit file whose documentationChunks use
+    // location/type values that pass Zod strict-parse (e.g. "description"/"warning"),
+    // but the surrounding toolkit object has a legacy field that fails strict parse.
+    const result = parsePreviousToolkitForDiff(
+      {
+        id: "Github",
+        label: "GitHub",
+        version: "3.0.0",
+        description: "GitHub toolkit",
+        metadata: {
+          category: "development",
+          iconUrl: "https://example.com/github.svg",
+          isBYOC: false,
+          isPro: false,
+          type: "arcade",
+          docsLink: "https://docs.example.com/github",
+          isComingSoon: false,
+          isHidden: false,
+        },
+        auth: null,
+        tools: [
+          {
+            name: "CreateIssue",
+            qualifiedName: "Github.CreateIssue",
+            fullyQualifiedName: "Github.CreateIssue@3.0.0",
+            description: null,
+            parameters: [],
+            auth: null,
+            secrets: [],
+            // Legacy field that causes strict parse to fail
+            output: { value_schema: { val_type: "json" } },
+          },
+        ],
+        documentationChunks: [
+          {
+            type: "warning",
+            location: "description",
+            position: "after",
+            content: "Critical: GitHub Apps only, not OAuth Apps.",
+          },
+          {
+            type: "info",
+            location: "before_available_tools",
+            position: "after",
+            content: "## GitHub Enterprise Support",
+            header: "## GitHub Enterprise Support",
+          },
+        ],
+        customImports: ['import { Callout } from "nextra/components";'],
+        subPages: [],
+      },
+      "github"
+    );
+
+    expect(result.usedFallback).toBe(true);
+    expect(result.toolkit?.documentationChunks).toHaveLength(2);
+    expect(result.toolkit?.documentationChunks[0]?.content).toBe(
+      "Critical: GitHub Apps only, not OAuth Apps."
+    );
+    expect(result.toolkit?.documentationChunks[1]?.location).toBe(
+      "before_available_tools"
+    );
+    expect(result.toolkit?.customImports).toHaveLength(1);
+    expect(result.toolkit?.customImports[0]).toBe(
+      'import { Callout } from "nextra/components";'
+    );
+    expect(result.toolkit?.subPages).toHaveLength(0);
+  });
+
+  it("preserves subPages on schema fallback", () => {
+    const result = parsePreviousToolkitForDiff(
+      {
+        id: "Zoom",
+        label: "Zoom",
+        version: "1.0.0",
+        description: null,
+        metadata: {
+          category: "productivity",
+          iconUrl: "https://example.com/zoom.svg",
+          isBYOC: false,
+          isPro: false,
+          type: "arcade",
+          docsLink: "https://docs.example.com/zoom",
+          isComingSoon: false,
+          isHidden: false,
+        },
+        auth: null,
+        tools: [
+          {
+            name: "CreateMeeting",
+            qualifiedName: "Zoom.CreateMeeting",
+            // Missing fullyQualifiedName — causes strict parse to fail
+            description: null,
+            parameters: [],
+            auth: null,
+            secrets: [],
+            output: null,
+          },
+        ],
+        documentationChunks: [
+          {
+            type: "info",
+            location: "header",
+            position: "after",
+            content: "Zoom requires admin approval.",
+          },
+        ],
+        customImports: [],
+        subPages: ["environment-setup", "rate-limits"],
+      },
+      "zoom"
+    );
+
+    expect(result.usedFallback).toBe(true);
+    expect(result.toolkit?.documentationChunks).toHaveLength(1);
+    expect(result.toolkit?.subPages).toEqual([
+      "environment-setup",
+      "rate-limits",
+    ]);
+    expect(result.toolkit?.customImports).toHaveLength(0);
+  });
+
   it("derives missing qualified names from toolkit and tool names", () => {
     const result = parsePreviousToolkitForDiff(
       {

@@ -22,8 +22,22 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SCROLLING_CELL } from "../constants";
-import type { AvailableToolsTableProps, SecretType } from "../types";
+import type {
+  AvailableToolsTableProps,
+  BehaviorFlagKey,
+  SecretType,
+} from "../types";
+import {
+  type AvailableToolsFilter,
+  filterTools,
+} from "./available-tools-filter";
 import { normalizeScopes } from "./scopes-display";
+
+export {
+  type AvailableToolsFilter,
+  type FilterToolsOptions,
+  filterTools,
+} from "./available-tools-filter";
 
 const DEFAULT_PAGE_SIZE = 25;
 const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
@@ -222,19 +236,213 @@ export function toToolAnchorId(value: string): string {
   return value.toLowerCase().replace(/\s+/g, "-").replace(/\./g, "");
 }
 
-export type AvailableToolsFilter =
-  | "all"
-  | "has_scopes"
-  | "no_scopes"
-  | "has_secrets"
-  | "no_secrets";
-
 export type AvailableToolsSort =
   | "name_asc"
   | "name_desc"
   | "scopes_first"
   | "secrets_first"
   | "selected_first";
+
+const BEHAVIOR_FILTER_LABELS: Record<BehaviorFlagKey, string> = {
+  readOnly: "Read only",
+  destructive: "Destructive",
+  idempotent: "Idempotent",
+  openWorld: "Open world",
+};
+
+const BEHAVIOR_FILTER_ORDER: BehaviorFlagKey[] = [
+  "readOnly",
+  "destructive",
+  "idempotent",
+  "openWorld",
+];
+
+function formatMetadataLabel(value: string): string {
+  const words = value.split("_");
+  return words
+    .map((word, index) => {
+      if (word === "crm") {
+        return "CRM";
+      }
+      if (index === 0) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }
+      return word.toLowerCase();
+    })
+    .join(" ");
+}
+
+type BehaviorFlagsState = Partial<Record<BehaviorFlagKey, boolean>>;
+
+function getBehaviorFilterStateLabel(value: boolean | undefined): string {
+  if (value === undefined) {
+    return "Any";
+  }
+  if (value) {
+    return "Yes";
+  }
+  return "No";
+}
+
+function getNextBehaviorFilterValue(
+  value: boolean | undefined
+): boolean | undefined {
+  if (value === undefined) {
+    return true;
+  }
+  if (value) {
+    return false;
+  }
+  return;
+}
+
+function getBehaviorFilterToneClass(value: boolean | undefined): string {
+  if (value === undefined) {
+    return "border-muted/60 bg-neutral-dark/20 text-muted-foreground hover:bg-neutral-dark/35";
+  }
+  if (value) {
+    return "border-emerald-500/45 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25";
+  }
+  return "border-rose-500/45 bg-rose-500/15 text-rose-200 hover:bg-rose-500/25";
+}
+
+function BehaviorFilterButtons({
+  behaviorFilterKeys,
+  behaviorFlags,
+  onBehaviorFlagsChange,
+  onFiltersChanged,
+}: {
+  behaviorFilterKeys: BehaviorFlagKey[];
+  behaviorFlags: BehaviorFlagsState;
+  onBehaviorFlagsChange: (
+    updater: (current: BehaviorFlagsState) => BehaviorFlagsState
+  ) => void;
+  onFiltersChanged: () => void;
+}) {
+  return behaviorFilterKeys.map((key) => {
+    const currentValue = behaviorFlags[key];
+    const stateLabel = getBehaviorFilterStateLabel(currentValue);
+
+    return (
+      <Button
+        aria-label={`${BEHAVIOR_FILTER_LABELS[key]} filter: ${stateLabel}`}
+        className={`h-7 px-2.5 text-xs ${getBehaviorFilterToneClass(
+          currentValue
+        )}`}
+        key={key}
+        onClick={() => {
+          onBehaviorFlagsChange((current) => {
+            const next = { ...current };
+            const nextValue = getNextBehaviorFilterValue(current[key]);
+
+            if (nextValue === undefined) {
+              delete next[key];
+            } else {
+              next[key] = nextValue;
+            }
+
+            return next;
+          });
+          onFiltersChanged();
+        }}
+        size="sm"
+        title={`${BEHAVIOR_FILTER_LABELS[key]} filter. Click to cycle Any, Yes, and No.`}
+        variant="outline"
+      >
+        {BEHAVIOR_FILTER_LABELS[key]}: {stateLabel}
+      </Button>
+    );
+  });
+}
+
+function MetadataFilterSection({
+  operationOptions,
+  activeOperations,
+  onActiveOperationsChange,
+  behaviorFilterKeys,
+  behaviorFlags,
+  onBehaviorFlagsChange,
+  hasActiveMetadataFilters,
+  onFiltersChanged,
+}: {
+  operationOptions: string[];
+  activeOperations: Set<string>;
+  onActiveOperationsChange: (
+    updater: (current: Set<string>) => Set<string>
+  ) => void;
+  behaviorFilterKeys: BehaviorFlagKey[];
+  behaviorFlags: BehaviorFlagsState;
+  onBehaviorFlagsChange: (
+    updater: (current: BehaviorFlagsState) => BehaviorFlagsState
+  ) => void;
+  hasActiveMetadataFilters: boolean;
+  onFiltersChanged: () => void;
+}) {
+  return (
+    <div className="rounded-lg bg-neutral-dark/15 p-3">
+      <div className="flex flex-wrap items-start gap-3">
+        {operationOptions.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground/85 text-xs uppercase tracking-wide">
+              Operations
+            </span>
+            {operationOptions.map((operation) => (
+              <Button
+                className="h-7 px-2.5 text-xs"
+                key={operation}
+                onClick={() => {
+                  onActiveOperationsChange((current) => {
+                    const next = new Set(current);
+                    if (next.has(operation)) {
+                      next.delete(operation);
+                    } else {
+                      next.add(operation);
+                    }
+                    return next;
+                  });
+                  onFiltersChanged();
+                }}
+                size="sm"
+                variant={
+                  activeOperations.has(operation) ? "default" : "outline"
+                }
+              >
+                {formatMetadataLabel(operation)}
+              </Button>
+            ))}
+          </div>
+        )}
+        {behaviorFilterKeys.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground/85 text-xs uppercase tracking-wide">
+              Behavior
+            </span>
+            <BehaviorFilterButtons
+              behaviorFilterKeys={behaviorFilterKeys}
+              behaviorFlags={behaviorFlags}
+              onBehaviorFlagsChange={onBehaviorFlagsChange}
+              onFiltersChanged={onFiltersChanged}
+            />
+          </div>
+        )}
+        {hasActiveMetadataFilters && (
+          <Button
+            className="h-7 px-2.5 text-xs"
+            onClick={() => {
+              onActiveOperationsChange(() => new Set());
+              onBehaviorFlagsChange(() => ({}));
+              onFiltersChanged();
+            }}
+            size="sm"
+            variant="ghost"
+          >
+            Clear filters
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 type SecretDisplayItem = {
   label: string;
@@ -487,43 +695,6 @@ export function sortTools(
   }
 }
 
-function filterTools(
-  tools: AvailableToolsTableProps["tools"],
-  query: string,
-  filter: AvailableToolsFilter
-): AvailableToolsTableProps["tools"] {
-  const normalizedQuery = query.trim().toLowerCase();
-
-  return tools.filter((tool) => {
-    const haystack = [tool.name, tool.qualifiedName, tool.description ?? ""]
-      .join(" ")
-      .toLowerCase();
-    const matchesQuery =
-      normalizedQuery.length === 0 || haystack.includes(normalizedQuery);
-
-    if (!matchesQuery) {
-      return false;
-    }
-
-    const hasScopes = buildScopeDisplayItems(tool.scopes ?? []).length > 0;
-    const hasSecrets =
-      (tool.secretsInfo?.length ?? 0) > 0 || (tool.secrets?.length ?? 0) > 0;
-
-    switch (filter) {
-      case "has_scopes":
-        return hasScopes;
-      case "no_scopes":
-        return !hasScopes;
-      case "has_secrets":
-        return hasSecrets;
-      case "no_secrets":
-        return !hasSecrets;
-      default:
-        return true;
-    }
-  });
-}
-
 /**
  * AvailableToolsTable
  *
@@ -550,13 +721,61 @@ export function AvailableToolsTable({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<AvailableToolsFilter>(defaultFilter);
   const [sort, setSort] = useState<AvailableToolsSort>("name_asc");
+  const [activeOperations, setActiveOperations] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [behaviorFlags, setBehaviorFlags] = useState<BehaviorFlagsState>({});
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [page, setPage] = useState<number>(1);
 
+  const operationOptions = useMemo(() => {
+    const values = new Set<string>();
+    for (const tool of safeTools) {
+      for (const operation of tool.metadata?.behavior?.operations ?? []) {
+        if (operation.trim().length > 0) {
+          values.add(operation);
+        }
+      }
+    }
+    return [...values].sort((a, b) => a.localeCompare(b));
+  }, [safeTools]);
+
+  const behaviorFilterKeys = useMemo(() => {
+    const available = new Set<BehaviorFlagKey>();
+    for (const tool of safeTools) {
+      const behavior = tool.metadata?.behavior;
+      if (!behavior) {
+        continue;
+      }
+      for (const key of BEHAVIOR_FILTER_ORDER) {
+        if (behavior[key] !== undefined) {
+          available.add(key);
+        }
+      }
+    }
+    return BEHAVIOR_FILTER_ORDER.filter((key) => available.has(key));
+  }, [safeTools]);
+
+  const hasMetadataFilters =
+    operationOptions.length > 0 || behaviorFilterKeys.length > 0;
+  const hasActiveMetadataFilters =
+    activeOperations.size > 0 || Object.keys(behaviorFlags).length > 0;
+
   const filteredTools = useMemo(() => {
-    const filtered = filterTools(safeTools, query, filter);
+    const filtered = filterTools(safeTools, query, filter, {
+      activeOperations,
+      behaviorFlags,
+    });
     return sortTools(filtered, sort, selectedTools);
-  }, [safeTools, query, filter, sort, selectedTools]);
+  }, [
+    safeTools,
+    query,
+    filter,
+    sort,
+    selectedTools,
+    activeOperations,
+    behaviorFlags,
+  ]);
 
   const pageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredTools.length / pageSize)),
@@ -583,107 +802,135 @@ export function AvailableToolsTable({
   return (
     <div className="mt-6 space-y-4">
       {(enableSearch || enableFilters) && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-neutral-dark/20 p-3">
-          {enableSearch && (
-            <div className="relative w-full flex-1 sm:min-w-[200px] sm:max-w-md">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pr-9 pl-9"
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setPage(1);
-                }}
-                placeholder={searchPlaceholder}
-                type="text"
-                value={query}
-              />
-              {query && (
-                <Button
-                  aria-label="Clear search"
-                  className="absolute top-1/2 right-3 h-auto -translate-y-1/2 p-0"
-                  onClick={() => setQuery("")}
-                  size="sm"
-                  variant="ghost"
+        <div className="space-y-3 rounded-lg bg-neutral-dark/20 p-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {enableSearch && (
+              <div className="relative w-full flex-1 sm:min-w-[200px] sm:max-w-md">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pr-9 pl-9"
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setPage(1);
+                  }}
+                  placeholder={searchPlaceholder}
+                  type="text"
+                  value={query}
+                />
+                {query && (
+                  <Button
+                    aria-label="Clear search"
+                    className="absolute top-1/2 right-3 h-auto -translate-y-1/2 p-0"
+                    onClick={() => setQuery("")}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+            {enableFilters && (
+              <>
+                <Select
+                  onValueChange={(value) => {
+                    setFilter(value as AvailableToolsFilter);
+                    setPage(1);
+                  }}
+                  value={filter}
                 >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+                  <SelectTrigger
+                    aria-label={filterLabel}
+                    className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
+                  >
+                    <SelectValue placeholder={filterLabel} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All tools</SelectItem>
+                    <SelectItem value="has_scopes">
+                      Requires OAuth scopes only
+                    </SelectItem>
+                    <SelectItem value="no_scopes">No OAuth scopes</SelectItem>
+                    <SelectItem value="has_secrets">
+                      Requires secrets only
+                    </SelectItem>
+                    <SelectItem value="no_secrets">
+                      No secrets required
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  onValueChange={(value) => {
+                    setPageSize(Number(value));
+                    setPage(1);
+                  }}
+                  value={String(pageSize)}
+                >
+                  <SelectTrigger
+                    aria-label="Rows per page"
+                    className="h-9 w-full sm:w-[140px] border-muted/60 text-sm hover:border-muted"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size} / page
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  onValueChange={(value) => {
+                    setSort(value as AvailableToolsSort);
+                    setPage(1);
+                  }}
+                  value={sort}
+                >
+                  <SelectTrigger
+                    aria-label="Sort by"
+                    className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name_asc">Name A-Z</SelectItem>
+                    <SelectItem value="name_desc">Name Z-A</SelectItem>
+                    <SelectItem value="scopes_first">
+                      Requires OAuth scopes first
+                    </SelectItem>
+                    <SelectItem value="secrets_first">
+                      Requires secrets first
+                    </SelectItem>
+                    {showSelection && (
+                      <SelectItem value="selected_first">
+                        Selected first
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
+            <span className="w-full text-muted-foreground text-sm tabular-nums sm:ml-auto sm:w-[220px] sm:flex-none sm:text-right">
+              <span className="font-medium text-foreground">
+                {filteredTools.length}
+              </span>{" "}
+              of {safeTools.length} tools
+            </span>
+          </div>
+
+          {enableFilters && hasMetadataFilters && (
+            <MetadataFilterSection
+              activeOperations={activeOperations}
+              behaviorFilterKeys={behaviorFilterKeys}
+              behaviorFlags={behaviorFlags}
+              hasActiveMetadataFilters={hasActiveMetadataFilters}
+              onActiveOperationsChange={setActiveOperations}
+              onBehaviorFlagsChange={setBehaviorFlags}
+              onFiltersChanged={() => setPage(1)}
+              operationOptions={operationOptions}
+            />
           )}
-          {enableFilters && (
-            <Select
-              onValueChange={(value) => {
-                setFilter(value as AvailableToolsFilter);
-                setPage(1);
-              }}
-              value={filter}
-            >
-              <SelectTrigger
-                aria-label={filterLabel}
-                className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
-              >
-                <SelectValue placeholder={filterLabel} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All tools</SelectItem>
-                <SelectItem value="has_secrets">
-                  Requires secrets only
-                </SelectItem>
-                <SelectItem value="no_secrets">No secrets required</SelectItem>
-              </SelectContent>
-            </Select>
-          )}
-          <Select
-            onValueChange={(value) => {
-              setPageSize(Number(value));
-              setPage(1);
-            }}
-            value={String(pageSize)}
-          >
-            <SelectTrigger
-              aria-label="Rows per page"
-              className="h-9 w-full sm:w-[140px] border-muted/60 text-sm hover:border-muted"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {PAGE_SIZE_OPTIONS.map((size) => (
-                <SelectItem key={size} value={String(size)}>
-                  {size} / page
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select
-            onValueChange={(value) => {
-              setSort(value as AvailableToolsSort);
-              setPage(1);
-            }}
-            value={sort}
-          >
-            <SelectTrigger
-              aria-label="Sort by"
-              className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
-            >
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="name_asc">Name A-Z</SelectItem>
-              <SelectItem value="name_desc">Name Z-A</SelectItem>
-              <SelectItem value="secrets_first">
-                Requires secrets first
-              </SelectItem>
-              {showSelection && (
-                <SelectItem value="selected_first">Selected first</SelectItem>
-              )}
-            </SelectContent>
-          </Select>
-          <span className="text-muted-foreground text-sm">
-            <span className="font-medium text-foreground">
-              {filteredTools.length}
-            </span>{" "}
-            of {safeTools.length}
-          </span>
         </div>
       )}
       {filteredTools.length === 0 ? (

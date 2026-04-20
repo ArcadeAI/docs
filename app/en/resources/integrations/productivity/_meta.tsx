@@ -21,6 +21,10 @@ const meta: MetaRecord = {
     title: "Dropbox",
     href: "/en/resources/integrations/productivity/dropbox",
   },
+  figma: {
+    title: "Figma",
+    href: "/en/resources/integrations/productivity/figma",
+  },
   gmail: {
     title: "Gmail",
     href: "/en/resources/integrations/productivity/gmail",
@@ -49,6 +53,10 @@ const meta: MetaRecord = {
     title: "Google Slides",
     href: "/en/resources/integrations/productivity/google-slides",
   },
+  granola: {
+    title: "Granola",
+    href: "/en/resources/integrations/productivity/granola",
+  },
   jira: {
     title: "Jira",
     href: "/en/resources/integrations/productivity/jira",
@@ -65,25 +73,25 @@ const meta: MetaRecord = {
     title: "Microsoft OneDrive",
     href: "/en/resources/integrations/productivity/microsoft-onedrive",
   },
+  "microsoft-outlook-calendar": {
+    title: "Microsoft Outlook Calendar",
+    href: "/en/resources/integrations/productivity/microsoft-outlook-calendar",
+  },
+  "microsoft-outlook-mail": {
+    title: "Microsoft Outlook Mail",
+    href: "/en/resources/integrations/productivity/microsoft-outlook-mail",
+  },
   "microsoft-powerpoint": {
     title: "Microsoft PowerPoint",
     href: "/en/resources/integrations/productivity/microsoft-powerpoint",
   },
-  sharepoint: {
+  "microsoft-sharepoint": {
     title: "Microsoft SharePoint",
-    href: "/en/resources/integrations/productivity/sharepoint",
+    href: "/en/resources/integrations/productivity/microsoft-sharepoint",
   },
   "microsoft-word": {
     title: "Microsoft Word",
     href: "/en/resources/integrations/productivity/microsoft-word",
-  },
-  "outlook-calendar": {
-    title: "Outlook Calendar",
-    href: "/en/resources/integrations/productivity/outlook-calendar",
-  },
-  "outlook-mail": {
-    title: "Outlook Mail",
-    href: "/en/resources/integrations/productivity/outlook-mail",
   },
   "-- Starter": {
     type: "separator",
@@ -121,9 +129,9 @@ const meta: MetaRecord = {
     title: "Luma API",
     href: "/en/resources/integrations/productivity/luma-api",
   },
-  "mailchimp-api": {
+  "mailchimp-marketing-api": {
     title: "Mailchimp API",
-    href: "/en/resources/integrations/productivity/mailchimp-api",
+    href: "/en/resources/integrations/productivity/mailchimp-marketing-api",
   },
   "miro-api": {
     title: "Miro API",

@@ -112,19 +112,14 @@ const MDX_COMPONENTS = {
 // Maximum number of MDX components to cache to prevent unbounded memory growth
 const MDX_CACHE_MAX_SIZE = 100;
 
-const mdxCache =
-  createMdxCache<React.ComponentType<{ components?: typeof MDX_COMPONENTS }>>(
-    MDX_CACHE_MAX_SIZE
-  );
+const mdxCache = createMdxCache<React.ElementType>(MDX_CACHE_MAX_SIZE);
 
 /**
  * Renders MDX content from a string with custom components.
  */
 function MdxContent({ content }: { content: string }) {
   const source = useMemo(() => stripMdxImports(content), [content]);
-  const [Component, setComponent] = useState<React.ComponentType<{
-    components?: typeof MDX_COMPONENTS;
-  }> | null>(null);
+  const [Component, setComponent] = useState<React.ElementType | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

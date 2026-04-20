@@ -9,25 +9,13 @@ const meta: MetaRecord = {
     title: "Bright Data",
     href: "/en/resources/integrations/development/brightdata",
   },
-  complextools: {
-    title: "ComplexTools",
-    href: "/en/resources/integrations/development/complextools",
-  },
   daytona: {
     title: "Daytona",
     href: "/en/resources/integrations/development/daytona",
   },
-  deepwiki: {
-    title: "Deepwiki",
-    href: "/en/resources/integrations/development/deepwiki",
-  },
   e2b: {
     title: "E2B",
     href: "/en/resources/integrations/development/e2b",
-  },
-  figma: {
-    title: "Figma",
-    href: "/en/resources/integrations/development/figma",
   },
   firecrawl: {
     title: "Firecrawl",
@@ -42,24 +30,12 @@ const meta: MetaRecord = {
     href: "/en/resources/integrations/development/math",
   },
   pagerduty: {
-    title: "Pagerduty",
+    title: "PagerDuty",
     href: "/en/resources/integrations/development/pagerduty",
   },
-  pylon: {
-    title: "Pylon",
-    href: "/en/resources/integrations/development/pylon",
-  },
-  search: {
-    title: "Search",
-    href: "/en/resources/integrations/development/search",
-  },
-  test2: {
-    title: "Test2",
-    href: "/en/resources/integrations/development/test2",
-  },
-  web: {
-    title: "Web",
-    href: "/en/resources/integrations/development/web",
+  posthog: {
+    title: "PostHog",
+    href: "/en/resources/integrations/development/posthog",
   },
   "-- Starter": {
     type: "separator",
@@ -81,21 +57,17 @@ const meta: MetaRecord = {
     title: "GitHub API",
     href: "/en/resources/integrations/development/github-api",
   },
-  "pagerduty-api": {
-    title: "PagerDuty API",
-    href: "/en/resources/integrations/development/pagerduty-api",
-  },
   "posthog-api": {
     title: "PostHog API",
     href: "/en/resources/integrations/development/posthog-api",
   },
-  pylonapi: {
-    title: "PylonApi",
-    href: "/en/resources/integrations/development/pylonapi",
-  },
   "vercel-api": {
     title: "Vercel API",
     href: "/en/resources/integrations/development/vercel-api",
+  },
+  "zoho-creator-api": {
+    title: "Zoho Creator API",
+    href: "/en/resources/integrations/development/zoho-creator-api",
   },
 };
 

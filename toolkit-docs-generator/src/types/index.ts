@@ -199,6 +199,7 @@ export const DocumentationChunkTypeSchema = z.enum([
   "warning",
   "info",
   "tip",
+  "section",
 ]);
 
 export type DocumentationChunkType = z.infer<
@@ -214,6 +215,9 @@ export type DocumentationChunkType = z.infer<
  * - secrets: Around the secrets section
  * - output: Around the output section
  * - footer: After all tools, before the footer
+ * - before_available_tools: Before the available tools section (toolkit-level)
+ * - after_available_tools: After the available tools section (toolkit-level)
+ * - custom_section: Standalone custom section outside the tools list
  */
 export const DocumentationChunkLocationSchema = z.enum([
   "header",
@@ -223,6 +227,9 @@ export const DocumentationChunkLocationSchema = z.enum([
   "secrets",
   "output",
   "footer",
+  "before_available_tools",
+  "after_available_tools",
+  "custom_section",
 ]);
 
 export type DocumentationChunkLocation = z.infer<
@@ -260,6 +267,10 @@ export const DocumentationChunkSchema = z.object({
   variant: z
     .enum(["default", "destructive", "warning", "info", "success"])
     .optional(),
+  /** Optional section header for sidebar navigation (e.g., "## Auth Setup") */
+  header: z.string().optional(),
+  /** Optional priority for ordering (lower = earlier, default = 100) */
+  priority: z.number().optional(),
 });
 
 export type DocumentationChunk = z.infer<typeof DocumentationChunkSchema>;
@@ -388,6 +399,20 @@ export const MergedToolkitSchema = z.object({
   description: z.string().nullable(),
   /** LLM-generated summary (optional) */
   summary: z.string().optional(),
+  /**
+   * True when the current `summary` is known to be out of date with the
+   * toolkit's current tools (the signature changed but regeneration was
+   * skipped or failed, so the previous summary was carried forward as a
+   * fallback). Cleared whenever a fresh summary is successfully generated
+   * or when the summary is verified against an unchanged signature.
+   */
+  summaryStale: z.boolean().optional(),
+  /**
+   * Machine-readable reason the summary is stale (e.g.
+   * "llm_generator_unavailable", "llm_generation_failed"). Always set
+   * together with `summaryStale: true`. Cleared together with it.
+   */
+  summaryStaleReason: z.string().optional(),
   /** Metadata from Design System */
   metadata: MergedToolkitMetadataSchema,
   /** Authentication requirements */
@@ -398,8 +423,14 @@ export const MergedToolkitSchema = z.object({
   documentationChunks: z.array(DocumentationChunkSchema).default([]),
   /** Custom imports for MDX */
   customImports: z.array(z.string()).default([]),
-  /** Sub-pages that exist for this toolkit */
-  subPages: z.array(z.string()).default([]),
+  /**
+   * Sub-pages that exist for this toolkit.
+   * Each entry is either a string (legacy slug) or a rich object with
+   * { type, content, relativePath } for inline MDX sub-page content.
+   */
+  subPages: z
+    .array(z.union([z.string(), z.record(z.string(), z.unknown())]))
+    .default([]),
   /** Generation metadata */
   generatedAt: z.string().optional(),
 });

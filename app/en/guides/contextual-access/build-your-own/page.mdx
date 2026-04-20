@@ -21,9 +21,9 @@ Use the OpenAPI spec with standard code generators to scaffold your server:
 
 | Language | Generator |
 | --- | --- |
-| **Go** | [oapi-codegen](https://github.com/deepmap/oapi-codegen), [ogen](https://github.com/ogen-go/ogen) |
+| **Go** | [oapi-codegen](https://github.com/oapi-codegen/oapi-codegen), [ogen](https://github.com/ogen-go/ogen) |
 | **Python** | [openapi-generator](https://openapi-generator.tech/), [datamodel-code-generator](https://github.com/koxudaxi/datamodel-code-generator) |
-| **TypeScript** | [openapi-typescript](https://github.com/drwpow/openapi-typescript), [openapi-generator](https://openapi-generator.tech/) |
+| **TypeScript** | [openapi-typescript](https://github.com/openapi-ts/openapi-typescript), [openapi-generator](https://openapi-generator.tech/) |
 
 **Example (Go with oapi-codegen):**
 
@@ -55,7 +55,7 @@ You do not need to implement all endpoints. Only implement the ones you configur
 | Field | Type | Description |
 | --- | --- | --- |
 | `execution_id` | string | Correlates request/response across hooks |
-| `tool` | object | `name`, `toolkit`, `version` |
+| `tool` | object | `name`, `toolkit`, `version`, and optional `metadata` (see [Tool Metadata](#tool-metadata)) |
 | `inputs` | object | Tool inputs (name → value) |
 | `context` | object | `authorization` (OAuth per provider), `secrets` (key names only), `metadata`, `user_id` |
 
@@ -76,7 +76,7 @@ You do not need to implement all endpoints. Only implement the ones you configur
 | Field | Type | Description |
 | --- | --- | --- |
 | `execution_id` | string | Correlates with pre-execution hook |
-| `tool` | object | `name`, `toolkit`, `version` |
+| `tool` | object | `name`, `toolkit`, `version`, and optional `metadata` (see [Tool Metadata](#tool-metadata)) |
 | `inputs` | object | Tool inputs |
 | `success` | boolean | Whether the tool call succeeded |
 | `output` | any | The execution output (any JSON type) |
@@ -101,7 +101,7 @@ You do not need to implement all endpoints. Only implement the ones you configur
 | Field | Type | Description |
 | --- | --- | --- |
 | `user_id` | string | User to check |
-| `toolkits` | object | Map of toolkit name → toolkit info (tools, versions, requirements) |
+| `toolkits` | object | Map of toolkit name → toolkit info. Each toolkit contains a `tools` map of tool name → version info arrays. Each version info includes `version`, `requirements`, and optional `metadata` (see [Tool Metadata](#tool-metadata)) |
 
 ### Response
 
@@ -112,7 +112,100 @@ Return either an allow list or a deny list (not both):
 | `only` | object | If present, **only** these tools are allowed (deny list ignored) |
 | `deny` | object | Tools listed here are denied (ignored if `only` is present) |
 
-If you return neither field, the Arcade treats it as "no change" — all tools remain allowed at this hook.
+If you return neither field, the Arcade treats it as "no change"—all tools remain allowed at this hook.
+
+## Tool Metadata
+
+Tools can include an optional `metadata` field with classification, behavioral, and custom information. Webhook servers can use this metadata to make more granular access and filtering decisions.
+
+All metadata fields are optional and omitted from the JSON when empty, so existing webhook servers continue to work without changes.
+
+For the full list of valid `service_domains` and `operations` values, see [Add Tool Metadata](/guides/create-tools/tool-basics/add-tool-metadata).
+
+### Structure
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `metadata` | object \| absent | Container for tool metadata. Omitted when the tool has no metadata set. |
+| `metadata.classification` | object | Classification information. |
+| `metadata.classification.service_domains` | string[] | Service domains this tool interfaces with (for example, `"email"`, `"calendar"`, `"crm"`). |
+| `metadata.behavior` | object | Behavioral characteristics. |
+| `metadata.behavior.operations` | string[] | Operations this tool performs (for example, `"read"`, `"create"`, `"update"`, `"delete"`, `"opaque"`). |
+| `metadata.behavior.read_only` | boolean | Whether the tool only reads data. |
+| `metadata.behavior.destructive` | boolean | Whether the tool can delete or irreversibly modify data. |
+| `metadata.behavior.idempotent` | boolean | Whether repeated calls with the same inputs produce the same result. |
+| `metadata.behavior.open_world` | boolean | Whether the tool can affect state outside its defined outputs. |
+| `metadata.extras` | object | Arbitrary additional metadata set by the toolkit author (for example, `{"IdP": "entra_id"}`). |
+
+### Example: pre/post hook request with metadata
+
+```json
+{
+  "execution_id": "exec_abc123",
+  "tool": {
+    "name": "ListEmails",
+    "toolkit": "Gmail",
+    "version": "1.0.0",
+    "metadata": {
+      "classification": {
+        "service_domains": ["email"]
+      },
+      "behavior": {
+        "operations": ["read"],
+        "read_only": true,
+        "destructive": false,
+        "idempotent": true,
+        "open_world": false
+      },
+      "extras": {
+        "IdP": "entra_id"
+      }
+    }
+  },
+  "inputs": { "query": "from:boss@company.com" },
+  "context": { "user_id": "user_123" }
+}
+```
+
+### Example: access hook request with metadata
+
+```json
+{
+  "user_id": "user_123",
+  "toolkits": {
+    "Gmail": {
+      "tools": {
+        "ListEmails": [
+          {
+            "version": "1.0.0",
+            "metadata": {
+              "classification": {
+                "service_domains": ["email"]
+              },
+              "behavior": {
+                "operations": ["read"],
+                "read_only": true
+              }
+            },
+            "requirements": {
+              "authorization": [{ "provider_type": "oauth2" }]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+### Use cases
+
+Webhook servers can use tool metadata to make more granular decisions:
+
+- **Block destructive operations**—Deny tools where `metadata.behavior.destructive` is `true` for certain users
+- **Restrict by service domain**—Only allow tools in the `"email"` domain for a particular project
+- **Audit read vs. write**—Log or rate-limit tools based on their `operations` array
+- **Route by IdP**—Use `metadata.extras.IdP` to apply provider-specific policies
 
 ## Response codes (pre and post)
 

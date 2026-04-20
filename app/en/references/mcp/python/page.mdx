@@ -118,6 +118,46 @@ Decorator for registering tools. Can be used with or without arguments.
 | `requires_metadata` | `list[str] \| None` | List of metadata keys the tool requires | `None` |
 | `adapters` | `list[ErrorAdapter] \| None` | Error adapters for custom error handling | `None` |
 | `metadata` | `ToolMetadata \| None` | Additional tool metadata | `None` |
+| `meta` | `dict[str, Any] \| None` | Arbitrary `_meta` extensions (e.g., `{"ui": {"resourceUri": "..."}}`) | `None` |
+
+#### `resource`
+
+```python
+@app.resource(
+    "config://settings",
+    name="Settings",
+    description="Application settings",
+    mime_type="application/json",
+)
+def settings_handler(uri: str) -> str:
+    ...
+```
+
+Decorator for registering resources and resource templates. See [Resources](/references/mcp/python/resources) for full documentation.
+
+#### `add_resource`
+
+```python
+app.add_resource(uri, name=None, handler=my_handler, ...)
+```
+
+Imperative form of `@app.resource`. See [Resources](/references/mcp/python/resources) for full documentation.
+
+#### `add_text_resource`
+
+```python
+app.add_text_resource(uri, text="...", name=None, ...)
+```
+
+Register a static text resource. See [Resources](/references/mcp/python/resources) for full documentation.
+
+#### `add_file_resource`
+
+```python
+app.add_file_resource(uri, path="path/to/file", name=None, ...)
+```
+
+Register a file-backed resource. See [Resources](/references/mcp/python/resources) for full documentation.
 
 #### `add_tool`
 

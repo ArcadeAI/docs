@@ -1,8 +1,76 @@
 import { describe, expect, it } from "vitest";
 import {
+  collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
 } from "../../src/cli/generate-flow.js";
+import type { ChangeDetectionResult } from "../../src/diff/index.js";
+
+// ── Minimal ChangeDetectionResult builder ─────────────────────────────────────
+
+const makeResult = (
+  changes: Array<{ toolkitId: string; changeType: string }>
+): ChangeDetectionResult =>
+  ({
+    toolkitChanges: changes.map((c) => ({ ...c })),
+    summary: {
+      newToolkits: 0,
+      removedToolkits: 0,
+      modifiedToolkits: 0,
+      unchangedToolkits: 0,
+      versionOnlyToolkits: 0,
+      totalToolkits: 0,
+      newTools: 0,
+      removedTools: 0,
+      modifiedTools: 0,
+    },
+  }) as unknown as ChangeDetectionResult;
+
+// ── collectRemovedToolkitIds ───────────────────────────────────────────────────
+
+describe("collectRemovedToolkitIds", () => {
+  it("returns IDs of removed toolkits as a lowercase set", () => {
+    const result = makeResult([
+      { toolkitId: "Github", changeType: "removed" },
+      { toolkitId: "Slack", changeType: "removed" },
+    ]);
+    const ids = collectRemovedToolkitIds(result);
+    expect(ids).toEqual(new Set(["github", "slack"]));
+  });
+
+  it("returns empty set when no toolkits are removed", () => {
+    const result = makeResult([
+      { toolkitId: "Github", changeType: "modified" },
+      { toolkitId: "Slack", changeType: "unchanged" },
+    ]);
+    expect(collectRemovedToolkitIds(result).size).toBe(0);
+  });
+
+  it("excludes added, modified, and unchanged toolkits", () => {
+    const result = makeResult([
+      { toolkitId: "Added", changeType: "added" },
+      { toolkitId: "Modified", changeType: "modified" },
+      { toolkitId: "Unchanged", changeType: "unchanged" },
+      { toolkitId: "Removed", changeType: "removed" },
+    ]);
+    const ids = collectRemovedToolkitIds(result);
+    expect(ids).toEqual(new Set(["removed"]));
+  });
+
+  it("lowercases toolkit IDs regardless of original casing", () => {
+    const result = makeResult([
+      { toolkitId: "GoogleCalendar", changeType: "removed" },
+      { toolkitId: "SLACK", changeType: "removed" },
+    ]);
+    const ids = collectRemovedToolkitIds(result);
+    expect(ids).toContain("googlecalendar");
+    expect(ids).toContain("slack");
+  });
+
+  it("returns empty set for empty change list", () => {
+    expect(collectRemovedToolkitIds(makeResult([])).size).toBe(0);
+  });
+});
 
 describe("computeProcessingStats", () => {
   it("ignores skip IDs that do not exist in the fetched toolkit list", () => {
