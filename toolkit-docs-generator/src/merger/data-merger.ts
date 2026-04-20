@@ -467,6 +467,31 @@ const getToolDocumentationChunks = (
   return fromPrevious;
 };
 
+/**
+ * Mark the toolkit's summary as stale — the summary is being carried forward
+ * from a previous run even though the toolkit signature changed (regen was
+ * skipped or failed). The CI check in tests/stale-summaries.test.ts surfaces
+ * these toolkits so a human rerun or fix can follow.
+ */
+export const STALE_SUMMARY_WARNING_PREFIX = "Summary is stale for";
+
+const markSummaryStale = (
+  toolkit: MergedToolkit,
+  reason: string,
+  warnings: string[]
+): void => {
+  toolkit.summaryStale = true;
+  toolkit.summaryStaleReason = reason;
+  warnings.push(
+    `${STALE_SUMMARY_WARNING_PREFIX} ${toolkit.id}: ${reason}. Previous summary carried forward.`
+  );
+};
+
+const clearStaleSummaryFlags = (toolkit: MergedToolkit): void => {
+  toolkit.summaryStale = undefined;
+  toolkit.summaryStaleReason = undefined;
+};
+
 const isOverviewChunk = (chunk: DocumentationChunk): boolean =>
   chunk.location === "header" &&
   chunk.position === "before" &&
@@ -950,23 +975,49 @@ export class DataMerger {
     if (hasToolkitOverviewChunk(result.toolkit)) {
       // Keep overview as the canonical toolkit-level narrative.
       result.toolkit.summary = undefined;
+      clearStaleSummaryFlags(result.toolkit);
+      return;
+    }
+
+    // Defensive guard: if something upstream already set a summary on
+    // `result.toolkit`, respect it. buildMergedToolkit does not set one
+    // today, but we don't want the reuse / fallback paths below to
+    // silently replace a pre-populated value.
+    if (result.toolkit.summary) {
+      clearStaleSummaryFlags(result.toolkit);
       return;
     }
 
     if (previousToolkit?.summary) {
       const currentSignature = buildToolkitSummarySignature(result.toolkit);
       const previousSignature = buildToolkitSummarySignature(previousToolkit);
-      if (currentSignature === previousSignature) {
+      // Signature-match reuse is only safe when the PREVIOUS summary itself
+      // was fresh. If the previous run already flagged the summary stale,
+      // a matching signature does not prove freshness — the stale summary
+      // was carried forward from an even earlier toolset and will stay
+      // wrong until an LLM actually regenerates it.
+      if (
+        currentSignature === previousSignature &&
+        !previousToolkit.summaryStale
+      ) {
         result.toolkit.summary = previousToolkit.summary;
+        clearStaleSummaryFlags(result.toolkit);
         return;
       }
     }
 
     if (!this.toolkitSummaryGenerator) {
-      return;
-    }
-
-    if (result.toolkit.summary) {
+      // Preserve previous summary when no LLM is available to regenerate.
+      // A slightly stale summary is better than silently wiping hand-authored
+      // or previously generated content on every run that disables the LLM.
+      if (previousToolkit?.summary) {
+        result.toolkit.summary = previousToolkit.summary;
+        markSummaryStale(
+          result.toolkit,
+          "llm_generator_unavailable",
+          result.warnings
+        );
+      }
       return;
     }
 
@@ -975,11 +1026,24 @@ export class DataMerger {
         result.toolkit
       );
       result.toolkit.summary = summary;
+      clearStaleSummaryFlags(result.toolkit);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       result.warnings.push(
         `Summary generation failed for ${result.toolkit.id}: ${message}`
       );
+      // Preserve previous summary on LLM failure. Losing the summary on a
+      // transient API error would require waiting for another run — and if
+      // the failure is persistent we keep showing the last known-good text
+      // instead of a blank overview.
+      if (previousToolkit?.summary) {
+        result.toolkit.summary = previousToolkit.summary;
+        markSummaryStale(
+          result.toolkit,
+          "llm_generation_failed",
+          result.warnings
+        );
+      }
     }
   }
 

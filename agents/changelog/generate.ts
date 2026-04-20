@@ -7,8 +7,8 @@ import { fileURLToPath } from "url";
 
 const REPOS = [
   { owner: "ArcadeAI", repo: "docs", private: false },
-  { owner: "ArcadeAI", repo: "arcade-mcp", private: false },
-  { owner: "ArcadeAI", repo: "monorepo", private: true },
+  { owner: "ArcadeAI", repo: "arcade-mcp", private: false, productionBranch: "production" },
+  { owner: "ArcadeAI", repo: "monorepo", private: true, productionBranch: "production" },
 ];
 
 const CATEGORIES = [
@@ -51,6 +51,7 @@ type PR = {
   labels: string[];
   merged_at: string;
   is_private: boolean;
+  merge_commit_sha: string;
 };
 
 type CategorizedPR = {
@@ -63,12 +64,6 @@ type CategorizedPR = {
   is_private: boolean;
 };
 
-type FinalEntry = {
-  category: string;
-  type: string;
-  description: string;
-  sources: { repo: string; pr_number: number }[];
-};
 
 // --- Step 1: Compute upcoming Friday (or today if Friday) ---
 
@@ -105,7 +100,7 @@ async function fetchMergedPRs(
   let page = 1;
 
   while (true) {
-    const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&sort=updated&direction=desc&per_page=100&page=${page}`;
+    const url = `https://api.github.com/repos/${owner}/${repo}/pulls?state=closed&base=main&sort=updated&direction=desc&per_page=100&page=${page}`;
     const res = await fetch(url, {
       headers: {
         Accept: "application/vnd.github+json",
@@ -134,6 +129,7 @@ async function fetchMergedPRs(
           labels: pr.labels?.map((l: any) => l.name) || [],
           merged_at: pr.merged_at,
           is_private: isPrivate,
+          merge_commit_sha: pr.merge_commit_sha,
         });
       }
     }
@@ -199,89 +195,48 @@ async function categorizePR(pr: PR, openai: OpenAI): Promise<CategorizedPR> {
   };
 }
 
-// --- Step 5: Final combining call ---
 
-const COMBINE_SCHEMA = {
-  name: "combined_changelog",
-  strict: true,
-  schema: {
-    type: "object" as const,
-    properties: {
-      entries: {
-        type: "array" as const,
-        items: {
-          type: "object" as const,
-          properties: {
-            category: { type: "string" as const, enum: [...CATEGORIES] },
-            type: { type: "string" as const, enum: [...TYPES] },
-            description: { type: "string" as const },
-            sources: {
-              type: "array" as const,
-              items: {
-                type: "object" as const,
-                properties: {
-                  repo: { type: "string" as const },
-                  pr_number: { type: "integer" as const },
-                },
-                required: ["repo", "pr_number"] as const,
-                additionalProperties: false,
-              },
-            },
-          },
-          required: ["category", "type", "description", "sources"] as const,
-          additionalProperties: false,
-        },
-      },
+// --- Step 5a: Filter to production-deployed PRs ---
+
+async function getUndeployedSHAs(
+  owner: string,
+  repo: string,
+  productionBranch: string,
+): Promise<Set<string>> {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) throw new Error("GITHUB_TOKEN env var is required");
+
+  const url = `https://api.github.com/repos/${owner}/${repo}/compare/${productionBranch}...main`;
+  const res = await fetch(url, {
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${token}`,
+      "X-GitHub-Api-Version": "2022-11-28",
     },
-    required: ["entries"] as const,
-    additionalProperties: false,
-  },
-};
-
-async function combineEntries(
-  categorized: CategorizedPR[],
-  openai: OpenAI,
-): Promise<FinalEntry[]> {
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
-
-  const input = categorized
-    .sort((a, b) => a.merged_at.localeCompare(b.merged_at))
-    .map((pr) => ({
-      category: pr.category,
-      type: pr.type,
-      description: pr.description,
-      repo: pr.repo,
-      pr_number: pr.pr_number,
-      merged_at: pr.merged_at,
-    }));
-
-  const res = await openai.chat.completions.create({
-    model,
-    response_format: { type: "json_schema", json_schema: COMBINE_SCHEMA },
-    messages: [
-      {
-        role: "system",
-        content: [
-          `You are combining changelog entries.`,
-          `If a docs PR and a non-docs PR are about the same feature, combine them into one entry under the non-docs category.`,
-          `Do not alter categories or types unless combining.`,
-          `Keep descriptions concise. Return ALL entries.`,
-        ].join(" "),
-      },
-      { role: "user", content: JSON.stringify(input) },
-    ],
   });
 
-  return JSON.parse(res.choices[0].message.content!).entries;
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`GitHub compare API error for ${owner}/${repo}: ${res.status} ${body}`);
+  }
+
+  const data: any = await res.json();
+  const shas = new Set<string>();
+  for (const commit of data.commits) {
+    shas.add(commit.sha);
+  }
+  return shas;
 }
 
 // --- Step 6: Format the entry ---
 
-function formatEntry(date: string, entries: FinalEntry[]): string {
+function formatEntry(date: string, entries: CategorizedPR[]): string {
   const privateRepos = new Set(REPOS.filter((r) => r.private).map((r) => r.repo));
 
-  const grouped: Record<string, FinalEntry[]> = {};
-  for (const entry of entries) {
+  const sorted = [...entries].sort((a, b) => a.merged_at.localeCompare(b.merged_at));
+
+  const grouped: Record<string, CategorizedPR[]> = {};
+  for (const entry of sorted) {
     if (!grouped[entry.category]) grouped[entry.category] = [];
     grouped[entry.category].push(entry);
   }
@@ -296,14 +251,7 @@ function formatEntry(date: string, entries: FinalEntry[]): string {
 
     for (const item of items) {
       const emoji = EMOJI[item.type] || EMOJI.maintenance;
-      const sources = item.sources
-        .map((s) => {
-          const prefix = privateRepos.has(s.repo) ? s.repo : s.repo;
-          return `${prefix} PR #${s.pr_number}`;
-        })
-        .join(", ");
-
-      result += `- \`[${item.type} - ${emoji}]\` ${item.description} (${sources})\n`;
+      result += `- \`[${item.type} - ${emoji}]\` ${item.description} (${item.repo} PR #${item.pr_number})\n`;
     }
   }
 
@@ -351,21 +299,32 @@ async function main() {
   ).flat();
   console.log(`Found ${allPRs.length} merged PRs since ${lastEntryDate}`);
 
-  if (allPRs.length === 0) {
-    console.log("No new PRs. Exiting.");
+  // Step 3a: Filter to only PRs deployed to production
+  console.log("Filtering to production-deployed PRs...");
+  const undeployedByRepo: Record<string, Set<string>> = {};
+  await Promise.all(
+    REPOS.filter((r) => r.productionBranch).map(async (r) => {
+      undeployedByRepo[r.repo] = await getUndeployedSHAs(r.owner, r.repo, r.productionBranch!);
+    }),
+  );
+  const deployedPRs = allPRs.filter((pr) => {
+    const undeployed = undeployedByRepo[pr.repo];
+    if (!undeployed) return true;
+    return !undeployed.has(pr.merge_commit_sha);
+  });
+  console.log(`${deployedPRs.length} PRs are on production`);
+
+  if (deployedPRs.length === 0) {
+    console.log("No deployed PRs. Exiting.");
     return;
   }
 
   // Step 4
   console.log("Categorizing PRs...");
-  const categorized = await Promise.all(allPRs.map((pr) => categorizePR(pr, openai)));
+  const categorized = await Promise.all(deployedPRs.map((pr) => categorizePR(pr, openai)));
 
   // Step 5
-  console.log("Combining related entries...");
-  const combined = await combineEntries(categorized, openai);
-
-  // Step 6
-  const entry = formatEntry(fridayDate, combined);
+  const entry = formatEntry(fridayDate, categorized);
   console.log("\nGenerated entry:\n");
   console.log(entry);
 
