@@ -8,12 +8,29 @@ export type LinkClickedProps = {
   linkLocation: string;
   children?: React.ReactNode;
   className?: string;
+  utmCampaign?: string;
+  utmMedium?: string;
+};
+
+const UTM_SOURCE = "docs";
+const DEFAULT_UTM_CAMPAIGN = "docs";
+
+const buildRegisterHref = (utmCampaign: string, utmMedium?: string): string => {
+  const url = new URL(getDashboardUrl("register"));
+  url.searchParams.set("utm_source", UTM_SOURCE);
+  url.searchParams.set("utm_campaign", utmCampaign);
+  if (utmMedium) {
+    url.searchParams.set("utm_medium", utmMedium);
+  }
+  return url.toString();
 };
 
 export const SignupLink = ({
   linkLocation,
   children,
   className,
+  utmCampaign = DEFAULT_UTM_CAMPAIGN,
+  utmMedium,
 }: LinkClickedProps) => {
   const trackSignupClick = (source: string) => {
     posthog.capture("Signup clicked", {
@@ -24,7 +41,7 @@ export const SignupLink = ({
   return (
     <Link
       className={cn("text-primary", className)}
-      href={getDashboardUrl("register")}
+      href={buildRegisterHref(utmCampaign, utmMedium)}
       onClick={() => trackSignupClick(linkLocation)}
     >
       {children}
