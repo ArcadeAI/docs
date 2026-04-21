@@ -58,7 +58,7 @@ export type SecretCoherenceIssues = {
   coverageGaps: SecretCoverageGap[];
 };
 
-const collectToolkitSecrets = (toolkit: MergedToolkit): Set<string> => {
+export const collectToolkitSecrets = (toolkit: MergedToolkit): Set<string> => {
   const names = new Set<string>();
   for (const tool of toolkit.tools) {
     for (const secret of tool.secrets) {

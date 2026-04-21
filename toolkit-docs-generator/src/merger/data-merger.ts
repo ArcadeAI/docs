@@ -30,6 +30,7 @@ import {
   formatFreshnessWarnings,
 } from "./metadata-freshness.js";
 import {
+  collectToolkitSecrets,
   detectSecretCoherenceIssues,
   groupStaleRefsByTarget,
   hasCoherenceIssues,
@@ -485,19 +486,6 @@ const getToolDocumentationChunks = (
     return fromSource;
   }
   return fromPrevious;
-};
-
-const collectCurrentSecretNames = (toolkit: MergedToolkit): Set<string> => {
-  const names = new Set<string>();
-  for (const tool of toolkit.tools) {
-    for (const name of tool.secrets) {
-      names.add(name);
-    }
-    for (const info of tool.secretsInfo ?? []) {
-      names.add(info.name);
-    }
-  }
-  return names;
 };
 
 const describeLocation = (
@@ -1214,7 +1202,7 @@ export class DataMerger {
     if (targets.length === 0) {
       return;
     }
-    const currentSecrets = Array.from(collectCurrentSecretNames(result.toolkit))
+    const currentSecrets = Array.from(collectToolkitSecrets(result.toolkit))
       .sort()
       .map((name) => name);
     for (const target of targets) {
@@ -1257,7 +1245,7 @@ export class DataMerger {
     if (missing.length === 0 && !needsLink) {
       return;
     }
-    const currentSecrets = Array.from(collectCurrentSecretNames(result.toolkit))
+    const currentSecrets = Array.from(collectToolkitSecrets(result.toolkit))
       .sort()
       .map((name) => name);
     try {
