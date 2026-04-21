@@ -10,16 +10,6 @@ on:
   repository_dispatch:
     types: [porter_deploy_succeeded]
   workflow_dispatch:
-    inputs:
-      providers:
-        description: >-
-          Comma-separated list of provider IDs (e.g. "Github,Slack"). When set,
-          the workflow runs only these providers and bypasses --skip-unchanged,
-          forcing the full merge (including the secret-coherence scan and LLM
-          edits) to re-evaluate even when the Engine API reports no version
-          change. Leave empty to run the full scheduled flow.
-        required: false
-        default: ""
   # 11:00 UTC = 3 AM PST / 4 AM PDT — late enough that DST drift doesn't matter.
   schedule:
     - cron: "0 11 * * *"
@@ -60,21 +50,9 @@ jobs:
 
       - name: Generate toolkit docs
         run: |
-          # Manual focused runs: workflow_dispatch with `providers` input
-          # bypasses --skip-unchanged and --all, so the secret-coherence
-          # scan actually re-evaluates the chosen toolkits even when the
-          # Engine API reports no version change. Scheduled and porter
-          # runs keep the default --all --skip-unchanged behavior.
-          PROVIDERS_INPUT="${{ inputs.providers }}"
-          if [ -n "$PROVIDERS_INPUT" ]; then
-            SCOPE_ARGS=(--providers "$PROVIDERS_INPUT")
-            echo "Focused run for: $PROVIDERS_INPUT (--skip-unchanged disabled)"
-          else
-            SCOPE_ARGS=(--all --skip-unchanged)
-          fi
-
           pnpm dlx tsx src/cli/index.ts generate \
-            "${SCOPE_ARGS[@]}" \
+            --all \
+            --skip-unchanged \
             --require-complete \
             --verbose \
             --api-source tool-metadata \

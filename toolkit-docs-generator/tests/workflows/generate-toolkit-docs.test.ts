@@ -51,11 +51,11 @@ test("porter workflow opts JS actions into Node 24 to unblock the 2026-06-02 dep
   );
 });
 
-test("workflow_dispatch accepts a providers input for focused manual runs", () => {
-  expect(workflowContents).toContain("providers:");
-  expect(workflowContents).toContain("inputs.providers");
-  // A non-empty providers input must bypass --skip-unchanged so the
-  // secret-coherence scan actually re-evaluates the chosen toolkits.
-  expect(workflowContents).toContain("PROVIDERS_INPUT=");
-  expect(workflowContents).toContain("--all --skip-unchanged");
+test("workflow dispatch keeps default full-run behavior", () => {
+  expect(workflowContents).toContain("workflow_dispatch:");
+  expect(workflowContents).toContain("--all");
+  expect(workflowContents).toContain("--skip-unchanged");
+  expect(workflowContents).not.toContain("providers:");
+  expect(workflowContents).not.toContain("inputs.providers");
+  expect(workflowContents).not.toContain("PROVIDERS_INPUT=");
 });
