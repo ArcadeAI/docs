@@ -276,12 +276,15 @@ const clearOutputDir = async (
   }
 };
 
-const resolveLlmProvider = (value?: string): LlmProvider => {
+const resolveLlmProvider = (
+  value?: string,
+  optionName = "--llm-provider"
+): LlmProvider => {
   if (value === "openai" || value === "anthropic") {
     return value;
   }
   throw new Error(
-    'LLM provider is required. Use --llm-provider "openai" or "anthropic".'
+    `LLM provider is required. Use ${optionName} "openai" or "anthropic".`
   );
 };
 
@@ -431,7 +434,7 @@ const resolveSecretEditGenerator = (
     return;
   }
 
-  const provider = resolveLlmProvider(providerRaw);
+  const provider = resolveLlmProvider(providerRaw, "--llm-editor-provider");
   const apiKey = resolveEditorApiKey(provider, options.llmEditorApiKey);
   if (!apiKey) {
     // Fail open: unconfigured editor degrades to scanner-only warnings
