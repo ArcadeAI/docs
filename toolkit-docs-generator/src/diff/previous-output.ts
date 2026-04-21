@@ -276,6 +276,12 @@ const buildFallbackToolkit = (
   const authResult = MergedToolkitAuthSchema.safeParse(record.auth);
   const summary =
     typeof record.summary === "string" ? record.summary : undefined;
+  const summaryStale =
+    typeof record.summaryStale === "boolean" ? record.summaryStale : undefined;
+  const summaryStaleReason =
+    typeof record.summaryStaleReason === "string"
+      ? record.summaryStaleReason
+      : undefined;
   const generatedAt =
     typeof record.generatedAt === "string" ? record.generatedAt : undefined;
 
@@ -299,6 +305,8 @@ const buildFallbackToolkit = (
       version,
       description,
       ...(summary ? { summary } : {}),
+      ...(summaryStale !== undefined ? { summaryStale } : {}),
+      ...(summaryStaleReason !== undefined ? { summaryStaleReason } : {}),
       metadata: metadataResult.success
         ? metadataResult.data
         : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
