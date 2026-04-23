@@ -11,7 +11,7 @@ export const ToolFeedbackSurvey = () => {
   const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
-    posthog.onFeatureFlags(() => {
+    const unsubscribe = posthog.onFeatureFlags(() => {
       posthog.getSurveys((surveys) => {
         const survey = surveys.find((s) => s.id === SURVEY_ID);
         if (survey) {
@@ -19,6 +19,7 @@ export const ToolFeedbackSurvey = () => {
         }
       }, true);
     });
+    return unsubscribe;
   }, []);
 
   const handleSurveyComplete = () => {
