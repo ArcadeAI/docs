@@ -1,6 +1,6 @@
 "use client";
 
-import { Info, Lightbulb, TriangleAlert } from "lucide-react";
+import { AlertTriangle, Info, Lightbulb } from "lucide-react";
 import type React from "react";
 
 type CheatSheetSectionProps = {
@@ -134,7 +134,7 @@ export function InfoBox({
   const icons = {
     tip: Lightbulb,
     note: Info,
-    warning: TriangleAlert,
+    warning: AlertTriangle,
   };
 
   const Icon = icons[type];
