@@ -1,4 +1,4 @@
-import { AlertTriangle, BookOpen, Info } from "lucide-react";
+import { BookOpen, Info, TriangleAlert } from "lucide-react";
 import type React from "react";
 
 type NoteType = "notice" | "caution" | "learn-more";
@@ -23,7 +23,7 @@ const noteConfig: Record<
       "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-100",
   },
   caution: {
-    icon: AlertTriangle,
+    icon: TriangleAlert,
     label: "Caution",
     styles:
       "border-orange-200 bg-orange-50 text-orange-900 dark:border-orange-800 dark:bg-orange-950 dark:text-orange-100",

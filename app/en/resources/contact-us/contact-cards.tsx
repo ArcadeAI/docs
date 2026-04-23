@@ -12,10 +12,10 @@ import {
   Textarea,
 } from "@arcadeai/design-system";
 import {
-  AlertOctagon,
-  CheckCircle,
+  CircleCheckBig,
   HeartPulse,
   Mail,
+  OctagonAlert,
   Shield,
   Users,
 } from "lucide-react";
@@ -235,7 +235,7 @@ function ContactSalesForm({ onSuccess }: { onSuccess: () => void }) {
       </div>
       {submitError && (
         <div className="flex items-center gap-3 rounded-lg bg-red-500/10 p-3 text-white">
-          <AlertOctagon className="h-5 w-5 shrink-0" />
+          <OctagonAlert className="h-5 w-5 shrink-0" />
           <span className="text-sm">{submitError}</span>
         </div>
       )}
@@ -250,7 +250,7 @@ function SuccessMessage({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center pt-6 pb-2 text-center">
       <div className="mb-4 rounded-full bg-green-500/10 p-3">
-        <CheckCircle className="h-6 w-6 text-green-500" />
+        <CircleCheckBig className="h-6 w-6 text-green-500" />
       </div>
       <h3 className="mb-1 font-semibold text-gray-100 text-lg">Thank you!</h3>
       <p className="text-gray-400 text-sm">We'll be in touch shortly.</p>
