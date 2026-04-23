@@ -292,6 +292,11 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/resources/registry-early-access",
           permanent: true,
         },
+        {
+          source: "/:locale/resources/integrations/contribute-a-server",
+          destination: "/:locale/resources/registry-early-access",
+          permanent: true,
+        },
         // Moved MCP Gateway UI guide to guides
         {
           source: "/:locale/guides/create-tools/mcp-gateways",
