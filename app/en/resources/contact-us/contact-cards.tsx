@@ -12,7 +12,7 @@ import {
   Textarea,
 } from "@arcadeai/design-system";
 import {
-  CircleCheckBig,
+  CircleCheck,
   HeartPulse,
   Mail,
   OctagonAlert,
@@ -250,7 +250,7 @@ function SuccessMessage({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center pt-6 pb-2 text-center">
       <div className="mb-4 rounded-full bg-green-500/10 p-3">
-        <CircleCheckBig className="h-6 w-6 text-green-500" />
+        <CircleCheck className="h-6 w-6 text-green-500" />
       </div>
       <h3 className="mb-1 font-semibold text-gray-100 text-lg">Thank you!</h3>
       <p className="text-gray-400 text-sm">We'll be in touch shortly.</p>

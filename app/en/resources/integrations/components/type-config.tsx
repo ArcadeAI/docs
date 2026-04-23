@@ -1,5 +1,5 @@
 import type { ToolkitType } from "@arcadeai/design-system";
-import { BadgeCheck, CircleCheckBig, Key, Terminal, Users } from "lucide-react";
+import { BadgeCheck, CircleCheck, Key, Terminal, Users } from "lucide-react";
 import type React from "react";
 
 export const TYPE_CONFIG: Record<
@@ -18,7 +18,7 @@ export const TYPE_CONFIG: Record<
   },
   verified: {
     label: "Verified",
-    icon: CircleCheckBig,
+    icon: CircleCheck,
     color: "text-blue-500",
   },
   community: {
@@ -55,7 +55,7 @@ export const TOOL_CARD_TYPE_CONFIG: Record<
     className:
       "border-blue-600/20 hover:border-primary bg-blue-600/[0.02] hover:bg-blue-600/[0.03]",
     label: "Verified MCP Server",
-    icon: CircleCheckBig,
+    icon: CircleCheck,
     color: "text-blue-400",
   },
   community: {
