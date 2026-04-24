@@ -11,15 +11,21 @@ export const ToolFeedbackSurvey = () => {
   const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = posthog.onFeatureFlags(() => {
+    let mounted = true;
+    posthog.onFeatureFlags(() => {
       posthog.getSurveys((surveys) => {
+        if (!mounted) {
+          return;
+        }
         const survey = surveys.find((s) => s.id === SURVEY_ID);
         if (survey) {
           setSurveyData(survey);
         }
       }, true);
     });
-    return unsubscribe;
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const handleSurveyComplete = () => {
