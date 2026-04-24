@@ -17,6 +17,7 @@ import { FiltersBar } from "./filters-bar";
 import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
+import { useUrlFilterSync } from "./use-url-filter-sync";
 
 type ToolkitsClientProps = {
   toolkits: ToolkitWithDocsLink[];
@@ -63,6 +64,8 @@ function getToolkitIconWithFallback(
 }
 
 export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
+  useUrlFilterSync();
+
   const clearAllFilters = useFilterStore((state) => state.clearAllFilters);
 
   const { hasActiveFilters, filteredToolkits, resultsCount } =
