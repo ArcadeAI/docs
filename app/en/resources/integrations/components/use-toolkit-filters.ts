@@ -25,7 +25,7 @@ const TYPE_LABELS: Record<ToolkitType, string> = {
 const getTypePriority = (type: string): number =>
   TYPE_PRIORITY[type as ToolkitType] ?? DEFAULT_PRIORITY;
 
-const compareToolkits = (a: Toolkit, b: Toolkit): number => {
+const compareToolkits = <T extends Toolkit>(a: T, b: T): number => {
   // First prioritize available toolkits over coming soon toolkits
   if (a.isComingSoon !== b.isComingSoon) {
     return a.isComingSoon ? 1 : -1;
@@ -80,7 +80,7 @@ export const useFilterStore = create<FilterState>((set) => ({
     }),
 }));
 
-export function useToolkitFilters(toolkits: Toolkit[]) {
+export function useToolkitFilters<T extends Toolkit>(toolkits: T[]) {
   const {
     selectedCategory,
     selectedType,
@@ -91,7 +91,7 @@ export function useToolkitFilters(toolkits: Toolkit[]) {
 
   const debouncedSearchQuery = useDebounce(searchQuery, DEBOUNCE_TIME);
 
-  const filteredToolkits = useMemo(() => {
+  const filteredToolkits = useMemo<T[]>(() => {
     const searchLower = debouncedSearchQuery.toLowerCase();
 
     return toolkits
