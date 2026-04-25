@@ -483,12 +483,12 @@ const meta: MetaRecord = {
     },
   },
 ${categoryEntries},
-  "-- Submit your Server": {
+  "-- Feedback": {
     type: "separator",
-    title: "Submit your server",
+    title: "Feedback",
   },
-  "contribute-a-server": {
-    title: "Contribute a Server",
+  "tool-feedback": {
+    title: "Tool Feedback",
   },
 };
 
@@ -534,8 +534,7 @@ export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
       ? readdirSync(CONFIG.integrationsDir, { withFileTypes: true })
           .filter((d) => d.isDirectory())
           .filter(
-            (d) =>
-              !["components", "contribute-a-server", "_lib"].includes(d.name)
+            (d) => !["components", "tool-feedback", "_lib"].includes(d.name)
           )
           .map((d) => d.name)
       : [];

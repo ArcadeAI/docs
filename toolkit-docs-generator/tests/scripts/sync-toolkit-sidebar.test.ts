@@ -645,7 +645,7 @@ describe("generateMainMeta", () => {
     expect(result).toContain('title: "Productivity & Docs"');
     expect(result).toContain("social: {");
     expect(result).toContain('title: "Social & Communication"');
-    expect(result).toContain('"contribute-a-server"');
+    expect(result).toContain('"tool-feedback"');
     expect(result).not.toContain("preview:");
   });
 
@@ -681,7 +681,7 @@ describe("generateMainMeta", () => {
 
     expect(result).toContain("const meta: MetaRecord = {");
     expect(result).toContain("index:");
-    expect(result).toContain('"contribute-a-server"');
+    expect(result).toContain('"tool-feedback"');
   });
 
   it("does not mutate the input array", () => {
@@ -698,8 +698,8 @@ describe("generateMainMeta", () => {
 
     expect(result).toContain('"*":'); // Theme config
     expect(result).toContain("index:"); // Overview
-    expect(result).toContain('"-- Submit your Server"'); // Separator
-    expect(result).toContain('"contribute-a-server"'); // Contribute page
+    expect(result).toContain('"-- Feedback"'); // Separator
+    expect(result).toContain('"tool-feedback"'); // Feedback page
     expect(result).not.toContain("preview:"); // Preview page removed
   });
 });
