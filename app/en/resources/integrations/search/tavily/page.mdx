@@ -1,0 +1,80 @@
+---
+title: "Tavily"
+description: "Enable agents to search the web in real time and extract structured content. Available directly in Arcade as a Partner MCP Server."
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Tavily
+
+Tavily is a remote MCP Server offered by [Tavily](https://tavily.com), an Arcade Partner. Add it to an [MCP Gateway](/guides/mcp-gateways/add-remote-servers) for central governance, authorization, and access control alongside Arcade's native servers.
+
+## MCP Server URL
+
+Paste the following URL into Arcade: **Servers → Add Server → Remote MCP**. Replace `YOUR_API_KEY` with the key you generate at [tavily.com](https://tavily.com).
+
+```text
+https://mcp.tavily.com/mcp/?tavilyApiKey=YOUR_API_KEY
+```
+
+## What you can do
+
+Once Tavily is registered in your Arcade project, Arcade discovers these tools automatically:
+
+| Tool | What it does |
+| --- | --- |
+| `Tavily.Search` | Real-time web search with agent-optimized ranking. |
+| `Tavily.Extract` | Extract structured content from specific URLs. |
+| `Tavily.Crawl` | Crawl a site and return content across pages. |
+| `Tavily.Map` | Map the structure of a site or domain. |
+| `Tavily.Research` | Multi-source deep research across the web. |
+| `Tavily.Skill` | High-level research skills built on the tools above. |
+
+Compose these tools with Google Docs, Slack, Salesforce, GitHub, or any of Arcade's native servers in a single MCP Gateway, so an agent can research, draft, and act in one flow, with full authorization and audit from Arcade's runtime.
+
+## Add Tavily to your Arcade project
+
+<Steps>
+
+### Get your Tavily API key
+
+Go to [tavily.com](https://tavily.com) → **Overview** → **Generate MCP Link**. Copy the generated URL (it contains your API key).
+
+### Add Tavily as a Remote MCP Server in Arcade
+
+Open the [Arcade Dashboard](https://api.arcade.dev/dashboard) → **Servers** → **Add Server** → **Remote MCP**. Paste the URL from the [MCP Server URL](#mcp-server-url) section above (with your API key in place of `YOUR_API_KEY`) and save.
+
+<Callout type="info">
+  See the full walkthrough in <a href="/guides/mcp-gateways/add-remote-servers">Add remote MCP servers</a> for advanced settings like connection retries, OAuth, and custom headers.
+</Callout>
+
+### Verify Tavily tools
+
+Arcade discovers six Tavily tools: `Tavily.Search`, `Tavily.Extract`, `Tavily.Crawl`, `Tavily.Map`, `Tavily.Research`, and `Tavily.Skill`. They appear in the Playground for this project and in the MCP Gateway tool picker.
+
+### Create an MCP Gateway
+
+Go to **MCP Gateways** → **Create Gateway**. Select Tavily plus any other MCP Servers you want to compose with (for example, Google Docs and Slack). Set the auth mode to **Arcade Auth** so users authenticate with their Arcade account. Copy the gateway URL. This is what your agent connects to.
+
+</Steps>
+
+## Call Tavily tools from your agent
+
+Once your gateway is created, any MCP client that supports Streamable HTTP can use it: Cursor, Claude Desktop, VS Code, or a custom application built with the Vercel AI SDK, LangChain, or OpenAI Agents.
+
+```text
+https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>
+```
+
+Authorization, credential handling, and audit logging are handled by Arcade at runtime.
+
+## Example
+
+See the open-source [Financial Intelligence Agent](https://github.com/arcadeai-labs/financial-intelligence), a web-based research assistant that composes Tavily, Google Docs, and Slack through a single MCP Gateway in under 200 lines of code.
+
+## Resources
+
+- [Tavily documentation](https://docs.tavily.com)
+- [Add remote MCP servers to Arcade](/guides/mcp-gateways/add-remote-servers)
+- [Create an MCP Gateway](/guides/mcp-gateways/create-via-dashboard)
+- [Connect to MCP clients](/get-started/mcp-clients)
