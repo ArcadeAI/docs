@@ -5,6 +5,7 @@ import {
   getToolkitIcon,
   Separator,
 } from "@arcadeai/design-system";
+import { Generic as GenericIcon } from "@arcadeai/design-system/components/ui/atoms/icons";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
@@ -36,25 +37,27 @@ function mapToToolkitPage(
 
 /**
  * Get toolkit icon with fallback for API toolkits.
- * If "GithubApi" has no icon, falls back to "Github" icon.
+ *
+ * `getToolkitIcon` from @arcadeai/design-system returns the Generic placeholder
+ * (not null) when a toolkit id isn't in its icon map. For toolkits that ship
+ * their own `publicIconUrl` (e.g. partner toolkits not yet in the DS),
+ * we treat Generic as "no match" so the caller can fall through to `iconUrl`.
  */
 function getToolkitIconWithFallback(
   toolkitId: string
 ): React.ComponentType<React.SVGProps<SVGSVGElement>> | null {
   const apiSuffix = "api";
 
-  // Try direct match first
-  const directIcon = getToolkitIcon(toolkitId);
-  if (directIcon) {
-    return directIcon;
+  const resolved = getToolkitIcon(toolkitId);
+  if (resolved && resolved !== GenericIcon) {
+    return resolved;
   }
 
-  // For API toolkits, try the base provider ID
   const normalizedId = toolkitId.toLowerCase();
   if (normalizedId.endsWith(apiSuffix)) {
-    const baseProviderId = toolkitId.slice(0, -apiSuffix.length); // Remove "Api" suffix
+    const baseProviderId = toolkitId.slice(0, -apiSuffix.length);
     const baseIcon = getToolkitIcon(baseProviderId);
-    if (baseIcon) {
+    if (baseIcon && baseIcon !== GenericIcon) {
       return baseIcon;
     }
   }
@@ -175,6 +178,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                       iconUrl={iconUrl}
                       isByoc={toolkit.isBYOC}
                       isComingSoon={toolkit.isComingSoon}
+                      isPartner={toolkit.isPartner}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
                       link={mapToToolkitPage(
