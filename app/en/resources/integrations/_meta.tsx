@@ -42,12 +42,12 @@ const meta: MetaRecord = {
   "customer-support": {
     title: "Customer Support",
   },
-  "-- Submit your Server": {
+  "-- Feedback": {
     type: "separator",
-    title: "Submit your server",
+    title: "Feedback",
   },
-  "contribute-a-server": {
-    title: "Contribute a Server",
+  "tool-feedback": {
+    title: "Tool Feedback",
   },
 };
 
