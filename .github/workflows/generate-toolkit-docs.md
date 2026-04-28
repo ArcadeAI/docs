@@ -15,14 +15,15 @@ Required secrets:
 
 - `ENGINE_API_URL`
 - `ENGINE_API_KEY`
-- `OPENAI_API_KEY`
+- `ANTHROPIC_API_KEY`
 
 Optional secrets:
 
-- `OPENAI_MODEL` (falls back to `gpt-4o-mini`)
+- `ANTHROPIC_MODEL` (falls back to `claude-sonnet-4-6`)
+- `ANTHROPIC_EDITOR_MODEL` (falls back to `claude-sonnet-4-6`)
 
 ## Where to look
 
-- Workflow: `.github/workflows/generate-toolkit-docs-porter.yml`
+- Workflow: `.github/workflows/generate-toolkit-docs.yml`
 - Sidebar sync script: `toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts`
 - Generator code: `toolkit-docs-generator/src/cli/index.ts`

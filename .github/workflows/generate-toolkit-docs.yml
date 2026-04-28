@@ -58,9 +58,10 @@ jobs:
             --api-source tool-metadata \
             --tool-metadata-url "$ENGINE_API_URL" \
             --tool-metadata-key "$ENGINE_API_KEY" \
-            --llm-provider openai \
-            --llm-model "$OPENAI_MODEL" \
-            --llm-api-key "$OPENAI_API_KEY" \
+            --llm-provider anthropic \
+            --llm-model "$ANTHROPIC_MODEL" \
+            --llm-api-key "$ANTHROPIC_API_KEY" \
+            --llm-max-tokens 8192 \
             --llm-editor-provider anthropic \
             --llm-editor-model "$ANTHROPIC_EDITOR_MODEL" \
             --llm-editor-api-key "$ANTHROPIC_API_KEY" \
@@ -73,12 +74,11 @@ jobs:
         env:
           ENGINE_API_URL: ${{ secrets.ENGINE_API_URL }}
           ENGINE_API_KEY: ${{ secrets.ENGINE_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4o-mini' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL || 'claude-sonnet-4-6' }}
           # Stronger model for the secret-coherence editor. Keeps
           # stale-secret cleanup precise instead of re-summarizing the whole
-          # artifact (which gpt-4o-mini tends to do).
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # artifact.
           ANTHROPIC_EDITOR_MODEL: ${{ secrets.ANTHROPIC_EDITOR_MODEL || 'claude-sonnet-4-6' }}
 
       - name: Sync toolkit sidebar navigation
