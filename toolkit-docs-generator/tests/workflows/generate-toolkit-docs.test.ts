@@ -36,3 +36,26 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("[AUTO] Adding MCP Servers docs update");
   expect(workflowContents).toContain("pull-requests: write");
 });
+
+test("porter workflow wires the secret-coherence editor", () => {
+  expect(workflowContents).toContain("--llm-editor-provider anthropic");
+  expect(workflowContents).toContain("--llm-editor-model");
+  expect(workflowContents).toContain("--llm-editor-api-key");
+  expect(workflowContents).toContain("ANTHROPIC_API_KEY");
+  expect(workflowContents).toContain("claude-sonnet-4-6");
+});
+
+test("porter workflow opts JS actions into Node 24 to unblock the 2026-06-02 deprecation", () => {
+  expect(workflowContents).toContain(
+    'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"'
+  );
+});
+
+test("workflow dispatch keeps default full-run behavior", () => {
+  expect(workflowContents).toContain("workflow_dispatch:");
+  expect(workflowContents).toContain("--all");
+  expect(workflowContents).toContain("--skip-unchanged");
+  expect(workflowContents).not.toContain("providers:");
+  expect(workflowContents).not.toContain("inputs.providers");
+  expect(workflowContents).not.toContain("PROVIDERS_INPUT=");
+});
