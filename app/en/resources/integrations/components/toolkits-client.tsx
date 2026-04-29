@@ -7,7 +7,7 @@ import {
 } from "@arcadeai/design-system";
 import { Generic as GenericIcon } from "@arcadeai/design-system/components/ui/atoms/icons";
 import { cn } from "@arcadeai/design-system/lib/utils";
-import { Plus, Search } from "lucide-react";
+import { Code2, MessageSquarePlus, Search } from "lucide-react";
 import Link from "next/link";
 import { ComingSoonProvider } from "@/app/_components/coming-soon-context";
 import {
@@ -106,31 +106,51 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
               )}
             </div>
 
-            {/* Custom Integration Call-to-Action */}
+            {/* Don't see what you need? Two paths to fix that. */}
             <div className="mt-4 rounded-lg border border-blue-500/50 border-dashed bg-blue-500/10 p-4 sm:mt-6 sm:p-5 dark:border-blue-400/50 dark:bg-blue-500/20">
-              <div className="flex flex-col items-center gap-3 sm:gap-4 md:flex-row md:gap-6">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-500/20 dark:bg-blue-400/20">
-                  <Plus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="text-center md:text-left">
-                  <h2 className="font-bold text-base text-gray-900 dark:text-gray-50">
-                    Build your own MCP Server
-                  </h2>
-                  <p className="!mt-1.5 text-gray-700 text-sm dark:text-gray-300">
-                    Don't see what you need? Use Arcade's SDK to integrate with
-                    any service or API.
-                  </p>
-                  <div className="mt-3 mb-1">
-                    <Link
-                      className={cn(
-                        buttonVariants({ variant: "default", size: "sm" }),
-                        "bg-blue-600 hover:bg-blue-700 active:bg-blue-700 dark:bg-blue-500 dark:active:bg-blue-600 dark:hover:bg-blue-600"
-                      )}
-                      href="/guides/create-tools/tool-basics/build-mcp-server"
-                    >
-                      Learn how to build a MCP Server
-                    </Link>
+              <h2 className="text-center font-bold text-base text-gray-900 sm:text-left dark:text-gray-50">
+                Don't see what you need?
+              </h2>
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:mt-4 sm:grid-cols-2 sm:gap-4">
+                <div className="flex flex-col rounded-md border border-blue-500/30 bg-white/70 p-4 dark:border-blue-400/30 dark:bg-gray-900/40">
+                  <div className="flex items-center gap-2">
+                    <Code2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <h3 className="font-semibold text-gray-900 text-sm dark:text-gray-50">
+                      Build it yourself
+                    </h3>
                   </div>
+                  <p className="!mt-2 flex-1 text-gray-700 text-xs leading-relaxed dark:text-gray-300">
+                    Use Arcade's SDK to integrate with any service or API.
+                  </p>
+                  <Link
+                    className={cn(
+                      buttonVariants({ variant: "default", size: "sm" }),
+                      "mt-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-700 dark:bg-blue-500 dark:active:bg-blue-600 dark:hover:bg-blue-600"
+                    )}
+                    href="/guides/create-tools/tool-basics/build-mcp-server"
+                  >
+                    Learn how to build a MCP Server
+                  </Link>
+                </div>
+                <div className="flex flex-col rounded-md border border-blue-500/30 bg-white/70 p-4 dark:border-blue-400/30 dark:bg-gray-900/40">
+                  <div className="flex items-center gap-2">
+                    <MessageSquarePlus className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <h3 className="font-semibold text-gray-900 text-sm dark:text-gray-50">
+                      Tell us what's missing
+                    </h3>
+                  </div>
+                  <p className="!mt-2 flex-1 text-gray-700 text-xs leading-relaxed dark:text-gray-300">
+                    Request a missing tool, suggest a feature, or report a bug.
+                  </p>
+                  <Link
+                    className={cn(
+                      buttonVariants({ variant: "outline", size: "sm" }),
+                      "mt-3"
+                    )}
+                    href="/resources/integrations/tool-feedback"
+                  >
+                    Submit tool feedback
+                  </Link>
                 </div>
               </div>
             </div>
