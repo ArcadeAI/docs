@@ -120,7 +120,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                     Don't see what you need? Use Arcade's SDK to integrate with
                     any service or API.
                   </p>
-                  <div className="mt-3 mb-1">
+                  <div className="mt-3 mb-1 flex flex-wrap justify-center gap-2 md:justify-start">
                     <Link
                       className={cn(
                         buttonVariants({ variant: "default", size: "sm" }),
@@ -129,6 +129,14 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                       href="/guides/create-tools/tool-basics/build-mcp-server"
                     >
                       Learn how to build a MCP Server
+                    </Link>
+                    <Link
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "sm" })
+                      )}
+                      href="/resources/integrations/tool-feedback"
+                    >
+                      Submit tool feedback
                     </Link>
                   </div>
                 </div>
