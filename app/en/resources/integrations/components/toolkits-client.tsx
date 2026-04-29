@@ -117,16 +117,10 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                     Build your own MCP Server
                   </h2>
                   <p className="!mt-1.5 text-gray-700 text-sm dark:text-gray-300">
-                    Don't see what you need?{" "}
-                    <Link
-                      href="/resources/integrations/tool-feedback"
-                      className="font-semibold text-blue-600 hover:underline dark:text-blue-400"
-                    >
-                      Submit tool feedback
-                    </Link>
-                    {" "}or use Arcade's SDK to integrate with any service or API.
+                    Don't see what you need? Use Arcade's SDK to integrate with
+                    any service or API.
                   </p>
-                  <div className="mt-3 mb-1">
+                  <div className="mt-3 mb-1 flex flex-nowrap gap-2">
                     <Link
                       className={cn(
                         buttonVariants({ variant: "default", size: "sm" }),
@@ -135,6 +129,14 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                       href="/guides/create-tools/tool-basics/build-mcp-server"
                     >
                       Learn how to build a MCP Server
+                    </Link>
+                    <Link
+                      className={cn(
+                        buttonVariants({ variant: "outline", size: "sm" })
+                      )}
+                      href="/resources/integrations/tool-feedback"
+                    >
+                      Submit tool feedback
                     </Link>
                   </div>
                 </div>
