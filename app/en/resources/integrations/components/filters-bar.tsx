@@ -16,7 +16,7 @@ import {
 import { Check, Filter, FolderOpen, Layers, Search, X } from "lucide-react";
 import type React from "react";
 import { TYPE_CONFIG } from "./type-config";
-import { useFilterStore } from "./use-toolkit-filters";
+import { useFilters } from "./use-filters";
 
 type FiltersBarProps = {
   resultsCount: number;
@@ -35,7 +35,7 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
     searchQuery,
     setSearchQuery,
     clearAllFilters,
-  } = useFilterStore();
+  } = useFilters();
 
   const hasActiveFilters =
     selectedCategory !== "all" ||

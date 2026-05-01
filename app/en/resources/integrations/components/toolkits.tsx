@@ -1,4 +1,5 @@
 import { TOOLKITS, type Toolkit } from "@arcadeai/design-system";
+import { Suspense } from "react";
 import { PARTNER_TOOLKITS } from "@/app/_data/partner-toolkits";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
 import {
@@ -48,5 +49,12 @@ const getToolkitsWithDocsLinks = async (): Promise<ToolkitWithDocsLink[]> => {
 
 export default async function Toolkits() {
   const toolkits = await getToolkitsWithDocsLinks();
-  return <ToolkitsClient toolkits={toolkits} />;
+  // Suspense boundary is required because ToolkitsClient calls
+  // useSearchParams(); without it, Next.js bails out of static prerendering
+  // for the whole page.
+  return (
+    <Suspense fallback={null}>
+      <ToolkitsClient toolkits={toolkits} />
+    </Suspense>
+  );
 }
