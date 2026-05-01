@@ -16,8 +16,8 @@ import {
 import { FiltersBar } from "./filters-bar";
 import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
-import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
-import { useUrlFilterSync } from "./use-url-filter-sync";
+import { useFilters } from "./use-filters";
+import { useToolkitFilters } from "./use-toolkit-filters";
 
 type ToolkitsClientProps = {
   toolkits: ToolkitWithDocsLink[];
@@ -64,9 +64,7 @@ function getToolkitIconWithFallback(
 }
 
 export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
-  useUrlFilterSync();
-
-  const clearAllFilters = useFilterStore((state) => state.clearAllFilters);
+  const { clearAllFilters } = useFilters();
 
   const { hasActiveFilters, filteredToolkits, resultsCount } =
     useToolkitFilters(toolkits);
@@ -136,7 +134,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
             </div>
           </div>
         </div>
-        <div className="mx-auto max-w-7xl px-4">
+        <div className="mx-auto max-w-7xl scroll-mt-20 px-4" id="list">
           <Separator className="mt-4" />
           <FiltersBar resultsCount={resultsCount} />
           <main className="mx-auto max-w-7xl px-4 pt-2 pb-8 sm:pb-12">
