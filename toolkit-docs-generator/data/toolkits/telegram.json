@@ -1,0 +1,459 @@
+{
+  "id": "Telegram",
+  "label": "Telegram",
+  "version": "1.0.1",
+  "description": "Arcade.dev LLM tools for Telegram",
+  "metadata": {
+    "category": "social",
+    "iconUrl": "https://design-system.arcade.dev/icons/telegram.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/social-communication/telegram",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "GetChatInfo",
+      "qualifiedName": "Telegram.GetChatInfo",
+      "fullyQualifiedName": "Telegram.GetChatInfo@1.0.1",
+      "description": "Get metadata about a Telegram chat, group, or channel.\n\nReturns information including the chat type, title, description, and member count.\nThe bot must be a member of the chat to retrieve its information.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": true,
+          "description": "The numeric chat ID or group ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "TELEGRAM_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Telegram.GetChatInfo",
+        "parameters": {
+          "chat_id": {
+            "value": "-1001234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMessages",
+      "qualifiedName": "Telegram.GetMessages",
+      "fullyQualifiedName": "Telegram.GetMessages@1.0.1",
+      "description": "Get recent private-chat messages sent to the bot via Telegram's getUpdates API.\n\nReturns messages from private (1:1) chats only. Group and channel messages are\nexcluded for security — any group member could inject content into the response.\nOnly pending (unacknowledged) updates are returned.\n\nThe limit parameter controls how many raw Telegram updates are fetched, not how\nmany messages are returned. After filtering to private-chat messages for the\nrequested chat_id, the result may contain fewer items. has_more indicates whether\nmore updates exist on the server, not whether more messages exist for this chat.\n\nNote: This retrieves updates delivered to the bot, not the full history of a chat.\nPassing a non-zero offset permanently confirms all earlier updates — they cannot be\nretrieved again. Returns newest messages last.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": true,
+          "description": "The numeric chat ID to retrieve messages from. Only messages from this chat are returned. Note: pagination offset confirmation always applies across all chats regardless of this filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of updates to fetch from Telegram (1-100). Defaults to 20. The actual number of messages returned may be less because non-message updates and messages from other chats are filtered out. If you receive fewer messages than expected and has_more is true, call again with a higher limit or use next_offset to page forward.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Update ID offset for pagination. Use the next_offset value from a previous response to fetch newer updates. WARNING: passing a non-zero offset permanently confirms (removes) all updates with a lower update ID. Defaults to 0 (most recent updates).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "TELEGRAM_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Telegram.GetMessages",
+        "parameters": {
+          "chat_id": {
+            "value": "987654321",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 1234567890,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SendMessage",
+      "qualifiedName": "Telegram.SendMessage",
+      "fullyQualifiedName": "Telegram.SendMessage@1.0.1",
+      "description": "Send a text message to a Telegram chat, group, or channel.\n\nThe bot must be a member of the target chat or have permission to send messages\nto the specified channel.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": true,
+          "description": "The numeric chat ID to send the message to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "The text content of the message to send.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parse_mode",
+          "type": "string",
+          "required": false,
+          "description": "How to format the message text. Defaults to PLAIN.",
+          "enum": [
+            "plain",
+            "MarkdownV2",
+            "HTML"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "disable_notification",
+          "type": "boolean",
+          "required": false,
+          "description": "Send the message silently without a notification sound. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "TELEGRAM_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Telegram.SendMessage",
+        "parameters": {
+          "chat_id": {
+            "value": "-1001234567890",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "Hello! This is a test message sent via the Telegram Bot API.",
+            "type": "string",
+            "required": true
+          },
+          "parse_mode": {
+            "value": "Markdown",
+            "type": "string",
+            "required": false
+          },
+          "disable_notification": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SendTtsAudio",
+      "qualifiedName": "Telegram.SendTtsAudio",
+      "fullyQualifiedName": "Telegram.SendTtsAudio@1.0.1",
+      "description": "Convert text to speech using OpenAI TTS and send it as an audio message on Telegram.\n\nGenerates an MP3 audio file from the provided text using OpenAI's text-to-speech API,\nthen sends it to the specified Telegram chat.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": true,
+          "description": "The numeric chat ID to send the audio to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "The text to convert to speech and send as an audio message. Maximum 4096 characters (after stripping leading/trailing whitespace).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "voice",
+          "type": "string",
+          "required": false,
+          "description": "The voice to use for text-to-speech. Defaults to ALLOY.",
+          "enum": [
+            "alloy",
+            "ash",
+            "coral",
+            "echo",
+            "fable",
+            "onyx",
+            "nova",
+            "sage",
+            "shimmer"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "speed",
+          "type": "number",
+          "required": false,
+          "description": "Playback speed multiplier (0.25-4.0). 1.0 is normal speed, higher is faster. Defaults to 1.0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "instructions",
+          "type": "string",
+          "required": false,
+          "description": "Optional style or tone instructions for the voice (e.g., 'speak in a cheerful tone'). Leave empty for the default voice style.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "disable_notification",
+          "type": "boolean",
+          "required": false,
+          "description": "Send the audio silently without a notification sound. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "TELEGRAM_BOT_TOKEN",
+        "OPENAI_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "token"
+        },
+        {
+          "name": "OPENAI_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Telegram.SendTtsAudio",
+        "parameters": {
+          "chat_id": {
+            "value": "987654321",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "Hello! Welcome to our daily news briefing. Today's top stories include advancements in renewable energy and new developments in space exploration.",
+            "type": "string",
+            "required": true
+          },
+          "voice": {
+            "value": "NOVA",
+            "type": "string",
+            "required": false
+          },
+          "speed": {
+            "value": 1.25,
+            "type": "integer",
+            "required": false
+          },
+          "instructions": {
+            "value": "speak in a calm and professional tone",
+            "type": "string",
+            "required": false
+          },
+          "disable_notification": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Telegram.WhoAmI",
+      "fullyQualifiedName": "Telegram.WhoAmI@1.0.1",
+      "description": "Get information about the Telegram bot.\n\nReturns the bot's identity including its ID, username, and capabilities.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "TELEGRAM_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Telegram.WhoAmI",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-04-30T11:39:05.060Z",
+  "summary": "**Telegram toolkit** provides Arcade tools for interacting with Telegram via a bot, enabling LLMs to send messages, retrieve chat data, and deliver AI-generated audio in Telegram chats, groups, and channels.\n\n## Capabilities\n\n- **Bot identity & chat metadata** — Retrieve the bot's own profile and capabilities, and look up metadata (type, title, description, member count) for any chat the bot belongs to.\n- **Message retrieval** — Fetch pending private-chat messages delivered to the bot via Telegram's `getUpdates` API; group/channel messages are excluded by design. Offset handling permanently acknowledges earlier updates.\n- **Messaging** — Send text messages to any chat, group, or channel where the bot has send permissions.\n- **Text-to-speech audio** — Convert text to an MP3 using OpenAI TTS and deliver it as an audio message to a Telegram chat.\n\n## Secrets\n\nThis toolkit requires two secrets:\n\n- **`TELEGRAM_BOT_TOKEN`** — The API token that authenticates your Telegram bot. Create a bot and obtain its token by messaging [@BotFather](https://t.me/BotFather) on Telegram, using the `/newbot` command (or `/token` for an existing bot). BotFather returns a token in the format `123456789:ABC-...`. No special account tier is required. See [Telegram Bot API docs](https://core.telegram.org/bots/tutorial#obtain-your-bot-token) for details.\n\n- **`OPENAI_API_KEY`** — An OpenAI API key used to call the TTS endpoint for `Telegram.SendTtsAudio`. Generate one in the [OpenAI platform dashboard](https://platform.openai.com/api-keys) under **API keys**. The key needs access to the `tts-1` or `tts-1-hd` model; ensure your account has an active billing plan, as TTS is not available on the free tier.\n\nConfigure secrets in Arcade at https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets or via the dashboard at https://api.arcade.dev/dashboard/auth/secrets."
+}

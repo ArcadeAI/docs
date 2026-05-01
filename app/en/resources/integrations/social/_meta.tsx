@@ -21,6 +21,10 @@ const meta: MetaRecord = {
     title: "Slack",
     href: "/en/resources/integrations/social/slack",
   },
+  telegram: {
+    title: "Telegram",
+    href: "/en/resources/integrations/social/telegram",
+  },
   x: {
     title: "X",
     href: "/en/resources/integrations/social/x",
