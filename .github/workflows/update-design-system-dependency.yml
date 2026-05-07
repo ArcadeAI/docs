@@ -44,6 +44,9 @@ jobs:
       - name: Run design-system compatibility tests
         if: steps.check-changes.outputs.has_changes == 'true'
         run: |
+          echo "Running compatibility tests to detect breaking changes..."
+          echo "If this step fails, it means the new design system version has breaking changes."
+          echo "This is expected behavior - the workflow will stop and no PR will be created."
           pnpm vitest run toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts toolkit-docs-generator/tests/sources/oauth-provider-resolver.test.ts
           pnpm run build
 
