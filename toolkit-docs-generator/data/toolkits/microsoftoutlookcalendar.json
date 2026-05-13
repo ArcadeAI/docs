@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookCalendar",
   "label": "Microsoft Outlook Calendar",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Arcade.dev LLM tools for Outlook Calendar",
   "metadata": {
     "category": "productivity",
@@ -28,7 +28,7 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CreateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@0.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@0.3.0",
       "description": "Create an event in the authenticated user's default calendar.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
       "parameters": [
         {
@@ -112,6 +112,58 @@
         "description": "A dictionary containing the created event details"
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.CreateEvent",
+        "parameters": {
+          "subject": {
+            "value": "Q3 Project Kickoff Meeting",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Please join us for the Q3 project kickoff. We will review goals, assign responsibilities, and outline the timeline for the upcoming quarter.",
+            "type": "string",
+            "required": true
+          },
+          "start_date_time": {
+            "value": "2025-07-15T10:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_date_time": {
+            "value": "2025-07-15T11:00:00",
+            "type": "string",
+            "required": true
+          },
+          "location": {
+            "value": "Conference Room B, 3rd Floor",
+            "type": "string",
+            "required": false
+          },
+          "attendee_emails": {
+            "value": [
+              "alice.johnson@example.com",
+              "bob.smith@example.com",
+              "carol.white@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "is_online_meeting": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "custom_meeting_url": {
+            "value": "https://teams.microsoft.com/l/meetup-join/example-meeting-id",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -133,7 +185,7 @@
     {
       "name": "GetEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.GetEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@0.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@0.3.0",
       "description": "Get an event by its ID from the user's calendar.",
       "parameters": [
         {
@@ -160,6 +212,19 @@
         "description": "A dictionary containing the event details"
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.GetEvent",
+        "parameters": {
+          "event_id": {
+            "value": "AAMkADI5NmY2OWE4LTRkZjMtNGQzZC1hYmNkLTEyMzQ1Njc4OTAxMg==",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -181,7 +246,7 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "MicrosoftOutlookCalendar.ListCalendars",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@0.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@0.3.0",
       "description": "List all calendars the user has access to.\n\nReturns the user's own calendars plus any shared or delegated calendars.\nEach calendar includes its ID, name, owner, and permissions.\n\nUse a calendar_id from the results to target a specific calendar\nin other calendar tools.",
       "parameters": [
         {
@@ -215,6 +280,24 @@
         "description": "A dictionary containing a list of available calendars."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.ListCalendars",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJza2lwVG9rZW4iOiIlMjRza2lwJTNENTAifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -236,7 +319,7 @@
     {
       "name": "ListEventAttachments",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@0.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@0.3.0",
       "description": "List attachment metadata for a calendar event.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to a calendar event\nor meeting.\n\nPass a calendar_id to list attachments on events in shared or delegated calendars.",
       "parameters": [
         {
@@ -287,6 +370,34 @@
         "description": "A dictionary containing a list of attachment metadata objects."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.ListEventAttachments",
+        "parameters": {
+          "event_id": {
+            "value": "AAMkAGI2TG93AAA=",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "AQMkADAwATM0MDAAMS1iNTQ5LTBhZjQtMDACLTAwCgBGAAADyW3X",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJza2lwVG9rZW4iOiIxMjM0NTY3ODkwIn0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -308,7 +419,7 @@
     {
       "name": "ListEventsInTimeRange",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@0.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@0.3.0",
       "description": "List events in the user's calendar in a specific time range.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
       "parameters": [
         {
@@ -351,6 +462,29 @@
         "description": "A dictionary containing a list of events"
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.ListEventsInTimeRange",
+        "parameters": {
+          "start_date_time": {
+            "value": "2025-06-01T08:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_date_time": {
+            "value": "2025-06-07T23:59:59",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -372,8 +506,8 @@
     {
       "name": "SearchEvents",
       "qualifiedName": "MicrosoftOutlookCalendar.SearchEvents",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@0.2.0",
-      "description": "Search calendar events within a time range with optional filters.\n\nReturns events filtered by subject keyword, attendee, organizer,\nimportance, or online-meeting status. Results are in chronological order.\n\nBy default, searches the user's primary calendar. Pass a calendar_id\nto search a shared or delegated calendar.\n\nEvent bodies are truncated to 200 characters for efficient skimming.\nUse the event_id from the results to retrieve full event details.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@0.3.0",
+      "description": "Search calendar events within a time range with optional filters.\n\nResults are in chronological order.\n\nEvent bodies are truncated to 200 characters for efficient skimming.\nUse the event_id from the results to retrieve full event details.",
       "parameters": [
         {
           "name": "subject",
@@ -396,7 +530,15 @@
           "name": "organizer_name",
           "type": "string",
           "required": false,
-          "description": "Filter events organized by this person's display name. Note: filtering by organizer email address is not supported by the Microsoft Graph API. Use the organizer's display name instead. Defaults to None (no organizer filter).",
+          "description": "Filter events organized by another specific person by their display name. Matching is case-insensitive substring against the organizer's display name. Do not use this to filter for events organized by the current authenticated user — use organized_by_me=True instead, which does not depend on knowing your own display name. Defaults to None (no organizer filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organized_by_me",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter for events the current authenticated user organized (True) vs. events the current user was invited to but did not organize (False). Defaults to None (no filter). Prefer this over organizer_name when the user asks about their own events — it does not require knowing the user's display name in the tenant's format.",
           "enum": null,
           "inferrable": true
         },
@@ -456,7 +598,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of events to return. Max is 200. Defaults to 25.",
+          "description": "Maximum number of matching events to return. Max is 200. Defaults to 25. When client-side filters are active, the tool may scan multiple pages to accumulate matches.",
           "enum": null,
           "inferrable": true
         },
@@ -464,7 +606,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request.",
+          "description": "Encoded pagination token to continue a previous request. Preserves client-side filter state (attendee_emails, organizer_name, organized_by_me, is_online_meeting) across continuation calls.",
           "enum": null,
           "inferrable": true
         }
@@ -484,6 +626,77 @@
         "description": "A dictionary containing a list of matching calendar events."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.SearchEvents",
+        "parameters": {
+          "subject": {
+            "value": "quarterly review",
+            "type": "string",
+            "required": false
+          },
+          "attendee_emails": {
+            "value": [
+              "alice@example.com",
+              "bob@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "organizer_name": {
+            "value": "Jane Smith",
+            "type": "string",
+            "required": false
+          },
+          "organized_by_me": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "importance": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "is_online_meeting": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "start_date_time": {
+            "value": "2024-06-01T08:00:00",
+            "type": "string",
+            "required": false
+          },
+          "end_date_time": {
+            "value": "2024-09-01T18:00:00",
+            "type": "string",
+            "required": false
+          },
+          "calendar_id": {
+            "value": "AQMkADAwATM0MDAAMS1hYjcd==",
+            "type": "string",
+            "required": false
+          },
+          "include_cancelled": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJza2lwVG9rZW4iOiIlMjRza2lwdG9rZW49MTAifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -505,7 +718,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookCalendar.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@0.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@0.3.0",
       "description": "Get information about the current user and their Outlook Calendar environment.",
       "parameters": [],
       "auth": {
@@ -524,6 +737,13 @@
         "description": "Get comprehensive user profile and Outlook Calendar information."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -546,6 +766,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-04-02T11:25:02.800Z",
-  "summary": "Microsoft Outlook Calendar is Microsoft's calendaring service, accessed through the Microsoft Graph API. The Arcade Outlook Calendar toolkit lets agents read and manage events across a user's primary and shared calendars.\n\n**Capabilities**\n\n- Create events with attendees, locations, and optional online-meeting links.\n- List and search events in a time range with filters for subject, attendees, organizer, importance, and online-meeting status.\n- Retrieve individual events and list event attachment metadata.\n- Enumerate calendars (including shared and delegated) and fetch profile details via WhoAmI.\n\n**OAuth**\n\nRequires Microsoft OAuth. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration."
+  "generatedAt": "2026-05-13T11:50:27.729Z",
+  "summary": "## Microsoft Outlook Calendar Toolkit\n\nThe Microsoft Outlook Calendar toolkit lets Arcade-powered LLMs interact with a user's Outlook Calendar via the Microsoft Graph API, enabling calendar reads, writes, and queries on behalf of authenticated users.\n\n## Capabilities\n\n- **Calendar discovery & context:** List all calendars the user owns, shares, or has delegated access to; retrieve current user identity and calendar environment details.\n- **Event creation:** Create events in the user's default calendar; timezone handling defers to the calendar's configured timezone (falls back to UTC if unset).\n- **Event retrieval & listing:** Fetch a specific event by ID, or list all events within a defined time range using the calendar's native timezone.\n- **Search & filtering:** Search events across a time range with optional filters; results are chronologically ordered with body content truncated to 200 characters for efficiency — use the returned event ID to fetch full details.\n- **Attachment inspection:** List attachment metadata (name, size, type) for any calendar event, including events on shared or delegated calendars; attachment content is not returned.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 delegated auth via **Microsoft**. Arcade handles the OAuth flow automatically. See the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
 }
