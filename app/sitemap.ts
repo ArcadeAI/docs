@@ -58,7 +58,7 @@ async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
 
   const seen = new Set<string>(mdxRoutes.map((r) => r.url));
   const uniqueToolkitEntries = toolkitEntries.filter((entry) => {
-    if (seen.has(entry.url)) return false;
+    if (seen.has(entry.url)) { return false; }
     seen.add(entry.url);
     return true;
   });
