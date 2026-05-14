@@ -26,6 +26,9 @@ const meta: MetaRecord = {
   "copilot-studio": {
     title: "Microsoft Copilot Studio",
   },
+  "github-copilot": {
+    title: "GitHub Copilot",
+  },
 };
 
 export default meta;
