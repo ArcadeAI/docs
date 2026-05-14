@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { MetadataRoute } from "next";
+import { listToolkitRoutes } from "./_lib/toolkit-static-params";
 
 const SITE_URL = process.env.SITE_URL ?? "https://docs.arcade.dev";
 const NORMALIZED_SITE_URL = SITE_URL.replace(/\/+$/, "");
@@ -43,13 +44,33 @@ async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
   return entries;
 }
 
+async function buildSitemap(): Promise<MetadataRoute.Sitemap> {
+  const [mdxRoutes, toolkitRoutes] = await Promise.all([
+    collectRoutes(APP_DIR),
+    listToolkitRoutes(),
+  ]);
+
+  const toolkitEntries: MetadataRoute.Sitemap = toolkitRoutes
+    .filter((route) => route.category !== "others")
+    .map((route) => ({
+      url: `${NORMALIZED_SITE_URL}/en/resources/integrations/${route.category}/${route.toolkitId}`,
+    }));
+
+  const seen = new Set<string>(mdxRoutes.map((r) => r.url));
+  const uniqueToolkitEntries = toolkitEntries.filter((entry) => {
+    if (seen.has(entry.url)) return false;
+    seen.add(entry.url);
+    return true;
+  });
+
+  return [...mdxRoutes, ...uniqueToolkitEntries].sort((a, b) =>
+    a.url.localeCompare(b.url)
+  );
+}
+
 export default function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!cachedRoutes) {
-    cachedRoutes = collectRoutes(APP_DIR).then((routes) => {
-      routes.sort((a, b) => a.url.localeCompare(b.url));
-      return routes;
-    });
+    cachedRoutes = buildSitemap();
   }
-
   return cachedRoutes;
 }

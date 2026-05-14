@@ -19,8 +19,20 @@ test("sitemap lists expected URLs", async () => {
       true
     );
 
-    // Known page should be present
+    // Known static page should be present
     expect(urls).toContain("https://example.test/en/references/changelog");
+
+    // Toolkit pages should be included
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/development/github"
+    );
+    const integrationUrls = urls.filter((url) =>
+      url.includes("/en/resources/integrations/")
+    );
+    expect(integrationUrls.length).toBeGreaterThan(10);
+
+    // No dynamic-segment placeholders should leak into output
+    expect(urls.every((url) => !url.includes("["))).toBe(true);
 
     // No duplicates
     const duplicates = urls.filter(
