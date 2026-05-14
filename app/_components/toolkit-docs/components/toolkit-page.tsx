@@ -234,9 +234,7 @@ function BreadcrumbBar({
 }) {
   return (
     <nav className="mb-6 flex flex-wrap items-center gap-2 text-muted-foreground text-sm">
-      <a className="hover:text-brand-accent" href="/en/resources">
-        Resources
-      </a>
+      <span>Resources</span>
       <span className="text-muted-foreground/40">›</span>
       <a className="hover:text-brand-accent" href="/en/resources/integrations">
         Integrations

@@ -24,6 +24,82 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Broken /en/home/* paths from old doc structure — redirect to current locations
+        {
+          source: "/:locale/home/auth/authorized-tool-calling",
+          destination:
+            "/:locale/guides/tool-calling/custom-apps/auth-tool-calling",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/build-tools/create-a-toolkit",
+          destination: "/:locale/guides/create-tools/tool-basics",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/configure/arcade-deploy",
+          destination: "/:locale/guides/deployment-hosting/arcade-deploy",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/hybrid-deployment/hybrid-worker",
+          destination: "/:locale/guides/deployment-hosting",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/local-deployment/install/local",
+          destination: "/:locale/guides/deployment-hosting/on-prem",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/local-deployment/install/overview",
+          destination: "/:locale/guides/deployment-hosting",
+          permanent: true,
+        },
+        // squareup renamed to square
+        {
+          source: "/:locale/references/auth-providers/squareup",
+          destination: "/:locale/references/auth-providers/square",
+          permanent: true,
+        },
+        // Removed toolkit pages — redirect to integrations index
+        {
+          source: "/:locale/resources/integrations/entertainment/twitch",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social/discord",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social/twilio",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/obsidian",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/closeio",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        // Old daytona path structure — redirect to current category page
+        {
+          source: "/:locale/resources/integrations/daytona/overview",
+          destination: "/:locale/resources/integrations/development/daytona",
+          permanent: true,
+        },
+        // Old nested Google/Gmail toolkit path
+        {
+          source: "/:locale/resources/integrations/productivity/google/gmail",
+          destination: "/:locale/resources/integrations/productivity/gmail",
+          permanent: true,
+        },
         // Dissolved guides/security section
         {
           source: "/:locale/guides/security/security-research-program",
