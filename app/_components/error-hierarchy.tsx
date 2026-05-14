@@ -19,6 +19,7 @@ ToolkitError                                  # (Abstract base class)
             ├── RetryableToolError            # Tool can be retried with extra context
             ├── ContextRequiredToolError      # Additional context needed before retry
             ├── FatalToolError                # Unhandled bugs in the tool implementation
+            ├── NetworkTransportError         # No HTTP response received (timeout, DNS, TLS, etc.)
             └── UpstreamError                 # HTTP/API errors from external services
                 └── UpstreamRateLimitError    # Rate limiting errors from service
 `}</code>

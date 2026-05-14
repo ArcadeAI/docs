@@ -21,6 +21,10 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    # Opt in to Node 24 for JavaScript actions before GitHub forces the
+    # switch on 2026-06-02. Harmless today; unblocks the cutover.
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
     steps:
       - name: Checkout repository
@@ -54,9 +58,13 @@ jobs:
             --api-source tool-metadata \
             --tool-metadata-url "$ENGINE_API_URL" \
             --tool-metadata-key "$ENGINE_API_KEY" \
-            --llm-provider openai \
-            --llm-model "$OPENAI_MODEL" \
-            --llm-api-key "$OPENAI_API_KEY" \
+            --llm-provider anthropic \
+            --llm-model "$ANTHROPIC_MODEL" \
+            --llm-api-key "$ANTHROPIC_API_KEY" \
+            --llm-max-tokens 8192 \
+            --llm-editor-provider anthropic \
+            --llm-editor-model "$ANTHROPIC_EDITOR_MODEL" \
+            --llm-editor-api-key "$ANTHROPIC_API_KEY" \
             --toolkit-concurrency 8 \
             --llm-concurrency 15 \
             --exclude-file ./excluded-toolkits.txt \
@@ -66,8 +74,12 @@ jobs:
         env:
           ENGINE_API_URL: ${{ secrets.ENGINE_API_URL }}
           ENGINE_API_KEY: ${{ secrets.ENGINE_API_KEY }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4o-mini' }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL || 'claude-sonnet-4-6' }}
+          # Stronger model for the secret-coherence editor. Keeps
+          # stale-secret cleanup precise instead of re-summarizing the whole
+          # artifact.
+          ANTHROPIC_EDITOR_MODEL: ${{ secrets.ANTHROPIC_EDITOR_MODEL || 'claude-sonnet-4-6' }}
 
       - name: Sync toolkit sidebar navigation
         run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose

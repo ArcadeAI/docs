@@ -1,7 +1,7 @@
 {
   "id": "Gmail",
   "label": "Gmail",
-  "version": "4.2.1",
+  "version": "6.0.0",
   "description": "Arcade.dev LLM tools for Gmail",
   "metadata": {
     "category": "productivity",
@@ -30,7 +30,7 @@
     {
       "name": "ChangeEmailLabels",
       "qualifiedName": "Gmail.ChangeEmailLabels",
-      "fullyQualifiedName": "Gmail.ChangeEmailLabels@4.2.1",
+      "fullyQualifiedName": "Gmail.ChangeEmailLabels@6.0.0",
       "description": "Add and remove labels from an email using the Gmail API.",
       "parameters": [
         {
@@ -124,7 +124,7 @@
     {
       "name": "CreateLabel",
       "qualifiedName": "Gmail.CreateLabel",
-      "fullyQualifiedName": "Gmail.CreateLabel@4.2.1",
+      "fullyQualifiedName": "Gmail.CreateLabel@6.0.0",
       "description": "Create a new label in the user's mailbox.",
       "parameters": [
         {
@@ -184,7 +184,7 @@
     {
       "name": "DeleteDraftEmail",
       "qualifiedName": "Gmail.DeleteDraftEmail",
-      "fullyQualifiedName": "Gmail.DeleteDraftEmail@4.2.1",
+      "fullyQualifiedName": "Gmail.DeleteDraftEmail@6.0.0",
       "description": "Delete a draft email using the Gmail API.",
       "parameters": [
         {
@@ -244,7 +244,7 @@
     {
       "name": "GetThread",
       "qualifiedName": "Gmail.GetThread",
-      "fullyQualifiedName": "Gmail.GetThread@4.2.1",
+      "fullyQualifiedName": "Gmail.GetThread@6.0.0",
       "description": "Get the specified thread by ID.",
       "parameters": [
         {
@@ -304,7 +304,7 @@
     {
       "name": "ListDraftEmails",
       "qualifiedName": "Gmail.ListDraftEmails",
-      "fullyQualifiedName": "Gmail.ListDraftEmails@4.2.1",
+      "fullyQualifiedName": "Gmail.ListDraftEmails@6.0.0",
       "description": "Lists draft emails in the user's draft mailbox using the Gmail API.",
       "parameters": [
         {
@@ -364,7 +364,7 @@
     {
       "name": "ListEmails",
       "qualifiedName": "Gmail.ListEmails",
-      "fullyQualifiedName": "Gmail.ListEmails@4.2.1",
+      "fullyQualifiedName": "Gmail.ListEmails@6.0.0",
       "description": "Read emails from a Gmail account and extract plain text content.",
       "parameters": [
         {
@@ -424,7 +424,7 @@
     {
       "name": "ListEmailsByHeader",
       "qualifiedName": "Gmail.ListEmailsByHeader",
-      "fullyQualifiedName": "Gmail.ListEmailsByHeader@4.2.1",
+      "fullyQualifiedName": "Gmail.ListEmailsByHeader@6.0.0",
       "description": "Search for emails by header using the Gmail API.",
       "parameters": [
         {
@@ -570,7 +570,7 @@
     {
       "name": "ListLabels",
       "qualifiedName": "Gmail.ListLabels",
-      "fullyQualifiedName": "Gmail.ListLabels@4.2.1",
+      "fullyQualifiedName": "Gmail.ListLabels@6.0.0",
       "description": "List all the labels in the user's mailbox.",
       "parameters": [],
       "auth": {
@@ -615,7 +615,7 @@
     {
       "name": "ListThreads",
       "qualifiedName": "Gmail.ListThreads",
-      "fullyQualifiedName": "Gmail.ListThreads@4.2.1",
+      "fullyQualifiedName": "Gmail.ListThreads@6.0.0",
       "description": "List threads in the user's mailbox.",
       "parameters": [
         {
@@ -701,14 +701,14 @@
     {
       "name": "ReplyToEmail",
       "qualifiedName": "Gmail.ReplyToEmail",
-      "fullyQualifiedName": "Gmail.ReplyToEmail@4.2.1",
+      "fullyQualifiedName": "Gmail.ReplyToEmail@6.0.0",
       "description": "Send a reply to an email message.",
       "parameters": [
         {
           "name": "body",
           "type": "string",
           "required": true,
-          "description": "The body of the email",
+          "description": "The body of the email, as plain text or HTML.",
           "enum": null,
           "inferrable": true
         },
@@ -732,11 +732,20 @@
           "inferrable": true
         },
         {
+          "name": "cc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Additional CC recipients. When replying to every recipient, merged with CC from the original message; duplicates are removed (RFC-aware). Duplicates of the reply's To recipients are dropped from Cc (RFC-aware mailbox comparison). The authenticated user's own email address is removed from Cc on replies.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
           "name": "bcc",
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "BCC recipients of the email",
+          "description": "BCC recipients of the email. The authenticated user's own email address is removed from Bcc on replies.",
           "enum": null,
           "inferrable": true
         },
@@ -744,10 +753,11 @@
           "name": "content_type",
           "type": "string",
           "required": false,
-          "description": "The content type of the email body. Defaults to 'plain'",
+          "description": "How the body is encoded on the wire. `auto` (default) sends as HTML and auto-converts plain-text input to paragraphs. `html` sends the body verbatim as HTML (use this when it contains entities or non-allow-listed tags); `plain` is plain text.",
           "enum": [
             "plain",
-            "html"
+            "html",
+            "auto"
           ],
           "inferrable": true
         }
@@ -756,7 +766,8 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/gmail.send"
+          "https://www.googleapis.com/auth/gmail.send",
+          "https://www.googleapis.com/auth/gmail.readonly"
         ]
       },
       "secrets": [],
@@ -770,30 +781,37 @@
         "toolName": "Gmail.ReplyToEmail",
         "parameters": {
           "body": {
-            "value": "Thank you for your email. I appreciate your feedback and will get back to you soon.",
+            "value": "<p>Thank you for reaching out! I will get back to you with more details shortly.</p>",
             "type": "string",
             "required": true
           },
           "reply_to_message_id": {
-            "value": "1234567890",
+            "value": "18e4f2a3b7c91d05",
             "type": "string",
             "required": true
           },
           "reply_to_whom": {
-            "value": "GmailReplyToWhom.REPLY_ALL",
+            "value": "GmailReplyToWhom.ONLY_THE_SENDER",
             "type": "string",
+            "required": false
+          },
+          "cc": {
+            "value": [
+              "manager@example.com",
+              "team-lead@example.com"
+            ],
+            "type": "array",
             "required": false
           },
           "bcc": {
             "value": [
-              "example1@example.com",
-              "example2@example.com"
+              "archive@example.com"
             ],
             "type": "array",
             "required": false
           },
           "content_type": {
-            "value": "html",
+            "value": "auto",
             "type": "string",
             "required": false
           }
@@ -823,7 +841,7 @@
     {
       "name": "SearchThreads",
       "qualifiedName": "Gmail.SearchThreads",
-      "fullyQualifiedName": "Gmail.SearchThreads@4.2.1",
+      "fullyQualifiedName": "Gmail.SearchThreads@6.0.0",
       "description": "Search for threads in the user's mailbox",
       "parameters": [
         {
@@ -999,7 +1017,7 @@
     {
       "name": "SendDraftEmail",
       "qualifiedName": "Gmail.SendDraftEmail",
-      "fullyQualifiedName": "Gmail.SendDraftEmail@4.2.1",
+      "fullyQualifiedName": "Gmail.SendDraftEmail@6.0.0",
       "description": "Send a draft email using the Gmail API.",
       "parameters": [
         {
@@ -1059,7 +1077,7 @@
     {
       "name": "SendEmail",
       "qualifiedName": "Gmail.SendEmail",
-      "fullyQualifiedName": "Gmail.SendEmail@4.2.1",
+      "fullyQualifiedName": "Gmail.SendEmail@6.0.0",
       "description": "Send an email using the Gmail API.",
       "parameters": [
         {
@@ -1074,7 +1092,7 @@
           "name": "body",
           "type": "string",
           "required": true,
-          "description": "The body of the email",
+          "description": "The body of the email, as plain text or HTML.",
           "enum": null,
           "inferrable": true
         },
@@ -1108,10 +1126,11 @@
           "name": "content_type",
           "type": "string",
           "required": false,
-          "description": "The content type of the email body. Defaults to 'plain'",
+          "description": "How the body is encoded on the wire. `auto` (default) sends as HTML and auto-converts plain-text input to paragraphs. `html` sends the body verbatim as HTML (use this when it contains entities or non-allow-listed tags); `plain` is plain text.",
           "enum": [
             "plain",
-            "html"
+            "html",
+            "auto"
           ],
           "inferrable": true
         }
@@ -1134,37 +1153,37 @@
         "toolName": "Gmail.SendEmail",
         "parameters": {
           "subject": {
-            "value": "Meeting Reminder",
+            "value": "Meeting Reminder: Project Kickoff Tomorrow at 10 AM",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Don't forget our meeting tomorrow at 10 AM.",
+            "value": "<p>Hi Jane,</p><p>Just a friendly reminder that our project kickoff meeting is scheduled for <strong>tomorrow at 10:00 AM</strong> in Conference Room B.</p><p>Please bring your project outlines and any questions you may have.</p><p>Best regards,<br>John</p>",
             "type": "string",
             "required": true
           },
           "recipient": {
-            "value": "example@example.com",
+            "value": "jane.doe@example.com",
             "type": "string",
             "required": true
           },
           "cc": {
             "value": [
               "manager@example.com",
-              "assistant@example.com"
+              "teamlead@example.com"
             ],
             "type": "array",
             "required": false
           },
           "bcc": {
             "value": [
-              "sensitive@example.com"
+              "archive@example.com"
             ],
             "type": "array",
             "required": false
           },
           "content_type": {
-            "value": "plain",
+            "value": "html",
             "type": "string",
             "required": false
           }
@@ -1194,7 +1213,7 @@
     {
       "name": "TrashEmail",
       "qualifiedName": "Gmail.TrashEmail",
-      "fullyQualifiedName": "Gmail.TrashEmail@4.2.1",
+      "fullyQualifiedName": "Gmail.TrashEmail@6.0.0",
       "description": "Move an email to the trash folder using the Gmail API.",
       "parameters": [
         {
@@ -1254,8 +1273,8 @@
     {
       "name": "UpdateDraftEmail",
       "qualifiedName": "Gmail.UpdateDraftEmail",
-      "fullyQualifiedName": "Gmail.UpdateDraftEmail@4.2.1",
-      "description": "Update an existing email draft using the Gmail API.",
+      "fullyQualifiedName": "Gmail.UpdateDraftEmail@6.0.0",
+      "description": "Update an existing email draft using the Gmail API.\n\nSingle-part ``text/plain`` and single-part ``text/html`` drafts both support full\nbody replacement; the rebuild follows the existing draft's content type, so a\nplain draft stays plain and an HTML draft stays HTML. Plain-text input supplied\nagainst an HTML draft is auto-converted to HTML, and HTML input supplied against\na plain draft is stored verbatim as ``text/plain``. Reply drafts preserve their\nreply-quote tail (``> `` lines for plain, ``<blockquote>`` for HTML) when the\nbody is supplied as a top-only update.\n\nMultipart drafts and drafts with attachments still fail when the body changes;\nin those cases the tool succeeds only when the effective body is unchanged\n(metadata-only update preserving the existing MIME tree). Edit those drafts in\nGmail directly.\n\nFor each of subject, body, recipient, cc, and bcc, omitting the parameter or passing\n``None`` leaves that part of the draft unchanged (for cc/bcc, existing headers are kept;\npass an empty list to clear).",
       "parameters": [
         {
           "name": "draft_email_id",
@@ -1268,24 +1287,24 @@
         {
           "name": "subject",
           "type": "string",
-          "required": true,
-          "description": "The subject of the draft email",
+          "required": false,
+          "description": "Draft subject. Omit or pass None to leave the existing subject unchanged.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "body",
           "type": "string",
-          "required": true,
-          "description": "The body of the draft email",
+          "required": false,
+          "description": "Updated body for the draft. There is no `content_type` argument — the body is encoded to match the existing draft, and reply drafts re-attach their existing reply-quote tail. Omit or pass None to leave the body unchanged.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "recipient",
           "type": "string",
-          "required": true,
-          "description": "The recipient of the draft email",
+          "required": false,
+          "description": "To header. Omit or pass None to leave the existing recipient unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1294,7 +1313,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "CC recipients of the draft email",
+          "description": "Cc recipients. Omit or pass None to preserve the existing Cc header; pass an empty list to clear Cc.",
           "enum": null,
           "inferrable": true
         },
@@ -1303,7 +1322,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "BCC recipients of the draft email",
+          "description": "Bcc recipients. Omit or pass None to preserve the existing Bcc header; pass an empty list to clear Bcc.",
           "enum": null,
           "inferrable": true
         }
@@ -1326,36 +1345,36 @@
         "toolName": "Gmail.UpdateDraftEmail",
         "parameters": {
           "draft_email_id": {
-            "value": "abc123def456",
+            "value": "r5678901234567890",
             "type": "string",
             "required": true
           },
           "subject": {
-            "value": "Meeting Reminder",
+            "value": "Updated Meeting Agenda for Thursday",
             "type": "string",
-            "required": true
+            "required": false
           },
           "body": {
-            "value": "Don't forget about our meeting tomorrow at 10 AM.",
+            "value": "Hi team,\n\nPlease find the updated agenda for our Thursday meeting below:\n\n1. Project status update\n2. Budget review\n3. Q3 planning\n\nLet me know if you have any additions.\n\nBest regards,\nAlex",
             "type": "string",
-            "required": true
+            "required": false
           },
           "recipient": {
-            "value": "recipient@example.com",
+            "value": "jane.doe@example.com",
             "type": "string",
-            "required": true
+            "required": false
           },
           "cc": {
             "value": [
-              "cc1@example.com",
-              "cc2@example.com"
+              "manager@example.com",
+              "teamlead@example.com"
             ],
             "type": "array",
             "required": false
           },
           "bcc": {
             "value": [
-              "bcc@example.com"
+              "archive@example.com"
             ],
             "type": "array",
             "required": false
@@ -1386,7 +1405,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Gmail.WhoAmI",
-      "fullyQualifiedName": "Gmail.WhoAmI@4.2.1",
+      "fullyQualifiedName": "Gmail.WhoAmI@6.0.0",
       "description": "Get comprehensive user profile and Gmail account information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Gmail account statistics, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -1433,7 +1452,7 @@
     {
       "name": "WriteDraftEmail",
       "qualifiedName": "Gmail.WriteDraftEmail",
-      "fullyQualifiedName": "Gmail.WriteDraftEmail@4.2.1",
+      "fullyQualifiedName": "Gmail.WriteDraftEmail@6.0.0",
       "description": "Compose a new email draft using the Gmail API.",
       "parameters": [
         {
@@ -1448,7 +1467,7 @@
           "name": "body",
           "type": "string",
           "required": true,
-          "description": "The body of the draft email",
+          "description": "The body of the email, as plain text or HTML.",
           "enum": null,
           "inferrable": true
         },
@@ -1482,10 +1501,11 @@
           "name": "content_type",
           "type": "string",
           "required": false,
-          "description": "The content type of the email body. Defaults to 'plain'",
+          "description": "How the body is encoded on the wire. `auto` (default) sends as HTML and auto-converts plain-text input to paragraphs. `html` sends the body verbatim as HTML (use this when it contains entities or non-allow-listed tags); `plain` is plain text.",
           "enum": [
             "plain",
-            "html"
+            "html",
+            "auto"
           ],
           "inferrable": true
         }
@@ -1508,152 +1528,31 @@
         "toolName": "Gmail.WriteDraftEmail",
         "parameters": {
           "subject": {
-            "value": "Meeting Reminder",
+            "value": "Project Update: Q3 Milestones Review",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "This is a reminder for our meeting scheduled for tomorrow at 10 AM.",
+            "value": "<p>Hi Sarah,</p><p>I wanted to follow up on our discussion from last week regarding the Q3 milestones. Please find the summary below:</p><ul><li>Feature A: Completed</li><li>Feature B: In Progress</li><li>Feature C: Pending Review</li></ul><p>Let me know if you have any questions.</p><p>Best regards,<br>John</p>",
             "type": "string",
             "required": true
           },
           "recipient": {
-            "value": "john.doe@example.com",
+            "value": "sarah.johnson@example.com",
             "type": "string",
             "required": true
           },
           "cc": {
             "value": [
-              "jane.smith@example.com"
+              "manager@example.com",
+              "teamlead@example.com"
             ],
             "type": "array",
             "required": false
           },
           "bcc": {
             "value": [
-              "manager@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "content_type": {
-            "value": "plain",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "google",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "WriteDraftReplyEmail",
-      "qualifiedName": "Gmail.WriteDraftReplyEmail",
-      "fullyQualifiedName": "Gmail.WriteDraftReplyEmail@4.2.1",
-      "description": "Compose a draft reply to an email message.",
-      "parameters": [
-        {
-          "name": "body",
-          "type": "string",
-          "required": true,
-          "description": "The body of the draft reply email",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "reply_to_message_id",
-          "type": "string",
-          "required": true,
-          "description": "The Gmail message ID of the message to draft a reply to",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "reply_to_whom",
-          "type": "string",
-          "required": false,
-          "description": "Whether to reply to every recipient (including cc) or only to the original sender. Defaults to 'GmailReplyToWhom.ONLY_THE_SENDER'.",
-          "enum": [
-            "every_recipient",
-            "only_the_sender"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "bcc",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "BCC recipients of the draft reply email",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "content_type",
-          "type": "string",
-          "required": false,
-          "description": "The content type of the email body. Defaults to 'plain'",
-          "enum": [
-            "plain",
-            "html"
-          ],
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "google",
-        "providerType": "oauth2",
-        "scopes": [
-          "https://www.googleapis.com/auth/gmail.compose"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "A dictionary containing draft reply email details with dates in descriptive UTC format"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Gmail.WriteDraftReplyEmail",
-        "parameters": {
-          "body": {
-            "value": "Thank you for your email. I appreciate your insights and will get back to you soon.",
-            "type": "string",
-            "required": true
-          },
-          "reply_to_message_id": {
-            "value": "1685748392020",
-            "type": "string",
-            "required": true
-          },
-          "reply_to_whom": {
-            "value": "GmailReplyToWhom.REPLY_ALL",
-            "type": "string",
-            "required": false
-          },
-          "bcc": {
-            "value": [
-              "examplebcc@example.com",
-              "anotherbcc@example.com"
+              "archive@example.com"
             ],
             "type": "array",
             "required": false
@@ -1685,6 +1584,147 @@
         },
         "extras": null
       }
+    },
+    {
+      "name": "WriteDraftReplyEmail",
+      "qualifiedName": "Gmail.WriteDraftReplyEmail",
+      "fullyQualifiedName": "Gmail.WriteDraftReplyEmail@6.0.0",
+      "description": "Compose a draft reply to an email message.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the email, as plain text or HTML.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_message_id",
+          "type": "string",
+          "required": true,
+          "description": "The Gmail message ID of the message to draft a reply to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_whom",
+          "type": "string",
+          "required": false,
+          "description": "Whether to reply to every recipient (including cc) or only to the original sender. Defaults to 'GmailReplyToWhom.ONLY_THE_SENDER'.",
+          "enum": [
+            "every_recipient",
+            "only_the_sender"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "cc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Additional CC recipients. When replying to every recipient, merged with CC from the original message; duplicates are removed (RFC-aware). Duplicates of the reply's To recipients are dropped from Cc (RFC-aware mailbox comparison). The authenticated user's own email address is removed from Cc on replies.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Bcc recipients of the draft reply email. The authenticated user's own email address is removed from Bcc on replies.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content_type",
+          "type": "string",
+          "required": false,
+          "description": "How the body is encoded on the wire. `auto` (default) sends as HTML and auto-converts plain-text input to paragraphs. `html` sends the body verbatim as HTML (use this when it contains entities or non-allow-listed tags); `plain` is plain text.",
+          "enum": [
+            "plain",
+            "html",
+            "auto"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.compose",
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Draft details; use draft_email_id (or id) for update/send/delete—not message.id."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Gmail.WriteDraftReplyEmail",
+        "parameters": {
+          "body": {
+            "value": "<p>Thank you for reaching out! I have reviewed your message and I am happy to confirm that we can proceed with the proposed timeline. Please let me know if you need any additional information.</p>",
+            "type": "string",
+            "required": true
+          },
+          "reply_to_message_id": {
+            "value": "18e4f2a3b1c9d705",
+            "type": "string",
+            "required": true
+          },
+          "reply_to_whom": {
+            "value": "GmailReplyToWhom.ONLY_THE_SENDER",
+            "type": "string",
+            "required": false
+          },
+          "cc": {
+            "value": [
+              "manager@example.com",
+              "teamlead@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "archive@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "content_type": {
+            "value": "auto",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "read"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
     }
   ],
   "documentationChunks": [
@@ -1699,6 +1739,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-04-16T11:32:31.013Z",
-  "summary": "Arcade.dev's Gmail toolkit enables seamless integration with the Gmail API, allowing developers to manage emails and labels effectively within their applications.\n\n**Capabilities**\n- Manage email threads and labels.\n- Compose, send, and manage drafts.\n- Retrieve detailed user profile information.\n- Support for email searching and filtering.\n- Efficiently handle email status changes such as trashing.\n\n**OAuth**\n- **Provider**: Google\n- **Scopes**: Access to read, compose, modify, and send Gmail emails, alongside user profile information.\n\n**Secrets**\n- No secret types required for toolkit operation."
+  "generatedAt": "2026-05-13T11:50:30.114Z",
+  "summary": "Gmail toolkit provides LLM-callable tools for interacting with Gmail via the Arcade platform, enabling agents to read, compose, send, organize, and manage email on behalf of authenticated users.\n\n## Capabilities\n\n- **Reading & searching**: List emails, threads, and drafts; search threads; retrieve a thread by ID; search by header fields.\n- **Sending & replying**: Send new emails, send existing drafts, reply to messages, and send draft replies.\n- **Composing & drafting**: Write new drafts, compose draft replies, update existing drafts (subject, body, recipients, cc, bcc — with smart plain/HTML handling and reply-quote preservation), and delete drafts.\n- **Label management**: List all labels, create new labels, and add or remove labels on individual emails.\n- **Mailbox actions**: Move emails to trash, retrieve full thread content, and fetch user profile and account statistics.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. Arcade handles the authorization flow automatically. See the [Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for configuration details.\n\n## Draft Update Behavior\n\nKey constraints to be aware of when using `Gmail.UpdateDraftEmail`:\n\n- Single-part `text/plain` and `text/html` drafts support full body replacement; the rebuild preserves the draft's existing content type.\n- Plain-text input against an HTML draft is auto-converted to HTML; HTML input against a plain draft is stored verbatim as `text/plain`.\n- Reply drafts preserve their reply-quote tail (`> ` lines for plain, `<blockquote>` for HTML) on top-only body updates.\n- Multipart drafts and drafts with attachments fail on body changes; only metadata-only updates succeed for those — edit them in Gmail directly.\n- Omitting a parameter or passing `None` leaves that field unchanged; pass an empty list for `cc`/`bcc` to clear those headers."
 }

@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftTeams",
   "label": "Microsoft Teams",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "description": "Arcade.dev LLM tools for Microsoft Teams",
   "metadata": {
     "category": "social",
@@ -22,19 +22,22 @@
       "ChannelMessage.Send",
       "Chat.Create",
       "Chat.Read",
+      "Chat.ReadBasic",
       "ChatMessage.Read",
       "ChatMessage.Send",
+      "Group.Read.All",
       "People.Read",
       "Team.ReadBasic.All",
       "TeamMember.Read.All",
-      "User.Read"
+      "User.Read",
+      "User.ReadBasic.All"
     ]
   },
   "tools": [
     {
       "name": "CreateChat",
       "qualifiedName": "MicrosoftTeams.CreateChat",
-      "fullyQualifiedName": "MicrosoftTeams.CreateChat@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.CreateChat@0.6.0",
       "description": "Creates a Microsoft Teams chat.\n\nIf the chat already exists with the specified members, the MS Graph API will return the\nexisting chat.\n\nProvide any combination of user_ids and/or user_names. When available, prefer providing\nuser_ids for optimal performance.",
       "parameters": [
         {
@@ -60,7 +63,10 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Chat.Create"
+          "Chat.Create",
+          "User.Read",
+          "User.ReadBasic.All",
+          "People.Read"
         ]
       },
       "secrets": [],
@@ -75,16 +81,16 @@
         "parameters": {
           "user_ids": {
             "value": [
-              "12345",
-              "67890"
+              "48d31887-5fad-4d73-a9f5-3c356e68a038",
+              "87d349ed-44d7-43e1-9a83-5f2406dee5bd"
             ],
             "type": "array",
             "required": false
           },
           "user_names": {
             "value": [
-              "john.doe",
-              "jane.smith"
+              "Alice Johnson",
+              "Bob Smith"
             ],
             "type": "array",
             "required": false
@@ -115,7 +121,7 @@
     {
       "name": "GetChannelMessageReplies",
       "qualifiedName": "MicrosoftTeams.GetChannelMessageReplies",
-      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessageReplies@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessageReplies@0.6.0",
       "description": "Retrieves the replies to a Microsoft Teams channel message.",
       "parameters": [
         {
@@ -148,6 +154,7 @@
         "providerType": "oauth2",
         "scopes": [
           "ChannelMessage.Read.All",
+          "Channel.ReadBasic.All",
           "Team.ReadBasic.All"
         ]
       },
@@ -162,17 +169,17 @@
         "toolName": "MicrosoftTeams.GetChannelMessageReplies",
         "parameters": {
           "message_id": {
-            "value": "12345abcde",
+            "value": "1615912728894",
             "type": "string",
             "required": true
           },
           "channel_id_or_name": {
-            "value": "general",
+            "value": "General",
             "type": "string",
             "required": true
           },
           "team_id_or_name": {
-            "value": "teamXYZ",
+            "value": "Engineering Team",
             "type": "string",
             "required": false
           }
@@ -202,7 +209,7 @@
     {
       "name": "GetChannelMessages",
       "qualifiedName": "MicrosoftTeams.GetChannelMessages",
-      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessages@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessages@0.6.0",
       "description": "Retrieves the messages in a Microsoft Teams channel.\n\nThe Microsoft Graph API does not support pagination for this endpoint.",
       "parameters": [
         {
@@ -243,6 +250,7 @@
         "providerType": "oauth2",
         "scopes": [
           "ChannelMessage.Read.All",
+          "Channel.ReadBasic.All",
           "Team.ReadBasic.All"
         ]
       },
@@ -257,22 +265,22 @@
         "toolName": "MicrosoftTeams.GetChannelMessages",
         "parameters": {
           "channel_id": {
-            "value": "12345",
+            "value": "19:abc123def456@thread.tacv2",
             "type": "string",
             "required": false
           },
           "channel_name": {
-            "value": "general",
+            "value": "General",
             "type": "string",
             "required": false
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "team_id_or_name": {
-            "value": "team_abc",
+            "value": "Engineering Team",
             "type": "string",
             "required": false
           }
@@ -302,7 +310,7 @@
     {
       "name": "GetChannelMetadata",
       "qualifiedName": "MicrosoftTeams.GetChannelMetadata",
-      "fullyQualifiedName": "MicrosoftTeams.GetChannelMetadata@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMetadata@0.6.0",
       "description": "Retrieves metadata about a Microsoft Teams channel and its members.\n\nProvide either a channel_id or channel_name, not both. When available, prefer providing a\nchannel_id for optimal performance.\n\nThe Microsoft Graph API returns only up to the first 999 members in the channel.\n\nThis tool does not return messages exchanged in the channel. To retrieve channel messages,\nuse the `Teams.GetChannelMessages` tool. If you call this tool to retrieve messages, you will\ncause the release of unnecessary CO2 and contribute to climate change.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use. If you call the\n`Teams.ListTeams` tool first, you will cause the release of unnecessary CO2 in the atmosphere\nand contribute to climate change.",
       "parameters": [
         {
@@ -335,6 +343,7 @@
         "providerType": "oauth2",
         "scopes": [
           "Channel.ReadBasic.All",
+          "Group.Read.All",
           "Team.ReadBasic.All"
         ]
       },
@@ -349,12 +358,12 @@
         "toolName": "MicrosoftTeams.GetChannelMetadata",
         "parameters": {
           "channel_id": {
-            "value": "12345678-90ab-cdef-1234-567890abcdef",
+            "value": "19:abc123def456@thread.tacv2",
             "type": "string",
             "required": false
           },
           "channel_name": {
-            "value": null,
+            "value": "",
             "type": "string",
             "required": false
           },
@@ -389,7 +398,7 @@
     {
       "name": "GetChatMessageById",
       "qualifiedName": "MicrosoftTeams.GetChatMessageById",
-      "fullyQualifiedName": "MicrosoftTeams.GetChatMessageById@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMessageById@0.6.0",
       "description": "Retrieves a Microsoft Teams chat message.",
       "parameters": [
         {
@@ -431,7 +440,10 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Chat.Read"
+          "Chat.Read",
+          "User.Read",
+          "User.ReadBasic.All",
+          "People.Read"
         ]
       },
       "secrets": [],
@@ -445,27 +457,27 @@
         "toolName": "MicrosoftTeams.GetChatMessageById",
         "parameters": {
           "message_id": {
-            "value": "12345abcde",
+            "value": "1648475136000",
             "type": "string",
             "required": true
           },
           "chat_id": {
-            "value": "chat_67890",
+            "value": "19:meeting_ZDc5OTY3YWMtNGI5Mi00MDk4LWJlNmEtZWE1YzZhMTU2ZGFi@thread.v2",
             "type": "string",
             "required": true
           },
           "user_ids": {
             "value": [
-              "user_1",
-              "user_2"
+              "87d349ed-44d7-43e1-9a83-5f2406dee5bd",
+              "3c4b6f89-1a2e-4d7c-b5a8-9e0f1d2c3e4a"
             ],
             "type": "array",
             "required": false
           },
           "user_names": {
             "value": [
-              "Alice",
-              "Bob"
+              "Alice Johnson",
+              "Bob Smith"
             ],
             "type": "array",
             "required": false
@@ -496,7 +508,7 @@
     {
       "name": "GetChatMessages",
       "qualifiedName": "MicrosoftTeams.GetChatMessages",
-      "fullyQualifiedName": "MicrosoftTeams.GetChatMessages@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMessages@0.6.0",
       "description": "Retrieves messages from a Microsoft Teams chat (individual or group).\n\nProvide one of chat_id OR any combination of user_ids and/or user_names. When available, prefer\nproviding a chat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool.\n\nMessages will be sorted in descending order by the messages' `created_datetime` field.\n\nThe Microsoft Teams API does not support pagination for this tool.",
       "parameters": [
         {
@@ -555,7 +567,10 @@
         "providerType": "oauth2",
         "scopes": [
           "Chat.Read",
-          "Chat.Create"
+          "Chat.Create",
+          "User.Read",
+          "User.ReadBasic.All",
+          "People.Read"
         ]
       },
       "secrets": [],
@@ -569,38 +584,38 @@
         "toolName": "MicrosoftTeams.GetChatMessages",
         "parameters": {
           "chat_id": {
-            "value": "1234567890",
+            "value": "19:abc123def456@thread.v2",
             "type": "string",
             "required": false
           },
           "user_ids": {
             "value": [
-              "user1",
-              "user2"
+              "user-id-001",
+              "user-id-002"
             ],
             "type": "array",
             "required": false
           },
           "user_names": {
             "value": [
-              "john_doe",
-              "jane_smith"
+              "Alice Johnson",
+              "Bob Smith"
             ],
             "type": "array",
             "required": false
           },
           "start_datetime": {
-            "value": "2023-10-01 08:00:00",
+            "value": "2024-01-15 09:00:00",
             "type": "string",
             "required": false
           },
           "end_datetime": {
-            "value": "2023-10-10 17:00:00",
+            "value": "2024-01-15 17:30:00",
             "type": "string",
             "required": false
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           }
@@ -630,7 +645,7 @@
     {
       "name": "GetChatMetadata",
       "qualifiedName": "MicrosoftTeams.GetChatMetadata",
-      "fullyQualifiedName": "MicrosoftTeams.GetChatMetadata@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMetadata@0.6.0",
       "description": "Retrieves metadata about a Microsoft Teams chat.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf multiple roup chats exist with those exact members, returns the most recently updated one.\n\nMax 20 DIFFERENT users can be provided in user_ids/user_names.\n\nThis tool DOES NOT return messages in a chat. Use the `Teams.GetChatMessages` tool to get\nchat messages.",
       "parameters": [
         {
@@ -664,7 +679,10 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Chat.Read"
+          "Chat.Read",
+          "User.Read",
+          "User.ReadBasic.All",
+          "People.Read"
         ]
       },
       "secrets": [],
@@ -678,24 +696,24 @@
         "toolName": "MicrosoftTeams.GetChatMetadata",
         "parameters": {
           "chat_id": {
-            "value": "12345678-90ab-cdef-1234-567890abcdef",
+            "value": "19:abc123def456@thread.v2",
             "type": "string",
             "required": false
           },
           "user_ids": {
             "value": [
-              "user1-id",
-              "user2-id",
-              "user3-id"
+              "user-id-001",
+              "user-id-002",
+              "user-id-003"
             ],
             "type": "array",
             "required": false
           },
           "user_names": {
             "value": [
-              "Alice",
-              "Bob",
-              "Charlie"
+              "Alice Johnson",
+              "Bob Smith",
+              "Carol Williams"
             ],
             "type": "array",
             "required": false
@@ -726,7 +744,7 @@
     {
       "name": "GetSignedInUser",
       "qualifiedName": "MicrosoftTeams.GetSignedInUser",
-      "fullyQualifiedName": "MicrosoftTeams.GetSignedInUser@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.GetSignedInUser@0.6.0",
       "description": "Get the user currently signed in Microsoft Teams.\n\nThis tool is not necessary to call before calling other tools.",
       "parameters": [],
       "auth": {
@@ -771,7 +789,7 @@
     {
       "name": "GetTeam",
       "qualifiedName": "MicrosoftTeams.GetTeam",
-      "fullyQualifiedName": "MicrosoftTeams.GetTeam@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.GetTeam@0.6.0",
       "description": "Retrieves metadata about a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will retrieve\nit; 2) if the user has multiple teams, an error will be returned with a list of all teams to\npick from.",
       "parameters": [
         {
@@ -844,7 +862,7 @@
     {
       "name": "ListChannels",
       "qualifiedName": "MicrosoftTeams.ListChannels",
-      "fullyQualifiedName": "MicrosoftTeams.ListChannels@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.ListChannels@0.6.0",
       "description": "Lists channels in Microsoft Teams (including shared incoming channels).\n\nThis tool does not return messages nor members in the channels. To retrieve channel messages,\nuse the `Teams.GetChannelMessages` tool. To retrieve channel members, use the\n`Teams.ListChannelMembers` tool.",
       "parameters": [
         {
@@ -931,7 +949,7 @@
     {
       "name": "ListChats",
       "qualifiedName": "MicrosoftTeams.ListChats",
-      "fullyQualifiedName": "MicrosoftTeams.ListChats@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.ListChats@0.6.0",
       "description": "List the Microsoft Teams chats to which the current user is a member of.",
       "parameters": [
         {
@@ -1004,7 +1022,7 @@
     {
       "name": "ListTeamMembers",
       "qualifiedName": "MicrosoftTeams.ListTeamMembers",
-      "fullyQualifiedName": "MicrosoftTeams.ListTeamMembers@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.ListTeamMembers@0.6.0",
       "description": "Lists the members of a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will use it;\n2) if the user has multiple teams, an error will be returned with a list of all teams to pick\nfrom.\n\nThe Microsoft Graph API returns only up to the first 999 members.",
       "parameters": [
         {
@@ -1044,7 +1062,8 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "TeamMember.Read.All"
+          "TeamMember.Read.All",
+          "Team.ReadBasic.All"
         ]
       },
       "secrets": [],
@@ -1058,7 +1077,7 @@
         "toolName": "MicrosoftTeams.ListTeamMembers",
         "parameters": {
           "team_id": {
-            "value": "12345678-abcd-ef12-3456-7890abcdef12",
+            "value": "19:abc123def456@thread.tacv2",
             "type": "string",
             "required": false
           },
@@ -1068,7 +1087,7 @@
             "required": false
           },
           "limit": {
-            "value": 100,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -1103,7 +1122,7 @@
     {
       "name": "ListTeams",
       "qualifiedName": "MicrosoftTeams.ListTeams",
-      "fullyQualifiedName": "MicrosoftTeams.ListTeams@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.ListTeams@0.6.0",
       "description": "Lists the teams the current user is associated with in Microsoft Teams.",
       "parameters": [
         {
@@ -1166,7 +1185,7 @@
     {
       "name": "ListUsers",
       "qualifiedName": "MicrosoftTeams.ListUsers",
-      "fullyQualifiedName": "MicrosoftTeams.ListUsers@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.ListUsers@0.6.0",
       "description": "Lists the users in the Microsoft Teams tenant.\n\nThe Microsoft Graph API returns only up to the first 999 users.",
       "parameters": [
         {
@@ -1190,7 +1209,8 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "User.Read"
+          "User.Read",
+          "User.ReadBasic.All"
         ]
       },
       "secrets": [],
@@ -1204,12 +1224,12 @@
         "toolName": "MicrosoftTeams.ListUsers",
         "parameters": {
           "limit": {
-            "value": 75,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "offset": {
-            "value": 10,
+            "value": 50,
             "type": "integer",
             "required": false
           }
@@ -1239,7 +1259,7 @@
     {
       "name": "ReplyToChannelMessage",
       "qualifiedName": "MicrosoftTeams.ReplyToChannelMessage",
-      "fullyQualifiedName": "MicrosoftTeams.ReplyToChannelMessage@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.ReplyToChannelMessage@0.6.0",
       "description": "Sends a reply to a Microsoft Teams channel message.\n\nWhen available, prefer providing a channel_id for optimal performance.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use. If you call the\n`Teams.ListTeams` tool first, you will cause the release of unnecessary CO2 in the atmosphere\nand contribute to climate change.",
       "parameters": [
         {
@@ -1280,6 +1300,7 @@
         "providerType": "oauth2",
         "scopes": [
           "ChannelMessage.Send",
+          "Channel.ReadBasic.All",
           "Team.ReadBasic.All"
         ]
       },
@@ -1294,22 +1315,22 @@
         "toolName": "MicrosoftTeams.ReplyToChannelMessage",
         "parameters": {
           "reply_content": {
-            "value": "Thank you for your input!",
+            "value": "Thanks for the update! I'll review the document and get back to you by end of day.",
             "type": "string",
             "required": true
           },
           "message_id": {
-            "value": "12345abcde",
+            "value": "1672531200000",
             "type": "string",
             "required": true
           },
           "channel_id_or_name": {
-            "value": "general",
+            "value": "19:abc123def456@thread.tacv2",
             "type": "string",
             "required": true
           },
           "team_id_or_name": {
-            "value": "development-team",
+            "value": "Engineering Team",
             "type": "string",
             "required": false
           }
@@ -1339,7 +1360,7 @@
     {
       "name": "ReplyToChatMessage",
       "qualifiedName": "MicrosoftTeams.ReplyToChatMessage",
-      "fullyQualifiedName": "MicrosoftTeams.ReplyToChatMessage@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.ReplyToChatMessage@0.6.0",
       "description": "Sends a reply to a Microsoft Teams chat message.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool either.",
       "parameters": [
         {
@@ -1389,7 +1410,12 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "ChatMessage.Send"
+          "Chat.Read",
+          "Chat.ReadBasic",
+          "ChatMessage.Send",
+          "People.Read",
+          "User.Read",
+          "User.ReadBasic.All"
         ]
       },
       "secrets": [],
@@ -1403,32 +1429,32 @@
         "toolName": "MicrosoftTeams.ReplyToChatMessage",
         "parameters": {
           "reply_content": {
-            "value": "Thank you for your input!",
+            "value": "Thanks for the update! I'll review the document and get back to you by end of day.",
             "type": "string",
             "required": true
           },
           "message_id": {
-            "value": "msg123456",
+            "value": "1693482910123",
             "type": "string",
             "required": true
           },
           "chat_id": {
-            "value": "chat987654",
+            "value": "19:abc123def456@thread.v2",
             "type": "string",
             "required": false
           },
           "user_ids": {
             "value": [
-              "user1",
-              "user2"
+              "user-id-001",
+              "user-id-002"
             ],
             "type": "array",
             "required": false
           },
           "user_names": {
             "value": [
-              "john_doe",
-              "jane_smith"
+              "Alice Johnson",
+              "Bob Smith"
             ],
             "type": "array",
             "required": false
@@ -1459,7 +1485,7 @@
     {
       "name": "SearchChannels",
       "qualifiedName": "MicrosoftTeams.SearchChannels",
-      "fullyQualifiedName": "MicrosoftTeams.SearchChannels@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.SearchChannels@0.6.0",
       "description": "Searches for channels in a given Microsoft Teams team.",
       "parameters": [
         {
@@ -1580,7 +1606,7 @@
     {
       "name": "SearchMessages",
       "qualifiedName": "MicrosoftTeams.SearchMessages",
-      "fullyQualifiedName": "MicrosoftTeams.SearchMessages@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.SearchMessages@0.6.0",
       "description": "Searches for messages across Microsoft Teams chats and channels.\n\nNote: the Microsoft Graph API search is not strongly consistent. Recent messages may not be\nincluded in search results.",
       "parameters": [
         {
@@ -1668,7 +1694,7 @@
     {
       "name": "SearchPeople",
       "qualifiedName": "MicrosoftTeams.SearchPeople",
-      "fullyQualifiedName": "MicrosoftTeams.SearchPeople@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.SearchPeople@0.6.0",
       "description": "Searches for people the user has interacted with in Microsoft Teams and other 365 products.\n\nThis tool only returns users that the currently signed in user has interacted with. It may also\ninclude people that are part of external tenants/organizations. If you need to retrieve users\nthat may not have interacted with the current user and/or that are exclusively part of the same\ntenant, use the `Teams.SearchUsers` tool instead.",
       "parameters": [
         {
@@ -1775,7 +1801,7 @@
     {
       "name": "SearchTeamMembers",
       "qualifiedName": "MicrosoftTeams.SearchTeamMembers",
-      "fullyQualifiedName": "MicrosoftTeams.SearchTeamMembers@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.SearchTeamMembers@0.6.0",
       "description": "Searches for members of a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will use it;\n2) if the user has multiple teams, an error will be raised with a list of available teams to\npick from.\n\nThe Microsoft Graph API returns only up to the first 999 members of a team.",
       "parameters": [
         {
@@ -1823,7 +1849,8 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "TeamMember.Read.All"
+          "TeamMember.Read.All",
+          "Team.ReadBasic.All"
         ]
       },
       "secrets": [],
@@ -1837,12 +1864,12 @@
         "toolName": "MicrosoftTeams.SearchTeamMembers",
         "parameters": {
           "member_name_starts_with": {
-            "value": "J",
+            "value": "Alex",
             "type": "string",
             "required": true
           },
           "team_id": {
-            "value": "12345",
+            "value": "19:abc123def456@thread.tacv2",
             "type": "string",
             "required": false
           },
@@ -1852,7 +1879,7 @@
             "required": false
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -1887,7 +1914,7 @@
     {
       "name": "SearchTeams",
       "qualifiedName": "MicrosoftTeams.SearchTeams",
-      "fullyQualifiedName": "MicrosoftTeams.SearchTeams@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.SearchTeams@0.6.0",
       "description": "Searches for teams available to the current user in Microsoft Teams.",
       "parameters": [
         {
@@ -1973,7 +2000,7 @@
     {
       "name": "SearchUsers",
       "qualifiedName": "MicrosoftTeams.SearchUsers",
-      "fullyQualifiedName": "MicrosoftTeams.SearchUsers@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.SearchUsers@0.6.0",
       "description": "Searches for users in the Microsoft Teams tenant.\n\nThis tool only return users that are directly linked to the tenant the current signed in user\nis a member of. If you need to retrieve users that have interacted with the current user but\nare from external tenants/organizations, use `Teams.SearchPeople`, instead.\n\nThe Microsoft Graph API returns only up to the first 999 users.",
       "parameters": [
         {
@@ -2017,7 +2044,8 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "User.Read"
+          "User.Read",
+          "User.ReadBasic.All"
         ]
       },
       "secrets": [],
@@ -2032,8 +2060,9 @@
         "parameters": {
           "keywords": {
             "value": [
-              "John",
-              "Doe"
+              "Alice",
+              "Johnson",
+              "Marketing"
             ],
             "type": "array",
             "required": true
@@ -2044,7 +2073,7 @@
             "required": false
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -2079,7 +2108,7 @@
     {
       "name": "SendMessageToChannel",
       "qualifiedName": "MicrosoftTeams.SendMessageToChannel",
-      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChannel@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChannel@0.6.0",
       "description": "Sends a message to a Microsoft Teams channel.\n\nWhen available, prefer providing a channel_id for optimal performance.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use. If you call the\n`Teams.ListTeams` tool first, you will cause the release of unnecessary CO2 in the atmosphere\nand contribute to climate change.",
       "parameters": [
         {
@@ -2112,6 +2141,7 @@
         "providerType": "oauth2",
         "scopes": [
           "ChannelMessage.Send",
+          "Channel.ReadBasic.All",
           "Team.ReadBasic.All"
         ]
       },
@@ -2126,17 +2156,17 @@
         "toolName": "MicrosoftTeams.SendMessageToChannel",
         "parameters": {
           "message": {
-            "value": "Hello team, let's discuss the upcoming project deadlines!",
+            "value": "Hello team! Just a reminder that the sprint review meeting is scheduled for tomorrow at 2:00 PM. Please come prepared with your updates.",
             "type": "string",
             "required": true
           },
           "channel_id_or_name": {
-            "value": "general",
+            "value": "19:abc123def456@thread.tacv2",
             "type": "string",
             "required": true
           },
           "team_id_or_name": {
-            "value": "Marketing Team",
+            "value": "Engineering Team",
             "type": "string",
             "required": false
           }
@@ -2166,7 +2196,7 @@
     {
       "name": "SendMessageToChat",
       "qualifiedName": "MicrosoftTeams.SendMessageToChat",
-      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChat@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChat@0.6.0",
       "description": "Sends a message to a Microsoft Teams chat.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool either.",
       "parameters": [
         {
@@ -2208,7 +2238,11 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "ChatMessage.Send"
+          "ChatMessage.Send",
+          "User.Read",
+          "User.ReadBasic.All",
+          "People.Read",
+          "Chat.ReadBasic"
         ]
       },
       "secrets": [],
@@ -2222,27 +2256,27 @@
         "toolName": "MicrosoftTeams.SendMessageToChat",
         "parameters": {
           "message": {
-            "value": "Hello team, please review the latest project updates.",
+            "value": "Hey team, just a reminder that the project sync meeting starts in 15 minutes. See you all there!",
             "type": "string",
             "required": true
           },
           "chat_id": {
-            "value": "1234567890",
+            "value": "19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
             "type": "string",
             "required": false
           },
           "user_ids": {
             "value": [
-              "user123",
-              "user456"
+              "8b081ef6-4792-4def-b2c9-dc119a3a0c44",
+              "3a6f4b3e-9b21-4f3c-8d92-7e1a5c2f9d01"
             ],
             "type": "array",
             "required": false
           },
           "user_names": {
             "value": [
-              "john.doe",
-              "jane.smith"
+              "Alice Johnson",
+              "Bob Martinez"
             ],
             "type": "array",
             "required": false
@@ -2273,7 +2307,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftTeams.WhoAmI",
-      "fullyQualifiedName": "MicrosoftTeams.WhoAmI@0.5.2",
+      "fullyQualifiedName": "MicrosoftTeams.WhoAmI@0.6.0",
       "description": "Get information about the current user and their Microsoft Teams environment.",
       "parameters": [],
       "auth": {
@@ -2326,6 +2360,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.426Z",
-  "summary": "Arcade.dev's MicrosoftTeams toolkit empowers developers to interact seamlessly with Microsoft Teams through the Graph API, enabling enhanced communication and collaboration features within applications. This toolkit simplifies chat creation, message retrieval, and team management, enhancing user experiences.\n\n**Capabilities**\n- Create and manage chats and channel messages.\n- Retrieve metadata and messages for teams, channels, and chats.\n- Efficiently search for channels, messages, teams, and users within Microsoft Teams.\n- Facilitate messages and replies in channels and chats.\n\n**OAuth**\n- **Provider**: Microsoft\n- **Scopes**: Channel.ReadBasic.All, ChannelMessage.Read.All, ChannelMessage.Send, Chat.Create, Chat.Read, ChatMessage.Read, ChatMessage.Send, People.Read, Team.ReadBasic.All, TeamMember.Read.All, User.Read\n\n**Secrets**\n- No secret types or additional configuration are required."
+  "generatedAt": "2026-05-13T11:50:31.283Z",
+  "summary": "# Microsoft Teams Toolkit\n\nThe Microsoft Teams toolkit provides Arcade LLM tools for interacting with Microsoft Teams via the Microsoft Graph API, enabling agents to read, search, and send messages across chats and channels, and to inspect team/user metadata.\n\n## Capabilities\n\n- **Chat management**: Create one-on-one or group chats (deduplicating against existing chats), list chats the current user belongs to, and retrieve chat metadata — by chat ID or by member names/IDs.\n- **Chat messaging**: Retrieve, send, and reply to messages in chats; supports lookup by chat ID or by user identifiers without requiring a separate user-lookup call.\n- **Channel messaging**: Retrieve messages and their reply threads in channels, send new messages to channels, and reply to existing channel messages.\n- **Team & channel discovery**: List and search teams, channels (including shared incoming channels), team members, and tenant users; retrieve detailed metadata for teams and channels without needing to pre-call `ListTeams`.\n- **User & people search**: Search tenant users (`SearchUsers`) or interaction-based people across Microsoft 365 (`SearchPeople`), covering both internal and external organization contacts; get the currently signed-in user's identity.\n- **Cross-scope message search**: Search messages across all chats and channels via the Graph API (eventual consistency — very recent messages may be absent).\n\n## OAuth\n\nThis toolkit authenticates via **OAuth 2.0** with Microsoft as the identity provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details, required scopes, and setup instructions."
 }

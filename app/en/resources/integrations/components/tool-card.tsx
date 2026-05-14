@@ -9,7 +9,7 @@ import {
   type ToolkitType,
 } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
-import { Package } from "lucide-react";
+import { Handshake, Package } from "lucide-react";
 import Link from "next/link";
 import posthog from "posthog-js";
 import type React from "react";
@@ -26,6 +26,7 @@ type ToolCardProps = {
   isComingSoon?: boolean;
   isByoc?: boolean;
   isPro?: boolean;
+  isPartner?: boolean;
 };
 
 export const ToolCard: React.FC<ToolCardProps> = ({
@@ -37,6 +38,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   isComingSoon = false,
   isByoc = false,
   isPro = false,
+  isPartner = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const {
@@ -45,7 +47,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
     icon: IconComponent,
     color,
   } = TOOL_CARD_TYPE_CONFIG[type];
-  const showHeaderBadges = isByoc || isPro || isComingSoon;
+  const showHeaderBadges = isByoc || isPro || isPartner || isComingSoon;
 
   const trackToolCardClick = () => {
     posthog.capture("Tool card clicked", {
@@ -55,6 +57,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
       is_coming_soon: isComingSoon,
       is_byoc: isByoc,
       is_pro: isPro,
+      is_partner: isPartner,
     });
   };
 
@@ -131,6 +134,15 @@ export const ToolCard: React.FC<ToolCardProps> = ({
               )}
               {isByoc && <ByocBadge className="gap-1.5 rounded-md" />}
               {isPro && <ProBadge className="gap-1.5 rounded-md" />}
+              {isPartner && (
+                <Badge
+                  className="shrink-0 gap-1.5 whitespace-nowrap rounded-md border-pink-400/50 bg-pink-500/10 text-pink-700 dark:border-pink-400/50 dark:bg-pink-400/10 dark:text-pink-300"
+                  variant="outline"
+                >
+                  <Handshake className="h-3 w-3" />
+                  Partner
+                </Badge>
+              )}
             </div>
           )}
         </div>

@@ -1,7 +1,7 @@
 import type { Toolkit, ToolkitType } from "@arcadeai/design-system";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useMemo } from "react";
-import { create } from "zustand";
+import { useFilters } from "./use-filters";
 
 const DEFAULT_PRIORITY = 5;
 const DEBOUNCE_TIME = 300;
@@ -25,7 +25,7 @@ const TYPE_LABELS: Record<ToolkitType, string> = {
 const getTypePriority = (type: string): number =>
   TYPE_PRIORITY[type as ToolkitType] ?? DEFAULT_PRIORITY;
 
-const compareToolkits = (a: Toolkit, b: Toolkit): number => {
+const compareToolkits = <T extends Toolkit>(a: T, b: T): number => {
   // First prioritize available toolkits over coming soon toolkits
   if (a.isComingSoon !== b.isComingSoon) {
     return a.isComingSoon ? 1 : -1;
@@ -45,53 +45,18 @@ const compareToolkits = (a: Toolkit, b: Toolkit): number => {
   return a.label.localeCompare(b.label);
 };
 
-type FilterState = {
-  selectedCategory: string;
-  selectedType: ToolkitType | "all";
-  filterByPro: boolean;
-  filterByByoc: boolean;
-  searchQuery: string;
-  setSelectedCategory: (category: string) => void;
-  setSelectedType: (type: ToolkitType | "all") => void;
-  setFilterByPro: (value: boolean) => void;
-  setFilterByByoc: (value: boolean) => void;
-  setSearchQuery: (query: string) => void;
-  clearAllFilters: () => void;
-};
-
-export const useFilterStore = create<FilterState>((set) => ({
-  selectedCategory: "all",
-  selectedType: "all",
-  filterByPro: false,
-  filterByByoc: false,
-  searchQuery: "",
-  setSelectedCategory: (category) => set({ selectedCategory: category }),
-  setSelectedType: (type) => set({ selectedType: type }),
-  setFilterByPro: (value) => set({ filterByPro: value }),
-  setFilterByByoc: (value) => set({ filterByByoc: value }),
-  setSearchQuery: (query) => set({ searchQuery: query }),
-  clearAllFilters: () =>
-    set({
-      selectedCategory: "all",
-      selectedType: "all",
-      filterByPro: false,
-      filterByByoc: false,
-      searchQuery: "",
-    }),
-}));
-
-export function useToolkitFilters(toolkits: Toolkit[]) {
+export function useToolkitFilters<T extends Toolkit>(toolkits: T[]) {
   const {
     selectedCategory,
     selectedType,
     filterByPro,
     filterByByoc,
     searchQuery,
-  } = useFilterStore();
+  } = useFilters();
 
   const debouncedSearchQuery = useDebounce(searchQuery, DEBOUNCE_TIME);
 
-  const filteredToolkits = useMemo(() => {
+  const filteredToolkits = useMemo<T[]>(() => {
     const searchLower = debouncedSearchQuery.toLowerCase();
 
     return toolkits

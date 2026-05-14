@@ -5,6 +5,7 @@
  * into the final MergedToolkit format.
  */
 
+import type { ISecretEditGenerator } from "../llm/secret-edit-generator.js";
 import type { ICustomSectionsSource } from "../sources/interfaces.js";
 import type {
   IToolkitDataSource,
@@ -28,6 +29,14 @@ import {
   detectMetadataChanges,
   formatFreshnessWarnings,
 } from "./metadata-freshness.js";
+import {
+  collectToolkitSecrets,
+  detectSecretCoherenceIssues,
+  groupStaleRefsByTarget,
+  hasCoherenceIssues,
+  type SecretCoherenceIssues,
+  type StaleSecretEditTarget,
+} from "./secret-coherence.js";
 
 // ============================================================================
 // Merger Configuration
@@ -38,6 +47,18 @@ export interface DataMergerConfig {
   customSectionsSource: ICustomSectionsSource;
   toolExampleGenerator?: ToolExampleGenerator;
   toolkitSummaryGenerator?: ToolkitSummaryGenerator;
+  /**
+   * Optional editor used to repair stale secret references and fill
+   * coverage gaps in summary / documentation chunks. When omitted the
+   * scanners still run and emit warnings, but no content is rewritten.
+   */
+  secretEditGenerator?: ISecretEditGenerator;
+  /**
+   * When true, the secret-coherence step is disabled entirely — neither
+   * the scan nor the LLM edit runs, and no warnings are emitted. Wired
+   * from the CLI's `--skip-secret-coherence` flag.
+   */
+  skipSecretCoherence?: boolean;
   previousToolkits?: ReadonlyMap<string, MergedToolkit>;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
@@ -467,6 +488,66 @@ const getToolDocumentationChunks = (
   return fromPrevious;
 };
 
+const describeLocation = (
+  location:
+    | { kind: "summary" }
+    | { kind: "toolkit_chunk"; chunkIndex: number }
+    | {
+        kind: "tool_chunk";
+        toolQualifiedName: string;
+        chunkIndex: number;
+      }
+): string => {
+  switch (location.kind) {
+    case "summary":
+      return "summary";
+    case "toolkit_chunk":
+      return `toolkit documentation chunk #${location.chunkIndex}`;
+    case "tool_chunk":
+      return `tool chunk #${location.chunkIndex} of ${location.toolQualifiedName}`;
+    default:
+      return "unknown location";
+  }
+};
+
+const applyEditedContent = (
+  toolkit: MergedToolkit,
+  target: StaleSecretEditTarget,
+  edited: string
+): void => {
+  switch (target.kind) {
+    case "summary":
+      toolkit.summary = edited;
+      return;
+    case "toolkit_chunk": {
+      const chunk = toolkit.documentationChunks[target.chunkIndex];
+      if (chunk) {
+        toolkit.documentationChunks[target.chunkIndex] = {
+          ...chunk,
+          content: edited,
+        };
+      }
+      return;
+    }
+    case "tool_chunk": {
+      const tool = toolkit.tools.find(
+        (candidate) => candidate.qualifiedName === target.toolQualifiedName
+      );
+      if (!tool) return;
+      const chunk = tool.documentationChunks[target.chunkIndex];
+      if (chunk) {
+        tool.documentationChunks[target.chunkIndex] = {
+          ...chunk,
+          content: edited,
+        };
+      }
+      return;
+    }
+    default:
+      return;
+  }
+};
+
 /**
  * Mark the toolkit's summary as stale — the summary is being carried forward
  * from a previous run even though the toolkit signature changed (regen was
@@ -850,6 +931,8 @@ export class DataMerger {
   private readonly customSectionsSource: ICustomSectionsSource;
   private readonly toolExampleGenerator: ToolExampleGenerator | undefined;
   private readonly toolkitSummaryGenerator: ToolkitSummaryGenerator | undefined;
+  private readonly secretEditGenerator: ISecretEditGenerator | undefined;
+  private readonly skipSecretCoherence: boolean;
   private readonly previousToolkits:
     | ReadonlyMap<string, MergedToolkit>
     | undefined;
@@ -876,6 +959,8 @@ export class DataMerger {
     this.customSectionsSource = config.customSectionsSource;
     this.toolExampleGenerator = config.toolExampleGenerator;
     this.toolkitSummaryGenerator = config.toolkitSummaryGenerator;
+    this.secretEditGenerator = config.secretEditGenerator;
+    this.skipSecretCoherence = config.skipSecretCoherence ?? false;
     this.previousToolkits = config.previousToolkits;
     this.llmConcurrency = config.llmConcurrency ?? 10;
     this.toolkitConcurrency = config.toolkitConcurrency ?? 5;
@@ -954,6 +1039,7 @@ export class DataMerger {
         }
       );
       await this.maybeGenerateSummary(result, previousToolkit);
+      await this.enforceSecretCoherence(result, previousToolkit);
 
       // Write immediately if callback provided (incremental mode)
       if (this.onToolkitComplete) {
@@ -1047,6 +1133,138 @@ export class DataMerger {
     }
   }
 
+  private async enforceSecretCoherence(
+    result: MergeResult,
+    previousToolkit?: MergedToolkit
+  ): Promise<void> {
+    if (this.skipSecretCoherence) {
+      // --skip-secret-coherence disables the entire step: no scan, no
+      // warnings, no edits. Callers who want warnings without edits
+      // should leave the flag off and simply not configure a
+      // secretEditGenerator.
+      return;
+    }
+    const issues = detectSecretCoherenceIssues(result.toolkit, previousToolkit);
+    if (!hasCoherenceIssues(issues)) {
+      return;
+    }
+
+    this.appendCoherenceWarnings(result, issues);
+
+    if (!this.secretEditGenerator) {
+      return;
+    }
+
+    // Order matters: stale cleanup runs first, then coverage gaps are
+    // re-detected against the edited summary. If cleanup accidentally
+    // dropped a passage that incidentally mentioned a current secret,
+    // the fresh scan notices and the editor restores it.
+    await this.applyStaleRefCleanup(result, issues);
+    const postCleanupIssues = detectSecretCoherenceIssues(
+      result.toolkit,
+      previousToolkit
+    );
+    await this.applyCoverageFill(result, postCleanupIssues);
+  }
+
+  private appendCoherenceWarnings(
+    result: MergeResult,
+    issues: SecretCoherenceIssues
+  ): void {
+    for (const stale of issues.staleReferences) {
+      const where = describeLocation(stale.location);
+      result.warnings.push(
+        `Stale secret reference in ${where}: ${stale.removedSecret} (removed from toolkit ${result.toolkit.id})`
+      );
+    }
+    for (const gap of issues.coverageGaps) {
+      if (gap.kind === "missing_secret_in_summary") {
+        result.warnings.push(
+          `Summary does not mention current secret: ${gap.secretName} (toolkit ${result.toolkit.id})`
+        );
+      } else {
+        result.warnings.push(
+          `Summary is missing a link to the Arcade secret config docs (toolkit ${result.toolkit.id})`
+        );
+      }
+    }
+  }
+
+  private async applyStaleRefCleanup(
+    result: MergeResult,
+    issues: SecretCoherenceIssues
+  ): Promise<void> {
+    const editor = this.secretEditGenerator;
+    if (!editor) {
+      return;
+    }
+    const targets = groupStaleRefsByTarget(issues.staleReferences);
+    if (targets.length === 0) {
+      return;
+    }
+    const currentSecrets = Array.from(collectToolkitSecrets(result.toolkit))
+      .sort()
+      .map((name) => name);
+    for (const target of targets) {
+      try {
+        const edited = await editor.cleanupStaleReferences({
+          kind: target.kind === "summary" ? "summary" : "documentation_chunk",
+          content: target.content,
+          removedSecrets: target.removedSecrets,
+          currentSecrets,
+          toolkitLabel: result.toolkit.label,
+        });
+        applyEditedContent(result.toolkit, target, edited);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        result.warnings.push(
+          `Secret cleanup edit failed for ${result.toolkit.id} (${target.kind}): ${message}`
+        );
+      }
+    }
+  }
+
+  private async applyCoverageFill(
+    result: MergeResult,
+    issues: SecretCoherenceIssues
+  ): Promise<void> {
+    const editor = this.secretEditGenerator;
+    if (!editor) {
+      return;
+    }
+    const summary = result.toolkit.summary;
+    if (!summary) {
+      return;
+    }
+    const missing = issues.coverageGaps
+      .filter((gap) => gap.kind === "missing_secret_in_summary")
+      .map((gap) => gap.secretName as string);
+    const needsLink = issues.coverageGaps.some(
+      (gap) => gap.kind === "missing_secret_config_link"
+    );
+    if (missing.length === 0 && !needsLink) {
+      return;
+    }
+    const currentSecrets = Array.from(collectToolkitSecrets(result.toolkit))
+      .sort()
+      .map((name) => name);
+    try {
+      const edited = await editor.fillCoverageGaps({
+        content: summary,
+        missingSecretNames: missing,
+        currentSecrets,
+        toolkitLabel: result.toolkit.label,
+        requireConfigLink: needsLink,
+      });
+      result.toolkit.summary = edited;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      result.warnings.push(
+        `Secret coverage edit failed for ${result.toolkit.id}: ${message}`
+      );
+    }
+  }
+
   /**
    * Merge data for a single toolkit
    */
@@ -1079,6 +1297,7 @@ export class DataMerger {
       }
     );
     await this.maybeGenerateSummary(result, previousToolkit);
+    await this.enforceSecretCoherence(result, previousToolkit);
 
     return result;
   }

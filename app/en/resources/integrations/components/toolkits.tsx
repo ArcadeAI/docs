@@ -1,9 +1,12 @@
 import { TOOLKITS, type Toolkit } from "@arcadeai/design-system";
+import { Suspense } from "react";
+import { PARTNER_TOOLKITS } from "@/app/_data/partner-toolkits";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
-import { normalizeToolkitId } from "@/app/_lib/toolkit-slug";
+import {
+  normalizeToolkitId,
+  type ToolkitWithDocsLink,
+} from "@/app/_lib/toolkit-slug";
 import ToolkitsClient from "./toolkits-client";
-
-type ToolkitWithDocsLink = Toolkit & { docsLink?: string | null };
 
 const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
   if ("docsLink" in toolkit) {
@@ -33,16 +36,25 @@ const getToolkitsWithDocsLinks = async (): Promise<ToolkitWithDocsLink[]> => {
     })
   );
 
-  return TOOLKITS.map((toolkit) => {
+  const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((toolkit) => {
     const existing = getToolkitDocsLink(toolkit);
     const docsLink =
       existing ?? docsLinkById.get(normalizeToolkitId(toolkit.id));
 
     return docsLink ? { ...toolkit, docsLink } : toolkit;
   });
+
+  return [...dsToolkits, ...PARTNER_TOOLKITS];
 };
 
 export default async function Toolkits() {
   const toolkits = await getToolkitsWithDocsLinks();
-  return <ToolkitsClient toolkits={toolkits} />;
+  // Suspense boundary is required because ToolkitsClient calls
+  // useSearchParams(); without it, Next.js bails out of static prerendering
+  // for the whole page.
+  return (
+    <Suspense fallback={null}>
+      <ToolkitsClient toolkits={toolkits} />
+    </Suspense>
+  );
 }

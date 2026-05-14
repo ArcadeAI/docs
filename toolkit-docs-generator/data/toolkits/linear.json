@@ -1,7 +1,7 @@
 {
   "id": "Linear",
   "label": "Linear",
-  "version": "3.3.3",
+  "version": "3.4.0",
   "description": "Arcade tools designed for LLMs to interact with Linear",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "AddComment",
       "qualifiedName": "Linear.AddComment",
-      "fullyQualifiedName": "Linear.AddComment@3.3.3",
+      "fullyQualifiedName": "Linear.AddComment@3.4.0",
       "description": "Add a comment to an issue.",
       "parameters": [
         {
@@ -99,7 +99,7 @@
     {
       "name": "AddProjectComment",
       "qualifiedName": "Linear.AddProjectComment",
-      "fullyQualifiedName": "Linear.AddProjectComment@3.3.3",
+      "fullyQualifiedName": "Linear.AddProjectComment@3.4.0",
       "description": "Add a comment to a project's document content.\n\nIMPORTANT: Due to Linear API limitations, comments created via the API will NOT\nappear visually anchored inline in the document (no yellow highlight on text).\nThe comment will be stored and can be retrieved via list_project_comments, but\nit will appear in the comments panel rather than inline in the document.\n\nFor true inline comments that are visually anchored to text, users should create\nthem directly in the Linear UI by selecting text and adding a comment.\n\nThe quoted_text parameter stores metadata about what text the comment references,\nwhich is useful for context even though the comment won't be visually anchored.",
       "parameters": [
         {
@@ -198,7 +198,7 @@
     {
       "name": "AddProjectToInitiative",
       "qualifiedName": "Linear.AddProjectToInitiative",
-      "fullyQualifiedName": "Linear.AddProjectToInitiative@3.3.3",
+      "fullyQualifiedName": "Linear.AddProjectToInitiative@3.4.0",
       "description": "Link a project to an initiative.\n\nBoth initiative and project can be specified by ID or name.\nIf a name is provided, fuzzy matching is used to resolve it.",
       "parameters": [
         {
@@ -284,7 +284,7 @@
     {
       "name": "ArchiveInitiative",
       "qualifiedName": "Linear.ArchiveInitiative",
-      "fullyQualifiedName": "Linear.ArchiveInitiative@3.3.3",
+      "fullyQualifiedName": "Linear.ArchiveInitiative@3.4.0",
       "description": "Archive an initiative.\n\nArchived initiatives are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -357,7 +357,7 @@
     {
       "name": "ArchiveIssue",
       "qualifiedName": "Linear.ArchiveIssue",
-      "fullyQualifiedName": "Linear.ArchiveIssue@3.3.3",
+      "fullyQualifiedName": "Linear.ArchiveIssue@3.4.0",
       "description": "Archive an issue.\n\nArchived issues are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -417,7 +417,7 @@
     {
       "name": "ArchiveProject",
       "qualifiedName": "Linear.ArchiveProject",
-      "fullyQualifiedName": "Linear.ArchiveProject@3.3.3",
+      "fullyQualifiedName": "Linear.ArchiveProject@3.4.0",
       "description": "Archive a project.\n\nArchived projects are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -490,7 +490,7 @@
     {
       "name": "CreateInitiative",
       "qualifiedName": "Linear.CreateInitiative",
-      "fullyQualifiedName": "Linear.CreateInitiative@3.3.3",
+      "fullyQualifiedName": "Linear.CreateInitiative@3.4.0",
       "description": "Create a new Linear initiative.\n\nInitiatives are high-level strategic goals that group related projects.",
       "parameters": [
         {
@@ -596,7 +596,7 @@
     {
       "name": "CreateIssue",
       "qualifiedName": "Linear.CreateIssue",
-      "fullyQualifiedName": "Linear.CreateIssue@3.3.3",
+      "fullyQualifiedName": "Linear.CreateIssue@3.4.0",
       "description": "Create a new Linear issue with validation.\n\nWhen assignee is None or '@me', the issue is assigned to the authenticated user.\nAll entity references (team, assignee, labels, state, project, cycle, parent)\nare validated before creation. If an entity is not found, suggestions are\nreturned to help correct the input.",
       "parameters": [
         {
@@ -741,6 +741,93 @@
         "description": "Created issue details"
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.CreateIssue",
+        "parameters": {
+          "team": {
+            "value": "Engineering",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Fix null pointer exception in user authentication flow",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "## Bug Report\n\nA null pointer exception occurs when a user attempts to log in with an expired token.\n\n**Steps to reproduce:**\n1. Let a session token expire\n2. Attempt to log in again\n3. Observe the error in logs\n\n**Expected:** Graceful re-authentication prompt\n**Actual:** Server returns 500 with NPE",
+            "type": "string",
+            "required": false
+          },
+          "assignee": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "labels_to_add": {
+            "value": [
+              "bug",
+              "high-impact",
+              "backend"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "priority": {
+            "value": "urgent",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "In Progress",
+            "type": "string",
+            "required": false
+          },
+          "project": {
+            "value": "Q3 Platform Stability",
+            "type": "string",
+            "required": false
+          },
+          "cycle": {
+            "value": "Cycle 12",
+            "type": "string",
+            "required": false
+          },
+          "parent_issue": {
+            "value": "ENG-204",
+            "type": "string",
+            "required": false
+          },
+          "estimate": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          },
+          "due_date": {
+            "value": "2025-08-15",
+            "type": "string",
+            "required": false
+          },
+          "attachment_url": {
+            "value": "https://sentry.io/organizations/example/issues/123456789/",
+            "type": "string",
+            "required": false
+          },
+          "attachment_title": {
+            "value": "Sentry Error Trace – NPE in AuthService",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -762,7 +849,7 @@
     {
       "name": "CreateIssueRelation",
       "qualifiedName": "Linear.CreateIssueRelation",
-      "fullyQualifiedName": "Linear.CreateIssueRelation@3.3.3",
+      "fullyQualifiedName": "Linear.CreateIssueRelation@3.4.0",
       "description": "Create a relation between two issues.\n\nRelation types define the relationship from the source issue's perspective:\n- blocks: Source issue blocks the related issue\n- blockedBy: Source issue is blocked by the related issue\n- duplicate: Source issue is a duplicate of the related issue\n- related: Issues are related (bidirectional)",
       "parameters": [
         {
@@ -853,7 +940,7 @@
     {
       "name": "CreateProject",
       "qualifiedName": "Linear.CreateProject",
-      "fullyQualifiedName": "Linear.CreateProject@3.3.3",
+      "fullyQualifiedName": "Linear.CreateProject@3.4.0",
       "description": "Create a new Linear project.\n\nTeam is validated before creation. If team is not found, suggestions are\nreturned to help correct the input. Lead is validated if provided.",
       "parameters": [
         {
@@ -1024,7 +1111,7 @@
     {
       "name": "CreateProjectUpdate",
       "qualifiedName": "Linear.CreateProjectUpdate",
-      "fullyQualifiedName": "Linear.CreateProjectUpdate@3.3.3",
+      "fullyQualifiedName": "Linear.CreateProjectUpdate@3.4.0",
       "description": "Create a project status update.\n\nProject updates are posts that communicate progress, blockers, or status\nchanges to stakeholders. They appear in the project's Updates tab and\ncan include a health status indicator.",
       "parameters": [
         {
@@ -1114,7 +1201,7 @@
     {
       "name": "GetCycle",
       "qualifiedName": "Linear.GetCycle",
-      "fullyQualifiedName": "Linear.GetCycle@3.3.3",
+      "fullyQualifiedName": "Linear.GetCycle@3.4.0",
       "description": "Get detailed information about a specific Linear cycle.",
       "parameters": [
         {
@@ -1174,7 +1261,7 @@
     {
       "name": "GetInitiative",
       "qualifiedName": "Linear.GetInitiative",
-      "fullyQualifiedName": "Linear.GetInitiative@3.3.3",
+      "fullyQualifiedName": "Linear.GetInitiative@3.4.0",
       "description": "Get detailed information about a specific Linear initiative.\n\nSupports lookup by ID or name (with fuzzy matching for name).",
       "parameters": [
         {
@@ -1276,7 +1363,7 @@
     {
       "name": "GetInitiativeDescription",
       "qualifiedName": "Linear.GetInitiativeDescription",
-      "fullyQualifiedName": "Linear.GetInitiativeDescription@3.3.3",
+      "fullyQualifiedName": "Linear.GetInitiativeDescription@3.4.0",
       "description": "Get an initiative's full description with pagination support.\n\nUse this tool when you need the complete description of an initiative that\nwas truncated in the get_initiative response. Supports chunked reading for\nvery large descriptions.",
       "parameters": [
         {
@@ -1362,7 +1449,7 @@
     {
       "name": "GetIssue",
       "qualifiedName": "Linear.GetIssue",
-      "fullyQualifiedName": "Linear.GetIssue@3.3.3",
+      "fullyQualifiedName": "Linear.GetIssue@3.4.0",
       "description": "Get detailed information about a specific Linear issue.\n\nAccepts either the issue UUID or the human-readable identifier (like TOO-123).",
       "parameters": [
         {
@@ -1472,9 +1559,95 @@
       }
     },
     {
+      "name": "GetMilestone",
+      "qualifiedName": "Linear.GetMilestone",
+      "fullyQualifiedName": "Linear.GetMilestone@3.4.0",
+      "description": "Get a milestone by ID or name inside a project.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project ID, slug_id, or name of the project that the milestone is under.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Milestone ID or milestone name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, auto-accept fuzzy project/milestone matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Milestone details or fuzzy match suggestions"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetMilestone",
+        "parameters": {
+          "project": {
+            "value": "proj_abc123xyz",
+            "type": "string",
+            "required": true
+          },
+          "query": {
+            "value": "Q3 Launch Milestone",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetNotifications",
       "qualifiedName": "Linear.GetNotifications",
-      "fullyQualifiedName": "Linear.GetNotifications@3.3.3",
+      "fullyQualifiedName": "Linear.GetNotifications@3.4.0",
       "description": "Get the authenticated user's notifications.\n\nReturns notifications including issue mentions, comments, assignments,\nand state changes.",
       "parameters": [
         {
@@ -1560,7 +1733,7 @@
     {
       "name": "GetProject",
       "qualifiedName": "Linear.GetProject",
-      "fullyQualifiedName": "Linear.GetProject@3.3.3",
+      "fullyQualifiedName": "Linear.GetProject@3.4.0",
       "description": "Get detailed information about a specific Linear project.\n\nSupports lookup by ID, slug_id, or name (with fuzzy matching for name).",
       "parameters": [
         {
@@ -1676,7 +1849,7 @@
     {
       "name": "GetProjectDescription",
       "qualifiedName": "Linear.GetProjectDescription",
-      "fullyQualifiedName": "Linear.GetProjectDescription@3.3.3",
+      "fullyQualifiedName": "Linear.GetProjectDescription@3.4.0",
       "description": "Get a project's full description with pagination support.\n\nUse this tool when you need the complete description of a project that\nwas truncated in the get_project response. Supports chunked reading for\nvery large descriptions.",
       "parameters": [
         {
@@ -1762,7 +1935,7 @@
     {
       "name": "GetRecentActivity",
       "qualifiedName": "Linear.GetRecentActivity",
-      "fullyQualifiedName": "Linear.GetRecentActivity@3.3.3",
+      "fullyQualifiedName": "Linear.GetRecentActivity@3.4.0",
       "description": "Get the authenticated user's recent issue activity.\n\nReturns issues the user has recently created or been assigned to\nwithin the specified time period.",
       "parameters": [
         {
@@ -1835,7 +2008,7 @@
     {
       "name": "GetTeam",
       "qualifiedName": "Linear.GetTeam",
-      "fullyQualifiedName": "Linear.GetTeam@3.3.3",
+      "fullyQualifiedName": "Linear.GetTeam@3.4.0",
       "description": "Get detailed information about a specific Linear team.\n\nSupports lookup by ID, key (like TOO, ENG), or name (with fuzzy matching).",
       "parameters": [
         {
@@ -1925,7 +2098,7 @@
     {
       "name": "LinkGithubToIssue",
       "qualifiedName": "Linear.LinkGithubToIssue",
-      "fullyQualifiedName": "Linear.LinkGithubToIssue@3.3.3",
+      "fullyQualifiedName": "Linear.LinkGithubToIssue@3.4.0",
       "description": "Link a GitHub PR, commit, or issue to a Linear issue.\n\nAutomatically detects the artifact type from the URL and generates\nan appropriate title if not provided.",
       "parameters": [
         {
@@ -2011,7 +2184,7 @@
     {
       "name": "ListComments",
       "qualifiedName": "Linear.ListComments",
-      "fullyQualifiedName": "Linear.ListComments@3.3.3",
+      "fullyQualifiedName": "Linear.ListComments@3.4.0",
       "description": "List comments on an issue.\n\nReturns comments with user info, timestamps, and reply threading info.",
       "parameters": [
         {
@@ -2097,7 +2270,7 @@
     {
       "name": "ListCycles",
       "qualifiedName": "Linear.ListCycles",
-      "fullyQualifiedName": "Linear.ListCycles@3.3.3",
+      "fullyQualifiedName": "Linear.ListCycles@3.4.0",
       "description": "List Linear cycles, optionally filtered by team and status.\n\nCycles are time-boxed iterations (like sprints) for organizing work.",
       "parameters": [
         {
@@ -2209,7 +2382,7 @@
     {
       "name": "ListInitiatives",
       "qualifiedName": "Linear.ListInitiatives",
-      "fullyQualifiedName": "Linear.ListInitiatives@3.3.3",
+      "fullyQualifiedName": "Linear.ListInitiatives@3.4.0",
       "description": "List Linear initiatives, optionally filtered by keywords and other criteria.\n\nReturns all initiatives when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -2315,7 +2488,7 @@
     {
       "name": "ListIssues",
       "qualifiedName": "Linear.ListIssues",
-      "fullyQualifiedName": "Linear.ListIssues@3.3.3",
+      "fullyQualifiedName": "Linear.ListIssues@3.4.0",
       "description": "List Linear issues, optionally filtered by keywords and other criteria.\n\nReturns all issues when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -2498,7 +2671,7 @@
     {
       "name": "ListLabels",
       "qualifiedName": "Linear.ListLabels",
-      "fullyQualifiedName": "Linear.ListLabels@3.3.3",
+      "fullyQualifiedName": "Linear.ListLabels@3.4.0",
       "description": "List available issue labels in the workspace.\n\nReturns labels that can be applied to issues. Use label IDs or names\nwhen creating or updating issues.",
       "parameters": [
         {
@@ -2556,9 +2729,108 @@
       }
     },
     {
+      "name": "ListMilestones",
+      "qualifiedName": "Linear.ListMilestones",
+      "fullyQualifiedName": "Linear.ListMilestones@3.4.0",
+      "description": "List milestones in a Linear project.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project ID, slug_id, or name of the project to list milestones from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum milestones to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, auto-accept fuzzy project matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Milestones for the selected project"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListMilestones",
+        "parameters": {
+          "project": {
+            "value": "mobile-app-redesign",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "eyJpZCI6IjEyMyIsInR5cGUiOiJwcm9qZWN0In0=",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListProjectComments",
       "qualifiedName": "Linear.ListProjectComments",
-      "fullyQualifiedName": "Linear.ListProjectComments@3.3.3",
+      "fullyQualifiedName": "Linear.ListProjectComments@3.4.0",
       "description": "List comments on a project's document content.\n\nReturns comments with user info, timestamps, quoted text for inline comments,\nand reply threading info. Replies are nested under their parent comments.\n\nUse comment_filter to control which comments are returned:\n- only_quoted (default): Only comments attached to a quote in the text\n- only_unquoted: Only comments not attached to a particular quote\n- all: All comments regardless of being attached to a quote or not",
       "parameters": [
         {
@@ -2687,7 +2959,7 @@
     {
       "name": "ListProjects",
       "qualifiedName": "Linear.ListProjects",
-      "fullyQualifiedName": "Linear.ListProjects@3.3.3",
+      "fullyQualifiedName": "Linear.ListProjects@3.4.0",
       "description": "List Linear projects, optionally filtered by keywords and other criteria.\n\nReturns all projects when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -2812,7 +3084,7 @@
     {
       "name": "ListTeams",
       "qualifiedName": "Linear.ListTeams",
-      "fullyQualifiedName": "Linear.ListTeams@3.3.3",
+      "fullyQualifiedName": "Linear.ListTeams@3.4.0",
       "description": "List Linear teams, optionally filtered by keywords and other criteria.\n\nReturns all teams when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -2924,7 +3196,7 @@
     {
       "name": "ListWorkflowStates",
       "qualifiedName": "Linear.ListWorkflowStates",
-      "fullyQualifiedName": "Linear.ListWorkflowStates@3.3.3",
+      "fullyQualifiedName": "Linear.ListWorkflowStates@3.4.0",
       "description": "List available workflow states in the workspace.\n\nReturns workflow states that can be used for issue transitions.\nStates are team-specific and have different types.",
       "parameters": [
         {
@@ -3017,7 +3289,7 @@
     {
       "name": "ManageIssueSubscription",
       "qualifiedName": "Linear.ManageIssueSubscription",
-      "fullyQualifiedName": "Linear.ManageIssueSubscription@3.3.3",
+      "fullyQualifiedName": "Linear.ManageIssueSubscription@3.4.0",
       "description": "Subscribe to or unsubscribe from an issue's notifications.",
       "parameters": [
         {
@@ -3090,7 +3362,7 @@
     {
       "name": "ReplyToComment",
       "qualifiedName": "Linear.ReplyToComment",
-      "fullyQualifiedName": "Linear.ReplyToComment@3.3.3",
+      "fullyQualifiedName": "Linear.ReplyToComment@3.4.0",
       "description": "Reply to an existing comment on an issue.\n\nCreates a threaded reply to the specified parent comment.",
       "parameters": [
         {
@@ -3176,7 +3448,7 @@
     {
       "name": "ReplyToProjectComment",
       "qualifiedName": "Linear.ReplyToProjectComment",
-      "fullyQualifiedName": "Linear.ReplyToProjectComment@3.3.3",
+      "fullyQualifiedName": "Linear.ReplyToProjectComment@3.4.0",
       "description": "Reply to an existing comment on a project document.\n\nCreates a threaded reply to the specified parent comment.",
       "parameters": [
         {
@@ -3275,7 +3547,7 @@
     {
       "name": "TransitionIssueState",
       "qualifiedName": "Linear.TransitionIssueState",
-      "fullyQualifiedName": "Linear.TransitionIssueState@3.3.3",
+      "fullyQualifiedName": "Linear.TransitionIssueState@3.4.0",
       "description": "Transition a Linear issue to a new workflow state.\n\nThe target state is validated against the team's available states.",
       "parameters": [
         {
@@ -3361,7 +3633,7 @@
     {
       "name": "UpdateComment",
       "qualifiedName": "Linear.UpdateComment",
-      "fullyQualifiedName": "Linear.UpdateComment@3.3.3",
+      "fullyQualifiedName": "Linear.UpdateComment@3.4.0",
       "description": "Update an existing comment.",
       "parameters": [
         {
@@ -3434,7 +3706,7 @@
     {
       "name": "UpdateInitiative",
       "qualifiedName": "Linear.UpdateInitiative",
-      "fullyQualifiedName": "Linear.UpdateInitiative@3.3.3",
+      "fullyQualifiedName": "Linear.UpdateInitiative@3.4.0",
       "description": "Update a Linear initiative with partial updates.\n\nOnly fields that are explicitly provided will be updated.",
       "parameters": [
         {
@@ -3553,7 +3825,7 @@
     {
       "name": "UpdateIssue",
       "qualifiedName": "Linear.UpdateIssue",
-      "fullyQualifiedName": "Linear.UpdateIssue@3.3.3",
+      "fullyQualifiedName": "Linear.UpdateIssue@3.4.0",
       "description": "Update a Linear issue with partial updates.\n\nOnly fields that are explicitly provided will be updated. All entity\nreferences are validated before update.",
       "parameters": [
         {
@@ -3808,7 +4080,7 @@
     {
       "name": "UpdateProject",
       "qualifiedName": "Linear.UpdateProject",
-      "fullyQualifiedName": "Linear.UpdateProject@3.3.3",
+      "fullyQualifiedName": "Linear.UpdateProject@3.4.0",
       "description": "Update a Linear project with partial updates.\n\nOnly fields that are explicitly provided will be updated. All entity\nreferences are validated before update.\n\nIMPORTANT: Updating the 'content' field will break any existing inline\ncomment anchoring. The comments will still exist and be retrievable via\nlist_project_comments, but they will no longer appear visually anchored\nto text in the Linear UI. The 'description' field can be safely updated\nwithout affecting inline comments.",
       "parameters": [
         {
@@ -4010,9 +4282,135 @@
       }
     },
     {
+      "name": "UpsertMilestone",
+      "qualifiedName": "Linear.UpsertMilestone",
+      "fullyQualifiedName": "Linear.UpsertMilestone@3.4.0",
+      "description": "Upsert a project's milestone.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project ID, slug_id, or name of the project that the milestone is under.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "milestone_id",
+          "type": "string",
+          "required": false,
+          "description": "Milestone ID. When provided, the existing milestone with this ID is updated. When omitted, a new milestone is created.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Milestone name. When creating a milestone, this sets the name. When updating a milestone, providing this changes the name; omitting it leaves the existing name unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Milestone description. When creating a milestone, this sets the description. When updating a milestone, providing this changes the description; omitting it leaves the existing description unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_date",
+          "type": "string",
+          "required": false,
+          "description": "Target date in YYYY-MM-DD format. When creating a milestone, this sets the target date. When updating a milestone, providing this changes the target date; providing an empty string clears it; omitting it leaves the existing target date unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, auto-accept fuzzy project matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Upserted milestone details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.UpsertMilestone",
+        "parameters": {
+          "project": {
+            "value": "proj_abc123xyz",
+            "type": "string",
+            "required": true
+          },
+          "milestone_id": {
+            "value": "milestone_7f3d9e21",
+            "type": "string",
+            "required": false
+          },
+          "name": {
+            "value": "Beta Launch",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "All features required for the beta release are complete and tested.",
+            "type": "string",
+            "required": false
+          },
+          "target_date": {
+            "value": "2024-09-30",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "WhoAmI",
       "qualifiedName": "Linear.WhoAmI",
-      "fullyQualifiedName": "Linear.WhoAmI@3.3.3",
+      "fullyQualifiedName": "Linear.WhoAmI@3.4.0",
       "description": "Get the authenticated user's profile and team memberships.\n\nReturns the current user's information including their name, email,\norganization, and the teams they belong to.",
       "parameters": [],
       "auth": {
@@ -4066,5 +4464,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-04-18T11:20:23.013Z"
+  "generatedAt": "2026-04-29T11:39:21.304Z",
+  "summary": "# Linear Toolkit\n\nProvides Arcade tools for LLMs to interact with [Linear](https://linear.app), enabling programmatic management of issues, projects, initiatives, cycles, and team workflows.\n\n## Capabilities\n\n- **Issue management:** Create, update, archive, transition workflow states, manage subscriptions, link GitHub PRs/commits, create issue relations (blocks, blocked-by, duplicate, related), and retrieve detailed issue data with fuzzy-matched entity validation.\n- **Comments & threading:** Add, update, list, and reply to threaded comments on both issues and project documents; project document comments are stored but rendered in the comments panel rather than visually anchored inline (Linear API limitation).\n- **Projects & milestones:** Create, update, archive, and query projects; manage milestones (upsert/get/list); post structured project status updates with health indicators; paginate large project descriptions.\n- **Initiatives & cycles:** Create, update, archive, and query high-level initiatives; link projects to initiatives; list and inspect time-boxed cycles (sprints) with team and status filters.\n- **Workspace & team metadata:** List teams, workflow states, labels, and notifications; retrieve recent user activity; look up team members and user profile via `WhoAmI`.\n- **Flexible lookups:** Most resources support lookup by UUID, human-readable identifier (e.g., `TOO-123`), slug, key, or name with fuzzy matching; suggestions are returned when an entity cannot be resolved.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with Linear. See the [Linear auth provider docs](https://docs.arcade.dev/en/references/auth-providers/linear) for setup details."
 }

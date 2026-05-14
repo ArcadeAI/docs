@@ -76,6 +76,21 @@ function getUpcomingFriday(): string {
   return friday.toISOString().split("T")[0];
 }
 
+function parseDateArg(): string | null {
+  const arg = process.argv.find((a) => a.startsWith("--date="));
+  if (!arg) return null;
+  const value = arg.slice("--date=".length);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new Error(`--date must be YYYY-MM-DD, got: ${value}`);
+  }
+  // Validate it's a Friday (interpret as UTC to avoid TZ drift).
+  const day = new Date(`${value}T00:00:00Z`).getUTCDay();
+  if (day !== 5) {
+    throw new Error(`--date=${value} is not a Friday (got weekday ${day}).`);
+  }
+  return value;
+}
+
 // --- Step 2: Read changelog, extract last entry date ---
 
 function getLastEntryDate(): string {
@@ -91,6 +106,7 @@ async function fetchMergedPRs(
   owner: string,
   repo: string,
   sinceDate: string,
+  untilDate: string,
   isPrivate: boolean,
 ): Promise<PR[]> {
   const token = process.env.GITHUB_TOKEN;
@@ -120,7 +136,7 @@ async function fetchMergedPRs(
     for (const pr of data) {
       if (!pr.merged_at) continue;
       const mergedDate = pr.merged_at.split("T")[0];
-      if (mergedDate > sinceDate) {
+      if (mergedDate > sinceDate && mergedDate <= untilDate) {
         prs.push({
           repo,
           number: pr.number,
@@ -278,8 +294,9 @@ async function main() {
   const openai = new OpenAI();
 
   // Step 1
-  const fridayDate = getUpcomingFriday();
-  console.log(`Changelog date: ${fridayDate}`);
+  const overrideDate = parseDateArg();
+  const fridayDate = overrideDate ?? getUpcomingFriday();
+  console.log(`Changelog date: ${fridayDate}${overrideDate ? " (from --date)" : ""}`);
 
   // Step 2
   const lastEntryDate = getLastEntryDate();
@@ -294,7 +311,7 @@ async function main() {
   console.log("Fetching merged PRs...");
   const allPRs = (
     await Promise.all(
-      REPOS.map((r) => fetchMergedPRs(r.owner, r.repo, lastEntryDate, r.private)),
+      REPOS.map((r) => fetchMergedPRs(r.owner, r.repo, lastEntryDate, fridayDate, r.private)),
     )
   ).flat();
   console.log(`Found ${allPRs.length} merged PRs since ${lastEntryDate}`);
