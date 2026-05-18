@@ -1,7 +1,7 @@
 {
   "id": "Slack",
   "label": "Slack",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "Arcade.dev LLM tools for Slack",
   "metadata": {
     "category": "social",
@@ -37,7 +37,7 @@
     {
       "name": "GetConversationMetadata",
       "qualifiedName": "Slack.GetConversationMetadata",
-      "fullyQualifiedName": "Slack.GetConversationMetadata@2.5.1",
+      "fullyQualifiedName": "Slack.GetConversationMetadata@2.5.2",
       "description": "Get metadata of a Channel, a Direct Message (IM / DM) or a Multi-Person (MPIM) conversation.\n\nUse this tool to retrieve metadata about a conversation with a conversation_id, a channel name,\nor by the user_id(s), username(s), and/or email(s) of the user(s) in the conversation.\n\nThis tool does not return the messages in a conversation. To get the messages, use the\n'Slack.GetMessages' tool instead.\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.",
       "parameters": [
         {
@@ -157,8 +157,8 @@
     {
       "name": "GetMessages",
       "qualifiedName": "Slack.GetMessages",
-      "fullyQualifiedName": "Slack.GetMessages@2.5.1",
-      "description": "Get messages in a Slack Channel, DM (direct message) or MPIM (multi-person) conversation.\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.\n\nTo filter messages by an absolute datetime, use 'oldest_datetime' and/or 'latest_datetime'. If\nonly 'oldest_datetime' is provided, it will return messages from the oldest_datetime to the\ncurrent time. If only 'latest_datetime' is provided, it will return messages since the\nbeginning of the conversation to the latest_datetime.\n\nTo filter messages by a relative datetime (e.g. 3 days ago, 1 hour ago, etc.), use\n'oldest_relative' and/or 'latest_relative'. If only 'oldest_relative' is provided, it will\nreturn messages from the oldest_relative to the current time. If only 'latest_relative' is\nprovided, it will return messages from the current time to the latest_relative.\n\nDo not provide both 'oldest_datetime' and 'oldest_relative' or both 'latest_datetime' and\n'latest_relative'.\n\nLeave all arguments with the default None to get messages without date/time filtering",
+      "fullyQualifiedName": "Slack.GetMessages@2.5.2",
+      "description": "Get messages in a Slack Channel, DM (direct message) or MPIM (multi-person) conversation.\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.\n\nTo filter messages by an absolute datetime, use 'oldest_datetime' and/or 'latest_datetime'. If\nonly 'oldest_datetime' is provided, it will return messages from the oldest_datetime to the\ncurrent time. If only 'latest_datetime' is provided, it will return messages since the\nbeginning of the conversation to the latest_datetime.\n\nTo filter messages by a relative datetime, use 'oldest_relative' and/or 'latest_relative'\nwith numeric `DD:HH:MM` offsets only. Convert relative phrases to `DD:HH:MM` before calling\nthis tool. If only 'oldest_relative' is provided, it will return messages from the\noldest_relative to the current time. If only 'latest_relative' is provided, it will return\nmessages from the current time to the latest_relative.\n\nDo not provide both 'oldest_datetime' and 'oldest_relative' or both 'latest_datetime' and\n'latest_relative'.\n\nLeave all arguments with the default None to get messages without date/time filtering",
       "parameters": [
         {
           "name": "conversation_id",
@@ -207,7 +207,7 @@
           "name": "oldest_relative",
           "type": "string",
           "required": false,
-          "description": "The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'",
+          "description": "The oldest message to include in the results, specified as a time offset from the current time. Use only the numeric 'DD:HH:MM' format; convert relative phrases to that format before calling this tool.",
           "enum": null,
           "inferrable": true
         },
@@ -215,7 +215,7 @@
           "name": "latest_relative",
           "type": "string",
           "required": false,
-          "description": "The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'",
+          "description": "The latest message to include in the results, specified as a time offset from the current time. Use only the numeric 'DD:HH:MM' format; convert relative phrases to that format before calling this tool.",
           "enum": null,
           "inferrable": true
         },
@@ -223,7 +223,7 @@
           "name": "oldest_datetime",
           "type": "string",
           "required": false,
-          "description": "The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'",
+          "description": "The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS' or ISO 8601.",
           "enum": null,
           "inferrable": true
         },
@@ -231,7 +231,7 @@
           "name": "latest_datetime",
           "type": "string",
           "required": false,
-          "description": "The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'",
+          "description": "The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS' or ISO 8601.",
           "enum": null,
           "inferrable": true
         },
@@ -359,8 +359,8 @@
     {
       "name": "GetThreadMessages",
       "qualifiedName": "Slack.GetThreadMessages",
-      "fullyQualifiedName": "Slack.GetThreadMessages@2.5.1",
-      "description": "Get messages in a Slack thread.\n\nA thread is a collection of messages grouped together as replies to a parent message.\nThis tool retrieves all messages in a specific thread, identified by the parent message's\ntimestamp (thread_ts).\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.\n\nTo filter messages by an absolute datetime, use 'oldest_datetime' and/or 'latest_datetime'. If\nonly 'oldest_datetime' is provided, it will return messages from the oldest_datetime to the\ncurrent time. If only 'latest_datetime' is provided, it will return messages since the\nbeginning of the thread to the latest_datetime.\n\nTo filter messages by a relative datetime (e.g. 3 days ago, 1 hour ago, etc.), use\n'oldest_relative' and/or 'latest_relative'. If only 'oldest_relative' is provided, it will\nreturn messages from the oldest_relative to the current time. If only 'latest_relative' is\nprovided, it will return messages from the current time to the latest_relative.\n\nDo not provide both 'oldest_datetime' and 'oldest_relative' or both 'latest_datetime' and\n'latest_relative'.\n\nLeave all datetime arguments with the default None to get all thread messages without\ndate/time filtering.",
+      "fullyQualifiedName": "Slack.GetThreadMessages@2.5.2",
+      "description": "Get messages in a Slack thread.\n\nA thread is a collection of messages grouped together as replies to a parent message.\nThis tool retrieves all messages in a specific thread, identified by the parent message's\ntimestamp (thread_ts).\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.\n\nTo filter messages by an absolute datetime, use 'oldest_datetime' and/or 'latest_datetime'. If\nonly 'oldest_datetime' is provided, it will return messages from the oldest_datetime to the\ncurrent time. If only 'latest_datetime' is provided, it will return messages since the\nbeginning of the thread to the latest_datetime.\n\nTo filter messages by a relative datetime, use 'oldest_relative' and/or 'latest_relative'\nwith numeric `DD:HH:MM` offsets only. Convert relative phrases to `DD:HH:MM` before calling\nthis tool. If only 'oldest_relative' is provided, it will return messages from the\noldest_relative to the current time. If only 'latest_relative' is provided, it will return\nmessages from the current time to the latest_relative.\n\nDo not provide both 'oldest_datetime' and 'oldest_relative' or both 'latest_datetime' and\n'latest_relative'.\n\nLeave all datetime arguments with the default None to get all thread messages without\ndate/time filtering.",
       "parameters": [
         {
           "name": "thread_ts",
@@ -417,7 +417,7 @@
           "name": "oldest_relative",
           "type": "string",
           "required": false,
-          "description": "The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'",
+          "description": "The oldest message to include in the results, specified as a time offset from the current time. Use only the numeric 'DD:HH:MM' format; convert relative phrases to that format before calling this tool.",
           "enum": null,
           "inferrable": true
         },
@@ -425,7 +425,7 @@
           "name": "latest_relative",
           "type": "string",
           "required": false,
-          "description": "The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'",
+          "description": "The latest message to include in the results, specified as a time offset from the current time. Use only the numeric 'DD:HH:MM' format; convert relative phrases to that format before calling this tool.",
           "enum": null,
           "inferrable": true
         },
@@ -433,7 +433,7 @@
           "name": "oldest_datetime",
           "type": "string",
           "required": false,
-          "description": "The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'",
+          "description": "The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS' or ISO 8601.",
           "enum": null,
           "inferrable": true
         },
@@ -441,7 +441,7 @@
           "name": "latest_datetime",
           "type": "string",
           "required": false,
-          "description": "The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'",
+          "description": "The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS' or ISO 8601.",
           "enum": null,
           "inferrable": true
         },
@@ -574,7 +574,7 @@
     {
       "name": "GetUsersInConversation",
       "qualifiedName": "Slack.GetUsersInConversation",
-      "fullyQualifiedName": "Slack.GetUsersInConversation@2.5.1",
+      "fullyQualifiedName": "Slack.GetUsersInConversation@2.5.2",
       "description": "Get the users in a Slack conversation (Channel, DM/IM, or MPIM) by its ID or by channel name.\n\nProvide exactly one of conversation_id or channel_name. Prefer providing a conversation_id,\nwhen available, since the performance is better.",
       "parameters": [
         {
@@ -678,7 +678,7 @@
     {
       "name": "GetUsersInfo",
       "qualifiedName": "Slack.GetUsersInfo",
-      "fullyQualifiedName": "Slack.GetUsersInfo@2.5.1",
+      "fullyQualifiedName": "Slack.GetUsersInfo@2.5.2",
       "description": "Get the information of one or more users in Slack by ID, username, and/or email.\n\nProvide any combination of user_ids, usernames, and/or emails. If you need to retrieve\ndata about multiple users, DO NOT CALL THE TOOL MULTIPLE TIMES. Instead, call it once\nwith all the user_ids, usernames, and/or emails. IF YOU CALL THIS TOOL MULTIPLE TIMES\nUNNECESSARILY, YOU WILL RELEASE MORE CO2 IN THE ATMOSPHERE AND CONTRIBUTE TO GLOBAL WARMING.\n\nIf you need to get metadata or messages of a conversation, use the\n`Slack.GetConversationMetadata` or `Slack.GetMessages` tool instead. These\ntools accept user_ids, usernames, and/or emails. Do not retrieve users' info first,\nas it is inefficient, releases more CO2 in the atmosphere, and contributes to climate change.",
       "parameters": [
         {
@@ -777,7 +777,7 @@
     {
       "name": "InviteUsersToChannel",
       "qualifiedName": "Slack.InviteUsersToChannel",
-      "fullyQualifiedName": "Slack.InviteUsersToChannel@2.5.1",
+      "fullyQualifiedName": "Slack.InviteUsersToChannel@2.5.2",
       "description": "Invite users to a Slack channel or MPIM (multi-person direct message).\n\nThis tool invites specified users to join a Slack conversation. It works with:\n- Public channels\n- Private channels\n- MPIMs (multi-person direct messages / group DMs)\n\nYou can specify users by their user IDs, usernames, or email addresses.\n\nProvide exactly one of channel_id or channel_name, and at least one of user_ids, usernames,\nor emails.\n\nThe tool will resolve usernames and emails to user IDs before inviting them.\nUp to 100 users may be invited at once.",
       "parameters": [
         {
@@ -901,7 +901,7 @@
     {
       "name": "ListConversations",
       "qualifiedName": "Slack.ListConversations",
-      "fullyQualifiedName": "Slack.ListConversations@2.5.1",
+      "fullyQualifiedName": "Slack.ListConversations@2.5.2",
       "description": "List metadata for Slack conversations (channels, DMs, MPIMs) the user is a member of.\n\nThis tool does not return the messages in a conversation. To get the messages, use the\n'Slack.GetMessages' tool instead. Calling this tool when the user is asking for messages\nwill release too much CO2 in the atmosphere and contribute to global warming.",
       "parameters": [
         {
@@ -1001,7 +1001,7 @@
     {
       "name": "ListUsers",
       "qualifiedName": "Slack.ListUsers",
-      "fullyQualifiedName": "Slack.ListUsers@2.5.1",
+      "fullyQualifiedName": "Slack.ListUsers@2.5.2",
       "description": "List all users in the authenticated user's Slack team.\n\nIf you need to get metadata or messages of a conversation, use the\n`Slack.GetConversationMetadata` tool or `Slack.GetMessages` tool instead. These\ntools accept a user_id, username, and/or email. Do not use this tool to first retrieve user(s),\nas it is inefficient and releases more CO2 in the atmosphere, contributing to climate change.",
       "parameters": [
         {
@@ -1088,7 +1088,7 @@
     {
       "name": "SendMessage",
       "qualifiedName": "Slack.SendMessage",
-      "fullyQualifiedName": "Slack.SendMessage@2.5.1",
+      "fullyQualifiedName": "Slack.SendMessage@2.5.2",
       "description": "Send a message to a Channel, Direct Message (IM/DM), or Multi-Person (MPIM) conversation.\n\nCan send top-level messages or reply to an existing thread.\n\nProvide exactly one of:\n- channel_name; or\n- conversation_id; or\n- any combination of user_ids, usernames, and/or emails.\n\nIn case multiple user_ids, usernames, and/or emails are provided, the tool will open a\nmulti-person conversation with the specified people and send the message to it.\n\nTo reply to a thread, also provide thread_ts (the 'ts' field of the parent message).\nOptionally set reply_broadcast to true to also post the reply to the main conversation.",
       "parameters": [
         {
@@ -1249,7 +1249,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Slack.WhoAmI",
-      "fullyQualifiedName": "Slack.WhoAmI@2.5.1",
+      "fullyQualifiedName": "Slack.WhoAmI@2.5.2",
       "description": "Get comprehensive user profile and Slack information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, and other important profile details from\nSlack services.",
       "parameters": [],
       "auth": {
@@ -1303,6 +1303,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.433Z",
-  "summary": "Arcade's Slack toolkit integrates with Slack via OAuth2, enabling programmatic access to conversations, users, threads, and messaging for automation and bots. It exposes tools to read conversation metadata and messages, manage threads, invite participants, and send messages.\n\n**Capabilities**\n- Retrieve and filter conversation and thread messages with absolute or relative time windows.\n- Fetch conversation metadata and resolve participant lists and user profiles at scale.\n- Send messages and threaded replies, open MPIMs, and invite users to channels.\n- List conversations and users for discovery and synchronization.\n\n**OAuth**\nProvider: slack\nScopes: channels:history, channels:read, channels:write, chat:write, groups:history, groups:read, groups:write, im:history, im:read, im:write, mpim:history, mpim:read, users:read, users:read.email"
+  "generatedAt": "2026-05-18T12:15:54.497Z",
+  "summary": "# Slack Toolkit\n\nThe Slack toolkit provides Arcade-powered LLM tools for interacting with Slack workspaces, enabling agents to read, send, and manage messages and conversations programmatically.\n\n## Capabilities\n\n- **Conversation discovery & metadata** — list conversations the user belongs to (channels, DMs, MPIMs) and retrieve metadata for any conversation by ID, channel name, or participant identifiers.\n- **Message reading** — fetch messages from channels, DMs, MPIMs, and threads with flexible absolute (`oldest_datetime`/`latest_datetime`) or relative (`DD:HH:MM` offsets) time filtering.\n- **Message sending & threading** — send top-level messages or threaded replies to any conversation, with optional `reply_broadcast` to surface replies in the main channel.\n- **User lookup & management** — resolve users by ID, username, or email in batch; list all workspace users; invite users to channels or MPIMs (up to 100 at once).\n- **Identity** — retrieve the authenticated user's full profile and workspace details.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 using the **Slack** provider. See the [Slack auth provider docs](https://docs.arcade.dev/en/references/auth-providers/slack) for setup details."
 }
