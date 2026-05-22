@@ -64,37 +64,31 @@ function getHitUrl(hit: DocSearchRecord): string {
   }
 }
 
-function Breadcrumb({ hit }: { hit: DocSearchRecord }) {
+function SectionPath({ hit }: { hit: DocSearchRecord }) {
   if (!hit.hierarchy) {
     return null;
   }
 
-  const levels = [
-    hit.hierarchy.lvl0,
-    hit.hierarchy.lvl1,
-    hit.hierarchy.lvl2,
-    hit.hierarchy.lvl3,
-    hit.hierarchy.lvl4,
-    hit.hierarchy.lvl5,
-  ].filter(Boolean) as string[];
+  const castHit = hit as unknown as Parameters<typeof Highlight>[0]["hit"];
+  const levelKeys = ["lvl1", "lvl2", "lvl3", "lvl4", "lvl5"] as const;
+  const sectionLevels = levelKeys.filter((key) => hit.hierarchy?.[key]);
 
-  // Exclude the deepest level — it's already shown as the hit title
-  const breadcrumbLevels = levels.slice(0, -1);
-
-  if (breadcrumbLevels.length === 0) {
+  if (sectionLevels.length === 0) {
     return null;
   }
 
   return (
-    <div className="mb-0.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-      {breadcrumbLevels.map((level, i) => (
-        <span className="flex items-center gap-1" key={`${i}-${level}`}>
+    <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+      {sectionLevels.map((key, i) => (
+        <span className="flex items-center gap-1" key={key}>
           {i > 0 && (
             <span aria-hidden="true" className="text-muted-foreground/50">
               ›
             </span>
           )}
-          <span className="truncate">{level}</span>
+          <span className="truncate">
+            <Highlight attribute={["hierarchy", key]} hit={castHit} />
+          </span>
         </span>
       ))}
     </div>
@@ -104,31 +98,9 @@ function Breadcrumb({ hit }: { hit: DocSearchRecord }) {
 function HitTitle({ hit }: { hit: DocSearchRecord }) {
   const castHit = hit as unknown as Parameters<typeof Highlight>[0]["hit"];
 
-  // For content-type records, the "title" is the nearest heading
-  if (hit.type === "content") {
-    // Find the deepest non-null heading level
-    const headingAttr = (
-      [
-        "hierarchy.lvl5",
-        "hierarchy.lvl4",
-        "hierarchy.lvl3",
-        "hierarchy.lvl2",
-        "hierarchy.lvl1",
-        "hierarchy.lvl0",
-      ] as const
-    ).find((attr) => {
-      const key = attr.split(".")[1] as keyof DocSearchHierarchy;
-      return hit.hierarchy?.[key];
-    });
-
-    if (headingAttr) {
-      return <Highlight attribute={headingAttr.split(".")} hit={castHit} />;
-    }
-  }
-
-  // For heading-type records, highlight the heading itself
-  if (hit.type?.startsWith("lvl") && hit.hierarchy) {
-    return <Highlight attribute={["hierarchy", hit.type]} hit={castHit} />;
+  // lvl0 is the page title in DocSearch hierarchy
+  if (hit.hierarchy?.lvl0) {
+    return <Highlight attribute={["hierarchy", "lvl0"]} hit={castHit} />;
   }
 
   // Fallback for legacy flat records
@@ -136,7 +108,7 @@ function HitTitle({ hit }: { hit: DocSearchRecord }) {
     return <Highlight attribute="title" hit={castHit} />;
   }
 
-  return <span>{hit.hierarchy?.lvl0 ?? "Untitled"}</span>;
+  return <span>Untitled</span>;
 }
 
 function SearchHit({ hit }: { hit: DocSearchRecord }) {
@@ -148,10 +120,10 @@ function SearchHit({ hit }: { hit: DocSearchRecord }) {
       className="block rounded-lg px-4 py-3 hover:bg-neutral-100 dark:hover:bg-white/5"
       href={getHitUrl(hit)}
     >
-      <Breadcrumb hit={hit} />
       <div className="truncate text-sm font-medium text-foreground">
         <HitTitle hit={hit} />
       </div>
+      <SectionPath hit={hit} />
       {isContentHit && hit.content && (
         <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
           <Snippet attribute="content" hit={castHit} />
