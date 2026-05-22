@@ -65,34 +65,10 @@ The options available when configuring an MCP Gateway are:
     - **Arcade Headers** (fallback): The client passes an Arcade API key in the `Authorization` header and the end user's ID in the `Arcade-User-ID` header. Pick this for MCP clients that can't run a browser-based OAuth flow.
 - **Allowed Tools**: A selection of tools in the Arcade Tool Catalog that will be available to the MCP Gateway.
 
-## Skip consent for trusted MCP clients
-
-When an end user signs in to a gateway, Arcade shows an OAuth consent screen before issuing a token. The **Skip consent for trusted clients (optional)** field on the gateway form lets you allowlist specific MCP client IDs that should bypass that consent screen. End users connecting through an allowlisted client go straight from sign-in to a working session.
-
-The field is available on gateways that use **Arcade Auth** or a **User Source**. It does not apply to Arcade Headers.
-
-A client ID is what the MCP client sends to Arcade during OAuth registration. Most MCP clients today perform [Dynamic Client Registration](https://datatracker.ietf.org/doc/html/rfc7591), which mints a fresh, per-installation client ID that's not useful for an allowlist. Clients that publish a [Client ID Metadata Document](https://datatracker.ietf.org/doc/draft-parecki-oauth-client-id-metadata-document/) (CIMD) use their published HTTPS URL as a stable client ID — that URL is what goes in the allowlist.
-
-### Known MCP client IDs
-
-The values below are the literal `client_id` strings these clients send in their OAuth authorize requests to Arcade today.
-
-| MCP client | Client ID |
-|---|---|
-| Claude (Claude Desktop and Claude.ai) | `https://claude.ai/oauth/mcp-oauth-client-metadata` |
-| Claude Code | `https://claude.ai/oauth/claude-code-client-metadata` |
-| Visual Studio Code | `https://vscode.dev/oauth/client-metadata.json` |
-
-This list is intentionally short. The CIMD ecosystem is early as of May 2026, so most other MCP clients (Cursor, GitHub Copilot, Codex, and others) do not yet publish a stable client ID that can be allowlisted. We expect this list to grow as those clients add CIMD support.
-
-### Find the client ID for an unlisted client
-
-If the MCP client publishes a CIMD, its documentation will reference an `https://...client-metadata` URL or similar. That URL is the client ID — paste it into the allowlist as-is.
-
-If the client uses Dynamic Client Registration, the client ID is generated per registration and changes any time the client re-registers. You'd need to track the latest registered client ID against your gateway, which usually isn't worth the operational cost. Wait until the client adopts CIMD instead.
+See [Skip consent for trusted MCP clients](/guides/mcp-gateways#skip-consent-for-trusted-mcp-clients) for the **Skip consent for trusted clients (optional)** field on this same form.
 
 ## After Creating a Gateway
 
-Once you've created a gateway, you'll need to add it to your chat client. The assistant will provide the MCP URL (for example, `https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>`).
+Once you've created a gateway, you'll need to add it to your chat client. The assistant will provide the MCP URL (for example, `https://api.arcade.dev/mcp/your-gateway-slug`).
 
 See [Connect to MCP clients](/get-started/mcp-clients) for setup instructions specific to your client.
