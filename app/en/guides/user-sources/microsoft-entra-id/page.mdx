@@ -32,14 +32,16 @@ Go to **Entra ID** → **App registrations** → **New registration**.
 
 Give the app a name your team will recognize, for example `Arcade MCP Gateways`.
 
-Under **Supported account types**, choose one:
+Under **Supported account types**, pick one:
 
-- **Accounts in this organizational directory only** — only people in your own Microsoft Entra directory can sign in. Pick this unless you specifically need to accept users from other directories.
-- **Accounts in any organizational directory** — people in any Microsoft Entra directory can sign in. Pick this only if you have agents that serve users from organizations you don't control.
+- **Single tenant only — _your tenant name_**: only people in your own Microsoft Entra directory can sign in. Pick this unless you specifically need to accept users from organizations you don't control.
+- **Multiple Entra ID tenants**: people with a Microsoft work or school account in any Microsoft Entra directory can sign in.
+
+Don't pick the **Any Entra ID Tenant + Personal Microsoft accounts** or **Personal accounts only** options. Those include personal consumer accounts (Skype, Xbox, and so on), which sit outside the workforce identity model that User Sources are designed for.
 
 Your choice affects the **Issuer URL** you'll copy into Arcade later, so make a note of which option you picked.
 
-{/* TODO: screenshot—Supported account types radio + Redirect URI fields */}
+{/* TODO: screenshot—Supported account types dropdown + Redirect URI fields */}
 
 ### Add the Arcade redirect URL
 
@@ -83,7 +85,7 @@ Open the app's **Overview** page in Entra and copy these values into Arcade's Us
 
 | Arcade field | Where to find it in Entra ID |
 |---|---|
-| **Issuer URL** | `https://login.microsoftonline.com/{tenant-id}/v2.0` if you picked the single-directory option, or `https://login.microsoftonline.com/common/v2.0` if you picked the any-directory option. `{tenant-id}` is the **Directory (tenant) ID** field on the Overview page. |
+| **Issuer URL** | `https://login.microsoftonline.com/{tenant-id}/v2.0` if you picked **Single tenant only**, or `https://login.microsoftonline.com/organizations/v2.0` if you picked **Multiple Entra ID tenants**. `{tenant-id}` is the **Directory (tenant) ID** field on the Overview page. |
 | **Client ID** | The **Application (client) ID** field on the Overview page. |
 | **Client Secret** | The value you copied when you created the client secret. |
 | **Subject Claim** | Use `oid`. Entra keeps `oid` stable even if the person renames their account or changes their email, which makes it a better long-term identifier than the default `sub`. |
@@ -98,4 +100,4 @@ Once the User Source is active, attach it to an MCP Gateway by following [Create
 
 - **PKCE**: Arcade always uses PKCE when authenticating end users. Entra ID accepts PKCE automatically on the **Web** platform, so you don't need to change any Entra setting.
 - **Client secret rotation**: Entra client secrets expire. Rotate yours before the expiration date. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for how.
-- **Single-directory recommendation**: If you're not sure which "Supported account types" option to pick, choose the single-directory one. You can change it later only by registering a new app, so the safe default is the narrower scope.
+- **Single-tenant recommendation**: If you're not sure which "Supported account types" option to pick, choose **Single tenant only**. You can change it later only by registering a new app, so the safe default is the narrower option.
