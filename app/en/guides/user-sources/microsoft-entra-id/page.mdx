@@ -1,0 +1,99 @@
+---
+title: "Microsoft Entra ID"
+description: "Use Microsoft Entra ID as a User Source so people who already sign in with Microsoft work or school accounts can sign in to your MCP Gateways"
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Microsoft Entra ID
+
+Use Microsoft Entra ID as a User Source so the people who already sign in with their Microsoft work or school account can sign in to your MCP Gateways. This guide walks you through what to do in the Microsoft Entra admin center. Once you have the values it tells you to copy, [create the User Source in Arcade](/guides/user-sources#create-a-user-source).
+
+## Before you start
+
+- An account with one of these roles in your Microsoft Entra tenant: **Cloud Application Administrator** or **Application Administrator**.
+- An Arcade project where you'll create the User Source.
+
+## Register an app in Microsoft Entra ID
+
+<Steps>
+
+### Open the Entra admin center
+
+Sign in to the [Microsoft Entra admin center](https://entra.microsoft.com) with one of the roles listed above.
+
+Go to **Entra ID** → **App registrations** → **New registration**.
+
+{/* TODO: screenshot — App registrations → New registration */}
+
+### Name the app and choose who can sign in
+
+Give the app a name your team will recognize, for example `Arcade MCP Gateways`.
+
+Under **Supported account types**, choose one:
+
+- **Accounts in this organizational directory only** — only people in your own Microsoft Entra directory can sign in. Pick this unless you specifically need to accept users from other directories.
+- **Accounts in any organizational directory** — people in any Microsoft Entra directory can sign in. Pick this only if you have agents that serve users from organizations you don't control.
+
+Your choice affects the **Issuer URL** you'll copy into Arcade later, so make a note of which option you picked.
+
+{/* TODO: screenshot — Supported account types radio + Redirect URI fields */}
+
+### Add the Arcade redirect URL
+
+In the **Redirect URI** section, select the **Web** platform and paste this URL:
+
+```
+https://cloud.arcade.dev/oauth2/intermediate_callback
+```
+
+Click **Register**. Entra creates the app and opens its **Overview** page.
+
+### Create a client secret
+
+In the new app's left menu, go to **Certificates & secrets** → **Client secrets** → **New client secret**.
+
+Add a description (for example, `Arcade User Source`) and pick an expiration period. Click **Add**.
+
+Copy the **Value** column immediately and keep it somewhere safe — Entra hides it as soon as you leave the page. You'll paste this into Arcade as the **Client Secret**.
+
+{/* TODO: screenshot — Client secret created, with the Value field circled */}
+
+<Callout type="info">
+Arcade currently supports client secrets only, not certificate credentials. We'll add certificate support in a future release.
+</Callout>
+
+### Allow the openid permission
+
+In the app's left menu, go to **API permissions**.
+
+Microsoft adds `User.Read` for you by default — leave it alone. Then click **Add a permission** → **Microsoft Graph** → **Delegated permissions** and check **openid**. Click **Add permissions**.
+
+`openid` is the only permission Arcade needs. You can optionally add `profile` and `email` if you want Entra to include those claims in the token; Arcade doesn't require them today.
+
+{/* TODO: screenshot — API permissions screen with openid checked */}
+
+</Steps>
+
+## Copy these values to Arcade
+
+Open the app's **Overview** page in Entra and copy these values into Arcade's User Source form:
+
+| Arcade field | Where to find it in Entra ID |
+|---|---|
+| **Issuer URL** | `https://login.microsoftonline.com/{tenant-id}/v2.0` if you picked the single-directory option, or `https://login.microsoftonline.com/common/v2.0` if you picked the any-directory option. `{tenant-id}` is the **Directory (tenant) ID** field on the Overview page. |
+| **Client ID** | The **Application (client) ID** field on the Overview page. |
+| **Client Secret** | The value you copied when you created the client secret. |
+| **Subject Claim** | Use `oid`. Entra keeps `oid` stable even if the person renames their account or changes their email, which makes it a better long-term identifier than the default `sub`. |
+
+## Create the User Source in Arcade
+
+Open the [User Sources dashboard](https://cloud.arcade.dev/dashboard/user-sources), click **Create User Source**, and paste the values from the table above. For a walkthrough of the form, see [Create a User Source](/guides/user-sources#create-a-user-source) in the User Sources overview.
+
+Once the User Source is active, attach it to an MCP Gateway by following [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard) and picking **User Source** under "Non-Arcade Users" in the gateway form.
+
+## Notes
+
+- **PKCE**: Arcade always uses PKCE when authenticating end users. Entra ID accepts PKCE automatically on the **Web** platform, so you don't need to change any Entra setting.
+- **Client secret rotation**: Entra client secrets expire. Rotate yours before the expiration date. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for how.
+- **Single-directory recommendation**: If you're not sure which "Supported account types" option to pick, choose the single-directory one. You can change it later only by registering a new app, so the safe default is the narrower scope.
