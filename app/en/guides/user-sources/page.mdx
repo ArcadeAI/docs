@@ -1,0 +1,114 @@
+---
+title: "User Sources"
+description: "Connect an OIDC identity provider to an MCP Gateway so your end users sign in with their existing identities"
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# User Sources
+
+A User Source is the connection between an MCP Gateway and your OIDC identity provider. When a gateway uses a User Source, Arcade redirects each end user to your identity provider to sign in and then identifies them by an OIDC subject claim on every gateway request.
+
+## What is a User Source?
+
+Use a User Source when your end users already have identities in your own identity system, such as Entra ID, Okta, Auth0, Clerk, Stytch, or a similar OIDC provider. A User Source plugs that identity directly into your gateway, so Arcade doesn't have to know about your end users ahead of time and you don't have to provision them into Arcade.
+
+A User Source is deliberately separate from any identity provider you use for Arcade admin sign-in. The User Source identifies the **Users** of your gateways (end users), while the Arcade admin sign-in provider identifies the **Arcade Accounts** that manage your projects. Keeping the two distinct means you can govern your administrators and your end users with different identity systems and different policies.
+
+User Sources are project-bound. You create one in a project, then attach it to any MCP Gateway in that project. One User Source can back many gateways, so gateways serving different purposes can share the same end-user identity system without duplicating the configuration.
+
+## When to use a User Source
+
+Arcade MCP Gateways support three ways to authenticate end users:
+
+| Mode | Best for |
+|------|----------|
+| **Arcade Auth** | Development, testing, and internal use, when every end user is a member of your Arcade project |
+| **User Source** (recommended for production) | Production agents whose end users have identities in your OIDC identity provider |
+| **Arcade Headers** (fallback) | MCP clients that can't run a browser-based OAuth flow |
+
+See [MCP Gateway authentication](/guides/mcp-gateways) for the full comparison and for how to pick an authentication mode when creating a gateway.
+
+## Register an OAuth client at your identity provider
+
+Before you create a User Source in Arcade, register a confidential OAuth client at your identity provider. The client must use the Authorization Code flow with PKCE.
+
+<Steps>
+
+### Configure the redirect URL
+
+Set the redirect URL on the OAuth client to `https://cloud.arcade.dev/oauth2/intermediate_callback`.
+
+Your identity provider will redirect end users back to this URL after they sign in, and Arcade exchanges the resulting code for an ID token.
+
+### Copy the client credentials
+
+From your identity provider, copy the **issuer URL**, **client ID**, and **client secret**. You'll provide them to Arcade in the next section.
+
+</Steps>
+
+## Create a User Source
+
+<Steps>
+
+### Open the User Sources dashboard
+
+Go to the [User Sources dashboard](https://cloud.arcade.dev/dashboard/user-sources) for your project and click **Create User Source**.
+
+### Fill in the User Source details
+
+Provide the following:
+
+- **Name**: A short, human-readable name for this connection. For example, `Corporate Identity`.
+- **Description** (optional): Free-form notes about the connection. These notes are visible to other members of your Arcade project and are never shown to end users.
+- **Issuer URL**: The OIDC issuer URL from your identity provider, for example `https://accounts.example.com`. Arcade matches this against the `iss` claim on incoming tokens, so it must exactly match what your identity provider issues.
+- **Client ID**: The client ID of the OAuth client you registered with your identity provider.
+- **Client Secret**: The matching client secret. Arcade stores it encrypted and never returns it through the API or dashboard.
+- **Subject Claim**: The JWT claim Arcade uses as the end user's stable identifier. Defaults to `sub`.
+
+### Save the User Source
+
+Click **Create**. The new User Source appears in the list with **Active** status and is ready to attach to an MCP Gateway.
+
+</Steps>
+
+## Use a User Source on an MCP Gateway
+
+You attach a User Source to an MCP Gateway when you create or edit the gateway. One User Source can back multiple gateways in the same project, so you can reuse the same end-user identity system across every gateway you build for those users.
+
+See [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard) for how to pick a User Source when configuring a gateway's authentication.
+
+## Manage User Sources
+
+### Edit a User Source
+
+You can change a User Source's name, description, issuer URL, client ID, or subject claim at any time from the User Sources dashboard. Saving the changes affects every gateway that uses this User Source on its next request.
+
+### Rotate the client secret
+
+To rotate the client secret:
+
+1. Open the User Source in the dashboard.
+2. Enter the new secret in the **Client Secret** field.
+3. Save.
+
+The field is blank in edit mode and only updates when you fill it in, so editing other fields does not affect the stored secret.
+
+<Callout type="warning">
+Rotate the client secret in your identity provider first, then update it in Arcade. There's a short window where token exchange fails if Arcade's stored secret doesn't match the one your provider expects.
+</Callout>
+
+### Deactivate a User Source
+
+Set a User Source's status to **Inactive** to take it out of rotation. You can only deactivate a User Source after every MCP Gateway that uses it is itself deactivated or deleted. If an active gateway still references the source, the dashboard blocks deactivation and tells you how many gateways still depend on it.
+
+To deactivate a User Source, deactivate or delete the dependent gateways first, then change the User Source's status to **Inactive**.
+
+### Delete a User Source
+
+Deleting a User Source is permanent. As with deactivation, you can only delete a User Source when no active gateway references it. The dashboard blocks the action until you deactivate or remove the dependent gateways.
+
+## Next steps
+
+- [MCP Gateway authentication](/guides/mcp-gateways) for a comparison of Arcade Auth, User Sources, and Arcade Headers
+- [Connect to MCP clients](/get-started/mcp-clients) to point your client at a gateway that uses a User Source
