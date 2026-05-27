@@ -34,6 +34,18 @@ export function remarkGlossary(options: RemarkGlossaryOptions) {
       return;
     }
 
+    // Don't process User Source per-provider pages — they discuss
+    // Microsoft, Auth0, Okta, etc. concepts (account, tenant, realm)
+    // that collide with Arcade glossary terms in ways that mislead
+    // readers. The User Sources overview itself stays opted-in.
+    const filePath = file.history?.[0];
+    if (
+      filePath?.includes("/guides/user-sources/") &&
+      !filePath.endsWith("/guides/user-sources/page.mdx")
+    ) {
+      return;
+    }
+
     // Lazy-load and cache glossary terms
     if (!cachedTerms || cachedGlossaryPath !== glossaryPath) {
       cachedTerms = sortTermsByLength(parseGlossary(glossaryPath));
