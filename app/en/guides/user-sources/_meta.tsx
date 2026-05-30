@@ -1,5 +1,12 @@
 import type { MetaRecord } from "nextra";
 
-export const meta: MetaRecord = {};
+export const meta: MetaRecord = {
+  index: {
+    title: "Overview",
+  },
+  "microsoft-entra-id": {
+    title: "Microsoft Entra ID",
+  },
+};
 
 export default meta;
