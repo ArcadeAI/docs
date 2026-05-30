@@ -41,14 +41,7 @@ Go to **Entra ID** → **App registrations** → **New registration**.
 
 Give the app a name your team will recognize, for example `Arcade MCP Gateways`.
 
-Under **Supported account types**, pick one:
-
-- **Single tenant only — _your tenant name_**: only people in your own Microsoft Entra directory can sign in. Pick this unless you specifically need to accept users from organizations you don't control.
-- **Multiple Entra ID tenants**: people with a Microsoft work or school account in any Microsoft Entra directory can sign in.
-
-Don't pick the **Any Entra ID Tenant + Personal Microsoft accounts** or **Personal accounts only** options. Those include personal consumer accounts (Skype, Xbox, and so on), which sit outside the workforce identity model that User Sources are designed for.
-
-Your choice affects the **Issuer URL** you'll copy into Arcade later, so make a note of which option you picked.
+Under **Supported account types**, pick **Single tenant only — _your tenant name_**. This is the only account type Arcade supports today — see the [Notes](#notes) below for details on the other options.
 
 ### Add the Arcade redirect URL
 
@@ -110,9 +103,9 @@ Open the app's **Overview** page in Entra and copy these values into Arcade's Us
 
 | Arcade field | Where to find it in Entra ID |
 |---|---|
-| **Issuer URL** | `https://login.microsoftonline.com/{tenant-id}/v2.0` if you picked **Single tenant only**, or `https://login.microsoftonline.com/organizations/v2.0` if you picked **Multiple Entra ID tenants**. `{tenant-id}` is the **Directory (tenant) ID** field on the Overview page. |
-| **Client ID** | The **Application (client) ID** field on the Overview page. |
-| **Client Secret** | The value you copied when you created the client secret. |
+| **Issuer URL** | `https://login.microsoftonline.com/{tenant-id}/v2.0`. `{tenant-id}` is the **Directory (tenant) ID** field on the app's **Overview** page. |
+| **Client ID** | The **Application (client) ID** field on the app's **Overview** page. |
+| **Client Secret** | The value you copied earlier when you created the client secret. It is not shown anywhere after creation, so use the value you saved rather than going back to the **Overview** page for it. |
 | **Subject Claim** | Use `oid`. The default `sub` is unique per app registration, which makes it harder to trace a signed-in user back to their identity in your Entra directory. `oid` is the same identifier across your directory. It's also a better choice than `email`, because `oid` stays the same if the person's email address ever changes. |
 
 ## Create the User Source in Arcade
@@ -123,6 +116,7 @@ Once the User Source is active, attach it to an MCP Gateway by following [Create
 
 ## Notes
 
+- **Multi-tenant and personal-account options aren't supported today**: Arcade matches the OIDC `iss` claim on every ID token byte-for-byte against the issuer URL you save on the User Source. The **Multiple Entra ID tenants**, **Any Entra ID Tenant + Personal Microsoft accounts**, and **Personal accounts only** options all rely on Entra issuing tokens whose `iss` reflects the signing-in user's home tenant, so there's no single issuer URL that will validate for users from more than one tenant. If you need to onboard users from multiple Entra tenants today, create a separate Arcade User Source per tenant.
 - **PKCE**: Arcade always uses PKCE when authenticating end users. Entra ID accepts PKCE automatically on the **Web** platform, so you don't need to change any Entra setting.
 - **Client secret rotation**: Entra client secrets expire. Rotate yours before the expiration date. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for how.
 - **Custom subject claims**: If you need Arcade to identify end users by a value other than `oid`, configure that value as an [optional claim](https://learn.microsoft.com/en-us/entra/identity-platform/optional-claims#configure-optional-claims-in-your-application) on Entra's ID token, then set the User Source's **Subject Claim** to its name. Arcade can read any claim that ends up in the ID token; it doesn't have access to access tokens or other token types.
