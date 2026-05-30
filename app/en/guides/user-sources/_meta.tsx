@@ -7,6 +7,9 @@ export const meta: MetaRecord = {
   "microsoft-entra-id": {
     title: "Microsoft Entra ID",
   },
+  okta: {
+    title: "Okta",
+  },
 };
 
 export default meta;
