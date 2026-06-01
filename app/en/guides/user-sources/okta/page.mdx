@@ -1,0 +1,109 @@
+---
+title: "Okta"
+description: "Use Okta as a User Source so people who already sign in with their Okta account can sign in to your MCP Gateways"
+---
+
+import Image from "next/image";
+import { Steps } from "nextra/components";
+
+export const IMAGE_SCALE_FACTOR = 1.5;
+export const OKTA_SCREENSHOT_WIDTH = 1312 / IMAGE_SCALE_FACTOR;
+export const OKTA_SCREENSHOT_HEIGHT = 1099 / IMAGE_SCALE_FACTOR;
+
+# Okta
+
+Use Okta as a User Source so the people who already sign in with their Okta account can sign in to your MCP Gateways. This guide walks you through what to do in the Okta admin console. Once you have the values it tells you to copy, [create the User Source in Arcade](/guides/user-sources#create-a-user-source).
+
+## Before you start
+
+- An Okta admin role that can create OIDC app integrations, such as **Super Admin** or **Application Administrator**.
+- An Arcade project where you'll create the User Source.
+
+## Register an app in Okta
+
+<Steps>
+
+### Open the Okta admin console
+
+Sign in to your Okta admin console (typically `https://<your-okta-org>-admin.okta.com`) with one of the roles listed above.
+
+Go to **Applications** → **Applications** → **Create App Integration**.
+
+### Choose OIDC and Web Application
+
+In the **Create a new app integration** dialog:
+
+- **Sign-in method**: **OIDC - OpenID Connect**
+- **Application type**: **Web Application**
+
+Click **Next**.
+
+<Image
+  alt="Create a new app integration dialog with OIDC and Web Application selected"
+  className="max-w-full mt-4"
+  src="/images/user-sources/okta/okta-create-app-light.png"
+  width={OKTA_SCREENSHOT_WIDTH}
+  height={OKTA_SCREENSHOT_HEIGHT}
+/>
+
+### Fill in the app settings
+
+On the **New Web App Integration** form:
+
+- **App integration name**: a name your team will recognize, for example `Arcade User Source`.
+- **Grant type**: leave **Authorization Code** checked (the default). Leave **Refresh Token** unchecked; Arcade doesn't need it.
+- **Sign-in redirect URIs**: replace the placeholder value with `https://cloud.arcade.dev/oauth2/intermediate_callback`.
+- **Sign-out redirect URIs**: leave empty.
+- **Assignments**: the users and groups you assign to this app are exactly the people who'll be able to sign in to any MCP Gateway backed by this User Source. Anyone Okta won't let through here is blocked at sign-in. Pick whichever assignment model fits how your team usually grants application access.
+
+Scroll down and click **Save**. Okta creates the app and opens its details page.
+
+<Image
+  alt="New Web App Integration form with the Arcade redirect URI filled in"
+  className="max-w-full mt-4"
+  src="/images/user-sources/okta/okta-new-web-app-form-light.png"
+  width={OKTA_SCREENSHOT_WIDTH}
+  height={OKTA_SCREENSHOT_HEIGHT}
+/>
+
+### Require PKCE and note the client credentials
+
+On the app's **General** tab, find the **Client Credentials** panel and click **Edit**.
+
+- Check **Require PKCE as additional verification**. Arcade always uses PKCE when authenticating end users; requiring it here means Okta refuses any non-PKCE flow, even by accident. Click **Save**.
+- Note the **Client ID** value.
+- Click the eye icon next to the **Client secret** value, copy it, and keep it somewhere safe. You'll paste this into Arcade as the **Client Secret**.
+
+<Image
+  alt="Client Credentials panel with Require PKCE checked and the Client ID and Client secret visible"
+  className="max-w-full mt-4"
+  src="/images/user-sources/okta/okta-client-credentials-pkce-light.png"
+  width={OKTA_SCREENSHOT_WIDTH}
+  height={OKTA_SCREENSHOT_HEIGHT}
+/>
+
+</Steps>
+
+## Copy these values to Arcade
+
+Copy these values into Arcade's User Source form:
+
+| Arcade field | Where to find it in Okta |
+|---|---|
+| **Issuer URL** | Your Okta org URL, for example `https://<your-okta-org>.okta.com`. This is the same hostname you see in the admin console URL, minus the `-admin` suffix. |
+| **Client ID** | The **Client ID** field on the app's **General** tab, **Client Credentials** panel. |
+| **Client Secret** | The Client secret value you copied earlier. The secret stays visible on the **General** tab so you can re-copy it later if needed. |
+| **Subject Claim** | Use the default, `sub`. Okta's `sub` claim is the user's stable Okta user ID. |
+
+## Create the User Source in Arcade
+
+Open the [User Sources dashboard](https://cloud.arcade.dev/dashboard/user-sources), click **Create User Source**, and paste the values from the table above. For a walkthrough of the form, see [Create a User Source](/guides/user-sources#create-a-user-source) in the User Sources overview.
+
+Once the User Source is active, attach it to an MCP Gateway by following [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard) and picking **User Source** under "Non-Arcade Users" in the gateway form.
+
+## Notes
+
+- **Custom Okta domains**: If your org uses an Okta-hosted custom domain (for example, `auth.yourcompany.com`), use that hostname in the **Issuer URL** instead of `<your-okta-org>.okta.com`. Your end users will see the custom domain in the sign-in URL.
+- **Custom Authorization Servers**: This guide uses Okta's built-in **Org Authorization Server**, whose issuer is your Okta org URL. If your team uses a Custom Authorization Server for this app (for example, the default `oauth2/default` server, or one you've configured under **Security** → **API** → **Authorization Servers**), use that server's **Issuer URI** instead. Custom Authorization Servers are useful when you need to customize scopes, claims, or access policies.
+- **Client secret rotation**: Okta lets you generate a new client secret on the same Client Credentials panel and keep the old one active until you're ready to switch. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for the Arcade side.
+- **Custom subject claims**: If you need Arcade to identify end users by a value other than `sub`, configure a custom claim on a [Custom Authorization Server](https://developer.okta.com/docs/guides/customize-tokens-returned-from-okta/main/) and set the User Source's **Subject Claim** to its name. Arcade only reads the ID token; it doesn't have access to access tokens or other token types. See [Pick a subject claim](/guides/user-sources#pick-a-subject-claim) in the User Sources overview for what makes a good claim value. In particular, avoid claims that aren't both stable and never-reused.
