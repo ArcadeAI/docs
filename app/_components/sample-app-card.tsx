@@ -36,7 +36,7 @@ export function SampleAppCard({
     <motion.div
       whileHover={{
         scale: 1.02,
-        boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",
+        boxShadow: "0 0 20px 0 oklch(from var(--primary) l c h / 0.1)",
       }}
       whileTap={{ scale: 0.98 }}
     >
