@@ -1,9 +1,5 @@
 "use client";
-import {
-  Button,
-  getToolkitIcon,
-  Separator,
-} from "@arcadeai/design-system";
+import { Button, getToolkitIcon, Separator } from "@arcadeai/design-system";
 import { Generic as GenericIcon } from "@arcadeai/design-system/components/ui/atoms/icons";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Code2, MessageSquarePlus, Search } from "lucide-react";
@@ -144,7 +140,9 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                   </p>
                   <Button
                     className="mt-3"
-                    render={<Link href="/resources/integrations/tool-feedback" />}
+                    render={
+                      <Link href="/resources/integrations/tool-feedback" />
+                    }
                     size="sm"
                     variant="outline"
                   >
