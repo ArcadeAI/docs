@@ -46,7 +46,7 @@ export function SampleAppCard({
         onClick={handleClick}
         target={blank ? "_blank" : undefined}
       >
-        <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
+        <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-primary/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
           <CardContent className="p-0">
             {image && (
               <div className="relative aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100 dark:bg-gray-800">

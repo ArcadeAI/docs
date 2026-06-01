@@ -78,16 +78,16 @@ export function ChallengeSolution({
                 {solution.description}
               </p>
               <Button
-                asChild
                 className="h-auto p-0 pt-1.5 text-zinc-400 hover:text-zinc-300"
+                render={
+                  <Link
+                    className="flex items-center gap-1.5"
+                    href={solution.href}
+                  />
+                }
                 variant="link"
               >
-                <Link
-                  className="flex items-center gap-1.5"
-                  href={solution.href}
-                >
-                  Learn more <ExternalLink className="h-4 w-4" />
-                </Link>
+                Learn more <ExternalLink className="h-4 w-4" />
               </Button>
             </div>
           </div>
