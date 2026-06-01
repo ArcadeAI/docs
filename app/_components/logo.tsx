@@ -7,7 +7,7 @@ export function Logo() {
   return (
     <>
       <div className="mr-2 hidden w-40 flex-row lg:flex lg:items-end lg:gap-2.5">
-        <ArcadeLogo className="h-7 w-auto invert dark:invert-0" />
+        <ArcadeLogo className="h-7 w-auto text-foreground" />
         {/* <Badge
           className="relative top-0.5 font-medium font-mono text-xs"
           variant="outline"
