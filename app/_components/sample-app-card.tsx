@@ -34,10 +34,8 @@ export function SampleAppCard({
 
   return (
     <motion.div
-      whileHover={{
-        scale: 1.02,
-        boxShadow: "0 0 20px 0 oklch(from var(--primary) l c h / 0.1)",
-      }}
+      className="transition-shadow hover:shadow-[0_0_20px_0_oklch(from_var(--primary)_l_c_h_/_0.1)]"
+      whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
       <Link

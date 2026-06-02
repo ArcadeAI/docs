@@ -143,11 +143,8 @@ export function QuickStartCard({
 
   return (
     <motion.div
-      className="h-full"
-      whileHover={{
-        scale: 1.02,
-        boxShadow: "0 0 20px 0 oklch(from var(--primary) l c h / 0.1)",
-      }}
+      className="h-full transition-shadow hover:shadow-[0_0_20px_0_oklch(from_var(--primary)_l_c_h_/_0.1)]"
+      whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
       <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-primary/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
