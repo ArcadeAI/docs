@@ -1,0 +1,76 @@
+---
+title: "Clerk"
+description: "Use Clerk as a User Source so people who already sign in through your Clerk instance can sign in to your MCP Gateways"
+---
+
+import Image from "next/image";
+import { Steps } from "nextra/components";
+
+export const IMAGE_SCALE_FACTOR = 1.5;
+export const CLERK_SCREENSHOT_WIDTH = 1312 / IMAGE_SCALE_FACTOR;
+export const CLERK_SCREENSHOT_HEIGHT = 849 / IMAGE_SCALE_FACTOR;
+
+# Clerk
+
+Use Clerk as a User Source so the people who already sign in through your Clerk instance can sign in to your MCP Gateways. Clerk's [OAuth applications](https://clerk.com/docs/advanced-usage/clerk-idp) feature turns your Clerk instance into an OIDC identity provider that Arcade can connect to. Once you have the values it tells you to copy, [create the User Source in Arcade](/guides/user-sources#create-a-user-source).
+
+## Before you start
+
+- A Clerk account with admin access to the instance you want to use.
+- A Clerk instance. Clerk maintains separate development and production instances per app, each with its own Frontend API URL. You can develop against the development instance first and switch the User Source to the production instance when you're ready.
+- An Arcade project where you'll create the User Source.
+
+## Register an OAuth application in Clerk
+
+<Steps>
+
+### Open the Clerk Dashboard
+
+Sign in to the [Clerk Dashboard](https://dashboard.clerk.com/sign-in). Pick the workspace that owns your Clerk application, open the application you want to configure, then in the application's top tabs select **Configure**. In the left navigation under **Developers**, click **OAuth Applications**, then **Add OAuth application**.
+
+### Fill in the application details
+
+In the **Add OAuth application** dialog:
+
+- **Name**: a label your team will recognize, for example `Arcade User Source`.
+- **Scopes**: select `openid`, `profile`, and `email`. These are the scopes Arcade requests by default.
+- **Redirect URIs**: add `https://cloud.arcade.dev/oauth2/intermediate_callback`.
+
+Click **Add** to create the application.
+
+### Save the Client Secret
+
+Clerk shows the **Client Secret** in a one-time dialog after the application is created. Copy the value and store it somewhere secure. The full secret is not retrievable from the Dashboard afterward, so a lost value requires rotating to a new one.
+
+### Note the Client ID
+
+After closing the secret dialog, Clerk redirects you to the application's settings page. The **Client ID** is listed under **Application credentials** and remains visible from there.
+
+</Steps>
+
+## Copy these values to Arcade
+
+The Issuer URL is your Clerk instance's **Frontend API URL**. Find it on the **Configure** tab under **Developers** → **API keys**. It takes one of these forms:
+
+- Development instance: `https://<verb-noun-NN>.clerk.accounts.dev` (Clerk-generated subdomain).
+- Production instance: `https://clerk.<your-app-domain>.com` (your domain through Clerk's DNS setup).
+
+Copy these values into Arcade's User Source form:
+
+| Arcade field | Where to find it in Clerk |
+|---|---|
+| **Issuer URL** | The Frontend API URL exactly as Clerk shows it on the **API keys** page. Don't add a trailing slash. Clerk emits the issuer without one and Arcade matches the value exactly. |
+| **Client ID** | The **Client ID** under **Application credentials** on the OAuth application's settings page. |
+| **Client Secret** | The Client Secret you saved when you created the application. |
+
+## Create the User Source in Arcade
+
+Open the Arcade Dashboard, select your project, navigate to **User Sources**, and click **Create User Source**. Paste the values from the table above. For a walkthrough of the form, see [Create a User Source](/guides/user-sources#create-a-user-source) in the User Sources overview.
+
+Once the User Source is active, attach it to an MCP Gateway by following [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard) and picking **User Source** under "Non-Arcade Users" in the gateway form.
+
+## Notes
+
+- **Development vs production instances**: Clerk's development and production instances have different Frontend API URLs and different OAuth applications. When you're ready to move from a development setup to production, register a new OAuth application in the production instance and create a separate Arcade User Source for it.
+- **Client secret rotation**: Clerk lets you rotate the Client Secret from the OAuth application's settings page in the Dashboard. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for the Arcade-side procedure.
+- **Subject Claim**: Arcade's default Subject Claim, `sub`, is the Clerk user ID and is the recommended value. Clerk's OAuth applications also expose `public_metadata` and `private_metadata` scopes that surface the corresponding [user metadata](https://clerk.com/docs/users/metadata) on the ID token, which lets you add organization, role, or other custom data to claims. See [Advanced: scopes and subject claim](/guides/user-sources#advanced-scopes-and-subject-claim) in the overview for what makes a good claim.
