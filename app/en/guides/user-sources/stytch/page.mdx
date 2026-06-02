@@ -1,0 +1,73 @@
+---
+title: "Stytch"
+description: "Use Stytch as a User Source so people who already sign in through your Stytch tenant can sign in to your MCP Gateways"
+---
+
+import { Steps } from "nextra/components";
+
+# Stytch
+
+Use Stytch as a User Source so the people who already sign in through your Stytch tenant can sign in to your MCP Gateways. Stytch's [Connected Apps](https://stytch.com/docs/guides/connected-apps/getting-started) feature turns your Stytch project into an OIDC identity provider that Arcade can connect to. This guide walks you through what to do in the Stytch Dashboard. Once you have the values it tells you to copy, [create the User Source in Arcade](/guides/user-sources#create-a-user-source).
+
+## Before you start
+
+- A Stytch admin role that can manage Connected Apps in your project.
+- A [custom domain](https://stytch.com/docs/guides/dashboard/custom-domains) configured on the project. Arcade matches the OIDC `iss` claim byte-for-byte against the issuer URL you save on the User Source, and Stytch only emits a fully OIDC-compliant issuer when a custom domain is in place. Projects without a custom domain emit an issuer in the form `stytch.com/<project_id>`, which Arcade can't validate.
+- An Arcade project where you'll create the User Source.
+
+This guide applies to both Stytch [Consumer](https://stytch.com/docs/guides/connected-apps/getting-started) and [B2B](https://stytch.com/docs/b2b/guides/connected-apps/getting-started) projects. The Connected Apps feature works the same way in both. Only the Dashboard you log into differs.
+
+## Register a Connected App in Stytch
+
+<Steps>
+
+### Open the Stytch Dashboard
+
+Sign in to the [Stytch Dashboard](https://stytch.com/dashboard) for your project.
+
+Go to **Connected Apps** in the left navigation, then click **Create Connected App**.
+
+### Create the app
+
+Give the Connected App a name your team will recognize, for example `Arcade User Source`.
+
+For **Client type**, select **Third-party app** (a confidential client). Arcade needs a client secret, so the public-client option isn't suitable.
+
+Click **Create**. Stytch opens the new app's settings.
+
+### Add the Arcade redirect URL
+
+On the app's settings, find the **Redirect URLs** field and add this URL:
+
+`https://cloud.arcade.dev/oauth2/intermediate_callback`
+
+Save the change.
+
+### Note the client credentials
+
+On the app's settings, copy the **Client ID** and the **Client Secret**. The secret is typically shown once on creation; Stytch lets you rotate it later if you lose track.
+
+</Steps>
+
+## Copy these values to Arcade
+
+Copy these values into Arcade's User Source form:
+
+| Arcade field | Where to find it in Stytch |
+|---|---|
+| **Issuer URL** | Your Stytch project's custom domain, for example `https://login.yourcompany.com`. This is the OIDC issuer Stytch publishes at `<your-custom-domain>/.well-known/openid-configuration`. |
+| **Client ID** | The **Client ID** on the Connected App's settings page. |
+| **Client Secret** | The **Client Secret** you copied when you created the app. |
+
+## Create the User Source in Arcade
+
+Open the Arcade Dashboard, select your project, navigate to **User Sources**, and click **Create User Source**. Paste the values from the table above. For a walkthrough of the form, see [Create a User Source](/guides/user-sources#create-a-user-source) in the User Sources overview.
+
+Once the User Source is active, attach it to an MCP Gateway by following [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard) and picking **User Source** under "Non-Arcade Users" in the gateway form.
+
+## Notes
+
+- **Custom domain expected**: Stytch projects without a custom domain emit an issuer in the form `stytch.com/<project_id>` (no scheme), which isn't a valid issuer URL. Arcade can't validate or match against that value. Set up a [custom domain](https://stytch.com/docs/guides/dashboard/custom-domains) on the Stytch side before creating the User Source.
+- **PKCE**: Arcade always uses PKCE when authenticating end users. Stytch's Connected Apps support PKCE on confidential clients automatically, with no separate setting.
+- **Client secret rotation**: Stytch supports [rotating the client secret](https://stytch.com/docs/api/connected-apps-rotate-secret-start) for a Connected App from the Dashboard or via the API. The rotation flow lets you keep the old secret active while you swap the new one into Arcade. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for the Arcade side.
+- **Custom subject claims**: Arcade's default Subject Claim, `sub`, is the Stytch user's stable identifier. If you need Arcade to identify users by a different value, configure a [custom claim](https://stytch.com/docs/guides/sessions/custom-claims) on the ID token and set the User Source's **Subject Claim** to its name. Arcade only reads ID tokens, so the claim must be on the ID token (not the access token). See [Advanced: scopes and subject claim](/guides/user-sources#advanced-scopes-and-subject-claim) in the overview for what makes a good claim.
