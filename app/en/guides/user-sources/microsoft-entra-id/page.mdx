@@ -85,7 +85,7 @@ In the app's left menu, go to **API permissions**.
 
 Microsoft adds `User.Read` for you by default; leave it alone. Then click **Add a permission** → **Microsoft Graph** → **Delegated permissions** and check **openid**, **profile**, and **email**. Click **Add permissions**.
 
-These three are the OIDC scopes Arcade requests by default. `profile` is what unlocks Entra's directory-wide user identifier, which you'll see again in the [Advanced section](#advanced-settings) below; without it Entra won't include that claim in the ID token even if you configure it everywhere else.
+These three are the OIDC scopes Arcade requests by default. Granting `profile` is what unlocks Entra's directory-wide user identifier, which appears again in the [optional `oid` configuration](#optional-use-oid-as-the-subject-claim) below. Without `profile`, Entra omits that claim from the ID token regardless of any other configuration.
 
 <Image
   alt="Request API permissions panel with the openid, profile, and email OpenID permissions checked"
@@ -117,9 +117,11 @@ Once the User Source is active, attach it to an MCP Gateway by following [Create
 
 ## Optional: use `oid` as the subject claim
 
-The default Subject Claim, `sub`, identifies users with a per-app pseudonymous identifier. That's the right pick for most setups. If you'd rather see the user's directory-wide identifier in Arcade logs and gateway requests, useful when auditing against your Entra directory or correlating activity across multiple User Sources, open the form's **Advanced** section and change **Subject Claim** to `oid`.
+The default Subject Claim is `sub`. Entra issues `sub` as an opaque, per-application identifier, which suits most setups.
 
-`oid` only appears in the ID token when `profile` is in the requested scopes. You granted the `profile` permission in the step above, and `profile` is in the default scope set, so nothing else changes.
+To identify users by their directory-wide identifier instead, open the form's **Advanced** section and set **Subject Claim** to `oid`. The `oid` claim makes auditing against your Entra directory more straightforward and lets you correlate the same user across multiple User Sources.
+
+Entra only emits `oid` when `profile` is in the requested scopes. You granted the `profile` permission in the step above, and `profile` belongs to Arcade's default scope set, so no further changes apply.
 
 ## Notes
 
