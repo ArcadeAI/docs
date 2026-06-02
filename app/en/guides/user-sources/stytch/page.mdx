@@ -36,8 +36,8 @@ Go to **Connected Apps** in the left navigation, then click **Add Application**.
 
 In the **Select type of Connected App** dialog:
 
-- **Application type**: **First-party application**. Arcade is part of your team's infrastructure, so first-party is the right pick. End users sign in without an additional Stytch consent screen.
-- **Authorization Code method**: **Confidential method**, with **Secure Web Application** selected. Arcade is a confidential client (it has a client secret), so the public method isn't suitable.
+- **Application type**: **First-party application**. First-party apps skip the Stytch consent screen at sign-in, which fits the User Source pattern where Arcade is acting as part of your own identity infrastructure rather than a third-party application requesting access.
+- **Authorization Code method**: **Confidential method**, with **Secure Web Application** selected. Arcade authenticates with Stytch using a client secret, which the confidential method supports. The public method is intended for applications that cannot securely store a secret and does not apply here.
 
 Click **Add Application**.
 
@@ -69,7 +69,7 @@ Click **Save** to apply the changes. Stytch reveals the **Client ID** at the top
 
 ### Save the client secret
 
-Stytch shows the **Client Secret** in a one-time dialog after the app is created. Copy it and keep it somewhere safe; you won't see the full value again from the Dashboard.
+Stytch shows the **Client Secret** in a one-time dialog after the app is created. Copy the value and store it somewhere secure. The full secret is not retrievable from the Dashboard afterward, so a lost value requires rotating to a new one.
 
 Check the **I have saved my client secret in a secure place** box and confirm.
 
@@ -111,7 +111,7 @@ Once the User Source is active, attach it to an MCP Gateway by following [Create
 
 ## Notes
 
-- **Test vs production**: Connected Apps default to test mode. Test-mode apps issue test-mode credentials and require test API keys. Enable the **Enable for production** toggle on the app's **Details** page when you're ready to issue live tokens, and update the User Source in Arcade with the production Client ID and Client Secret.
+- **Test vs production**: New Connected Apps default to test mode and issue test-environment credentials. Enable the **Enable for production** toggle on the app's **Details** page when you're ready to issue live tokens, then update the User Source in Arcade with the production Client ID and Client Secret.
 - **Custom Stytch domains**: If you've configured a [custom domain](https://stytch.com/docs/connected-apps/resources/custom-domains) on the Stytch project, use that hostname as the **Issuer URL** instead of the `<project-domain>.customers.stytch.dev` value. End users see the custom domain on the authorization page.
-- **Client secret rotation**: Stytch supports [rotating the client secret](https://stytch.com/docs/api-reference/consumer/api/connected-apps/rotate-secret/start-secret-rotation) for a Connected App from the Dashboard or via the API. The rotation flow lets you keep the old secret active while you swap the new one into Arcade. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for the Arcade side.
-- **Subject Claim**: Stick with Arcade's default Subject Claim, `sub`, which is the Stytch user's stable identifier. Stytch's Connected Apps issues a fixed set of [standard OIDC claims](https://stytch.com/docs/api-reference/consumer/api/connected-apps/tokens/connected-app-id-token-object) on the ID token (`iss`, `sub`, `aud`, `exp`, `nbf`, `iat`, plus profile, email, and phone claims when those scopes apply). There's no custom-claim template for the ID token today, so the standard claims are the only available picks. See [Advanced: scopes and subject claim](/guides/user-sources#advanced-scopes-and-subject-claim) in the overview for what makes a good claim.
+- **Client secret rotation**: Stytch supports [rotating the client secret](https://stytch.com/docs/api-reference/consumer/api/connected-apps/rotate-secret/start-secret-rotation) for a Connected App from the Dashboard or via the API. The rotation flow keeps the previous secret active while you swap the new one into Arcade. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for the Arcade-side procedure.
+- **Subject Claim**: Arcade's default Subject Claim, `sub`, is the Stytch user's stable identifier and is the recommended value. Stytch's Connected Apps issues a [fixed set of standard OIDC claims](https://stytch.com/docs/api-reference/consumer/api/connected-apps/tokens/connected-app-id-token-object) on the ID token (`iss`, `sub`, `aud`, `exp`, `nbf`, `iat`, with profile, email, and phone claims included when the matching scopes apply). Stytch does not currently support a custom-claim template for the ID token, so the standard claim set is what Arcade has available. See [Advanced: scopes and subject claim](/guides/user-sources#advanced-scopes-and-subject-claim) in the overview for what makes a good claim.
