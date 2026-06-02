@@ -3,19 +3,24 @@ title: "Stytch"
 description: "Use Stytch as a User Source so people who already sign in through your Stytch tenant can sign in to your MCP Gateways"
 ---
 
-import { Steps } from "nextra/components";
+import Image from "next/image";
+import { Callout, Steps } from "nextra/components";
+
+export const IMAGE_SCALE_FACTOR = 1.5;
+export const STYTCH_SCREENSHOT_WIDTH = 1312 / IMAGE_SCALE_FACTOR;
+export const STYTCH_SCREENSHOT_HEIGHT = 1099 / IMAGE_SCALE_FACTOR;
 
 # Stytch
 
-Use Stytch as a User Source so the people who already sign in through your Stytch tenant can sign in to your MCP Gateways. Stytch's [Connected Apps](https://stytch.com/docs/guides/connected-apps/getting-started) feature turns your Stytch project into an OIDC identity provider that Arcade can connect to. This guide walks you through what to do in the Stytch Dashboard. Once you have the values it tells you to copy, [create the User Source in Arcade](/guides/user-sources#create-a-user-source).
+Use Stytch as a User Source so the people who already sign in through your Stytch project can sign in to your MCP Gateways. Stytch's [Connected Apps](https://stytch.com/docs/guides/connected-apps/getting-started) feature turns your Stytch project into an OIDC identity provider that Arcade can connect to. This guide applies to both Stytch [Consumer](https://stytch.com/docs/guides/connected-apps/getting-started) and [B2B](https://stytch.com/docs/b2b/guides/connected-apps/getting-started) projects; the Connected Apps feature behaves identically in both. Once you have the values it tells you to copy, [create the User Source in Arcade](/guides/user-sources#create-a-user-source).
 
 ## Before you start
 
 - A Stytch admin role that can manage Connected Apps in your project.
-- A [custom domain](https://stytch.com/docs/guides/dashboard/custom-domains) configured on the project. Arcade matches the OIDC `iss` claim byte-for-byte against the issuer URL you save on the User Source, and Stytch only emits a fully OIDC-compliant issuer when a custom domain is in place. Projects without a custom domain emit an issuer in the form `stytch.com/<project_id>`, which Arcade can't validate.
+- A Stytch project. You can develop and test in the project's test environment first and switch the Connected App to production mode when you're ready.
+- The Stytch [Frontend SDK](https://stytch.com/docs/sdks/getting-started/javascript) enabled on the project. Stytch's Connected Apps flow uses a customer-hosted page to render the authorization UI, and the SDK is what powers that page.
+- An **Authorization URL** configured on the Connected App, pointing to a page on your site that mounts Stytch's `<IdentityProvider />` (Consumer) or `<B2BIdentityProvider />` (B2B) component. Stytch's [Add Connected Apps to an existing authentication system](https://stytch.com/docs/guides/connected-apps/existing-auth-system) guide walks through the setup.
 - An Arcade project where you'll create the User Source.
-
-This guide applies to both Stytch [Consumer](https://stytch.com/docs/guides/connected-apps/getting-started) and [B2B](https://stytch.com/docs/b2b/guides/connected-apps/getting-started) projects. The Connected Apps feature works the same way in both. Only the Dashboard you log into differs.
 
 ## Register a Connected App in Stytch
 
@@ -25,39 +30,78 @@ This guide applies to both Stytch [Consumer](https://stytch.com/docs/guides/conn
 
 Sign in to the [Stytch Dashboard](https://stytch.com/dashboard) for your project.
 
-Go to **Connected Apps** in the left navigation, then click **Create Connected App**.
+Go to **Connected Apps** in the left navigation, then click **Add Application**.
 
-### Create the app
+### Choose the application type
 
-Give the Connected App a name your team will recognize, for example `Arcade User Source`.
+In the **Select type of Connected App** dialog:
 
-For **Client type**, select **Third-party app** (a confidential client). Arcade needs a client secret, so the public-client option isn't suitable.
+- **Application type**: **First-party application**. Arcade is part of your team's infrastructure, so first-party is the right pick. End users sign in without an additional Stytch consent screen.
+- **Authorization Code method**: **Confidential method**, with **Secure Web Application** selected. Arcade is a confidential client (it has a client secret), so the public method isn't suitable.
 
-Click **Create**. Stytch opens the new app's settings.
+Click **Add Application**.
 
-### Add the Arcade redirect URL
+<Image
+  alt="Select type of Connected App dialog with First-party application and Confidential method selected"
+  className="max-w-full mt-4"
+  src="/images/user-sources/stytch/stytch-create-app-light.png"
+  width={STYTCH_SCREENSHOT_WIDTH}
+  height={STYTCH_SCREENSHOT_HEIGHT}
+/>
 
-On the app's settings, find the **Redirect URLs** field and add this URL:
+### Name the app and add the Arcade redirect URL
+
+On the new app's **Details** page, set **Name** to something your team will recognize, for example `Arcade User Source`.
+
+Scroll to the **Login Redirect URLs** section and add this URL:
 
 `https://cloud.arcade.dev/oauth2/intermediate_callback`
 
-Save the change.
+Click **Save** to apply the changes. Stytch reveals the **Client ID** at the top of the details panel.
 
-### Note the client credentials
+<Image
+  alt="Connected App Details panel showing the Client ID at the top and Login Redirect URLs section with the Arcade redirect URL filled in"
+  className="max-w-full mt-4"
+  src="/images/user-sources/stytch/stytch-client-id-redirect-uri-light.png"
+  width={STYTCH_SCREENSHOT_WIDTH}
+  height={STYTCH_SCREENSHOT_HEIGHT}
+/>
 
-On the app's settings, copy the **Client ID** and the **Client Secret**. The secret is typically shown once on creation; Stytch lets you rotate it later if you lose track.
+### Save the client secret
+
+Stytch shows the **Client Secret** in a one-time dialog after the app is created. Copy it and keep it somewhere safe; you won't see the full value again from the Dashboard.
+
+Check the **I have saved my client secret in a secure place** box and confirm.
+
+<Image
+  alt="Did you save your client secret? dialog with the secret visible and the confirmation checkbox"
+  className="max-w-full mt-4"
+  src="/images/user-sources/stytch/stytch-client-secret-light.png"
+  width={STYTCH_SCREENSHOT_WIDTH}
+  height={STYTCH_SCREENSHOT_HEIGHT}
+/>
 
 </Steps>
 
 ## Copy these values to Arcade
 
+Open your project's **Project Overview** page in the Stytch Dashboard. The **Project ID & API keys** section lists your **Project domain**, which is the OIDC issuer Arcade uses.
+
+<Image
+  alt="Stytch Project Overview page with the Project domain field highlighted"
+  className="max-w-full mt-4"
+  src="/images/user-sources/stytch/stytch-domain-light.png"
+  width={STYTCH_SCREENSHOT_WIDTH}
+  height={STYTCH_SCREENSHOT_HEIGHT}
+/>
+
 Copy these values into Arcade's User Source form:
 
 | Arcade field | Where to find it in Stytch |
 |---|---|
-| **Issuer URL** | Your Stytch project's custom domain, for example `https://login.yourcompany.com`. This is the OIDC issuer Stytch publishes at `<your-custom-domain>/.well-known/openid-configuration`. |
-| **Client ID** | The **Client ID** on the Connected App's settings page. |
-| **Client Secret** | The **Client Secret** you copied when you created the app. |
+| **Issuer URL** | The full URL form of your **Project domain** from the **Project Overview** page, for example `https://<your-project-domain>.customers.stytch.dev`. Stytch publishes the OIDC discovery document at `<project-domain>/.well-known/openid-configuration`. |
+| **Client ID** | The ID shown at the top of the Connected App's **Details** page. |
+| **Client Secret** | The Client Secret you saved when you created the app. |
 
 ## Create the User Source in Arcade
 
@@ -67,7 +111,8 @@ Once the User Source is active, attach it to an MCP Gateway by following [Create
 
 ## Notes
 
-- **Custom domain expected**: Stytch projects without a custom domain emit an issuer in the form `stytch.com/<project_id>` (no scheme), which isn't a valid issuer URL. Arcade can't validate or match against that value. Set up a [custom domain](https://stytch.com/docs/guides/dashboard/custom-domains) on the Stytch side before creating the User Source.
-- **PKCE**: Arcade always uses PKCE when authenticating end users. Stytch's Connected Apps support PKCE on confidential clients automatically, with no separate setting.
+- **Test vs production**: Connected Apps default to test mode. Test-mode apps issue test-mode credentials and require test API keys. Enable the **Enable for production** toggle on the app's **Details** page when you're ready to issue live tokens, and update the User Source in Arcade with the production Client ID and Client Secret.
+- **Custom Stytch domains**: If you've configured a [custom domain](https://stytch.com/docs/guides/dashboard/custom-domains) on the Stytch project, use that hostname as the **Issuer URL** instead of the `<project-domain>.customers.stytch.dev` value. End users see the custom domain on the authorization page.
+- **PKCE**: Arcade always uses PKCE. Stytch's Confidential method accepts PKCE automatically, with no separate setting.
 - **Client secret rotation**: Stytch supports [rotating the client secret](https://stytch.com/docs/api/connected-apps-rotate-secret-start) for a Connected App from the Dashboard or via the API. The rotation flow lets you keep the old secret active while you swap the new one into Arcade. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for the Arcade side.
 - **Custom subject claims**: Arcade's default Subject Claim, `sub`, is the Stytch user's stable identifier. If you need Arcade to identify users by a different value, configure a [custom claim](https://stytch.com/docs/guides/sessions/custom-claims) on the ID token and set the User Source's **Subject Claim** to its name. Arcade only reads ID tokens, so the claim must be on the ID token (not the access token). See [Advanced: scopes and subject claim](/guides/user-sources#advanced-scopes-and-subject-claim) in the overview for what makes a good claim.
