@@ -109,7 +109,7 @@ Open the app's **Overview** page in Entra and copy these values into Arcade's Us
 | **Client ID** | The **Application (client) ID** field on the app's **Overview** page. |
 | **Client Secret** | The value you copied earlier when you created the client secret. It is not shown anywhere after creation, so use the value you saved rather than going back to the **Overview** page for it. |
 
-Leave Arcade's other defaults alone unless you have a specific reason to change them. See [Advanced settings](#advanced-settings) below.
+Leave Arcade's other defaults alone for a standard Entra setup. See [Optional: use `oid` as the subject claim](#optional-use-oid-as-the-subject-claim) below if you'd rather have Arcade identify users by their Entra directory ID instead of the per-app default.
 
 ## Create the User Source in Arcade
 
@@ -117,18 +117,15 @@ Open the [User Sources dashboard](https://cloud.arcade.dev/dashboard/user-source
 
 Once the User Source is active, attach it to an MCP Gateway by following [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard) and picking **User Source** under "Non-Arcade Users" in the gateway form.
 
-## Advanced settings
+## Optional: use `oid` as the subject claim
 
-You don't need to touch the **Advanced** section in the User Source form for a standard Entra ID setup, but two settings live there for cases where the defaults don't fit:
+The default Subject Claim, `sub`, identifies users with a per-app pseudonymous identifier. That's the right pick for most setups. If you'd rather see the user's directory-wide identifier in Arcade logs and gateway requests, useful when auditing against your Entra directory or correlating activity across multiple User Sources, open the form's **Advanced** section and change **Subject Claim** to `oid`.
 
-- **Subject Claim**: defaults to `sub`, which Entra issues as a stable, app-specific identifier. Switch to `oid` if you need the same user to resolve to the same identifier across multiple User Sources or app registrations in the same tenant. For example, when you want one Arcade user identity to follow a person across multiple gateway projects backed by different User Sources. The trade-off is privacy: `sub` is pairwise per app, so different apps can't correlate the same person, while `oid` is the user's directory-wide identifier. Whichever you pick, make sure the **profile** permission you granted above is in place. Entra only emits `oid` when `profile` is in the requested scopes.
-- **Scopes**: defaults to `openid profile email`, which matches the API permissions you granted in the step above. Add a scope here only if you've configured a custom claim on the ID token that depends on it.
-
-See [Advanced: scopes and subject claim](/guides/user-sources#advanced-scopes-and-subject-claim) in the User Sources overview for the general guidance.
+`oid` only appears in the ID token when `profile` is in the requested scopes. You granted the `profile` permission in the step above, and `profile` is in the default scope set, so nothing else changes.
 
 ## Notes
 
 - **Multi-tenant and personal-account options aren't supported today**: Arcade matches the OIDC `iss` claim on every ID token byte-for-byte against the issuer URL you save on the User Source. The **Multiple Entra ID tenants**, **Any Entra ID Tenant + Personal Microsoft accounts**, and **Personal accounts only** options all rely on Entra issuing tokens whose `iss` reflects the signing-in user's home tenant, so there's no single issuer URL that will validate for users from more than one tenant. If you need to onboard users from multiple Entra tenants today, create a separate Arcade User Source per tenant.
 - **PKCE**: Arcade always uses PKCE when authenticating end users. Entra ID accepts PKCE automatically on the **Web** platform, so you don't need to change any Entra setting.
 - **Client secret rotation**: Entra client secrets expire. Rotate yours before the expiration date. See [Rotate the client secret](/guides/user-sources#rotate-the-client-secret) in the User Sources guide for how.
-- **Custom subject claims**: If neither `sub` nor `oid` fits, configure the value you want as an [optional claim](https://learn.microsoft.com/en-us/entra/identity-platform/optional-claims#configure-optional-claims-in-your-application) on Entra's ID token, then set the User Source's **Subject Claim** to its name. Arcade can read any claim that ends up in the ID token; it doesn't have access to access tokens or other token types. See [Advanced: scopes and subject claim](/guides/user-sources#advanced-scopes-and-subject-claim) in the User Sources overview for what makes a good claim value. In particular, avoid claims that aren't both stable and never-reused.
+- **Custom subject claims**: If neither `sub` nor `oid` fits, you can configure a different value as an [optional claim](https://learn.microsoft.com/en-us/entra/identity-platform/optional-claims#configure-optional-claims-in-your-application) on Entra's ID token, then set the User Source's **Subject Claim** to its name. Arcade only reads ID tokens, so the claim must be on the ID token specifically (not the access token). See [Advanced: scopes and subject claim](/guides/user-sources#advanced-scopes-and-subject-claim) in the overview for what makes a good claim.
