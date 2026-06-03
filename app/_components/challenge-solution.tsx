@@ -31,11 +31,8 @@ export function ChallengeSolution({
 }: ChallengeSolutionProps) {
   return (
     <motion.div
-      className="group"
-      whileHover={{
-        scale: 1.01,
-        boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",
-      }}
+      className="group transition-shadow hover:shadow-[0_0_20px_0_oklch(from_var(--primary)_l_c_h_/_0.1)]"
+      whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.98 }}
     >
       <Card className="h-full overflow-hidden border-zinc-700 bg-[rgba(17,17,17,0.8)] backdrop-blur-xs">
@@ -78,16 +75,16 @@ export function ChallengeSolution({
                 {solution.description}
               </p>
               <Button
-                asChild
                 className="h-auto p-0 pt-1.5 text-zinc-400 hover:text-zinc-300"
+                render={
+                  <Link
+                    className="flex items-center gap-1.5"
+                    href={solution.href}
+                  />
+                }
                 variant="link"
               >
-                <Link
-                  className="flex items-center gap-1.5"
-                  href={solution.href}
-                >
-                  Learn more <ExternalLink className="h-4 w-4" />
-                </Link>
+                Learn more <ExternalLink className="h-4 w-4" />
               </Button>
             </div>
           </div>

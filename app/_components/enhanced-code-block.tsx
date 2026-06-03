@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@arcadeai/design-system";
 import { Copy, FileText } from "lucide-react";
 import type React from "react";
 
@@ -62,8 +63,7 @@ const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
             {displayName}
           </span>
         </div>
-        <button
-          className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-gray-600 text-xs transition-colors hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+        <Button
           onClick={async () => {
             try {
               await navigator.clipboard.writeText(children);
@@ -81,11 +81,12 @@ const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
               document.body.removeChild(textArea);
             }
           }}
-          type="button"
+          size="xs"
+          variant="ghost"
         >
-          <Copy className="h-3 w-3" />
+          <Copy />
           Copy
-        </button>
+        </Button>
       </div>
 
       {/* Code Content */}

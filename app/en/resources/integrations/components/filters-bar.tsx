@@ -78,15 +78,17 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
           <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
             {/* Category dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="flex-1 sm:flex-none"
-                  size="sm"
-                  variant="outline"
-                >
-                  <FolderOpen className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Category</span>
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    className="flex-1 sm:flex-none"
+                    size="sm"
+                    variant="outline"
+                  />
+                }
+              >
+                <FolderOpen className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Category</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
@@ -111,15 +113,17 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
 
             {/* Type dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="flex-1 sm:flex-none"
-                  size="sm"
-                  variant="outline"
-                >
-                  <Layers className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Type</span>
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    className="flex-1 sm:flex-none"
+                    size="sm"
+                    variant="outline"
+                  />
+                }
+              >
+                <Layers className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Type</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"
@@ -154,15 +158,17 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
 
             {/* Features dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="flex-1 sm:flex-none"
-                  size="sm"
-                  variant="outline"
-                >
-                  <Filter className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Features</span>
-                </Button>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    className="flex-1 sm:flex-none"
+                    size="sm"
+                    variant="outline"
+                  />
+                }
+              >
+                <Filter className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Features</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="start"

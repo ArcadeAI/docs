@@ -36,15 +36,13 @@ export function GlossaryTerm({
 
   return (
     <Popover onOpenChange={setOpen} open={open}>
-      <PopoverTrigger asChild>
-        <button
-          className="cursor-help border-gray-400 border-b border-dotted bg-transparent p-0 font-inherit text-inherit transition-colors hover:border-gray-600 dark:border-gray-600 dark:hover:border-gray-400"
-          onMouseEnter={() => setOpen(true)}
-          onMouseLeave={() => setOpen(false)}
-          type="button"
-        >
-          {displayText}
-        </button>
+      <PopoverTrigger
+        className="cursor-help border-gray-400 border-b border-dotted bg-transparent p-0 font-inherit text-inherit transition-colors hover:border-gray-600 dark:border-gray-600 dark:hover:border-gray-400"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        type="button"
+      >
+        {displayText}
       </PopoverTrigger>
       <PopoverContent
         align="center"

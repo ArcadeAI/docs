@@ -214,7 +214,7 @@ export function LandingPage() {
           className="-top-24 -z-10 sm:-top-40 absolute inset-x-0 transform-gpu overflow-hidden blur-3xl"
         >
           <div
-            className="-translate-x-1/2 relative left-[calc(50%-11rem)] aspect-1155/678 w-sm rotate-30 bg-linear-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-3xl"
+            className="-translate-x-1/2 relative left-[calc(50%-11rem)] aspect-1155/678 w-sm rotate-30 bg-linear-to-tr from-primary to-primary/30 opacity-20 sm:left-[calc(50%-30rem)] sm:w-3xl"
             style={{
               clipPath:
                 "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
@@ -254,37 +254,37 @@ export function LandingPage() {
               }}
             >
               <Button
-                asChild
-                className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
+                className="h-12 px-6"
+                render={
+                  <Link
+                    href="/get-started/quickstarts/call-tool-agent"
+                    onClick={trackClick(
+                      "hero_get_started_clicked",
+                      "/get-started/quickstarts/call-tool-agent"
+                    )}
+                  />
+                }
                 size="lg"
               >
-                <Link
-                  href="/get-started/quickstarts/call-tool-agent"
-                  onClick={trackClick(
-                    "hero_get_started_clicked",
-                    "/get-started/quickstarts/call-tool-agent"
-                  )}
-                >
-                  <Rocket className="mr-2 h-5 w-5" />
-                  Get Started
-                </Link>
+                <Rocket className="mr-2 h-5 w-5" />
+                Get Started
               </Button>
               <Button
-                asChild
-                className="h-12 border-gray-900 bg-transparent px-6 text-gray-900 hover:bg-gray-900 hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-gray-900"
+                className="h-12 px-6"
+                render={
+                  <Link
+                    href={INTEGRATIONS_PAGE_HREF}
+                    onClick={trackClick(
+                      "hero_explore_tools_clicked",
+                      INTEGRATIONS_PAGE_HREF
+                    )}
+                  />
+                }
                 size="lg"
                 variant="outline"
               >
-                <Link
-                  href={INTEGRATIONS_PAGE_HREF}
-                  onClick={trackClick(
-                    "hero_explore_tools_clicked",
-                    INTEGRATIONS_PAGE_HREF
-                  )}
-                >
-                  <Puzzle className="mr-2 h-5 w-5" />
-                  Explore Tools
-                </Link>
+                <Puzzle className="mr-2 h-5 w-5" />
+                Explore Tools
               </Button>
             </motion.div>
           </div>
@@ -294,7 +294,7 @@ export function LandingPage() {
       {/* LLM-friendly docs banner (desktop only) */}
       <div className="flex justify-center px-4">
         <Link
-          className="group inline-flex items-center gap-2.5 rounded-full border border-[#ee175e]/30 bg-gradient-to-r from-[#ee175e]/10 to-[#9089fc]/10 px-5 py-2 font-medium text-[#ee175e] text-sm shadow-sm transition-all hover:border-[#ee175e]/50 hover:shadow-md hover:shadow-[#ee175e]/10 dark:border-[#ee175e]/40 dark:from-[#ee175e]/15 dark:to-[#9089fc]/15 dark:text-[#ff6b8a]"
+          className="group inline-flex items-center gap-2.5 rounded-full border border-brand-accent/30 bg-gradient-to-r from-brand-accent/10 to-brand-accent/5 px-5 py-2 font-medium text-brand-accent text-sm shadow-sm transition-all hover:border-brand-accent/50 hover:shadow-md hover:shadow-brand-accent/10 dark:border-primary/40 dark:from-primary/15 dark:to-primary/5"
           href="/get-started/setup/connect-arcade-docs"
           onClick={trackClick(
             "llm_banner_clicked",
@@ -447,20 +447,20 @@ export function LandingPage() {
               </p>
             </div>
             <Button
-              asChild
               className="mt-4 min-[1062px]:mt-0"
+              render={
+                <Link
+                  href={INTEGRATIONS_PAGE_HREF}
+                  onClick={trackClick(
+                    "view_all_integrations_clicked",
+                    INTEGRATIONS_PAGE_HREF
+                  )}
+                />
+              }
               variant="outline"
             >
-              <Link
-                href={INTEGRATIONS_PAGE_HREF}
-                onClick={trackClick(
-                  "view_all_integrations_clicked",
-                  INTEGRATIONS_PAGE_HREF
-                )}
-              >
-                See all 7,000+
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+              See all 7,000+
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
           <div className="space-y-4">
@@ -613,20 +613,20 @@ export function LandingPage() {
               </p>
             </div>
             <Button
-              asChild
               className="mt-4 min-[1062px]:mt-0"
+              render={
+                <Link
+                  href="/resources/examples"
+                  onClick={trackClick(
+                    "view_all_examples_clicked",
+                    "/resources/examples"
+                  )}
+                />
+              }
               variant="outline"
             >
-              <Link
-                href="/resources/examples"
-                onClick={trackClick(
-                  "view_all_examples_clicked",
-                  "/resources/examples"
-                )}
-              >
-                See all examples
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
+              See all examples
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
           <div className="grid grid-cols-1 gap-8 min-[1062px]:grid-cols-3">
@@ -660,7 +660,7 @@ export function LandingPage() {
           </div>
           <div className="flex flex-wrap justify-center gap-6">
             <Link
-              className="flex items-center gap-2 text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+              className="flex items-center gap-2 text-gray-600 hover:text-brand-accent dark:text-gray-400 dark:hover:text-brand-accent"
               href="/references/api"
               onClick={trackClick("quick_link_api_clicked", "/references/api")}
             >
@@ -668,7 +668,7 @@ export function LandingPage() {
               <span className="font-medium">API Reference</span>
             </Link>
             <Link
-              className="flex items-center gap-2 text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+              className="flex items-center gap-2 text-gray-600 hover:text-brand-accent dark:text-gray-400 dark:hover:text-brand-accent"
               href="/references/cli-cheat-sheet"
               onClick={trackClick(
                 "quick_link_cli_clicked",
@@ -679,7 +679,7 @@ export function LandingPage() {
               <span className="font-medium">CLI Cheat Sheet</span>
             </Link>
             <Link
-              className="flex items-center gap-2 text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+              className="flex items-center gap-2 text-gray-600 hover:text-brand-accent dark:text-gray-400 dark:hover:text-brand-accent"
               href="/resources/faq"
               onClick={trackClick("quick_link_faq_clicked", "/resources/faq")}
             >
@@ -687,7 +687,7 @@ export function LandingPage() {
               <span className="font-medium">FAQ</span>
             </Link>
             <Link
-              className="flex items-center gap-2 text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
+              className="flex items-center gap-2 text-gray-600 hover:text-brand-accent dark:text-gray-400 dark:hover:text-brand-accent"
               href="/references/changelog"
               onClick={trackClick(
                 "quick_link_changelog_clicked",
@@ -707,7 +707,7 @@ export function LandingPage() {
         className="-z-10 absolute inset-x-0 top-[calc(100%-13rem)] transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
       >
         <div
-          className="-translate-x-1/2 relative left-[calc(50%+3rem)] aspect-1155/678 w-sm bg-linear-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-3xl"
+          className="-translate-x-1/2 relative left-[calc(50%+3rem)] aspect-1155/678 w-sm bg-linear-to-tr from-primary to-primary/30 opacity-20 sm:left-[calc(50%+36rem)] sm:w-3xl"
           style={{
             clipPath:
               "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",

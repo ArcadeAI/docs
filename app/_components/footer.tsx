@@ -85,7 +85,7 @@ const ResourceCol: React.FC<ResourceColProps> = ({ title, resources }) => (
       {resources?.map((resource) => (
         <li key={resource.url}>
           <a
-            className="text-gray-500 no-underline transition-colors duration-150 ease-in-out hover:text-primary"
+            className="text-gray-500 no-underline transition-colors duration-150 ease-in-out hover:text-brand-accent"
             href={resource.url}
             rel="noreferrer"
             target={resource.external ? "_blank" : "_self"}

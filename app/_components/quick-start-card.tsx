@@ -49,8 +49,8 @@ export function QuickStartCard({
   const content = (
     <>
       <CardHeader className="flex flex-row items-center gap-3 p-4 min-[1062px]:p-6">
-        <div className="rounded-full bg-[#ee175e]/10 p-2">
-          <Icon className="h-5 w-5 text-[#ee175e]" />
+        <div className="rounded-full bg-brand-accent/10 p-2">
+          <Icon className="h-5 w-5 text-brand-accent" />
         </div>
         <CardTitle className="text-gray-900 text-xl tracking-tight dark:text-white">
           {title}
@@ -102,7 +102,7 @@ export function QuickStartCard({
           </pre>
         )}
         {isClickable && (
-          <div className="mt-4 flex items-center justify-end font-medium text-[#ee175e] text-sm">
+          <div className="mt-4 flex items-center justify-end font-medium text-brand-accent text-sm">
             Learn more
             <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
@@ -143,14 +143,11 @@ export function QuickStartCard({
 
   return (
     <motion.div
-      className="h-full"
-      whileHover={{
-        scale: 1.02,
-        boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",
-      }}
+      className="h-full transition-shadow hover:shadow-[0_0_20px_0_oklch(from_var(--primary)_l_c_h_/_0.1)]"
+      whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
     >
-      <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
+      <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-primary/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
         {wrapper}
       </Card>
     </motion.div>

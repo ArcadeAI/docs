@@ -1,10 +1,5 @@
 "use client";
-import {
-  Button,
-  buttonVariants,
-  getToolkitIcon,
-  Separator,
-} from "@arcadeai/design-system";
+import { Button, getToolkitIcon, Separator } from "@arcadeai/design-system";
 import { Generic as GenericIcon } from "@arcadeai/design-system/components/ui/atoms/icons";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Code2, MessageSquarePlus, Search } from "lucide-react";
@@ -123,15 +118,15 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                   <p className="!mt-2 flex-1 text-gray-700 text-xs leading-relaxed dark:text-gray-300">
                     Use Arcade's SDK to integrate with any service or API.
                   </p>
-                  <Link
-                    className={cn(
-                      buttonVariants({ variant: "default", size: "sm" }),
-                      "mt-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-700 dark:bg-blue-500 dark:active:bg-blue-600 dark:hover:bg-blue-600"
-                    )}
-                    href="/guides/create-tools/tool-basics/build-mcp-server"
+                  <Button
+                    className="mt-3"
+                    render={
+                      <Link href="/guides/create-tools/tool-basics/build-mcp-server" />
+                    }
+                    size="sm"
                   >
                     Learn how to build a MCP Server
-                  </Link>
+                  </Button>
                 </div>
                 <div className="flex flex-col rounded-md border border-blue-500/30 bg-white/70 p-4 dark:border-blue-400/30 dark:bg-gray-900/40">
                   <div className="flex items-center gap-2">
@@ -143,15 +138,16 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                   <p className="!mt-2 flex-1 text-gray-700 text-xs leading-relaxed dark:text-gray-300">
                     Request a missing tool, suggest a feature, or report a bug.
                   </p>
-                  <Link
-                    className={cn(
-                      buttonVariants({ variant: "outline", size: "sm" }),
-                      "mt-3"
-                    )}
-                    href="/resources/integrations/tool-feedback"
+                  <Button
+                    className="mt-3"
+                    render={
+                      <Link href="/resources/integrations/tool-feedback" />
+                    }
+                    size="sm"
+                    variant="outline"
                   >
                     Submit tool feedback
-                  </Link>
+                  </Button>
                 </div>
               </div>
             </div>
