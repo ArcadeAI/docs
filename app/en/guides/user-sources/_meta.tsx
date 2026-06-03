@@ -7,6 +7,9 @@ export const meta: MetaRecord = {
   auth0: {
     title: "Auth0",
   },
+  clerk: {
+    title: "Clerk",
+  },
   "microsoft-entra-id": {
     title: "Microsoft Entra ID",
   },
