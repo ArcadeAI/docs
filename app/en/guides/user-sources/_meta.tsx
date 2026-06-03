@@ -16,6 +16,9 @@ export const meta: MetaRecord = {
   okta: {
     title: "Okta",
   },
+  stytch: {
+    title: "Stytch",
+  },
 };
 
 export default meta;
