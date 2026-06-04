@@ -25,6 +25,10 @@ const meta: MetaRecord = {
     title: "Figma",
     href: "/en/resources/integrations/productivity/figma",
   },
+  forkable: {
+    title: "Forkable",
+    href: "/en/resources/integrations/productivity/forkable",
+  },
   gmail: {
     title: "Gmail",
     href: "/en/resources/integrations/productivity/gmail",
