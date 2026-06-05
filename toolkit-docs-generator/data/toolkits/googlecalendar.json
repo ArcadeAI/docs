@@ -1,7 +1,7 @@
 {
   "id": "GoogleCalendar",
   "label": "Google Calendar",
-  "version": "3.3.2",
+  "version": "3.4.0",
   "description": "Arcade.dev LLM tools for Google Calendar",
   "metadata": {
     "category": "productivity",
@@ -27,8 +27,8 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "GoogleCalendar.CreateEvent",
-      "fullyQualifiedName": "GoogleCalendar.CreateEvent@3.3.2",
-      "description": "Create a new event/meeting/sync/meetup in the specified calendar.",
+      "fullyQualifiedName": "GoogleCalendar.CreateEvent@3.4.0",
+      "description": "Create a new event/meeting/sync/meetup in the specified calendar.\n\nPass `recurrence` to create a repeating event.",
       "parameters": [
         {
           "name": "summary",
@@ -119,6 +119,15 @@
           "description": "Whether to add a Google Meet link to the event. Defaults to False.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "recurrence",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Recurrence rules for a repeating event, in RFC 5545 format. Each entry is an RRULE/RDATE/EXDATE line; a bare rule is automatically prefixed with 'RRULE:'. Examples: ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for every Mon/Wed/Fri for 10 occurrences, or ['RRULE:FREQ=DAILY;UNTIL=20241231T000000Z'] for daily until 2024-12-31. Omit for a one-time event.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
@@ -140,17 +149,17 @@
         "toolName": "GoogleCalendar.CreateEvent",
         "parameters": {
           "summary": {
-            "value": "Project Kickoff Meeting",
+            "value": "Team Sprint Planning Meeting",
             "type": "string",
             "required": true
           },
           "start_datetime": {
-            "value": "2026-03-10T09:00:00-04:00",
+            "value": "2025-03-15T10:00:00",
             "type": "string",
             "required": true
           },
           "end_datetime": {
-            "value": "2026-03-10T10:00:00-04:00",
+            "value": "2025-03-15T11:30:00",
             "type": "string",
             "required": true
           },
@@ -160,12 +169,12 @@
             "required": false
           },
           "description": {
-            "value": "Initial project kickoff to align on scope, timeline, and next steps.",
+            "value": "Weekly sprint planning session to review backlog, assign tasks, and set goals for the upcoming sprint.",
             "type": "string",
             "required": false
           },
           "location": {
-            "value": "Conference Room B / Zoom",
+            "value": "Conference Room B, 123 Main St, San Francisco, CA 94105",
             "type": "string",
             "required": false
           },
@@ -176,8 +185,9 @@
           },
           "attendee_emails": {
             "value": [
-              "alice@example.com",
-              "bob@example.org"
+              "alice.johnson@example.com",
+              "bob.smith@example.com",
+              "carol.white@example.com"
             ],
             "type": "array",
             "required": false
@@ -190,6 +200,13 @@
           "add_google_meet": {
             "value": true,
             "type": "boolean",
+            "required": false
+          },
+          "recurrence": {
+            "value": [
+              "RRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=8"
+            ],
+            "type": "array",
             "required": false
           }
         },
@@ -218,7 +235,7 @@
     {
       "name": "DeleteEvent",
       "qualifiedName": "GoogleCalendar.DeleteEvent",
-      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@3.3.2",
+      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@3.4.0",
       "description": "Delete an event from Google Calendar.",
       "parameters": [
         {
@@ -308,7 +325,7 @@
     {
       "name": "FindTimeSlotsWhenEveryoneIsFree",
       "qualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree",
-      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@3.3.2",
+      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@3.4.0",
       "description": "Provides time slots when everyone is free within a given date range and time boundaries.",
       "parameters": [
         {
@@ -424,7 +441,7 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "GoogleCalendar.ListCalendars",
-      "fullyQualifiedName": "GoogleCalendar.ListCalendars@3.3.2",
+      "fullyQualifiedName": "GoogleCalendar.ListCalendars@3.4.0",
       "description": "List all calendars accessible by the user.",
       "parameters": [
         {
@@ -524,7 +541,7 @@
     {
       "name": "ListEvents",
       "qualifiedName": "GoogleCalendar.ListEvents",
-      "fullyQualifiedName": "GoogleCalendar.ListEvents@3.3.2",
+      "fullyQualifiedName": "GoogleCalendar.ListEvents@3.4.0",
       "description": "List events from the specified calendar within the given datetime range.\n\nmin_end_datetime serves as the lower bound (exclusive) for an event's end time.\nmax_start_datetime serves as the upper bound (exclusive) for an event's start time.\n\nFor example:\nIf min_end_datetime is set to 2024-09-15T09:00:00 and max_start_datetime\nis set to 2024-09-16T17:00:00, the function will return events that:\n1. End after 09:00 on September 15, 2024 (exclusive)\n2. Start before 17:00 on September 16, 2024 (exclusive)\nThis means an event starting at 08:00 on September 15 and\nending at 10:00 on September 15 would be included, but an\nevent starting at 17:00 on September 16 would not be included.",
       "parameters": [
         {
@@ -624,7 +641,7 @@
     {
       "name": "UpdateEvent",
       "qualifiedName": "GoogleCalendar.UpdateEvent",
-      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@3.3.2",
+      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@3.4.0",
       "description": "Update an existing event in the specified calendar with the provided details.\nOnly the provided fields will be updated; others will remain unchanged.\n\n`updated_start_datetime` and `updated_end_datetime` are\nindependent and can be provided separately.",
       "parameters": [
         {
@@ -697,6 +714,15 @@
           "inferrable": true
         },
         {
+          "name": "updated_recurrence",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Updated recurrence rules for a repeating event, in RFC 5545 format. Each entry is an RRULE/RDATE/EXDATE line; a bare rule is automatically prefixed with 'RRULE:'. Provide the full set of rules to replace the event's existing recurrence, e.g. ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for every Mon/Wed/Fri for 10 occurrences. Pass an empty list ([]) to REMOVE recurrence and make the event a one-time event. Omit (leave unset) to leave recurrence unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
           "name": "attendee_emails_to_add",
           "type": "array",
           "innerType": "string",
@@ -757,17 +783,17 @@
         "toolName": "GoogleCalendar.UpdateEvent",
         "parameters": {
           "event_id": {
-            "value": "evt_9a8b7c6d",
+            "value": "abc123xyz789eventid",
             "type": "string",
             "required": true
           },
           "updated_start_datetime": {
-            "value": "2026-03-10T09:00:00",
+            "value": "2024-12-31T15:30:00",
             "type": "string",
             "required": false
           },
           "updated_end_datetime": {
-            "value": "2026-03-10T10:30:00",
+            "value": "2024-12-31T17:30:00",
             "type": "string",
             "required": false
           },
@@ -777,17 +803,17 @@
             "required": false
           },
           "updated_summary": {
-            "value": "Quarterly Planning Meeting",
+            "value": "Team Year-End Review Meeting",
             "type": "string",
             "required": false
           },
           "updated_description": {
-            "value": "Discuss Q2 objectives, budget allocation, and hiring needs.",
+            "value": "Annual review of team goals, achievements, and plans for the upcoming year.",
             "type": "string",
             "required": false
           },
           "updated_location": {
-            "value": "Conference Room B / Zoom",
+            "value": "Conference Room B, 123 Main St, San Francisco, CA 94105",
             "type": "string",
             "required": false
           },
@@ -796,17 +822,24 @@
             "type": "string",
             "required": false
           },
+          "updated_recurrence": {
+            "value": [
+              "RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10"
+            ],
+            "type": "array",
+            "required": false
+          },
           "attendee_emails_to_add": {
             "value": [
               "alice@example.com",
-              "bob@company.com"
+              "bob@company.org"
             ],
             "type": "array",
             "required": false
           },
           "attendee_emails_to_remove": {
             "value": [
-              "carol@example.com"
+              "charlie@oldcompany.com"
             ],
             "type": "array",
             "required": false
@@ -847,7 +880,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleCalendar.WhoAmI",
-      "fullyQualifiedName": "GoogleCalendar.WhoAmI@3.3.2",
+      "fullyQualifiedName": "GoogleCalendar.WhoAmI@3.4.0",
       "description": "Get comprehensive user profile and Google Calendar environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Calendar access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -912,6 +945,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.392Z",
-  "summary": "Arcade.dev offers a toolkit for Google Calendar that streamlines event management and calendar interaction through powerful APIs. This toolkit enables developers to effectively create, update, and manage calendar events while accessing user calendars.\n\n**Capabilities:**\n- Create and delete events seamlessly.\n- Fetch user calendars and events within specified date ranges.\n- Identify time slots when all participants are available.\n- Retrieve user profile information from Google services.\n\n**OAuth:**\n- Provider: Google\n- Scopes: `https://www.googleapis.com/auth/calendar.events`, `https://www.googleapis.com/auth/calendar.readonly`, `https://www.googleapis.com/auth/userinfo.email`, `https://www.googleapis.com/auth/userinfo.profile`."
+  "generatedAt": "2026-06-05T12:08:01.475Z",
+  "summary": "The Google Calendar toolkit for Arcade integrates with Google Calendar via OAuth, enabling LLMs to read, create, update, and delete calendar data on behalf of authenticated users.\n\n## Capabilities\n\n- **Calendar discovery & user context:** List all calendars accessible to the user and retrieve the authenticated user's profile, email, and Calendar access permissions.\n- **Event querying:** List events within a datetime range using precise exclusive bounds on both start and end times, supporting complex filtering across one or more days.\n- **Event management:** Create single or recurring events (via recurrence rules), update individual fields of existing events without overwriting unchanged fields, and delete events.\n- **Scheduling assistance:** Find available time slots when all specified participants are free within a given date range and time boundaries.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details, required API enablement, and scope coverage."
 }
