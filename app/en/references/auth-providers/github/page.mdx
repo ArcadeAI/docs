@@ -822,11 +822,10 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 | **Repositories**  | Contents (Read/Write for file ops), Metadata (Read), Members (Read for org repos) |
 | **Reviews**       | Contents (Read), Pull requests (Read/Write), Metadata (Read)                      |
 | **User Context**  | Read user profile, Members (Read for orgs)                                        |
-| **Notifications** | ⚠️ Classic PAT with `notifications` scope (GitHub Apps limitation)                |
 
 ### Detailed Permissions by Category
 
-<Tabs items={["Issues", "Pull Requests", "Projects", "Repositories", "User Context", "Special Cases"]}>
+<Tabs items={["Issues", "Pull Requests", "Projects", "Repositories", "User Context", "Act on Behalf of User"]}>
 <Tabs.Tab>
 
 **Issues Tools** (7 tools):
@@ -914,18 +913,7 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 </Tabs.Tab>
 <Tabs.Tab>
 
-**⚠️ Notifications Tools**
-
-GitHub Apps **cannot** access the notifications API. This is a [platform limitation by design](https://docs.github.com/en/rest/activity/notifications).
-
-**Workaround:**
-
-- Tools: `get_notification_summary`, `list_notifications`
-- **Required**: Classic Personal Access Token with `notifications` scope
-- **Create at**: [github.com/settings/tokens](https://github.com/settings/tokens)
-- **Why**: Notifications are personal user data, not accessible to apps by GitHub's design
-
-**User-on-Behalf-of Actions:**
+**Act on Behalf of User**
 
 The "Act on behalf of user" permission is only needed for specific user-attributed actions:
 
@@ -1029,7 +1017,6 @@ After initial installation, you can add more repositories:
 | **"Installation not found"**                 | Wrong Installation ID                               | Check Installation ID in URL                     |
 | **"403 Forbidden"**                          | Missing permissions, not installed, or rate limited | Review permissions, check installation           |
 | **"404 Not Found" on existing repo**         | Permissions not approved by admin                   | Check app settings → verify permissions approved |
-| **Notifications not working**                | GitHub Apps can't access notifications              | Use classic PAT with `notifications` scope       |
 | **Can't star repositories**                  | Missing "Act on behalf of user" permission          | Enable in User permissions settings              |
 
 ### Debugging Steps
@@ -1109,13 +1096,6 @@ A: Starring repositories requires the "Act on behalf of user" permission:
 - Users must authorize this permission when they first use your agent
 - The app can still read and perform other actions without this permission
 - [Why this permission exists](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/authenticating-with-a-github-app-on-behalf-of-a-user)
-
-**Q: Why can't I access notifications?**
-A: Notifications require a classic PAT (GitHub Apps cannot access notifications API by design):
-
-- This is a platform limitation, not an Arcade limitation
-- Create a classic PAT at [github.com/settings/tokens](https://github.com/settings/tokens) with `notifications` scope
-- [Why GitHub Apps can't access notifications](https://docs.github.com/en/rest/activity/notifications)
 
 ### Security
 
