@@ -97,6 +97,10 @@ const meta: MetaRecord = {
     title: "Microsoft Word",
     href: "/en/resources/integrations/productivity/microsoft-word",
   },
+  resend: {
+    title: "Resend",
+    href: "/en/resources/integrations/productivity/resend",
+  },
   "-- Starter": {
     type: "separator",
     title: "Starter",
