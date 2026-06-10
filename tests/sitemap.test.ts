@@ -36,6 +36,68 @@ test("sitemap lists expected URLs", async () => {
   }
 });
 
+test("sitemap contains no URL that we redirect away", async () => {
+  const previousSiteUrl = process.env.SITE_URL;
+  process.env.SITE_URL = "https://example.test";
+
+  try {
+    const { default: sitemap } = await import("../app/sitemap");
+    const entries = await sitemap();
+    const paths = entries.map((entry) =>
+      entry.url.replace("https://example.test", "")
+    );
+
+    // Every redirect `source` in next.config.ts is a path we 3xx away, so a live
+    // page must never sit there — otherwise the sitemap ships a redirecting URL
+    // (Ahrefs "3XX redirect in sitemap"). This guards against stale pages left
+    // behind after a rename, e.g. the logic-extensions page that lingered after
+    // the contextual-access rename (MARTECH-16).
+    const config = readFileSync(join(process.cwd(), "next.config.ts"), "utf-8");
+    const exactSources = new Set<string>();
+    const prefixSources: string[] = [];
+
+    for (const match of config.matchAll(/source:\s*"([^"]+)"/g)) {
+      const normalized = match[1]
+        .replace(/:locale\([^)]*\)/g, "en")
+        .replace(/:locale/g, "en");
+
+      if (normalized.includes("/:")) {
+        // Wildcard source (e.g. ".../:path*"): match by its static prefix, but
+        // skip any that collapse to just the locale to avoid matching everything.
+        const prefix = normalized.slice(0, normalized.indexOf("/:"));
+        if (prefix.split("/").filter(Boolean).length >= 2) {
+          prefixSources.push(prefix);
+        }
+      } else {
+        exactSources.add(normalized);
+      }
+    }
+
+    const offenders = paths.filter(
+      (path) =>
+        exactSources.has(path) ||
+        prefixSources.some(
+          (prefix) => path === prefix || path.startsWith(`${prefix}/`)
+        )
+    );
+
+    for (const offender of offenders) {
+      console.error(
+        `Sitemap includes ${offender}, which matches a redirect source in next.config.ts. ` +
+          "Delete the stale page (or remove the redirect) so the sitemap ships no 3XX URLs (MARTECH-16)."
+      );
+    }
+
+    expect(offenders).toEqual([]);
+  } finally {
+    if (previousSiteUrl === undefined) {
+      process.env.SITE_URL = undefined;
+    } else {
+      process.env.SITE_URL = previousSiteUrl;
+    }
+  }
+});
+
 test("robots.txt references the sitemap", () => {
   const robotsPath = join(process.cwd(), "public", "robots.txt");
   const robotsContent = readFileSync(robotsPath, "utf-8");
