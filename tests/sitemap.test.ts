@@ -49,9 +49,8 @@ test("sitemap contains no URL that we redirect away", async () => {
 
     // Every redirect `source` in next.config.ts is a path we 3xx away, so a live
     // page must never sit there — otherwise the sitemap ships a redirecting URL
-    // (Ahrefs "3XX redirect in sitemap"). This guards against stale pages left
-    // behind after a rename, e.g. the logic-extensions page that lingered after
-    // the contextual-access rename (MARTECH-16).
+    // (Ahrefs flags "3XX redirect in sitemap"). Guards against pages left behind
+    // after a rename.
     const config = readFileSync(join(process.cwd(), "next.config.ts"), "utf-8");
     const exactSources = new Set<string>();
     const prefixSources: string[] = [];
@@ -84,7 +83,7 @@ test("sitemap contains no URL that we redirect away", async () => {
     for (const offender of offenders) {
       console.error(
         `Sitemap includes ${offender}, which matches a redirect source in next.config.ts. ` +
-          "Delete the stale page (or remove the redirect) so the sitemap ships no 3XX URLs (MARTECH-16)."
+          "Delete the stale page (or remove the redirect) so the sitemap ships no 3XX URLs."
       );
     }
 

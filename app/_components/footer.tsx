@@ -54,9 +54,6 @@ const Socials = () => (
     >
       <Linkedin className="h-6 w-6 text-gray-400 transition-colors duration-150 ease-in-out hover:text-gray-900" />
     </a>
-    {/* Internal contact page instead of a raw mailto: a sitewide mailto gets
-        rewritten by Cloudflare Email Obfuscation into /cdn-cgi/l/email-protection,
-        which 404s for crawlers and tanks the Ahrefs health score (MARTECH-16). */}
     <a href="/en/resources/contact-us" title="Contact us">
       <Mail className="h-6 w-6 text-gray-400 transition-colors duration-150 ease-in-out hover:text-gray-900" />
     </a>
