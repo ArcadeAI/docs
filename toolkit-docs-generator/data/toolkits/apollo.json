@@ -1,0 +1,692 @@
+{
+  "id": "Apollo",
+  "label": "Apollo",
+  "version": "0.1.0",
+  "description": "Arcade tools designed for LLMs to interact with Apollo.io sales intelligence",
+  "metadata": {
+    "category": "sales",
+    "iconUrl": "https://design-system.arcade.dev/icons/apollo.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/sales/apollo",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "EnrichOrganization",
+      "qualifiedName": "Apollo.EnrichOrganization",
+      "fullyQualifiedName": "Apollo.EnrichOrganization@0.1.0",
+      "description": "Turn a company domain into firmographics (industry, size, revenue, funding,\nlocation) so a rep can qualify and size an account. Consumes one enrichment\ncredit on a match; when the plan is out of credits the result reports\nstatus=insufficient_credits rather than failing.",
+      "parameters": [
+        {
+          "name": "domain",
+          "type": "string",
+          "required": true,
+          "description": "Company domain to look up, such as apollo.io. A full URL or www prefix is accepted and normalized.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "APOLLO_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "APOLLO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The matched company, or found=False when no match."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Apollo.EnrichOrganization",
+        "parameters": {
+          "domain": {
+            "value": "stripe.com",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "EnrichPerson",
+      "qualifiedName": "Apollo.EnrichPerson",
+      "fullyQualifiedName": "Apollo.EnrichPerson@0.1.0",
+      "description": "Turn a known person into a verified profile with their current role and,\non request, contact details. Provide at least one identifier: an Apollo person\nID, a name (or first and last name), an email, or a LinkedIn URL; an employer\nname or domain alone is not enough to identify someone. Consumes one enrichment\ncredit on a match; when the plan is out of credits the result reports\nstatus=insufficient_credits rather than failing.",
+      "parameters": [
+        {
+          "name": "person_id",
+          "type": "string",
+          "required": false,
+          "description": "Apollo person ID, such as the id from a people search result. The most reliable identifier when available. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Full name of the person. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": false,
+          "description": "First name, paired with last_name. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": false,
+          "description": "Last name, paired with first_name. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Known email address of the person. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_name",
+          "type": "string",
+          "required": false,
+          "description": "Employer name to disambiguate a name match. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "domain",
+          "type": "string",
+          "required": false,
+          "description": "Employer domain to disambiguate a name match. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "linkedin_url",
+          "type": "string",
+          "required": false,
+          "description": "LinkedIn profile URL of the person. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reveal_work_email",
+          "type": "boolean",
+          "required": false,
+          "description": "When True, include the matched person's work email in the result. A successful match consumes an enrichment credit whether or not this is set, so the flag controls only whether the email value is surfaced. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "APOLLO_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "APOLLO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The matched person, or found=False when no match."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Apollo.EnrichPerson",
+        "parameters": {
+          "person_id": {
+            "value": "583f6b2e7b6b8a1d4e9c0f23",
+            "type": "string",
+            "required": false
+          },
+          "name": {
+            "value": "Jane Doe",
+            "type": "string",
+            "required": false
+          },
+          "first_name": {
+            "value": "Jane",
+            "type": "string",
+            "required": false
+          },
+          "last_name": {
+            "value": "Doe",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@techcorp.com",
+            "type": "string",
+            "required": false
+          },
+          "organization_name": {
+            "value": "TechCorp Inc.",
+            "type": "string",
+            "required": false
+          },
+          "domain": {
+            "value": "techcorp.com",
+            "type": "string",
+            "required": false
+          },
+          "linkedin_url": {
+            "value": "https://www.linkedin.com/in/janedoe",
+            "type": "string",
+            "required": false
+          },
+          "reveal_work_email": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetApiUsage",
+      "qualifiedName": "Apollo.GetApiUsage",
+      "fullyQualifiedName": "Apollo.GetApiUsage@0.1.0",
+      "description": "Report per-endpoint rate limits and how many requests remain, so the agent\ncan pace a batch of lookups and avoid being throttled. Requires an Apollo\nmaster API key.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "APOLLO_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "APOLLO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Per-endpoint rate limits and remaining request counts."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Apollo.GetApiUsage",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchOrganizations",
+      "qualifiedName": "Apollo.SearchOrganizations",
+      "fullyQualifiedName": "Apollo.SearchOrganizations@0.1.0",
+      "description": "Find companies in Apollo's database that match a firmographic profile so a\nrep can prioritize the accounts worth working. Results include firmographics\ninline unless include_firmographics is disabled. Company search consumes plan\ncredits; when the plan is out of credits the result reports\nstatus=insufficient_credits with an empty list rather than failing.",
+      "parameters": [
+        {
+          "name": "keyword_tags",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Industry or keyword tags to match, such as fintech or cybersecurity. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "locations",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Headquarters locations, such as a city, state, or country. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "num_employees_ranges",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Headcount ranges, each formatted as min,max (for example 51,200). Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "revenue_min",
+          "type": "integer",
+          "required": false,
+          "description": "Minimum annual revenue in whole dollars. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "revenue_max",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum annual revenue in whole dollars. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "technology_uids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Apollo technology UIDs the company must use. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_firmographics",
+          "type": "boolean",
+          "required": false,
+          "description": "When True, backfill each result with firmographics (industry, headcount, location, revenue, founded year) via enrichment so accounts can be ranked without a separate lookup; set False for a faster, lighter name/domain-only list. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum companies to return, 1 to 100. Default is 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position into the matches. Default is 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "APOLLO_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "APOLLO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching companies with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Apollo.SearchOrganizations",
+        "parameters": {
+          "keyword_tags": {
+            "value": [
+              "fintech",
+              "cybersecurity",
+              "cloud computing"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "locations": {
+            "value": [
+              "San Francisco, CA",
+              "New York, NY",
+              "United States"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "num_employees_ranges": {
+            "value": [
+              "51,200",
+              "201,500"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "revenue_min": {
+            "value": 1000000,
+            "type": "integer",
+            "required": false
+          },
+          "revenue_max": {
+            "value": 50000000,
+            "type": "integer",
+            "required": false
+          },
+          "technology_uids": {
+            "value": [
+              "salesforce",
+              "aws",
+              "hubspot"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "include_firmographics": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchPeople",
+      "qualifiedName": "Apollo.SearchPeople",
+      "fullyQualifiedName": "Apollo.SearchPeople@0.1.0",
+      "description": "Find people in Apollo's database by role and the firmographics of their\nemployer. Returns lightweight records without email or phone; use person\nenrichment to reveal verified contact details.",
+      "parameters": [
+        {
+          "name": "person_titles",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Job titles to match, such as VP of Sales. Matched loosely unless include_similar_titles is disabled. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "person_seniorities",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Seniority levels of the person's current role. Default is None.",
+          "enum": [
+            "owner",
+            "founder",
+            "c_suite",
+            "partner",
+            "vp",
+            "head",
+            "director",
+            "manager",
+            "senior",
+            "entry",
+            "intern"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "person_locations",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Locations of the person, such as a city, state, or country. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_locations",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Locations of the person's employer headquarters. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_num_employees_ranges",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Employer headcount ranges, each formatted as min,max (for example 51,200). Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "employer_domains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Company domains the person must work at. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Free-text keywords matched across the person's profile. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_similar_titles",
+          "type": "boolean",
+          "required": false,
+          "description": "When True, titles match loosely (similar titles included). Set False to keep only people whose title exactly matches one of person_titles. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum people to return, 1 to 100. Default is 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position into the matches. Default is 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "APOLLO_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "APOLLO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching people with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Apollo.SearchPeople",
+        "parameters": {
+          "person_titles": {
+            "value": [
+              "VP of Sales",
+              "Director of Marketing",
+              "Chief Revenue Officer"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "person_seniorities": {
+            "value": [
+              "vp",
+              "director",
+              "c_suite"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "person_locations": {
+            "value": [
+              "San Francisco, California",
+              "New York, NY",
+              "United States"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "organization_locations": {
+            "value": [
+              "Austin, Texas",
+              "London, United Kingdom"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "organization_num_employees_ranges": {
+            "value": [
+              "51,200",
+              "201,500"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "employer_domains": {
+            "value": [
+              "salesforce.com",
+              "hubspot.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "keywords": {
+            "value": "SaaS B2B growth strategy revenue",
+            "type": "string",
+            "required": false
+          },
+          "include_similar_titles": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-06-10T12:11:44.647Z",
+  "summary": "# Apollo Toolkit\n\nThe Apollo toolkit lets LLMs interact with [Apollo.io](https://www.apollo.io/) sales intelligence, enabling account research, lead discovery, and contact enrichment workflows via the Apollo API.\n\n## Capabilities\n\n- **Company intelligence**: Search Apollo's database by firmographic filters and enrich a company domain into detailed account data (industry, size, revenue, funding, location).\n- **People discovery & enrichment**: Search for people by role and employer profile, then enrich individual records with verified contact details using any available identifier (Apollo ID, name, email, or LinkedIn URL).\n- **Credit-aware results**: Enrichment and search operations report `status=insufficient_credits` with graceful degradation rather than hard failures when plan credits are exhausted.\n- **Rate-limit introspection**: Retrieve per-endpoint rate limits and remaining request counts to let agents pace batch workloads and avoid throttling.\n\n## Secrets\n\n`APOLLO_API_KEY` — A master API key issued by Apollo.io, required for all toolkit calls. The `Apollo.GetApiUsage` tool specifically requires the **master** API key (not a scoped or restricted key). Obtain it from the [Apollo.io API Keys settings page](https://app.apollo.io/#/settings/integrations/api) (Settings → Integrations → API Keys → Create new key). Ensure the key has the permissions your plan supports; enrichment and search calls consume plan credits tied to the key's account.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to configure secrets in Arcade, or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}

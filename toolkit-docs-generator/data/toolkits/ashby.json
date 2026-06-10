@@ -1,0 +1,729 @@
+{
+  "id": "Ashby",
+  "label": "Ashby",
+  "version": "0.1.0",
+  "description": "Arcade.dev tools for interacting with Ashby",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/ashby.svg",
+    "isBYOC": true,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/ashby",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AddCandidateNote",
+      "qualifiedName": "Ashby.AddCandidateNote",
+      "fullyQualifiedName": "Ashby.AddCandidateNote@0.1.0",
+      "description": "Add a plain-text note to a candidate (e.g. an agent handoff or summary).\n\nCreates a new note each time it runs. Requires the Candidates write permission\non the API key.",
+      "parameters": [
+        {
+          "name": "candidate_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the candidate to add the note to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "required": true,
+          "description": "The note text to add. Sent as plain text; do not pass HTML markup.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_notifications",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether users subscribed to the candidate are notified of the note. Default is false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created note."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.AddCandidateNote",
+        "parameters": {
+          "candidate_id": {
+            "value": "cand_01HABCDE1234FGHIJ5678KLMN",
+            "type": "string",
+            "required": true
+          },
+          "note": {
+            "value": "Candidate spoke with recruiter on initial screening call. Strong background in backend engineering with 5+ years of experience. Recommended to move forward to technical interview stage.",
+            "type": "string",
+            "required": true
+          },
+          "send_notifications": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ChangeApplicationStage",
+      "qualifiedName": "Ashby.ChangeApplicationStage",
+      "fullyQualifiedName": "Ashby.ChangeApplicationStage@0.1.0",
+      "description": "Move an application to a named interview stage, in either direction.\n\nResolves the stage name to its id inside the application's own interview plan,\nthen moves the application — you do not look up stage ids yourself. Works to\nadvance or to move a candidate back; if the name does not match, the error lists\nthe plan's available stage names, and an ambiguous name (two stages share it)\nerrors rather than guessing. Records a transition each time it runs. It cannot\nmove an application into an archived/rejected stage (Ashby requires an archive\nreason this tool does not collect). Requires the Candidates write and Interviews\nread permissions on the API key.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the application to move.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_stage",
+          "type": "string",
+          "required": true,
+          "description": "The NAME of the destination interview stage, e.g. 'Onsite'. Resolved to the stage id for you within the application's interview plan.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The application after the stage change."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.ChangeApplicationStage",
+        "parameters": {
+          "application_id": {
+            "value": "app_3f8a92c1-4b7e-4d21-9e6f-bc012345abcd",
+            "type": "string",
+            "required": true
+          },
+          "to_stage": {
+            "value": "Onsite Interview",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCandidate",
+      "qualifiedName": "Ashby.GetCandidate",
+      "fullyQualifiedName": "Ashby.GetCandidate@0.1.0",
+      "description": "Get a candidate's profile and the ids of their applications.\n\nUse the returned application ids with feedback or application tools; the Ashby\nAPI does not list a candidate's applications directly. Requires the Candidates\nread permission on the API key.",
+      "parameters": [
+        {
+          "name": "candidate_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the candidate to fetch.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The candidate's profile and the ids of their applications."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.GetCandidate",
+        "parameters": {
+          "candidate_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCandidateDebrief",
+      "qualifiedName": "Ashby.GetCandidateDebrief",
+      "fullyQualifiedName": "Ashby.GetCandidateDebrief@0.1.0",
+      "description": "Gather everything about a candidate for a debrief in one call.\n\nPulls the candidate's profile, the notes on file, and the interview feedback and\nscorecards across each of their applications, then returns them together — you do\nnot chain the candidate, note, and feedback reads yourself. Feedback covers up to\nthe candidate's first applications when there are many; an application whose\nfeedback can't be read is counted in `feedback_failed` rather than failing the\nwhole call. Requires the Candidates read permission on the API key.",
+      "parameters": [
+        {
+          "name": "candidate_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the candidate to gather a debrief for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The candidate's profile, notes, and interview feedback across their applications."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.GetCandidateDebrief",
+        "parameters": {
+          "candidate_id": {
+            "value": "cand_3f8a92b1-4d7e-4c21-ae56-9f0b123d4567",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListApplicationFeedback",
+      "qualifiedName": "Ashby.ListApplicationFeedback",
+      "fullyQualifiedName": "Ashby.ListApplicationFeedback@0.1.0",
+      "description": "Read the feedback and interview scorecards submitted on an application.\n\nUseful for synthesizing what reviewers said about a candidate before a debrief.\nRequires the Candidates read permission on the API key.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the application whose feedback and interview scorecards to read.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a previous call's next_cursor. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of feedback items to return on this page (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Feedback / scorecards submitted on the application."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.ListApplicationFeedback",
+        "parameters": {
+          "application_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          },
+          "cursor": {
+            "value": "eyJvZmZzZXQiOjUwfQ==",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListApplications",
+      "qualifiedName": "Ashby.ListApplications",
+      "fullyQualifiedName": "Ashby.ListApplications@0.1.0",
+      "description": "List the organization's applications, optionally filtered by job and/or status.\n\nThe Ashby API does not filter applications by candidate; to find a specific\ncandidate's applications, read the candidate first and use its application ids.\nRequires the Candidates read permission on the API key.",
+      "parameters": [
+        {
+          "name": "job_id",
+          "type": "string",
+          "required": false,
+          "description": "Return only applications to this job. Omit to return applications across all jobs.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Filter by application status. Omit for any status.",
+          "enum": [
+            "Active",
+            "Hired",
+            "Archived",
+            "Lead"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a previous call's next_cursor. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of applications to return on this page (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of the organization's applications."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.ListApplications",
+        "parameters": {
+          "job_id": {
+            "value": "job_abc123xyz",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "active",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJpZCI6IjEyMzQ1NiIsImRpcmVjdGlvbiI6Im5leHQifQ==",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListCandidateNotes",
+      "qualifiedName": "Ashby.ListCandidateNotes",
+      "fullyQualifiedName": "Ashby.ListCandidateNotes@0.1.0",
+      "description": "Read the notes recorded on a candidate, paginated via the cursor.\n\nRequires the Candidates read permission on the API key.",
+      "parameters": [
+        {
+          "name": "candidate_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the candidate whose notes to read.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a previous call's next_cursor. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of notes to return on this page (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of the candidate's notes."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.ListCandidateNotes",
+        "parameters": {
+          "candidate_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          },
+          "cursor": {
+            "value": "eyJsYXN0SWQiOiI0MmFiY2RlZi0xMjM0LTU2NzgtOTAxMi1hYmNkZWYxMjM0NTYifQ==",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListJobs",
+      "qualifiedName": "Ashby.ListJobs",
+      "fullyQualifiedName": "Ashby.ListJobs@0.1.0",
+      "description": "List the organization's jobs (roles), optionally filtered by status.\n\nA job is the role record; headcount slots (\"openings\") are a separate concept\nnot exposed here. Requires the Jobs read permission on the API key.",
+      "parameters": [
+        {
+          "name": "status",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter to jobs with these statuses. Omit to return jobs of every status.",
+          "enum": [
+            "Open",
+            "Closed",
+            "Archived",
+            "Draft"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a previous call's next_cursor. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of jobs to return on this page (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of the organization's jobs."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.ListJobs",
+        "parameters": {
+          "status": {
+            "value": [
+              "open",
+              "closed"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJpZCI6IjEyMzQ1NiIsInRpbWVzdGFtcCI6MTY5ODc2NTQzMn0=",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchCandidates",
+      "qualifiedName": "Ashby.SearchCandidates",
+      "fullyQualifiedName": "Ashby.SearchCandidates@0.1.0",
+      "description": "Search the organization's candidates by name and/or email.\n\nIntended for narrowing to a small set of known candidates (e.g. re-engaging a\npast applicant). Returns at most 100 matches; provide at least one of name or\nemail, each at least 3 characters. Requires the Candidates read permission on\nthe API key.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Full or partial candidate name to match. Combined with email using AND when both are given. Omit to search by email only.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Candidate email address to match. Combined with name using AND when both are given. Omit to search by name only.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Candidates across the organization matching the search (capped at 100 by the API)."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.SearchCandidates",
+        "parameters": {
+          "name": {
+            "value": "Jordan Lee",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jordan.lee@example.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-06-10T12:11:44.524Z",
+  "summary": "Ashby is an all-in-one recruiting platform. This toolkit lets Arcade agents read and write recruiting data in Ashby — candidates, applications, jobs, notes, feedback, and interview stage progression.\n\n## Capabilities\n\n- **Candidate management**: Search candidates by name/email, retrieve full profiles (with application IDs), and add plain-text notes (e.g. agent handoffs or summaries).\n- **Application lifecycle**: List applications filtered by job or status, move applications forward or backward through named interview stages, and read submitted feedback/scorecards.\n- **Job listings**: Enumerate the organization's roles, optionally filtered by status.\n- **Debrief aggregation**: Pull a candidate's profile, all notes, and all interview feedback across applications in a single call — no manual chaining required.\n\n## Secrets\n\n- **`ASHBY_API_KEY`** — An Ashby API key scoped to the permissions required by the tools you use. Generate one in your Ashby account under **Settings → Integrations → API Keys**. Each key carries granular permissions; the tools in this toolkit require the following depending on usage:\n  - **Candidates read** — searching, reading profiles, listing notes, listing feedback, listing applications, debrief aggregation.\n  - **Candidates write** — adding notes, changing application stage.\n  - **Interviews read** — changing application stage (stage plan lookup).\n  - **Jobs read** — listing jobs.\n\n  Create and scope the key from the [Ashby API Keys settings page](https://app.ashbyhq.com/settings/api-keys). Note that Ashby API keys are organization-scoped; the key holder can read or write across all candidates and jobs in the org, so apply least-privilege scoping.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to store secrets, or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}

@@ -9,6 +9,10 @@ const meta: MetaRecord = {
     title: "Bright Data",
     href: "/en/resources/integrations/development/brightdata",
   },
+  datadog: {
+    title: "Datadog",
+    href: "/en/resources/integrations/development/datadog",
+  },
   daytona: {
     title: "Daytona",
     href: "/en/resources/integrations/development/daytona",
@@ -36,6 +40,10 @@ const meta: MetaRecord = {
   posthog: {
     title: "PostHog",
     href: "/en/resources/integrations/development/posthog",
+  },
+  vercel: {
+    title: "Vercel",
+    href: "/en/resources/integrations/development/vercel",
   },
   "-- Starter": {
     type: "separator",
