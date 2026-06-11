@@ -8,6 +8,7 @@ import {
   resolveIndexToolkits,
   toIntegrationLink,
 } from "@/app/_lib/integration-index";
+import type { ToolkitWithDocsLink } from "@/app/_lib/toolkit-slug";
 import { listValidIntegrationLinks } from "@/app/_lib/toolkit-static-params";
 
 const TIMEOUT = 30_000;
@@ -18,11 +19,82 @@ const ROOT = process.cwd();
  * component) and the toolkit breadcrumb produced internal links to pages that
  * don't exist. tests/broken-link-check.test.ts only scans MDX, so it can't see
  * component-generated links or dynamic [toolkitId] slugs.
+ *
+ * These tests derive their cases from the live catalog + route data rather than
+ * hard-coding toolkit names, so they don't break when a toolkit gains or loses
+ * its own docs page (which is exactly what happened in CI: `main` shipped real
+ * pages for several toolkits this PR treated as doc-less).
  */
-describe("integrations index links", () => {
-  let resolved: ResolvedIndexToolkit[];
+
+const INTEGRATIONS = "/en/resources/integrations";
+
+// Build a minimal catalog entry for the unit tests. resolveIndexToolkits only
+// reads `id`, `category`, `docsLink`, and `isHidden`.
+const makeToolkit = (
+  id: string,
+  category: string,
+  slug: string,
+  isHidden = false
+): ToolkitWithDocsLink =>
+  ({
+    id,
+    label: id,
+    type: "arcade",
+    category,
+    isHidden,
+    isComingSoon: false,
+    isBYOC: false,
+    isPro: false,
+    docsLink: `https://docs.arcade.dev${INTEGRATIONS}/${category}/${slug}`,
+  }) as unknown as ToolkitWithDocsLink;
+
+describe("resolveIndexToolkits (logic)", () => {
+  // A fixed set of "real" pages, independent of the repo's toolkit data.
+  const validLinks = new Set([
+    `${INTEGRATIONS}/development/datadog-api`, // a generated [toolkitId] route
+    `${INTEGRATIONS}/search/tavily`, // an authored static page
+  ]);
+  const catalog: ToolkitWithDocsLink[] = [
+    makeToolkit("DatadogApi", "development", "datadog-api"), // real page
+    makeToolkit("Datadog", "development", "datadog"), // bare, no page, has -api sibling -> drop
+    makeToolkit("Discord", "social", "discord"), // no page, no -api sibling -> non-clickable
+    makeToolkit("Tavily", "search", "tavily"), // static page -> clickable
+    makeToolkit("Notion", "productivity", "notion"), // duplicate A (no page)
+    makeToolkit("NotionToolkit", "productivity", "notion"), // duplicate B, same link -> collapse
+    makeToolkit("Hidden", "social", "hidden", true), // hidden -> excluded
+  ];
+  const resolved = resolveIndexToolkits(catalog, validLinks);
+  const byId = (id: string) => resolved.find((toolkit) => toolkit.id === id);
+  const links = resolved.map(toIntegrationLink);
+
+  test("drops a bare entry when its '-api' sibling owns the page", () => {
+    expect(resolved.some((toolkit) => toolkit.id === "Datadog")).toBe(false);
+    expect(byId("DatadogApi")?.hasPage).toBe(true);
+  });
+
+  test("keeps doc-less toolkits but marks them non-clickable", () => {
+    expect(byId("Discord")?.hasPage).toBe(false);
+  });
+
+  test("keeps toolkits backed by an authored static page clickable", () => {
+    expect(byId("Tavily")?.hasPage).toBe(true);
+  });
+
+  test("excludes hidden toolkits entirely", () => {
+    expect(resolved.some((toolkit) => toolkit.id === "Hidden")).toBe(false);
+  });
+
+  test("collapses entries that resolve to the same link", () => {
+    expect(
+      links.filter((link) => link === `${INTEGRATIONS}/productivity/notion`)
+    ).toHaveLength(1);
+    expect(links.length).toBe(new Set(links).size);
+  });
+});
+
+describe("integrations index links (live data)", () => {
   let validLinks: Set<string>;
-  let byLink: Map<string, ResolvedIndexToolkit[]>;
+  let resolved: ResolvedIndexToolkit[];
 
   beforeAll(async () => {
     const [toolkits, links] = await Promise.all([
@@ -31,13 +103,6 @@ describe("integrations index links", () => {
     ]);
     validLinks = links;
     resolved = resolveIndexToolkits(toolkits, validLinks);
-    byLink = new Map();
-    for (const toolkit of resolved) {
-      const link = toIntegrationLink(toolkit);
-      const bucket = byLink.get(link) ?? [];
-      bucket.push(toolkit);
-      byLink.set(link, bucket);
-    }
   }, TIMEOUT);
 
   test("no clickable card links to a page that does not exist", () => {
@@ -49,36 +114,34 @@ describe("integrations index links", () => {
     expect(brokenClickable).toEqual([]);
   });
 
-  test("doc-less catalog toolkits stay visible but are non-clickable", () => {
-    // "Discord" is in the design-system catalog but has no docs page and no
-    // "-api" sibling — it must be rendered, but not as a link to a 404.
-    const discord = byLink.get("/en/resources/integrations/social/discord");
-    expect(discord, "discord card is present").toBeDefined();
-    expect(discord?.every((toolkit) => toolkit.hasPage === false)).toBe(true);
+  test("every rendered card resolves to a unique link (duplicates collapse)", () => {
+    const links = resolved.map((toolkit) => toIntegrationLink(toolkit));
+    expect(links.length).toBe(new Set(links).size);
   });
 
-  test("bare '-api' duplicates are dropped in favor of the real card", () => {
-    // The catalog carries both "Datadog" (bare, no page) and "DatadogApi".
-    expect(byLink.has("/en/resources/integrations/development/datadog")).toBe(
-      false
+  test("the index mixes real (clickable) and placeholder (non-clickable) cards", () => {
+    // Guards against a regression that makes everything clickable (re-introducing
+    // broken links) or everything non-clickable.
+    expect(resolved.some((toolkit) => toolkit.hasPage)).toBe(true);
+    expect(resolved.some((toolkit) => !toolkit.hasPage)).toBe(true);
+  });
+
+  test("authored static pages are recognized as valid links", () => {
+    // listValidIntegrationLinks must include authored static pages (e.g. the
+    // Tavily partner page), not only generated [toolkitId] routes. Guarded so it
+    // only asserts while that page exists in the tree.
+    const tavilyLink = `${INTEGRATIONS}/search/tavily`;
+    const tavilyPage = join(
+      ROOT,
+      "app/en/resources/integrations/search/tavily/page.mdx"
     );
-    const datadogApi = byLink.get(
-      "/en/resources/integrations/development/datadog-api"
-    );
-    expect(datadogApi?.[0]?.hasPage).toBe(true);
-  });
-
-  test("partner toolkits with authored static pages stay clickable", () => {
-    // Tavily is a partner toolkit; its page is an authored static MDX file, not
-    // a generated [toolkitId] route.
-    const tavily = byLink.get("/en/resources/integrations/search/tavily");
-    expect(tavily?.[0]?.hasPage).toBe(true);
-  });
-
-  test("duplicate catalog entries collapse to a single card", () => {
-    // "Notion" and "NotionToolkit" both resolve to /productivity/notion.
-    const notion = byLink.get("/en/resources/integrations/productivity/notion");
-    expect(notion).toHaveLength(1);
+    if (existsSync(tavilyPage)) {
+      expect(validLinks.has(tavilyLink)).toBe(true);
+      const tavily = resolved.find(
+        (toolkit) => toIntegrationLink(toolkit) === tavilyLink
+      );
+      expect(tavily?.hasPage).toBe(true);
+    }
   });
 });
 
