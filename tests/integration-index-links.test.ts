@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { beforeAll, describe, expect, test } from "vitest";
@@ -9,10 +9,14 @@ import {
   toIntegrationLink,
 } from "@/app/_lib/integration-index";
 import type { ToolkitWithDocsLink } from "@/app/_lib/toolkit-slug";
-import { listValidIntegrationLinks } from "@/app/_lib/toolkit-static-params";
+import {
+  INTEGRATION_CATEGORIES,
+  listValidIntegrationLinks,
+} from "@/app/_lib/toolkit-static-params";
 
 const TIMEOUT = 30_000;
 const ROOT = process.cwd();
+const INTEGRATIONS = "/en/resources/integrations";
 
 /**
  * Guards the regression class MARTECH-19 fixed: the integrations index (a TSX
@@ -20,16 +24,14 @@ const ROOT = process.cwd();
  * don't exist. tests/broken-link-check.test.ts only scans MDX, so it can't see
  * component-generated links or dynamic [toolkitId] slugs.
  *
- * These tests derive their cases from the live catalog + route data rather than
- * hard-coding toolkit names, so they don't break when a toolkit gains or loses
- * its own docs page (which is exactly what happened in CI: `main` shipped real
- * pages for several toolkits this PR treated as doc-less).
+ * Assertions are kept deliberately general — the unit tests use placeholder
+ * toolkits, and the live-data tests derive their cases from the catalog + route
+ * data — so adding/removing real toolkits (or giving one its own page) never
+ * requires editing this file unless behavior actually regresses.
  */
 
-const INTEGRATIONS = "/en/resources/integrations";
-
-// Build a minimal catalog entry for the unit tests. resolveIndexToolkits only
-// reads `id`, `category`, `docsLink`, and `isHidden`.
+// Minimal catalog entry for the unit tests. resolveIndexToolkits only reads
+// `id`, `category`, `docsLink`, and `isHidden`.
 const makeToolkit = (
   id: string,
   category: string,
@@ -49,44 +51,45 @@ const makeToolkit = (
   }) as unknown as ToolkitWithDocsLink;
 
 describe("resolveIndexToolkits (logic)", () => {
-  // A fixed set of "real" pages, independent of the repo's toolkit data.
+  // A fixed set of "real" pages and placeholder toolkits, independent of the
+  // repo's toolkit data. Names are deliberately fake.
   const validLinks = new Set([
-    `${INTEGRATIONS}/development/datadog-api`, // a generated [toolkitId] route
-    `${INTEGRATIONS}/search/tavily`, // an authored static page
+    `${INTEGRATIONS}/development/alpha-api`, // stands in for a generated route
+    `${INTEGRATIONS}/search/gamma`, // stands in for an authored static page
   ]);
   const catalog: ToolkitWithDocsLink[] = [
-    makeToolkit("DatadogApi", "development", "datadog-api"), // real page
-    makeToolkit("Datadog", "development", "datadog"), // bare, no page, has -api sibling -> drop
-    makeToolkit("Discord", "social", "discord"), // no page, no -api sibling -> non-clickable
-    makeToolkit("Tavily", "search", "tavily"), // static page -> clickable
-    makeToolkit("Notion", "productivity", "notion"), // duplicate A (no page)
-    makeToolkit("NotionToolkit", "productivity", "notion"), // duplicate B, same link -> collapse
-    makeToolkit("Hidden", "social", "hidden", true), // hidden -> excluded
+    makeToolkit("AlphaApi", "development", "alpha-api"), // real page
+    makeToolkit("Alpha", "development", "alpha"), // bare, no page, has "-api" sibling -> drop
+    makeToolkit("Beta", "social", "beta"), // no page, no "-api" sibling -> non-clickable
+    makeToolkit("Gamma", "search", "gamma"), // page exists -> clickable
+    makeToolkit("Delta", "productivity", "delta"), // duplicate A (no page)
+    makeToolkit("DeltaPrime", "productivity", "delta"), // duplicate B, same link -> collapse
+    makeToolkit("Zeta", "social", "zeta", true), // hidden -> excluded
   ];
   const resolved = resolveIndexToolkits(catalog, validLinks);
   const byId = (id: string) => resolved.find((toolkit) => toolkit.id === id);
   const links = resolved.map(toIntegrationLink);
 
   test("drops a bare entry when its '-api' sibling owns the page", () => {
-    expect(resolved.some((toolkit) => toolkit.id === "Datadog")).toBe(false);
-    expect(byId("DatadogApi")?.hasPage).toBe(true);
+    expect(resolved.some((toolkit) => toolkit.id === "Alpha")).toBe(false);
+    expect(byId("AlphaApi")?.hasPage).toBe(true);
   });
 
-  test("keeps doc-less toolkits but marks them non-clickable", () => {
-    expect(byId("Discord")?.hasPage).toBe(false);
+  test("keeps a toolkit without a page, but marks it non-clickable", () => {
+    expect(byId("Beta")?.hasPage).toBe(false);
   });
 
-  test("keeps toolkits backed by an authored static page clickable", () => {
-    expect(byId("Tavily")?.hasPage).toBe(true);
+  test("keeps a toolkit whose page exists clickable", () => {
+    expect(byId("Gamma")?.hasPage).toBe(true);
   });
 
   test("excludes hidden toolkits entirely", () => {
-    expect(resolved.some((toolkit) => toolkit.id === "Hidden")).toBe(false);
+    expect(resolved.some((toolkit) => toolkit.id === "Zeta")).toBe(false);
   });
 
   test("collapses entries that resolve to the same link", () => {
     expect(
-      links.filter((link) => link === `${INTEGRATIONS}/productivity/notion`)
+      links.filter((link) => link === `${INTEGRATIONS}/productivity/delta`)
     ).toHaveLength(1);
     expect(links.length).toBe(new Set(links).size);
   });
@@ -119,31 +122,54 @@ describe("integrations index links (live data)", () => {
     expect(links.length).toBe(new Set(links).size);
   });
 
-  test("the index mixes real (clickable) and placeholder (non-clickable) cards", () => {
-    // Guards against a regression that makes everything clickable (re-introducing
-    // broken links) or everything non-clickable.
+  test("the index renders cards and at least one links to a real page", () => {
+    // Guards total breakage (empty catalog, or a validLinks computation that
+    // matches nothing so every card is non-clickable).
+    expect(resolved.length).toBeGreaterThan(0);
     expect(resolved.some((toolkit) => toolkit.hasPage)).toBe(true);
-    expect(resolved.some((toolkit) => !toolkit.hasPage)).toBe(true);
   });
 
-  test("authored static pages are recognized as valid links", () => {
-    // listValidIntegrationLinks must include authored static pages (e.g. the
-    // Tavily partner page), not only generated [toolkitId] routes. Guarded so it
-    // only asserts while that page exists in the tree.
-    const tavilyLink = `${INTEGRATIONS}/search/tavily`;
-    const tavilyPage = join(
-      ROOT,
-      "app/en/resources/integrations/search/tavily/page.mdx"
-    );
-    if (existsSync(tavilyPage)) {
-      expect(validLinks.has(tavilyLink)).toBe(true);
-      const tavily = resolved.find(
-        (toolkit) => toIntegrationLink(toolkit) === tavilyLink
-      );
-      expect(tavily?.hasPage).toBe(true);
+  test("authored static integration pages are recognized as valid links", () => {
+    // listValidIntegrationLinks must include authored static category pages
+    // (e.g. partner pages), not only generated [toolkitId] routes. Discovered
+    // from disk so it covers whatever static pages exist now or later.
+    for (const link of listStaticCategoryPageLinks()) {
+      expect(validLinks.has(link), `${link} should be a valid link`).toBe(true);
     }
   });
 });
+
+// Independently enumerate authored static pages under each integration category
+// (a `<category>/<slug>/page.{mdx,tsx}` that isn't the dynamic [toolkitId] route).
+const listStaticCategoryPageLinks = (): string[] => {
+  const links: string[] = [];
+  for (const category of INTEGRATION_CATEGORIES) {
+    const categoryDir = join(
+      ROOT,
+      "app",
+      "en",
+      "resources",
+      "integrations",
+      category
+    );
+    if (!existsSync(categoryDir)) {
+      continue;
+    }
+    for (const entry of readdirSync(categoryDir, { withFileTypes: true })) {
+      if (!entry.isDirectory() || entry.name.startsWith("[")) {
+        continue;
+      }
+      const pageDir = join(categoryDir, entry.name);
+      if (
+        existsSync(join(pageDir, "page.mdx")) ||
+        existsSync(join(pageDir, "page.tsx"))
+      ) {
+        links.push(`${INTEGRATIONS}/${category}/${entry.name}`);
+      }
+    }
+  }
+  return links;
+};
 
 const LOCALE_PREFIX = /^\/(en|es|pt-BR)(?=\/|$)/;
 const HREF_LITERAL = /href="(\/[^"#]+)"/g;
