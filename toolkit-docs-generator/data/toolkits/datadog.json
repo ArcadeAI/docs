@@ -1,0 +1,704 @@
+{
+  "id": "Datadog",
+  "label": "Datadog",
+  "version": "0.1.0",
+  "description": "Arcade.dev LLM tools for Datadog log and trace search",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/datadog.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/development/datadog",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AggregateEvents",
+      "qualifiedName": "Datadog.AggregateEvents",
+      "fullyQualifiedName": "Datadog.AggregateEvents@0.1.0",
+      "description": "Aggregate log events or spans over a window, optionally grouped and bucketed by time.\n\nUse this single call for triage questions like which service errors most, whether an\nerror rate is rising, or whether a span's latency percentile is climbing (set\naggregation to a percentile with measure '@duration' and an interval), instead of\npaginating raw events. For spans, group_by facets, query filters, and the returned\nbucket labels all use the same field names span results expose ('resource',\n'operation'); the Datadog resource_name/operation_name facets are handled internally.",
+      "parameters": [
+        {
+          "name": "dataset",
+          "type": "string",
+          "required": true,
+          "description": "Whether to count log events or APM spans.",
+          "enum": [
+            "logs",
+            "spans"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Datadog search query using facet syntax, e.g. 'status:error'. Empty counts everything in the window. Only indexed facets are filterable; a filter on a non-indexed field silently matches nothing rather than erroring.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": false,
+          "description": "Start of the time window as Datadog date math (now-1h), ISO-8601 (YYYY-MM-DDTHH:MM:SSZ), or Unix epoch milliseconds. Defaults to now-1h.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": false,
+          "description": "End of the time window, in the same formats as start_time. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Facets to break the count down by, e.g. 'service' or 'status'. Multiple facets nest the grouping. Empty returns a single total for the window. Only configured facets are groupable; grouping by a non-facet field yields an empty bucket set (surfaced in warnings), not an error.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "interval",
+          "type": "string",
+          "required": false,
+          "description": "Bucket the counts into a time series with this rollup, e.g. '5m' or '1h'. Leave empty for a single total per group with no time buckets.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of groups to return per facet (1-1000). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "aggregation",
+          "type": "string",
+          "required": false,
+          "description": "How to aggregate matching events. COUNT tallies events; the other values compute a statistic of the measure facet. Defaults to COUNT.",
+          "enum": [
+            "count",
+            "avg",
+            "min",
+            "max",
+            "sum",
+            "p50",
+            "p75",
+            "p90",
+            "p95",
+            "p99"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "measure",
+          "type": "string",
+          "required": false,
+          "description": "Numeric facet the statistic is computed over when aggregation is not COUNT, e.g. '@duration' for span latency (the value is then in nanoseconds). Defaults to '@duration'. Ignored when aggregation is COUNT.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DATADOG_API_KEY",
+        "DATADOG_APPLICATION_KEY",
+        "DATADOG_SITE"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DATADOG_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_APPLICATION_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_SITE",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Datadog.AggregateEvents",
+        "parameters": {
+          "dataset": {
+            "value": "spans",
+            "type": "string",
+            "required": true
+          },
+          "query": {
+            "value": "service:checkout-api status:error",
+            "type": "string",
+            "required": false
+          },
+          "start_time": {
+            "value": "now-3h",
+            "type": "string",
+            "required": false
+          },
+          "end_time": {
+            "value": "now",
+            "type": "string",
+            "required": false
+          },
+          "group_by": {
+            "value": [
+              "service",
+              "status"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "interval": {
+            "value": "15m",
+            "type": "string",
+            "required": false
+          },
+          "group_limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "aggregation": {
+            "value": "p95",
+            "type": "string",
+            "required": false
+          },
+          "measure": {
+            "value": "@duration",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverFacets",
+      "qualifiedName": "Datadog.DiscoverFacets",
+      "fullyQualifiedName": "Datadog.DiscoverFacets@0.1.0",
+      "description": "Probe which standard facets are groupable and filterable for a dataset in a window.\n\nCall this before grouping or filtering when the right facet name is uncertain,\ninstead of guessing a name and reading an empty bucket set back: it returns the\nfacets that actually have data to break down by right now, each with sample\nvalues. This resolves environment-specific naming (e.g. whether HTTP status is\nexposed as @http.status_code or @http.status) empirically rather than by guess.",
+      "parameters": [
+        {
+          "name": "dataset",
+          "type": "string",
+          "required": true,
+          "description": "Whether to probe log facets or APM span facets.",
+          "enum": [
+            "logs",
+            "spans"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Datadog search query scoping the probe, e.g. 'status:error'. Empty probes against everything in the window (the widest, most reliable signal). For spans, filter on 'resource'/'operation' with the same names span results expose; they are mapped to Datadog's facets automatically.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": false,
+          "description": "Start of the time window as Datadog date math (now-1h), ISO-8601 (YYYY-MM-DDTHH:MM:SSZ), or Unix epoch milliseconds. Defaults to now-1h.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": false,
+          "description": "End of the time window, in the same formats as start_time. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DATADOG_API_KEY",
+        "DATADOG_APPLICATION_KEY",
+        "DATADOG_SITE"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DATADOG_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_APPLICATION_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_SITE",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Datadog.DiscoverFacets",
+        "parameters": {
+          "dataset": {
+            "value": "logs",
+            "type": "string",
+            "required": true
+          },
+          "query": {
+            "value": "status:error service:checkout-api",
+            "type": "string",
+            "required": false
+          },
+          "start_time": {
+            "value": "now-3h",
+            "type": "string",
+            "required": false
+          },
+          "end_time": {
+            "value": "now",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTrace",
+      "qualifiedName": "Datadog.GetTrace",
+      "fullyQualifiedName": "Datadog.GetTrace@0.1.0",
+      "description": "Retrieve a single trace assembled with a summary, bounding the span list.\n\nPages through the trace's spans internally; an unknown trace id returns an\nempty trace. Use this single call to inspect a trace end to end without\nrisking an oversized response on large traces.",
+      "parameters": [
+        {
+          "name": "trace_id",
+          "type": "string",
+          "required": true,
+          "description": "The Datadog trace id to inspect.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": false,
+          "description": "Start of the window to search for the trace's spans, as Datadog date math (now-1h), ISO-8601 (YYYY-MM-DDTHH:MM:SSZ), or Unix epoch milliseconds. Defaults to now-1h.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": false,
+          "description": "End of the window, in the same formats as start_time. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_spans",
+          "type": "integer",
+          "required": false,
+          "description": "Upper bound on spans to include in the response (1-500). Defaults to 100. The returned set is further auto-fit to a token-safe size, so the default call is always safe; the summary covers every span the call assembled (summary_complete is false on the rare trace too large to assemble in full), and the kept spans are every error span plus the slowest, with the result marked truncated when any are dropped.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DATADOG_API_KEY",
+        "DATADOG_APPLICATION_KEY",
+        "DATADOG_SITE"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DATADOG_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_APPLICATION_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_SITE",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Datadog.GetTrace",
+        "parameters": {
+          "trace_id": {
+            "value": "7890123456789012345",
+            "type": "string",
+            "required": true
+          },
+          "start_time": {
+            "value": "now-3h",
+            "type": "string",
+            "required": false
+          },
+          "end_time": {
+            "value": "now",
+            "type": "string",
+            "required": false
+          },
+          "max_spans": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchLogs",
+      "qualifiedName": "Datadog.SearchLogs",
+      "fullyQualifiedName": "Datadog.SearchLogs@0.1.0",
+      "description": "Search Datadog log events matching a query over a time window.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Datadog logs search query using facet syntax, e.g. 'service:checkout status:error'. Empty matches all logs in the window. Only indexed facets are filterable: an attribute that merely appears in a result (e.g. an http status under a log's attributes) is not necessarily a queryable facet, and a filter on a non-indexed field silently matches nothing rather than erroring.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": false,
+          "description": "Start of the time window as Datadog date math (now-1h), ISO-8601 (YYYY-MM-DDTHH:MM:SSZ), or Unix epoch milliseconds. Defaults to now-15m.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": false,
+          "description": "End of the time window, in the same formats as start_time. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of log events to return (1-1000). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Order results by event timestamp. Defaults to NEWEST.",
+          "enum": [
+            "newest",
+            "oldest"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a previous result's next_cursor. Leave empty to fetch the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DATADOG_API_KEY",
+        "DATADOG_APPLICATION_KEY",
+        "DATADOG_SITE"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DATADOG_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_APPLICATION_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_SITE",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Datadog.SearchLogs",
+        "parameters": {
+          "query": {
+            "value": "service:checkout status:error",
+            "type": "string",
+            "required": true
+          },
+          "start_time": {
+            "value": "now-1h",
+            "type": "string",
+            "required": false
+          },
+          "end_time": {
+            "value": "now",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "sort_order": {
+            "value": "NEWEST",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchSpans",
+      "qualifiedName": "Datadog.SearchSpans",
+      "fullyQualifiedName": "Datadog.SearchSpans@0.1.0",
+      "description": "Search Datadog APM spans matching a query over a time window.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Datadog spans search query using facet syntax, e.g. 'service:api-gateway status:error'. Filter on an endpoint or operation with the same field names that span results expose ('resource', 'operation'); they are mapped to Datadog's facets automatically. Quote values containing spaces or dots, e.g. resource:\"GET /v1/auth\". Bound span latency with @duration in nanoseconds (e.g. @duration:>500000000 for >500ms, or @duration:<60000000000 to exclude long-lived streaming spans when sorting by LONGEST). Empty matches all spans in the window. Only indexed facets are filterable: an attribute that merely appears in a span's meta is not necessarily a queryable facet, and a filter on a non-indexed field silently matches nothing rather than erroring.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": false,
+          "description": "Start of the time window as Datadog date math (now-1h), ISO-8601 (YYYY-MM-DDTHH:MM:SSZ), or Unix epoch milliseconds. Defaults to now-15m.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": false,
+          "description": "End of the time window, in the same formats as start_time. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of spans to return (1-1000). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Order results by start time or duration. Use LONGEST to surface the slowest spans first. Defaults to NEWEST.",
+          "enum": [
+            "newest",
+            "oldest",
+            "longest"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a previous result's next_cursor. Leave empty to fetch the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DATADOG_API_KEY",
+        "DATADOG_APPLICATION_KEY",
+        "DATADOG_SITE"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DATADOG_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_APPLICATION_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "DATADOG_SITE",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Datadog.SearchSpans",
+        "parameters": {
+          "query": {
+            "value": "service:api-gateway status:error @duration:>500000000",
+            "type": "string",
+            "required": true
+          },
+          "start_time": {
+            "value": "now-1h",
+            "type": "string",
+            "required": false
+          },
+          "end_time": {
+            "value": "now",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "sort_order": {
+            "value": "LONGEST",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-06-10T12:11:45.864Z",
+  "summary": "Datadog toolkit for Arcade provides LLM tools to search, aggregate, and inspect Datadog logs, APM spans, and traces programmatically. It enables AI agents to perform observability triage — identifying error patterns, latency trends, and trace-level diagnostics — directly against a Datadog account.\n\n## Capabilities\n\n- **Log & span search**: Query log events and APM spans over configurable time windows using Datadog search syntax.\n- **Aggregation & bucketing**: Aggregate events or spans by count, percentile, or other measures, optionally grouped by facets and bucketed by time — suited for triage questions like rising error rates or latency trends without paginating raw results.\n- **Facet discovery**: Probe which facets have live data in a given window and dataset before filtering or grouping, resolving environment-specific naming empirically (e.g. `@http.status_code` vs `@http.status`).\n- **Trace inspection**: Retrieve a single assembled trace with span summary, handling internal pagination to avoid oversized responses on large traces.\n\n## Secrets\n\nThis toolkit requires three secrets configured in your Arcade environment.\n\n- **`DATADOG_API_KEY`** — A Datadog API key that authenticates requests to the Datadog API. Generate one in the Datadog dashboard under **Organization Settings → API Keys**. API keys are not scoped; any valid key for your org works. See [Datadog API Keys docs](https://docs.datadoghq.com/account_management/api-app-keys/#api-keys).\n\n- **`DATADOG_APPLICATION_KEY`** — A Datadog Application key, required alongside the API key to authorize read operations against logs, spans, and traces. Create one under **Organization Settings → Application Keys**. For least-privilege access, scope it to the specific permissions your agent needs (e.g. `logs_read_data`, `apm_read`). See [Datadog Application Keys docs](https://docs.datadoghq.com/account_management/api-app-keys/#application-keys).\n\n- **`DATADOG_SITE`** — The Datadog site URL for your account (e.g. `datadoghq.com`, `datadoghq.eu`, `us3.datadoghq.com`). This determines which regional API endpoint the toolkit calls. Find your site in the Datadog dashboard URL or under **Organization Settings**. See [Datadog site list](https://docs.datadoghq.com/getting_started/site/).\n\nConfigure secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets). For details on how Arcade handles secrets in tools, see [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+}

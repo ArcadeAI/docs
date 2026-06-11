@@ -9,6 +9,10 @@ const meta: MetaRecord = {
     title: "Asana",
     href: "/en/resources/integrations/productivity/asana",
   },
+  ashby: {
+    title: "Ashby",
+    href: "/en/resources/integrations/productivity/ashby",
+  },
   clickup: {
     title: "ClickUp",
     href: "/en/resources/integrations/productivity/clickup",
