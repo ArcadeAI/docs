@@ -18,11 +18,18 @@ const NON_NEWLINE = /[^\n]/g;
  * shared chrome becomes a broken link on every page. Link to
  * /en/resources/contact-us instead. In-content email links on individual pages
  * are fine and are not scanned here.
+ *
+ * Exception: app/_components/contact-email.tsx is the sanctioned helper that
+ * assembles a mailto only on the client (after mount) and renders a plain
+ * contact-page link in SSR, so it never emits a raw email link for crawlers.
  */
 test(
   "shared components contain no mailto: or email-protection links",
   async () => {
-    const files = await fg("app/_components/**/*.{ts,tsx}");
+    const files = await fg("app/_components/**/*.{ts,tsx}", {
+      // The sanctioned client-only mailto helper (see docstring) is exempt.
+      ignore: ["app/_components/contact-email.tsx"],
+    });
     const offenders: Array<{ file: string; line: number; match: string }> = [];
 
     for (const file of files) {

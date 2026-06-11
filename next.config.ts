@@ -24,6 +24,13 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // The toolkit-page breadcrumb links "Resources" -> /resources, which has
+        // no index page. Send it to the integrations registry instead of 404ing.
+        {
+          source: "/:locale/resources",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
         // Dissolved guides/security section
         {
           source: "/:locale/guides/security/security-research-program",
