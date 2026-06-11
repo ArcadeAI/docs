@@ -1,0 +1,2262 @@
+{
+  "id": "Vercel",
+  "label": "Vercel",
+  "version": "0.1.0",
+  "description": "Arcade.dev tools for interacting with Vercel",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/vercel.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/development/vercel",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AddProjectDomain",
+      "qualifiedName": "Vercel.AddProjectDomain",
+      "fullyQualifiedName": "Vercel.AddProjectDomain@0.1.0",
+      "description": "Attach a custom domain to a project; the result reports its verification status.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name to attach the domain to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "domain",
+          "type": "string",
+          "required": true,
+          "description": "Fully-qualified domain name to attach (e.g. app.example.com).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "redirect",
+          "type": "string",
+          "required": false,
+          "description": "Domain to redirect this domain to. Defaults to None (serve the project directly).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "git_branch",
+          "type": "string",
+          "required": false,
+          "description": "Git branch to bind the domain to. Defaults to None (the production branch).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.AddProjectDomain",
+        "parameters": {
+          "project": {
+            "value": "prj_4fBz9kLmXqR2wTyUvN8pJcDsEaHiOg",
+            "type": "string",
+            "required": true
+          },
+          "domain": {
+            "value": "app.example.com",
+            "type": "string",
+            "required": true
+          },
+          "redirect": {
+            "value": "www.example.com",
+            "type": "string",
+            "required": false
+          },
+          "git_branch": {
+            "value": "main",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "team_7kXqP3mLwRtUyNvBcDsEaHi",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CancelDeployment",
+      "qualifiedName": "Vercel.CancelDeployment",
+      "fullyQualifiedName": "Vercel.CancelDeployment@0.1.0",
+      "description": "Cancel an in-progress deployment.\n\nCanceling a deployment that has already finished is not an error: its current (terminal) state\nis returned unchanged rather than reporting a cancellation.",
+      "parameters": [
+        {
+          "name": "deployment",
+          "type": "string",
+          "required": true,
+          "description": "Deployment id (dpl_...) to cancel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.CancelDeployment",
+        "parameters": {
+          "deployment": {
+            "value": "dpl_4MuNfvKgNxTbFuTpw9mYf3bHXQkL",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_7aB3cD9eF2gHiJkLmNoPqRsT",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateDeployment",
+      "qualifiedName": "Vercel.CreateDeployment",
+      "fullyQualifiedName": "Vercel.CreateDeployment@0.1.0",
+      "description": "Trigger a new deployment from inline source files, a git repository, or a prior deployment.\n\nThe target project must already exist (create it first); an unknown project name or id is\nrejected rather than silently auto-created. Exactly one source is required: pass files to\nupload source inline (no Git connection needed, the way to ship a first deployment on an\naccount without a connected repository), git_repo together with git_ref to deploy from a\nconnected repository, or redeploy_of to rebuild a prior deployment's source. Deploying from a\nrepository requires the Vercel account to have a connected Git integration for that provider.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Project name the deployment belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Project id (prj_...) or name to deploy. Defaults to None (inferred from name).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target",
+          "type": "string",
+          "required": false,
+          "description": "Environment to deploy to. Selecting preview, or leaving this as the default None, creates a preview deployment, with one exception: a project's very first deployment is always promoted to production by Vercel regardless of this value, so an omitted target on a project that has no prior deployment still goes live in production.",
+          "enum": [
+            "production",
+            "preview"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "files",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Source files to deploy inline, without any connected Git repository. Each entry is a file path and its UTF-8 text content. Use this to ship a first deployment for a project that has no Git integration. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "git_repo",
+          "type": "string",
+          "required": false,
+          "description": "Repository to deploy from, as owner/repo. Defaults to None (use files or redeploy_of instead).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "git_ref",
+          "type": "string",
+          "required": false,
+          "description": "Branch name or commit SHA to deploy from the repository. Required whenever git_repo is set (Vercel does not infer a default branch). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "git_provider",
+          "type": "string",
+          "required": false,
+          "description": "Git host the repository lives on. Defaults to github.",
+          "enum": [
+            "github",
+            "gitlab",
+            "bitbucket"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "redeploy_of",
+          "type": "string",
+          "required": false,
+          "description": "Deployment id to redeploy. Rebuilds that deployment's source while picking up the project's current environment variables and build settings, so use this to roll out config changes (env vars edited after a deployment do not affect the running build until a rebuild). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.CreateDeployment",
+        "parameters": {
+          "name": {
+            "value": "my-nextjs-app",
+            "type": "string",
+            "required": true
+          },
+          "project": {
+            "value": "prj_abc123XYZ456def789",
+            "type": "string",
+            "required": false
+          },
+          "target": {
+            "value": "production",
+            "type": "string",
+            "required": false
+          },
+          "files": {
+            "value": [
+              {
+                "path": "index.html",
+                "content": "<!DOCTYPE html><html><body><h1>Hello World</h1></body></html>"
+              },
+              {
+                "path": "style.css",
+                "content": "body { font-family: sans-serif; margin: 0; padding: 20px; }"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "git_repo": {
+            "value": "acme-org/my-nextjs-app",
+            "type": "string",
+            "required": false
+          },
+          "git_ref": {
+            "value": "main",
+            "type": "string",
+            "required": false
+          },
+          "git_provider": {
+            "value": "github",
+            "type": "string",
+            "required": false
+          },
+          "redeploy_of": {
+            "value": "dpl_7gHkJmNpQrStUvWxYz1234567890",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "team_aBcDeFgHiJkLmNoPqRsTuVwX",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateProject",
+      "qualifiedName": "Vercel.CreateProject",
+      "fullyQualifiedName": "Vercel.CreateProject@0.1.0",
+      "description": "Create a new project, optionally connecting a git repository to deploy from.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Name for the new project (lowercase letters, digits, and hyphens).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "framework",
+          "type": "string",
+          "required": false,
+          "description": "Framework preset slug (e.g. nextjs, vite, sveltekit). Defaults to None (auto-detect).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "git_repository",
+          "type": "string",
+          "required": false,
+          "description": "Repository to connect, as owner/repo (e.g. acme/marketing-site). Connecting a repository is what lets you deploy and scope preview variables to a branch. Defaults to None (no repository connected).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "git_provider",
+          "type": "string",
+          "required": false,
+          "description": "Git host the connected repository lives on. Defaults to github.",
+          "enum": [
+            "github",
+            "gitlab",
+            "bitbucket"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.CreateProject",
+        "parameters": {
+          "name": {
+            "value": "my-awesome-app",
+            "type": "string",
+            "required": true
+          },
+          "framework": {
+            "value": "nextjs",
+            "type": "string",
+            "required": false
+          },
+          "git_repository": {
+            "value": "acme/marketing-site",
+            "type": "string",
+            "required": false
+          },
+          "git_provider": {
+            "value": "github",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "team_abc123xyz",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteEnvironmentVariable",
+      "qualifiedName": "Vercel.DeleteEnvironmentVariable",
+      "fullyQualifiedName": "Vercel.DeleteEnvironmentVariable@0.1.0",
+      "description": "Delete an environment variable from a project.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name the variable belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "env_id",
+          "type": "string",
+          "required": true,
+          "description": "Id of the environment variable to delete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.DeleteEnvironmentVariable",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZ456def789",
+            "type": "string",
+            "required": true
+          },
+          "env_id": {
+            "value": "env_7gHiJkLmNoPqRsTu",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_myorganization",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteProject",
+      "qualifiedName": "Vercel.DeleteProject",
+      "fullyQualifiedName": "Vercel.DeleteProject@0.1.0",
+      "description": "Permanently delete a project and all of its deployments.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or project name to delete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.DeleteProject",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZ456def789",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_xyz987uvw654",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCurrentUser",
+      "qualifiedName": "Vercel.GetCurrentUser",
+      "fullyQualifiedName": "Vercel.GetCurrentUser@0.1.0",
+      "description": "Return the Vercel account the access token authenticates as.\n\nCall this first in a session to confirm which account you are acting on\nbefore making any changes.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.GetCurrentUser",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetDeployment",
+      "qualifiedName": "Vercel.GetDeployment",
+      "fullyQualifiedName": "Vercel.GetDeployment@0.1.0",
+      "description": "Return a single deployment's state and metadata.",
+      "parameters": [
+        {
+          "name": "deployment",
+          "type": "string",
+          "required": true,
+          "description": "Deployment id (dpl_...) or deployment URL to inspect.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.GetDeployment",
+        "parameters": {
+          "deployment": {
+            "value": "dpl_4TxNGKHqnEFh9wR2oVmLcJyB",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_acme-corp",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetDeploymentLogs",
+      "qualifiedName": "Vercel.GetDeploymentLogs",
+      "fullyQualifiedName": "Vercel.GetDeploymentLogs@0.1.0",
+      "description": "Read a deployment's build and runtime log events to diagnose why it failed.",
+      "parameters": [
+        {
+          "name": "deployment",
+          "type": "string",
+          "required": true,
+          "description": "Deployment id (dpl_...) or deployment URL to read logs for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of log events to return (1-1000). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "Order to read events in. Defaults to forward (oldest first).",
+          "enum": [
+            "forward",
+            "backward"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "since",
+          "type": "integer",
+          "required": false,
+          "description": "Only return events created at or after this epoch-millisecond time. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "until",
+          "type": "integer",
+          "required": false,
+          "description": "Only return events created at or before this epoch-millisecond time. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.GetDeploymentLogs",
+        "parameters": {
+          "deployment": {
+            "value": "dpl_4TxBnGSMeQk7GnzBFWGHzPaD",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          },
+          "direction": {
+            "value": "forward",
+            "type": "string",
+            "required": false
+          },
+          "since": {
+            "value": 1711929600000,
+            "type": "integer",
+            "required": false
+          },
+          "until": {
+            "value": 1711933200000,
+            "type": "integer",
+            "required": false
+          },
+          "team": {
+            "value": "team_RgcMPBvkKxUmGzVXiRzJsHqW",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetProject",
+      "qualifiedName": "Vercel.GetProject",
+      "fullyQualifiedName": "Vercel.GetProject@0.1.0",
+      "description": "Return a single project's settings and latest deployment state.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or project name to inspect.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.GetProject",
+        "parameters": {
+          "project": {
+            "value": "prj_4aBcDeFgHiJkLmNoPqRsTuVwXyZ12345",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_7xYzAbCdEfGhIjKlMnOpQrSt",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetProjectDomain",
+      "qualifiedName": "Vercel.GetProjectDomain",
+      "fullyQualifiedName": "Vercel.GetProjectDomain@0.1.0",
+      "description": "Return a project domain's verification status and DNS-configuration state.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name the domain is attached to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "domain",
+          "type": "string",
+          "required": true,
+          "description": "Fully-qualified domain name to inspect.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.GetProjectDomain",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZexampleProjectId",
+            "type": "string",
+            "required": true
+          },
+          "domain": {
+            "value": "www.example.com",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_xyz789exampleTeamId",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTeam",
+      "qualifiedName": "Vercel.GetTeam",
+      "fullyQualifiedName": "Vercel.GetTeam@0.1.0",
+      "description": "Return a team's details, including its billing plan.",
+      "parameters": [
+        {
+          "name": "team",
+          "type": "string",
+          "required": true,
+          "description": "Team id (team_...) or team slug to look up.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.GetTeam",
+        "parameters": {
+          "team": {
+            "value": "team_abc123xyz456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListDeployments",
+      "qualifiedName": "Vercel.ListDeployments",
+      "fullyQualifiedName": "Vercel.ListDeployments@0.1.0",
+      "description": "List deployments in the active scope, optionally filtered by project, target, and state.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Project id (prj_...) or name to scope to. Defaults to None (all projects in scope).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target",
+          "type": "string",
+          "required": false,
+          "description": "Filter to deployments for this environment. Defaults to None (any environment).",
+          "enum": [
+            "production",
+            "preview"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Filter to deployments in this state. Defaults to None (any state).",
+          "enum": [
+            "QUEUED",
+            "INITIALIZING",
+            "BUILDING",
+            "READY",
+            "ERROR",
+            "CANCELED",
+            "DELETED"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of deployments to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a prior call's next_cursor. Defaults to None (first page).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.ListDeployments",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZ456def789",
+            "type": "string",
+            "required": false
+          },
+          "target": {
+            "value": "production",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "READY",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJwYWdlIjoyfQ==",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "team_xyz987uvw654",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEnvironmentVariables",
+      "qualifiedName": "Vercel.ListEnvironmentVariables",
+      "fullyQualifiedName": "Vercel.ListEnvironmentVariables@0.1.0",
+      "description": "List a project's environment variables across all environments.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name to list variables for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "decrypt",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include decrypted plaintext values in the result (only effective when the plan supports decryption). Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.ListEnvironmentVariables",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZ456def789ghi",
+            "type": "string",
+            "required": true
+          },
+          "decrypt": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "team": {
+            "value": "team_xyz987uvw654rst321",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListProjectDomains",
+      "qualifiedName": "Vercel.ListProjectDomains",
+      "fullyQualifiedName": "Vercel.ListProjectDomains@0.1.0",
+      "description": "List the custom domains attached to a project.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name to list domains for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of domains to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a prior call's next_cursor. Defaults to None (first page).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.ListProjectDomains",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZ456defGHI789",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "cursor_eyJhbGciOiJIUzI1NiJ9",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "team_xyz987uvw654",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListProjects",
+      "qualifiedName": "Vercel.ListProjects",
+      "fullyQualifiedName": "Vercel.ListProjects@0.1.0",
+      "description": "List the projects in the active scope, optionally narrowed by a fuzzy name search.",
+      "parameters": [
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Case-insensitive name fragment to filter projects by. Only projects whose name contains this fragment are returned. Defaults to None (no filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Number of projects to return (1-100). Without a search filter, a call returns up to this many. With a search filter, the listing is paged until at least this many matches are gathered (a call may return a few more from the last page scanned); use next_cursor for additional matches. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a prior call's next_cursor. Defaults to None (first page).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.ListProjects",
+        "parameters": {
+          "search": {
+            "value": "my-app",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsaW1pdCI6MjUsInN0YXJ0IjoiYWJjMTIzIn0=",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "team_abc123xyz",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListTeams",
+      "qualifiedName": "Vercel.ListTeams",
+      "fullyQualifiedName": "Vercel.ListTeams@0.1.0",
+      "description": "List the teams the access token can act on, to discover a valid team scope.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of teams to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a prior call's next_cursor. Defaults to None (first page).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.ListTeams",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJwYWdlIjoxfQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "PromoteDeployment",
+      "qualifiedName": "Vercel.PromoteDeployment",
+      "fullyQualifiedName": "Vercel.PromoteDeployment@0.1.0",
+      "description": "Make a deployment the project's current production deployment (\"ship this one\").\n\nA deployment that already targeted production (a staged or prior production build) is\npromoted instantly without a rebuild. A preview deployment cannot be aliased to production\ndirectly, because preview and production builds can differ (e.g. environment variables), so\nthis rebuilds the preview's source as a new production deployment — the same complete-rebuild\npath the Vercel dashboard uses to promote a preview. In that case the returned deployment is\nthe new build (still building), not the preview that was passed in.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name whose production to repoint.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deployment",
+          "type": "string",
+          "required": true,
+          "description": "Deployment id (dpl_...) to make the current production deployment.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.PromoteDeployment",
+        "parameters": {
+          "project": {
+            "value": "prj_4TzGn9xDuTvR8kLmQwPsYjF2cN1oE7aB",
+            "type": "string",
+            "required": true
+          },
+          "deployment": {
+            "value": "dpl_9XkR3mHvTqLpWnCsYbDjF6eA2uG8oZ1",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_5VcKp7dMxNqWrJtBsYhLfA3eG2iU9oR",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RemoveProjectDomain",
+      "qualifiedName": "Vercel.RemoveProjectDomain",
+      "fullyQualifiedName": "Vercel.RemoveProjectDomain@0.1.0",
+      "description": "Detach a custom domain from a project.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name the domain is attached to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "domain",
+          "type": "string",
+          "required": true,
+          "description": "Fully-qualified domain name to detach.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.RemoveProjectDomain",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123xyz456def789ghi",
+            "type": "string",
+            "required": true
+          },
+          "domain": {
+            "value": "www.example.com",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_xyz789abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RollbackDeployment",
+      "qualifiedName": "Vercel.RollbackDeployment",
+      "fullyQualifiedName": "Vercel.RollbackDeployment@0.1.0",
+      "description": "Roll production back to a prior deployment, making it the current production deployment.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name whose production to repoint.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deployment",
+          "type": "string",
+          "required": true,
+          "description": "Prior deployment id (dpl_...) to roll production back to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.RollbackDeployment",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZdefGHI456jklMNO",
+            "type": "string",
+            "required": true
+          },
+          "deployment": {
+            "value": "dpl_7pQrStUvWxYz1234AbCdEfGh",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_myorganization",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SaveEnvironmentVariable",
+      "qualifiedName": "Vercel.SaveEnvironmentVariable",
+      "fullyQualifiedName": "Vercel.SaveEnvironmentVariable@0.1.0",
+      "description": "Create or update a project environment variable.\n\nOmit env_id to create (key, value, and target are required); pass env_id to update an existing\nvariable in place, changing only the fields you supply. Saving a variable does not affect\nalready-built deployments: a new deployment must be triggered for the change to take effect.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name the variable belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "env_id",
+          "type": "string",
+          "required": false,
+          "description": "Id of an existing variable to update. Omit to create a new variable.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "key",
+          "type": "string",
+          "required": false,
+          "description": "Variable name. When creating, this is required and sets the name. When updating, it is ignored (the name is fixed). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": false,
+          "description": "Variable value. When creating, this is required. When updating, providing it changes the value; omitting it leaves the value unchanged. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Environments the variable applies to. When creating, this is required. When updating, providing it replaces the set; omitting it leaves it unchanged. Defaults to None.",
+          "enum": [
+            "production",
+            "preview",
+            "development"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": false,
+          "description": "How the value is stored, applied only when creating. Defaults to encrypted.",
+          "enum": [
+            "encrypted",
+            "plain",
+            "sensitive"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "git_branch",
+          "type": "string",
+          "required": false,
+          "description": "Git branch to scope a preview variable to (requires a project with a connected repository). When updating, providing it changes the scope. Defaults to None (all branches).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": false,
+          "description": "Note describing the variable. When updating, providing it changes the note. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "overwrite",
+          "type": "boolean",
+          "required": false,
+          "description": "When creating, whether to overwrite an existing variable with the same key and target instead of returning a conflict. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.SaveEnvironmentVariable",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZ456defGHI789",
+            "type": "string",
+            "required": true
+          },
+          "env_id": {
+            "value": "env_7gHkLmNpQrStUvWx",
+            "type": "string",
+            "required": false
+          },
+          "key": {
+            "value": "DATABASE_URL",
+            "type": "string",
+            "required": false
+          },
+          "value": {
+            "value": "postgresql://user:pass@host:5432/mydb",
+            "type": "string",
+            "required": false
+          },
+          "target": {
+            "value": [
+              "production",
+              "preview"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "type": {
+            "value": "encrypted",
+            "type": "string",
+            "required": false
+          },
+          "git_branch": {
+            "value": "main",
+            "type": "string",
+            "required": false
+          },
+          "comment": {
+            "value": "Primary database connection string for production use",
+            "type": "string",
+            "required": false
+          },
+          "overwrite": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "team": {
+            "value": "team_exampleSlug123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateProjectSettings",
+      "qualifiedName": "Vercel.UpdateProjectSettings",
+      "fullyQualifiedName": "Vercel.UpdateProjectSettings@0.1.0",
+      "description": "Update a project's build and framework settings; unset fields are left unchanged.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or project name to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New project name. Defaults to None (unchanged).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "framework",
+          "type": "string",
+          "required": false,
+          "description": "New framework preset slug (e.g. nextjs, vite). Pass an empty string to clear the preset so the project type reverts to no framework (Other / static). Defaults to None (unchanged).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "build_command",
+          "type": "string",
+          "required": false,
+          "description": "Override the build command. Defaults to None (unchanged).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "install_command",
+          "type": "string",
+          "required": false,
+          "description": "Override the install command. Defaults to None (unchanged).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "output_directory",
+          "type": "string",
+          "required": false,
+          "description": "Override the build output directory. Defaults to None (unchanged).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "root_directory",
+          "type": "string",
+          "required": false,
+          "description": "Override the project root directory. Defaults to None (unchanged).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.UpdateProjectSettings",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZ456defGHI789",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "my-updated-project",
+            "type": "string",
+            "required": false
+          },
+          "framework": {
+            "value": "nextjs",
+            "type": "string",
+            "required": false
+          },
+          "build_command": {
+            "value": "npm run build",
+            "type": "string",
+            "required": false
+          },
+          "install_command": {
+            "value": "npm install",
+            "type": "string",
+            "required": false
+          },
+          "output_directory": {
+            "value": ".next",
+            "type": "string",
+            "required": false
+          },
+          "root_directory": {
+            "value": "apps/web",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "team_xyz789TeamSlug",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "VerifyProjectDomain",
+      "qualifiedName": "Vercel.VerifyProjectDomain",
+      "fullyQualifiedName": "Vercel.VerifyProjectDomain@0.1.0",
+      "description": "Trigger verification of a project domain and return its resulting status.\n\nAn unmet DNS challenge is the normal polling path, not an error: this returns the domain's\nstill-unverified status (with the outstanding challenge records) rather than failing.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project id (prj_...) or name the domain is attached to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "domain",
+          "type": "string",
+          "required": true,
+          "description": "Fully-qualified domain name to verify.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "VERCEL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "VERCEL_ACCESS_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Vercel.VerifyProjectDomain",
+        "parameters": {
+          "project": {
+            "value": "prj_abc123XYZ456def789",
+            "type": "string",
+            "required": true
+          },
+          "domain": {
+            "value": "example.com",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "team_xyz789abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-06-10T12:12:07.252Z",
+  "summary": "The Vercel toolkit lets you manage Vercel projects, deployments, domains, and environment variables programmatically via Arcade. It covers the full project lifecycle — from creation and configuration through deployment, promotion, rollback, and teardown.\n\n## Capabilities\n\n- **Account & team discovery** — resolve the authenticated account, list accessible teams, and inspect team details (including billing plan) to establish the correct scope before making changes.\n- **Project management** — create, retrieve, list, update settings for, and permanently delete projects; optionally connect a Git repository at creation time.\n- **Deployment lifecycle** — trigger deployments from inline source files, connected Git repositories, or prior deployment sources; cancel in-progress builds; inspect state and build/runtime logs; promote a deployment to production; and roll production back to a prior build.\n- **Custom domain management** — attach and detach custom domains, retrieve verification and DNS-configuration status, list all domains on a project, and trigger re-verification against outstanding DNS challenges.\n- **Environment variable management** — list, create, update, and delete project environment variables across all environments.\n\n## Secrets\n\n`VERCEL_ACCESS_TOKEN` is a Vercel personal access token (or team-scoped OAuth token) used to authenticate every API call. To obtain one:\n\n1. Log in to your Vercel account and open **Account Settings → Tokens** (personal token): [https://vercel.com/account/tokens](https://vercel.com/account/tokens). For a team-scoped token, open the team's **Settings → Tokens**.\n2. Click **Create**, give it a name, choose an expiry, and optionally restrict it to a specific team scope.\n3. Copy the token immediately — Vercel only shows it once.\n4. The token needs sufficient permissions for all operations you intend to use (full-access tokens work for all tools; read-only tokens will fail write operations).\n\nFor details on creating tokens see the [Vercel documentation on access tokens](https://vercel.com/docs/accounts/create-and-manage-access-tokens).\n\nStore this value as an Arcade secret. See [Arcade secret configuration docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) and manage your secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}

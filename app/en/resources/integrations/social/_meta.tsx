@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  "discord-bot": {
+    title: "Discord Bot",
+    href: "/en/resources/integrations/social/discord-bot",
+  },
   linkedin: {
     title: "LinkedIn",
     href: "/en/resources/integrations/social/linkedin",
