@@ -1,0 +1,1689 @@
+{
+  "id": "DiscordBot",
+  "label": "Discord Bot",
+  "version": "0.1.0",
+  "description": "Arcade.dev LLM tools for Discord",
+  "metadata": {
+    "category": "social",
+    "iconUrl": "https://design-system.arcade.dev/icons/discord.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/social-communication/discord-bot",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AddReaction",
+      "qualifiedName": "DiscordBot.AddReaction",
+      "fullyQualifiedName": "DiscordBot.AddReaction@0.1.0",
+      "description": "Add an emoji reaction to a Discord message as the bot.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id the message is in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the message to react to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "emoji",
+          "type": "string",
+          "required": true,
+          "description": "The emoji to add: a unicode emoji character, or a custom emoji as name:id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The reaction outcome."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.AddReaction",
+        "parameters": {
+          "channel_id": {
+            "value": "1098234567890123456",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1105678901234567890",
+            "type": "string",
+            "required": true
+          },
+          "emoji": {
+            "value": "👍",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteMessage",
+      "qualifiedName": "DiscordBot.DeleteMessage",
+      "fullyQualifiedName": "DiscordBot.DeleteMessage@0.1.0",
+      "description": "Delete a message from a Discord channel. This cannot be undone.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id the message is in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the message to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The delete outcome."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.DeleteMessage",
+        "parameters": {
+          "channel_id": {
+            "value": "1098234567890123456",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1105678901234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "EditMessage",
+      "qualifiedName": "DiscordBot.EditMessage",
+      "fullyQualifiedName": "DiscordBot.EditMessage@0.1.0",
+      "description": "Edit a message the bot posted. The bot can only edit its own messages.\n\nEdits suppress @everyone, @here, and role mentions, so correcting an earlier post never\npings the whole server (Discord re-parses mentions in edited content by default).\n\nEditing a message authored by someone else is not an error: it returns a result whose\n``status`` is ``not_author`` so the caller can pivot (e.g. post a new message) without\nits tool chain aborting.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id the message is in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the bot's message to edit.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "The new message text (1-2000 characters).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The message after editing."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.EditMessage",
+        "parameters": {
+          "channel_id": {
+            "value": "1098273645019287552",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1102938475610234880",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "✅ The scheduled maintenance has been completed. All services are back online as of 3:45 PM UTC.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetChannel",
+      "qualifiedName": "DiscordBot.GetChannel",
+      "fullyQualifiedName": "DiscordBot.GetChannel@0.1.0",
+      "description": "Get a single Discord channel's name, type, and topic.\n\nA missing channel (e.g. one that was deleted) is not an error: the result's ``status``\nis ``not_found`` so the caller can branch without a try/catch. A genuine permission\nproblem is still raised.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel or thread id to fetch.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Full details for one channel."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.GetChannel",
+        "parameters": {
+          "channel_id": {
+            "value": "1098765432109876543",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMessage",
+      "qualifiedName": "DiscordBot.GetMessage",
+      "fullyQualifiedName": "DiscordBot.GetMessage@0.1.0",
+      "description": "Fetch a single Discord message by id.\n\nA missing message (e.g. one that was deleted) is not an error: the result's ``status``\nis ``not_found`` so the caller can branch without a try/catch. A genuine permission\nproblem is still raised.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel or thread id the message is in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The message id to fetch.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The requested message."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.GetMessage",
+        "parameters": {
+          "channel_id": {
+            "value": "1098234567890123456",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1105987654321098765",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetServer",
+      "qualifiedName": "DiscordBot.GetServer",
+      "fullyQualifiedName": "DiscordBot.GetServer@0.1.0",
+      "description": "Get a single Discord server's name, owner, and member count.\n\nA server the bot cannot resolve (it is not a member, or the id is wrong) is not an\nerror: the result's ``status`` is ``not_found`` so the caller can branch without a\ntry/catch. A genuine permission problem is still raised.",
+      "parameters": [
+        {
+          "name": "server_id",
+          "type": "string",
+          "required": true,
+          "description": "The server (guild) id to fetch.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Full details for one server."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.GetServer",
+        "parameters": {
+          "server_id": {
+            "value": "850123456789012345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetUser",
+      "qualifiedName": "DiscordBot.GetUser",
+      "fullyQualifiedName": "DiscordBot.GetUser@0.1.0",
+      "description": "Resolve a user id (such as a message author_id) into a human-readable name.\n\nPass server_id to fold in the user's nickname in that server. Use this to turn the opaque\nauthor_id on messages into a name without leaving the agent. A user id that resolves to no\naccount is not an error: the result's ``status`` is ``not_found`` so the caller can branch.",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": true,
+          "description": "The user id to resolve, such as a message author_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "server_id",
+          "type": "string",
+          "required": false,
+          "description": "Resolve the user's nickname within this server (guild). Leave empty to return only the account-level profile.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The resolved user."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.GetUser",
+        "parameters": {
+          "user_id": {
+            "value": "123456789012345678",
+            "type": "string",
+            "required": true
+          },
+          "server_id": {
+            "value": "987654321098765432",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListActiveThreads",
+      "qualifiedName": "DiscordBot.ListActiveThreads",
+      "fullyQualifiedName": "DiscordBot.ListActiveThreads@0.1.0",
+      "description": "List a Discord server's currently active (non-archived) threads.",
+      "parameters": [
+        {
+          "name": "server_id",
+          "type": "string",
+          "required": true,
+          "description": "The server (guild) id whose active threads to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum threads to return (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position into the thread list. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The server's active threads."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.ListActiveThreads",
+        "parameters": {
+          "server_id": {
+            "value": "987654321098765432",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListChannels",
+      "qualifiedName": "DiscordBot.ListChannels",
+      "fullyQualifiedName": "DiscordBot.ListChannels@0.1.0",
+      "description": "List the channels in a Discord server, optionally filtered by type.",
+      "parameters": [
+        {
+          "name": "server_id",
+          "type": "string",
+          "required": true,
+          "description": "The server (guild) id whose channels to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_type",
+          "type": "string",
+          "required": false,
+          "description": "Restrict results to one channel type. Defaults to ALL (no filter).",
+          "enum": [
+            "all",
+            "text",
+            "voice",
+            "category",
+            "announcement",
+            "forum"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum channels to return (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position into the filtered list. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The channels in the server."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.ListChannels",
+        "parameters": {
+          "server_id": {
+            "value": "798354615243890712",
+            "type": "string",
+            "required": true
+          },
+          "channel_type": {
+            "value": "TEXT",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListMessages",
+      "qualifiedName": "DiscordBot.ListMessages",
+      "fullyQualifiedName": "DiscordBot.ListMessages@0.1.0",
+      "description": "Read a channel's or thread's recent messages, newest first.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel or thread id to read. A thread is a channel, so this reads threads too.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum messages to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "before",
+          "type": "string",
+          "required": false,
+          "description": "Return only messages older than this message id. Leave empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "after",
+          "type": "string",
+          "required": false,
+          "description": "Return only messages newer than this message id. Leave empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "around",
+          "type": "string",
+          "required": false,
+          "description": "Return messages centered on this message id. Leave empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_system",
+          "type": "boolean",
+          "required": false,
+          "description": "Include Discord's auto-generated system notices (thread-created, pin, join messages). Defaults to false, which keeps a catch-up read free of blank non-conversational rows.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Recent messages, newest first."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.ListMessages",
+        "parameters": {
+          "channel_id": {
+            "value": "1103847562901234688",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "before": {
+            "value": "1198450123456789504",
+            "type": "string",
+            "required": false
+          },
+          "after": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "around": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "include_system": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPinnedMessages",
+      "qualifiedName": "DiscordBot.ListPinnedMessages",
+      "fullyQualifiedName": "DiscordBot.ListPinnedMessages@0.1.0",
+      "description": "List the pinned messages in a Discord channel.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id whose pinned messages to list.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The channel's pinned messages."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.ListPinnedMessages",
+        "parameters": {
+          "channel_id": {
+            "value": "987654321098765432",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListServers",
+      "qualifiedName": "DiscordBot.ListServers",
+      "fullyQualifiedName": "DiscordBot.ListServers@0.1.0",
+      "description": "List the Discord servers the bot is a member of and can act in.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum servers to return (1-200). Defaults to 200.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "before",
+          "type": "string",
+          "required": false,
+          "description": "Return servers before this server id (for paging backward). Leave empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "after",
+          "type": "string",
+          "required": false,
+          "description": "Return servers after this server id; pass next_cursor to get the next page. Leave empty to start at the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The servers the bot belongs to."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.ListServers",
+        "parameters": {
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "before": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "after": {
+            "value": "1098765432109876543",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "PinMessage",
+      "qualifiedName": "DiscordBot.PinMessage",
+      "fullyQualifiedName": "DiscordBot.PinMessage@0.1.0",
+      "description": "Pin a message in a Discord channel so the team can find it later.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id the message is in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the message to pin.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The pin outcome."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.PinMessage",
+        "parameters": {
+          "channel_id": {
+            "value": "1098765432109876543",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1123456789012345678",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RemoveReaction",
+      "qualifiedName": "DiscordBot.RemoveReaction",
+      "fullyQualifiedName": "DiscordBot.RemoveReaction@0.1.0",
+      "description": "Remove the bot's own emoji reaction from a Discord message.\n\nRemoves only the bot's reaction; other users' reactions with the same emoji are\nunaffected. Removing a reaction the bot never added is a no-op that returns\n``removed`` False, so the caller can tell that case apart from a real removal.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id the message is in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the message to remove the reaction from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "emoji",
+          "type": "string",
+          "required": true,
+          "description": "The emoji to remove: a unicode emoji character, or a custom emoji as name:id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The reaction outcome."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.RemoveReaction",
+        "parameters": {
+          "channel_id": {
+            "value": "1098234567890123456",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1105987654321098765",
+            "type": "string",
+            "required": true
+          },
+          "emoji": {
+            "value": "👍",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ReplyToMessage",
+      "qualifiedName": "DiscordBot.ReplyToMessage",
+      "fullyQualifiedName": "DiscordBot.ReplyToMessage@0.1.0",
+      "description": "Reply to an existing Discord message so the answer stays tied to the question.\n\nTo reply inside a thread, pass the thread id as channel_id and a message id from\ninside the thread as message_id. A thread's own id is its starter message, which lives\nin the parent channel, not inside the thread.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id the original message is in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the message to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "The reply text (1-2000 characters).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mention_author",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to ping the author of the message being replied to. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The reply the bot posted."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.ReplyToMessage",
+        "parameters": {
+          "channel_id": {
+            "value": "1098234567890123456",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1105678901234567890",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "Thanks for your question! The event starts at 3 PM UTC this Saturday. Feel free to ask if you need more details.",
+            "type": "string",
+            "required": true
+          },
+          "mention_author": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchMessages",
+      "qualifiedName": "DiscordBot.SearchMessages",
+      "fullyQualifiedName": "DiscordBot.SearchMessages@0.1.0",
+      "description": "Find messages by text and/or author in one channel or across a whole server.\n\nUse a single call with server_id to answer \"I remember a message but not where\" without\nlooping channels yourself; a server-wide search covers text and announcement channels plus\nactive threads and forum posts. Discord's bot API has no server-side message search, so\nthis scans recent messages locally and covers the most recent ``max_scan`` messages, not\nfull history. Matching reads ``content``, which is empty for messages the bot cannot see\nin full without the Message Content intent.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": false,
+          "description": "The channel or thread id to search (a thread is a channel, so this searches threads too). Leave empty to search a whole server instead via server_id. Provide exactly one of channel_id or server_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "server_id",
+          "type": "string",
+          "required": false,
+          "description": "The server (guild) id to search across all of its text and announcement channels. Leave empty to search a single channel via channel_id. Provide exactly one of channel_id or server_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Text to find in message content (case-insensitive). Leave empty to match any content, which is useful when filtering only by author_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "author_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return messages posted by this author id. Leave empty to match any author. Combine with an empty query to list a user's recent messages.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum matching messages to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_scan",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum recent messages to scan while searching (50-1000). Defaults to 300. In a server-wide search this is the total budget shared across channels. Raise to look further back at the cost of more API calls.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching messages, newest first."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.SearchMessages",
+        "parameters": {
+          "channel_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "server_id": {
+            "value": "834710293847102938",
+            "type": "string",
+            "required": false
+          },
+          "query": {
+            "value": "deployment update",
+            "type": "string",
+            "required": false
+          },
+          "author_id": {
+            "value": "192837465019283746",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "max_scan": {
+            "value": 500,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SendMessage",
+      "qualifiedName": "DiscordBot.SendMessage",
+      "fullyQualifiedName": "DiscordBot.SendMessage@0.1.0",
+      "description": "Post a new message to a Discord channel as the bot.\n\nPosts with @everyone, @here, and role mentions suppressed so a routine update never\npings the whole server.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id to post to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "The message text to post (1-2000 characters).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The message the bot posted."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.SendMessage",
+        "parameters": {
+          "channel_id": {
+            "value": "1098234567890123456",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "📢 Server maintenance is scheduled for tonight at 11:00 PM UTC. Expected downtime is approximately 30 minutes. Thank you for your patience!",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "StartThread",
+      "qualifiedName": "DiscordBot.StartThread",
+      "fullyQualifiedName": "DiscordBot.StartThread@0.1.0",
+      "description": "Start a thread from a message, standalone in a text channel, or as a forum/media post.\n\nDiscord seeds forum and media posts from the create call but does not accept an opening\nbody for text-channel threads, so for those this posts ``content`` as a follow-up opening\nmessage in one call. Mentions in ``content`` are suppressed so seeding never pings the\nserver.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id to start the thread in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The thread name (1-100 characters).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": false,
+          "description": "Start the thread attached to this existing message. Leave empty to start a standalone thread in the channel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "Body that seeds the thread (1-2000 characters). For a forum or media channel this opens the post and is required. For a standalone text-channel thread it is posted as the thread's opening message. Ignored when starting the thread from an existing message. Leave empty to open an unseeded text-channel thread.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_archive_minutes",
+          "type": "string",
+          "required": false,
+          "description": "Inactivity period before Discord auto-archives the thread. Defaults to ONE_DAY.",
+          "enum": [
+            "60",
+            "1440",
+            "4320",
+            "10080"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The thread the bot created."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.StartThread",
+        "parameters": {
+          "channel_id": {
+            "value": "1098765432109876543",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Weekly Discussion: Best Practices",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1105432109876543210",
+            "type": "string",
+            "required": false
+          },
+          "content": {
+            "value": "Welcome to this week's discussion thread! Feel free to share your thoughts and ideas below.",
+            "type": "string",
+            "required": false
+          },
+          "auto_archive_minutes": {
+            "value": "1440",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UnpinMessage",
+      "qualifiedName": "DiscordBot.UnpinMessage",
+      "fullyQualifiedName": "DiscordBot.UnpinMessage@0.1.0",
+      "description": "Unpin a previously pinned message in a Discord channel.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The channel id the message is in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the message to unpin.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The unpin outcome."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.UnpinMessage",
+        "parameters": {
+          "channel_id": {
+            "value": "1098234567890123456",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "1105678901234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "DiscordBot.WhoAmI",
+      "fullyQualifiedName": "DiscordBot.WhoAmI@0.1.0",
+      "description": "Return the authenticated Discord bot's own user identity.\n\nUse this to verify the configured bot token and confirm which bot account the tools\nact as. It is a verification helper, not a required preamble to the other tools.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "DISCORD_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "DISCORD_BOT_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The authenticated bot's identity."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "DiscordBot.WhoAmI",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-06-11T12:27:06.654Z",
+  "summary": "Discord Bot toolkit lets an Arcade agent act as a Discord bot — reading and writing messages, managing threads, reacting, pinning, and introspecting servers, channels, and users through the Discord Bot API.\n\n## Capabilities\n\n- **Messaging** — send, edit, delete, reply to, search, and paginate messages in channels and threads; mention suppression is enforced on send, edit, and thread seeding so agents never accidentally ping `@everyone` or roles.\n- **Reactions & pins** — add/remove the bot's emoji reactions (non-destructive: removing a reaction never added is a safe no-op); pin and unpin messages in any accessible channel.\n- **Threads & forums** — list active threads, start threads from messages or as standalone text-channel threads, and create forum/media posts in a single call.\n- **Discovery & introspection** — list servers the bot belongs to, list and filter channels by type, list pinned messages, resolve user IDs to human-readable names (with per-server nickname support), and verify bot identity via `WhoAmI`.\n- **Graceful not-found handling** — missing messages, channels, servers, and users return a structured `not_found` status rather than raising errors, letting agent chains branch cleanly without try/catch.\n\n## Secrets\n\n`DISCORD_BOT_TOKEN` — The bot token issued by Discord that authenticates every API call. To obtain it:\n1. Open the [Discord Developer Portal](https://discord.com/developers/applications) and select (or create) your application.\n2. Go to **Bot** in the left sidebar. Under **Token**, click **Reset Token** (or **Copy** if shown) to retrieve the secret value — it is only displayed once after a reset.\n3. Ensure the bot has the **Message Content** intent enabled (**Privileged Gateway Intents** section on the same page) if you need `content` populated on messages the bot did not send; without it, `content` is empty for those messages and `SearchMessages` coverage is limited.\n4. Invite the bot to your server(s) with appropriate permissions (at minimum: `Read Messages/View Channels`, `Send Messages`, `Manage Messages` for pin/delete, `Add Reactions`).\n\nStore the token in Arcade using the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}

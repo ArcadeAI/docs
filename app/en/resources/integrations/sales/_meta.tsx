@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  apollo: {
+    title: "Apollo",
+    href: "/en/resources/integrations/sales/apollo",
+  },
   attio: {
     title: "Attio",
     href: "/en/resources/integrations/sales/attio",

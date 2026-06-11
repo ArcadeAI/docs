@@ -1,7 +1,7 @@
 {
   "id": "GoogleFlights",
   "label": "Google Flights",
-  "version": "4.0.4",
+  "version": "4.1.0",
   "description": "Arcade.dev LLM tools for getting flights via Google Flights",
   "metadata": {
     "category": "search",
@@ -18,7 +18,7 @@
     {
       "name": "GetFlightBookingOptions",
       "qualifiedName": "GoogleFlights.GetFlightBookingOptions",
-      "fullyQualifiedName": "GoogleFlights.GetFlightBookingOptions@4.0.4",
+      "fullyQualifiedName": "GoogleFlights.GetFlightBookingOptions@4.1.0",
       "description": "Resolve a ``booking_token`` to the airlines and OTAs selling that itinerary.\n\nPass a ``booking_token`` returned by ``search_flights`` or\n``search_multi_city_flights`` to get the vendors selling that\nspecific flight. The token encodes the route, dates, cabin class,\nand passenger counts (every segment for multi-city), so there are\nno ``travel_class``, ``num_adults``, or ``num_children`` parameters;\nsupplying a cabin or party size would silently disagree with the\nitinerary the token was issued for.\n\nLeave ``include_booking_post_data`` off (the default) when an LLM\nis comparing prices; turn it on only when a backend needs to\nrebuild the vendor hand-off, since the POST body is multiple\nkilobytes per option.",
       "parameters": [
         {
@@ -130,7 +130,7 @@
     {
       "name": "LookupAirports",
       "qualifiedName": "GoogleFlights.LookupAirports",
-      "fullyQualifiedName": "GoogleFlights.LookupAirports@4.0.4",
+      "fullyQualifiedName": "GoogleFlights.LookupAirports@4.1.0",
       "description": "Find IATA airport codes for a city, country, or airport name.\n\nMetropolitan codes (NYC, LON, TYO, PAR, ...) are accepted as a\n``departure_airport_code`` or ``arrival_airport_code`` in flight\nsearches and mean \"any airport in this city\".",
       "parameters": [
         {
@@ -209,8 +209,8 @@
     {
       "name": "SearchFlights",
       "qualifiedName": "GoogleFlights.SearchFlights",
-      "fullyQualifiedName": "GoogleFlights.SearchFlights@4.0.4",
-      "description": "Search Google Flights for one-way or round-trip itineraries.\n\nFor a trip where the traveler returns to their origin, issue a\nsingle call with both ``outbound_date`` and ``return_date`` set.\nDo NOT issue two separate one-way searches in opposite directions\nand sum the prices: airlines price round-trip fares independently\nfrom one-way fares, so the sum of two cheapest one-ways is rarely\nequal to the cheapest round-trip and is typically more expensive.",
+      "fullyQualifiedName": "GoogleFlights.SearchFlights@4.1.0",
+      "description": "Search Google Flights for one-way or round-trip itineraries.\n\nFor a trip where the traveler returns to their origin, issue a\nsingle call with both ``outbound_date`` and ``return_date`` set.\nDo NOT issue two separate one-way searches in opposite directions\nand sum the prices: airlines price round-trip fares independently\nfrom one-way fares, so the sum of two cheapest one-ways is rarely\nequal to the cheapest round-trip and is typically more expensive.\n\nEach returned itinerary carries a ``google_flights_url`` that opens\nthat specific pre-selected flight on Google Flights, so you can hand\nthe user a booking link straight from these results without a\nseparate booking-options lookup.",
       "parameters": [
         {
           "name": "departure_airport_code",
@@ -588,8 +588,8 @@
     {
       "name": "SearchMultiCityFlights",
       "qualifiedName": "GoogleFlights.SearchMultiCityFlights",
-      "fullyQualifiedName": "GoogleFlights.SearchMultiCityFlights@4.0.4",
-      "description": "Search Google Flights for a multi-city (open-jaw) itinerary.\n\nUse this for trips that are neither a simple one-way nor a round-trip\n(e.g. an open-jaw three-leg trip that ends back at the origin).\nThe open-jaw bundle is typically cheaper than the equivalent set\nof one-way searches summed; never substitute multiple\n``search_flights`` calls for a single multi-city query.",
+      "fullyQualifiedName": "GoogleFlights.SearchMultiCityFlights@4.1.0",
+      "description": "Search Google Flights for a multi-city (open-jaw) itinerary.\n\nUse this for trips that are neither a simple one-way nor a round-trip\n(e.g. an open-jaw three-leg trip that ends back at the origin).\nThe open-jaw bundle is typically cheaper than the equivalent set\nof one-way searches summed; never substitute multiple\n``search_flights`` calls for a single multi-city query.\n\nEach returned itinerary carries a ``google_flights_url`` that opens\nthat specific pre-selected itinerary on Google Flights, so you can\nhand the user a booking link straight from these results without a\nseparate booking-options lookup.",
       "parameters": [
         {
           "name": "segments",
@@ -829,6 +829,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-06-05T12:08:01.562Z",
-  "summary": "The Google Flights toolkit lets LLMs search and resolve flight itineraries via the SerpApi Google Flights endpoint. It covers airport lookup, one-way/round-trip search, multi-city search, and booking option resolution.\n\n## Capabilities\n\n- **Airport discovery** — resolve city names, country names, or airport names to IATA codes (including metropolitan codes like NYC or LON) for use in flight searches.\n- **One-way & round-trip search** — query Google Flights for itineraries with flexible cabin class, passenger counts, and date options; round-trips are fetched in a single call to reflect true bundled pricing.\n- **Multi-city / open-jaw search** — book complex multi-leg itineraries in one query, which typically prices cheaper than summing equivalent one-way fares.\n- **Booking option resolution** — convert a `booking_token` from a search result into the full list of airlines and OTAs selling that specific itinerary, with optional POST data for backend vendor hand-offs.\n\n## Secrets\n\n- **`SERP_API_KEY`** — An API key issued by [SerpApi](https://serpapi.com), the service that powers the underlying Google Flights data. To obtain one: create an account at [https://serpapi.com/users/sign_up](https://serpapi.com/users/sign_up), then retrieve your private API key from the [SerpApi dashboard](https://serpapi.com/manage-api-key). The key must have access to the Google Flights engine; free-tier accounts include a limited monthly search quota, while paid plans unlock higher volume. Pass this key as the `SERP_API_KEY` secret in your Arcade configuration.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to store secrets, or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-06-11T12:27:09.649Z",
+  "summary": "# Google Flights Toolkit\n\nThe Google Flights toolkit lets LLMs search flight itineraries, look up airports, and resolve booking options by querying Google Flights data via the SerpApi backend — no user authentication required.\n\n## Capabilities\n\n- **Airport lookup:** Resolve city names, country names, or airport names to IATA codes, including metropolitan codes (NYC, LON, TYO, PAR) usable across all search tools.\n- **One-way & round-trip search:** Search for one-way or round-trip itineraries in a single call; results include direct Google Flights URLs for immediate user hand-off without a separate booking step.\n- **Multi-city / open-jaw search:** Search complex multi-leg itineraries as a bundled query — typically cheaper than summing individual one-way fares and should never be substituted with multiple one-way calls.\n- **Booking option resolution:** Convert a `booking_token` (returned by flight searches) into the list of airlines and OTAs selling that specific itinerary, with optional POST data for backend vendor hand-off.\n\n## Secrets\n\n- **`SERP_API_KEY`** — An API key issued by [SerpApi](https://serpapi.com/), the service this toolkit uses to query Google Flights data. To obtain one: create an account at [https://serpapi.com/users/sign_up](https://serpapi.com/users/sign_up), navigate to your [dashboard](https://serpapi.com/dashboard), and copy the **API Key** shown there. Free-tier keys include a limited monthly search quota; paid plans are required for higher volume. The key must have access to the Google Flights engine — no additional scope selection is needed beyond account creation.\n\nFor how to store and reference secrets in Arcade, see the [secrets configuration guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

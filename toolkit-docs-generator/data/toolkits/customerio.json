@@ -1,0 +1,1713 @@
+{
+  "id": "Customerio",
+  "label": "Customer.io",
+  "version": "0.1.0",
+  "description": "Arcade.dev LLM tools for Customer.io",
+  "metadata": {
+    "category": "customer-support",
+    "iconUrl": "https://design-system.arcade.dev/icons/customerio.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/customer-support/customerio",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "DeletePerson",
+      "qualifiedName": "Customerio.DeletePerson",
+      "fullyQualifiedName": "Customerio.DeletePerson@0.1.0",
+      "description": "Delete a person record to honor a data-removal request.\n\nDeleting a person who does not exist is accepted as a no-op.",
+      "parameters": [
+        {
+          "name": "person_id",
+          "type": "string",
+          "required": true,
+          "description": "Id of the person to delete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "identifier_type",
+          "type": "string",
+          "required": false,
+          "description": "Which kind of value person_id is, so the delete targets the right profile. Defaults to the external id you assigned the person; use the Customer.io internal id when person_id is a cio_id (people with no external id are returned that way), or email when it is an email address.",
+          "enum": [
+            "id",
+            "email",
+            "cio_id"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_SITE_ID",
+        "CUSTOMERIO_TRACKING_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_TRACKING_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.DeletePerson",
+        "parameters": {
+          "person_id": {
+            "value": "user_4829fbc1e03d",
+            "type": "string",
+            "required": true
+          },
+          "identifier_type": {
+            "value": "email",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCampaignMetrics",
+      "qualifiedName": "Customerio.GetCampaignMetrics",
+      "fullyQualifiedName": "Customerio.GetCampaignMetrics@0.1.0",
+      "description": "Read a campaign's aggregate delivery metrics over a period.",
+      "parameters": [
+        {
+          "name": "campaign_id",
+          "type": "string",
+          "required": true,
+          "description": "Id of the campaign whose metrics to read.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "period",
+          "type": "string",
+          "required": false,
+          "description": "Granularity of the metric series. Defaults to days.",
+          "enum": [
+            "hours",
+            "days",
+            "weeks",
+            "months"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "steps",
+          "type": "integer",
+          "required": false,
+          "description": "Number of periods to report, counting back from now. Defaults to 30.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.GetCampaignMetrics",
+        "parameters": {
+          "campaign_id": {
+            "value": "42",
+            "type": "string",
+            "required": true
+          },
+          "period": {
+            "value": "weeks",
+            "type": "string",
+            "required": false
+          },
+          "steps": {
+            "value": 12,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetNewsletterMetrics",
+      "qualifiedName": "Customerio.GetNewsletterMetrics",
+      "fullyQualifiedName": "Customerio.GetNewsletterMetrics@0.1.0",
+      "description": "Read a newsletter's aggregate delivery metrics over a period.",
+      "parameters": [
+        {
+          "name": "newsletter_id",
+          "type": "string",
+          "required": true,
+          "description": "Id of the newsletter whose metrics to read.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "period",
+          "type": "string",
+          "required": false,
+          "description": "Granularity of the metric series. Defaults to days.",
+          "enum": [
+            "hours",
+            "days",
+            "weeks",
+            "months"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "steps",
+          "type": "integer",
+          "required": false,
+          "description": "Number of periods to report, counting back from now. Defaults to 30.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.GetNewsletterMetrics",
+        "parameters": {
+          "newsletter_id": {
+            "value": "42",
+            "type": "string",
+            "required": true
+          },
+          "period": {
+            "value": "weeks",
+            "type": "string",
+            "required": false
+          },
+          "steps": {
+            "value": 12,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetPerson",
+      "qualifiedName": "Customerio.GetPerson",
+      "fullyQualifiedName": "Customerio.GetPerson@0.1.0",
+      "description": "Look up a person's profile by email or id.\n\nResolves the person by whichever identifier is supplied; an email shared by\nseveral people reports every match in the result.",
+      "parameters": [
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Email address to look up the person by. Provide this or a person id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "person_id",
+          "type": "string",
+          "required": false,
+          "description": "Customer.io person id to look up. Provide this or an email.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.GetPerson",
+        "parameters": {
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "person_id": {
+            "value": "person_abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "IdentifyPerson",
+      "qualifiedName": "Customerio.IdentifyPerson",
+      "fullyQualifiedName": "Customerio.IdentifyPerson@0.1.0",
+      "description": "Create or update a person and their attributes.\n\nExisting attributes not named in this call are preserved; named attributes\nare added or overwritten.",
+      "parameters": [
+        {
+          "name": "person_id",
+          "type": "string",
+          "required": true,
+          "description": "Stable id that identifies the person; creates the person if new.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "identifier_type",
+          "type": "string",
+          "required": false,
+          "description": "Which kind of value person_id is, so the write targets the right profile. Defaults to the external id you assigned the person; use the Customer.io internal id when person_id is a cio_id (people with no external id are returned that way), or email when it is an email address.",
+          "enum": [
+            "id",
+            "email",
+            "cio_id"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Email to set on the person. Provided values are stored as the email attribute; leave empty to leave the email unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attributes",
+          "type": "json",
+          "required": false,
+          "description": "Attributes to set or update on the person, as a flat mapping of attribute name to value. Omitted attributes are left unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_SITE_ID",
+        "CUSTOMERIO_TRACKING_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_TRACKING_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.IdentifyPerson",
+        "parameters": {
+          "person_id": {
+            "value": "user_4a8f2c91b3e7",
+            "type": "string",
+            "required": true
+          },
+          "identifier_type": {
+            "value": "email",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "attributes": {
+            "value": "{\"first_name\": \"Jane\", \"last_name\": \"Doe\", \"plan\": \"pro\", \"signed_up_at\": 1710000000, \"is_verified\": true}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListBroadcasts",
+      "qualifiedName": "Customerio.ListBroadcasts",
+      "fullyQualifiedName": "Customerio.ListBroadcasts@0.1.0",
+      "description": "List the workspace's broadcasts to discover ids that can be triggered.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListBroadcasts",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListCampaigns",
+      "qualifiedName": "Customerio.ListCampaigns",
+      "fullyQualifiedName": "Customerio.ListCampaigns@0.1.0",
+      "description": "List the campaigns in the workspace.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum campaigns to return (1-1000). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListCampaigns",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListNewsletters",
+      "qualifiedName": "Customerio.ListNewsletters",
+      "fullyQualifiedName": "Customerio.ListNewsletters@0.1.0",
+      "description": "List the newsletters in the workspace.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum newsletters to return (1-1000). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListNewsletters",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPersonActivities",
+      "qualifiedName": "Customerio.ListPersonActivities",
+      "fullyQualifiedName": "Customerio.ListPersonActivities@0.1.0",
+      "description": "List a person's recent activities, most recent first, resolved by email\nor id. Optionally filter by activity type and/or name; filtering by name\nrequires an activity type. When an email matches several people, the first\nmatch's activities are returned.",
+      "parameters": [
+        {
+          "name": "person_id",
+          "type": "string",
+          "required": false,
+          "description": "Customer.io person id. Provide this or an email.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Email of the person. Provide this or a person id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "activity_type",
+          "type": "string",
+          "required": false,
+          "description": "Restrict to one activity type. Leave empty for all types.",
+          "enum": [
+            "event",
+            "page",
+            "attribute_change",
+            "attribute_delete",
+            "secondary_id_change"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Restrict to activities with this exact name (e.g. an event name). Requires an activity type to also be set. Leave empty for any name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum activities to return (1-1000). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a prior page. Leave empty for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListPersonActivities",
+        "parameters": {
+          "person_id": {
+            "value": "person_84729301",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "activity_type": {
+            "value": "event",
+            "type": "string",
+            "required": false
+          },
+          "name": {
+            "value": "purchase_completed",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJpZCI6IjEyMzQ1NiIsInRzIjoxNjkwMDAwMDAwfQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPersonMessages",
+      "qualifiedName": "Customerio.ListPersonMessages",
+      "fullyQualifiedName": "Customerio.ListPersonMessages@0.1.0",
+      "description": "List a person's message and delivery history, most recent first,\nresolved by email or id. When an email matches several people, the first\nmatch's messages are returned.",
+      "parameters": [
+        {
+          "name": "person_id",
+          "type": "string",
+          "required": false,
+          "description": "Customer.io person id. Provide this or an email.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Email of the person. Provide this or a person id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum messages to return (1-1000). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a prior page. Leave empty for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListPersonMessages",
+        "parameters": {
+          "person_id": {
+            "value": "person_abc123",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJpZCI6MTIzNDUsImRpcmVjdGlvbiI6Im5leHQifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPersonSegments",
+      "qualifiedName": "Customerio.ListPersonSegments",
+      "fullyQualifiedName": "Customerio.ListPersonSegments@0.1.0",
+      "description": "List the segments a person belongs to, resolved by email or id. When an\nemail matches several people, the first match's segments are returned.",
+      "parameters": [
+        {
+          "name": "person_id",
+          "type": "string",
+          "required": false,
+          "description": "Customer.io person id. Provide this or an email.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Email of the person. Provide this or a person id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListPersonSegments",
+        "parameters": {
+          "person_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListSegmentMembers",
+      "qualifiedName": "Customerio.ListSegmentMembers",
+      "fullyQualifiedName": "Customerio.ListSegmentMembers@0.1.0",
+      "description": "List the ids of the people in a segment and the segment's total size.",
+      "parameters": [
+        {
+          "name": "segment_id",
+          "type": "string",
+          "required": true,
+          "description": "Id of the segment whose members to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum member ids to return (1-1000). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a prior page. Leave empty for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListSegmentMembers",
+        "parameters": {
+          "segment_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJpZCI6IjEwMCIsImRpciI6Im5leHQifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListSegments",
+      "qualifiedName": "Customerio.ListSegments",
+      "fullyQualifiedName": "Customerio.ListSegments@0.1.0",
+      "description": "List the segments defined in the workspace.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListSegments",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListTransactionalMessages",
+      "qualifiedName": "Customerio.ListTransactionalMessages",
+      "fullyQualifiedName": "Customerio.ListTransactionalMessages@0.1.0",
+      "description": "List the transactional message templates in the workspace.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.ListTransactionalMessages",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RecordEvent",
+      "qualifiedName": "Customerio.RecordEvent",
+      "fullyQualifiedName": "Customerio.RecordEvent@0.1.0",
+      "description": "Record a named custom event on a person's timeline to drive lifecycle\njourneys.",
+      "parameters": [
+        {
+          "name": "person_id",
+          "type": "string",
+          "required": true,
+          "description": "Id of the person the event is recorded against.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Name of the custom event (e.g. purchased, signed_up).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "identifier_type",
+          "type": "string",
+          "required": false,
+          "description": "Which kind of value person_id is, so the event targets the right profile. Defaults to the external id you assigned the person; use the Customer.io internal id when person_id is a cio_id (people with no external id are returned that way), or email when it is an email address.",
+          "enum": [
+            "id",
+            "email",
+            "cio_id"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "required": false,
+          "description": "Event data as a flat mapping of property name to value. Leave empty for an event with no data.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_SITE_ID",
+        "CUSTOMERIO_TRACKING_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_TRACKING_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.RecordEvent",
+        "parameters": {
+          "person_id": {
+            "value": "user_001abc123",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "purchased",
+            "type": "string",
+            "required": true
+          },
+          "identifier_type": {
+            "value": "id",
+            "type": "string",
+            "required": false
+          },
+          "data": {
+            "value": "{\"product_id\": \"prod_789\", \"amount\": 49.99, \"currency\": \"USD\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchPeople",
+      "qualifiedName": "Customerio.SearchPeople",
+      "fullyQualifiedName": "Customerio.SearchPeople@0.1.0",
+      "description": "Find people by segment membership and/or an attribute, to build an\naudience without a known id. Supply at least one of a segment or an\nattribute name; both combine with AND.",
+      "parameters": [
+        {
+          "name": "segment_id",
+          "type": "string",
+          "required": false,
+          "description": "Restrict to members of this segment. Leave empty to not filter by segment.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attribute_name",
+          "type": "string",
+          "required": false,
+          "description": "Restrict to people who have this attribute. Combine with an attribute value to match a specific value, or leave the value empty to match anyone the attribute is set on. Leave empty to not filter by attribute.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attribute_value",
+          "type": "string",
+          "required": false,
+          "description": "Value the named attribute must equal. Ignored unless an attribute name is given; leave empty to match any value the attribute is set to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum people to return (1-1000). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a prior page. Leave empty for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.SearchPeople",
+        "parameters": {
+          "segment_id": {
+            "value": "42",
+            "type": "string",
+            "required": false
+          },
+          "attribute_name": {
+            "value": "plan",
+            "type": "string",
+            "required": false
+          },
+          "attribute_value": {
+            "value": "premium",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJpZCI6IjEyMzQ1NiIsImRpciI6Im5leHQifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SendTransactionalEmail",
+      "qualifiedName": "Customerio.SendTransactionalEmail",
+      "fullyQualifiedName": "Customerio.SendTransactionalEmail@0.1.0",
+      "description": "Send a transactional email to one recipient by its template id.",
+      "parameters": [
+        {
+          "name": "transactional_message_id",
+          "type": "string",
+          "required": true,
+          "description": "Id of the transactional message template to send.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to",
+          "type": "string",
+          "required": true,
+          "description": "Recipient email address. The send is associated with the person who has this email; provide an email address, not a person id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_data",
+          "type": "json",
+          "required": false,
+          "description": "Values for the template's variables, as a flat mapping of name to value. Leave empty when the template has no variables.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "Subject line override. Leave empty to use the template's subject.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_address",
+          "type": "string",
+          "required": false,
+          "description": "From address override. Leave empty to use the template's sender.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "string",
+          "required": false,
+          "description": "BCC address. Leave empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to",
+          "type": "string",
+          "required": false,
+          "description": "Reply-to address override. Leave empty to use the template's default.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.SendTransactionalEmail",
+        "parameters": {
+          "transactional_message_id": {
+            "value": "42",
+            "type": "string",
+            "required": true
+          },
+          "to": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "message_data": {
+            "value": "{\"first_name\": \"Jane\", \"order_number\": \"ORD-98765\", \"total_amount\": \"$149.99\"}",
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "value": "Your Order Confirmation #ORD-98765",
+            "type": "string",
+            "required": false
+          },
+          "from_address": {
+            "value": "noreply@mycompany.com",
+            "type": "string",
+            "required": false
+          },
+          "bcc": {
+            "value": "records@mycompany.com",
+            "type": "string",
+            "required": false
+          },
+          "reply_to": {
+            "value": "support@mycompany.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "TriggerBroadcast",
+      "qualifiedName": "Customerio.TriggerBroadcast",
+      "fullyQualifiedName": "Customerio.TriggerBroadcast@0.1.0",
+      "description": "Trigger an API broadcast to a segment or an explicit recipient list.",
+      "parameters": [
+        {
+          "name": "broadcast_id",
+          "type": "string",
+          "required": true,
+          "description": "Id of the API-triggered broadcast to launch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "data",
+          "type": "json",
+          "required": false,
+          "description": "Trigger data referenced by the broadcast's content/liquid, as a flat mapping of name to value. Leave empty when the broadcast references no data.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "segment_id",
+          "type": "string",
+          "required": false,
+          "description": "Segment id to send to. Leave empty to use the broadcast's configured audience or an explicit recipient list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "recipient_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Explicit external customer ids to send to (the id you assigned the person, not a Customer.io cio_id). Leave empty to target a segment, recipient emails, or the configured audience.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "recipient_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Explicit recipient email addresses to send to. Prefer this when you only have an email or a cio_id. Leave empty to target a segment or ids.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CUSTOMERIO_APP_API_KEY",
+        "CUSTOMERIO_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_APP_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Customerio.TriggerBroadcast",
+        "parameters": {
+          "broadcast_id": {
+            "value": "42",
+            "type": "string",
+            "required": true
+          },
+          "data": {
+            "value": {
+              "promo_code": "SAVE20",
+              "discount_percent": 20,
+              "expiry_date": "2024-12-31"
+            },
+            "type": "string",
+            "required": false
+          },
+          "segment_id": {
+            "value": "7",
+            "type": "string",
+            "required": false
+          },
+          "recipient_ids": {
+            "value": [
+              "user_001",
+              "user_002",
+              "user_003"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "recipient_emails": {
+            "value": [
+              "alice@example.com",
+              "bob@example.com"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-06-11T12:27:03.366Z",
+  "summary": "The Customer.io toolkit lets LLM agents interact with a Customer.io workspace via Arcade. It covers the full lifecycle of people management, event tracking, messaging, and analytics.\n\n## Capabilities\n\n- **People management** — create, update, look up, search, and delete person profiles; resolve by email or ID; handle multi-match edge cases.\n- **Event & activity tracking** — record custom events on a person's timeline; browse a person's activity history with optional type/name filtering.\n- **Messaging** — send transactional emails by template ID, trigger API broadcasts to segments or explicit recipient lists, and list message/delivery history per person.\n- **Campaigns, newsletters & broadcasts** — list all campaigns, newsletters, and broadcasts to discover IDs needed for metrics or triggering.\n- **Analytics** — pull aggregate delivery metrics for any campaign or newsletter over a configurable period.\n- **Segments** — list workspace segments, enumerate segment members, and inspect which segments a given person belongs to.\n\n## Secrets\n\nThis toolkit requires four secrets. All are obtained from your Customer.io workspace settings.\n\n- **`CUSTOMERIO_SITE_ID`** — The Site ID for your workspace, used to authenticate Tracking API calls. Find it in your Customer.io workspace under **Settings → API & Webhooks → Tracking API Keys**. Each workspace has exactly one Site ID paired with a Tracking API Key.\n\n- **`CUSTOMERIO_TRACKING_API_KEY`** — The secret key paired with your Site ID for the [Customer.io Tracking API](https://customer.io/docs/api/track/). Retrieve it from the same **Settings → API & Webhooks → Tracking API Keys** page. Treat it as a password; it authorises writing events and person data.\n\n- **`CUSTOMERIO_APP_API_KEY`** — A Bearer token for the [Customer.io App API](https://customer.io/docs/api/app/) (also called the Beta API or Journeys API), used for reading campaigns, segments, metrics, and sending transactional email. Generate one at **Settings → API & Webhooks → App API Keys**. Scope it to the permissions your agent needs (read data, send messages, etc.); a workspace Admin role is required to create keys.\n\n- **`CUSTOMERIO_REGION`** — The data region your workspace is hosted in. Accepted values are typically `us` or `eu`, matching the Customer.io [regional data centers](https://customer.io/docs/accounts-and-workspaces/data-centers/). Check your workspace URL or **Settings → General** to confirm your region.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to store secrets, or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}
