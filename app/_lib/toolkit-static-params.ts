@@ -186,3 +186,67 @@ export async function getToolkitStaticParamsForCategory(
     .filter((route) => route.category === category)
     .map((route) => ({ toolkitId: route.toolkitId }));
 }
+
+const INTEGRATIONS_APP_DIR = join(
+  process.cwd(),
+  "app",
+  "en",
+  "resources",
+  "integrations"
+);
+
+const PAGE_FILE_NAMES = new Set(["page.mdx", "page.tsx"]);
+
+/**
+ * Authored static integration pages (e.g. partner pages like `search/tavily`
+ * and `tool-feedback`) live next to the dynamic `[toolkitId]` routes. They are
+ * real pages but are not part of `listToolkitRoutes`, so enumerate them from
+ * disk under the known integration categories.
+ */
+const listStaticIntegrationLinks = async (): Promise<string[]> => {
+  const links: string[] = [];
+
+  for (const category of INTEGRATION_CATEGORIES) {
+    const categoryDir = join(INTEGRATIONS_APP_DIR, category);
+    try {
+      const slugs = await readdir(categoryDir, { withFileTypes: true });
+      for (const slug of slugs) {
+        if (!slug.isDirectory() || slug.name.startsWith("[")) {
+          continue;
+        }
+        const files = await readdir(join(categoryDir, slug.name));
+        if (files.some((file) => PAGE_FILE_NAMES.has(file))) {
+          links.push(`/en/resources/integrations/${category}/${slug.name}`);
+        }
+      }
+    } catch {
+      // Category dir missing or unreadable — skip it.
+    }
+  }
+
+  return links;
+};
+
+/**
+ * The full set of links the integrations index may point at and that actually
+ * resolve: dynamic toolkit routes plus authored static pages. Used to decide
+ * whether a catalog card should be clickable.
+ */
+export async function listValidIntegrationLinks(options?: {
+  dataDir?: string;
+  toolkitsCatalog?: ToolkitCatalogEntry[];
+}): Promise<Set<string>> {
+  const routes = await listToolkitRoutes(options);
+  const links = new Set<string>(
+    routes.map(
+      (route) =>
+        `/en/resources/integrations/${route.category}/${route.toolkitId}`
+    )
+  );
+
+  for (const staticLink of await listStaticIntegrationLinks()) {
+    links.add(staticLink);
+  }
+
+  return links;
+}
