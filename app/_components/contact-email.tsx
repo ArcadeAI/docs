@@ -4,6 +4,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
+// TODO(i18n): hardcoded to the English contact page. Docs content is en-only
+// today, so this is the safe target (a /<locale>/ link could 404 for locales
+// without the page). When translated content ships, derive the active locale
+// (e.g. via usePathname) and point at /<locale>/resources/contact-us.
 const CONTACT_PAGE = "/en/resources/contact-us";
 
 type ContactEmailProps = {
