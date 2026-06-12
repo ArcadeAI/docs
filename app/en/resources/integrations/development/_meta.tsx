@@ -25,6 +25,10 @@ const meta: MetaRecord = {
     title: "Firecrawl",
     href: "/en/resources/integrations/development/firecrawl",
   },
+  "fly-io": {
+    title: "Fly.io",
+    href: "/en/resources/integrations/development/fly-io",
+  },
   github: {
     title: "GitHub",
     href: "/en/resources/integrations/development/github",
