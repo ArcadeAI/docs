@@ -1,7 +1,7 @@
 {
   "id": "GoogleSheets",
   "label": "Google Sheets",
-  "version": "8.0.0",
+  "version": "8.2.0",
   "description": "Arcade.dev LLM tools for Google Sheets.",
   "metadata": {
     "category": "productivity",
@@ -24,9 +24,192 @@
   },
   "tools": [
     {
+      "name": "CheckSpreadsheetAccess",
+      "qualifiedName": "GoogleSheets.CheckSpreadsheetAccess",
+      "fullyQualifiedName": "GoogleSheets.CheckSpreadsheetAccess@8.2.0",
+      "description": "Check whether this app can already read each of several spreadsheets, in one\nbatched pre-flight call, before attempting to read them.\n\nUse this when the user references multiple spreadsheets so any that are not yet\naccessible can be granted together in a single picker step, instead of hitting a\nseparate access error and grant prompt for each one. Each input may be a bare file id\nor a full Google Sheets/Drive URL.\n\nReturns ``spreadsheets`` (a per-id list with ``accessible``, the ``title`` and\n``mime_type`` when the file was read, and a ``reason`` when not usable),\n``all_accessible`` (true only when every id is an already-accessible spreadsheet),\n``connected_account_email`` (the connected Google account, empty when unknown), and a\n``grant`` block. ``grant`` is empty when nothing needs granting; otherwise it lists the\nungranted ids (``ungranted_ids``) plus, when the inline picker is enabled, a single\npicker URL covering them all.\n\nA ``reason`` of ``not_accessible_or_not_found`` is either a file not granted to this app\nyet or one that does not exist (indistinguishable here) — the picker resolves the\nformer. ``not_a_spreadsheet`` is an accessible file of another type (a Doc, PDF, image,\nor Excel/CSV file); granting cannot change a type, so for an Excel/CSV file ask the user\nto open it in Google Sheets and use File, Save as Google Sheets, then share the\nconverted file. ``invalid_reference`` is an input that is not a Drive id or link at all;\nask the user to re-check it.",
+      "parameters": [
+        {
+          "name": "spreadsheets",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The spreadsheets to check access for, each given as a bare spreadsheet id or a full Google Sheets/Drive URL (the id is extracted from the URL). Provide at most 50 per call; split larger lists across multiple calls.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Per-id accessibility (`spreadsheets`), an `all_accessible` flag, the `connected_account_email` (the Google account this app is connected through), and a `grant` block — empty when nothing needs granting, otherwise listing the ungranted ids with one consolidated picker URL covering them all."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.CheckSpreadsheetAccess",
+        "parameters": {
+          "spreadsheets": {
+            "value": [
+              "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+              "https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms/edit",
+              "https://drive.google.com/file/d/1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T/view",
+              "1A2B3C4D5E6F7G8H9I0J1K2L3M4N5O6P7Q8R9S0T"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CommentOnSpreadsheet",
+      "qualifiedName": "GoogleSheets.CommentOnSpreadsheet",
+      "fullyQualifiedName": "GoogleSheets.CommentOnSpreadsheet@8.2.0",
+      "description": "Create a comment on a spreadsheet, edit a comment's body, or resolve/reopen it.\n\nComments are created at the file level: the Drive API cannot anchor a NEW Sheets comment to a\nspecific cell or range. Cell/range-anchored comments made in the Sheets UI are still readable\nvia list_spreadsheet_comments (which returns their anchor). Editing a comment's body is\nallowed only for the comment's author.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to comment on.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": false,
+          "description": "Omit to CREATE a new comment. Provide an existing comment id to edit it (pass content) or to resolve/reopen it (pass status).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "The comment text. Required when creating. When editing an existing comment (comment_id set, no status) this replaces the body (author-only). When a status is set, this is the optional text of the resolving/reopening reply.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Resolve or reopen an existing comment (requires comment_id). Implemented as a reply with an action. Omit to create or edit instead.",
+          "enum": [
+            "resolve",
+            "reopen"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The affected comment id, any created reply id, the action taken, the resolved state, and the spreadsheet URL."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.CommentOnSpreadsheet",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "AAAABhJGg3E",
+            "type": "string",
+            "required": false
+          },
+          "content": {
+            "value": "Please review the Q3 figures in this section.",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "resolved",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "CreateOrEditSpreadsheet",
       "qualifiedName": "GoogleSheets.CreateOrEditSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@8.0.0",
+      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@8.2.0",
       "description": "Create a new spreadsheet or batch-edit an existing one.\n\nOmit `spreadsheet_id` to create; provide it to edit. All writes flow through\n`requests[]` — typed operations like updateCells, addSheet, sortRange,\naddConditionalFormatRule, autoResizeDimensions, and more.\n\nFor updateCells use ExtendedValue with an explicit type field (stringValue,\nnumberValue, boolValue, formulaValue).\n\nBy default, build clean, professional-looking tables with restrained, consistent\nformatting and plain-text tab names/headers (no emojis); only use emojis or\ndecorative styling when the user explicitly asks for it.",
       "parameters": [
         {
@@ -475,10 +658,90 @@
       }
     },
     {
+      "name": "DeleteComment",
+      "qualifiedName": "GoogleSheets.DeleteComment",
+      "fullyQualifiedName": "GoogleSheets.DeleteComment@8.2.0",
+      "description": "Delete a comment from a spreadsheet.\n\nOnly the comment's author can delete it (enforced by Google Drive); deleting marks the\nwhole thread (the comment and its replies) as deleted.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet the comment belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the comment to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of deletion and the spreadsheet URL."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.DeleteComment",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "AAAABmfu3hk",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@8.0.0",
-      "description": "Generate a URL where the user can grant this app access to specific Drive files.\n\nOpens Google's first-party Drive picker. The user selects which files to share\nwith this application — it is not a sign-in or credential prompt.\n\nUse this when a prior tool reported that a file was not found or access was denied,\nand the user expects the file to exist. After the user completes the picker flow,\nretry the prior tool.",
+      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@8.2.0",
+      "description": "Generate a URL where the user can grant this app access to spreadsheets.\n\nOpens Google's first-party Drive picker, filtered to Google Sheets, where the user\nbrowses and selects which spreadsheets to share with this application — it is not a\nsign-in or credential prompt.\n\nUse this when a prior tool reported that a file was not found or access was denied, and\nthe user expects the file to exist. After the user completes the picker flow, retry the\nprior operation.",
       "parameters": [],
       "auth": {
         "providerId": "google",
@@ -520,7 +783,7 @@
     {
       "name": "GetSpreadsheetEditHistory",
       "qualifiedName": "GoogleSheets.GetSpreadsheetEditHistory",
-      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@8.0.0",
+      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@8.2.0",
       "description": "Report who edited a spreadsheet and when, from Google Drive revisions.\n\nReports the \"who\" and \"when\" only — not which cells changed, and it can't revert.\n\n'summary' (default) answers \"who last edited this and when\" (read from the file's head,\nso always accurate), plus per-window aggregates (revisions read, contributors, first\nedit) and a preview of recent edits — computed over a bounded window of history per call.\nThese aggregates describe the whole history only when `is_incomplete` is false; it is\ntrue when the scan was resumed from a token and/or more history remains. To answer\n\"when was this first edited?\" or \"who contributed?\" reliably, call from the beginning\n(no `pagination_token`) and check `is_incomplete` is false. `pagination_token` is\nreturned when more pages remain so you can resume.\n\n'list' returns one page of individual revisions, oldest first. Drive can't sort\nnewest-first, so the most recent individual revisions are on the final page.",
       "parameters": [
         {
@@ -629,7 +892,7 @@
     {
       "name": "InspectSpreadsheet",
       "qualifiedName": "GoogleSheets.InspectSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@8.0.0",
+      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@8.2.0",
       "description": "Inspect a Google Sheets spreadsheet's structure or read a range of cells.\n\nUse the default 'structure' mode to understand a workbook cheaply before reading.\nSwitch to 'read' mode to pull a range as a grid of rows, optionally with\nper-cell annotations and a rendered markdown/csv/tsv export.\n\nIn 'read' mode the response's per-tab 'sheets' block reports only tab identity and\nthe allocated grid; its scan-derived fields (used_range, populated_cell_count,\nformula_cell_count, first_row, table_regions) are placeholders (0/empty) because read\nmode does not scan the tab — they do NOT mean the tab is empty or that it has no\ntables. The data you read is in the top-level 'range' and 'rows'. Call 'structure'\nmode for those aggregates and for the workbook's charts, merges, protected ranges, and\nconditional formats.\n\nWorkflow for a tab that holds multiple tables, or a table that does not start at A1:\ncall 'structure' first and use that tab's estimated 'table_regions' to choose the\na1_range to read or filter, so you target one table instead of a glued multi-table\nrange.\n\nAlways check the response's top-level 'warnings' list: read mode reports there when a\nresult was capped or trimmed (cell budget, the per-cell annotation cap, or an empty\nfilter scan) and tells you how to recover (page 'next_range', narrow 'a1_range',\n'select_columns', or request fewer annotation kinds).",
       "parameters": [
         {
@@ -909,9 +1172,546 @@
       }
     },
     {
+      "name": "ListSpreadsheetComments",
+      "qualifiedName": "GoogleSheets.ListSpreadsheetComments",
+      "fullyQualifiedName": "GoogleSheets.ListSpreadsheetComments@8.2.0",
+      "description": "List a spreadsheet's comment threads, or the full replies of a single comment.\n\nIn 'comments' mode each comment includes up to a few trimmed reply previews plus the total reply_count; use 'thread' mode for a comment's complete reply list. Without filters/ordering, pagination walks every comment. Client-side filters (has_replies, resolved) and order_by are applied only within a bounded scan of the first 500 comments, so on larger sheets drop them and page through everything with the native (unbounded) pagination. Each comment's Drive anchor is returned when it was cell/range-anchored in the Sheets UI; comments created via the API are file-level. Filtering, ordering, and offset pagination are best-effort: results can drift if comments are added or removed between paginated calls.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet whose comments to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "'comments' (default) lists top-level comments, each with a capped reply preview and a reply_count. 'thread' lists the FULL replies of one comment (set comment_id).",
+          "enum": [
+            "comments",
+            "thread"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": false,
+          "description": "Required when mode='thread': the comment whose replies to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max comments (or replies, in thread mode) to return. Clamped to [1, 50].",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Opaque token from a previous call's page_token to fetch the next page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_deleted",
+          "type": "boolean",
+          "required": false,
+          "description": "Include deleted comments/replies (their bodies are blank). Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "modified_after",
+          "type": "string",
+          "required": false,
+          "description": "Server-side filter: only comments modified at/after this RFC3339 time (e.g. '2025-01-01T00:00:00Z'). Comments mode only.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "has_replies",
+          "type": "boolean",
+          "required": false,
+          "description": "Client-side filter (comments mode): keep only comments that have (True) or lack (False) replies.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "resolved",
+          "type": "boolean",
+          "required": false,
+          "description": "Client-side filter (comments mode): keep only resolved (True) or unresolved (False) comments.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Fetch exactly these comments by id (comments mode), instead of paging. Replaces a dedicated get tool. At most 50 ids per call, and not combined with page_token.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "Client-side ordering (comments mode) by created/modified time, ascending or descending. Defaults to Drive's native order.",
+          "enum": [
+            "created_time_asc",
+            "created_time_desc",
+            "modified_time_asc",
+            "modified_time_desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "max_length",
+          "type": "integer",
+          "required": false,
+          "description": "Cap each returned comment/reply body (and quoted text) at this many characters. A longer body becomes '<prefix>…(+N chars)' (suffix not counted; N = hidden chars). Pass 0 for full, untruncated text; a positive value below the floor (or negative) clamps up to the floor. Filtering still matches the FULL text. Defaults to 280.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The matching comments (or replies) with pagination info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.ListSpreadsheetComments",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "mode": {
+            "value": "comments",
+            "type": "string",
+            "required": false
+          },
+          "comment_id": {
+            "value": "AAAABx3Kz7E",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page_token": {
+            "value": "CiAKGjBpNDd2Nmp2Zml2cXRwYjBpOXA",
+            "type": "string",
+            "required": false
+          },
+          "include_deleted": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "modified_after": {
+            "value": "2025-01-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "has_replies": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "resolved": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "comment_ids": {
+            "value": [
+              "AAAABx3Kz7E",
+              "AAAACy4Lw8F",
+              "AAAADz5Mx9G"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "order_by": {
+            "value": "modifiedTime desc",
+            "type": "string",
+            "required": false
+          },
+          "max_length": {
+            "value": 280,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ReplyToComment",
+      "qualifiedName": "GoogleSheets.ReplyToComment",
+      "fullyQualifiedName": "GoogleSheets.ReplyToComment@8.2.0",
+      "description": "Add a reply to an existing comment on a spreadsheet.\n\nTo resolve or reopen the comment instead, use comment_on_spreadsheet with a status.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet the comment belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the comment to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_text",
+          "type": "string",
+          "required": true,
+          "description": "The text of the reply.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created reply id, its comment id, and the URL."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.ReplyToComment",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "AAAABmFtCjc",
+            "type": "string",
+            "required": true
+          },
+          "reply_text": {
+            "value": "Thanks for the note! I've updated the values in column C to reflect the latest figures.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ScanForDataIssues",
+      "qualifiedName": "GoogleSheets.ScanForDataIssues",
+      "fullyQualifiedName": "GoogleSheets.ScanForDataIssues@8.2.0",
+      "description": "Deterministically flag 'weird'/bad cells in spreadsheet data.\n\nNo LLM judgement: the same input always returns the same flags. Each cell-level finding\ncarries a coord, a 0-based row_index/column_index (ready for a Sheets GridRange), the rule,\na severity (high -> red, medium/low -> yellow), and a note-ready reason — so the output\ndrops straight into an annotate/format recipe. In the default `mode='grouped'` these are\naggregated per rule+column within each table into `groups` (with A1 `coords`); use\n`mode='list'` to get every flagged cell in `flags` with its 0-based indices.\n\nProvide `spreadsheet_id` to scan a live sheet (scan one tab via sheet_id/sheet_title, or\nevery tab when both are omitted). Set `orientation='rows'` for transposed tables whose\nfields run down a column instead of across a row. Findings come back as flags (cell-level,\nhigh certainty) and alerts (table-level, lower certainty), grouped sheet -> table -> rule.\n\nIn all-sheets mode an unreadable tab never aborts the scan: its title is collected in\n`failed_sheets` (and echoed as a `warnings` entry) while every other tab still returns.\n`failed_sheets` is empty for a single-tab scan and whenever every tab reads cleanly.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to scan. Scan one tab via sheet_id/sheet_title, or every tab when both are omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_id",
+          "type": "integer",
+          "required": false,
+          "description": "Scan only this tab (by numeric sheetId). Mutually exclusive with sheet_title. Omit both to scan every tab, grouped by sheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_title",
+          "type": "string",
+          "required": false,
+          "description": "Scan only this tab (by name). Mutually exclusive with sheet_id. Omit both to scan every tab.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "a1_range",
+          "type": "string",
+          "required": false,
+          "description": "Single-sheet only: limit the analysis window (e.g. 'A1:F100'). Table detection still runs inside it; scope it to a single table's range for a precise scan. Defaults to the tab's used range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "treat_range_as_single_table",
+          "type": "boolean",
+          "required": false,
+          "description": "Single-sheet only: treat the whole a1_range as ONE table, skipping auto-detection. Use when detection would over-split a table that has an interior blank row. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "'grouped' (default) aggregates findings per rule+column within each table with counts; 'list' enumerates every flagged cell.",
+          "enum": [
+            "list",
+            "grouped"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "rules",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Which deterministic checks to run. Omit to run every check. Each is fully reproducible (no LLM judgement).",
+          "enum": [
+            "error_value",
+            "text_sentinel",
+            "parenthesized_number",
+            "number_stored_as_text",
+            "whitespace",
+            "type_outlier",
+            "formula_outlier",
+            "date_serial",
+            "gap",
+            "repeated_header",
+            "inconsistent_column"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "has_header",
+          "type": "boolean",
+          "required": false,
+          "description": "Treat each detected table's first row as labels (never flagged as a type outlier). Defaults to True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "orientation",
+          "type": "string",
+          "required": false,
+          "description": "'columns' (default): records are rows, fields are columns. 'rows': the table is transposed — records are columns and fields are rows (row labels down column A). Applies to the whole scan, not per-table (one setting for every table on the tab). Coords are always reported in the sheet's real coordinates.",
+          "enum": [
+            "columns",
+            "rows"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "max_items_per_group",
+          "type": "integer",
+          "required": false,
+          "description": "Grouped mode: max cell coords listed per rule+column (within a table) before an 'omitted' count. Defaults to 10, hard-capped at 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_rows",
+          "type": "integer",
+          "required": false,
+          "description": "Max rows scanned per tab (applies to every scanned tab). Defaults to 200, floored to 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Deterministic data-issue flags, grouped sheet -> table -> rule."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.ScanForDataIssues",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "sheet_id": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "sheet_title": {
+            "value": "Sales Data Q1",
+            "type": "string",
+            "required": false
+          },
+          "a1_range": {
+            "value": "A1:F100",
+            "type": "string",
+            "required": false
+          },
+          "treat_range_as_single_table": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "mode": {
+            "value": "grouped",
+            "type": "string",
+            "required": false
+          },
+          "rules": {
+            "value": [
+              "blank",
+              "type_outlier",
+              "duplicate",
+              "out_of_range"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "has_header": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "orientation": {
+            "value": "columns",
+            "type": "string",
+            "required": false
+          },
+          "max_items_per_group": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "max_rows": {
+            "value": 200,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "SearchSpreadsheets",
       "qualifiedName": "GoogleSheets.SearchSpreadsheets",
-      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@8.0.0",
+      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@8.2.0",
       "description": "Searches for spreadsheets in the user's Google Drive based on the titles and content and\nreturns the title, ID, and URL for each matching spreadsheet.\n\nDoes not return the content/data of the sheets in the spreadsheets - only the metadata.\nExcludes spreadsheets that are in the trash.",
       "parameters": [
         {
@@ -1104,7 +1904,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleSheets.WhoAmI",
-      "fullyQualifiedName": "GoogleSheets.WhoAmI@8.0.0",
+      "fullyQualifiedName": "GoogleSheets.WhoAmI@8.2.0",
       "description": "Get comprehensive user profile and Google Sheets environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Sheets access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -1154,6 +1954,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-06-10T12:12:15.675Z",
-  "summary": "**Google Sheets toolkit** connects Arcade to Google Sheets (and Drive), enabling LLMs to create, read, edit, search, and audit spreadsheets on behalf of authenticated users.\n\n## Capabilities\n\n- **Spreadsheet creation & editing** — Create new spreadsheets or batch-edit existing ones using typed cell operations (updateCells, addSheet, sortRange, addConditionalFormatRule, autoResizeDimensions, and more); supports formulas, formatting, and structured table layouts.\n- **Structure inspection & data reading** — Inspect workbook structure (tabs, charts, merges, conditional formats, table regions) cheaply before reading, then pull specific cell ranges as grids with optional annotations and markdown/CSV/TSV export.\n- **Search & discovery** — Search a user's Google Drive for spreadsheets by title or content, returning metadata (title, ID, URL); excludes trashed files.\n- **Edit history auditing** — Retrieve revision history (contributor identity and timestamps) from Drive; supports summary mode (aggregates, recent preview) and paginated list mode for full history traversal.\n- **Drive file picker integration** — Generate a first-party Google Drive Picker URL to let users grant file-level access when a file is not found or access is denied, enabling retry flows.\n- **User profile & permissions** — Retrieve the authenticated user's name, email, profile picture, and Google Sheets access permissions.\n\n## OAuth\n\nThis toolkit uses **OAuth 2.0** via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`\n\nThis secret is a **URL override or feature flag value** that controls the behavior of the inline Google Drive Picker flow used by `GoogleSheets.GenerateGoogleFilePickerUrl`. It is not a credential issued by Google — it is a configuration value set by the developer (or Arcade platform operator) to enable or customize the picker URL endpoint used internally. Set this in your Arcade secrets configuration; no specific Google dashboard page issues it.\n\nSee the [Arcade secrets configuration docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to define and manage secrets, and the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets) to set values."
+  "generatedAt": "2026-06-13T11:44:29.054Z",
+  "summary": "**Google Sheets** is an Arcade toolkit that lets LLM agents read, write, and manage Google Sheets spreadsheets and their metadata through the Google Drive and Sheets APIs.\n\n## Capabilities\n\n- **Spreadsheet discovery & access checks** — search Drive for spreadsheets by title/content, pre-flight batch-check access to multiple files before reading, and retrieve authenticated user profile and permission info.\n- **Read & inspect** — inspect workbook structure (tabs, charts, merges, conditional formats, table regions) or read arbitrary cell ranges as grids with optional per-cell annotations and markdown/CSV/TSV export.\n- **Write & create** — create new spreadsheets or batch-edit existing ones via the full Sheets batchUpdate API (cell values, formatting, sheets, sorting, conditional rules, auto-resize, and more).\n- **Data quality scanning** — deterministically flag bad/weird cells (nulls, type mismatches, outliers, etc.) with severity levels and GridRange-ready coordinates for downstream annotation workflows.\n- **Edit history** — retrieve revision history summarized or paginated, reporting contributors and timestamps (not cell-level diffs).\n- **Comments & collaboration** — list, create, edit, resolve/reopen, reply to, and delete comment threads; generate a Google Drive file-picker URL to grant spreadsheet access inline.\n\n## OAuth\n\nUses OAuth 2.0 via the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n### `ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`\n\nA feature-flag secret that controls whether the inline Google Drive file-picker URL is generated and returned inside the `grant` block of `CheckSpreadsheetAccess` and `GenerateGoogleFilePickerUrl`. When set, those tools can return a single picker URL that lets users grant access to one or more spreadsheets without leaving the agent conversation flow.\n\nThis is **not** a credential issued by Google — it is a configuration value you set yourself in your Arcade deployment to opt in to the inline picker feature. Set it to a truthy value (e.g. `\"true\"` or `\"1\"`) in your Arcade secrets store to enable the behavior. No specific Google dashboard page or OAuth scope is required to obtain it.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to configure secrets, and manage your values at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

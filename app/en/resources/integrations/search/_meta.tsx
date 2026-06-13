@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  glean: {
+    title: "Glean",
+    href: "/en/resources/integrations/search/glean",
+  },
   google_finance: {
     title: "Google Finance",
     href: "/en/resources/integrations/search/google_finance",
