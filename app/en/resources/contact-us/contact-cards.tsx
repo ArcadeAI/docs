@@ -20,7 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import posthog from "posthog-js";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { QuickStartCard } from "../../../_components/quick-start-card";
 
@@ -264,6 +264,14 @@ function SuccessMessage({ onClose }: { onClose: () => void }) {
 export function ContactCards() {
   const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  // Assemble the support mailto only after mount so the SSR/crawled markup
+  // shows a plain contact-page link — Cloudflare's email obfuscation then has
+  // nothing to rewrite into a broken /cdn-cgi/l/email-protection link. Mirrors
+  // <ContactEmail> (see app/_components/contact-email.tsx).
+  const [supportHref, setSupportHref] = useState("/en/resources/contact-us");
+  useEffect(() => {
+    setSupportHref("mailto:support@arcade.dev");
+  }, []);
 
   const handleContactSalesClick = () => {
     posthog.capture("Contact sales modal opened", {
@@ -282,7 +290,7 @@ export function ContactCards() {
       <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         <QuickStartCard
           description="Get help with technical issues, account questions, and general inquiries from our support team.  Email support is available for customers on paid plans."
-          href="mailto:support@arcade.dev"
+          href={supportHref}
           icon={Mail}
           title="Email Support"
         />
