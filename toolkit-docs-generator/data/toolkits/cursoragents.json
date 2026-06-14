@@ -1,0 +1,1251 @@
+{
+  "id": "CursorAgents",
+  "label": "Cursor Agents",
+  "version": "0.1.0",
+  "description": "Arcade.dev tools for operating Cursor Cloud Agents",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/cursor.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/development/cursor-agents",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "ArchiveAgent",
+      "qualifiedName": "CursorAgents.ArchiveAgent",
+      "fullyQualifiedName": "CursorAgents.ArchiveAgent@0.1.0",
+      "description": "Archive a cloud agent so it stops accepting new runs (reversible).\n\nThe archive is committed once accepted; if the follow-up read of the agent\nfails, the result carries only the agent id with an empty status, and a\nget_agent call returns the refreshed state.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.ArchiveAgent",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CancelRun",
+      "qualifiedName": "CursorAgents.CancelRun",
+      "fullyQualifiedName": "CursorAgents.CancelRun@0.1.0",
+      "description": "Cancel an active run; cancelling an already-terminal run returns an error.\n\nCancellation is accepted asynchronously: the returned status reflects the run's\nstate at the moment of the call and may still be non-terminal even though the\ncancel was accepted. Poll the run afterward to confirm it settles to CANCELLED;\ndo not treat a non-terminal status here as a failed cancel. If the post-cancel\nread of the run fails, the result carries an empty status instead of an error.\nUpstream failures carry a stable bracketed code before the message when Cursor\nsupplies one (an open set; the most common here is ``[run_not_cancellable]``,\nreturned when the run is already terminal).",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "run_id",
+          "type": "string",
+          "required": true,
+          "description": "The active run identifier to cancel.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.CancelRun",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-a3f7e291-4c82-4b1d-9e56-d0f123456789",
+            "type": "string",
+            "required": true
+          },
+          "run_id": {
+            "value": "run-7b2d1e84-09ac-4f3a-bc67-e9a012345678",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteAgent",
+      "qualifiedName": "CursorAgents.DeleteAgent",
+      "fullyQualifiedName": "CursorAgents.DeleteAgent@0.1.0",
+      "description": "Permanently delete a cloud agent. This cannot be undone.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.DeleteAgent",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-a3f7c2e1-84b5-4d92-b631-0e9f7a2c5d18",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DownloadArtifact",
+      "qualifiedName": "CursorAgents.DownloadArtifact",
+      "fullyQualifiedName": "CursorAgents.DownloadArtifact@0.1.0",
+      "description": "Get a time-limited download link for one uploaded artifact file.\n\nArtifacts are Cursor \"background composer\" uploads, not an agent's code changes;\nfor code output read the run's branch and PR instead.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "The artifact's path, as returned when listing artifacts.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.DownloadArtifact",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-3f7a1c2e-84d0-4b9f-a631-0e52d8c74b1a",
+            "type": "string",
+            "required": true
+          },
+          "path": {
+            "value": "outputs/report_summary.pdf",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetAgent",
+      "qualifiedName": "CursorAgents.GetAgent",
+      "fullyQualifiedName": "CursorAgents.GetAgent@0.1.0",
+      "description": "Get a cloud agent's configuration and latest run pointer.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.GetAgent",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetAgentUsage",
+      "qualifiedName": "CursorAgents.GetAgentUsage",
+      "fullyQualifiedName": "CursorAgents.GetAgentUsage@0.1.0",
+      "description": "Get token usage for an agent, summed and broken down per run.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "run_id",
+          "type": "string",
+          "required": false,
+          "description": "Scope usage to a single run. Leave empty to total across all of the agent's runs.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.GetAgentUsage",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-a3f7c912-4e2b-4d89-b1f0-8c3e5d6a7f21",
+            "type": "string",
+            "required": true
+          },
+          "run_id": {
+            "value": "run-9b2e1d4c-7a3f-4c85-b0e2-1f6d8a9c3b47",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetRun",
+      "qualifiedName": "CursorAgents.GetRun",
+      "fullyQualifiedName": "CursorAgents.GetRun@0.1.0",
+      "description": "Get a run's current status, and its result, branches, and PR once terminal.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "run_id",
+          "type": "string",
+          "required": true,
+          "description": "The run identifier to read.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.GetRun",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-3f7a1c2d-8e45-4b09-a123-9d6f0e5c7b82",
+            "type": "string",
+            "required": true
+          },
+          "run_id": {
+            "value": "run_4a2b9c1d-5e6f-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "LaunchAgent",
+      "qualifiedName": "CursorAgents.LaunchAgent",
+      "fullyQualifiedName": "CursorAgents.LaunchAgent@0.1.0",
+      "description": "Launch a Cursor cloud agent on a repository or named environment.\n\nThis single call starts the agent and its first run; follow it to completion\nwith the run tools.",
+      "parameters": [
+        {
+          "name": "prompt",
+          "type": "string",
+          "required": true,
+          "description": "The coding task for the agent, in natural language.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repository_url",
+          "type": "string",
+          "required": false,
+          "description": "GitHub repository the agent works on (https://github.com/org/repo; the schemeless github.com/org/repo form returned by list_repositories is also accepted). Leave empty when launching into a named environment, which already pins its repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "starting_ref",
+          "type": "string",
+          "required": false,
+          "description": "Branch, tag, or commit to start from. Only valid with a repository url; a named environment pins its own repository and ref. Leave empty to use the repository default branch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "environment",
+          "type": "string",
+          "required": false,
+          "description": "Named cloud environment to run in. Leave empty to run on the given repository. Cannot be combined with a repository url.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "model",
+          "type": "string",
+          "required": false,
+          "description": "Model id to use. Leave empty to use the account default model.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mcp_servers",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "MCP servers to pre-wire into the agent. Leave empty for none. Each item is an object with fields: name (str, required); type (str: \"http\", \"sse\", or \"stdio\"); url (str, for http/sse servers); headers (object of str to str, optional, for http/sse servers); command (str, for stdio servers, run inside the agent VM); args (list of str, optional, for stdio servers); env (object of str to str, optional, for stdio servers).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "env_vars",
+          "type": "json",
+          "required": false,
+          "description": "Environment variables injected into the agent shell, as name/value pairs. At most 50 entries; names cannot start with CURSOR_. Leave empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "Whether the agent edits code or only produces a plan. Defaults to AGENT.",
+          "enum": [
+            "agent",
+            "plan"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "auto_create_pr",
+          "type": "boolean",
+          "required": false,
+          "description": "Open a pull request with the agent's changes when it finishes. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "work_on_current_branch",
+          "type": "boolean",
+          "required": false,
+          "description": "Commit to the starting branch instead of a new branch. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Display name for the agent (max 100 characters). Leave empty to auto-name it.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.LaunchAgent",
+        "parameters": {
+          "prompt": {
+            "value": "Refactor the authentication module to use JWT tokens instead of session cookies, and add unit tests for the new implementation.",
+            "type": "string",
+            "required": true
+          },
+          "repository_url": {
+            "value": "https://github.com/acme-org/backend-api",
+            "type": "string",
+            "required": false
+          },
+          "starting_ref": {
+            "value": "feature/auth-refactor",
+            "type": "string",
+            "required": false
+          },
+          "environment": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "model": {
+            "value": "claude-3-5-sonnet",
+            "type": "string",
+            "required": false
+          },
+          "mcp_servers": {
+            "value": [
+              {
+                "name": "filesystem-server",
+                "type": "stdio",
+                "command": "npx",
+                "args": [
+                  "-y",
+                  "@modelcontextprotocol/server-filesystem",
+                  "/workspace"
+                ],
+                "env": {
+                  "NODE_ENV": "production"
+                }
+              },
+              {
+                "name": "github-mcp",
+                "type": "http",
+                "url": "https://mcp.github.example.com/sse",
+                "headers": {
+                  "Authorization": "Bearer ghp_exampletoken123"
+                }
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "env_vars": {
+            "value": {
+              "NODE_ENV": "development",
+              "LOG_LEVEL": "debug",
+              "DATABASE_URL": "postgres://localhost:5432/mydb",
+              "APP_PORT": "3000"
+            },
+            "type": "string",
+            "required": false
+          },
+          "mode": {
+            "value": "AGENT",
+            "type": "string",
+            "required": false
+          },
+          "auto_create_pr": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "work_on_current_branch": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "name": {
+            "value": "JWT Auth Refactor Agent",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListAgents",
+      "qualifiedName": "CursorAgents.ListAgents",
+      "fullyQualifiedName": "CursorAgents.ListAgents@0.1.0",
+      "description": "List your cloud agents, newest first.",
+      "parameters": [
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Include archived agents in the results. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pr_url",
+          "type": "string",
+          "required": false,
+          "description": "Only return agents associated with this pull request url. Leave empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum agents to return (1-100; values outside the range are clamped). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a previous call. Leave empty for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.ListAgents",
+        "parameters": {
+          "include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "pr_url": {
+            "value": "https://github.com/example-org/example-repo/pull/42",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJpZCI6IjEyMzQ1NiIsInRzIjoiMjAyNC0wMS0xNVQxMDozMDowMFoifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListArtifacts",
+      "qualifiedName": "CursorAgents.ListArtifacts",
+      "fullyQualifiedName": "CursorAgents.ListArtifacts@0.1.0",
+      "description": "List the artifact files a cloud agent explicitly uploaded.\n\nArtifacts are Cursor \"background composer\" uploads. Code an agent writes to a repo\nlands on the run's branch and PR (see the run's ``branches``), not here, so this is\nempty for typical fix-a-repo / open-a-PR tasks.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.ListArtifacts",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-3f7a1d2e-84c6-4b19-a532-9e0d7c8f1b45",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListModels",
+      "qualifiedName": "CursorAgents.ListModels",
+      "fullyQualifiedName": "CursorAgents.ListModels@0.1.0",
+      "description": "List the LLM models available to launch a cloud agent with.\n\nReturns the model ids (e.g. Claude, GPT, and Gemini family models) accepted\nby the launch tool's model parameter, with display names and aliases.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.ListModels",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListRepositories",
+      "qualifiedName": "CursorAgents.ListRepositories",
+      "fullyQualifiedName": "CursorAgents.ListRepositories@0.1.0",
+      "description": "List every GitHub repository Cursor can reach, as repository urls.\n\nThe upstream returns the full set in one response, so this is always the\ncomplete list and never a partial page.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.ListRepositories",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListRuns",
+      "qualifiedName": "CursorAgents.ListRuns",
+      "fullyQualifiedName": "CursorAgents.ListRuns@0.1.0",
+      "description": "List an agent's runs, newest first.\n\nListing omits each run's final result text; read an individual run to get it.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum runs to return (1-100; values outside the range are clamped). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from a previous call. Leave empty for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.ListRuns",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJpZCI6ImJjLWY0N2FjMTBiLTU4Y2MtNDM3Mi1hNTY3LTBlMDJiMmMzZDQ3OSIsInRzIjoxNzA5MzIxNjAwfQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SendFollowupRun",
+      "qualifiedName": "CursorAgents.SendFollowupRun",
+      "fullyQualifiedName": "CursorAgents.SendFollowupRun@0.1.0",
+      "description": "Send a follow-up prompt to an existing agent, starting a new run.\n\nAn agent runs one turn at a time. Upstream failures carry a stable bracketed\ncode before the message when Cursor supplies one (an open set; the most\ncommon here is ``[agent_busy]``). If this returns ``[agent_busy]``, the agent\nalready has an active run: poll get_run until is_terminal, then resend the\nfollow-up.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>) to steer.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "prompt",
+          "type": "string",
+          "required": true,
+          "description": "Follow-up instructions for the agent, in natural language.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mcp_servers",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "MCP servers scoped to this run only. Leave empty for none. Each item is an object with fields: name (str, required); type (str: \"http\", \"sse\", or \"stdio\"); url (str, for http/sse servers); headers (object of str to str, optional, for http/sse servers); command (str, for stdio servers, run inside the agent VM); args (list of str, optional, for stdio servers); env (object of str to str, optional, for stdio servers).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "Whether the agent edits code or only produces a plan. Defaults to AGENT.",
+          "enum": [
+            "agent",
+            "plan"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.SendFollowupRun",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-a3f7c2d1-84eb-4f92-b631-09e5d7a8c104",
+            "type": "string",
+            "required": true
+          },
+          "prompt": {
+            "value": "Now refactor the authentication module to use JWT tokens instead of session cookies, and ensure all existing tests still pass.",
+            "type": "string",
+            "required": true
+          },
+          "mcp_servers": {
+            "value": [
+              {
+                "name": "filesystem-server",
+                "type": "stdio",
+                "command": "npx",
+                "args": [
+                  "-y",
+                  "@modelcontextprotocol/server-filesystem",
+                  "/workspace"
+                ],
+                "env": {
+                  "NODE_ENV": "development"
+                }
+              },
+              {
+                "name": "github-mcp",
+                "type": "sse",
+                "url": "https://mcp.github.example.com/sse",
+                "headers": {
+                  "Authorization": "Bearer ghp_exampletoken123",
+                  "X-Repo": "my-org/my-repo"
+                }
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "mode": {
+            "value": "AGENT",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UnarchiveAgent",
+      "qualifiedName": "CursorAgents.UnarchiveAgent",
+      "fullyQualifiedName": "CursorAgents.UnarchiveAgent@0.1.0",
+      "description": "Restore an archived cloud agent to active.\n\nThe restore is committed once accepted; if the follow-up read of the agent\nfails, the result carries only the agent id with an empty status, and a\nget_agent call returns the refreshed state.",
+      "parameters": [
+        {
+          "name": "agent_id",
+          "type": "string",
+          "required": true,
+          "description": "The agent identifier (bc-<uuid>).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.UnarchiveAgent",
+        "parameters": {
+          "agent_id": {
+            "value": "bc-f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "CursorAgents.WhoAmI",
+      "fullyQualifiedName": "CursorAgents.WhoAmI@0.1.0",
+      "description": "Return the Cursor account the API key authenticates as.\n\nCall this first in a session to confirm which account you are acting on\nbefore launching or managing any cloud agents.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CURSOR_AGENTS_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CURSOR_AGENTS_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CursorAgents.WhoAmI",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-06-14T11:47:45.709Z",
+  "summary": "**Cursor Agents** is an Arcade toolkit for programmatically operating [Cursor Cloud Agents](https://cursor.sh) — AI coding agents that run on repositories in the cloud. It enables launching, managing, monitoring, and tearing down agents and their runs entirely through Arcade tools.\n\n## Capabilities\n\n- **Agent lifecycle management** — launch agents on repos or named environments, archive/unarchive them reversibly, or permanently delete them.\n- **Run control & monitoring** — start follow-up runs, cancel active runs (with async-safe polling guidance), and retrieve full run status, result text, branches, and PRs once terminal.\n- **Usage & account introspection** — fetch per-agent and per-run token usage breakdowns; confirm the authenticated Cursor account with a `WhoAmI` check before acting.\n- **Discovery** — list all reachable GitHub repositories, available LLM models (Claude, GPT, Gemini families), agents, and runs.\n- **Artifact access** — list files a cloud agent explicitly uploaded and obtain time-limited download links; note that repo code changes land on the run's branch/PR, not the artifact list.\n\n## Secrets\n\n`CURSOR_AGENTS_API_KEY` — A Cursor API key that authenticates all requests to the Cursor Cloud Agents API. To obtain one, log in to your Cursor account, navigate to **Settings → API Keys** (or the equivalent section in the [Cursor dashboard](https://cursor.sh)), and generate a new key. The key must belong to an account that has access to Cursor Cloud Agents; ensure your Cursor plan supports cloud agent usage before generating. Store the key value exactly as issued — it is not recoverable after initial display.\n\nConfigure secrets in Arcade at [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly via the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
+}

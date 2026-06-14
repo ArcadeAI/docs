@@ -9,6 +9,10 @@ const meta: MetaRecord = {
     title: "Bright Data",
     href: "/en/resources/integrations/development/brightdata",
   },
+  "cursor-agents": {
+    title: "Cursor Agents",
+    href: "/en/resources/integrations/development/cursor-agents",
+  },
   datadog: {
     title: "Datadog",
     href: "/en/resources/integrations/development/datadog",
