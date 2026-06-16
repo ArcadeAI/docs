@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ToolDetail, ToolkitData } from "../types";
+import type { ToolDefinition, ToolkitData } from "../types";
 
 /**
  * Lazy per-tool detail loading.
@@ -15,7 +15,7 @@ import type { ToolDetail, ToolkitData } from "../types";
  * One fetch per toolkit per page (the full toolkit JSON), shared across every
  * tool section via a module-level cache and keyed by `qualifiedName`.
  */
-type DetailMap = Map<string, ToolDetail>;
+type DetailMap = Map<string, ToolDefinition>;
 
 const detailCache = new Map<string, Promise<DetailMap>>();
 
@@ -35,11 +35,7 @@ function loadToolkitDetail(toolkitId: string): Promise<DetailMap> {
     .then((data) => {
       const map: DetailMap = new Map();
       for (const tool of data.tools ?? []) {
-        map.set(tool.qualifiedName, {
-          parameters: tool.parameters,
-          output: tool.output,
-          codeExample: tool.codeExample,
-        });
+        map.set(tool.qualifiedName, tool);
       }
       return map;
     })
@@ -56,7 +52,7 @@ function loadToolkitDetail(toolkitId: string): Promise<DetailMap> {
 export type ToolDetailState =
   | { status: "loading" }
   | { status: "error" }
-  | { status: "ready"; detail: ToolDetail };
+  | { status: "ready"; tool: ToolDefinition };
 
 export function useToolDetail(
   toolkitId: string,
@@ -85,8 +81,8 @@ export function useToolDetail(
         if (!active) {
           return;
         }
-        const detail = map.get(qualifiedName);
-        setState(detail ? { status: "ready", detail } : { status: "error" });
+        const tool = map.get(qualifiedName);
+        setState(tool ? { status: "ready", tool } : { status: "error" });
       })
       .catch(() => {
         if (active) {

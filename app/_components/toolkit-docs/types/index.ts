@@ -245,18 +245,9 @@ export type ToolDefinition = {
 };
 
 /**
- * The heavy per-tool fields that are lazily fetched (not in the initial HTML).
- * Kept out of the server-rendered payload to stay under Googlebot's 2 MB limit.
- */
-export type ToolDetail = Pick<
-  ToolDefinition,
-  "parameters" | "output" | "codeExample"
->;
-
-/**
  * A tool with its heavy detail fields stripped — everything needed to render the
  * Available Tools table, the sidebar, and a collapsed tool section. The detail
- * (parameters/output/codeExample) is fetched on expand via {@link ToolDetail}.
+ * (parameters/output/codeExample) is fetched on expand as a full ToolDefinition.
  */
 export type ToolSummary = Omit<
   ToolDefinition,

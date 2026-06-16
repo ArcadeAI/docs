@@ -10,7 +10,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { splitEmails } from "../lib/neutralize-emails";
 import type { ToolDefinition, ToolSectionProps, ToolSummary } from "../types";
 import { toToolAnchorId } from "./available-tools-table";
 import {
@@ -197,9 +196,7 @@ function ToolDescriptionSection({
       />
       {showDescription && (
         <p className="text-foreground text-sm leading-relaxed">
-          {tool.description
-            ? splitEmails(tool.description)
-            : "No description provided."}
+          {tool.description ?? "No description provided."}
         </p>
       )}
       <DocumentationChunkRenderer
@@ -518,7 +515,7 @@ export function ToolSection({
     reloadToken
   );
   const fullTool: ToolDefinition | null =
-    detail.status === "ready" ? { ...tool, ...detail.detail } : null;
+    detail.status === "ready" ? detail.tool : null;
 
   // Expand when the URL hash targets this tool (deep-link or sidebar/row click).
   useEffect(() => {
