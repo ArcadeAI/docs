@@ -14,8 +14,8 @@ import {
   type ToolkitWithDocsLink,
 } from "@/app/_lib/toolkit-slug";
 import {
-  getToolkitStaticParamsForCategory,
   INTEGRATION_CATEGORIES,
+  listToolkitRoutes,
   listValidIntegrationLinks,
 } from "@/app/_lib/toolkit-static-params";
 
@@ -263,7 +263,7 @@ describe("hardcoded internal links in toolkit components resolve", () => {
 // (notion): every toolkit page's canonical points at its own URL, canonicals are
 // unique (no two pages share one), and none points at a redirect source or a
 // non-generated route. We re-derive the canonical with the same pure helpers the
-// page uses (static params + readToolkitData + getToolkitSlug) rather than
+// page uses (listToolkitRoutes + readToolkitData + getToolkitSlug) rather than
 // importing the page module, which pulls in browser-only render code.
 //
 // (The docs sitemap — app/sitemap.ts, static MDX pages only — is guarded in
@@ -281,22 +281,22 @@ describe("toolkit page canonical hygiene", () => {
       readRedirectSources(),
     ]);
     canonicals = [];
-    for (const category of INTEGRATION_CATEGORIES) {
-      for (const { toolkitId } of await getToolkitStaticParamsForCategory(
-        category
-      )) {
-        const data = await readToolkitData(toolkitId);
-        const canonical = data
-          ? `${INTEGRATIONS}/${category}/${getToolkitSlug({
-              id: data.id,
-              docsLink: data.metadata?.docsLink,
-            })}`
-          : "";
-        canonicals.push({
-          page: `${INTEGRATIONS}/${category}/${toolkitId}`,
-          canonical,
-        });
-      }
+    // Fetch the route list ONCE. getToolkitStaticParamsForCategory() recomputes
+    // listToolkitRoutes() (toolkit index + every data file) internally, so
+    // looping it over all categories re-read the whole catalog once per category.
+    // listToolkitRoutes() already yields both category and toolkitId.
+    for (const { category, toolkitId } of await listToolkitRoutes()) {
+      const data = await readToolkitData(toolkitId);
+      const canonical = data
+        ? `${INTEGRATIONS}/${category}/${getToolkitSlug({
+            id: data.id,
+            docsLink: data.metadata?.docsLink,
+          })}`
+        : "";
+      canonicals.push({
+        page: `${INTEGRATIONS}/${category}/${toolkitId}`,
+        canonical,
+      });
     }
   }, TIMEOUT);
 
