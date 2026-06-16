@@ -1,7 +1,7 @@
 "use client";
 
 import { Badge, Button } from "@arcadeai/design-system";
-import { ArrowDown, ArrowUp, KeyRound } from "lucide-react";
+import { ArrowDown, ArrowUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
@@ -27,11 +27,12 @@ const TOC_OBSERVER_THRESHOLD_MID = 0.5;
 // Scroll padding for TOC item visibility
 const TOC_SCROLL_PADDING = 20;
 
+import { rehypeNeutralizeEmails } from "../lib/neutralize-emails";
 import type {
-  ToolDefinition,
   ToolkitCategory,
   ToolkitPageProps,
   ToolkitType,
+  ToolSummary,
 } from "../types";
 import { AvailableToolsTable, toToolAnchorId } from "./available-tools-table";
 import {
@@ -261,7 +262,7 @@ function ToolsOnThisPage({
   selectedTools,
   documentationChunks = [],
 }: {
-  tools: ToolDefinition[];
+  tools: ToolSummary[];
   selectedTools: Set<string>;
   documentationChunks?: ReadonlyArray<{ header?: string }>;
 }) {
@@ -472,22 +473,16 @@ function ToolsOnThisPage({
         >
           <div className="space-y-1">
             {filteredTools.map((tool) => {
-              const hasSecrets =
-                (tool.secretsInfo?.length ?? 0) > 0 ||
-                (tool.secrets?.length ?? 0) > 0;
               const toolId = toToolAnchorId(tool.qualifiedName);
               return (
                 <a
-                  className={`flex items-center gap-2 py-1 pl-3 text-sm transition-colors ${getLinkClasses(toolId)}`}
+                  className={`block truncate py-1 pl-3 text-sm transition-colors ${getLinkClasses(toolId)}`}
                   href={`#${toolId}`}
                   key={tool.qualifiedName}
                   ref={(el) => setItemRef(toolId, el)}
                   title={tool.qualifiedName}
                 >
-                  <span className="truncate">{tool.qualifiedName}</span>
-                  {hasSecrets && (
-                    <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-                  )}
+                  {tool.qualifiedName}
                 </a>
               );
             })}
@@ -522,6 +517,25 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
     };
   }, []);
 
+  // Track the URL hash so the targeted tool section can auto-expand its
+  // (lazily-loaded) detail on deep-link landing and on sidebar/table clicks.
+  const [activeHash, setActiveHash] = useState<string>("");
+  useEffect(() => {
+    const update = () => setActiveHash(window.location.hash.slice(1));
+    update();
+    window.addEventListener("hashchange", update);
+    return () => window.removeEventListener("hashchange", update);
+  }, []);
+
+  // The per-tool sections render after mount (client-only). The crawlable
+  // summary in the server HTML is the Available Tools table + the sidebar; for
+  // large toolkits (e.g. github-api, 818 tools) server-rendering every section
+  // would blow past Googlebot's 2 MB uncompressed-HTML crawl limit.
+  const [sectionsMounted, setSectionsMounted] = useState(false);
+  useEffect(() => {
+    setSectionsMounted(true);
+  }, []);
+
   const tools = data.tools ?? [];
   const documentationChunks = data.documentationChunks ?? [];
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
@@ -535,12 +549,13 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       name: tool.name,
       scopes: tool.auth?.scopes ?? [],
       secrets,
-      // Full tool definition for enhanced copy functionality
+      // Detail (parameters/output) is lazy-loaded per tool and not in the
+      // summary, so the "copy selected tools" JSON uses ScopePicker's basic
+      // {name, scopes, secrets} format. Per-tool "Copy definition" (in an
+      // expanded section) still has full fidelity.
       qualifiedName: tool.qualifiedName,
       fullyQualifiedName: tool.fullyQualifiedName,
       description: tool.description,
-      parameters: tool.parameters,
-      output: tool.output,
     };
   });
   const shouldShowSelection = tools.length > 0;
@@ -646,7 +661,9 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
 
         {data.summary && (
           <div className="prose prose-sm dark:prose-invert mt-6 max-w-none text-foreground">
-            <ReactMarkdown>{data.summary}</ReactMarkdown>
+            <ReactMarkdown rehypePlugins={[rehypeNeutralizeEmails]}>
+              {data.summary}
+            </ReactMarkdown>
           </div>
         )}
 
@@ -735,7 +752,10 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         position="after"
       />
 
-      {shouldShowSelection && (
+      {/* Client-only: the scope picker is an interactive widget (no crawlable
+          content) that renders a per-tool grid, so keeping it out of the server
+          HTML saves significant bytes on large toolkits. */}
+      {sectionsMounted && shouldShowSelection && (
         <section
           className="mt-10 scroll-mt-20"
           id={TOOLKIT_PAGE_SELECTED_TOOLS_LINK.id}
@@ -748,15 +768,18 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         </section>
       )}
 
-      {tools.map((tool) => (
-        <ToolSection
-          isSelected={selectedTools.has(tool.name)}
-          key={tool.qualifiedName}
-          onToggleSelection={toggleToolSelection}
-          showSelection={shouldShowSelection}
-          tool={tool}
-        />
-      ))}
+      {sectionsMounted &&
+        tools.map((tool) => (
+          <ToolSection
+            forceExpanded={toToolAnchorId(tool.qualifiedName) === activeHash}
+            isSelected={selectedTools.has(tool.name)}
+            key={tool.qualifiedName}
+            onToggleSelection={toggleToolSelection}
+            showSelection={shouldShowSelection}
+            tool={tool}
+            toolkitId={data.id}
+          />
+        ))}
 
       <section className="mt-10 scroll-mt-20" id="get-building">
         <DocumentationChunkRenderer

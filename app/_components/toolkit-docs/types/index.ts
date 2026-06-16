@@ -244,6 +244,25 @@ export type ToolDefinition = {
   codeExample?: ToolCodeExample;
 };
 
+/**
+ * The heavy per-tool fields that are lazily fetched (not in the initial HTML).
+ * Kept out of the server-rendered payload to stay under Googlebot's 2 MB limit.
+ */
+export type ToolDetail = Pick<
+  ToolDefinition,
+  "parameters" | "output" | "codeExample"
+>;
+
+/**
+ * A tool with its heavy detail fields stripped — everything needed to render the
+ * Available Tools table, the sidebar, and a collapsed tool section. The detail
+ * (parameters/output/codeExample) is fetched on expand via {@link ToolDetail}.
+ */
+export type ToolSummary = Omit<
+  ToolDefinition,
+  "parameters" | "output" | "codeExample"
+>;
+
 // ============================================================================
 // Toolkit Metadata Types
 // ============================================================================
@@ -356,6 +375,14 @@ export type ToolkitData = {
   generatedAt?: string;
 };
 
+/**
+ * Toolkit data with each tool's heavy detail fields stripped. This is what the
+ * client `ToolkitPage` receives, keeping the initial HTML/Flight payload small.
+ */
+export type ToolkitSummary = Omit<ToolkitData, "tools"> & {
+  tools: ToolSummary[];
+};
+
 // ============================================================================
 // Component Props Types
 // ============================================================================
@@ -436,14 +463,18 @@ export type DynamicCodeBlockProps = {
  * Props for ToolSection component
  */
 export type ToolSectionProps = {
-  /** Tool definition */
-  tool: ToolDefinition;
+  /** Tool summary (heavy detail fetched lazily on expand) */
+  tool: ToolSummary;
+  /** Toolkit id, used to lazily fetch this tool's detail */
+  toolkitId: string;
   /** Whether the tool is selected in the selected tools panel */
   isSelected?: boolean;
   /** Show selection checkbox */
   showSelection?: boolean;
   /** Toggle selection handler */
   onToggleSelection?: (toolName: string) => void;
+  /** Expand on mount and keep expanded (e.g. when the URL hash targets it) */
+  forceExpanded?: boolean;
 };
 
 /**
@@ -495,6 +526,6 @@ export type AvailableToolsTableProps = {
  * Props for ToolkitPage component
  */
 export type ToolkitPageProps = {
-  /** Complete toolkit data */
-  data: ToolkitData;
+  /** Toolkit data with per-tool detail stripped (fetched lazily on expand) */
+  data: ToolkitSummary;
 };

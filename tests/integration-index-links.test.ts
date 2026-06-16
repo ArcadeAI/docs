@@ -14,6 +14,7 @@ import {
   type ToolkitWithDocsLink,
 } from "@/app/_lib/toolkit-slug";
 import {
+  getToolkitCanonicalPath,
   INTEGRATION_CATEGORIES,
   listToolkitRoutes,
   listValidIntegrationLinks,
@@ -345,4 +346,47 @@ describe("toolkit page canonical hygiene", () => {
     }
     expect(offenders).toEqual([]);
   });
+
+  // MARTECH-17: the dynamic [toolkitId] route accepts ANY category segment, so a
+  // toolkit is reachable at wrong-category aliases (a docsLink/category mismatch
+  // produced development/pagerduty-api). generateMetadata canonicalizes every
+  // such page to getToolkitCanonicalPath(data) — the toolkit's own category +
+  // slug — which must be a real, index-linked route, or the alias self-canonicals
+  // into an orphan ("Canonical URL has no incoming internal links"). Derived over
+  // ALL data files, not just static routes. Hidden toolkits are noindex (excluded).
+  test(
+    "every non-hidden toolkit canonicalizes to a linked route (no orphan canonicals)",
+    async () => {
+      const dataDir = join(ROOT, "toolkit-docs-generator", "data", "toolkits");
+      const files = readdirSync(dataDir).filter(
+        (file) => file.endsWith(".json") && file !== "index.json"
+      );
+      const orphans: string[] = [];
+      for (const file of files) {
+        const parsed = JSON.parse(
+          await readFile(join(dataDir, file), "utf-8")
+        ) as {
+          id?: string;
+          metadata?: {
+            category?: string;
+            docsLink?: string;
+            isHidden?: boolean;
+          };
+        };
+        if (!parsed.id || parsed.metadata?.isHidden) {
+          continue;
+        }
+        const canonical = getToolkitCanonicalPath({
+          id: parsed.id,
+          category: parsed.metadata?.category,
+          docsLink: parsed.metadata?.docsLink,
+        });
+        if (!validLinks.has(canonical)) {
+          orphans.push(`${file} → ${canonical}`);
+        }
+      }
+      expect(orphans).toEqual([]);
+    },
+    TIMEOUT
+  );
 });
