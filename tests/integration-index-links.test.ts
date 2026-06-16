@@ -8,9 +8,14 @@ import {
   resolveIndexToolkits,
   toIntegrationLink,
 } from "@/app/_lib/integration-index";
-import type { ToolkitWithDocsLink } from "@/app/_lib/toolkit-slug";
+import { readToolkitData } from "@/app/_lib/toolkit-data";
+import {
+  getToolkitSlug,
+  type ToolkitWithDocsLink,
+} from "@/app/_lib/toolkit-slug";
 import {
   INTEGRATION_CATEGORIES,
+  listToolkitRoutes,
   listValidIntegrationLinks,
 } from "@/app/_lib/toolkit-static-params";
 
@@ -245,4 +250,99 @@ describe("hardcoded internal links in toolkit components resolve", () => {
     },
     TIMEOUT
   );
+});
+
+// ---------------------------------------------------------------------------
+// Toolkit page canonical hygiene
+//
+// docs' only page-level <link rel="canonical"> comes from the generated toolkit
+// pages (toolkit-docs-page.tsx → generateMetadata, which emits
+// `/en/resources/integrations/<category>/<getToolkitSlug(data)>`). This guards
+// that canonical class — the docs analog of the www canonical guard, and
+// specifically the "Duplicate pages without canonical" finding MARTECH-19 fixed
+// (notion): every toolkit page's canonical points at its own URL, canonicals are
+// unique (no two pages share one), and none points at a redirect source or a
+// non-generated route. We re-derive the canonical with the same pure helpers the
+// page uses (listToolkitRoutes + readToolkitData + getToolkitSlug) rather than
+// importing the page module, which pulls in browser-only render code.
+//
+// (The docs sitemap — app/sitemap.ts, static MDX pages only — is guarded in
+// tests/sitemap.test.ts: no redirect-source URLs, no duplicates.)
+// ---------------------------------------------------------------------------
+
+describe("toolkit page canonical hygiene", () => {
+  let canonicals: Array<{ page: string; canonical: string }>;
+  let validLinks: Set<string>;
+  let redirectSources: Set<string>;
+
+  beforeAll(async () => {
+    [validLinks, redirectSources] = await Promise.all([
+      listValidIntegrationLinks(),
+      readRedirectSources(),
+    ]);
+    canonicals = [];
+    // Fetch the route list ONCE. getToolkitStaticParamsForCategory() recomputes
+    // listToolkitRoutes() (toolkit index + every data file) internally, so
+    // looping it over all categories re-read the whole catalog once per category.
+    // listToolkitRoutes() already yields both category and toolkitId.
+    for (const { category, toolkitId } of await listToolkitRoutes()) {
+      const data = await readToolkitData(toolkitId);
+      const canonical = data
+        ? `${INTEGRATIONS}/${category}/${getToolkitSlug({
+            id: data.id,
+            docsLink: data.metadata?.docsLink,
+          })}`
+        : "";
+      canonicals.push({
+        page: `${INTEGRATIONS}/${category}/${toolkitId}`,
+        canonical,
+      });
+    }
+  }, TIMEOUT);
+
+  test("every generated toolkit page emits a canonical", () => {
+    expect(canonicals.length).toBeGreaterThan(0);
+    expect(canonicals.filter((c) => !c.canonical).map((c) => c.page)).toEqual(
+      []
+    );
+  });
+
+  test("each toolkit canonical points at the page's own URL", () => {
+    const mismatched = canonicals
+      .filter((c) => c.canonical && c.canonical !== c.page)
+      .map((c) => `${c.page} → ${c.canonical}`);
+    expect(mismatched).toEqual([]);
+  });
+
+  test("toolkit canonicals are unique (no duplicate-canonical pages)", () => {
+    const byCanonical = new Map<string, string>();
+    const duplicates: string[] = [];
+    for (const { page, canonical } of canonicals) {
+      if (!canonical) {
+        continue;
+      }
+      const prior = byCanonical.get(canonical);
+      if (prior) {
+        duplicates.push(`${canonical} ← ${prior} + ${page}`);
+      } else {
+        byCanonical.set(canonical, page);
+      }
+    }
+    expect(duplicates).toEqual([]);
+  });
+
+  test("no toolkit canonical points at a redirect or a missing route", () => {
+    const offenders: string[] = [];
+    for (const { canonical } of canonicals) {
+      if (!canonical) {
+        continue;
+      }
+      if (redirectSources.has(toLocaleParam(canonical))) {
+        offenders.push(`${canonical}: redirect source`);
+      } else if (!validLinks.has(withEnLocale(canonical))) {
+        offenders.push(`${canonical}: not a generated route`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
 });

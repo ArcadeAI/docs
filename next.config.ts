@@ -31,6 +31,13 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/resources/integrations",
           permanent: true,
         },
+        // The auth provider is "square"; an external/stale link points at the
+        // old "squareup" slug, which 404s. Send it to the real page.
+        {
+          source: "/:locale/references/auth-providers/squareup",
+          destination: "/:locale/references/auth-providers/square",
+          permanent: true,
+        },
         // Dissolved guides/security section
         {
           source: "/:locale/guides/security/security-research-program",
