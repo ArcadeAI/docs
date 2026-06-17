@@ -10,6 +10,11 @@ const COPYING_TEXT = "Copying\u2026";
 const COPY_FAILED_TEXT = "Failed to copy";
 const DROPDOWN_IDENTIFIER = "Markdown for LLMs";
 
+// A toolkit reference page: /<locale>/resources/integrations/<category>/<slug>.
+// Captures the slug so we can pull full markdown from the data route.
+const TOOLKIT_PAGE_PATH =
+  /^\/[^/]+\/resources\/integrations\/[^/]+\/([^/]+)\/?$/;
+
 const ICON_COPY = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5"></path></svg>`;
 
 const ICON_SPINNER = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" class="x:animate-spin"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" stroke-linecap="round"></path></svg>`;
@@ -84,15 +89,34 @@ export function CopyPageOverride() {
 
   const fetchAndCopyMarkdown = useCallback(async (): Promise<boolean> => {
     try {
-      const response = await fetch(pathname, {
-        headers: { Accept: "text/markdown" },
-      });
+      let markdown: string | null = null;
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch markdown: ${response.status}`);
+      // Toolkit reference pages render per-tool detail client-only, so the edge
+      // HTML→markdown view would miss parameters/output/examples. Pull full
+      // markdown from the data route instead. If the slug isn't a generated
+      // toolkit (e.g. a static partner page) the route 404s and we fall back to
+      // the normal page fetch below.
+      const toolkitSlug = pathname.match(TOOLKIT_PAGE_PATH)?.[1];
+      if (toolkitSlug) {
+        const dataResponse = await fetch(
+          `/api/toolkit-data/${encodeURIComponent(toolkitSlug)}`,
+          { headers: { Accept: "text/markdown" } }
+        );
+        if (dataResponse.ok) {
+          markdown = await dataResponse.text();
+        }
       }
 
-      const markdown = await response.text();
+      if (markdown === null) {
+        const response = await fetch(pathname, {
+          headers: { Accept: "text/markdown" },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch markdown: ${response.status}`);
+        }
+        markdown = await response.text();
+      }
+
       await navigator.clipboard.writeText(markdown);
       return true;
     } catch {
