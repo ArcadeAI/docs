@@ -19,7 +19,7 @@ type DetailMap = Map<string, ToolDefinition>;
 
 const detailCache = new Map<string, Promise<DetailMap>>();
 
-function loadToolkitDetail(toolkitId: string): Promise<DetailMap> {
+export function loadToolkitDetail(toolkitId: string): Promise<DetailMap> {
   const cached = detailCache.get(toolkitId);
   if (cached) {
     return cached;
@@ -50,6 +50,7 @@ function loadToolkitDetail(toolkitId: string): Promise<DetailMap> {
 }
 
 export type ToolDetailState =
+  | { status: "idle" }
   | { status: "loading" }
   | { status: "error" }
   | { status: "ready"; tool: ToolDefinition };
@@ -60,10 +61,13 @@ export function useToolDetail(
   enabled: boolean,
   reloadToken = 0
 ): ToolDetailState {
-  const [state, setState] = useState<ToolDetailState>({ status: "loading" });
+  // Start idle — nothing is loading until a section is actually enabled
+  // (expanded). Reporting "loading" while disabled would misrepresent the state.
+  const [state, setState] = useState<ToolDetailState>({ status: "idle" });
 
   useEffect(() => {
     if (!enabled) {
+      setState({ status: "idle" });
       return;
     }
 

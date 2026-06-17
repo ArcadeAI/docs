@@ -2,10 +2,10 @@
 
 import { Badge, Button } from "@arcadeai/design-system";
 import { ArrowDown, ArrowUp } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
-import ScopePicker from "../../scope-picker";
 import ToolFooter from "../../tool-footer";
 import {
   getPackageName,
@@ -42,8 +42,16 @@ import {
   sortChunksDeterministically,
 } from "./documentation-chunk-renderer";
 import { PageActionsBar } from "./page-actions";
-import { ToolSection } from "./tool-section";
 import { ToolkitHeader } from "./toolkit-header";
+
+// The per-tool detail area (scope picker + tool sections) renders client-only
+// (ssr: false) so it stays out of the server HTML — the crawlable summary
+// (Available Tools table + sidebar) is what ships server-side. Keeps large
+// toolkit pages under Googlebot's 2 MB crawl limit.
+const ToolkitToolDetail = dynamic(
+  () => import("./toolkit-tool-detail").then((m) => m.ToolkitToolDetail),
+  { ssr: false }
+);
 
 /**
  * Floating buttons to scroll to top/bottom of the page.
@@ -527,37 +535,9 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
     return () => window.removeEventListener("hashchange", update);
   }, []);
 
-  // The per-tool sections render after mount (client-only). The crawlable
-  // summary in the server HTML is the Available Tools table + the sidebar; for
-  // large toolkits (e.g. github-api, 818 tools) server-rendering every section
-  // would blow past Googlebot's 2 MB uncompressed-HTML crawl limit.
-  const [sectionsMounted, setSectionsMounted] = useState(false);
-  useEffect(() => {
-    setSectionsMounted(true);
-  }, []);
-
   const tools = data.tools ?? [];
   const documentationChunks = data.documentationChunks ?? [];
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
-  const selectionTools = tools.map((tool) => {
-    const secrets =
-      (tool.secrets ?? []).length > 0
-        ? (tool.secrets ?? [])
-        : (tool.secretsInfo ?? []).map((secret) => secret.name);
-
-    return {
-      name: tool.name,
-      scopes: tool.auth?.scopes ?? [],
-      secrets,
-      // Detail (parameters/output) is lazy-loaded per tool and not in the
-      // summary, so the "copy selected tools" JSON uses ScopePicker's basic
-      // {name, scopes, secrets} format. Per-tool "Copy definition" (in an
-      // expanded section) still has full fidelity.
-      qualifiedName: tool.qualifiedName,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      description: tool.description,
-    };
-  });
   const shouldShowSelection = tools.length > 0;
 
   // Compute tool stats
@@ -752,34 +732,15 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         position="after"
       />
 
-      {/* Client-only: the scope picker is an interactive widget (no crawlable
-          content) that renders a per-tool grid, so keeping it out of the server
-          HTML saves significant bytes on large toolkits. */}
-      {sectionsMounted && shouldShowSelection && (
-        <section
-          className="mt-10 scroll-mt-20"
-          id={TOOLKIT_PAGE_SELECTED_TOOLS_LINK.id}
-        >
-          <ScopePicker
-            onSelectedToolsChange={handleScopeSelectionChange}
-            selectedTools={Array.from(selectedTools)}
-            tools={selectionTools}
-          />
-        </section>
-      )}
-
-      {sectionsMounted &&
-        tools.map((tool) => (
-          <ToolSection
-            forceExpanded={toToolAnchorId(tool.qualifiedName) === activeHash}
-            isSelected={selectedTools.has(tool.name)}
-            key={tool.qualifiedName}
-            onToggleSelection={toggleToolSelection}
-            showSelection={shouldShowSelection}
-            tool={tool}
-            toolkitId={data.id}
-          />
-        ))}
+      <ToolkitToolDetail
+        activeHash={activeHash}
+        onScopeSelectionChange={handleScopeSelectionChange}
+        onToggleSelection={toggleToolSelection}
+        selectedTools={selectedTools}
+        shouldShowSelection={shouldShowSelection}
+        toolkitId={data.id}
+        tools={tools}
+      />
 
       <section className="mt-10 scroll-mt-20" id="get-building">
         <DocumentationChunkRenderer
