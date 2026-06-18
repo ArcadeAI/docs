@@ -2,9 +2,13 @@ import { NextResponse } from "next/server";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
 import { toToolkitMarkdown } from "@/app/_lib/toolkit-markdown";
 
-// Cache headers for toolkit data responses
+// Cache headers for toolkit data responses. This route content-negotiates on
+// Accept (JSON vs. text/markdown), so Vary: Accept is required — without it a
+// shared cache/CDN could serve one representation for a request that asked for
+// the other.
 const CACHE_HEADERS = {
   "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+  Vary: "Accept",
 };
 
 export async function GET(
