@@ -42,7 +42,7 @@ const DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES: ToolkitCatalogEntry[] =
 const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> =>
   DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES;
 
-function normalizeCategory(
+export function normalizeCategory(
   value: string | null | undefined
 ): IntegrationCategory {
   if (!value) {
@@ -52,6 +52,25 @@ function normalizeCategory(
   return INTEGRATION_CATEGORIES.includes(value as IntegrationCategory)
     ? (value as IntegrationCategory)
     : "others";
+}
+
+/**
+ * The canonical docs path for a toolkit: `/en/resources/integrations/<category>/
+ * <slug>`. Category comes from the toolkit's own data (its true, linked
+ * category) — NOT the URL it was reached through. The dynamic `[toolkitId]`
+ * route accepts any category segment, so a page reached at a wrong-category
+ * alias (e.g. `development/pagerduty-api` when its category is `customer-support`)
+ * must canonicalize to the one generated, index-linked page instead of
+ * orphaning itself. Mirrors the slug + category logic in `listToolkitRoutes`.
+ */
+export function getToolkitCanonicalPath(toolkit: {
+  id: string;
+  category?: string | null;
+  docsLink?: string | null;
+}): string {
+  const category = normalizeCategory(toolkit.category);
+  const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
+  return `/en/resources/integrations/${category}/${slug}`;
 }
 
 const DEFAULT_DATA_DIR = join(

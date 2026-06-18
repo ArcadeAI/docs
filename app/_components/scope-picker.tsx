@@ -4,6 +4,7 @@ import { Button } from "@arcadeai/design-system";
 import { Check, Copy, KeyRound, ShieldCheck, Wrench } from "lucide-react";
 import posthog from "posthog-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { loadToolkitDetail } from "./toolkit-docs/components/use-toolkit-detail";
 
 const COPY_FEEDBACK_MS = 2000;
 
@@ -47,20 +48,33 @@ type ScopePickerProps = {
   tools: Tool[];
   selectedTools?: string[];
   onSelectedToolsChange?: (selectedTools: string[]) => void;
+  /** Toolkit id — lets "Copy tools JSON" lazily fetch full per-tool detail. */
+  toolkitId?: string;
 };
 
-function CopyButton({ text, label }: { text: string; label: string }) {
+function CopyButton({
+  text,
+  getText,
+  label,
+}: {
+  text?: string;
+  // Build the text to copy on demand (e.g. lazily fetch full tool detail).
+  getText?: () => Promise<string>;
+  label: string;
+}) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(
+        getText ? await getText() : (text ?? "")
+      );
       setCopied(true);
       setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
     } catch {
       // Ignore clipboard errors (e.g., permissions, unsupported browser).
     }
-  }, [text]);
+  }, [text, getText]);
 
   return (
     <Button onClick={handleCopy} size="sm" title={label} variant="outline">
@@ -71,6 +85,50 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       )}
       {copied ? "Copied!" : label}
     </Button>
+  );
+}
+
+type ToolDetailMap = Awaited<ReturnType<typeof loadToolkitDetail>>;
+
+/**
+ * Build the "selected tools" JSON. When full per-tool detail is available
+ * (fetched lazily on copy), emit the full definition; otherwise fall back to a
+ * basic shape — but always key on the qualified name so the identifier stays
+ * correct for downstream tool configs.
+ */
+function buildSelectedToolsJson(
+  tools: Tool[],
+  selectedToolsSet: Set<string>,
+  detailMap?: ToolDetailMap
+): string {
+  const selected = tools.filter((tool) => selectedToolsSet.has(tool.name));
+  return JSON.stringify(
+    selected.map((tool) => {
+      const detail = tool.qualifiedName
+        ? detailMap?.get(tool.qualifiedName)
+        : undefined;
+      const parameters = detail?.parameters ?? tool.parameters;
+      const name = tool.qualifiedName ?? tool.name;
+      if (parameters) {
+        return {
+          name,
+          description: detail?.description ?? tool.description ?? null,
+          parameters: parameters.map((p) => ({
+            name: p.name,
+            type: p.type,
+            required: p.required,
+            description: p.description,
+            ...(p.enum ? { enum: p.enum } : {}),
+          })),
+          scopes: tool.scopes,
+          secrets: tool.secrets ?? [],
+          output: detail?.output ?? tool.output ?? null,
+        };
+      }
+      return { name, scopes: tool.scopes, secrets: tool.secrets ?? [] };
+    }),
+    null,
+    JSON_PRETTY_PRINT_INDENT
   );
 }
 
@@ -259,6 +317,7 @@ export default function ScopePicker({
   tools,
   selectedTools,
   onSelectedToolsChange,
+  toolkitId,
 }: ScopePickerProps) {
   const [internalSelectedTools, setInternalSelectedTools] = useState<
     Set<string>
@@ -353,37 +412,6 @@ export default function ScopePicker({
   const scopesAsText = requiredScopes.join("\n");
   const secretsAsText = requiredSecrets.join("\n");
   const toolNamesAsText = selectedToolNames.join(", ");
-  const selectedToolsAsJson = JSON.stringify(
-    tools
-      .filter((t) => selectedToolsSet.has(t.name))
-      .map((t) => {
-        // If full tool definition is available, include all fields
-        if (t.qualifiedName && t.parameters) {
-          return {
-            name: t.qualifiedName,
-            description: t.description ?? null,
-            parameters: t.parameters.map((p) => ({
-              name: p.name,
-              type: p.type,
-              required: p.required,
-              description: p.description,
-              ...(p.enum ? { enum: p.enum } : {}),
-            })),
-            scopes: t.scopes,
-            secrets: t.secrets ?? [],
-            output: t.output ?? null,
-          };
-        }
-        // Fallback to basic format
-        return {
-          name: t.name,
-          scopes: t.scopes,
-          secrets: t.secrets ?? [],
-        };
-      }),
-    null,
-    JSON_PRETTY_PRINT_INDENT
-  );
 
   return (
     <div className="my-6 overflow-hidden rounded-xl bg-neutral-dark/20">
@@ -532,7 +560,27 @@ export default function ScopePicker({
         {selectedToolNames.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-2">
             <CopyButton label="Copy tool names" text={toolNamesAsText} />
-            <CopyButton label="Copy tools JSON" text={selectedToolsAsJson} />
+            <CopyButton
+              getText={async () => {
+                // Pull full per-tool detail (parameters/output) on demand — the
+                // page payload only carries the summary — so the JSON keeps full
+                // fidelity; fall back to the summary if the fetch fails.
+                let detailMap: ToolDetailMap | undefined;
+                if (toolkitId) {
+                  try {
+                    detailMap = await loadToolkitDetail(toolkitId);
+                  } catch {
+                    // Keep detailMap undefined → summary-only JSON.
+                  }
+                }
+                return buildSelectedToolsJson(
+                  tools,
+                  selectedToolsSet,
+                  detailMap
+                );
+              }}
+              label="Copy tools JSON"
+            />
             {showAdvanced && requiredScopes.length > 0 && (
               <CopyButton label="Copy scopes" text={scopesAsText} />
             )}

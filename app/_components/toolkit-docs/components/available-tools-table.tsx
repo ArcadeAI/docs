@@ -22,6 +22,7 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SCROLLING_CELL } from "../constants";
+import { splitEmails } from "../lib/neutralize-emails";
 import type {
   AvailableToolsTableProps,
   BehaviorFlagKey,
@@ -585,7 +586,11 @@ function AvailableToolsRow({
       </td>
       <td className="max-w-[300px] px-4 py-3.5 text-sm text-foreground">
         <ScrollingCell>
-          <span>{tool.description ?? "No description provided."}</span>
+          <span>
+            {tool.description
+              ? splitEmails(tool.description)
+              : "No description provided."}
+          </span>
         </ScrollingCell>
       </td>
       <td className="px-4 py-3.5">

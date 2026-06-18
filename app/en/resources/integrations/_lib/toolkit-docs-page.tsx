@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ToolkitPage } from "@/app/_components/toolkit-docs";
-import { readToolkitData } from "@/app/_lib/toolkit-data";
-import { getToolkitSlug, normalizeToolkitId } from "@/app/_lib/toolkit-slug";
+import { readToolkitData, toToolkitSummary } from "@/app/_lib/toolkit-data";
+import { normalizeToolkitId } from "@/app/_lib/toolkit-slug";
 import {
+  getToolkitCanonicalPath,
   getToolkitStaticParamsForCategory,
   type IntegrationCategory,
 } from "@/app/_lib/toolkit-static-params";
@@ -43,21 +44,30 @@ export function createToolkitDocsPage(category: IntegrationCategory) {
       return {};
     }
 
-    // Canonicalize to the toolkit's preferred slug so any alias that resolves
-    // to the same content (e.g. a normalized id vs. its docsLink slug) points
-    // search engines at one URL.
-    const canonicalSlug = getToolkitSlug({
+    // Canonicalize to the toolkit's own category + slug, not the URL it was
+    // reached through. The dynamic [toolkitId] route accepts any category, so a
+    // wrong-category alias (e.g. development/pagerduty-api for a customer-support
+    // toolkit) must point at the one generated, index-linked page.
+    const canonical = getToolkitCanonicalPath({
       id: data.id,
+      category: data.metadata?.category,
       docsLink: data.metadata?.docsLink,
     });
 
-    return {
+    const metadata: Metadata = {
       title: data.label || data.id,
       description: data.description || "Generated MCP server documentation.",
-      alternates: {
-        canonical: `/en/resources/integrations/${category}/${canonicalSlug}`,
-      },
+      alternates: { canonical },
     };
+
+    // Hidden toolkits stay reachable via the dynamic route (and render as
+    // non-clickable cards in the index), but must not be indexed — otherwise
+    // their self-canonical is flagged as an orphan with no incoming links.
+    if (data.metadata?.isHidden) {
+      metadata.robots = { index: false };
+    }
+
+    return metadata;
   };
 
   const Page = async ({ params }: { params: Promise<ToolkitDocsParams> }) => {
@@ -68,7 +78,9 @@ export function createToolkitDocsPage(category: IntegrationCategory) {
       notFound();
     }
 
-    return <ToolkitPage data={data} />;
+    // Pass a summary (per-tool detail stripped) so the heavy fields never enter
+    // the initial Flight payload — detail is fetched on expand. See MARTECH-17.
+    return <ToolkitPage data={toToolkitSummary(data)} />;
   };
 
   return { generateMetadata, generateStaticParams, Page };

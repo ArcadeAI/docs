@@ -1,9 +1,16 @@
 "use client";
 
 import { Button } from "@arcadeai/design-system";
-import { Check, Copy, KeyRound, ShieldCheck } from "lucide-react";
-import { useCallback, useState } from "react";
-import type { ToolSectionProps } from "../types";
+import {
+  Check,
+  ChevronDown,
+  Copy,
+  KeyRound,
+  Loader2,
+  ShieldCheck,
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { ToolDefinition, ToolSectionProps, ToolSummary } from "../types";
 import { toToolAnchorId } from "./available-tools-table";
 import {
   DocumentationChunkRenderer,
@@ -13,11 +20,12 @@ import { DynamicCodeBlock } from "./dynamic-code-block";
 import { ParametersTable } from "./parameters-table";
 import { ScopesDisplay } from "./scopes-display";
 import { ToolMetadataSection } from "./tool-metadata-section";
+import { useToolDetail } from "./use-toolkit-detail";
 
 const COPY_FEEDBACK_MS = 2000;
 const JSON_PRETTY_PRINT_INDENT = 2;
 
-function CopyToolButton({ tool }: { tool: ToolSectionProps["tool"] }) {
+function CopyToolButton({ tool }: { tool: ToolDefinition }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -95,7 +103,7 @@ function CopyScopesButton({ scopes }: { scopes: string[] }) {
 }
 
 export function shouldRenderDefaultSection(
-  chunks: ToolSectionProps["tool"]["documentationChunks"],
+  chunks: ToolSummary["documentationChunks"],
   location: "description" | "parameters" | "auth" | "secrets" | "output"
 ): boolean {
   return !hasChunksAt(chunks, location, "replace");
@@ -103,23 +111,17 @@ export function shouldRenderDefaultSection(
 
 function ToolHeaderSection({
   tool,
-  showSelection,
-  isSelected,
-  onToggleSelection,
-  hasScopes,
-  hasSecrets,
   anchorId,
+  expanded,
+  onToggleExpanded,
 }: {
-  tool: ToolSectionProps["tool"];
-  showSelection: boolean;
-  isSelected: boolean;
-  onToggleSelection?: (toolName: string) => void;
-  hasScopes: boolean;
-  hasSecrets: boolean;
+  tool: ToolSummary;
   anchorId: string;
+  expanded: boolean;
+  onToggleExpanded: () => void;
 }) {
   return (
-    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="group flex items-center gap-2">
         <a
           aria-label={`Link to ${tool.qualifiedName}`}
@@ -132,27 +134,49 @@ function ToolHeaderSection({
           {tool.qualifiedName}
         </h3>
       </div>
-      <div className="flex flex-wrap items-center gap-2">
-        <CopyToolButton tool={tool} />
-        {showSelection && (
-          <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-dark-high bg-neutral-dark/40 px-3 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark/60">
-            <input
-              aria-label={`Add ${tool.name} to selected tools`}
-              checked={isSelected}
-              className="rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
-              onChange={() => onToggleSelection?.(tool.name)}
-              type="checkbox"
-            />
-            Add to selected tools
-            {!(hasScopes || hasSecrets) && (
-              <span className="text-muted-foreground/60">
-                (no auth required)
-              </span>
-            )}
-          </label>
-        )}
-      </div>
+      <Button
+        aria-expanded={expanded}
+        onClick={onToggleExpanded}
+        size="sm"
+        title={expanded ? "Hide tool details" : "Show tool details"}
+        variant="outline"
+      >
+        <ChevronDown
+          className={`h-3.5 w-3.5 transition-transform ${expanded ? "rotate-180" : ""}`}
+        />
+        {expanded ? "Hide details" : "Show details"}
+      </Button>
     </div>
+  );
+}
+
+function ToolSelectionToggle({
+  tool,
+  isSelected,
+  onToggleSelection,
+  hasScopes,
+  hasSecrets,
+}: {
+  tool: ToolSummary;
+  isSelected: boolean;
+  onToggleSelection?: (toolName: string) => void;
+  hasScopes: boolean;
+  hasSecrets: boolean;
+}) {
+  return (
+    <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-dark-high bg-neutral-dark/40 px-3 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark/60">
+      <input
+        aria-label={`Add ${tool.name} to selected tools`}
+        checked={isSelected}
+        className="rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
+        onChange={() => onToggleSelection?.(tool.name)}
+        type="checkbox"
+      />
+      Add to selected tools
+      {!(hasScopes || hasSecrets) && (
+        <span className="text-muted-foreground/60">(no auth required)</span>
+      )}
+    </label>
   );
 }
 
@@ -160,7 +184,7 @@ function ToolDescriptionSection({
   tool,
   showDescription,
 }: {
-  tool: ToolSectionProps["tool"];
+  tool: ToolSummary;
   showDescription: boolean;
 }) {
   return (
@@ -193,7 +217,7 @@ function ToolParametersSection({
   tool,
   showParameters,
 }: {
-  tool: ToolSectionProps["tool"];
+  tool: ToolDefinition;
   showParameters: boolean;
 }) {
   return (
@@ -231,11 +255,11 @@ function ToolRequirementsSection({
   hasSecrets,
   showSecrets,
 }: {
-  tool: ToolSectionProps["tool"];
+  tool: ToolSummary;
   showAdvanced: boolean;
   onToggleAdvanced: () => void;
   scopes: string[];
-  secretsInfo: ToolSectionProps["tool"]["secretsInfo"];
+  secretsInfo: ToolSummary["secretsInfo"];
   hasScopes: boolean;
   hasSecrets: boolean;
   showSecrets: boolean;
@@ -331,7 +355,7 @@ function ToolScopesDetailsSection({
   showAuth,
   scopes,
 }: {
-  tool: ToolSectionProps["tool"];
+  tool: ToolSummary;
   showAdvanced: boolean;
   hasScopes: boolean;
   showAuth: boolean;
@@ -374,7 +398,7 @@ function ToolOutputSection({
   tool,
   showOutput,
 }: {
-  tool: ToolSectionProps["tool"];
+  tool: ToolDefinition;
   showOutput: boolean;
 }) {
   return (
@@ -422,7 +446,7 @@ function ToolOutputSection({
   );
 }
 
-function ToolExampleSection({ tool }: { tool: ToolSectionProps["tool"] }) {
+function ToolExampleSection({ tool }: { tool: ToolDefinition }) {
   return tool.codeExample ? (
     <div className="mt-6">
       <DynamicCodeBlock codeExample={tool.codeExample} />
@@ -434,24 +458,79 @@ function ToolExampleSection({ tool }: { tool: ToolSectionProps["tool"] }) {
   );
 }
 
+function ToolDetailLoading() {
+  return (
+    <div className="mt-6 flex items-center gap-2 text-muted-foreground text-sm">
+      <Loader2 className="h-4 w-4 animate-spin" />
+      Loading details...
+    </div>
+  );
+}
+
+function ToolDetailError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="mt-6 flex flex-wrap items-center gap-3 rounded-lg bg-neutral-dark/30 p-4 text-sm">
+      <span className="text-muted-foreground">Couldn't load tool details.</span>
+      <Button onClick={onRetry} size="sm" variant="outline">
+        Retry
+      </Button>
+    </div>
+  );
+}
+
 /**
  * ToolSection
  *
- * Renders a single tool section with parameters, scopes, secrets, output, and example.
+ * Renders a single tool. The header, metadata and description render from the
+ * lightweight summary (and ship in the initial HTML); the parameters, scopes,
+ * secrets, output and code example load on expand from
+ * `/api/toolkit-data/[toolkitId]` so the initial document stays small enough
+ * for Googlebot's 2 MB crawl limit. Sections targeted by the URL hash expand
+ * automatically.
  */
 export function ToolSection({
   tool,
+  toolkitId,
   isSelected = false,
   showSelection = false,
   onToggleSelection,
+  forceExpanded = false,
 }: ToolSectionProps) {
+  const [expanded, setExpanded] = useState(forceExpanded);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [reloadToken, setReloadToken] = useState(0);
+  const sectionRef = useRef<HTMLElement>(null);
+
   const anchorId = toToolAnchorId(tool.qualifiedName);
   const scopes = tool.auth?.scopes ?? [];
   const secretsInfo = tool.secretsInfo ?? [];
   const hasScopes = scopes.length > 0;
   const hasSecrets =
     (tool.secrets?.length ?? 0) > 0 || (tool.secretsInfo?.length ?? 0) > 0;
+
+  const detail = useToolDetail(
+    toolkitId,
+    tool.qualifiedName,
+    expanded,
+    reloadToken
+  );
+  const fullTool: ToolDefinition | null =
+    detail.status === "ready" ? detail.tool : null;
+
+  // Expand when the URL hash targets this tool (deep-link or sidebar/row click).
+  useEffect(() => {
+    if (forceExpanded) {
+      setExpanded(true);
+    }
+  }, [forceExpanded]);
+
+  // A deep-linked section is short while its detail loads, so the browser's
+  // initial scroll lands above its final position — re-scroll once it grows.
+  useEffect(() => {
+    if (forceExpanded && fullTool) {
+      sectionRef.current?.scrollIntoView();
+    }
+  }, [forceExpanded, fullTool]);
 
   const showDescription = shouldRenderDefaultSection(
     tool.documentationChunks,
@@ -475,38 +554,70 @@ export function ToolSection({
     <section
       className="mt-10 scroll-mt-20 rounded-xl border-neutral-dark-high/20 border-b bg-neutral-dark/20 p-6 last:border-b-0"
       id={anchorId}
+      ref={sectionRef}
     >
       <ToolHeaderSection
         anchorId={anchorId}
-        hasScopes={hasScopes}
-        hasSecrets={hasSecrets}
-        isSelected={isSelected}
-        onToggleSelection={onToggleSelection}
-        showSelection={showSelection}
+        expanded={expanded}
+        onToggleExpanded={() => setExpanded((value) => !value)}
         tool={tool}
       />
-      <ToolMetadataSection metadata={tool.metadata} />
-      <ToolDescriptionSection showDescription={showDescription} tool={tool} />
-      <ToolParametersSection showParameters={showParameters} tool={tool} />
-      <ToolRequirementsSection
-        hasScopes={hasScopes}
-        hasSecrets={hasSecrets}
-        onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-        scopes={scopes}
-        secretsInfo={secretsInfo}
-        showAdvanced={showAdvanced}
-        showSecrets={showSecrets}
-        tool={tool}
-      />
-      <ToolScopesDetailsSection
-        hasScopes={hasScopes}
-        scopes={scopes}
-        showAdvanced={showAdvanced}
-        showAuth={showAuth}
-        tool={tool}
-      />
-      <ToolOutputSection showOutput={showOutput} tool={tool} />
-      <ToolExampleSection tool={tool} />
+
+      {expanded && (
+        <>
+          {showSelection && (
+            <ToolSelectionToggle
+              hasScopes={hasScopes}
+              hasSecrets={hasSecrets}
+              isSelected={isSelected}
+              onToggleSelection={onToggleSelection}
+              tool={tool}
+            />
+          )}
+          <ToolMetadataSection metadata={tool.metadata} />
+          <ToolDescriptionSection
+            showDescription={showDescription}
+            tool={tool}
+          />
+
+          {detail.status === "loading" && <ToolDetailLoading />}
+          {detail.status === "error" && (
+            <ToolDetailError
+              onRetry={() => setReloadToken((token) => token + 1)}
+            />
+          )}
+          {fullTool && (
+            <>
+              <ToolParametersSection
+                showParameters={showParameters}
+                tool={fullTool}
+              />
+              <ToolRequirementsSection
+                hasScopes={hasScopes}
+                hasSecrets={hasSecrets}
+                onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+                scopes={scopes}
+                secretsInfo={secretsInfo}
+                showAdvanced={showAdvanced}
+                showSecrets={showSecrets}
+                tool={tool}
+              />
+              <ToolScopesDetailsSection
+                hasScopes={hasScopes}
+                scopes={scopes}
+                showAdvanced={showAdvanced}
+                showAuth={showAuth}
+                tool={tool}
+              />
+              <ToolOutputSection showOutput={showOutput} tool={fullTool} />
+              <ToolExampleSection tool={fullTool} />
+              <div className="mt-6 flex justify-end">
+                <CopyToolButton tool={fullTool} />
+              </div>
+            </>
+          )}
+        </>
+      )}
     </section>
   );
 }
