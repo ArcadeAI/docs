@@ -1,7 +1,7 @@
 {
   "id": "Ashby",
   "label": "Ashby",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Arcade.dev tools for interacting with Ashby",
   "metadata": {
     "category": "productivity",
@@ -18,7 +18,7 @@
     {
       "name": "AddCandidateNote",
       "qualifiedName": "Ashby.AddCandidateNote",
-      "fullyQualifiedName": "Ashby.AddCandidateNote@0.1.0",
+      "fullyQualifiedName": "Ashby.AddCandidateNote@0.2.0",
       "description": "Add a plain-text note to a candidate (e.g. an agent handoff or summary).\n\nCreates a new note each time it runs. Requires the Candidates write permission\non the API key.",
       "parameters": [
         {
@@ -100,9 +100,80 @@
       }
     },
     {
+      "name": "ArchiveApplication",
+      "qualifiedName": "Ashby.ArchiveApplication",
+      "fullyQualifiedName": "Ashby.ArchiveApplication@0.2.0",
+      "description": "Archive (reject) an application, recording why.\n\nThis is how Ashby rejects a candidate for a job: the application moves to its\ninterview plan's archived stage with an archive reason. Resolves the reason name\nto the organization's configured reason id for you — an unknown name errors with\nthe available reasons, and an ambiguous one errors rather than guessing. Does NOT\nemail the candidate. The application's data is preserved, and it can later be\nmoved back to an active stage to un-archive it — though anything the rejection\nalready triggered (notifications, a status visible to humans) is not undone.\nRequires the Candidates write, Interviews read, and hiring-process-metadata read\npermissions on the API key.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the application to archive (reject).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "required": true,
+          "description": "The NAME of the archive reason to record, e.g. 'Candidate withdrew' or 'Not enough experience'. Resolved to the organization's configured reason id for you; if it doesn't match, the error lists the available reasons.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The application after it was archived."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.ArchiveApplication",
+        "parameters": {
+          "application_id": {
+            "value": "app_4f8c2e1a-9b3d-4710-ae56-7c0d1f832b94",
+            "type": "string",
+            "required": true
+          },
+          "reason": {
+            "value": "Not enough experience",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ChangeApplicationStage",
       "qualifiedName": "Ashby.ChangeApplicationStage",
-      "fullyQualifiedName": "Ashby.ChangeApplicationStage@0.1.0",
+      "fullyQualifiedName": "Ashby.ChangeApplicationStage@0.2.0",
       "description": "Move an application to a named interview stage, in either direction.\n\nResolves the stage name to its id inside the application's own interview plan,\nthen moves the application — you do not look up stage ids yourself. Works to\nadvance or to move a candidate back; if the name does not match, the error lists\nthe plan's available stage names, and an ambiguous name (two stages share it)\nerrors rather than guessing. Records a transition each time it runs. It cannot\nmove an application into an archived/rejected stage (Ashby requires an archive\nreason this tool does not collect). Requires the Candidates write and Interviews\nread permissions on the API key.",
       "parameters": [
         {
@@ -173,7 +244,7 @@
     {
       "name": "GetCandidate",
       "qualifiedName": "Ashby.GetCandidate",
-      "fullyQualifiedName": "Ashby.GetCandidate@0.1.0",
+      "fullyQualifiedName": "Ashby.GetCandidate@0.2.0",
       "description": "Get a candidate's profile and the ids of their applications.\n\nUse the returned application ids with feedback or application tools; the Ashby\nAPI does not list a candidate's applications directly. Requires the Candidates\nread permission on the API key.",
       "parameters": [
         {
@@ -231,7 +302,7 @@
     {
       "name": "GetCandidateDebrief",
       "qualifiedName": "Ashby.GetCandidateDebrief",
-      "fullyQualifiedName": "Ashby.GetCandidateDebrief@0.1.0",
+      "fullyQualifiedName": "Ashby.GetCandidateDebrief@0.2.0",
       "description": "Gather everything about a candidate for a debrief in one call.\n\nPulls the candidate's profile, the notes on file, and the interview feedback and\nscorecards across each of their applications, then returns them together — you do\nnot chain the candidate, note, and feedback reads yourself. Feedback covers up to\nthe candidate's first applications when there are many; an application whose\nfeedback can't be read is counted in `feedback_failed` rather than failing the\nwhole call. Requires the Candidates read permission on the API key.",
       "parameters": [
         {
@@ -289,7 +360,7 @@
     {
       "name": "ListApplicationFeedback",
       "qualifiedName": "Ashby.ListApplicationFeedback",
-      "fullyQualifiedName": "Ashby.ListApplicationFeedback@0.1.0",
+      "fullyQualifiedName": "Ashby.ListApplicationFeedback@0.2.0",
       "description": "Read the feedback and interview scorecards submitted on an application.\n\nUseful for synthesizing what reviewers said about a candidate before a debrief.\nRequires the Candidates read permission on the API key.",
       "parameters": [
         {
@@ -373,7 +444,7 @@
     {
       "name": "ListApplications",
       "qualifiedName": "Ashby.ListApplications",
-      "fullyQualifiedName": "Ashby.ListApplications@0.1.0",
+      "fullyQualifiedName": "Ashby.ListApplications@0.2.0",
       "description": "List the organization's applications, optionally filtered by job and/or status.\n\nThe Ashby API does not filter applications by candidate; to find a specific\ncandidate's applications, read the candidate first and use its application ids.\nRequires the Candidates read permission on the API key.",
       "parameters": [
         {
@@ -475,7 +546,7 @@
     {
       "name": "ListCandidateNotes",
       "qualifiedName": "Ashby.ListCandidateNotes",
-      "fullyQualifiedName": "Ashby.ListCandidateNotes@0.1.0",
+      "fullyQualifiedName": "Ashby.ListCandidateNotes@0.2.0",
       "description": "Read the notes recorded on a candidate, paginated via the cursor.\n\nRequires the Candidates read permission on the API key.",
       "parameters": [
         {
@@ -559,7 +630,7 @@
     {
       "name": "ListJobs",
       "qualifiedName": "Ashby.ListJobs",
-      "fullyQualifiedName": "Ashby.ListJobs@0.1.0",
+      "fullyQualifiedName": "Ashby.ListJobs@0.2.0",
       "description": "List the organization's jobs (roles), optionally filtered by status.\n\nA job is the role record; headcount slots (\"openings\") are a separate concept\nnot exposed here. Requires the Jobs read permission on the API key.",
       "parameters": [
         {
@@ -652,7 +723,7 @@
     {
       "name": "SearchCandidates",
       "qualifiedName": "Ashby.SearchCandidates",
-      "fullyQualifiedName": "Ashby.SearchCandidates@0.1.0",
+      "fullyQualifiedName": "Ashby.SearchCandidates@0.2.0",
       "description": "Search the organization's candidates by name and/or email.\n\nIntended for narrowing to a small set of known candidates (e.g. re-engaging a\npast applicant). Returns at most 100 matches; provide at least one of name or\nemail, each at least 3 characters. Requires the Candidates read permission on\nthe API key.",
       "parameters": [
         {
@@ -724,6 +795,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-06-10T12:11:44.524Z",
-  "summary": "Ashby is an all-in-one recruiting platform. This toolkit lets Arcade agents read and write recruiting data in Ashby — candidates, applications, jobs, notes, feedback, and interview stage progression.\n\n## Capabilities\n\n- **Candidate management**: Search candidates by name/email, retrieve full profiles (with application IDs), and add plain-text notes (e.g. agent handoffs or summaries).\n- **Application lifecycle**: List applications filtered by job or status, move applications forward or backward through named interview stages, and read submitted feedback/scorecards.\n- **Job listings**: Enumerate the organization's roles, optionally filtered by status.\n- **Debrief aggregation**: Pull a candidate's profile, all notes, and all interview feedback across applications in a single call — no manual chaining required.\n\n## Secrets\n\n- **`ASHBY_API_KEY`** — An Ashby API key scoped to the permissions required by the tools you use. Generate one in your Ashby account under **Settings → Integrations → API Keys**. Each key carries granular permissions; the tools in this toolkit require the following depending on usage:\n  - **Candidates read** — searching, reading profiles, listing notes, listing feedback, listing applications, debrief aggregation.\n  - **Candidates write** — adding notes, changing application stage.\n  - **Interviews read** — changing application stage (stage plan lookup).\n  - **Jobs read** — listing jobs.\n\n  Create and scope the key from the [Ashby API Keys settings page](https://app.ashbyhq.com/settings/api-keys). Note that Ashby API keys are organization-scoped; the key holder can read or write across all candidates and jobs in the org, so apply least-privilege scoping.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to store secrets, or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-06-19T12:27:52.451Z",
+  "summary": "Ashby is a recruiting platform; this toolkit lets Arcade agents read and write recruiting data — candidates, applications, jobs, notes, feedback, and interview stages — via the Ashby REST API.\n\n## Capabilities\n\n- **Candidate management**: Search candidates by name/email, fetch full profiles, read and add plain-text notes, and pull a combined debrief bundle (profile + notes + scorecards) in one call.\n- **Application lifecycle**: List applications (filtered by job and/or status), move applications forward or backward through named interview stages, and archive/reject applications with a resolved reason.\n- **Feedback & scorecards**: Read submitted interview feedback and scorecards on any application — useful for pre-debrief synthesis.\n- **Job listing**: Enumerate the organization's job records, optionally filtered by status.\n\n## Secrets\n\n`ASHBY_API_KEY` — An Ashby API key scoped to the permissions your agent needs. Ashby issues API keys per organization; generate one in **Settings → Integrations → API Keys** inside your Ashby admin panel. Each key carries explicit permission grants — the tools in this toolkit require combinations of **Candidates read**, **Candidates write**, **Interviews read**, and **Jobs read** depending on which tools you use (tool docstrings list the exact permissions required). Keys with insufficient permissions will return authorization errors at call time. See [Ashby's API key documentation](https://developers.ashby.com/docs/authentication) for creation steps.\n\nStore the key in Arcade at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets) and reference it as `ASHBY_API_KEY`. For full guidance on configuring secrets in Arcade, see [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
 }
