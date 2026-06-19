@@ -1,7 +1,7 @@
 {
   "id": "GoogleSlides",
   "label": "Google Slides",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Arcade.dev LLM tools for Google Slides",
   "metadata": {
     "category": "productivity",
@@ -26,14 +26,14 @@
     {
       "name": "CommentOnPresentation",
       "qualifiedName": "GoogleSlides.CommentOnPresentation",
-      "fullyQualifiedName": "GoogleSlides.CommentOnPresentation@2.0.1",
-      "description": "Comment on a specific slide by its index in a Google Slides presentation.",
+      "fullyQualifiedName": "GoogleSlides.CommentOnPresentation@3.0.0",
+      "description": "Add a comment to a presentation, or reply within an existing comment thread.\n\nComments are file-level, not anchored to a slide; to reference a slide, name it in\nthe text. Pass reply_to_comment_id to post within that thread instead of starting a\nnew comment.",
       "parameters": [
         {
           "name": "presentation_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the presentation to comment on",
+          "description": "The id of the presentation to comment on.",
           "enum": null,
           "inferrable": true
         },
@@ -41,7 +41,15 @@
           "name": "comment_text",
           "type": "string",
           "required": true,
-          "description": "The comment to add to the slide",
+          "description": "The comment text to add.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_comment_id",
+          "type": "string",
+          "required": false,
+          "description": "Post the text as a reply within an existing comment thread by passing that comment's id. Leave empty to start a new top-level comment.",
           "enum": null,
           "inferrable": true
         }
@@ -64,7 +72,7 @@
       ],
       "output": {
         "type": "json",
-        "description": "The comment's ID, presentationId, and slideNumber in a dictionary"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -76,80 +84,12 @@
             "required": true
           },
           "comment_text": {
-            "value": "Please update the font size on this slide to improve readability.",
-            "type": "string",
-            "required": true
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "google",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "presentations"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "CreatePresentation",
-      "qualifiedName": "GoogleSlides.CreatePresentation",
-      "fullyQualifiedName": "GoogleSlides.CreatePresentation@2.0.1",
-      "description": "Create a new Google Slides presentation\nThe first slide will be populated with the specified title and subtitle.",
-      "parameters": [
-        {
-          "name": "title",
-          "type": "string",
-          "required": true,
-          "description": "The title of the presentation to create",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "subtitle",
-          "type": "string",
-          "required": false,
-          "description": "The subtitle of the presentation to create",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "google",
-        "providerType": "oauth2",
-        "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The created presentation's title, presentationId, and presentationUrl"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "GoogleSlides.CreatePresentation",
-        "parameters": {
-          "title": {
-            "value": "Q2 Product Roadmap Presentation",
+            "value": "Please review slide 3 — the chart data looks outdated and needs to be updated before the client meeting.",
             "type": "string",
             "required": true
           },
-          "subtitle": {
-            "value": "Goals, Milestones, and Key Metrics",
+          "reply_to_comment_id": {
+            "value": "AAAABmqv3kE",
             "type": "string",
             "required": false
           }
@@ -177,32 +117,77 @@
       }
     },
     {
-      "name": "CreateSlide",
-      "qualifiedName": "GoogleSlides.CreateSlide",
-      "fullyQualifiedName": "GoogleSlides.CreateSlide@2.0.1",
-      "description": "Create a new slide at the end of the specified presentation",
+      "name": "CreateOrEditPresentation",
+      "qualifiedName": "GoogleSlides.CreateOrEditPresentation",
+      "fullyQualifiedName": "GoogleSlides.CreateOrEditPresentation@3.0.0",
+      "description": "Create a deck or apply a batch of edits to one, returning created object ids,\nreplace counts, and a fresh addressable snapshot.\n\nUse this single tool for all deck construction and editing: add, delete, or restyle\nslides and elements, insert and replace text, and brand a deck in one batch. Reorder\nslides with an updateSlidesPosition request; duplicate a slide or element with a\nduplicateObject request. To set speaker notes, insertText into a slide's\nnotes_object_id (surfaced per slide in the snapshot).\n\nTo add a slide into a specific branded layout, first read the deck and consult the\nsnapshot's layout inventory: each layout reports its placeholders (type, index, and\nobject id), so you can pick a layout that already carries the title/body/other\nplaceholders you intend to fill rather than guessing which layout holds what, and\naddress a specific placeholder in placeholderIdMappings (by {type, index} or by\nlayoutPlaceholderObjectId) even when a layout repeats a type. Read the snapshot to\ndiscover the object ids later edits target.\n\nThe batch is atomic: one invalid request rejects the whole batch, so target object\nids that exist in the snapshot. Object ids you assign to new objects are validated\nbefore the batch is sent.",
       "parameters": [
+        {
+          "name": "requests",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Ordered batchUpdate requests to apply. Each item sets exactly one request key. Pass an empty list to create a blank deck or to re-read an existing one. Any caller-chosen objectId (on createSlide, createShape, createTable, etc.) must be 5-50 characters long and contain only letters, digits, hyphen, underscore, or colon, beginning with a letter, digit, or underscore; it must be unique within the batch and the deck. These ids are validated before the batch is sent.",
+          "enum": null,
+          "inferrable": true
+        },
         {
           "name": "presentation_id",
           "type": "string",
-          "required": true,
-          "description": "The ID of the presentation to create the slide in",
+          "required": false,
+          "description": "Omit to create a new deck; provide a deck id to edit that deck in place.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "slide_title",
+          "name": "title",
           "type": "string",
-          "required": true,
-          "description": "The title of the slide to create",
+          "required": false,
+          "description": "Title for a newly created deck. Ignored when editing an existing deck.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "slide_body",
+          "name": "keep_default_slide",
+          "type": "boolean",
+          "required": false,
+          "description": "When creating a new deck whose requests add their own slides, the blank slide Google auto-creates is removed so the deck contains only what you built. Set true to keep that auto-created blank first slide. Ignored when editing an existing deck or when no new slides are created. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "snapshot_detail",
           "type": "string",
-          "required": true,
-          "description": "The body (text) of the slide to create",
+          "required": false,
+          "description": "How much per-slide detail the returned snapshot carries. OUTLINE reports object ids, placeholders, text, and notes; FULL adds per-element geometry. Defaults to OUTLINE.",
+          "enum": [
+            "OUTLINE",
+            "FULL"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "include_layouts",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the deck's layout inventory in the returned snapshot. Omit to use the default, which includes layouts when creating a new deck (their object ids are needed to add slides into branded layouts) and omits them when editing an existing deck (where layouts rarely change between edits and only add tokens). Set true or false to force.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_masters",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the deck's master inventory in the returned snapshot. Masters rarely change between edits and are the heaviest part of the snapshot, so they are omitted by default; set true when verifying a master-level branding edit.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "return_slide_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Scope the returned snapshot's slides to these slide object ids (in deck order). Omit (null) to return every slide; pass an empty list to return no slides (the snapshot still reports slide_count and other deck-level fields). Use after a localized edit to get back only the slides you touched instead of the whole deck.",
           "enum": null,
           "inferrable": true
         }
@@ -225,26 +210,87 @@
       ],
       "output": {
         "type": "json",
-        "description": "A URL to the created slide"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "GoogleSlides.CreateSlide",
+        "toolName": "GoogleSlides.CreateOrEditPresentation",
         "parameters": {
+          "requests": {
+            "value": [
+              {
+                "createSlide": {
+                  "objectId": "slide_001",
+                  "insertionIndex": 0,
+                  "slideLayoutReference": {
+                    "predefinedLayout": "TITLE_AND_BODY"
+                  }
+                }
+              },
+              {
+                "insertText": {
+                  "objectId": "title_placeholder_001",
+                  "text": "Welcome to Our Quarterly Review",
+                  "insertionIndex": 0
+                }
+              },
+              {
+                "updateTextStyle": {
+                  "objectId": "title_placeholder_001",
+                  "style": {
+                    "bold": true,
+                    "fontSize": {
+                      "magnitude": 36,
+                      "unit": "PT"
+                    }
+                  },
+                  "textRange": {
+                    "type": "ALL"
+                  },
+                  "fields": "bold,fontSize"
+                }
+              }
+            ],
+            "type": "array",
+            "required": true
+          },
           "presentation_id": {
             "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
-            "required": true
+            "required": false
           },
-          "slide_title": {
-            "value": "Q3 Sales Performance Overview",
+          "title": {
+            "value": "Q3 2024 Quarterly Business Review",
             "type": "string",
-            "required": true
+            "required": false
           },
-          "slide_body": {
-            "value": "Revenue increased by 24% compared to Q2, driven by strong performance in the enterprise segment and successful product launches in APAC markets.",
+          "keep_default_slide": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "snapshot_detail": {
+            "value": "OUTLINE",
             "type": "string",
-            "required": true
+            "required": false
+          },
+          "include_layouts": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_masters": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "return_slide_ids": {
+            "value": [
+              "slide_001",
+              "slide_002"
+            ],
+            "type": "array",
+            "required": false
           }
         },
         "requiresAuth": true,
@@ -259,6 +305,129 @@
         },
         "behavior": {
           "operations": [
+            "create",
+            "update",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreatePresentationFromTemplate",
+      "qualifiedName": "GoogleSlides.CreatePresentationFromTemplate",
+      "fullyQualifiedName": "GoogleSlides.CreatePresentationFromTemplate@3.0.0",
+      "description": "Derive a new on-brand deck from an existing branded deck, preserving its\nmasters, layouts, and theme, then optionally filling tokens.\n\nUse this instead of building from scratch when the user wants a deck in their\ncompany template; the new deck inherits the source's branding.",
+      "parameters": [
+        {
+          "name": "source_presentation_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the branded deck to derive the new deck from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Title for the new deck.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_replacements",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Token replacements applied to the new deck after copying (e.g. fill {{COMPANY}} with a value). Omit for a verbatim brand copy.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "match_case",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether token matching is case-sensitive. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSlides.CreatePresentationFromTemplate",
+        "parameters": {
+          "source_presentation_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Q3 2024 Company Overview Deck",
+            "type": "string",
+            "required": true
+          },
+          "text_replacements": {
+            "value": [
+              {
+                "find": "{{COMPANY}}",
+                "replace": "Acme Corporation"
+              },
+              {
+                "find": "{{QUARTER}}",
+                "replace": "Q3 2024"
+              },
+              {
+                "find": "{{PRESENTER}}",
+                "replace": "Jane Smith"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "match_case": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "presentations"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
             "create"
           ],
           "readOnly": false,
@@ -272,8 +441,8 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleSlides.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleSlides.GenerateGoogleFilePickerUrl@2.0.1",
-      "description": "Generate a URL where the user can grant this app access to specific Drive files.\n\nOpens Google's first-party Drive picker. The user selects which files to share\nwith this application — it is not a sign-in or credential prompt.\n\nUse this when a prior tool reported that a file was not found or access was denied,\nand the user expects the file to exist. After the user completes the picker flow,\nretry the prior tool.",
+      "fullyQualifiedName": "GoogleSlides.GenerateGoogleFilePickerUrl@3.0.0",
+      "description": "Generate a URL where the user grants this app access to specific Drive files.\n\nUse this when a prior tool reported a file was not found or access was denied and\nthe user expects the file to exist; after the user completes the picker, retry the\nprior tool. Opens Google's first-party Drive picker, not a sign-in prompt.\n\nReturns a soft envelope: an \"unavailable\" status (not an error) means the picker is\nnot configured in this environment and will not work here, so do not retry it.",
       "parameters": [],
       "auth": {
         "providerId": "google",
@@ -284,7 +453,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Google File Picker URL for user file selection and permission granting"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -313,16 +482,59 @@
       }
     },
     {
-      "name": "GetPresentationAsMarkdown",
-      "qualifiedName": "GoogleSlides.GetPresentationAsMarkdown",
-      "fullyQualifiedName": "GoogleSlides.GetPresentationAsMarkdown@2.0.1",
-      "description": "Get the specified Google Slides presentation and convert it to markdown.\n\nOnly retrieves the text content of the presentation and formats it as markdown.",
+      "name": "GetPresentation",
+      "qualifiedName": "GoogleSlides.GetPresentation",
+      "fullyQualifiedName": "GoogleSlides.GetPresentation@3.0.0",
+      "description": "Return an addressable snapshot of a deck: slide and element object ids,\nplaceholder types, text, speaker notes, and the layout and master inventory.\n\nThis is the read side of the read-edit loop: the object ids it returns are the\naddresses create_or_edit_presentation targets. Each layout in the inventory\nreports its placeholders with type, index, and object id, the identity a\ncreateSlide placeholderIdMappings entry needs (by {type, index} or by\nlayoutPlaceholderObjectId), even when a layout repeats a placeholder type.",
       "parameters": [
         {
           "name": "presentation_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the presentation to retrieve.",
+          "description": "The id of the presentation to read.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "detail",
+          "type": "string",
+          "required": false,
+          "description": "OUTLINE reports object ids, placeholders, text, notes, and the layout/master inventory. FULL adds per-element geometry. Defaults to OUTLINE.",
+          "enum": [
+            "OUTLINE",
+            "FULL"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed first slide to return. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_slides",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum slides to return in this read (1-50). Defaults to 50; use offset to page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_layouts",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the layout inventory. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_masters",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the master inventory. Defaults to true.",
           "enum": null,
           "inferrable": true
         }
@@ -340,21 +552,143 @@
       "secretsInfo": [
         {
           "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
-        "type": "string",
-        "description": "The presentation textual content as markdown"
+        "type": "json",
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "GoogleSlides.GetPresentationAsMarkdown",
+        "toolName": "GoogleSlides.GetPresentation",
         "parameters": {
           "presentation_id": {
             "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
+          },
+          "detail": {
+            "value": "OUTLINE",
+            "type": "string",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "max_slides": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "include_layouts": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_masters": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "presentations"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetSlideThumbnail",
+      "qualifiedName": "GoogleSlides.GetSlideThumbnail",
+      "fullyQualifiedName": "GoogleSlides.GetSlideThumbnail@3.0.0",
+      "description": "Render one slide to an image and return its content URL, for visually\nconfirming a deck looks right before sharing.",
+      "parameters": [
+        {
+          "name": "presentation_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_object_id",
+          "type": "string",
+          "required": true,
+          "description": "The object id of the slide (page) to render, from a read.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "size",
+          "type": "string",
+          "required": false,
+          "description": "Rendered size: LARGE (~1600px), MEDIUM (~800px), or SMALL (~200px). Defaults to MEDIUM.",
+          "enum": [
+            "LARGE",
+            "MEDIUM",
+            "SMALL"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSlides.GetSlideThumbnail",
+        "parameters": {
+          "presentation_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "slide_object_id": {
+            "value": "g1f2a3b4c5d_0_0",
+            "type": "string",
+            "required": true
+          },
+          "size": {
+            "value": "LARGE",
+            "type": "string",
+            "required": false
           }
         },
         "requiresAuth": true,
@@ -382,14 +716,14 @@
     {
       "name": "ListPresentationComments",
       "qualifiedName": "GoogleSlides.ListPresentationComments",
-      "fullyQualifiedName": "GoogleSlides.ListPresentationComments@2.0.1",
-      "description": "List all comments on the specified Google Slides presentation.",
+      "fullyQualifiedName": "GoogleSlides.ListPresentationComments@3.0.0",
+      "description": "List a page of comments and their replies on a presentation, newest first.",
       "parameters": [
         {
           "name": "presentation_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the presentation to list comments for",
+          "description": "The id of the presentation to list comments for.",
           "enum": null,
           "inferrable": true
         },
@@ -397,7 +731,23 @@
           "name": "include_deleted",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include deleted comments in the results. Defaults to False.",
+          "description": "Include deleted comments. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum comments to return per page (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for the next page, taken from a prior response's next_page_token. Leave empty to fetch the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -420,7 +770,7 @@
       ],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the comments"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -434,6 +784,16 @@
           "include_deleted": {
             "value": false,
             "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page_token": {
+            "value": "CAESFjFCeGlNVnMwWFJBNW5GTURLdkJkQlp",
+            "type": "string",
             "required": false
           }
         },
@@ -460,17 +820,113 @@
       }
     },
     {
+      "name": "ResolveComment",
+      "qualifiedName": "GoogleSlides.ResolveComment",
+      "fullyQualifiedName": "GoogleSlides.ResolveComment@3.0.0",
+      "description": "Close (resolve) or reopen a comment thread on a presentation.\n\nPosts an action reply on the thread, so the lifecycle change is attributed to the\nconnected account; the thread's existing comments and replies are preserved.",
+      "parameters": [
+        {
+          "name": "presentation_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the presentation the comment is on.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the comment thread to resolve or reopen.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "required": false,
+          "description": "Whether to resolve (close) the thread or reopen a resolved one. Defaults to RESOLVE.",
+          "enum": [
+            "resolve",
+            "reopen"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSlides.ResolveComment",
+        "parameters": {
+          "presentation_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "AAAABmXyZ1k",
+            "type": "string",
+            "required": true
+          },
+          "action": {
+            "value": "RESOLVE",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "presentations"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "SearchPresentations",
       "qualifiedName": "GoogleSlides.SearchPresentations",
-      "fullyQualifiedName": "GoogleSlides.SearchPresentations@2.0.1",
-      "description": "Searches for presentations in the user's Google Drive.\nExcludes presentations that are in the trash.",
+      "fullyQualifiedName": "GoogleSlides.SearchPresentations@3.0.0",
+      "description": "Search the user's Drive for presentations, newest first by default.\n\nKeyword matching is full-text: a keyword matches a deck's body content as well\nas its title, so a deck can match on words that never appear in its title. A\nkeyword search that matches nothing returns an empty list (not an error).",
       "parameters": [
         {
           "name": "presentation_contains",
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Keywords or phrases that must be in the presentation title or content. Provide a list of keywords or phrases if needed.",
+          "description": "Keywords that must appear in the presentation title or content. Omit to list all.",
           "enum": null,
           "inferrable": true
         },
@@ -479,7 +935,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Keywords or phrases that must NOT be in the presentation title or content. Provide a list of keywords or phrases if needed.",
+          "description": "Keywords that must NOT appear in the presentation title or content.",
           "enum": null,
           "inferrable": true
         },
@@ -487,7 +943,7 @@
           "name": "search_only_in_shared_drive_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return presentations from this drive. Defaults to None, which searches across all drives.",
+          "description": "Restrict the search to this shared drive. Omit to search across the user's drives.",
           "enum": null,
           "inferrable": true
         },
@@ -495,7 +951,7 @@
           "name": "include_shared_drives",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include presentations from shared drives. Defaults to False (searches only in the user's 'My Drive').",
+          "description": "Include presentations from shared drives. Defaults to false (My Drive only).",
           "enum": null,
           "inferrable": true
         },
@@ -503,7 +959,7 @@
           "name": "include_organization_domain_presentations",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include presentations from the organization's domain. This is applicable to admin users who have permissions to view organization-wide presentations in a Google Workspace account. Defaults to False.",
+          "description": "Include organization-wide presentations (admin accounts only). Defaults to false.",
           "enum": null,
           "inferrable": true
         },
@@ -512,7 +968,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Sort order. Defaults to listing the most recently modified presentations first. If presentation_contains or presentation_not_contains is provided, then the order_by will be ignored.",
+          "description": "Sort order. Defaults to most recently modified first. Ignored when a keyword filter is provided.",
           "enum": [
             "createdTime",
             "createdTime desc",
@@ -526,12 +982,8 @@
             "name desc",
             "name_natural",
             "name_natural desc",
-            "quotaBytesUsed",
-            "quotaBytesUsed desc",
             "recency",
             "recency desc",
-            "sharedWithMeTime",
-            "sharedWithMeTime desc",
             "starred",
             "starred desc",
             "viewedByMeTime",
@@ -543,7 +995,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of presentations to list",
+          "description": "Maximum presentations to return (1-100). Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -551,7 +1003,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "Token from a prior result's next_page_token to fetch the next page.",
           "enum": null,
           "inferrable": true
         }
@@ -574,7 +1026,7 @@
       ],
       "output": {
         "type": "json",
-        "description": "A dictionary containing 'presentations_count' (number of presentations returned) and 'presentations' (a list of presentation details including 'kind', 'mimeType', 'id', and 'name' for each presentation)"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -591,13 +1043,13 @@
           "presentation_not_contains": {
             "value": [
               "draft",
-              "archived"
+              "archive"
             ],
             "type": "array",
             "required": false
           },
           "search_only_in_shared_drive_id": {
-            "value": "0AHv3zDrXYZ123abc456",
+            "value": "0ABCdEfGhIjKlUk9PVA",
             "type": "string",
             "required": false
           },
@@ -620,12 +1072,12 @@
             "required": false
           },
           "limit": {
-            "value": 10,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "pagination_token": {
-            "value": "eyJzdGFydEluZGV4IjoxMCwicGFnZVNpemUiOjEwfQ==",
+            "value": "eyJzdGFydEluZGV4IjoyNX0=",
             "type": "string",
             "required": false
           }
@@ -655,8 +1107,8 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleSlides.WhoAmI",
-      "fullyQualifiedName": "GoogleSlides.WhoAmI@2.0.1",
-      "description": "Get comprehensive user profile and Google Slides environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Slides access permissions, and other\nimportant profile details from Google services.",
+      "fullyQualifiedName": "GoogleSlides.WhoAmI@3.0.0",
+      "description": "Return the connected Google account's profile (name, email, picture).",
       "parameters": [],
       "auth": {
         "providerId": "google",
@@ -671,7 +1123,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Get comprehensive user profile and Google Slides environment information."
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -713,6 +1165,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-06-05T12:07:56.906Z",
-  "summary": "The Google Slides toolkit lets Arcade-powered LLMs create, read, search, and annotate Google Slides presentations on behalf of authenticated users.\n\n## Capabilities\n\n- **Presentation management**: Create new presentations with a title and subtitle, or retrieve the full text content of any accessible presentation as Markdown.\n- **Slide & comment authoring**: Add slides to an existing presentation and post comments on specific slides by index; list all comments on a presentation.\n- **Search & discovery**: Search the authenticated user's Google Drive for presentations (trash excluded) and resolve access issues via the Google Drive inline file picker.\n- **Identity & environment inspection**: Retrieve the authenticated user's profile, email, permissions, and Google Slides environment details.\n\n## OAuth\n\nUses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`**: Controls whether the `GoogleSlides.GenerateGoogleFilePickerUrl` tool is available. This secret is expected to be a URL (or a flag value) that enables the Google Drive inline picker flow — the mechanism that lets a user grant the app access to specific Drive files without a full re-authentication. This is not a standard Google API credential; it is an application-level configuration value specific to your Arcade deployment. Set this in your Arcade secrets store. Consult the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to configure it, and manage your values at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-06-19T12:27:56.611Z",
+  "summary": "Google Slides toolkit for Arcade provides LLM-callable tools that create, read, edit, and manage Google Slides presentations via the Google Slides and Drive APIs.\n\n## Capabilities\n\n- **Presentation creation & editing:** Create new decks from scratch or from branded templates, apply atomic batches of edits (add/delete/restyle slides and elements, insert/replace text, reorder slides, duplicate objects, set speaker notes), and inspect addressable snapshots to discover object IDs and layout inventories before targeting them.\n- **Reading & visual inspection:** Retrieve full addressable snapshots (slide/element IDs, placeholder types, text, speaker notes, layout/master inventory) and render individual slides to thumbnail images for visual confirmation.\n- **Search & discovery:** Full-text search across a user's Drive presentations (matches body content and title); returns results newest-first.\n- **Comments & collaboration:** Add top-level comments or reply within threads, list comments/replies with pagination, and resolve or reopen comment threads — all attributed to the connected account.\n- **File access & identity:** Generate a Google Drive inline file picker URL to grant access to specific files when a file is not found or access is denied; look up the connected Google account's profile (name, email, picture).\n\n## OAuth\n\nThis toolkit authenticates via **OAuth 2.0** with Google as the provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details, required scopes, and configuration steps.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — An API key that enables the `GoogleSlides.GenerateGoogleFilePickerUrl` tool to open Google's first-party Drive file picker. This is a **Google Maps/Picker API key** with the [Google Picker API](https://developers.google.com/drive/picker/guides/overview) enabled. To obtain it:\n  1. Open the [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials) for the same project used for your OAuth client.\n  2. Click **Create Credentials → API key**.\n  3. Enable the **Google Picker API** on the project under [APIs & Services → Library](https://console.cloud.google.com/apis/library).\n  4. Restrict the key to the Picker API (and optionally to your app's domain) to limit exposure.\n  5. Copy the key value and register it as this secret.\n  If this secret is absent or invalid, `GenerateGoogleFilePickerUrl` returns an `\"unavailable\"` status rather than an error — do not retry the picker in that case.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to register secrets, or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }
