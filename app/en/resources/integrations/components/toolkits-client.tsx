@@ -1,19 +1,14 @@
 "use client";
-import {
-  Button,
-  buttonVariants,
-  getToolkitIcon,
-  Separator,
-} from "@arcadeai/design-system";
+import { Button, getToolkitIcon, Separator } from "@arcadeai/design-system";
 import { Generic as GenericIcon } from "@arcadeai/design-system/components/ui/atoms/icons";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Code2, MessageSquarePlus, Search } from "lucide-react";
 import Link from "next/link";
 import { ComingSoonProvider } from "@/app/_components/coming-soon-context";
 import {
-  getToolkitSlug,
-  type ToolkitWithDocsLink,
-} from "@/app/_lib/toolkit-slug";
+  type ResolvedIndexToolkit,
+  toIntegrationLink,
+} from "@/app/_lib/integration-index";
 import { FiltersBar } from "./filters-bar";
 import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
@@ -21,20 +16,8 @@ import { useFilters } from "./use-filters";
 import { useToolkitFilters } from "./use-toolkit-filters";
 
 type ToolkitsClientProps = {
-  toolkits: ToolkitWithDocsLink[];
+  toolkits: ResolvedIndexToolkit[];
 };
-
-// Map toolkits to their category page (JSON-rendered pages).
-function mapToToolkitPage(
-  toolkit: { id: string; docsLink?: string | null },
-  category: string
-): string {
-  const slug = getToolkitSlug({
-    id: toolkit.id,
-    docsLink: toolkit.docsLink,
-  });
-  return `/en/resources/integrations/${category}/${slug}`;
-}
 
 /**
  * Get toolkit icon with fallback for API toolkits.
@@ -123,15 +106,15 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                   <p className="!mt-2 flex-1 text-gray-700 text-xs leading-relaxed dark:text-gray-300">
                     Use Arcade's SDK to integrate with any service or API.
                   </p>
-                  <Link
-                    className={cn(
-                      buttonVariants({ variant: "default", size: "sm" }),
-                      "mt-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-700 dark:bg-blue-500 dark:active:bg-blue-600 dark:hover:bg-blue-600"
-                    )}
-                    href="/guides/create-tools/tool-basics/build-mcp-server"
+                  <Button
+                    className="mt-3"
+                    render={
+                      <Link href="/guides/create-tools/tool-basics/build-mcp-server" />
+                    }
+                    size="sm"
                   >
                     Learn how to build a MCP Server
-                  </Link>
+                  </Button>
                 </div>
                 <div className="flex flex-col rounded-md border border-blue-500/30 bg-white/70 p-4 dark:border-blue-400/30 dark:bg-gray-900/40">
                   <div className="flex items-center gap-2">
@@ -143,15 +126,16 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                   <p className="!mt-2 flex-1 text-gray-700 text-xs leading-relaxed dark:text-gray-300">
                     Request a missing tool, suggest a feature, or report a bug.
                   </p>
-                  <Link
-                    className={cn(
-                      buttonVariants({ variant: "outline", size: "sm" }),
-                      "mt-3"
-                    )}
-                    href="/resources/integrations/tool-feedback"
+                  <Button
+                    className="mt-3"
+                    render={
+                      <Link href="/resources/integrations/tool-feedback" />
+                    }
+                    size="sm"
+                    variant="outline"
                   >
                     Submit tool feedback
-                  </Link>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -198,17 +182,16 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                       icon={IconComponent}
                       iconUrl={iconUrl}
                       isByoc={toolkit.isBYOC}
-                      isComingSoon={toolkit.isComingSoon}
+                      // Doc-less toolkits have no page; render them as
+                      // non-clickable (coming-soon) cards instead of links to
+                      // a 404.
+                      isComingSoon={
+                        toolkit.isComingSoon || toolkit.hasPage === false
+                      }
                       isPartner={toolkit.isPartner}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
-                      link={mapToToolkitPage(
-                        {
-                          id: toolkit.id,
-                          docsLink: toolkit.docsLink,
-                        },
-                        toolkit.category ?? "others"
-                      )}
+                      link={toIntegrationLink(toolkit)}
                       name={toolkit.label}
                       type={toolkit.type}
                     />

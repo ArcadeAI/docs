@@ -1,7 +1,7 @@
 {
   "id": "GoogleSheets",
   "label": "Google Sheets",
-  "version": "5.2.0",
+  "version": "8.2.0",
   "description": "Arcade.dev LLM tools for Google Sheets.",
   "metadata": {
     "category": "productivity",
@@ -24,56 +24,17 @@
   },
   "tools": [
     {
-      "name": "AddNoteToCell",
-      "qualifiedName": "GoogleSheets.AddNoteToCell",
-      "fullyQualifiedName": "GoogleSheets.AddNoteToCell@5.2.0",
-      "description": "Add a note to a specific cell in a spreadsheet. A note is a small\npiece of text attached to a cell (shown with a black triangle) that\nappears when you hover over the cell.\n\nsheet_id_or_name takes precedence over sheet_position. If a sheet is not mentioned,\nthen always assume the default sheet_position is sufficient.",
+      "name": "CheckSpreadsheetAccess",
+      "qualifiedName": "GoogleSheets.CheckSpreadsheetAccess",
+      "fullyQualifiedName": "GoogleSheets.CheckSpreadsheetAccess@8.2.0",
+      "description": "Check whether this app can already read each of several spreadsheets, in one\nbatched pre-flight call, before attempting to read them.\n\nUse this when the user references multiple spreadsheets so any that are not yet\naccessible can be granted together in a single picker step, instead of hitting a\nseparate access error and grant prompt for each one. Each input may be a bare file id\nor a full Google Sheets/Drive URL.\n\nReturns ``spreadsheets`` (a per-id list with ``accessible``, the ``title`` and\n``mime_type`` when the file was read, and a ``reason`` when not usable),\n``all_accessible`` (true only when every id is an already-accessible spreadsheet),\n``connected_account_email`` (the connected Google account, empty when unknown), and a\n``grant`` block. ``grant`` is empty when nothing needs granting; otherwise it lists the\nungranted ids (``ungranted_ids``) plus, when the inline picker is enabled, a single\npicker URL covering them all.\n\nA ``reason`` of ``not_accessible_or_not_found`` is either a file not granted to this app\nyet or one that does not exist (indistinguishable here) — the picker resolves the\nformer. ``not_a_spreadsheet`` is an accessible file of another type (a Doc, PDF, image,\nor Excel/CSV file); granting cannot change a type, so for an Excel/CSV file ask the user\nto open it in Google Sheets and use File, Save as Google Sheets, then share the\nconverted file. ``invalid_reference`` is an input that is not a Drive id or link at all;\nask the user to re-check it.",
       "parameters": [
         {
-          "name": "spreadsheet_id",
-          "type": "string",
+          "name": "spreadsheets",
+          "type": "array",
+          "innerType": "string",
           "required": true,
-          "description": "The id of the spreadsheet to add a comment to",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "column",
-          "type": "string",
-          "required": true,
-          "description": "The column string to add a note to. For example, 'A', 'F', or 'AZ'",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "row",
-          "type": "integer",
-          "required": true,
-          "description": "The row number to add a note to",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "note_text",
-          "type": "string",
-          "required": true,
-          "description": "The text for the note to add",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sheet_position",
-          "type": "integer",
-          "required": false,
-          "description": "The position/tab of the sheet in the spreadsheet to write to. A value of 1 represents the first (leftmost/Sheet1) sheet. Defaults to 1.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sheet_id_or_name",
-          "type": "string",
-          "required": false,
-          "description": "The id or name of the sheet to write to. If provided, takes precedence over sheet_position.",
+          "description": "The spreadsheets to check access for, each given as a bare spreadsheet id or a full Google Sheets/Drive URL (the id is extracted from the URL). Provide at most 50 per call; split larger lists across multiple calls.",
           "enum": null,
           "inferrable": true
         }
@@ -85,45 +46,32 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "token"
+        }
+      ],
       "output": {
         "type": "json",
-        "description": "The status of the operation"
+        "description": "Per-id accessibility (`spreadsheets`), an `all_accessible` flag, the `connected_account_email` (the Google account this app is connected through), and a `grant` block — empty when nothing needs granting, otherwise listing the ungranted ids with one consolidated picker URL covering them all."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "GoogleSheets.AddNoteToCell",
+        "toolName": "GoogleSheets.CheckSpreadsheetAccess",
         "parameters": {
-          "spreadsheet_id": {
-            "value": "1A2B3C4D5E6F7G8H9I0J",
-            "type": "string",
+          "spreadsheets": {
+            "value": [
+              "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+              "https://docs.google.com/spreadsheets/d/1A2B3C4D5E6F7G8H9I0J/edit#gid=0",
+              "https://drive.google.com/file/d/1Z9Y8X7W6V5U4T3S2R1Q/view?usp=sharing",
+              "1Kp3mNqRtLwXyZaObPcDeFgHiJkLmNoPqRsTuVwXyZ"
+            ],
+            "type": "array",
             "required": true
-          },
-          "column": {
-            "value": "B",
-            "type": "string",
-            "required": true
-          },
-          "row": {
-            "value": 5,
-            "type": "integer",
-            "required": true
-          },
-          "note_text": {
-            "value": "This is a note regarding the data in this cell.",
-            "type": "string",
-            "required": true
-          },
-          "sheet_position": {
-            "value": 2,
-            "type": "integer",
-            "required": false
-          },
-          "sheet_id_or_name": {
-            "value": "Monthly Report",
-            "type": "string",
-            "required": false
           }
         },
         "requiresAuth": true,
@@ -138,9 +86,9 @@
         },
         "behavior": {
           "operations": [
-            "update"
+            "read"
           ],
-          "readOnly": false,
+          "readOnly": true,
           "destructive": false,
           "idempotent": true,
           "openWorld": true
@@ -149,25 +97,44 @@
       }
     },
     {
-      "name": "CreateSpreadsheet",
-      "qualifiedName": "GoogleSheets.CreateSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.CreateSpreadsheet@5.2.0",
-      "description": "Create a new spreadsheet with the provided title and data in its first sheet\n\nReturns the newly created spreadsheet's id and title",
+      "name": "CommentOnSpreadsheet",
+      "qualifiedName": "GoogleSheets.CommentOnSpreadsheet",
+      "fullyQualifiedName": "GoogleSheets.CommentOnSpreadsheet@8.2.0",
+      "description": "Create a comment on a spreadsheet, edit a comment's body, or resolve/reopen it.\n\nComments are created at the file level: the Drive API cannot anchor a NEW Sheets comment to a\nspecific cell or range. Cell/range-anchored comments made in the Sheets UI are still readable\nvia list_spreadsheet_comments (which returns their anchor). Editing a comment's body is\nallowed only for the comment's author.",
       "parameters": [
         {
-          "name": "title",
+          "name": "spreadsheet_id",
           "type": "string",
-          "required": false,
-          "description": "The title of the new spreadsheet",
+          "required": true,
+          "description": "The id of the spreadsheet to comment on.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "data",
+          "name": "comment_id",
           "type": "string",
           "required": false,
-          "description": "The data to write to the spreadsheet. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] would be the value of the cell in row 23, column C. Type hint: dict[int, dict[str, Union[int, float, str, bool]]]",
+          "description": "Omit to CREATE a new comment. Provide an existing comment id to edit it (pass content) or to resolve/reopen it (pass status).",
           "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "The comment text. Required when creating. When editing an existing comment (comment_id set, no status) this replaces the body (author-only). When a status is set, this is the optional text of the resolving/reopening reply.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Resolve or reopen an existing comment (requires comment_id). Implemented as a reply with an action. Omit to create or edit instead.",
+          "enum": [
+            "resolve",
+            "reopen"
+          ],
           "inferrable": true
         }
       ],
@@ -178,23 +145,40 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
-        "description": "The created spreadsheet's id and title"
+        "description": "The affected comment id, any created reply id, the action taken, the resolved state, and the spreadsheet URL."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "GoogleSheets.CreateSpreadsheet",
+        "toolName": "GoogleSheets.CommentOnSpreadsheet",
         "parameters": {
-          "title": {
-            "value": "Monthly Budget Report",
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "AAAABmXv3ko",
             "type": "string",
             "required": false
           },
-          "data": {
-            "value": "{\"1\":{\"A\":\"Item\",\"B\":\"Amount\",\"C\":\"Category\"},\"2\":{\"A\":\"Rent\",\"B\":1200,\"C\":\"Housing\"},\"3\":{\"A\":\"Groceries\",\"B\":400,\"C\":\"Food\"},\"4\":{\"A\":\"Utilities\",\"B\":150,\"C\":\"Housing\"},\"5\":{\"A\":\"Internet\",\"B\":60,\"C\":\"Utilities\"}}",
+          "content": {
+            "value": "Please review the Q3 revenue figures in column D before Friday.",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "resolved",
             "type": "string",
             "required": false
           }
@@ -211,7 +195,8 @@
         },
         "behavior": {
           "operations": [
-            "create"
+            "create",
+            "update"
           ],
           "readOnly": false,
           "destructive": false,
@@ -222,10 +207,541 @@
       }
     },
     {
+      "name": "CreateOrEditSpreadsheet",
+      "qualifiedName": "GoogleSheets.CreateOrEditSpreadsheet",
+      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@8.2.0",
+      "description": "Create a new spreadsheet or batch-edit an existing one.\n\nOmit `spreadsheet_id` to create; provide it to edit. All writes flow through\n`requests[]` — typed operations like updateCells, addSheet, sortRange,\naddConditionalFormatRule, autoResizeDimensions, and more.\n\nFor updateCells use ExtendedValue with an explicit type field (stringValue,\nnumberValue, boolValue, formulaValue).\n\nBy default, build clean, professional-looking tables with restrained, consistent\nformatting and plain-text tab names/headers (no emojis); only use emojis or\ndecorative styling when the user explicitly asks for it.",
+      "parameters": [
+        {
+          "name": "requests",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "A list of Google Sheets `spreadsheets.batchUpdate` request objects. Each object must have exactly one key naming the operation. Examples:\n\nFIELDS MASK: updateCells, repeatCell, updateSheetProperties, and updateDimensionProperties take a `fields` mask listing which sub-fields to write — anything you set but don't name is silently ignored. You can OMIT `fields` and the tool auto-derives it from the data you provide (recommended). Pass an explicit `fields` only for surgical edits, or `fields: \"*\"` to overwrite every sub-field (clearing ones you didn't provide).\n\nupdateCells — write typed values and formatting to a range. Use `range` OR `start` to anchor the write. Values must be wrapped in `userEnteredValue` with an explicit type field (stringValue, numberValue, boolValue, formulaValue). `fields` is auto-derived when omitted:\n{\"updateCells\": {\"range\": {\"sheetId\": 0, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 0, \"endColumnIndex\": 3}, \"rows\": [{\"values\": [{\"userEnteredValue\": {\"stringValue\": \"Name\"}, \"userEnteredFormat\": {\"textFormat\": {\"bold\": true}}}, {\"userEnteredValue\": {\"numberValue\": 42}}, {\"userEnteredValue\": {\"formulaValue\": \"=SUM(B1:B10)\"}}]}], \"fields\": \"userEnteredValue,userEnteredFormat.textFormat.bold\"}}\n\nrepeatCell — apply one CellData to every cell in a range. Good for painting formatting, notes, or validation without enumerating rows:\n{\"repeatCell\": {\"range\": {\"sheetId\": 0, \"startRowIndex\": 1, \"endRowIndex\": 100}, \"cell\": {\"userEnteredFormat\": {\"backgroundColorStyle\": {\"rgbColor\": {\"red\": 0.95, \"green\": 0.95, \"blue\": 0.95}}}}, \"fields\": \"userEnteredFormat.backgroundColorStyle\"}}\n\nupdateBorders — set per-edge borders. Each side takes a Border with a style (SOLID, DASHED, DOTTED, NONE, SOLID_MEDIUM, SOLID_THICK, DOUBLE):\n{\"updateBorders\": {\"range\": {\"sheetId\": 0, \"startRowIndex\": 0, \"endRowIndex\": 3, \"startColumnIndex\": 0, \"endColumnIndex\": 3}, \"top\": {\"style\": \"SOLID_THICK\"}, \"bottom\": {\"style\": \"SOLID_THICK\"}, \"left\": {\"style\": \"SOLID\"}, \"right\": {\"style\": \"SOLID\"}, \"innerHorizontal\": {\"style\": \"DASHED\"}, \"innerVertical\": {\"style\": \"DASHED\"}}}\n\naddSheet — create a new tab. Omit sheetId to let Google assign one; read the new ID from created_resources in the reply:\n{\"addSheet\": {\"properties\": {\"title\": \"Q2\", \"index\": 1, \"gridProperties\": {\"rowCount\": 200, \"columnCount\": 26, \"frozenRowCount\": 1}}}}\n\ndeleteSheet — remove a tab permanently by sheetId:\n{\"deleteSheet\": {\"sheetId\": 1234567890}}\n\nduplicateSheet — clone a tab. newSheetId is auto-assigned when omitted:\n{\"duplicateSheet\": {\"sourceSheetId\": 0, \"insertSheetIndex\": 1, \"newSheetName\": \"Copy of Q1\"}}\n\nupdateSheetProperties — rename, reorder, freeze rows/columns, or recolor a tab. fields is rooted at properties:\n{\"updateSheetProperties\": {\"properties\": {\"sheetId\": 0, \"gridProperties\": {\"frozenRowCount\": 1}}, \"fields\": \"gridProperties.frozenRowCount\"}}\n\nupdateSpreadsheetProperties — rename the whole spreadsheet (file) or change workbook-level properties. Use this (not updateSheetProperties) to change the spreadsheet title:\n{\"updateSpreadsheetProperties\": {\"properties\": {\"title\": \"Q3 Report\"}, \"fields\": \"title\"}}\n\ninsertDimension — add rows or columns. Both startIndex and endIndex are REQUIRED:\n{\"insertDimension\": {\"range\": {\"sheetId\": 0, \"dimension\": \"ROWS\", \"startIndex\": 2, \"endIndex\": 4}, \"inheritFromBefore\": true}}\n\ndeleteDimension — remove rows or columns. Apply largest-index first within a batch to avoid index shift:\n{\"deleteDimension\": {\"range\": {\"sheetId\": 0, \"dimension\": \"COLUMNS\", \"startIndex\": 5, \"endIndex\": 8}}}\n\nmergeCells — mergeType is MERGE_ALL, MERGE_COLUMNS, or MERGE_ROWS:\n{\"mergeCells\": {\"range\": {\"sheetId\": 0, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 0, \"endColumnIndex\": 5}, \"mergeType\": \"MERGE_ALL\"}}\n\nunmergeCells — range must not partially span an existing merge:\n{\"unmergeCells\": {\"range\": {\"sheetId\": 0, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 0, \"endColumnIndex\": 5}}}\n\nfindReplace — scope with ONE of range, sheetId, or allSheets:\n{\"findReplace\": {\"find\": \"TBD\", \"replacement\": \"N/A\", \"matchCase\": false, \"matchEntireCell\": true, \"allSheets\": true}}\n\naddNamedRange — create a workbook-scoped named range. Server assigns namedRangeId:\n{\"addNamedRange\": {\"namedRange\": {\"name\": \"revenue\", \"range\": {\"sheetId\": 0, \"startRowIndex\": 1, \"endRowIndex\": 1000, \"startColumnIndex\": 1, \"endColumnIndex\": 2}}}}\n\naddProtectedRange — lock a range. warningOnly=true gives soft protection:\n{\"addProtectedRange\": {\"protectedRange\": {\"range\": {\"sheetId\": 0, \"startRowIndex\": 0, \"endRowIndex\": 1}, \"description\": \"Do not edit headers\", \"warningOnly\": true}}}\n\nsetDataValidation — attach a validation rule to a range. Omit rule to clear:\n{\"setDataValidation\": {\"range\": {\"sheetId\": 0, \"startRowIndex\": 1, \"endRowIndex\": 100, \"startColumnIndex\": 2, \"endColumnIndex\": 3}, \"rule\": {\"condition\": {\"type\": \"ONE_OF_LIST\", \"values\": [{\"userEnteredValue\": \"PENDING\"}, {\"userEnteredValue\": \"DONE\"}]}, \"strict\": true, \"showCustomUi\": true}}}\n\naddConditionalFormatRule — insert a conditional-format rule at given index. Use booleanRule for categorical formatting:\n{\"addConditionalFormatRule\": {\"index\": 0, \"rule\": {\"ranges\": [{\"sheetId\": 0, \"startRowIndex\": 1, \"endRowIndex\": 100}], \"booleanRule\": {\"condition\": {\"type\": \"NUMBER_LESS\", \"values\": [{\"userEnteredValue\": \"0\"}]}, \"format\": {\"backgroundColorStyle\": {\"rgbColor\": {\"red\": 1.0, \"green\": 0.9, \"blue\": 0.9}}}}}}}\n\naddChart — embed a chart. Server assigns chartId in the reply:\n{\"addChart\": {\"chart\": {\"spec\": {\"title\": \"Revenue by quarter\", \"basicChart\": {\"chartType\": \"COLUMN\", \"domains\": [{\"domain\": {\"sourceRange\": {\"sources\": [{\"sheetId\": 0, \"startRowIndex\": 0, \"endRowIndex\": 5, \"startColumnIndex\": 0, \"endColumnIndex\": 1}]}}}], \"series\": [{\"series\": {\"sourceRange\": {\"sources\": [{\"sheetId\": 0, \"startRowIndex\": 0, \"endRowIndex\": 5, \"startColumnIndex\": 1, \"endColumnIndex\": 2}]}}}]}}, \"position\": {\"newSheet\": true}}}}\n\nsortRange — sort rows in a range by one or more columns. sortSpecs is ordered by priority (first = primary sort key). sortOrder is ASCENDING or DESCENDING:\n{\"sortRange\": {\"range\": {\"sheetId\": 0, \"startRowIndex\": 1, \"endRowIndex\": 100, \"startColumnIndex\": 0, \"endColumnIndex\": 5}, \"sortSpecs\": [{\"dimensionIndex\": 0, \"sortOrder\": \"ASCENDING\"}, {\"dimensionIndex\": 2, \"sortOrder\": \"DESCENDING\"}]}}\n\nautoResizeDimensions — resize columns or rows to fit their content. dimension is COLUMNS or ROWS:\n{\"autoResizeDimensions\": {\"dimensions\": {\"sheetId\": 0, \"dimension\": \"COLUMNS\", \"startIndex\": 0, \"endIndex\": 3}}}\nNOTE: the tool automatically runs all autoResizeDimensions requests in a second batchUpdate call after all other requests have been applied. This ensures the resize measures post-write cell contents, including spilling formulas (ARRAYFORMULA, SEQUENCE, MAKEARRAY, QUERY) whose spill values only exist after the first call returns. If the resize call fails (e.g. transient error), writes are unaffected and a warning is returned instead of an error. updateDimensionProperties (pixelSize) sets an explicit pixel width and does not need this treatment — it can stay in the same batch as writes.\n\nupdateDimensionProperties — set explicit pixel size or hide a row/column. fields is a mask rooted at DimensionProperties:\n{\"updateDimensionProperties\": {\"range\": {\"sheetId\": 0, \"dimension\": \"COLUMNS\", \"startIndex\": 1, \"endIndex\": 2}, \"properties\": {\"pixelSize\": 200}, \"fields\": \"pixelSize\"}}\n",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": false,
+          "description": "ID of an existing spreadsheet to edit. Omit to create a new spreadsheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Title for a newly created spreadsheet. Ignored when spreadsheet_id is provided. Defaults to 'Untitled spreadsheet'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Spreadsheet state after the operation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.CreateOrEditSpreadsheet",
+        "parameters": {
+          "requests": {
+            "value": [
+              {
+                "updateSpreadsheetProperties": {
+                  "properties": {
+                    "title": "Q3 Sales Report 2024"
+                  },
+                  "fields": "title"
+                }
+              },
+              {
+                "addSheet": {
+                  "properties": {
+                    "title": "Summary",
+                    "index": 0,
+                    "gridProperties": {
+                      "rowCount": 500,
+                      "columnCount": 10,
+                      "frozenRowCount": 1
+                    }
+                  }
+                }
+              },
+              {
+                "updateCells": {
+                  "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": 1,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": 4
+                  },
+                  "rows": [
+                    {
+                      "values": [
+                        {
+                          "userEnteredValue": {
+                            "stringValue": "Product"
+                          },
+                          "userEnteredFormat": {
+                            "textFormat": {
+                              "bold": true
+                            }
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "stringValue": "Units Sold"
+                          },
+                          "userEnteredFormat": {
+                            "textFormat": {
+                              "bold": true
+                            }
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "stringValue": "Unit Price"
+                          },
+                          "userEnteredFormat": {
+                            "textFormat": {
+                              "bold": true
+                            }
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "stringValue": "Total Revenue"
+                          },
+                          "userEnteredFormat": {
+                            "textFormat": {
+                              "bold": true
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "fields": "userEnteredValue,userEnteredFormat.textFormat.bold"
+                }
+              },
+              {
+                "updateCells": {
+                  "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "endRowIndex": 4,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": 4
+                  },
+                  "rows": [
+                    {
+                      "values": [
+                        {
+                          "userEnteredValue": {
+                            "stringValue": "Widget A"
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "numberValue": 320
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "numberValue": 29.99
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "formulaValue": "=B2*C2"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "values": [
+                        {
+                          "userEnteredValue": {
+                            "stringValue": "Widget B"
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "numberValue": 145
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "numberValue": 49.99
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "formulaValue": "=B3*C3"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "values": [
+                        {
+                          "userEnteredValue": {
+                            "stringValue": "Widget C"
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "numberValue": 210
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "numberValue": 19.99
+                          }
+                        },
+                        {
+                          "userEnteredValue": {
+                            "formulaValue": "=B4*C4"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "repeatCell": {
+                  "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "endRowIndex": 100
+                  },
+                  "cell": {
+                    "userEnteredFormat": {
+                      "backgroundColorStyle": {
+                        "rgbColor": {
+                          "red": 0.95,
+                          "green": 0.95,
+                          "blue": 0.95
+                        }
+                      }
+                    }
+                  },
+                  "fields": "userEnteredFormat.backgroundColorStyle"
+                }
+              },
+              {
+                "updateBorders": {
+                  "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 0,
+                    "endRowIndex": 4,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": 4
+                  },
+                  "top": {
+                    "style": "SOLID_THICK"
+                  },
+                  "bottom": {
+                    "style": "SOLID_THICK"
+                  },
+                  "left": {
+                    "style": "SOLID"
+                  },
+                  "right": {
+                    "style": "SOLID"
+                  },
+                  "innerHorizontal": {
+                    "style": "DASHED"
+                  },
+                  "innerVertical": {
+                    "style": "DASHED"
+                  }
+                }
+              },
+              {
+                "setDataValidation": {
+                  "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "endRowIndex": 100,
+                    "startColumnIndex": 4,
+                    "endColumnIndex": 5
+                  },
+                  "rule": {
+                    "condition": {
+                      "type": "ONE_OF_LIST",
+                      "values": [
+                        {
+                          "userEnteredValue": "PENDING"
+                        },
+                        {
+                          "userEnteredValue": "SHIPPED"
+                        },
+                        {
+                          "userEnteredValue": "DELIVERED"
+                        }
+                      ]
+                    },
+                    "strict": true,
+                    "showCustomUi": true
+                  }
+                }
+              },
+              {
+                "addConditionalFormatRule": {
+                  "index": 0,
+                  "rule": {
+                    "ranges": [
+                      {
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": 100,
+                        "startColumnIndex": 1,
+                        "endColumnIndex": 2
+                      }
+                    ],
+                    "booleanRule": {
+                      "condition": {
+                        "type": "NUMBER_LESS",
+                        "values": [
+                          {
+                            "userEnteredValue": "100"
+                          }
+                        ]
+                      },
+                      "format": {
+                        "backgroundColorStyle": {
+                          "rgbColor": {
+                            "red": 1,
+                            "green": 0.9,
+                            "blue": 0.9
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "sortRange": {
+                  "range": {
+                    "sheetId": 0,
+                    "startRowIndex": 1,
+                    "endRowIndex": 100,
+                    "startColumnIndex": 0,
+                    "endColumnIndex": 4
+                  },
+                  "sortSpecs": [
+                    {
+                      "dimensionIndex": 3,
+                      "sortOrder": "DESCENDING"
+                    }
+                  ]
+                }
+              },
+              {
+                "addChart": {
+                  "chart": {
+                    "spec": {
+                      "title": "Revenue by Product",
+                      "basicChart": {
+                        "chartType": "COLUMN",
+                        "domains": [
+                          {
+                            "domain": {
+                              "sourceRange": {
+                                "sources": [
+                                  {
+                                    "sheetId": 0,
+                                    "startRowIndex": 0,
+                                    "endRowIndex": 4,
+                                    "startColumnIndex": 0,
+                                    "endColumnIndex": 1
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ],
+                        "series": [
+                          {
+                            "series": {
+                              "sourceRange": {
+                                "sources": [
+                                  {
+                                    "sheetId": 0,
+                                    "startRowIndex": 0,
+                                    "endRowIndex": 4,
+                                    "startColumnIndex": 3,
+                                    "endColumnIndex": 4
+                                  }
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "position": {
+                      "newSheet": true
+                    }
+                  }
+                }
+              },
+              {
+                "autoResizeDimensions": {
+                  "dimensions": {
+                    "sheetId": 0,
+                    "dimension": "COLUMNS",
+                    "startIndex": 0,
+                    "endIndex": 4
+                  }
+                }
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Q3 Sales Report 2024",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteComment",
+      "qualifiedName": "GoogleSheets.DeleteComment",
+      "fullyQualifiedName": "GoogleSheets.DeleteComment@8.2.0",
+      "description": "Delete a comment from a spreadsheet.\n\nOnly the comment's author can delete it (enforced by Google Drive); deleting marks the\nwhole thread (the comment and its replies) as deleted.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet the comment belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the comment to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of deletion and the spreadsheet URL."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.DeleteComment",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "AAAABmFtXNk",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@5.2.0",
-      "description": "Generate a Google File Picker URL for user-driven file selection and authorization.\n\nThis tool generates a URL that directs the end-user to a Google File Picker interface where\nwhere they can select or upload Google Drive files. Users can grant permission to access their\nDrive files, providing a secure and authorized way to interact with their files.\n\nThis is particularly useful when prior tools (e.g., those accessing or modifying\nGoogle Docs, Google Sheets, etc.) encountered failures due to file non-existence\n(Requested entity was not found) or permission errors. Once the user completes the file\npicker flow, the prior tool can be retried.\n\nSuggest this tool to users when they are surprised or confused that the file they are\nsearching for or attempting to access cannot be found.",
+      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@8.2.0",
+      "description": "Generate a URL where the user can grant this app access to spreadsheets.\n\nOpens Google's first-party Drive picker, filtered to Google Sheets, where the user\nbrowses and selects which spreadsheets to share with this application — it is not a\nsign-in or credential prompt.\n\nUse this when a prior tool reported that a file was not found or access was denied, and\nthe user expects the file to exist. After the user completes the picker flow, retry the\nprior operation.",
       "parameters": [],
       "auth": {
         "providerId": "google",
@@ -265,64 +781,43 @@
       }
     },
     {
-      "name": "GetSpreadsheet",
-      "qualifiedName": "GoogleSheets.GetSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.GetSpreadsheet@5.2.0",
-      "description": "Gets the specified range of cells from a single sheet in the spreadsheet.\n\nsheet_id_or_name takes precedence over sheet_position. If a sheet is not mentioned,\nthen always assume the default sheet_position is sufficient.",
+      "name": "GetSpreadsheetEditHistory",
+      "qualifiedName": "GoogleSheets.GetSpreadsheetEditHistory",
+      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@8.2.0",
+      "description": "Report who edited a spreadsheet and when, from Google Drive revisions.\n\nReports the \"who\" and \"when\" only — not which cells changed, and it can't revert.\n\n'summary' (default) answers \"who last edited this and when\" (read from the file's head,\nso always accurate), plus per-window aggregates (revisions read, contributors, first\nedit) and a preview of recent edits — computed over a bounded window of history per call.\nThese aggregates describe the whole history only when `is_incomplete` is false; it is\ntrue when the scan was resumed from a token and/or more history remains. To answer\n\"when was this first edited?\" or \"who contributed?\" reliably, call from the beginning\n(no `pagination_token`) and check `is_incomplete` is false. `pagination_token` is\nreturned when more pages remain so you can resume.\n\n'list' returns one page of individual revisions, oldest first. Drive can't sort\nnewest-first, so the most recent individual revisions are on the final page.",
       "parameters": [
         {
           "name": "spreadsheet_id",
           "type": "string",
           "required": true,
-          "description": "The id of the spreadsheet to get",
+          "description": "The id of the spreadsheet to get the edit history for.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "sheet_position",
-          "type": "integer",
-          "required": false,
-          "description": "The position/tab of the sheet in the spreadsheet to get. A value of 1 represents the first (leftmost/Sheet1) sheet . Defaults to 1.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sheet_id_or_name",
+          "name": "mode",
           "type": "string",
           "required": false,
-          "description": "The id or name of the sheet to get. Defaults to None, which means sheet_position will be used instead.",
-          "enum": null,
+          "description": "'summary' (default): the latest edit, plus per-window aggregates (revisions read, contributors, first edit) that cover the whole history only when is_incomplete is false, and a preview of recent edits. 'list': one page of individual revisions.",
+          "enum": [
+            "summary",
+            "list"
+          ],
           "inferrable": true
         },
         {
-          "name": "start_row",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Starting row number (1-indexed, defaults to 1)",
+          "description": "Max revisions per page in 'list' mode. Between 1 and 50. Defaults to 20. Ignored in 'summary' mode.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "start_col",
+          "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "Starting column letter(s) or 1-based column number (defaults to 'A')",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_rows",
-          "type": "integer",
-          "required": false,
-          "description": "Maximum number of rows to fetch for each sheet in the spreadsheet. Must be between 1 and 1000. Defaults to 1000.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_cols",
-          "type": "integer",
-          "required": false,
-          "description": "Maximum number of columns to fetch for each sheet in the spreadsheet. Must be between 1 and 100. Defaults to 100.",
+          "description": "Token from a previous response's pagination_token, to continue reading more history. Works in both modes.",
           "enum": null,
           "inferrable": true
         }
@@ -334,48 +829,545 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
-        "description": "The spreadsheet properties and data for the specified sheet in the spreadsheet"
+        "description": "Edit history: who modified the spreadsheet and when. Always has spreadsheet_id and mode. 'summary' adds an accurate last_modified_time/last_modified_by, best-effort window_revision_count/contributors/first_modified_time, recent_edits, and is_incomplete. 'list' adds a page of revisions with revisions_count, limit, ordering, has_next_page. Both modes return a pagination_token when more history remains."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "GoogleSheets.GetSpreadsheet",
+        "toolName": "GoogleSheets.GetSpreadsheetEditHistory",
         "parameters": {
           "spreadsheet_id": {
-            "value": "12345abcde",
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
           },
-          "sheet_position": {
-            "value": 1,
-            "type": "integer",
-            "required": false
-          },
-          "sheet_id_or_name": {
-            "value": "SalesData",
+          "mode": {
+            "value": "list",
             "type": "string",
             "required": false
           },
-          "start_row": {
-            "value": 2,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "start_col": {
-            "value": "B",
+          "pagination_token": {
+            "value": "eyJwYWdlVG9rZW4iOiJBSHdlRVFBQUFBQVhZekp6TURBeE1EQXdNREF3TURBd01EQXdNREF3TURBd01EQXdNREF3In0=",
             "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "InspectSpreadsheet",
+      "qualifiedName": "GoogleSheets.InspectSpreadsheet",
+      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@8.2.0",
+      "description": "Inspect a Google Sheets spreadsheet's structure or read a range of cells.\n\nUse the default 'structure' mode to understand a workbook cheaply before reading.\nSwitch to 'read' mode to pull a range as a grid of rows, optionally with\nper-cell annotations and a rendered markdown/csv/tsv export.\n\nIn 'read' mode the response's per-tab 'sheets' block reports only tab identity and\nthe allocated grid; its scan-derived fields (used_range, populated_cell_count,\nformula_cell_count, first_row, table_regions) are placeholders (0/empty) because read\nmode does not scan the tab — they do NOT mean the tab is empty or that it has no\ntables. The data you read is in the top-level 'range' and 'rows'. Call 'structure'\nmode for those aggregates and for the workbook's charts, merges, protected ranges, and\nconditional formats.\n\nWorkflow for a tab that holds multiple tables, or a table that does not start at A1:\ncall 'structure' first and use that tab's estimated 'table_regions' to choose the\na1_range to read or filter, so you target one table instead of a glued multi-table\nrange.\n\nAlways check the response's top-level 'warnings' list: read mode reports there when a\nresult was capped or trimmed (cell budget, the per-cell annotation cap, or an empty\nfilter scan) and tells you how to recover (page 'next_range', narrow 'a1_range',\n'select_columns', or request fewer annotation kinds).",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to inspect.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "What to return. 'structure' (default) gives a cheap workbook overview: every tab's ids, allocated grid, frozen panes, merges, charts, protected ranges, conditional-format counts, real used range, first row, and ESTIMATED table_regions (A1 ranges of distinct data blocks per tab — a heuristic for spotting multiple tables in one tab; scope a1_range to one of these to read or filter a single table; empty for tabs too large to peek). 'read' pulls cell data from one tab.",
+          "enum": [
+            "structure",
+            "read"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "sheet_id",
+          "type": "integer",
+          "required": false,
+          "description": "Read mode only: select the tab by its numeric sheetId. Mutually exclusive with sheet_title. Defaults to the first tab when both are omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_title",
+          "type": "string",
+          "required": false,
+          "description": "Read mode only: select the tab by name. Mutually exclusive with sheet_id. Defaults to the first tab when both are omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "a1_range",
+          "type": "string",
+          "required": false,
+          "description": "Read mode only: the range of cells to pull, in A1 notation (e.g. 'A1:F100'), WITHIN the selected tab — the tab is chosen by sheet_id/sheet_title, and any sheet prefix here (e.g. 'Other!A1:B2') is ignored. Defaults to the tab's used range. This is also the paging knob — request the next range to page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "annotations",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Read mode only: per-cell extras to include — pass only the kinds you need (e.g. ['formulas','notes']); each extra kind adds payload. Omit or leave empty to return values only (cheaper). Returned sparsely — one entry only per cell that carries a requested extra — and capped at the first 500 entries (row-major). Over that cap a warning is returned; rows may extend past the annotated slice, so a missing annotation beyond the cap is NOT authoritative — re-read a narrower a1_range, use select_columns, or request fewer kinds to confirm.",
+          "enum": [
+            "formulas",
+            "notes",
+            "number_formats",
+            "data_validation",
+            "conditional_formats",
+            "merges",
+            "types",
+            "hyperlinks",
+            "protected",
+            "spill"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "export_as",
+          "type": "string",
+          "required": false,
+          "description": "Read mode only: also render the returned values as text. Omit to return structured values only. csv/tsv are lossless; markdown is display-oriented (in-cell newlines become <br>, pipes are escaped).",
+          "enum": [
+            "markdown",
+            "csv",
+            "tsv"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "value_render",
+          "type": "string",
+          "required": false,
+          "description": "Read mode only: 'formatted' (default) returns display strings like '$1,234.50'; 'unformatted' returns raw values suitable for math.",
+          "enum": [
+            "formatted",
+            "unformatted"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "max_length",
+          "type": "integer",
+          "required": false,
+          "description": "Read mode only: cap each returned cell string at this many characters. A longer cell becomes '<first chars>…(+N chars)' (the suffix is not counted; N = hidden chars). Pass 0 for full, untruncated strings; a positive value below the floor (or negative) clamps up to the floor. Filtering still matches the full cell value. Defaults to a small cap (50).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_rows",
+          "type": "integer",
+          "required": false,
+          "description": "Read mode only: maximum rows to return. Sets truncated=True when the range has more rows; pass the returned next_range as a1_range to page. When filtering, this bounds the rows SCANNED per page (matches may be fewer, even 0 — page until next_range is empty). Also capped so rows x columns stays within 4000 cells: a wide range returns fewer rows than requested (with a warning) and pages the rest. Defaults to 200.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_conditions",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Read mode only: keep only rows matching these conditions. Each is {column, op, value} where column is the spreadsheet column LETTER (e.g. 'C'), NOT the header name, and must be inside a1_range. Ops: eq/ne (exact string), contains/not_contains (case-insensitive substring), gt/gte/lt/lte (NUMERIC only — text columns match nothing), blank/not_blank (value is ignored — pass ''). Numeric ops parse currency like $1,234.50, but NOT percents (21%) or other formatted text — set value_render='unformatted' and compare against the underlying number (percents are stored as fractions, e.g. 0.21 for 21%). A warning is returned when a numeric filter matches nothing it scanned. Scans within a1_range only — page next_range for completeness, and scope a1_range to a single homogeneous table (use structure mode's table_regions to find each table's range; exclude header/title rows, which would otherwise be filtered as data).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_combine",
+          "type": "string",
+          "required": false,
+          "description": "Read mode only: how to combine multiple filter_conditions — a single top-level 'and'/'or' applied to all conditions (no nested grouping or mixed and/or). Defaults to 'and'.",
+          "enum": [
+            "and",
+            "or"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "select_columns",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Read mode only: return only these columns, by spreadsheet column LETTER (not header name), in this order. Defaults to all columns in a1_range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_headers",
+          "type": "boolean",
+          "required": false,
+          "description": "Structure mode only: include each tab's first row in the overview. Defaults to True.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The requested structure overview or range data."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.InspectSpreadsheet",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "mode": {
+            "value": "read",
+            "type": "string",
+            "required": false
+          },
+          "sheet_id": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "sheet_title": {
+            "value": "Sales Data",
+            "type": "string",
+            "required": false
+          },
+          "a1_range": {
+            "value": "A1:H50",
+            "type": "string",
+            "required": false
+          },
+          "annotations": {
+            "value": [
+              "formulas",
+              "notes"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "export_as": {
+            "value": "csv",
+            "type": "string",
+            "required": false
+          },
+          "value_render": {
+            "value": "formatted",
+            "type": "string",
+            "required": false
+          },
+          "max_length": {
+            "value": 100,
+            "type": "integer",
             "required": false
           },
           "max_rows": {
-            "value": 50,
+            "value": 150,
             "type": "integer",
             "required": false
           },
-          "max_cols": {
-            "value": 10,
+          "filter_conditions": {
+            "value": [
+              {
+                "column": "C",
+                "op": "gte",
+                "value": "1000"
+              },
+              {
+                "column": "E",
+                "op": "contains",
+                "value": "active"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "filter_combine": {
+            "value": "and",
+            "type": "string",
+            "required": false
+          },
+          "select_columns": {
+            "value": [
+              "A",
+              "C",
+              "E",
+              "H"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "include_headers": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListSpreadsheetComments",
+      "qualifiedName": "GoogleSheets.ListSpreadsheetComments",
+      "fullyQualifiedName": "GoogleSheets.ListSpreadsheetComments@8.2.0",
+      "description": "List a spreadsheet's comment threads, or the full replies of a single comment.\n\nIn 'comments' mode each comment includes up to a few trimmed reply previews plus the total reply_count; use 'thread' mode for a comment's complete reply list. Without filters/ordering, pagination walks every comment. Client-side filters (has_replies, resolved) and order_by are applied only within a bounded scan of the first 500 comments, so on larger sheets drop them and page through everything with the native (unbounded) pagination. Each comment's Drive anchor is returned when it was cell/range-anchored in the Sheets UI; comments created via the API are file-level. Filtering, ordering, and offset pagination are best-effort: results can drift if comments are added or removed between paginated calls.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet whose comments to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "'comments' (default) lists top-level comments, each with a capped reply preview and a reply_count. 'thread' lists the FULL replies of one comment (set comment_id).",
+          "enum": [
+            "comments",
+            "thread"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": false,
+          "description": "Required when mode='thread': the comment whose replies to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max comments (or replies, in thread mode) to return. Clamped to [1, 50].",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Opaque token from a previous call's page_token to fetch the next page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_deleted",
+          "type": "boolean",
+          "required": false,
+          "description": "Include deleted comments/replies (their bodies are blank). Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "modified_after",
+          "type": "string",
+          "required": false,
+          "description": "Server-side filter: only comments modified at/after this RFC3339 time (e.g. '2025-01-01T00:00:00Z'). Comments mode only.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "has_replies",
+          "type": "boolean",
+          "required": false,
+          "description": "Client-side filter (comments mode): keep only comments that have (True) or lack (False) replies.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "resolved",
+          "type": "boolean",
+          "required": false,
+          "description": "Client-side filter (comments mode): keep only resolved (True) or unresolved (False) comments.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Fetch exactly these comments by id (comments mode), instead of paging. Replaces a dedicated get tool. At most 50 ids per call, and not combined with page_token.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "Client-side ordering (comments mode) by created/modified time, ascending or descending. Defaults to Drive's native order.",
+          "enum": [
+            "created_time_asc",
+            "created_time_desc",
+            "modified_time_asc",
+            "modified_time_desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "max_length",
+          "type": "integer",
+          "required": false,
+          "description": "Cap each returned comment/reply body (and quoted text) at this many characters. A longer body becomes '<prefix>…(+N chars)' (suffix not counted; N = hidden chars). Pass 0 for full, untruncated text; a positive value below the floor (or negative) clamps up to the floor. Filtering still matches the FULL text. Defaults to 280.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The matching comments (or replies) with pagination info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.ListSpreadsheetComments",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "mode": {
+            "value": "comments",
+            "type": "string",
+            "required": false
+          },
+          "comment_id": {
+            "value": "AAAABcDeFgH",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page_token": {
+            "value": "eyJzdGFydEluZGV4IjoyNX0=",
+            "type": "string",
+            "required": false
+          },
+          "include_deleted": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "modified_after": {
+            "value": "2024-06-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "has_replies": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "resolved": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "comment_ids": {
+            "value": [
+              "AAAABcDeFgH",
+              "AAAAXyZ1234",
+              "AAAA9kLmNop"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "order_by": {
+            "value": "modifiedTime desc",
+            "type": "string",
+            "required": false
+          },
+          "max_length": {
+            "value": 280,
             "type": "integer",
             "required": false
           }
@@ -403,16 +1395,32 @@
       }
     },
     {
-      "name": "GetSpreadsheetMetadata",
-      "qualifiedName": "GoogleSheets.GetSpreadsheetMetadata",
-      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetMetadata@5.2.0",
-      "description": "Gets the metadata for a spreadsheet including the metadata for the sheets in the spreadsheet.\n\nUse this tool to get the name, position, ID, and URL of all sheets in a spreadsheet as well as\nthe number of rows and columns in each sheet.\n\nDoes not return the content/data of the sheets in the spreadsheet - only the metadata.\nExcludes spreadsheets that are in the trash.",
+      "name": "ReplyToComment",
+      "qualifiedName": "GoogleSheets.ReplyToComment",
+      "fullyQualifiedName": "GoogleSheets.ReplyToComment@8.2.0",
+      "description": "Add a reply to an existing comment on a spreadsheet.\n\nTo resolve or reopen the comment instead, use comment_on_spreadsheet with a status.",
       "parameters": [
         {
           "name": "spreadsheet_id",
           "type": "string",
           "required": true,
-          "description": "The id of the spreadsheet to get metadata for",
+          "description": "The id of the spreadsheet the comment belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the comment to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_text",
+          "type": "string",
+          "required": true,
+          "description": "The text of the reply.",
           "enum": null,
           "inferrable": true
         }
@@ -424,20 +1432,259 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
-        "description": "The spreadsheet metadata for the specified spreadsheet"
+        "description": "The created reply id, its comment id, and the URL."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "GoogleSheets.GetSpreadsheetMetadata",
+        "toolName": "GoogleSheets.ReplyToComment",
         "parameters": {
           "spreadsheet_id": {
-            "value": "1BxiMVs0x8gXj8lQySYqE3g5bQs8D_rPG6lXErnKPZsg",
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
+          },
+          "comment_id": {
+            "value": "AAAABmk3z1A",
+            "type": "string",
+            "required": true
+          },
+          "reply_text": {
+            "value": "Thanks for the note! I've reviewed the data and updated the figures in column C accordingly.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ScanForDataIssues",
+      "qualifiedName": "GoogleSheets.ScanForDataIssues",
+      "fullyQualifiedName": "GoogleSheets.ScanForDataIssues@8.2.0",
+      "description": "Deterministically flag 'weird'/bad cells in spreadsheet data.\n\nNo LLM judgement: the same input always returns the same flags. Each cell-level finding\ncarries a coord, a 0-based row_index/column_index (ready for a Sheets GridRange), the rule,\na severity (high -> red, medium/low -> yellow), and a note-ready reason — so the output\ndrops straight into an annotate/format recipe. In the default `mode='grouped'` these are\naggregated per rule+column within each table into `groups` (with A1 `coords`); use\n`mode='list'` to get every flagged cell in `flags` with its 0-based indices.\n\nProvide `spreadsheet_id` to scan a live sheet (scan one tab via sheet_id/sheet_title, or\nevery tab when both are omitted). Set `orientation='rows'` for transposed tables whose\nfields run down a column instead of across a row. Findings come back as flags (cell-level,\nhigh certainty) and alerts (table-level, lower certainty), grouped sheet -> table -> rule.\n\nIn all-sheets mode an unreadable tab never aborts the scan: its title is collected in\n`failed_sheets` (and echoed as a `warnings` entry) while every other tab still returns.\n`failed_sheets` is empty for a single-tab scan and whenever every tab reads cleanly.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to scan. Scan one tab via sheet_id/sheet_title, or every tab when both are omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_id",
+          "type": "integer",
+          "required": false,
+          "description": "Scan only this tab (by numeric sheetId). Mutually exclusive with sheet_title. Omit both to scan every tab, grouped by sheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_title",
+          "type": "string",
+          "required": false,
+          "description": "Scan only this tab (by name). Mutually exclusive with sheet_id. Omit both to scan every tab.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "a1_range",
+          "type": "string",
+          "required": false,
+          "description": "Single-sheet only: limit the analysis window (e.g. 'A1:F100'). Table detection still runs inside it; scope it to a single table's range for a precise scan. Defaults to the tab's used range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "treat_range_as_single_table",
+          "type": "boolean",
+          "required": false,
+          "description": "Single-sheet only: treat the whole a1_range as ONE table, skipping auto-detection. Use when detection would over-split a table that has an interior blank row. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "'grouped' (default) aggregates findings per rule+column within each table with counts; 'list' enumerates every flagged cell.",
+          "enum": [
+            "list",
+            "grouped"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "rules",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Which deterministic checks to run. Omit to run every check. Each is fully reproducible (no LLM judgement).",
+          "enum": [
+            "error_value",
+            "text_sentinel",
+            "parenthesized_number",
+            "number_stored_as_text",
+            "whitespace",
+            "type_outlier",
+            "formula_outlier",
+            "date_serial",
+            "gap",
+            "repeated_header",
+            "inconsistent_column"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "has_header",
+          "type": "boolean",
+          "required": false,
+          "description": "Treat each detected table's first row as labels (never flagged as a type outlier). Defaults to True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "orientation",
+          "type": "string",
+          "required": false,
+          "description": "'columns' (default): records are rows, fields are columns. 'rows': the table is transposed — records are columns and fields are rows (row labels down column A). Applies to the whole scan, not per-table (one setting for every table on the tab). Coords are always reported in the sheet's real coordinates.",
+          "enum": [
+            "columns",
+            "rows"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "max_items_per_group",
+          "type": "integer",
+          "required": false,
+          "description": "Grouped mode: max cell coords listed per rule+column (within a table) before an 'omitted' count. Defaults to 10, hard-capped at 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_rows",
+          "type": "integer",
+          "required": false,
+          "description": "Max rows scanned per tab (applies to every scanned tab). Defaults to 200, floored to 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Deterministic data-issue flags, grouped sheet -> table -> rule."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.ScanForDataIssues",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "sheet_id": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "sheet_title": {
+            "value": "Sales_Data_2024",
+            "type": "string",
+            "required": false
+          },
+          "a1_range": {
+            "value": "A1:H150",
+            "type": "string",
+            "required": false
+          },
+          "treat_range_as_single_table": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "mode": {
+            "value": "grouped",
+            "type": "string",
+            "required": false
+          },
+          "rules": {
+            "value": [
+              "blank_required",
+              "type_outlier",
+              "duplicate_row",
+              "out_of_range",
+              "whitespace_anomaly"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "has_header": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "orientation": {
+            "value": "columns",
+            "type": "string",
+            "required": false
+          },
+          "max_items_per_group": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "max_rows": {
+            "value": 200,
+            "type": "integer",
+            "required": false
           }
         },
         "requiresAuth": true,
@@ -465,7 +1712,7 @@
     {
       "name": "SearchSpreadsheets",
       "qualifiedName": "GoogleSheets.SearchSpreadsheets",
-      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@5.2.0",
+      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@8.2.0",
       "description": "Searches for spreadsheets in the user's Google Drive based on the titles and content and\nreturns the title, ID, and URL for each matching spreadsheet.\n\nDoes not return the content/data of the sheets in the spreadsheets - only the metadata.\nExcludes spreadsheets that are in the trash.",
       "parameters": [
         {
@@ -566,8 +1813,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "A dictionary containing the title, ID, and URL for each matching spreadsheet. Also contains a pagination token if there are more spreadsheets to list."
@@ -578,22 +1832,22 @@
         "parameters": {
           "spreadsheet_contains": {
             "value": [
-              "financial",
-              "budget"
+              "Q3 Budget",
+              "Finance"
             ],
             "type": "array",
             "required": false
           },
           "spreadsheet_not_contains": {
             "value": [
-              "draft",
-              "old"
+              "Archive",
+              "Draft"
             ],
             "type": "array",
             "required": false
           },
           "search_only_in_shared_drive_id": {
-            "value": "1A2B3C4D5E",
+            "value": "0AHz3pAZmRzXYUk9PVA",
             "type": "string",
             "required": false
           },
@@ -609,18 +1863,19 @@
           },
           "order_by": {
             "value": [
-              "lastModifiedTime"
+              "modifiedTime desc",
+              "name asc"
             ],
             "type": "array",
             "required": false
           },
           "limit": {
-            "value": 25,
+            "value": 15,
             "type": "integer",
             "required": false
           },
           "pagination_token": {
-            "value": "abcd1234",
+            "value": "V1*AHRsNm1QZ3h5dGN2ZXJzaW9u",
             "type": "string",
             "required": false
           }
@@ -648,108 +1903,9 @@
       }
     },
     {
-      "name": "UpdateCells",
-      "qualifiedName": "GoogleSheets.UpdateCells",
-      "fullyQualifiedName": "GoogleSheets.UpdateCells@5.2.0",
-      "description": "Write values to a Google Sheet using a flexible data format.\n\nsheet_id_or_name takes precedence over sheet_position. If a sheet is not mentioned,\nthen always assume the default sheet_position is sufficient.",
-      "parameters": [
-        {
-          "name": "spreadsheet_id",
-          "type": "string",
-          "required": true,
-          "description": "The id of the spreadsheet to write to",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "data",
-          "type": "string",
-          "required": true,
-          "description": "The data to write. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] is the value for cell C23. This is the same format accepted by create_spreadsheet. Type hint: dict[int, dict[str, int | float | str | bool]]",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sheet_position",
-          "type": "integer",
-          "required": false,
-          "description": "The position/tab of the sheet in the spreadsheet to write to. A value of 1 represents the first (leftmost/Sheet1) sheet. Defaults to 1.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sheet_id_or_name",
-          "type": "string",
-          "required": false,
-          "description": "The id or name of the sheet to write to. If provided, takes precedence over sheet_position.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "google",
-        "providerType": "oauth2",
-        "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The status of the operation, including updated ranges and counts"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "GoogleSheets.UpdateCells",
-        "parameters": {
-          "spreadsheet_id": {
-            "value": "1A2B3C4D5E6F7G8H9I0J",
-            "type": "string",
-            "required": true
-          },
-          "data": {
-            "value": "{\"23\":{\"A\":\"Value1\",\"B\":123,\"C\":45.67,\"D\":true}}",
-            "type": "string",
-            "required": true
-          },
-          "sheet_position": {
-            "value": 1,
-            "type": "integer",
-            "required": false
-          },
-          "sheet_id_or_name": {
-            "value": "SalesData",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "google",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "spreadsheets"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "WhoAmI",
       "qualifiedName": "GoogleSheets.WhoAmI",
-      "fullyQualifiedName": "GoogleSheets.WhoAmI@5.2.0",
+      "fullyQualifiedName": "GoogleSheets.WhoAmI@8.2.0",
       "description": "Get comprehensive user profile and Google Sheets environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Sheets access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -792,118 +1948,6 @@
         },
         "extras": null
       }
-    },
-    {
-      "name": "WriteToCell",
-      "qualifiedName": "GoogleSheets.WriteToCell",
-      "fullyQualifiedName": "GoogleSheets.WriteToCell@5.2.0",
-      "description": "Write a value to a single cell in a spreadsheet.",
-      "parameters": [
-        {
-          "name": "spreadsheet_id",
-          "type": "string",
-          "required": true,
-          "description": "The id of the spreadsheet to write to",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "column",
-          "type": "string",
-          "required": true,
-          "description": "The column string to write to. For example, 'A', 'F', or 'AZ'",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "row",
-          "type": "integer",
-          "required": true,
-          "description": "The row number to write to",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "value",
-          "type": "string",
-          "required": true,
-          "description": "The value to write to the cell",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sheet_name",
-          "type": "string",
-          "required": false,
-          "description": "The name of the sheet to write to. Defaults to 'Sheet1'",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "google",
-        "providerType": "oauth2",
-        "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The status of the operation"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "GoogleSheets.WriteToCell",
-        "parameters": {
-          "spreadsheet_id": {
-            "value": "1aBcD2EfGhIjKlMnOqRsTuVwXyZ",
-            "type": "string",
-            "required": true
-          },
-          "column": {
-            "value": "B",
-            "type": "string",
-            "required": true
-          },
-          "row": {
-            "value": 10,
-            "type": "integer",
-            "required": true
-          },
-          "value": {
-            "value": "Hello, World!",
-            "type": "string",
-            "required": true
-          },
-          "sheet_name": {
-            "value": "Data",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "google",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "spreadsheets"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
     }
   ],
   "documentationChunks": [],
@@ -911,6 +1955,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.404Z",
-  "summary": "Arcade.dev provides LLM tools for Google Sheets, enabling seamless interactions with spreadsheet data through API integration. This toolkit allows developers to automate tasks, manage files, and enhance user experience in Google Sheets.\n\n### Capabilities\n- Create and manage spreadsheets with flexible data formats.\n- Retrieve and update cell contents efficiently.\n- Access user profile information and permissions.\n- Generate file picker URLs for user-driven file selection and authorization.\n\n### OAuth\n- **Provider**: Google  \n- **Scopes**:  \n  - `https://www.googleapis.com/auth/drive.file`  \n  - `https://www.googleapis.com/auth/userinfo.email`  \n  - `https://www.googleapis.com/auth/userinfo.profile`\n\n### Secrets\n- No secret types or names are specified."
+  "generatedAt": "2026-06-17T12:31:32.590Z",
+  "summary": "**Google Sheets toolkit** integrates Arcade with Google Sheets and Google Drive, enabling LLM-powered agents to read, write, comment on, audit, and search spreadsheets on behalf of authenticated users.\n\n## Capabilities\n\n- **Access pre-flight & file discovery:** Batch-check spreadsheet accessibility before reading, generate Drive picker URLs to grant access, and search spreadsheets by title/content across a user's Drive.\n- **Read & inspect spreadsheets:** Retrieve workbook structure (tabs, charts, merges, protected ranges, conditional formats) or read specific cell ranges with optional markdown/CSV/TSV export and per-cell annotations.\n- **Write & edit spreadsheets:** Create new spreadsheets or apply batch edits to existing ones using typed operations (cell updates, sheet additions, sort, conditional formatting, auto-resize, and more).\n- **Comments & collaboration:** List, create, edit, resolve/reopen, reply to, and delete comment threads; supports both file-level and cell/range-anchored comments.\n- **Data quality scanning:** Deterministically flag bad/weird cells by rule and severity with zero-based grid coordinates ready for downstream annotation or formatting recipes.\n- **Edit history & identity:** Inspect Drive revision history (contributors, timestamps, pagination) and retrieve the authenticated user's profile and permissions.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. Arcade handles the OAuth flow automatically. See the [Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n### `ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`\n\nThis secret controls whether the inline Google Drive picker URL feature is enabled. When set, `CheckSpreadsheetAccess` and `GenerateGoogleFilePickerUrl` will return a ready-to-use picker URL inside the tool response instead of requiring a separate step to generate one. This is a feature-flag-style value configured in your Arcade environment — it is not a credential issued by Google.\n\nObtain or configure this value through your Arcade dashboard at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets).\n\nFor full details on defining and using secrets in Arcade tools, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
 }

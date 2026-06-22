@@ -5,6 +5,14 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  customerio: {
+    title: "Customer.io",
+    href: "/en/resources/integrations/customer-support/customerio",
+  },
+  freshdesk: {
+    title: "Freshdesk",
+    href: "/en/resources/integrations/customer-support/freshdesk",
+  },
   pylon: {
     title: "Pylon",
     href: "/en/resources/integrations/customer-support/pylon",

@@ -1,4 +1,5 @@
 "use client";
+import { Button } from "@arcadeai/design-system";
 import { useState } from "react";
 
 type ToggleContentProps = {
@@ -20,13 +21,9 @@ const ToggleContent: React.FC<ToggleContentProps> = ({
 
   return (
     <div>
-      <button
-        className="mb-4 cursor-pointer rounded-md border border-border bg-card px-3 py-2 font-normal text-card-foreground transition-colors duration-200 ease-in-out hover:bg-muted hover:text-muted-foreground"
-        onClick={handleToggle}
-        type="button"
-      >
+      <Button className="mb-4" onClick={handleToggle} variant="outline">
         {isExpanded ? hideText : showText}
-      </button>
+      </Button>
       {isExpanded && <div>{children}</div>}
     </div>
   );

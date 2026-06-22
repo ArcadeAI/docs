@@ -42,7 +42,7 @@ const DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES: ToolkitCatalogEntry[] =
 const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> =>
   DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES;
 
-function normalizeCategory(
+export function normalizeCategory(
   value: string | null | undefined
 ): IntegrationCategory {
   if (!value) {
@@ -52,6 +52,25 @@ function normalizeCategory(
   return INTEGRATION_CATEGORIES.includes(value as IntegrationCategory)
     ? (value as IntegrationCategory)
     : "others";
+}
+
+/**
+ * The canonical docs path for a toolkit: `/en/resources/integrations/<category>/
+ * <slug>`. Category comes from the toolkit's own data (its true, linked
+ * category) — NOT the URL it was reached through. The dynamic `[toolkitId]`
+ * route accepts any category segment, so a page reached at a wrong-category
+ * alias (e.g. `development/pagerduty-api` when its category is `customer-support`)
+ * must canonicalize to the one generated, index-linked page instead of
+ * orphaning itself. Mirrors the slug + category logic in `listToolkitRoutes`.
+ */
+export function getToolkitCanonicalPath(toolkit: {
+  id: string;
+  category?: string | null;
+  docsLink?: string | null;
+}): string {
+  const category = normalizeCategory(toolkit.category);
+  const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
+  return `/en/resources/integrations/${category}/${slug}`;
 }
 
 const DEFAULT_DATA_DIR = join(
@@ -185,4 +204,68 @@ export async function getToolkitStaticParamsForCategory(
   return routes
     .filter((route) => route.category === category)
     .map((route) => ({ toolkitId: route.toolkitId }));
+}
+
+const INTEGRATIONS_APP_DIR = join(
+  process.cwd(),
+  "app",
+  "en",
+  "resources",
+  "integrations"
+);
+
+const PAGE_FILE_NAMES = new Set(["page.mdx", "page.tsx"]);
+
+/**
+ * Authored static integration pages (e.g. partner pages like `search/tavily`
+ * and `tool-feedback`) live next to the dynamic `[toolkitId]` routes. They are
+ * real pages but are not part of `listToolkitRoutes`, so enumerate them from
+ * disk under the known integration categories.
+ */
+const listStaticIntegrationLinks = async (): Promise<string[]> => {
+  const links: string[] = [];
+
+  for (const category of INTEGRATION_CATEGORIES) {
+    const categoryDir = join(INTEGRATIONS_APP_DIR, category);
+    try {
+      const slugs = await readdir(categoryDir, { withFileTypes: true });
+      for (const slug of slugs) {
+        if (!slug.isDirectory() || slug.name.startsWith("[")) {
+          continue;
+        }
+        const files = await readdir(join(categoryDir, slug.name));
+        if (files.some((file) => PAGE_FILE_NAMES.has(file))) {
+          links.push(`/en/resources/integrations/${category}/${slug.name}`);
+        }
+      }
+    } catch {
+      // Category dir missing or unreadable — skip it.
+    }
+  }
+
+  return links;
+};
+
+/**
+ * The full set of links the integrations index may point at and that actually
+ * resolve: dynamic toolkit routes plus authored static pages. Used to decide
+ * whether a catalog card should be clickable.
+ */
+export async function listValidIntegrationLinks(options?: {
+  dataDir?: string;
+  toolkitsCatalog?: ToolkitCatalogEntry[];
+}): Promise<Set<string>> {
+  const routes = await listToolkitRoutes(options);
+  const links = new Set<string>(
+    routes.map(
+      (route) =>
+        `/en/resources/integrations/${route.category}/${route.toolkitId}`
+    )
+  );
+
+  for (const staticLink of await listStaticIntegrationLinks()) {
+    links.add(staticLink);
+  }
+
+  return links;
 }

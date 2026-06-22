@@ -1,0 +1,1926 @@
+{
+  "id": "Freshdesk",
+  "label": "Freshdesk",
+  "version": "0.1.1",
+  "description": "Arcade.dev LLM tools for Freshdesk customer support",
+  "metadata": {
+    "category": "customer-support",
+    "iconUrl": "https://design-system.arcade.dev/icons/freshdesk.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/customer-support/freshdesk",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AddPrivateNote",
+      "qualifiedName": "Freshdesk.AddPrivateNote",
+      "fullyQualifiedName": "Freshdesk.AddPrivateNote@0.1.1",
+      "description": "Add an internal private note to a ticket that the requester cannot see.",
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ticket to annotate.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The internal note text. Not visible to the requester.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "notify_agent_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Agent emails to notify about the note. Defaults to notifying no one.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Confirmation referencing the created private note."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.AddPrivateNote",
+        "parameters": {
+          "ticket_id": {
+            "value": 48291,
+            "type": "integer",
+            "required": true
+          },
+          "body": {
+            "value": "Customer has a history of billing disputes. Escalate to Tier 2 support if unresolved within 24 hours.",
+            "type": "string",
+            "required": true
+          },
+          "notify_agent_emails": {
+            "value": [
+              "alice.johnson@support.example.com",
+              "bob.smith@support.example.com"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateOrUpdateCompany",
+      "qualifiedName": "Freshdesk.CreateOrUpdateCompany",
+      "fullyQualifiedName": "Freshdesk.CreateOrUpdateCompany@0.1.1",
+      "description": "Create a new company account or update an existing one. To create, omit company_id and\nprovide a name; link a contact to the result by passing its id as a contact's company.",
+      "parameters": [
+        {
+          "name": "company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Id of the company to update. Omit to create a new company instead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Company name. When creating, this is required and must be unique. When updating, providing it renames the company and omitting it leaves the name unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "domains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Email domains owned by the company, used to auto-associate new contacts. Providing this replaces the existing list; omitting it leaves the domains unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "required": false,
+          "description": "Free-text account note. Providing it sets the note; omitting it leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created or updated company."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.CreateOrUpdateCompany",
+        "parameters": {
+          "company_id": {
+            "value": 10045,
+            "type": "integer",
+            "required": false
+          },
+          "name": {
+            "value": "Acme Corporation",
+            "type": "string",
+            "required": false
+          },
+          "domains": {
+            "value": [
+              "acme.com",
+              "acmecorp.net"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "note": {
+            "value": "Enterprise customer since 2021. Renewal due in Q3.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateOrUpdateContact",
+      "qualifiedName": "Freshdesk.CreateOrUpdateContact",
+      "fullyQualifiedName": "Freshdesk.CreateOrUpdateContact@0.1.1",
+      "description": "Create a new contact or update an existing one. To create, omit contact_id and\nprovide a name plus at least one of email, phone, or mobile.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "Id of the contact to update. Omit to create a new contact instead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Contact name. When creating, this is required. When updating, providing it changes the name and omitting it leaves the name unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Contact email. Providing it sets the email; omitting it leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "Contact phone. Providing it sets the phone; omitting it leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mobile",
+          "type": "string",
+          "required": false,
+          "description": "Contact mobile. Providing it sets the mobile; omitting it leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Company to associate the contact with. Omitting it leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "job_title",
+          "type": "string",
+          "required": false,
+          "description": "Contact job title. Providing it sets the title; omitting it leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created or updated contact."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.CreateOrUpdateContact",
+        "parameters": {
+          "contact_id": {
+            "value": 1042,
+            "type": "integer",
+            "required": false
+          },
+          "name": {
+            "value": "Jane Doe",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1-555-123-4567",
+            "type": "string",
+            "required": false
+          },
+          "mobile": {
+            "value": "+1-555-987-6543",
+            "type": "string",
+            "required": false
+          },
+          "company_id": {
+            "value": 305,
+            "type": "integer",
+            "required": false
+          },
+          "job_title": {
+            "value": "Product Manager",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateTicket",
+      "qualifiedName": "Freshdesk.CreateTicket",
+      "fullyQualifiedName": "Freshdesk.CreateTicket@0.1.1",
+      "description": "Open a ticket on a customer's behalf. Requires a subject, a description, and a\nrequester identified by email or id.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "The ticket subject line.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": true,
+          "description": "The ticket's first-message body. Plain text or HTML.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "requester_email",
+          "type": "string",
+          "required": false,
+          "description": "Email of the contact the ticket is for. Provide this or requester_id. Leave empty when using requester_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "requester_id",
+          "type": "integer",
+          "required": false,
+          "description": "Id of an existing contact the ticket is for. Provide this or requester_email.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Initial status. Defaults to OPEN.",
+          "enum": [
+            "open",
+            "pending",
+            "resolved",
+            "closed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Initial priority. Defaults to MEDIUM.",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "urgent"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "group_id",
+          "type": "integer",
+          "required": false,
+          "description": "Group to assign the new ticket to. Defaults to unassigned.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "agent_id",
+          "type": "integer",
+          "required": false,
+          "description": "Agent to assign as owner. Defaults to unassigned.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created ticket with its conversation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.CreateTicket",
+        "parameters": {
+          "subject": {
+            "value": "Unable to reset my account password",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "<p>Hello Support,</p><p>I have been trying to reset my password for the past two days but I never receive the reset email. Could you please help me regain access to my account?</p><p>Thank you.</p>",
+            "type": "string",
+            "required": true
+          },
+          "requester_email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "requester_id": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "status": {
+            "value": "OPEN",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "HIGH",
+            "type": "string",
+            "required": false
+          },
+          "group_id": {
+            "value": 48001234567,
+            "type": "integer",
+            "required": false
+          },
+          "agent_id": {
+            "value": 48009876543,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetArticle",
+      "qualifiedName": "Freshdesk.GetArticle",
+      "fullyQualifiedName": "Freshdesk.GetArticle@0.1.1",
+      "description": "Read a single knowledge base article's full content by id.\n\nA missing id returns a not-found envelope (``found`` false) rather than raising, so a\nstale or guessed id can be recovered from within the same turn.",
+      "parameters": [
+        {
+          "name": "article_id",
+          "type": "integer",
+          "required": true,
+          "description": "The article's unique identifier.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The article's full content, or a not-found envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.GetArticle",
+        "parameters": {
+          "article_id": {
+            "value": 48291,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCompany",
+      "qualifiedName": "Freshdesk.GetCompany",
+      "fullyQualifiedName": "Freshdesk.GetCompany@0.1.1",
+      "description": "Read a single company's details by id.\n\nA missing id returns a not-found envelope (``found`` false) rather than raising, so a\nstale or guessed id can be recovered from within the same turn.",
+      "parameters": [
+        {
+          "name": "company_id",
+          "type": "integer",
+          "required": true,
+          "description": "The company's unique identifier.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The company's full detail, or a not-found envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.GetCompany",
+        "parameters": {
+          "company_id": {
+            "value": 48291,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetContact",
+      "qualifiedName": "Freshdesk.GetContact",
+      "fullyQualifiedName": "Freshdesk.GetContact@0.1.1",
+      "description": "Read a single contact's details by id.\n\nA missing id returns a not-found envelope (``found`` false) rather than raising, so a\nstale or guessed id can be recovered from within the same turn.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "integer",
+          "required": true,
+          "description": "The contact's unique identifier.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The contact's full detail, or a not-found envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.GetContact",
+        "parameters": {
+          "contact_id": {
+            "value": 1042,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCustomerOverview",
+      "qualifiedName": "Freshdesk.GetCustomerOverview",
+      "fullyQualifiedName": "Freshdesk.GetCustomerOverview@0.1.1",
+      "description": "Assemble one requester's full context — their contact record, their company, and their\ntickets — in a single call instead of three separate lookups.\n\nIdentify the requester by contact_id or email; a missing requester returns a not-found\nenvelope rather than raising, so a stale id or wrong email can be recovered in the same turn.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "Id of the requester to profile. Takes precedence over email. Omit to look up by email.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Exact email of the requester to profile. Used only when contact_id is omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_closed",
+          "type": "boolean",
+          "required": false,
+          "description": "Include resolved and closed tickets too (true) or only open and pending ones (false). Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ticket_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum tickets to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The requester's contact, company, and tickets in one envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.GetCustomerOverview",
+        "parameters": {
+          "contact_id": {
+            "value": 1023847,
+            "type": "integer",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "include_closed": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "ticket_limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTicket",
+      "qualifiedName": "Freshdesk.GetTicket",
+      "fullyQualifiedName": "Freshdesk.GetTicket@0.1.1",
+      "description": "Read a ticket together with its full public-reply and private-note history.\n\nA missing id returns a not-found envelope (``found`` false) rather than raising, so a\nstale or guessed id can be recovered from within the same turn.",
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ticket's unique identifier.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The ticket with its conversation, or a not-found envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.GetTicket",
+        "parameters": {
+          "ticket_id": {
+            "value": 10842,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListAgents",
+      "qualifiedName": "Freshdesk.ListAgents",
+      "fullyQualifiedName": "Freshdesk.ListAgents@0.1.1",
+      "description": "List the helpdesk's agents, optionally filtered to one email, for routing tickets.",
+      "parameters": [
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Exact email to find a single agent by. Leave empty to list all agents.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum agents to return (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Helpdesk agents with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.ListAgents",
+        "parameters": {
+          "email": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListGroups",
+      "qualifiedName": "Freshdesk.ListGroups",
+      "fullyQualifiedName": "Freshdesk.ListGroups@0.1.1",
+      "description": "List the helpdesk's groups for routing tickets to a team.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum groups to return (1-100). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Helpdesk groups with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.ListGroups",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "MergeTickets",
+      "qualifiedName": "Freshdesk.MergeTickets",
+      "fullyQualifiedName": "Freshdesk.MergeTickets@0.1.1",
+      "description": "Merge duplicate tickets into one. Use this to consolidate related tickets from the same\nrequester so the conversation lives in a single place; the secondary tickets are closed.",
+      "parameters": [
+        {
+          "name": "primary_ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ticket that survives the merge and absorbs the others.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "secondary_ticket_ids",
+          "type": "array",
+          "innerType": "integer",
+          "required": true,
+          "description": "Ids of the duplicate tickets to fold into the primary. Each is closed and its conversation linked into the primary ticket.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "required": false,
+          "description": "Internal note added to the primary ticket recording the merge. Leave empty to add no note.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the merge."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.MergeTickets",
+        "parameters": {
+          "primary_ticket_id": {
+            "value": 10245,
+            "type": "integer",
+            "required": true
+          },
+          "secondary_ticket_ids": {
+            "value": [
+              10389,
+              10412,
+              10467
+            ],
+            "type": "array",
+            "required": true
+          },
+          "note": {
+            "value": "Merging duplicate tickets submitted by the same requester regarding the login issue reported on 2024-03-15. Tickets #10389, #10412, and #10467 have been consolidated here.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ReplyToTicket",
+      "qualifiedName": "Freshdesk.ReplyToTicket",
+      "fullyQualifiedName": "Freshdesk.ReplyToTicket@0.1.1",
+      "description": "Post a public reply on a ticket that the requester can see.",
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ticket to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The public reply text the requester will see. Plain text or HTML.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Confirmation referencing the created public reply."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.ReplyToTicket",
+        "parameters": {
+          "ticket_id": {
+            "value": 10482,
+            "type": "integer",
+            "required": true
+          },
+          "body": {
+            "value": "<p>Thank you for reaching out to our support team! We have reviewed your issue and are happy to let you know that a fix has been deployed. Please clear your browser cache and try again. If the problem persists, don't hesitate to reply to this ticket and we'll be happy to assist further.</p>",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchArticles",
+      "qualifiedName": "Freshdesk.SearchArticles",
+      "fullyQualifiedName": "Freshdesk.SearchArticles@0.1.1",
+      "description": "Search the knowledge base for published solution articles matching a term.",
+      "parameters": [
+        {
+          "name": "term",
+          "type": "string",
+          "required": true,
+          "description": "The keyword or phrase to search published articles for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum articles to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching published articles with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.SearchArticles",
+        "parameters": {
+          "term": {
+            "value": "reset password",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchCompanies",
+      "qualifiedName": "Freshdesk.SearchCompanies",
+      "fullyQualifiedName": "Freshdesk.SearchCompanies@0.1.1",
+      "description": "Find companies by name. Match is by name prefix; use the full name for an exact hit.\n\nReturns lightweight summaries without the company note; read a single company by id for\nits full detail.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Name or name prefix to match companies by. The name autocomplete requires at least 2 characters; a single-character query returns no matches rather than an error.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum companies to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching companies with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.SearchCompanies",
+        "parameters": {
+          "query": {
+            "value": "Acme",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchContacts",
+      "qualifiedName": "Freshdesk.SearchContacts",
+      "fullyQualifiedName": "Freshdesk.SearchContacts@0.1.1",
+      "description": "Find contacts by name, exact email, or company. With no filters, returns recent\ncontacts.\n\nCombining a name with a company scans up to the company's first 1000 contacts and matches the\nname among them; at a company with more contacts than that, a name match recorded beyond the\nscan may not appear.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Name or name prefix to match contacts by. Leave empty to not filter by name. The name autocomplete requires at least 2 characters; a single-character query returns no matches rather than an error.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Exact email to look up a contact by. Leave empty to not filter by email.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Only include contacts at this company. Defaults to no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum contacts to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching contacts with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.SearchContacts",
+        "parameters": {
+          "query": {
+            "value": "Jo",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "company_id": {
+            "value": 452871,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchTickets",
+      "qualifiedName": "Freshdesk.SearchTickets",
+      "fullyQualifiedName": "Freshdesk.SearchTickets@0.1.1",
+      "description": "Find tickets in the queue by status, priority, requester, agent, group, tag,\ntype, or recency. With no filters, returns the most recently updated tickets.\n\nPass requester_id (or requester_email) to pull one customer's full ticket history;\nother filters then refine that requester's tickets. A just-created ticket may take a\nmoment to appear here while Freshdesk indexes it.",
+      "parameters": [
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets with this status. Defaults to no filter.",
+          "enum": [
+            "open",
+            "pending",
+            "resolved",
+            "closed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets with this priority. Defaults to no filter.",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "urgent"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "requester_email",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets opened by the contact with this email. Leave empty for no filter. Ignored when requester_id is given.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "requester_id",
+          "type": "integer",
+          "required": false,
+          "description": "Only include tickets opened by the contact with this id. Takes precedence over requester_email. Defaults to no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "agent_id",
+          "type": "integer",
+          "required": false,
+          "description": "Only include tickets assigned to this agent. Defaults to no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_id",
+          "type": "integer",
+          "required": false,
+          "description": "Only include tickets in this group. Defaults to no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tag",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets carrying this tag. Leave empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ticket_type",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets of this type. Leave empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_since",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets updated on or after this date (YYYY-MM-DD). Leave empty for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum tickets to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching tickets, newest first, with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.SearchTickets",
+        "parameters": {
+          "status": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "requester_email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "requester_id": {
+            "value": 48291,
+            "type": "integer",
+            "required": false
+          },
+          "agent_id": {
+            "value": 7163,
+            "type": "integer",
+            "required": false
+          },
+          "group_id": {
+            "value": 3042,
+            "type": "integer",
+            "required": false
+          },
+          "tag": {
+            "value": "billing",
+            "type": "string",
+            "required": false
+          },
+          "ticket_type": {
+            "value": "Question",
+            "type": "string",
+            "required": false
+          },
+          "updated_since": {
+            "value": "2024-03-01",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateTicket",
+      "qualifiedName": "Freshdesk.UpdateTicket",
+      "fullyQualifiedName": "Freshdesk.UpdateTicket@0.1.1",
+      "description": "Change a ticket's status, priority, assignee, or group. Fields left unset are\nunchanged; at least one field must be provided.",
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ticket to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "New status. Omit to leave the status unchanged.",
+          "enum": [
+            "open",
+            "pending",
+            "resolved",
+            "closed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "New priority. Omit to leave the priority unchanged.",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "urgent"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "agent_id",
+          "type": "integer",
+          "required": false,
+          "description": "Agent to assign as owner. Omit to leave the assignee unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_id",
+          "type": "integer",
+          "required": false,
+          "description": "Group to move the ticket to. Omit to leave the group unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The updated ticket with its conversation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.UpdateTicket",
+        "parameters": {
+          "ticket_id": {
+            "value": 48321,
+            "type": "integer",
+            "required": true
+          },
+          "status": {
+            "value": "pending",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "agent_id": {
+            "value": 7654,
+            "type": "integer",
+            "required": false
+          },
+          "group_id": {
+            "value": 302,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Freshdesk.WhoAmI",
+      "fullyQualifiedName": "Freshdesk.WhoAmI@0.1.1",
+      "description": "Return the authenticated Freshdesk agent's profile.\n\nUse this to verify the configured API key and confirm which Freshdesk account\n(domain) the tools are connected to; it is not a required preamble to the other tools.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "FRESHDESK_API_KEY",
+        "FRESHDESK_DOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHDESK_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "FRESHDESK_DOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The authenticated agent's identity and connected account."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshdesk.WhoAmI",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-06-10T12:11:46.919Z",
+  "summary": "**Freshdesk** is a customer support platform; this toolkit lets LLM agents read and write Freshdesk data — tickets, contacts, companies, agents, groups, and the knowledge base — without a human clicking through the UI.\n\n## Capabilities\n\n- **Ticket lifecycle** — create, read, update, merge, reply publicly, and add private internal notes to tickets; search the queue by status, priority, requester, agent, group, tag, type, or recency.\n- **Contact & company management** — create or update contacts and company accounts; search and retrieve individual records; handle stale or missing IDs gracefully via not-found envelopes rather than hard errors.\n- **Customer context assembly** — retrieve a requester's contact record, company, and full ticket history in a single call (`GetCustomerOverview`) instead of three separate lookups.\n- **Routing support** — list agents (filterable by email) and groups to assign or escalate tickets to the right team.\n- **Knowledge base** — search published solution articles by term and read full article content by ID.\n- **Account verification** — confirm the active API key and connected domain with `WhoAmI`.\n\n## Secrets\n\nThis toolkit requires two secrets configured in Arcade:\n\n- **`FRESHDESK_API_KEY`** — A per-agent or per-account API key that authenticates all requests. Obtain it from your Freshdesk portal: go to **Profile Settings → API Key** (top-right avatar menu). The key is scoped to the permissions of the agent account it belongs to; use an admin account's key if the toolkit needs to manage agents, groups, or perform bulk operations. See [Freshdesk API authentication docs](https://developers.freshdesk.com/api/#authentication) for details.\n\n- **`FRESHDESK_DOMAIN`** — Your Freshdesk subdomain (e.g., `yourcompany` if your helpdesk URL is `https://yourcompany.freshdesk.com`). This is not a credential but must be supplied so the toolkit knows which Freshdesk instance to target. Find it in the address bar when logged into your Freshdesk account.\n\nConfigure both secrets in the Arcade dashboard or via the Arcade secrets API. See the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) and manage secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}

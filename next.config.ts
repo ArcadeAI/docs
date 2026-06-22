@@ -24,6 +24,20 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // The toolkit-page breadcrumb links "Resources" -> /resources, which has
+        // no index page. Send it to the integrations registry instead of 404ing.
+        {
+          source: "/:locale/resources",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        // The auth provider is "square"; an external/stale link points at the
+        // old "squareup" slug, which 404s. Send it to the real page.
+        {
+          source: "/:locale/references/auth-providers/squareup",
+          destination: "/:locale/references/auth-providers/square",
+          permanent: true,
+        },
         // Dissolved guides/security section
         {
           source: "/:locale/guides/security/security-research-program",

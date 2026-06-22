@@ -10,6 +10,9 @@ export const meta: MetaRecord = {
   "mcp-gateways": {
     title: "MCP Gateways",
   },
+  "user-sources": {
+    title: "User Sources",
+  },
   "tool-calling": {
     title: "Call tools",
   },

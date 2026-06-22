@@ -9,6 +9,14 @@ const meta: MetaRecord = {
     title: "Bright Data",
     href: "/en/resources/integrations/development/brightdata",
   },
+  "cursor-agents": {
+    title: "Cursor Agents",
+    href: "/en/resources/integrations/development/cursor-agents",
+  },
+  datadog: {
+    title: "Datadog",
+    href: "/en/resources/integrations/development/datadog",
+  },
   daytona: {
     title: "Daytona",
     href: "/en/resources/integrations/development/daytona",
@@ -20,6 +28,10 @@ const meta: MetaRecord = {
   firecrawl: {
     title: "Firecrawl",
     href: "/en/resources/integrations/development/firecrawl",
+  },
+  "fly-io": {
+    title: "Fly.io",
+    href: "/en/resources/integrations/development/fly-io",
   },
   github: {
     title: "GitHub",
@@ -36,6 +48,10 @@ const meta: MetaRecord = {
   posthog: {
     title: "PostHog",
     href: "/en/resources/integrations/development/posthog",
+  },
+  vercel: {
+    title: "Vercel",
+    href: "/en/resources/integrations/development/vercel",
   },
   "-- Starter": {
     type: "separator",

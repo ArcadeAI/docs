@@ -40,7 +40,7 @@ export const SignupLink = ({
 
   return (
     <Link
-      className={cn("text-primary", className)}
+      className={cn("text-brand-accent", className)}
       href={buildRegisterHref(utmCampaign, utmMedium)}
       onClick={() => trackSignupClick(linkLocation)}
     >

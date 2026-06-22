@@ -1,7 +1,39 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
+import type {
+  ToolkitData,
+  ToolkitSummary,
+  ToolSummary,
+} from "@/app/_components/toolkit-docs/types";
 import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
+
+/**
+ * Strip each tool's heavy fields (parameters, output, codeExample) so the
+ * client `ToolkitPage` ships only a lightweight summary in the initial HTML.
+ * The detail is fetched on expand from `/api/toolkit-data/[toolkitId]`. This is
+ * what keeps the largest reference pages under Googlebot's 2 MB crawl limit.
+ *
+ * The `ToolSummary` return annotation keeps this in sync with the type: if a
+ * non-heavy field is added to `ToolDefinition`, TypeScript flags the omission.
+ */
+export function toToolkitSummary(data: ToolkitData): ToolkitSummary {
+  return {
+    ...data,
+    tools: data.tools.map(
+      (tool): ToolSummary => ({
+        name: tool.name,
+        qualifiedName: tool.qualifiedName,
+        fullyQualifiedName: tool.fullyQualifiedName,
+        description: tool.description,
+        auth: tool.auth,
+        secrets: tool.secrets,
+        secretsInfo: tool.secretsInfo,
+        metadata: tool.metadata,
+        documentationChunks: tool.documentationChunks,
+      })
+    ),
+  };
+}
 
 export type ToolkitIndexEntry = {
   id: string;

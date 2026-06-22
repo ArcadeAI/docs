@@ -152,11 +152,12 @@ function NotFoundContent() {
 
             {/* Actions */}
             <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
-              <Button asChild size="lg">
-                <Link href={`/${currentLocale}/home`}>
-                  <Home className="mr-2 h-5 w-5" />
-                  {dict.goHome}
-                </Link>
+              <Button
+                render={<Link href={`/${currentLocale}/home`} />}
+                size="lg"
+              >
+                <Home className="mr-2 h-5 w-5" />
+                {dict.goHome}
               </Button>
               <BackButton goBackText={dict.goBack} />
             </div>

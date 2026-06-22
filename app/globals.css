@@ -17,8 +17,34 @@
   margin-bottom: 1.5rem;
 }
 
-.text-brand-accent {
-  color: var(--color-primary);
+/*
+ * Brand accent — the design-system primary, adapted for contrast on the
+ * surface that follows the active theme. Use this token (`text-brand-accent`,
+ * `bg-brand-accent/10`, `border-brand-accent`, etc.) anywhere the brand color
+ * appears as text / icon / border on a theme-following surface.
+ *
+ * The raw `--primary` (and `text-primary`) is a very light lime designed to
+ * sit under dark foreground content (e.g. on `bg-primary` buttons). It's not
+ * readable as text/icons on a white page background. This token mixes primary
+ * with black in light mode so it stays legible there, and falls back to full
+ * primary in dark mode where the bright lime reads cleanly on the dark surface.
+ *
+ * Keep raw `text-primary` only where the local surface is dark in both modes
+ * (e.g. cards with a fixed dark background) — there the lime needs no shifting.
+ */
+@theme inline {
+  --color-brand-accent: var(--brand-accent);
+}
+
+:root {
+  /* `oklch(from ... L c h)` keeps the chroma and hue of primary while pinning
+     lightness to a readable level — gives a saturated dark green instead of
+     the muted olive `color-mix(... black)` would produce. */
+  --brand-accent: oklch(from var(--primary) 0.45 c h);
+}
+
+.dark {
+  --brand-accent: var(--primary);
 }
 
 .text-text-color {
@@ -202,4 +228,40 @@ nav > div:has(.algolia-search-button) {
 .nextra-steps h6::before {
   content: none !important;
   display: none !important;
+}
+
+/*
+ * Map Nextra's primary color scale to the design-system --primary token.
+ * Nextra derives its primary scale (50–800) from a single HSL set in <Head color={}>,
+ * so the sidebar active state, TOC highlight, and accent links still read pink even
+ * after the design system shipped a new --primary. Re-deriving the scale from
+ * var(--primary) keeps everything in sync without duplicating the token.
+ *
+ * Light mode: lower shades fade toward white (subtle tints); higher shades fade
+ * toward black so they remain readable as text on light backgrounds.
+ * Dark mode: lower shades fade toward black; higher shades stay near full primary
+ * so accent text is bright on dark surfaces.
+ */
+:root {
+  --x-color-primary-50: color-mix(in oklch, var(--primary) 12%, white);
+  --x-color-primary-100: color-mix(in oklch, var(--primary) 22%, white);
+  --x-color-primary-200: color-mix(in oklch, var(--primary) 40%, white);
+  --x-color-primary-300: color-mix(in oklch, var(--primary) 60%, white);
+  --x-color-primary-400: color-mix(in oklch, var(--primary) 80%, white);
+  --x-color-primary-500: var(--primary);
+  --x-color-primary-600: color-mix(in oklch, var(--primary) 70%, black);
+  --x-color-primary-700: color-mix(in oklch, var(--primary) 55%, black);
+  --x-color-primary-800: color-mix(in oklch, var(--primary) 45%, black);
+}
+
+.dark {
+  --x-color-primary-50: color-mix(in oklch, var(--primary) 12%, black);
+  --x-color-primary-100: color-mix(in oklch, var(--primary) 22%, black);
+  --x-color-primary-200: color-mix(in oklch, var(--primary) 35%, black);
+  --x-color-primary-300: color-mix(in oklch, var(--primary) 55%, black);
+  --x-color-primary-400: var(--primary);
+  --x-color-primary-500: var(--primary);
+  --x-color-primary-600: var(--primary);
+  --x-color-primary-700: color-mix(in oklch, var(--primary) 85%, white);
+  --x-color-primary-800: color-mix(in oklch, var(--primary) 70%, white);
 }

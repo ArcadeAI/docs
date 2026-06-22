@@ -1,7 +1,7 @@
 {
   "id": "Confluence",
   "label": "Confluence",
-  "version": "2.3.2",
+  "version": "3.0.1",
   "description": "Arcade.dev LLM tools for Confluence",
   "metadata": {
     "category": "productivity",
@@ -30,7 +30,7 @@
     {
       "name": "CreatePage",
       "qualifiedName": "Confluence.CreatePage",
-      "fullyQualifiedName": "Confluence.CreatePage@2.3.2",
+      "fullyQualifiedName": "Confluence.CreatePage@3.0.1",
       "description": "Create a new page at the root of the given space.",
       "parameters": [
         {
@@ -169,7 +169,7 @@
     {
       "name": "GetAttachmentsForPage",
       "qualifiedName": "Confluence.GetAttachmentsForPage",
-      "fullyQualifiedName": "Confluence.GetAttachmentsForPage@2.3.2",
+      "fullyQualifiedName": "Confluence.GetAttachmentsForPage@3.0.1",
       "description": "Get attachments for a page by its ID or title.\n\nIf a page title is provided, then the first page with an exact matching title will be returned.",
       "parameters": [
         {
@@ -269,7 +269,7 @@
     {
       "name": "GetAvailableAtlassianClouds",
       "qualifiedName": "Confluence.GetAvailableAtlassianClouds",
-      "fullyQualifiedName": "Confluence.GetAvailableAtlassianClouds@2.3.2",
+      "fullyQualifiedName": "Confluence.GetAvailableAtlassianClouds@3.0.1",
       "description": "Get available Atlassian Clouds.",
       "parameters": [],
       "auth": {
@@ -314,7 +314,7 @@
     {
       "name": "GetPage",
       "qualifiedName": "Confluence.GetPage",
-      "fullyQualifiedName": "Confluence.GetPage@2.3.2",
+      "fullyQualifiedName": "Confluence.GetPage@3.0.1",
       "description": "Retrieve a SINGLE page's content by its ID or title.\n\nIf a title is provided, then the first page with an exact matching title will be returned.\n\nIMPORTANT: For retrieving MULTIPLE pages, use `get_pages_by_id` instead\nfor a massive performance and efficiency boost. If you call this function multiple times\ninstead of using `get_pages_by_id`, then the universe will explode.",
       "parameters": [
         {
@@ -387,7 +387,7 @@
     {
       "name": "GetPagesById",
       "qualifiedName": "Confluence.GetPagesById",
-      "fullyQualifiedName": "Confluence.GetPagesById@2.3.2",
+      "fullyQualifiedName": "Confluence.GetPagesById@3.0.1",
       "description": "Get the content of MULTIPLE pages by their ID in a single efficient request.\n\nIMPORTANT: Always use this function when you need to retrieve content from more than one page,\nrather than making multiple separate calls to get_page, because this function is significantly\nmore efficient than calling get_page multiple times.",
       "parameters": [
         {
@@ -467,7 +467,7 @@
     {
       "name": "GetSpace",
       "qualifiedName": "Confluence.GetSpace",
-      "fullyQualifiedName": "Confluence.GetSpace@2.3.2",
+      "fullyQualifiedName": "Confluence.GetSpace@3.0.1",
       "description": "Get the details of a space by its ID or key.",
       "parameters": [
         {
@@ -539,84 +539,9 @@
       }
     },
     {
-      "name": "GetSpaceHierarchy",
-      "qualifiedName": "Confluence.GetSpaceHierarchy",
-      "fullyQualifiedName": "Confluence.GetSpaceHierarchy@2.3.2",
-      "description": "Retrieve the full hierarchical structure of a Confluence space as a tree structure\n\nOnly structural metadata is returned (not content).\nThe response is akin to the sidebar in the Confluence UI.\n\nIncludes all pages, folders, whiteboards, databases,\nsmart links, etc. organized by parent-child relationships.",
-      "parameters": [
-        {
-          "name": "space_identifier",
-          "type": "string",
-          "required": true,
-          "description": "Can be a space's ID or key. Numerical keys are NOT supported",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "atlassian_cloud_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "atlassian",
-        "providerType": "oauth2",
-        "scopes": [
-          "read:page:confluence",
-          "read:space:confluence",
-          "read:hierarchical-content:confluence"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The space hierarchy"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Confluence.GetSpaceHierarchy",
-        "parameters": {
-          "space_identifier": {
-            "value": "DOCS",
-            "type": "string",
-            "required": true
-          },
-          "atlassian_cloud_id": {
-            "value": "12345-abcde-67890-fghij",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "atlassian",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "documents"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "ListAttachments",
       "qualifiedName": "Confluence.ListAttachments",
-      "fullyQualifiedName": "Confluence.ListAttachments@2.3.2",
+      "fullyQualifiedName": "Confluence.ListAttachments@3.0.1",
       "description": "List attachments in a workspace",
       "parameters": [
         {
@@ -719,9 +644,153 @@
       }
     },
     {
+      "name": "ListDirectChildren",
+      "qualifiedName": "Confluence.ListDirectChildren",
+      "fullyQualifiedName": "Confluence.ListDirectChildren@3.0.1",
+      "description": "List one page of direct children for a Confluence content item.\n\nCall this again with a returned child ID to continue exploring that child's children. For\npagination, send only pagination_token and optionally limit.",
+      "parameters": [
+        {
+          "name": "parent_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Confluence content item whose children to list. Required for the first page. Ignored when pagination_token is provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of parent content. For spaces, parent_id can be the space ID or key. Ignored when pagination_token is provided.",
+          "enum": [
+            "space",
+            "page",
+            "folder",
+            "database",
+            "whiteboard",
+            "embed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of children to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "The order of the children to sort by. Defaults to child-position-ascending. Ignored when pagination_token is provided because the token preserves the original sort order. For space roots, child-position ordering is omitted because Confluence does not support it on the space pages endpoint.",
+          "enum": [
+            "child-position-ascending",
+            "child-position-descending",
+            "created-date-ascending",
+            "created-date-descending",
+            "id-ascending",
+            "id-descending",
+            "modified-date-ascending",
+            "modified-date-descending",
+            "title-ascending",
+            "title-descending"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to use for the next page of child results. When provided, parent_id, parent_type, and sort_by are read from the token and do not need to be sent. Only limit may be changed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:hierarchical-content:confluence",
+          "read:page:confluence"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The direct children of the parent content item"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Confluence.ListDirectChildren",
+        "parameters": {
+          "parent_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": false
+          },
+          "parent_type": {
+            "value": "page",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "sort_by": {
+            "value": "child-position-ascending",
+            "type": "string",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJwYXJlbnRJZCI6IjEyMzQ1Njc4OSIsIm9mZnNldCI6MjV9",
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListPages",
       "qualifiedName": "Confluence.ListPages",
-      "fullyQualifiedName": "Confluence.ListPages@2.3.2",
+      "fullyQualifiedName": "Confluence.ListPages@3.0.1",
       "description": "Get the content of multiple pages by their ID",
       "parameters": [
         {
@@ -846,7 +915,7 @@
     {
       "name": "ListSpaces",
       "qualifiedName": "Confluence.ListSpaces",
-      "fullyQualifiedName": "Confluence.ListSpaces@2.3.2",
+      "fullyQualifiedName": "Confluence.ListSpaces@3.0.1",
       "description": "List all spaces sorted by name in ascending order.",
       "parameters": [
         {
@@ -933,7 +1002,7 @@
     {
       "name": "RenamePage",
       "qualifiedName": "Confluence.RenamePage",
-      "fullyQualifiedName": "Confluence.RenamePage@2.3.2",
+      "fullyQualifiedName": "Confluence.RenamePage@3.0.1",
       "description": "Rename a page by changing its title.",
       "parameters": [
         {
@@ -1020,7 +1089,7 @@
     {
       "name": "SearchContent",
       "qualifiedName": "Confluence.SearchContent",
-      "fullyQualifiedName": "Confluence.SearchContent@2.3.2",
+      "fullyQualifiedName": "Confluence.SearchContent@3.0.1",
       "description": "Search for content in Confluence.\n\nThe search is performed across all content in the authenticated user's Confluence workspace.\nAll search terms in Confluence are case insensitive.\n\nYou can use the parameters in different ways:\n- must_contain_all: For AND logic - content must contain ALL of these\n- can_contain_any: For OR logic - content can contain ANY of these\n- Combine them: must_contain_all=['banana'] AND can_contain_any=['database', 'guide']",
       "parameters": [
         {
@@ -1141,7 +1210,7 @@
     {
       "name": "UpdatePageContent",
       "qualifiedName": "Confluence.UpdatePageContent",
-      "fullyQualifiedName": "Confluence.UpdatePageContent@2.3.2",
+      "fullyQualifiedName": "Confluence.UpdatePageContent@3.0.1",
       "description": "Update a page's content.",
       "parameters": [
         {
@@ -1245,7 +1314,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Confluence.WhoAmI",
-      "fullyQualifiedName": "Confluence.WhoAmI@2.3.2",
+      "fullyQualifiedName": "Confluence.WhoAmI@3.0.1",
       "description": "CALL THIS TOOL FIRST to establish user profile context.\n\nGet information about the currently logged-in user and their available Confluence clouds.",
       "parameters": [],
       "auth": {
@@ -1299,6 +1368,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.377Z",
-  "summary": "Arcade.dev provides a comprehensive toolkit for interacting with Confluence, empowering developers to create, manage, and search content efficiently within their Confluence spaces.\n\n**Capabilities**\n- Seamlessly create, update, and rename pages.\n- Efficiently retrieve single or multiple pages and their content.\n- List and manage attachments and spaces with a hierarchical view.\n- Perform powerful search queries across all Confluence content.\n\n**OAuth**  \n- Provider: Atlassian  \n- Scopes: read:attachment:confluence, read:content-details:confluence, read:hierarchical-content:confluence, read:page:confluence, read:space:confluence, search:confluence, write:page:confluence"
+  "generatedAt": "2026-05-21T12:10:39.585Z",
+  "summary": "**Confluence** is an Atlassian wiki and documentation platform. This toolkit gives LLM agents the ability to read, write, search, and manage Confluence spaces and pages via the Arcade tool-calling interface.\n\n## Capabilities\n\n- **Page lifecycle** — create, rename, retrieve (single or batch), update content, and explore child pages recursively with pagination.\n- **Space & cloud discovery** — list all spaces, fetch space details by ID or key, retrieve available Atlassian cloud instances, and identify the authenticated user's profile and cloud access.\n- **Bulk & efficient retrieval** — fetch multiple pages in a single request (`GetPagesById`, `ListPages`) to avoid redundant API calls.\n- **Search** — full-text search across the authenticated user's entire Confluence workspace with AND/OR logic via `must_contain_all` and `can_contain_any` parameters; case-insensitive.\n- **Attachments** — list workspace attachments or retrieve attachments for a specific page by ID or title.\n\n## OAuth\n\nThis toolkit authenticates via **OAuth 2.0** with Atlassian as the identity provider. See the [Arcade Atlassian auth provider docs](https://docs.arcade.dev/en/references/auth-providers/atlassian) for setup instructions, required scopes, and configuration details."
 }

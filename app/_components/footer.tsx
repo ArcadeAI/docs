@@ -54,12 +54,7 @@ const Socials = () => (
     >
       <Linkedin className="h-6 w-6 text-gray-400 transition-colors duration-150 ease-in-out hover:text-gray-900" />
     </a>
-    <a
-      href={`mailto:${urlConfig.company.email}`}
-      rel="noreferrer"
-      target="_blank"
-      title="Send us an email"
-    >
+    <a href="/en/resources/contact-us" title="Contact us">
       <Mail className="h-6 w-6 text-gray-400 transition-colors duration-150 ease-in-out hover:text-gray-900" />
     </a>
   </div>
@@ -85,7 +80,7 @@ const ResourceCol: React.FC<ResourceColProps> = ({ title, resources }) => (
       {resources?.map((resource) => (
         <li key={resource.url}>
           <a
-            className="text-gray-500 no-underline transition-colors duration-150 ease-in-out hover:text-primary"
+            className="text-gray-500 no-underline transition-colors duration-150 ease-in-out hover:text-brand-accent"
             href={resource.url}
             rel="noreferrer"
             target={resource.external ? "_blank" : "_self"}

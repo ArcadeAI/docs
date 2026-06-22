@@ -9,6 +9,10 @@ const meta: MetaRecord = {
     title: "Asana",
     href: "/en/resources/integrations/productivity/asana",
   },
+  ashby: {
+    title: "Ashby",
+    href: "/en/resources/integrations/productivity/ashby",
+  },
   clickup: {
     title: "ClickUp",
     href: "/en/resources/integrations/productivity/clickup",
@@ -24,6 +28,10 @@ const meta: MetaRecord = {
   figma: {
     title: "Figma",
     href: "/en/resources/integrations/productivity/figma",
+  },
+  forkable: {
+    title: "Forkable",
+    href: "/en/resources/integrations/productivity/forkable",
   },
   gmail: {
     title: "Gmail",
@@ -92,6 +100,10 @@ const meta: MetaRecord = {
   "microsoft-word": {
     title: "Microsoft Word",
     href: "/en/resources/integrations/productivity/microsoft-word",
+  },
+  resend: {
+    title: "Resend",
+    href: "/en/resources/integrations/productivity/resend",
   },
   "-- Starter": {
     type: "separator",

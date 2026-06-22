@@ -1,7 +1,7 @@
 {
   "id": "GoogleDocs",
   "label": "Google Docs",
-  "version": "6.0.0",
+  "version": "7.0.1",
   "description": "Arcade.dev LLM tools for Google Docs",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "CommentOnDocument",
       "qualifiedName": "GoogleDocs.CommentOnDocument",
-      "fullyQualifiedName": "GoogleDocs.CommentOnDocument@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.CommentOnDocument@7.0.1",
       "description": "Comment on a specific document by its ID.",
       "parameters": [
         {
@@ -53,8 +53,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "The comment's ID, documentId, and documentUrl in a dictionary"
@@ -64,12 +71,12 @@
         "toolName": "GoogleDocs.CommentOnDocument",
         "parameters": {
           "document_id": {
-            "value": "1aBcD2EfGhIJ3klMnOpQrstUVwXyZ67890",
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
           },
           "comment_text": {
-            "value": "Please review the introduction for clarity and confirm that the data in Table 1 is accurate. Suggest any wording changes directly in the doc.",
+            "value": "This section needs more clarity. Please revise the third paragraph to better explain the methodology.",
             "type": "string",
             "required": true
           }
@@ -99,7 +106,7 @@
     {
       "name": "CreateBlankDocument",
       "qualifiedName": "GoogleDocs.CreateBlankDocument",
-      "fullyQualifiedName": "GoogleDocs.CreateBlankDocument@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.CreateBlankDocument@7.0.1",
       "description": "Create a blank Google Docs document with the specified title.",
       "parameters": [
         {
@@ -159,7 +166,7 @@
     {
       "name": "CreateDocumentFromText",
       "qualifiedName": "GoogleDocs.CreateDocumentFromText",
-      "fullyQualifiedName": "GoogleDocs.CreateDocumentFromText@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.CreateDocumentFromText@7.0.1",
       "description": "Create a Google Docs document with the specified title and text content.\n\nWhen input_format is MARKDOWN, the text_content is parsed as Markdown and the resulting\ndocument is formatted with headings, bold, italic, bullet lists, and numbered lists.",
       "parameters": [
         {
@@ -204,6 +211,29 @@
         "description": "The created document's title, documentId, and documentUrl in a dictionary"
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.CreateDocumentFromText",
+        "parameters": {
+          "title": {
+            "value": "Project Kickoff Meeting Notes",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "# Project Kickoff Meeting\n\n**Date:** October 15, 2024\n\n## Agenda\n\n- Introduction and team overview\n- Project goals and timeline\n- Task assignments\n\n## Key Decisions\n\n1. Launch date set for Q1 2025\n2. Weekly syncs every Monday at 10am\n3. Use Slack for daily communication\n\n## Next Steps\n\n*All team members* should review the project brief before the next meeting.\n\n### Action Items\n\n- Alice: Finalize requirements document\n- Bob: Set up the development environment\n- Carol: Schedule stakeholder interviews",
+            "type": "string",
+            "required": true
+          },
+          "input_format": {
+            "value": "MARKDOWN",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -225,7 +255,7 @@
     {
       "name": "EditDocument",
       "qualifiedName": "GoogleDocs.EditDocument",
-      "fullyQualifiedName": "GoogleDocs.EditDocument@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.EditDocument@7.0.1",
       "description": "Read or edit a Google Docs document using structured batchUpdate requests.\n\nWhen called without requests, returns the document content in DocMD format (block IDs,\ncharacter indices, and text styles). When called with requests, applies the edits and\nreturns the updated DocMD. Use the DocMD indices from the response to construct\nrequests for subsequent calls.",
       "parameters": [
         {
@@ -253,10 +283,12 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
       "secretsInfo": [
         {
-          "name": "OPENAI_API_KEY",
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
           "type": "api_key"
         }
       ],
@@ -265,6 +297,129 @@
         "description": "The result including document ID, URL, number of applied edits, and the document content in DocMD format."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.EditDocument",
+        "parameters": {
+          "document_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "requests": {
+            "value": [
+              {
+                "replaceAllText": {
+                  "containsText": {
+                    "text": "Project Title",
+                    "matchCase": true
+                  },
+                  "replaceText": "Q3 Report"
+                }
+              },
+              {
+                "insertText": {
+                  "location": {
+                    "index": 120
+                  },
+                  "text": "This section describes the key findings.\n"
+                }
+              },
+              {
+                "updateTextStyle": {
+                  "range": {
+                    "startIndex": 74,
+                    "endIndex": 86
+                  },
+                  "textStyle": {
+                    "bold": true,
+                    "fontSize": {
+                      "magnitude": 14,
+                      "unit": "PT"
+                    },
+                    "foregroundColor": {
+                      "color": {
+                        "rgbColor": {
+                          "red": 0.2,
+                          "green": 0.4,
+                          "blue": 0.8
+                        }
+                      }
+                    }
+                  },
+                  "fields": "bold,fontSize,foregroundColor"
+                }
+              },
+              {
+                "updateParagraphStyle": {
+                  "range": {
+                    "startIndex": 10,
+                    "endIndex": 50
+                  },
+                  "paragraphStyle": {
+                    "alignment": "CENTER",
+                    "lineSpacing": 150,
+                    "spaceBelow": {
+                      "magnitude": 10,
+                      "unit": "PT"
+                    }
+                  },
+                  "fields": "alignment,lineSpacing,spaceBelow"
+                }
+              },
+              {
+                "createParagraphBullets": {
+                  "range": {
+                    "startIndex": 200,
+                    "endIndex": 350
+                  },
+                  "bulletPreset": "BULLET_DISC_CIRCLE_SQUARE"
+                }
+              },
+              {
+                "insertTable": {
+                  "location": {
+                    "index": 400
+                  },
+                  "rows": 3,
+                  "columns": 4
+                }
+              },
+              {
+                "insertInlineImage": {
+                  "uri": "https://example.com/chart.png",
+                  "location": {
+                    "index": 500
+                  },
+                  "objectSize": {
+                    "width": {
+                      "magnitude": 300,
+                      "unit": "PT"
+                    },
+                    "height": {
+                      "magnitude": 200,
+                      "unit": "PT"
+                    }
+                  }
+                }
+              },
+              {
+                "createNamedRange": {
+                  "name": "summary-section",
+                  "range": {
+                    "startIndex": 60,
+                    "endIndex": 120
+                  }
+                }
+              }
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -287,8 +442,8 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl@6.0.0",
-      "description": "Generate a Google File Picker URL for user-driven file selection and authorization.\n\nThis tool generates a URL that directs the end-user to a Google File Picker interface where\nwhere they can select or upload Google Drive files. Users can grant permission to access their\nDrive files, providing a secure and authorized way to interact with their files.\n\nThis is particularly useful when prior tools (e.g., those accessing or modifying\nGoogle Docs, Google Sheets, etc.) encountered failures due to file non-existence\n(Requested entity was not found) or permission errors. Once the user completes the file\npicker flow, the prior tool can be retried.\n\nSuggest this tool to users when they are surprised or confused that the file they are\nsearching for or attempting to access cannot be found.",
+      "fullyQualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl@7.0.1",
+      "description": "Generate a URL where the user can grant this app access to specific Drive files.\n\nOpens Google's first-party Drive picker. The user selects which files to share\nwith this application — it is not a sign-in or credential prompt.\n\nUse this when a prior tool reported that a file was not found or access was denied,\nand the user expects the file to exist. After the user completes the picker flow,\nretry the prior tool.",
       "parameters": [],
       "auth": {
         "providerId": "google",
@@ -330,7 +485,7 @@
     {
       "name": "GetDocumentAsDocmd",
       "qualifiedName": "GoogleDocs.GetDocumentAsDocmd",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentAsDocmd@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentAsDocmd@7.0.1",
       "description": "Get the latest version of the specified Google Docs document as DocMD.\nThe DocMD output will include tags that can be used to annotate the document with location\ninformation, the type of block, block IDs, and other metadata. If the document has tabs,\nall tabs are included in sequential order unless a specific tab_id is provided.",
       "parameters": [
         {
@@ -357,8 +512,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "string",
         "description": "The document contents as DocMD"
@@ -368,12 +530,12 @@
         "toolName": "GoogleDocs.GetDocumentAsDocmd",
         "parameters": {
           "document_id": {
-            "value": "1a2B3cD4e5FgH6IJ7kLmNoPqR8sTuvWxYz",
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
           },
           "tab_id": {
-            "value": "tab-0",
+            "value": "t.abc123xyz",
             "type": "string",
             "required": false
           }
@@ -403,7 +565,7 @@
     {
       "name": "GetDocumentById",
       "qualifiedName": "GoogleDocs.GetDocumentById",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentById@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentById@7.0.1",
       "description": "DEPRECATED DO NOT USE THIS TOOL\nGet the latest version of the specified Google Docs document.",
       "parameters": [
         {
@@ -422,8 +584,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "The document contents as a dictionary"
@@ -433,7 +602,7 @@
         "toolName": "GoogleDocs.GetDocumentById",
         "parameters": {
           "document_id": {
-            "value": "1aBcD_EfGhIjKlMnOpQrStUvWxYz1234567890",
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
           }
@@ -463,7 +632,7 @@
     {
       "name": "GetDocumentMetadata",
       "qualifiedName": "GoogleDocs.GetDocumentMetadata",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentMetadata@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentMetadata@7.0.1",
       "description": "Get metadata for a Google Docs document including hierarchical tab structure.\nReturns document title, ID, URL, total character count, and nested tab information\nwith character counts for each tab.",
       "parameters": [
         {
@@ -482,8 +651,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "Document metadata including hierarchical tab structure"
@@ -493,7 +669,7 @@
         "toolName": "GoogleDocs.GetDocumentMetadata",
         "parameters": {
           "document_id": {
-            "value": "1a2B3cD4eF5GhI6JkLmNoPqRsTuVwXyZ_12345",
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
           }
@@ -523,7 +699,7 @@
     {
       "name": "InsertTextAtEndOfDocument",
       "qualifiedName": "GoogleDocs.InsertTextAtEndOfDocument",
-      "fullyQualifiedName": "GoogleDocs.InsertTextAtEndOfDocument@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.InsertTextAtEndOfDocument@7.0.1",
       "description": "Updates an existing Google Docs document using the batchUpdate API endpoint.",
       "parameters": [
         {
@@ -550,8 +726,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "The response from the batchUpdate API as a dict."
@@ -561,12 +744,12 @@
         "toolName": "GoogleDocs.InsertTextAtEndOfDocument",
         "parameters": {
           "document_id": {
-            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
           },
           "text_content": {
-            "value": "This is an example paragraph to append to the end of the document. Replace this sample text with the content you want inserted into the document.",
+            "value": "This is an example paragraph appended to the end of the document.",
             "type": "string",
             "required": true
           }
@@ -596,7 +779,7 @@
     {
       "name": "ListDocumentComments",
       "qualifiedName": "GoogleDocs.ListDocumentComments",
-      "fullyQualifiedName": "GoogleDocs.ListDocumentComments@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.ListDocumentComments@7.0.1",
       "description": "List all comments on the specified Google Docs document.",
       "parameters": [
         {
@@ -623,8 +806,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "A dictionary containing the comments"
@@ -634,7 +824,7 @@
         "toolName": "GoogleDocs.ListDocumentComments",
         "parameters": {
           "document_id": {
-            "value": "1a2B3cD4EfGhIjKlmNoPqRstUvWxYz",
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
             "type": "string",
             "required": true
           },
@@ -669,7 +859,7 @@
     {
       "name": "SearchAndRetrieveDocuments",
       "qualifiedName": "GoogleDocs.SearchAndRetrieveDocuments",
-      "fullyQualifiedName": "GoogleDocs.SearchAndRetrieveDocuments@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.SearchAndRetrieveDocuments@7.0.1",
       "description": "Searches for documents in the user's Google Drive and returns documents with their main body\ncontent and tab metadata. Excludes documents that are in the trash.\n\nReturns main body content only with metadata about tabs. Use get_document_as_docmd() to retrieve\nfull tab content for specific documents. Use search_documents() for metadata-only searches.",
       "parameters": [
         {
@@ -783,8 +973,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "A dictionary containing document count, list of documents with content and metadata, pagination token, and has_more flag"
@@ -800,9 +997,8 @@
           },
           "document_contains": {
             "value": [
-              "Q2 roadmap",
-              "budget overview",
-              "quarterly goals"
+              "quarterly report",
+              "budget 2024"
             ],
             "type": "array",
             "required": false
@@ -810,13 +1006,13 @@
           "document_not_contains": {
             "value": [
               "draft",
-              "personal notes"
+              "archived"
             ],
             "type": "array",
             "required": false
           },
           "search_only_in_shared_drive_id": {
-            "value": "0A1B2C3D4E5F6gHIJKLMNOP",
+            "value": "0AF1234abcXYZ567",
             "type": "string",
             "required": false
           },
@@ -839,12 +1035,12 @@
             "required": false
           },
           "limit": {
-            "value": 25,
+            "value": 10,
             "type": "integer",
             "required": false
           },
           "pagination_token": {
-            "value": "Cg0KC2RhdGFCbG9iMTIz",
+            "value": "eyJzdGFydEluZGV4IjoyMCwicGFnZVRva2VuIjoiYWJjMTIzIn0=",
             "type": "string",
             "required": false
           }
@@ -874,7 +1070,7 @@
     {
       "name": "SearchDocuments",
       "qualifiedName": "GoogleDocs.SearchDocuments",
-      "fullyQualifiedName": "GoogleDocs.SearchDocuments@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.SearchDocuments@7.0.1",
       "description": "Searches for documents in the user's Google Drive. Excludes documents in trash.\nReturns metadata only. Use get_document_metadata or get_document_as_docmd for content.",
       "parameters": [
         {
@@ -975,8 +1171,15 @@
           "https://www.googleapis.com/auth/drive.file"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "Document count, list of documents, pagination token, and has_more flag"
@@ -988,8 +1191,7 @@
           "document_contains": {
             "value": [
               "quarterly report",
-              "Q4 revenue",
-              "performance review"
+              "budget 2024"
             ],
             "type": "array",
             "required": false
@@ -997,13 +1199,13 @@
           "document_not_contains": {
             "value": [
               "draft",
-              "confidential"
+              "archived"
             ],
             "type": "array",
             "required": false
           },
           "search_only_in_shared_drive_id": {
-            "value": "0A1b2C3d4E5fGhIjKlmN",
+            "value": "0AFs3hMr6gJQRUk9PVA",
             "type": "string",
             "required": false
           },
@@ -1031,7 +1233,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "CgkI1a2b3c4d5e6f7g8h",
+            "value": "eyJzdGFydEluZGV4IjoyNX0=",
             "type": "string",
             "required": false
           }
@@ -1061,7 +1263,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleDocs.WhoAmI",
-      "fullyQualifiedName": "GoogleDocs.WhoAmI@6.0.0",
+      "fullyQualifiedName": "GoogleDocs.WhoAmI@7.0.1",
       "description": "Get comprehensive user profile and Google Docs environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Docs access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -1132,6 +1334,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-04-27T11:41:15.814Z",
-  "summary": "Arcade's Google Docs toolkit lets developers create, read, edit, comment on, and search Google Docs from LLM workflows.\n\n**Capabilities**\n- Create blank documents or generate documents from plain text and Markdown.\n- Read documents as DocMD, including tab annotations and structured edit indices.\n- Apply batchUpdate-style edits and return updated DocMD for follow-up changes.\n- Search and retrieve Docs content, inspect document metadata, list comments, add comments, and open a Google File Picker URL when file access needs user help.\n- Fetch authenticated user profile and Google Docs environment information.\n\n**OAuth**\n- **Provider**: Google\n- **Scopes**: Google Drive file access and Google user profile scopes.\n\n**Secrets**\n- No secret types required for toolkit operation."
+  "generatedAt": "2026-06-05T12:07:56.906Z",
+  "summary": "## Google Docs Toolkit\n\nThe Google Docs toolkit lets LLM agents create, read, edit, search, and annotate Google Docs documents through the Google Docs and Drive APIs via Arcade.\n\n## Capabilities\n\n- **Document creation:** Create blank documents or populate them from plain text or Markdown (with automatic heading, bold, italic, and list formatting).\n- **Document reading & metadata:** Retrieve full document content in DocMD format (block IDs, character indices, text styles, tab structure) or fetch metadata-only (title, ID, URL, character counts, tab hierarchy).\n- **Structured editing:** Apply batchUpdate requests using DocMD indices for precise in-document edits; append text to document ends.\n- **Search & discovery:** Search Drive for documents by query, with options to return metadata only or include full body content; trash is automatically excluded.\n- **Comments:** Add new comments to a document or list all existing comments.\n- **User & access management:** Retrieve authenticated user profile and permissions; generate a Google Drive inline file picker URL to grant per-file access when a document is not found or access is denied.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with **Google** as the provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — A flag/URL secret that activates the `GenerateGoogleFilePickerUrl` tool, which opens Google's first-party Drive file picker so users can grant the app access to specific files without a full re-authentication flow. To obtain or configure this value, you set it in your Arcade environment to enable the picker endpoint. Refer to the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to define secrets, and manage them at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }
