@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" class="diagram-svg" viewBox="0 0 1200 900" role="img" aria-label="Scenario 1 diagram">
+
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;}
+    .z-label{font-size:12.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+    .z-label-sm{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase}
+    .n-title{font-size:14.5px;font-weight:600;fill:#15131f}
+    .n-sub{font-size:12px;fill:#6b7280}
+    .n-mono{font-size:11.5px;fill:#7c768f;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .lbl{font-size:12.5px;font-weight:600;fill:#334155}
+    .lbl-mono{font-size:11.5px;font-weight:600;fill:#475569;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+    .lbl-red{font-size:12px;font-weight:700;fill:#dc2626}
+    .node-rect{filter:drop-shadow(0 1px 2px rgba(18,16,32,.10))}
+  </style>
+        <rect x="0" y="0" width="1200" height="900" rx="20" fill="#ffffff"/>
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#475569"/>
+          </marker>
+        </defs>
+
+        <!-- AI Clients -->
+        <g>
+          <rect class="node-rect" x="420" y="30" width="360" height="74" rx="12" fill="#fff" stroke="#cbd5e1"/>
+          <text class="n-title" x="600" y="60" text-anchor="middle">AI Clients</text>
+          <text class="n-sub" x="600" y="82" text-anchor="middle">Claude · Cursor · ChatGPT · Custom Agents</text>
+        </g>
+
+        <!-- Private network (single) -->
+        <rect x="70" y="148" width="1060" height="560" rx="18" fill="#eef1ff" stroke="#c7d2fe"/>
+        <text class="z-label" x="96" y="176" fill="#4f46e5">Private Network</text>
+
+        <!-- Arcade Engine sub-zone -->
+        <rect x="108" y="198" width="984" height="262" rx="13" fill="#fcfcff" stroke="#c7d2fe" stroke-dasharray="6 5"/>
+        <text class="z-label-sm" x="130" y="221" fill="#4f46e5">Arcade Engine · :9099</text>
+        <!-- gateways -->
+        <g>
+          <rect class="node-rect" x="242" y="244" width="236" height="88" rx="11" fill="#fff" stroke="#c7d2fe"/>
+          <text class="n-title" x="360" y="272" text-anchor="middle">/mcp/engineering</text>
+          <text class="n-sub" x="360" y="292" text-anchor="middle">auth: arcade_oauth</text>
+          <text class="n-sub" x="360" y="310" text-anchor="middle">tools: GitHub · Jira</text>
+        </g>
+        <g>
+          <rect class="node-rect" x="722" y="244" width="236" height="88" rx="11" fill="#fff" stroke="#c7d2fe"/>
+          <text class="n-title" x="840" y="272" text-anchor="middle">/mcp/finance</text>
+          <text class="n-sub" x="840" y="292" text-anchor="middle">auth: arcade_oauth</text>
+          <text class="n-sub" x="840" y="310" text-anchor="middle">tools: Bloomberg · SAP</text>
+        </g>
+        <!-- ssrf allowlist · egress gate -->
+        <g>
+          <rect class="node-rect" x="466" y="346" width="268" height="98" rx="12" fill="#fff" stroke="#4f46e5" stroke-width="1.5"/>
+          <path d="M593 360 L607 360 L607 367 C607 372 600 376 600 376 C600 376 593 372 593 367 Z" fill="#eef1ff" stroke="#4f46e5" stroke-width="1.1"/>
+          <path d="M597 366.5 L599.2 369 L603 364.3" fill="none" stroke="#4f46e5" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="600" y="395" text-anchor="middle" font-size="14" font-weight="700" fill="#4f46e5">ssrf_allowlist</text>
+          <g>
+            <rect x="492" y="409" width="112" height="22" rx="6" fill="#f4f3fb" stroke="#ddd6fe"/>
+            <text x="548" y="424" text-anchor="middle" class="lbl-mono" fill="#4f46e5">*.corp.internal</text>
+          </g>
+          <g>
+            <rect x="616" y="409" width="92" height="22" rx="6" fill="#f4f3fb" stroke="#ddd6fe"/>
+            <text x="662" y="424" text-anchor="middle" class="lbl-mono" fill="#4f46e5">10.10.0.0/16</text>
+          </g>
+        </g>
+
+        <!-- MCP servers (inside same private network) -->
+        <text class="z-label-sm" x="130" y="512" fill="#7c3aed">Internal MCP Servers</text>
+        <g>
+          <rect class="node-rect" x="110" y="524" width="224" height="84" rx="11" fill="#fff" stroke="#ddd6fe"/>
+          <text class="n-title" x="222" y="560" text-anchor="middle">Bloomberg MCP</text>
+          <text class="n-mono" x="222" y="581" text-anchor="middle">bloomberg.corp.internal:8000</text>
+        </g>
+        <g>
+          <rect class="node-rect" x="362" y="524" width="224" height="84" rx="11" fill="#fff" stroke="#ddd6fe"/>
+          <text class="n-title" x="474" y="560" text-anchor="middle">SAP MCP</text>
+          <text class="n-mono" x="474" y="581" text-anchor="middle">sap.corp.internal:8080</text>
+        </g>
+        <g>
+          <rect class="node-rect" x="614" y="524" width="224" height="84" rx="11" fill="#fff" stroke="#ddd6fe"/>
+          <text class="n-title" x="726" y="560" text-anchor="middle">GitHub Enterprise MCP</text>
+          <text class="n-mono" x="726" y="581" text-anchor="middle">github.corp.internal</text>
+        </g>
+        <g>
+          <rect class="node-rect" x="866" y="524" width="224" height="84" rx="11" fill="#fff" stroke="#ddd6fe"/>
+          <text class="n-title" x="978" y="560" text-anchor="middle">Jira MCP</text>
+          <text class="n-mono" x="978" y="581" text-anchor="middle">jira.corp.internal:8080</text>
+        </g>
+
+        <!-- Coordinator (outside, shared) -->
+        <g>
+          <rect class="node-rect" x="410" y="768" width="380" height="78" rx="12" fill="#f0fdfa" stroke="#99f6e4" stroke-width="1.4"/>
+          <text class="n-title" x="600" y="800" text-anchor="middle" fill="#0f766e">Coordinator · shared control plane</text>
+          <text class="n-sub" x="600" y="822" text-anchor="middle">Identity · RBAC · OAuth · API keys</text>
+        </g>
+
+        <!-- ===== connectors ===== -->
+        <!-- AI -> gateways -->
+        <path d="M560 104 C 470 150, 380 185, 362 242" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+        <path d="M640 104 C 730 150, 822 185, 840 242" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+        <g><rect x="306" y="160" width="112" height="22" rx="6" fill="#fff" stroke="#e9e8ef"/><text class="lbl" x="362" y="175" text-anchor="middle">HTTPS + OAuth</text></g>
+        <g><rect x="784" y="160" width="112" height="22" rx="6" fill="#fff" stroke="#e9e8ef"/><text class="lbl" x="840" y="175" text-anchor="middle">HTTPS + OAuth</text></g>
+
+        <!-- gateways -> ssrf -->
+        <path d="M360 332 C 360 352, 500 348, 560 346" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+        <path d="M840 332 C 840 352, 700 348, 640 346" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+
+        <!-- ssrf -> servers -->
+        <path d="M600 444 C 470 484, 320 498, 232 522" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+        <path d="M600 444 C 560 488, 500 504, 478 522" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+        <path d="M600 444 C 640 488, 700 504, 722 522" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+        <path d="M600 444 C 730 484, 880 498, 968 522" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+        <g><rect x="322" y="471" width="178" height="22" rx="6" fill="#fff" stroke="#e9e8ef"/><text class="lbl" x="411" y="486" text-anchor="middle">HTTP · private network</text></g>
+        <g><rect x="448" y="499" width="178" height="22" rx="6" fill="#fff" stroke="#e9e8ef"/><text class="lbl" x="537" y="514" text-anchor="middle">HTTP · private network</text></g>
+        <g><rect x="574" y="471" width="178" height="22" rx="6" fill="#fff" stroke="#e9e8ef"/><text class="lbl" x="663" y="486" text-anchor="middle">HTTP · private network</text></g>
+        <g><rect x="700" y="499" width="178" height="22" rx="6" fill="#fff" stroke="#e9e8ef"/><text class="lbl" x="789" y="514" text-anchor="middle">HTTP · private network</text></g>
+
+        <!-- private network -> coordinator (outbound only) -->
+        <path d="M600 708 L600 766" fill="none" stroke="#475569" stroke-width="1.6" marker-end="url(#a1)"/>
+        <g><rect x="626" y="726" width="156" height="22" rx="6" fill="#fff" stroke="#e9e8ef"/><text class="lbl" x="704" y="741" text-anchor="middle">outbound HTTPS only</text></g>
+      </svg>

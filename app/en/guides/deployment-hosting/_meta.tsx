@@ -17,6 +17,9 @@ const meta: MetaRecord = {
   "on-prem": {
     title: "On-premises MCP servers",
   },
+  "warp-tunnels": {
+    title: "Warp Tunnels",
+  },
   "configure-engine": {
     title: "Configure Arcade's engine",
   },
