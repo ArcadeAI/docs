@@ -111,7 +111,7 @@ This helper is the heart of the integration. `runArcadeTool` authorizes the user
   **Failures come back as data, not exceptions.** Arcade reports a tool's *runtime* failures as data (`success === false` / `output.error`), not as a thrown exception. If you only read `output.value`, a failed send renders a green "success" card, so the helper checks for errors explicitly and returns an `{ error }` shape the UI can show.
 </Callout>
 
-```ts title="lib/arcade.ts"
+```ts filename="lib/arcade.ts"
 import Arcade from "@arcadeai/arcadejs";
 
 // Created lazily so the module can be imported during `next build` without the
@@ -189,7 +189,7 @@ export async function runArcadeTool({
 
 Each CopilotKit tool is a thin `defineTool` wrapper that calls `runArcadeTool` with an Arcade tool name. `searchNews` needs no auth; Gmail does. Keep tool descriptions about *what the tool does*. The agent learns the Connect-then-retry protocol from the system prompt and the tool's result, not from prose in the description it can misread. Match each tool's parameter names to the Arcade tool's own schema, or unknown params are silently dropped.
 
-```ts title="app/api/copilotkit/route.ts"
+```ts filename="app/api/copilotkit/route.ts"
 import {
   BuiltInAgent,
   CopilotRuntime,
@@ -310,7 +310,7 @@ On the client, `useRenderTool` subscribes to each tool call. When the result is 
 
 The snippet below defines small inline `LoadingCard`, `ErrorCard`, `EmailSentCard`, and `AuthorizationCard` components so it stands alone.
 
-```tsx title="app/page.tsx"
+```tsx filename="app/page.tsx"
 "use client";
 import { CopilotChat, useRenderTool } from "@copilotkit/react-core/v2";
 import { z } from "zod";
@@ -454,7 +454,7 @@ Find the latest news on open-source AI agents and email me a 3-bullet summary.
 <details>
 <summary>**lib/arcade.ts** (full file)</summary>
 
-```ts title="lib/arcade.ts"
+```ts filename="lib/arcade.ts"
 import Arcade from "@arcadeai/arcadejs";
 
 let arcadeClient: Arcade | undefined;
@@ -523,7 +523,7 @@ export async function runArcadeTool({
 <details>
 <summary>**app/api/copilotkit/route.ts** (full file)</summary>
 
-```ts title="app/api/copilotkit/route.ts"
+```ts filename="app/api/copilotkit/route.ts"
 import {
   BuiltInAgent,
   CopilotRuntime,
@@ -622,7 +622,7 @@ export const OPTIONS = handler;
 <details>
 <summary>**app/page.tsx** (full file)</summary>
 
-```tsx title="app/page.tsx"
+```tsx filename="app/page.tsx"
 "use client";
 import { CopilotChat, useRenderTool } from "@copilotkit/react-core/v2";
 import { z } from "zod";
