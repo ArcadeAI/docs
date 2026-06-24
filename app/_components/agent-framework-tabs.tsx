@@ -80,7 +80,6 @@ export function AgentFrameworkTabs() {
           />
           <PlatformCard
             icon="/images/icons/copilotkit.svg"
-            invertInDark
             link="/en/get-started/agent-frameworks/copilotkit"
             name="CopilotKit"
             type="Agent Framework"
