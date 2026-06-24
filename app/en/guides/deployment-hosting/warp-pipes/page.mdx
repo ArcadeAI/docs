@@ -1,0 +1,309 @@
+---
+title: "Warp Pipes"
+description: "Connect external AI clients to your private Arcade runtime. Warp Pipes is the managed connection; the runtime governs every call. Includes the bring-your-own reverse proxy path you can use today."
+---
+
+import Image from "next/image";
+import { Callout, Steps, Tabs } from "nextra/components";
+
+# Warp Pipes
+
+Connecting AI agents to private tools is two problems. The first is **networking**: your internal MCP servers and services aren't reachable from the public internet, by design. The second is **governance**: a tunnel only moves bytes, so authentication, per-user credentials, access scoping, and audit are a separate problem that the tunnel products leave to you.
+
+The Arcade runtime already solves governance. **Warp Pipes** is a managed service that solves the networking — Arcade hands you a public MCP URL and forwards traffic to your private runtime, so you don't run the connection yourself.
+
+<Callout type="info">
+**Warp Pipes is in early access.** [Request access](https://www.arcade.dev/contact) to have Arcade manage the connection from your AI clients to your runtime. You can also connect clients today with your own reverse proxy — see [Bring your own reverse proxy](#bring-your-own-reverse-proxy).
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect external AI clients to private MCP servers through a self-hosted Arcade runtime, while keeping your internal services off the public internet and your firewall closed to inbound traffic.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- A [self-hosted Arcade runtime](/guides/deployment-hosting/on-prem)
+- Access to your [engine.yaml configuration](/guides/deployment-hosting/configure-engine)
+- The private hostnames or IP ranges of your internal MCP servers
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How Warp Pipes manages the connection from AI clients to your runtime
+- How the runtime reaches internal MCP servers without inbound ports
+- How to allowlist internal addresses and register MCP servers in `engine.yaml`
+- How to connect external clients today with your own reverse proxy
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## How Warp Pipes works
+
+Your Arcade runtime runs as an MCP server inside your private network, on port `9099` by default, and it never faces the internet. You run the **Warp Pipes connector** alongside it; the connector makes one outbound connection to Arcade. Arcade gives you a public MCP URL and forwards every request down that connection to your runtime.
+
+What Warp Pipes adds, and only this:
+
+- A **public MCP URL** hosted by Arcade that any AI client connects to.
+- **Managed forwarding** from that URL to your internal runtime.
+- An **outbound connector** in your network that holds the connection open. Nothing inbound is exposed.
+
+Everything behind the connector is the runtime you already have. Warp Pipes does not re-implement authentication, credentials, governance, or audit. It connects clients to the runtime that already does them.
+
+<Image
+  alt="Warp Pipes: external AI clients connect to a public MCP URL hosted by Arcade. Arcade forwards traffic down an outbound connection held open by the Warp Pipes connector inside the private network, to the Arcade runtime, which governs the call and reaches internal MCP servers. No inbound ports are opened."
+  className="mt-4 h-auto w-full rounded-lg border border-border"
+  src="/images/warp-pipes/warp-pipes.svg"
+  width={1080}
+  height={360}
+  unoptimized
+/>
+
+## How the runtime works
+
+Two concepts shape every deployment, with or without Warp Pipes:
+
+- **Gateways** are named paths on the runtime (`/mcp/{slug}`). Each gateway has its own auth mode, tool allow-list, and access rules, so an AI client connecting to `/mcp/finance` sees only finance tools. You create gateways in the [Arcade dashboard](/guides/mcp-gateways), not in `engine.yaml`.
+- **Identity and access** — users, organizations, API keys, RBAC, and OAuth — is managed in Arcade. The runtime makes outbound-only calls to it; it never dials the runtime. Multiple runtimes can share one Arcade account.
+
+## Gateway auth modes
+
+Each gateway uses one of three auth modes. The mode determines what the AI client sends and which clients can connect.
+
+| Dashboard name | Config value | What the client sends | Works with the Anthropic Messages API? |
+| --- | --- | --- | --- |
+| Arcade Auth | `arcade_oauth` | Bearer JWT issued by Arcade OAuth | Yes |
+| User Source | `user_source` | Bearer JWT from your identity provider | Yes |
+| Arcade Headers | `arcade_header` | Bearer token plus an `Arcade-User-ID` header | No. The Anthropic connector can't send custom headers |
+
+For Claude, through the Messages API or managed agents, use **Arcade Auth** or **User Source**. See [MCP Gateways](/guides/mcp-gateways) for how to choose a mode and [User Sources](/guides/user-sources) for connecting your own identity provider.
+
+## Connect to internal MCP servers
+
+Your internal MCP servers live at private hostnames or IP addresses. Configure the `ssrf_allowlist` in `engine.yaml` to tell the runtime which internal addresses it's permitted to call, then register each MCP server URI as a worker.
+
+The runtime calls these servers directly over your private network, by their internal addresses. No inbound ports, and no tunnel, are required.
+
+<Image
+  alt="A single Arcade runtime and its internal MCP servers share one private network. AI clients connect to scoped /mcp gateways, the ssrf_allowlist gates which internal addresses the runtime reaches, and the runtime makes outbound-only calls to Arcade for identity and access."
+  className="mt-4 h-auto w-full rounded-lg border border-border"
+  src="/images/warp-pipes/scenario-1.svg"
+  width={1080}
+  height={480}
+  unoptimized
+/>
+
+Add the allowlist and workers to the `tools.directors` section of `engine.yaml`:
+
+```yaml filename="engine.yaml"
+tools:
+  directors:
+    - id: default
+      ssrf_allowlist:
+        - "*.corp.internal"       # any subdomain
+        - "10.10.0.0/16"          # IP range
+      workers:
+        - id: bloomberg
+          enabled: true
+          http:
+            uri: "http://bloomberg.corp.internal:8000"
+            secret: "${env:BLOOMBERG_SECRET}"
+        - id: sap
+          enabled: true
+          http:
+            uri: "http://sap.corp.internal:8080"
+            secret: "${env:SAP_SECRET}"
+        - id: github-enterprise
+          enabled: true
+          http:
+            uri: "http://github.corp.internal"
+            secret: "${env:GITHUB_SECRET}"
+```
+
+For the rest of the `tools.directors` and worker options, see [runtime configuration](/guides/deployment-hosting/configure-engine#tools-configuration).
+
+### Allowlist entry types
+
+| Type | Example | Evaluated | Matches |
+| --- | --- | --- | --- |
+| Exact host | `https://host.corp:8080` | Before DNS | Scheme, host, and port exactly |
+| Wildcard | `*.corp.internal` | Before DNS | Any matching subdomain |
+| CIDR | `10.10.0.0/16` | After DNS resolution | IPs in the range |
+
+Keep these rules in mind when you write allowlist entries:
+
+- URIs must use `http://` or `https://`. The runtime rejects other schemes at startup.
+- A wildcard such as `*.corp.internal` does not match the bare apex `corp.internal`. Add the apex separately if the runtime needs to reach it.
+- CIDR entries match against the resolved IP. For split-horizon DNS, where a hostname resolves to different IPs inside and outside the network, use exact-host or wildcard entries instead.
+- Malformed entries cause the runtime to fail at startup.
+
+### Configure the allowlist with Helm
+
+If you deploy the runtime with the Arcade Helm chart, set the allowlist with `--set`:
+
+```bash
+helm upgrade arcade monorepo/deploy/charts/arcade/ \
+  --set engine.ssrfAllowlist[0]="*.corp.internal" \
+  --set engine.ssrfAllowlist[1]="10.10.0.0/16"
+```
+
+### Verify the connection
+
+Use the worker test endpoint in the Arcade dashboard. A successful test confirms the allowlist entry is correct and that the runtime has a network path to the MCP server.
+
+## Deploy across multiple networks
+
+For multiple business units or regions, deploy a separate runtime per network. Each runtime has its own `ssrf_allowlist` scoped to the servers in that network, and all runtimes share one Arcade account for identity and access.
+
+<Image
+  alt="Finance, Engineering, and EU each run their own Arcade runtime in their own private network with its own ssrf_allowlist. All three make outbound-only calls to one Arcade account, and cross-network access is blocked because the other networks' addresses aren't in each allowlist."
+  className="mt-4 h-auto w-full rounded-lg border border-border"
+  src="/images/warp-pipes/scenario-2.svg"
+  width={1080}
+  height={400}
+  unoptimized
+/>
+
+A typical topology assigns one runtime to each network:
+
+| Deployment | Network | `ssrf_allowlist` | MCP servers |
+| --- | --- | --- | --- |
+| `finance-nyc` | NYC datacenter | `10.10.0.0/16`, `*.finance.corp.internal` | Bloomberg, SAP, Workday |
+| `engineering-use1` | AWS `us-east-1` | `10.20.0.0/16`, `*.eng.corp.internal` | GitHub Enterprise, Jira |
+| `eu-euw1` | AWS `eu-west-1` | `10.30.0.0/16`, `*.eu.corp.internal` | EU APIs, GDPR-scoped data |
+
+This topology gives you:
+
+- **Network isolation** — each runtime can only reach the hosts and ranges in its own allowlist. The finance runtime can't dial `10.20.x.x` even if it receives a URI pointing there.
+- **Data residency** — the EU runtime's tool traffic never leaves eu-west-1, and credentials in its vault stay in-region.
+- **Credential isolation** — each runtime holds its own credential vault. A compromise of one runtime exposes no credentials from the others.
+- **Shared identity** — all runtimes make outbound calls to the same Arcade account for auth and RBAC. The data planes are independent; identity and access are shared.
+
+Connect each runtime out with its own Warp Pipes URL, or front each with your own reverse proxy.
+
+## Bring your own reverse proxy
+
+Warp Pipes manages the connection for you. If you'd rather run the networking hop yourself — or you already operate a reverse proxy or API gateway you trust — Arcade has always worked behind one.
+
+Run a reverse proxy inside your network. It makes one outbound connection, so no inbound ports are needed. External clients connect to the proxy's public hostname, and the proxy forwards traffic to the runtime internally.
+
+<Image
+  alt="External AI clients on the public internet reach the private Arcade runtime through a reverse proxy (cloudflared, ngrok, or nginx) running inside the network. The proxy makes one outbound connection, so no inbound ports are opened; everything behind it is the same governed runtime."
+  className="mt-4 h-auto w-full rounded-lg border border-border"
+  src="/images/warp-pipes/scenario-3.svg"
+  width={1080}
+  height={240}
+  unoptimized
+/>
+
+All AI clients see the same RFC 9728 OAuth interface regardless of which proxy you use. The runtime, the governance, and the security model are identical whether the connection is managed by Warp Pipes or by your own cloudflared, ngrok, or nginx.
+
+<Tabs items={["Cloudflare Tunnel", "ngrok", "nginx"]}>
+<Tabs.Tab>
+
+[Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/) runs `cloudflared` inside your network and exposes the runtime on a public hostname.
+
+```yaml filename="config.yaml"
+tunnel: <tunnel-id>
+credentials-file: /etc/cloudflared/credentials.json
+ingress:
+  - hostname: arcade.yourdomain.com
+    service: http://arcade:9099
+  - service: http_status:404
+```
+
+```bash
+cloudflared tunnel run
+```
+
+External clients connect to `https://arcade.yourdomain.com/mcp/{gateway-slug}`.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+[ngrok](https://ngrok.com) forwards a public domain to the runtime's port with a single command:
+
+```bash
+ngrok http 9099 --domain arcade.your-org.ngrok.app
+```
+
+External clients connect to `https://arcade.your-org.ngrok.app/mcp/{gateway-slug}`.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+nginx works as a straightforward reverse proxy. MCP uses streaming, so you must disable buffering.
+
+```nginx filename="arcade.conf"
+server {
+    listen 443 ssl;
+    server_name arcade.yourdomain.com;
+
+    ssl_certificate     /etc/ssl/certs/arcade.crt;
+    ssl_certificate_key /etc/ssl/private/arcade.key;
+
+    location / {
+        proxy_pass http://arcade:9099;
+
+        # Required for streaming
+        proxy_buffering    off;
+        proxy_cache        off;
+        proxy_read_timeout 3600s;
+        proxy_http_version 1.1;
+        proxy_set_header   Connection '';
+
+        # Required headers
+        proxy_set_header Host                  $host;
+        proxy_set_header X-Real-IP             $remote_addr;
+        proxy_set_header Authorization         $http_authorization;
+        proxy_set_header Mcp-Session-Id        $http_mcp_session_id;
+        proxy_set_header MCP-Protocol-Version  $http_mcp_protocol_version;
+    }
+}
+```
+
+External clients connect to `https://arcade.yourdomain.com/mcp/{gateway-slug}`.
+
+</Tabs.Tab>
+</Tabs>
+
+### Required proxy headers
+
+Whichever proxy you use, verify these headers pass through unchanged:
+
+| Header | Purpose | What breaks if stripped |
+| --- | --- | --- |
+| `Authorization` | OAuth bearer token | Auth fails; the runtime returns `401` |
+| `Mcp-Session-Id` | Session continuity | Each request starts a new session |
+| `MCP-Protocol-Version` | Protocol negotiation | Connection errors with strict clients |
+
+The path `/mcp/{slug}` must also pass through intact. The runtime routes by gateway slug from the path.
+
+## Client compatibility
+
+| Client | Connectivity | Auth mode |
+| --- | --- | --- |
+| Claude (Messages API or managed agents) | Warp Pipes or any proxy | Arcade Auth or User Source only |
+| Cursor, Cline, Claude Desktop | Warp Pipes or any proxy | All modes |
+| ChatGPT, OpenAI agents | Warp Pipes or any proxy | All modes |
+| Custom agents | Warp Pipes or any proxy | All modes |
+
+## Known limitations
+
+| Item | Notes |
+| --- | --- |
+| Arcade Headers with the Anthropic Messages API | Not compatible. The connector supports only `authorization_token`, with no custom headers. Use Arcade Auth or User Source. |
+| nginx buffering (bring-your-own proxy) | `proxy_buffering off` is required. Without it, nginx buffers streamed responses and clients never receive them. |
+| `Mcp-Session-Id` pass-through (bring-your-own proxy) | Verify your proxy forwards this header. Stripping it silently breaks session continuity for streamable HTTP clients. |
+| Wildcard apex mismatch | `*.corp.internal` does not match `corp.internal`. Register the apex separately if the runtime needs to reach it. |
+| CIDR with split-horizon DNS | CIDR entries match against the resolved IP. If a hostname resolves to different IPs inside and outside the network, use exact-host or wildcard entries instead. |
+
+## Next steps
+
+- [Configure the Arcade runtime](/guides/deployment-hosting/configure-engine) for the full `engine.yaml` reference
+- [Create an MCP Gateway](/guides/mcp-gateways) to scope tools and auth for each client
+- [Set up a User Source](/guides/user-sources) to authenticate end users with your own identity provider
+- [Connect your MCP client](/get-started/mcp-clients) to a gateway URL
