@@ -1,0 +1,172 @@
+---
+title: Cisco Duo
+description: Authorize tools and agents with Cisco Duo (OIDC) on behalf of a user
+---
+
+import { Tabs, Callout, Steps } from "nextra/components";
+
+# Cisco Duo
+
+The Cisco Duo auth provider lets tools and agents authorize with Cisco Duo and call your Duo-protected APIs, apps, and systems on behalf of a user. Duo Single Sign-On acts as an OpenID Connect (OIDC) provider, so Arcade runs the standard authorization code flow, including Duo's multi-factor (Duo Push) prompt, and hands your tool a token.
+
+<Callout>
+  **Cisco Duo is the central place for your access policies:** identities,
+  groups, scopes, and multi-factor requirements all live in Duo. **Arcade
+  enforces those policies in real time, on every tool call.** Each tool requests
+  the scopes it needs, Duo decides what to grant for each user or group, and an
+  agent can only ever act within the access Duo has authorized. Change a policy
+  in Duo and it takes effect on the next call, with no changes to your tools or
+  agents.
+</Callout>
+
+<Callout>
+  Cisco Duo is configured as a custom OAuth 2.0 provider. Duo's OAuth/OIDC
+  endpoints are unique to your Duo account, so you bring your own Duo application
+  credentials and endpoints. The generic [OAuth 2.0
+  provider](/references/auth-providers/oauth2) page is the underlying
+  configuration reference.
+</Callout>
+
+## What's documented here
+
+This page describes how to configure Cisco Duo auth with Arcade, and use it from:
+
+- An [agentic client](#use-cisco-duo-from-an-agentic-client) (Claude Code, Claude Desktop, Cursor, or your own agent) connected to an Arcade MCP gateway
+- Your [custom tools](#create-your-own-duo-authorized-tools) that call the APIs, apps, and systems protected by Cisco Duo
+
+## Create a Cisco Duo OIDC application
+
+<Callout type="info">
+  When using your own app credentials, make sure you configure your project to
+  use a [custom user
+  verifier](/guides/user-facing-agents/secure-auth-production#build-a-custom-user-verifier).
+  Without this, your end-users will not be able to use your app or agent in
+  production.
+</Callout>
+
+In the [Duo Admin Panel](https://admin.duosecurity.com):
+
+1. Go to **Applications → Protect an Application**.
+2. Search for **OIDC** and select the Single Sign-On application that makes Duo the OpenID Provider, labeled **"OAuth 2.1 / OIDC - Single Sign-On"** or **"Generic OIDC Relying Party"**, depending on your Duo version. Click **Protect**.
+3. On the **General** tab:
+   - Enable the **Authorization Code** grant type. Also enable **Refresh Token** if you want Arcade to refresh tokens silently.
+   - Leave **Sign-In Redirect URLs** empty for now. You'll add the Arcade-generated redirect URL after you create the provider in Arcade.
+4. On the **Scopes** tab, enable `openid`, `profile`, and `email`. Add any custom scopes your API requires (for example, `crm.contacts.read`). Duo requires each custom scope to map at least one claim.
+5. On the **Clients** tab, add `openid`, `profile`, `email`, and any custom scopes to the client's **Confidential client scopes** so the client is allowed to request them.
+6. On the **Access Policy** tab, under **Scope Authorization**, grant the scopes to the users or groups who should have them. Duo becomes the authorization source of truth: revoking a scope here blocks the tools that require it.
+7. Set **User access** to the users or groups who may sign in, and confirm the application's policy **requires two-factor authentication** so the Duo Push prompt is shown.
+8. Click **Save**.
+
+From the application's **Metadata** tab, copy the **Client ID**, **Client Secret**, and the **Issuer**. The Issuer looks like `https://sso-<tenant>.sso.duosecurity.com/oauth2/<app_id>`. You'll need these values in the next steps.
+
+## Get your Duo issuer URL
+
+All of your Duo OAuth/OIDC endpoints live under your account's per-tenant **Issuer** base URL, shown on the application's **Metadata** tab:
+
+```text
+https://sso-<tenant>.sso.duosecurity.com/oauth2/<app_id>
+```
+
+The endpoints are derived from it:
+
+- Authorization: `<issuer>/authorize`
+- Token: `<issuer>/token`
+- UserInfo: `<issuer>/userinfo`
+
+Copy the exact Issuer from the Metadata tab rather than building it by hand. The `<tenant>` and `<app_id>` segments are specific to your Duo account and application.
+
+## Configuring Cisco Duo auth
+
+<Tabs items={["Dashboard GUI"]}>
+<Tabs.Tab>
+
+### Configure Cisco Duo auth using the Arcade Dashboard
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard) and log in with your Arcade account credentials.
+
+#### Navigate to the OAuth providers page
+
+- Under the **Connections** section of the Arcade Dashboard left-side menu, click **Connected Apps**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **Custom Provider** tab at the top.
+
+#### Enter the provider details
+
+- Enter `cisco-duo-oidc` as the **ID** for your provider. It can be any unique string you reference from your tools and app code.
+- Optionally enter a **Description**.
+- Enter your Duo **Client ID** and **Client Secret** from the application's Metadata tab.
+- Note the **Redirect URL** generated by Arcade. You'll add it to your Duo application in a later step.
+
+#### Configure the auth endpoints
+
+<Callout type="info">
+  Replace `<issuer>` with your [Duo issuer URL](#get-your-duo-issuer-url), for
+  example `https://sso-abcd1234.sso.duosecurity.com/oauth2/DI0123456789ABCDEF`.
+</Callout>
+
+- **Authorization Endpoint**: `<issuer>/authorize`
+- **Token Endpoint**: `<issuer>/token`
+- Under **PKCE Settings**, check **Enable PKCE** and select method **S256**. Duo is OAuth 2.1 and requires PKCE.
+- Under **Authorization Settings**, set the `scope` parameter to `{{scopes}} {{existing_scopes}}`. Request `openid profile email` plus any custom scopes your API needs.
+- (Optional) Under **User Info Settings**, set the **User Info Endpoint** to `<issuer>/userinfo`.
+
+Your provider configuration should look like this:
+
+![Configuring the Cisco Duo OAuth provider in the Arcade Dashboard](/images/auth-providers/cisco-duo/configure-duo-oauth-provider.png)
+
+#### Add the redirect URL to Duo
+
+Copy the **Redirect URL** that Arcade generated and add it to your Duo application's **Sign-In Redirect URLs** (on the application's **General** tab), then save the Duo application.
+
+#### Create the provider
+
+Click the **Create** button. Cisco Duo is now ready to be used in the Arcade Engine.
+
+</Steps>
+</Tabs.Tab>
+</Tabs>
+
+## Use Cisco Duo from an agentic client
+
+The most common way to use Cisco Duo with Arcade is to put a Duo-protected system (an API, database, internal app, or other enterprise system) behind an MCP server, make it available in Arcade, and connect any agentic client (such as Claude Code, Claude Desktop, Cursor, or your own agent) to your Arcade MCP gateway. Each tool declares the Cisco Duo scopes it needs, and Arcade runs the Duo sign-in (including Duo Push) the first time a user calls it. The access token never reaches the model or the client.
+
+<Steps>
+
+### Deploy a Duo-protected MCP server to Arcade
+
+Build an MCP server whose tools require Cisco Duo auth (see [Create your own Duo-authorized tools](#create-your-own-duo-authorized-tools)), then make it available in Arcade by either:
+
+- Deploying a [custom MCP server](/guides/create-tools/tool-basics/build-mcp-server) to Arcade with [`arcade deploy`](/guides/deployment-hosting/arcade-deploy), or
+- Adding an existing remote MCP server to your Arcade project.
+
+Once deployed, your server and its tools appear in the Arcade Dashboard under **Servers**. Each tool shows the Cisco Duo provider it requires:
+
+![A Duo-protected MCP server deployed in Arcade, with every tool requiring the Cisco Duo provider](/images/auth-providers/cisco-duo/duo-protected-mcp-server.png)
+
+### Connect your agentic client to an MCP gateway
+
+Create an [MCP gateway](/guides/mcp-gateways) that exposes your server's tools, then connect your client to the gateway URL (`https://api.arcade.dev/mcp/<your-gateway>`).
+
+### Call a tool
+
+Ask the agent to do something that uses one of your tools. The first time, Arcade returns a Cisco Duo authorization link. The user signs in and approves the Duo Push, then the tool runs. Subsequent calls reuse the authorization.
+
+![An agent calling a Duo-protected CRM tool and prompting the user to authorize Cisco Duo](/images/auth-providers/cisco-duo/agent-authorize-cisco-duo.png)
+
+</Steps>
+
+## Create your own Duo-authorized tools
+
+Tools that call the APIs, databases, and enterprise systems protected by Cisco Duo are built like any other Arcade tool, so follow the [Add user authorization to your tools](/guides/create-tools/tool-basics/create-tool-auth) and [Build an MCP server](/guides/create-tools/tool-basics/build-mcp-server) guides.
+
+The only Duo-specific part is the auth requirement on each tool: use the `OAuth2` class with the provider ID you configured and the scopes the tool needs.
+
+```python
+from arcade_mcp_server.auth import OAuth2
+
+requires_auth = OAuth2(id="cisco-duo-oidc", scopes=["openid", "profile", "email"])
+```
