@@ -19,7 +19,7 @@ A CopilotKit Built-in Agent app that uses Arcade tools for Gmail and Google News
 <GuideOverview.Prerequisites>
 
 - <DashboardLink path="register" />
-- [Node.js 18+](https://nodejs.org/)
+- [Node.js 20+](https://nodejs.org/)
 - An [OpenAI API key](https://platform.openai.com/api-keys)
 - A running [CopilotKit](https://docs.copilotkit.ai) Built-in Agent app
 
@@ -296,6 +296,14 @@ export const OPTIONS = handler;
   **Single-route transport.** CopilotKit's `<CopilotKit>` provider defaults to `useSingleEndpoint`, so the client POSTs every call as a `{ method, params, body }` envelope to the base path. Mount a single-route handler to match (`createCopilotRuntimeHandler({ mode: "single-route" })`).
 </Callout>
 
+<Callout type="warning">
+  **Before you expose this publicly.** The runtime can read and send email on your keys, so treat `/api/copilotkit` like any privileged endpoint:
+
+  - **Authenticate the runtime.** Replace the `onRequest` hook with a real session check that throws a `Response` for unauthorized calls. The example fails closed in production and is open in development until you wire one. If your session check is async, make the hook `async` and `await` it, or the request runs before the check resolves.
+  - **Scope every call to a real user.** Resolve the Arcade `user_id` per request from a server-verified session, not a spoofable client header and not one shared env value. A single `ARCADE_USER_ID` for all visitors puts everyone on one token vault.
+  - **Use disposable keys** and a throwaway Google account for any public demo, add rate limiting, and set CSP, HSTS, and `X-Frame-Options`.
+</Callout>
+
 ### Render the authorization step as generative UI
 
 On the client, `useRenderTool` subscribes to each tool call. When the result is `authorizationRequired`, render a Connect card with the `authUrl`; otherwise render the result. This is the generative-UI moment: the OAuth handshake becomes a card in the chat.
@@ -387,7 +395,11 @@ export default function Page() {
       if (r?.error) return <ErrorCard message={r.error} />;
       if (r?.authorizationRequired)
         return <AuthorizationCard provider={r.provider} authUrl={r.authUrl} />;
-      return <EmailSentCard recipient={parameters.recipient} subject={parameters.subject} />;
+      // Only render success on the positive discriminant. A missing or unparseable
+      // result (r === undefined) must not fall through to a green "sent" card.
+      if (r?.authorizationRequired === false)
+        return <EmailSentCard recipient={parameters.recipient} subject={parameters.subject} />;
+      return <ErrorCard message="Couldn't read the tool result." />;
     },
   });
 
@@ -691,7 +703,11 @@ export default function Page() {
       if (r?.error) return <ErrorCard message={r.error} />;
       if (r?.authorizationRequired)
         return <AuthorizationCard provider={r.provider} authUrl={r.authUrl} />;
-      return <EmailSentCard recipient={parameters.recipient} subject={parameters.subject} />;
+      // Only render success on the positive discriminant. A missing or unparseable
+      // result (r === undefined) must not fall through to a green "sent" card.
+      if (r?.authorizationRequired === false)
+        return <EmailSentCard recipient={parameters.recipient} subject={parameters.subject} />;
+      return <ErrorCard message="Couldn't read the tool result." />;
     },
   });
 
