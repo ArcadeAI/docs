@@ -51,56 +51,18 @@ Before diving into the code, here are the key [CopilotKit](https://docs.copilotk
 
 <Steps>
 
-### Scaffold a CopilotKit Built-in Agent app
+### Scaffold a Next.js app and add CopilotKit
 
-Scaffold a CopilotKit app with the CopilotKit CLI:
-
-<Tabs items={["npm", "pnpm", "yarn", "bun"]} storageKey="package-manager">
-
-<Tabs.Tab>
-
-```bash
-npx copilotkit@latest init
-```
-
-</Tabs.Tab>
-
-<Tabs.Tab>
-
-```bash
-pnpm dlx copilotkit@latest init
-```
-
-</Tabs.Tab>
-
-<Tabs.Tab>
-
-```bash
-yarn dlx copilotkit@latest init
-```
-
-</Tabs.Tab>
-
-<Tabs.Tab>
-
-```bash
-bunx copilotkit@latest init
-```
-
-</Tabs.Tab>
-
-</Tabs>
-
-Follow the prompts to set up the Built-in Agent. For the full walkthrough, see the [CopilotKit quickstart](https://docs.copilotkit.ai).
-
-Then install the Arcade SDK:
+Scaffold a Next.js App Router app, then add CopilotKit's v2 runtime and React packages, `zod`, and the Arcade SDK:
 
 <Tabs items={["npm", "pnpm", "yarn", "bun"]} storageKey="package-manager">
 
 <Tabs.Tab>
 
 ```bash
-npm install @arcadeai/arcadejs
+npx create-next-app@latest my-arcade-agent --ts --app --tailwind --eslint --import-alias "@/*"
+cd my-arcade-agent
+npm install @copilotkit/runtime @copilotkit/react-core zod @arcadeai/arcadejs
 ```
 
 </Tabs.Tab>
@@ -108,7 +70,9 @@ npm install @arcadeai/arcadejs
 <Tabs.Tab>
 
 ```bash
-pnpm add @arcadeai/arcadejs
+pnpm create next-app my-arcade-agent --ts --app --tailwind --eslint --import-alias "@/*"
+cd my-arcade-agent
+pnpm add @copilotkit/runtime @copilotkit/react-core zod @arcadeai/arcadejs
 ```
 
 </Tabs.Tab>
@@ -116,7 +80,9 @@ pnpm add @arcadeai/arcadejs
 <Tabs.Tab>
 
 ```bash
-yarn add @arcadeai/arcadejs
+yarn create next-app my-arcade-agent --ts --app --tailwind --eslint --import-alias "@/*"
+cd my-arcade-agent
+yarn add @copilotkit/runtime @copilotkit/react-core zod @arcadeai/arcadejs
 ```
 
 </Tabs.Tab>
@@ -124,12 +90,16 @@ yarn add @arcadeai/arcadejs
 <Tabs.Tab>
 
 ```bash
-bun add @arcadeai/arcadejs
+bunx create-next-app@latest my-arcade-agent --ts --app --tailwind --eslint --import-alias "@/*"
+cd my-arcade-agent
+bun add @copilotkit/runtime @copilotkit/react-core zod @arcadeai/arcadejs
 ```
 
 </Tabs.Tab>
 
 </Tabs>
+
+This guide uses CopilotKit's v2 Built-in Agent APIs (the `@copilotkit/runtime/v2` and `@copilotkit/react-core/v2` subpaths) and targets `@copilotkit/runtime@1.61.1`, `@copilotkit/react-core@1.61.1`, and `@arcadeai/arcadejs@2.4.1`. For the full CopilotKit walkthrough, see the [CopilotKit quickstart](https://docs.copilotkit.ai).
 
 ### Set up environment variables
 
@@ -332,6 +302,8 @@ export const POST = handler;
 export const OPTIONS = handler;
 ```
 
+`BuiltInAgent` model ids are `provider/model` strings — use `openai/gpt-4o`, not a bare `gpt-4o`.
+
 <Callout type="info">
   **Single-route transport.** CopilotKit's `<CopilotKit>` provider defaults to `useSingleEndpoint`, so the client POSTs every call as a `{ method, params, body }` envelope to the base path. Mount a single-route handler to match (`createCopilotRuntimeHandler({ mode: "single-route" })`).
 </Callout>
@@ -367,6 +339,11 @@ function parse<T>(result: unknown): T | undefined {
     return undefined;
   }
 }
+
+type ToolResult =
+  | { authorizationRequired: true; provider: string; authUrl: string }
+  | { authorizationRequired: false; provider: string; output: unknown }
+  | { error: string };
 
 function LoadingCard({ label }: { label: string }) {
   return <p className="text-sm text-zinc-500">{label}</p>;
@@ -431,13 +408,13 @@ export default function Page() {
     parameters: z.object({ recipient: z.string(), subject: z.string(), body: z.string() }),
     render: ({ status, parameters, result }) => {
       if (status !== "complete") return <LoadingCard label="Sending email…" />;
-      const r = parse<any>(result);
-      if (r?.error) return <ErrorCard message={r.error} />;
-      if (r?.authorizationRequired)
+      const r = parse<ToolResult>(result);
+      if (r && "error" in r) return <ErrorCard message={r.error} />;
+      if (r && r.authorizationRequired)
         return <AuthorizationCard provider={r.provider} authUrl={r.authUrl} />;
       // Only render success on the positive discriminant. A missing or unparseable
       // result (r === undefined) must not fall through to a green "sent" card.
-      if (r?.authorizationRequired === false)
+      if (r && r.authorizationRequired === false)
         return <EmailSentCard recipient={parameters.recipient} subject={parameters.subject} />;
       return <ErrorCard message="Couldn't read the tool result." />;
     },
@@ -447,7 +424,37 @@ export default function Page() {
 }
 ```
 
-Wrap your app in the v2 `<CopilotKit>` provider (`runtimeUrl="/api/copilotkit"` plus `useSingleEndpoint` to match the single-route handler) and import `@copilotkit/react-core/v2/styles.css`, exactly as in the [CopilotKit](https://docs.copilotkit.ai) Built-in Agent quickstart.
+The `<CopilotKit>` provider is a client component, so wrap it in a small `"use client"` file, then use that wrapper from your server `app/layout.tsx` (which also imports the v2 stylesheet):
+
+```tsx filename="app/providers.tsx"
+"use client";
+import { CopilotKit } from "@copilotkit/react-core/v2";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <CopilotKit runtimeUrl="/api/copilotkit" useSingleEndpoint>
+      {children}
+    </CopilotKit>
+  );
+}
+```
+
+```tsx filename="app/layout.tsx"
+import "@copilotkit/react-core/v2/styles.css";
+import { Providers } from "./providers";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
+}
+```
+
+`useSingleEndpoint` matches the single-route handler you mounted, and `runtimeUrl` points the client at `/api/copilotkit`. For the full set of provider options, see the [CopilotKit](https://docs.copilotkit.ai) Built-in Agent quickstart.
 
 ### Run it
 
@@ -678,6 +685,11 @@ function parse<T>(result: unknown): T | undefined {
   }
 }
 
+type ToolResult =
+  | { authorizationRequired: true; provider: string; authUrl: string }
+  | { authorizationRequired: false; provider: string; output: unknown }
+  | { error: string };
+
 function LoadingCard({ label }: { label: string }) {
   return <p className="text-sm text-zinc-500">{label}</p>;
 }
@@ -739,19 +751,57 @@ export default function Page() {
     parameters: z.object({ recipient: z.string(), subject: z.string(), body: z.string() }),
     render: ({ status, parameters, result }) => {
       if (status !== "complete") return <LoadingCard label="Sending email…" />;
-      const r = parse<any>(result);
-      if (r?.error) return <ErrorCard message={r.error} />;
-      if (r?.authorizationRequired)
+      const r = parse<ToolResult>(result);
+      if (r && "error" in r) return <ErrorCard message={r.error} />;
+      if (r && r.authorizationRequired)
         return <AuthorizationCard provider={r.provider} authUrl={r.authUrl} />;
       // Only render success on the positive discriminant. A missing or unparseable
       // result (r === undefined) must not fall through to a green "sent" card.
-      if (r?.authorizationRequired === false)
+      if (r && r.authorizationRequired === false)
         return <EmailSentCard recipient={parameters.recipient} subject={parameters.subject} />;
       return <ErrorCard message="Couldn't read the tool result." />;
     },
   });
 
   return <CopilotChat agentId="default" />;
+}
+```
+
+</details>
+
+<details>
+<summary>**app/providers.tsx** (full file)</summary>
+
+```tsx filename="app/providers.tsx"
+"use client";
+import { CopilotKit } from "@copilotkit/react-core/v2";
+
+export function Providers({ children }: { children: React.ReactNode }) {
+  return (
+    <CopilotKit runtimeUrl="/api/copilotkit" useSingleEndpoint>
+      {children}
+    </CopilotKit>
+  );
+}
+```
+
+</details>
+
+<details>
+<summary>**app/layout.tsx** (full file)</summary>
+
+```tsx filename="app/layout.tsx"
+import "@copilotkit/react-core/v2/styles.css";
+import { Providers } from "./providers";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <Providers>{children}</Providers>
+      </body>
+    </html>
+  );
 }
 ```
 
