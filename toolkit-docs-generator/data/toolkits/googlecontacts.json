@@ -1,7 +1,7 @@
 {
   "id": "GoogleContacts",
   "label": "Google Contacts",
-  "version": "3.5.3",
+  "version": "3.6.0",
   "description": "Arcade.dev LLM tools for Google Contacts",
   "metadata": {
     "category": "productivity",
@@ -19,6 +19,7 @@
     "allScopes": [
       "https://www.googleapis.com/auth/contacts",
       "https://www.googleapis.com/auth/contacts.readonly",
+      "https://www.googleapis.com/auth/directory.readonly",
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/userinfo.profile"
     ]
@@ -27,7 +28,7 @@
     {
       "name": "CreateContact",
       "qualifiedName": "GoogleContacts.CreateContact",
-      "fullyQualifiedName": "GoogleContacts.CreateContact@3.5.3",
+      "fullyQualifiedName": "GoogleContacts.CreateContact@3.6.0",
       "description": "Create a new contact record in Google Contacts.\n\nExamples:\n```\ncreate_contact(given_name=\"Alice\")\ncreate_contact(given_name=\"Alice\", family_name=\"Smith\")\ncreate_contact(given_name=\"Alice\", email=\"alice@example.com\")\ncreate_contact(given_name=\"Alice\", phone_number=\"+1234567890\")\ncreate_contact(\n    given_name=\"Alice\",\n    family_name=\"Smith\",\n    email=\"alice@example.com\",\n    phone_number=\"+1234567890\",\n)\n```",
       "parameters": [
         {
@@ -74,7 +75,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the details of the created contact"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -124,7 +125,7 @@
     {
       "name": "SearchContactsByEmail",
       "qualifiedName": "GoogleContacts.SearchContactsByEmail",
-      "fullyQualifiedName": "GoogleContacts.SearchContactsByEmail@3.5.3",
+      "fullyQualifiedName": "GoogleContacts.SearchContactsByEmail@3.6.0",
       "description": "Search the user's contacts in Google Contacts by email address.",
       "parameters": [
         {
@@ -155,7 +156,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the list of matching contacts"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -195,7 +196,7 @@
     {
       "name": "SearchContactsByName",
       "qualifiedName": "GoogleContacts.SearchContactsByName",
-      "fullyQualifiedName": "GoogleContacts.SearchContactsByName@3.5.3",
+      "fullyQualifiedName": "GoogleContacts.SearchContactsByName@3.6.0",
       "description": "Search the user's contacts in Google Contacts by name.",
       "parameters": [
         {
@@ -226,7 +227,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the list of matching contacts"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -266,7 +267,7 @@
     {
       "name": "SearchContactsByPhoneNumber",
       "qualifiedName": "GoogleContacts.SearchContactsByPhoneNumber",
-      "fullyQualifiedName": "GoogleContacts.SearchContactsByPhoneNumber@3.5.3",
+      "fullyQualifiedName": "GoogleContacts.SearchContactsByPhoneNumber@3.6.0",
       "description": "Search the user's contacts in Google Contacts by phone number.",
       "parameters": [
         {
@@ -297,7 +298,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the list of matching contacts"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -335,9 +336,93 @@
       }
     },
     {
+      "name": "SearchDirectoryPeople",
+      "qualifiedName": "GoogleContacts.SearchDirectoryPeople",
+      "fullyQualifiedName": "GoogleContacts.SearchDirectoryPeople@3.6.0",
+      "description": "Search the user's Google Workspace organization directory by name or email.\nUse this to resolve a colleague's email address when they are not in the\nuser's personal Contacts (e.g. someone elsewhere in the same company).\n\nReturns one page of people. When has_next_page is true, call again with the same\nquery and limit plus the returned next_page_token to fetch the next page — Google\nrejects a continuation whose query or limit differs from the original call.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Name or email to search for in the organization's directory",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of people to return per page (1-100). Defaults to 30. Keep this value unchanged across paginated calls.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Token from a previous response's next_page_token to fetch the next page. Leave empty to fetch the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/directory.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleContacts.SearchDirectoryPeople",
+        "parameters": {
+          "query": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page_token": {
+            "value": "CAEQAhgBIgcIyZOx9AUoAQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "WhoAmI",
       "qualifiedName": "GoogleContacts.WhoAmI",
-      "fullyQualifiedName": "GoogleContacts.WhoAmI@3.5.3",
+      "fullyQualifiedName": "GoogleContacts.WhoAmI@3.6.0",
       "description": "Get comprehensive user profile and Google Contacts environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Contacts access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -392,6 +477,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-06-05T12:07:56.906Z",
-  "summary": "Google Contacts (Arcade.dev) toolkit enables LLM-driven apps to read, create, and manage a user's Google Contacts and profile data with OAuth-backed access. It provides consolidated contact operations and user environment insights for chatbots, CRMs, and automation.\n\n**Capabilities**\n- Create and update structured contact records (names, emails, phones) and return normalized contact payloads.\n- Search and retrieve contacts by name, email, or phone with consistent result formatting and paging support.\n- Access authenticated user profile and Contacts environment metadata (permissions, profile picture, email).\n- Field validation, normalization, and merge/deduplication-ready metadata to aid downstream workflows.\n\n**OAuth**\nProvider: google\nScopes:\n- https://www.googleapis.com/auth/contacts\n- https://www.googleapis.com/auth/contacts.readonly\n- https://www.googleapis.com/auth/userinfo.email\n- https://www.googleapis.com/auth/userinfo.profile"
+  "generatedAt": "2026-06-26T11:58:34.980Z",
+  "summary": "The Google Contacts toolkit lets Arcade-powered LLMs read and write a user's Google Contacts and Google Workspace directory via the People API.\n\n## Capabilities\n\n- **Contact creation** — Create new contact records with any combination of given name, family name, email, and phone number.\n- **Contact search** — Look up a user's personal contacts by name, email address, or phone number.\n- **Directory search** — Search the user's Google Workspace organization directory by name or email to resolve colleagues who are not in personal contacts; supports paginated results via `next_page_token`.\n- **User profile introspection** — Retrieve the authenticated user's profile details, email, picture, and Google Contacts permission state.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details."
 }
