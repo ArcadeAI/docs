@@ -22,6 +22,9 @@ export const meta: MetaRecord = {
   "contact-us": {
     title: "Contact",
   },
+  "early-access": {
+    title: "Early Access",
+  },
 };
 
 export default meta;
