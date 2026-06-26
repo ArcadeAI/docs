@@ -25,9 +25,6 @@ export const meta: MetaRecord = {
   "deployment-hosting": {
     title: "Deployment & hosting",
   },
-  "early-access": {
-    title: "Early Access",
-  },
 };
 
 export default meta;
