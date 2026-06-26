@@ -22,6 +22,9 @@ export const meta: MetaRecord = {
   "contact-us": {
     title: "Contact",
   },
+  "registry-early-access": {
+    display: "hidden",
+  },
   "early-access": {
     title: "Early Access",
   },
