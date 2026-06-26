@@ -5,7 +5,7 @@ const meta: MetaRecord = {
     title: "Warp Pipes",
     href: "/en/guides/deployment-hosting/warp-pipes",
   },
-  "registry": {
+  registry: {
     title: "Arcade Registry",
     href: "/en/resources/registry-early-access",
   },
