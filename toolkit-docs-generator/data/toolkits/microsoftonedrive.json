@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOnedrive",
   "label": "Microsoft OneDrive",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Arcade.dev LLM tools for Microsoft OneDrive",
   "metadata": {
     "category": "productivity",
@@ -18,16 +18,15 @@
     "providerId": "microsoft",
     "allScopes": [
       "Files.Read",
-      "Files.ReadWrite",
-      "User.Read"
+      "Files.ReadWrite"
     ]
   },
   "tools": [
     {
       "name": "CopyItem",
       "qualifiedName": "MicrosoftOnedrive.CopyItem",
-      "fullyQualifiedName": "MicrosoftOnedrive.CopyItem@0.3.0",
-      "description": "Copy a file or folder. Returns a completed item or an operation id.",
+      "fullyQualifiedName": "MicrosoftOnedrive.CopyItem@1.0.0",
+      "description": "Copy a file or folder and wait for the copy to finish, returning the new item.\n\nMicrosoft Graph performs copies asynchronously; this tool polls the operation to\ncompletion within a bounded budget so the caller receives the finished item directly.\nA stale or mistyped source id returns a structured not_found envelope (status\n\"not_found\", retryable false) rather than a fatal error, so the caller can branch on\nthe field.",
       "parameters": [
         {
           "name": "item_id",
@@ -52,6 +51,18 @@
           "description": "Optional new name for the copied item.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "conflict_behavior",
+          "type": "string",
+          "required": false,
+          "description": "How to resolve a name that already exists in the destination folder. Defaults to FAIL (report the conflict without copying).",
+          "enum": [
+            "fail",
+            "replace",
+            "rename"
+          ],
+          "inferrable": true
         }
       ],
       "auth": {
@@ -65,24 +76,29 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Copy status and result."
+        "description": "Copy result."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOnedrive.CopyItem",
         "parameters": {
           "item_id": {
-            "value": "0123456789ABCDEF!123",
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHLJD46S",
             "type": "string",
             "required": true
           },
           "destination_folder_id": {
-            "value": "67890ABCDEF!456",
+            "value": "01BYE5RZ74Y2GOVW7725BZO354PWSELRRZ",
             "type": "string",
             "required": false
           },
           "new_name": {
-            "value": "Project Plan - Copy.docx",
+            "value": "Project_Report_Copy.docx",
+            "type": "string",
+            "required": false
+          },
+          "conflict_behavior": {
+            "value": "rename",
             "type": "string",
             "required": false
           }
@@ -103,7 +119,7 @@
             "create"
           ],
           "readOnly": false,
-          "destructive": false,
+          "destructive": true,
           "idempotent": false,
           "openWorld": true
         },
@@ -113,7 +129,7 @@
     {
       "name": "CreateFolder",
       "qualifiedName": "MicrosoftOnedrive.CreateFolder",
-      "fullyQualifiedName": "MicrosoftOnedrive.CreateFolder@0.3.0",
+      "fullyQualifiedName": "MicrosoftOnedrive.CreateFolder@1.0.0",
       "description": "Create a new folder in OneDrive.",
       "parameters": [
         {
@@ -186,14 +202,52 @@
     {
       "name": "CreateShareLink",
       "qualifiedName": "MicrosoftOnedrive.CreateShareLink",
-      "fullyQualifiedName": "MicrosoftOnedrive.CreateShareLink@0.3.0",
-      "description": "Create a share link for a OneDrive item.",
+      "fullyQualifiedName": "MicrosoftOnedrive.CreateShareLink@1.0.0",
+      "description": "Create a share link for a OneDrive item.\n\nSet link_type to EDIT to let recipients change the item; use scope ORGANIZATION to keep\nthe link inside the tenant instead of anyone-with-the-link.",
       "parameters": [
         {
           "name": "item_id",
           "type": "string",
           "required": true,
           "description": "The ID of the file or folder to share.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "link_type",
+          "type": "string",
+          "required": false,
+          "description": "Whether the link grants read-only (view) or read-write (edit) access. Defaults to VIEW.",
+          "enum": [
+            "view",
+            "edit"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "required": false,
+          "description": "Who can use the link: anyone with the link (anonymous) or only people inside the organization (organization). Defaults to ANONYMOUS.",
+          "enum": [
+            "anonymous",
+            "organization"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "expiration_date",
+          "type": "string",
+          "required": false,
+          "description": "Date the link stops working (YYYY-MM-DD). Omit for a link that never expires.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "required": false,
+          "description": "Password required to open the link. Omit for no password. Only honored on anonymous links.",
           "enum": null,
           "inferrable": true
         }
@@ -216,9 +270,29 @@
         "toolName": "MicrosoftOnedrive.CreateShareLink",
         "parameters": {
           "item_id": {
-            "value": "0123456789abcdef!12345",
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
             "type": "string",
             "required": true
+          },
+          "link_type": {
+            "value": "EDIT",
+            "type": "string",
+            "required": false
+          },
+          "scope": {
+            "value": "ORGANIZATION",
+            "type": "string",
+            "required": false
+          },
+          "expiration_date": {
+            "value": "2025-12-31",
+            "type": "string",
+            "required": false
+          },
+          "password": {
+            "value": "Secure@Share2025",
+            "type": "string",
+            "required": false
           }
         },
         "requiresAuth": true,
@@ -246,14 +320,15 @@
     {
       "name": "DeleteItem",
       "qualifiedName": "MicrosoftOnedrive.DeleteItem",
-      "fullyQualifiedName": "MicrosoftOnedrive.DeleteItem@0.3.0",
-      "description": "Delete a file or folder from OneDrive.",
+      "fullyQualifiedName": "MicrosoftOnedrive.DeleteItem@1.0.0",
+      "description": "Delete one or more files or folders from OneDrive in a single call.\n\nAn item open for editing elsewhere is reported as locked and retryable rather than\nfailing the whole batch; every requested id is attempted.",
       "parameters": [
         {
-          "name": "item_id",
-          "type": "string",
+          "name": "item_ids",
+          "type": "array",
+          "innerType": "string",
           "required": true,
-          "description": "The ID of the file or folder to delete.",
+          "description": "IDs of the files or folders to delete. Pass one id or many; each is attempted independently so one locked item never aborts the rest.",
           "enum": null,
           "inferrable": true
         }
@@ -269,15 +344,19 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Deletion confirmation."
+        "description": "Per-item deletion outcomes."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOnedrive.DeleteItem",
         "parameters": {
-          "item_id": {
-            "value": "0123456789ABCDEF!123",
-            "type": "string",
+          "item_ids": {
+            "value": [
+              "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHNOU25O",
+              "01BYE5RZ74YMGSPGOHNOU36P",
+              "01ABCDE5RZ6QN3ZWBTUFABC123DEF456GH"
+            ],
+            "type": "array",
             "required": true
           }
         },
@@ -304,9 +383,207 @@
       }
     },
     {
+      "name": "DownloadFile",
+      "qualifiedName": "MicrosoftOnedrive.DownloadFile",
+      "fullyQualifiedName": "MicrosoftOnedrive.DownloadFile@1.0.0",
+      "description": "Download a OneDrive file's content as base64, paging large files by byte offset.\n\nFiles at or under the per-call cap return fully in one call; for larger files, re-call\nwith offset set to the returned next_offset until is_final is true. A stale or mistyped\nid returns a structured not_found envelope (status \"not_found\", retryable false) rather\nthan a fatal error, so the caller can branch on the field.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the file to download.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "The drive containing the file. Omit to use the current user's OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed byte offset of the page to fetch. Defaults to 0 (start of file).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_bytes",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum raw bytes to return on this call (1 to 5242880). Defaults to 16384 (16 KiB), sized so the base64 page fits an agent's tool-result budget; raise it to fetch a larger window per call, lower it for a tighter budget.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A page of the file's content as base64."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOnedrive.DownloadFile",
+        "parameters": {
+          "item_id": {
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHNOU25O",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "b!aB1cD2eF3gH4iJ5kL6mN7oP8qR9sT0uV1wX2yZ3",
+            "type": "string",
+            "required": false
+          },
+          "offset": {
+            "value": 16384,
+            "type": "integer",
+            "required": false
+          },
+          "max_bytes": {
+            "value": 524288,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "FindDuplicateFiles",
+      "qualifiedName": "MicrosoftOnedrive.FindDuplicateFiles",
+      "fullyQualifiedName": "MicrosoftOnedrive.FindDuplicateFiles@1.0.0",
+      "description": "Find files that are byte-identical copies of each other across folders in one call.\n\nGroups examined files by content fingerprint and returns only the fingerprints with two\nor more copies, each group flagging the copy to keep and the rest as deletion candidates,\nso a de-dup cleanup can act without listing and grouping by hash manually.\nThe scan walks the drive directly rather than the search index, so a file copied moments\nago is seen immediately. Supply folder_id to scope the scan to a subtree (much more likely to\nbe complete, though still bounded by limit and an internal walk cap); keywords further\nrestrict to files whose name contains the term.\nWhen truncated is true, truncated_warning explains what was missed and how to refocus.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Case-insensitive substring matched against file names; only files whose name contains it are examined, so a focused term finds copies of a specific file. Leave empty to scan every file regardless of name (a whole-drive de-dup audit), bounded by the same scan cap. Can be combined with folder_id to restrict to files matching this term within a specific subtree — the two filters are applied simultaneously. The scan walks the drive directly rather than the search index, so files written moments ago are included.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum files to examine in one scan (1 to 200). Defaults to 200. Lower it to speed up a focused scan; the response flags when this cap truncated the scan.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Scope the scan to a specific folder's subtree. When provided, only files within that folder and its subfolders are examined, which makes a complete result far more likely for a focused subtree. The scan is still bounded by limit and an internal walk cap, so a very large subtree can still be truncated — check the truncated flag. Omit to scan from the drive root.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keep_by_name_contains",
+          "type": "string",
+          "required": false,
+          "description": "Override the default newest-copy keep heuristic: within each duplicate group, the copy whose name contains this string (case-insensitive) is flagged as keep_item_id. If no copy in a group matches, the newest copy is kept. Leave empty to always keep the newest copy.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Groups of byte-identical files found among the matches."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOnedrive.FindDuplicateFiles",
+        "parameters": {
+          "keywords": {
+            "value": "budget report",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "folder_id": {
+            "value": "01BYE5RZ6QN3ZWBTUBB5BZR7MZOT6PPLQK",
+            "type": "string",
+            "required": false
+          },
+          "keep_by_name_contains": {
+            "value": "final",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetCopyStatus",
       "qualifiedName": "MicrosoftOnedrive.GetCopyStatus",
-      "fullyQualifiedName": "MicrosoftOnedrive.GetCopyStatus@0.3.0",
+      "fullyQualifiedName": "MicrosoftOnedrive.GetCopyStatus@1.0.0",
       "description": "Check status of an async copy operation using the token returned by copy_item.",
       "parameters": [
         {
@@ -364,9 +641,69 @@
       }
     },
     {
+      "name": "GetItem",
+      "qualifiedName": "MicrosoftOnedrive.GetItem",
+      "fullyQualifiedName": "MicrosoftOnedrive.GetItem@1.0.0",
+      "description": "Resolve a single OneDrive file or folder's metadata directly from its id.\n\nA stale or mistyped id returns a structured not_found envelope (status \"not_found\",\nretryable false) rather than a fatal error, so the caller can branch on the field.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the file or folder to resolve.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The resolved item's metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOnedrive.GetItem",
+        "parameters": {
+          "item_id": {
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetMyDrive",
       "qualifiedName": "MicrosoftOnedrive.GetMyDrive",
-      "fullyQualifiedName": "MicrosoftOnedrive.GetMyDrive@0.3.0",
+      "fullyQualifiedName": "MicrosoftOnedrive.GetMyDrive@1.0.0",
       "description": "Get metadata about the user's OneDrive (id, name, quota, owner).",
       "parameters": [],
       "auth": {
@@ -411,14 +748,14 @@
     {
       "name": "GetSharedWithMe",
       "qualifiedName": "MicrosoftOnedrive.GetSharedWithMe",
-      "fullyQualifiedName": "MicrosoftOnedrive.GetSharedWithMe@0.3.0",
+      "fullyQualifiedName": "MicrosoftOnedrive.GetSharedWithMe@1.0.0",
       "description": "List files shared with the current user.",
       "parameters": [
         {
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of items to list. Defaults to 100, max is 500.",
+          "description": "The number of items to return in this page (1 to 50). Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -426,7 +763,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "The next_token value returned by a previous request.",
+          "description": "Opaque cursor from a previous response's next_token to fetch the next page. Pass it back unchanged; omit for the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -484,7 +821,7 @@
     {
       "name": "ListFolderItems",
       "qualifiedName": "MicrosoftOnedrive.ListFolderItems",
-      "fullyQualifiedName": "MicrosoftOnedrive.ListFolderItems@0.3.0",
+      "fullyQualifiedName": "MicrosoftOnedrive.ListFolderItems@1.0.0",
       "description": "List files and folders in a OneDrive folder. Lists root if folder_id is omitted.",
       "parameters": [
         {
@@ -499,7 +836,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of items to list. Defaults to 100, max is 500.",
+          "description": "The number of items to return in this page (1 to 50). Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -507,7 +844,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "The next_token value returned by a previous request.",
+          "description": "Opaque cursor from a previous response's next_token to fetch the next page. Pass it back unchanged; omit for the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -568,24 +905,106 @@
       }
     },
     {
-      "name": "MoveItem",
-      "qualifiedName": "MicrosoftOnedrive.MoveItem",
-      "fullyQualifiedName": "MicrosoftOnedrive.MoveItem@0.3.0",
-      "description": "Move a file or folder to a new location in OneDrive.",
+      "name": "ListItemPermissions",
+      "qualifiedName": "MicrosoftOnedrive.ListItemPermissions",
+      "fullyQualifiedName": "MicrosoftOnedrive.ListItemPermissions@1.0.0",
+      "description": "List who can currently access a OneDrive item: every share link and direct grant on it.\n\nUse this to answer \"who can see this?\" and to find the permission_id needed to revoke a\ngrant. A stale or mistyped id returns a structured not_found envelope (status \"not_found\",\nretryable false) rather than a fatal error, so the caller can branch on the field. When\nhas_more is true, pass next_token back unchanged to fetch the remaining grants.",
       "parameters": [
         {
           "name": "item_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the item to move.",
+          "description": "The ID of the file or folder whose sharing grants to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Opaque cursor from a previous response's next_token to fetch the next page of grants. Pass it back unchanged; omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The item's current sharing grants."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOnedrive.ListItemPermissions",
+        "parameters": {
+          "item_id": {
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
+            "type": "string",
+            "required": true
+          },
+          "next_token": {
+            "value": "eyJza2lwdG9rZW4iOiJMU3RKaVFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSJ9",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "MoveItem",
+      "qualifiedName": "MicrosoftOnedrive.MoveItem",
+      "fullyQualifiedName": "MicrosoftOnedrive.MoveItem@1.0.0",
+      "description": "Move and/or rename one or more files or folders in OneDrive in a single call.\n\nProvide new_parent_id to relocate items, new_name (single item only) to rename in place,\nor both. At least one must be supplied. An item open for editing elsewhere is reported as\nlocked and retryable rather than failing the whole batch.",
+      "parameters": [
+        {
+          "name": "item_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "IDs of the items to move and/or rename. Pass one id or many; every listed item is moved into the same new_parent_id.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "new_parent_id",
           "type": "string",
-          "required": true,
-          "description": "The ID of the destination folder.",
+          "required": false,
+          "description": "Destination folder ID to move every listed item into. Omit to leave items in their current folder (rename only).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": false,
+          "description": "New name for the item, including its extension. Only valid when exactly one id is given; omit to leave names unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -601,21 +1020,29 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The updated item metadata."
+        "description": "Per-item move/rename outcomes."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOnedrive.MoveItem",
         "parameters": {
-          "item_id": {
-            "value": "01ZYXWVUTSRQ!123",
-            "type": "string",
+          "item_ids": {
+            "value": [
+              "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
+              "01BYE5RZ74BVZK4YGBZAGLKFP2BQWERTYU"
+            ],
+            "type": "array",
             "required": true
           },
           "new_parent_id": {
-            "value": "01ZYXWVUTSRQ!999",
+            "value": "01BYE5RZ5RANDOMFOLDERID7HJKLMNOPQR",
             "type": "string",
-            "required": true
+            "required": false
+          },
+          "new_name": {
+            "value": "quarterly_report_final.docx",
+            "type": "string",
+            "required": false
           }
         },
         "requiresAuth": true,
@@ -641,9 +1068,95 @@
       }
     },
     {
+      "name": "RevokeItemPermission",
+      "qualifiedName": "MicrosoftOnedrive.RevokeItemPermission",
+      "fullyQualifiedName": "MicrosoftOnedrive.RevokeItemPermission@1.0.0",
+      "description": "Revoke one or all anonymous sharing grants on a OneDrive item.\n\nSingle-grant mode (revoke_all_anonymous=false): removes the grant identified by\npermission_id. An unknown item or permission id returns a structured not_found envelope\nrather than a fatal error. To revoke an inherited grant, target the parent folder instead.\n\nBulk mode (revoke_all_anonymous=true): removes every anonymous (anyone-with-the-link) grant\non the item in one call. revoked_count reports how many were removed; 0 means none existed.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the file or folder the permission is on.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "permission_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the sharing grant to revoke. Required unless revoke_all_anonymous is true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "revoke_all_anonymous",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, revokes every anonymous sharing link on the item in one call. A common job is removing all open-web links from a file; this makes that a single call instead of one revoke per link — list the item's permissions first to see what will be removed. When true, permission_id is ignored. Defaults to false (single-grant mode, permission_id required).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Outcome of revoking the sharing grant(s)."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOnedrive.RevokeItemPermission",
+        "parameters": {
+          "item_id": {
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
+            "type": "string",
+            "required": true
+          },
+          "permission_id": {
+            "value": "perm-abc123xyz789",
+            "type": "string",
+            "required": false
+          },
+          "revoke_all_anonymous": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "cloud_storage"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "SearchItems",
       "qualifiedName": "MicrosoftOnedrive.SearchItems",
-      "fullyQualifiedName": "MicrosoftOnedrive.SearchItems@0.3.0",
+      "fullyQualifiedName": "MicrosoftOnedrive.SearchItems@1.0.0",
       "description": "Search for files and folders in the user's OneDrive.\n\nIt may take a few seconds to minutes for the search index to update with newly created items.",
       "parameters": [
         {
@@ -658,7 +1171,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of items to list. Defaults to 50, max is 200.",
+          "description": "The number of items to return in this page (1 to 50). Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -666,7 +1179,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "The next_token value returned by a previous request.",
+          "description": "Opaque cursor from a previous response's next_token to fetch the next page. Pass it back unchanged; omit for the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -729,21 +1242,21 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOnedrive.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOnedrive.WhoAmI@0.3.0",
-      "description": "Get information about the current user and their OneDrive environment.",
+      "fullyQualifiedName": "MicrosoftOnedrive.WhoAmI@1.0.0",
+      "description": "Identify the current user and confirm OneDrive access for orientation.",
       "parameters": [],
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "User.Read"
+          "Files.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Get comprehensive user profile and OneDrive environment information."
+        "description": "The current user's identity and OneDrive environment."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -775,6 +1288,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-03-24T11:24:51.308Z",
-  "summary": "Microsoft OneDrive provider for Arcade.dev exposes LLM-accessible operations to manage files, folders, sharing, search, and drive/user metadata in a user's OneDrive. It enables automation of common workflows—creating, moving, copying, deleting, listing, searching, and sharing items—plus monitoring async operations like large-file copies.\n\n**Capabilities**\n- Unified file and folder lifecycle management (create/move/copy/delete/list) with async copy status tracking.\n- Content discovery and indexing-aware search across the user's drive and items shared with them.\n- Share link creation and shared-item workflows without exposing individual tool signatures.\n- Drive and user metadata introspection (quota, owner, environment).\n\n**OAuth**\n- Provider: microsoft\n- Scopes: Files.Read, Files.ReadWrite, User.Read"
+  "generatedAt": "2026-06-27T11:38:19.177Z",
+  "summary": "Microsoft OneDrive toolkit for Arcade provides 16 LLM-callable tools that read, write, organize, and share files and folders in a user's OneDrive via the Microsoft Graph API.\n\n## Capabilities\n\n- **Drive & item inspection:** Retrieve drive metadata and quota, resolve individual item metadata by ID, list folder contents (including root), and identify the current user/confirm access.\n- **File operations:** Download files as base64 with paginated byte-offset support for large files; copy items with synchronous polling to completion; move and/or rename single or multiple items in one call; delete one or more items in a single batched call.\n- **Folder management:** Create new folders anywhere in the drive hierarchy.\n- **Search & duplicate detection:** Full-text search across the drive's index; content-fingerprint scan to find byte-identical duplicate files within a subtree, with flagged keep/delete candidates returned directly.\n- **Sharing & permissions:** Create share links (view or edit, tenant-scoped or anonymous); list all grants and share links on an item with pagination; revoke a single grant or all anonymous grants in bulk.\n- **Async operation support:** Poll a long-running copy operation by token when the caller needs finer control over timing.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with **Microsoft** as the identity provider. Arcade manages the OAuth flow automatically.\n\nSee the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
 }

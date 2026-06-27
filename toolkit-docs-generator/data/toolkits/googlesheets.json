@@ -1,7 +1,7 @@
 {
   "id": "GoogleSheets",
   "label": "Google Sheets",
-  "version": "8.2.0",
+  "version": "8.2.1",
   "description": "Arcade.dev LLM tools for Google Sheets.",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "CheckSpreadsheetAccess",
       "qualifiedName": "GoogleSheets.CheckSpreadsheetAccess",
-      "fullyQualifiedName": "GoogleSheets.CheckSpreadsheetAccess@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.CheckSpreadsheetAccess@8.2.1",
       "description": "Check whether this app can already read each of several spreadsheets, in one\nbatched pre-flight call, before attempting to read them.\n\nUse this when the user references multiple spreadsheets so any that are not yet\naccessible can be granted together in a single picker step, instead of hitting a\nseparate access error and grant prompt for each one. Each input may be a bare file id\nor a full Google Sheets/Drive URL.\n\nReturns ``spreadsheets`` (a per-id list with ``accessible``, the ``title`` and\n``mime_type`` when the file was read, and a ``reason`` when not usable),\n``all_accessible`` (true only when every id is an already-accessible spreadsheet),\n``connected_account_email`` (the connected Google account, empty when unknown), and a\n``grant`` block. ``grant`` is empty when nothing needs granting; otherwise it lists the\nungranted ids (``ungranted_ids``) plus, when the inline picker is enabled, a single\npicker URL covering them all.\n\nA ``reason`` of ``not_accessible_or_not_found`` is either a file not granted to this app\nyet or one that does not exist (indistinguishable here) — the picker resolves the\nformer. ``not_a_spreadsheet`` is an accessible file of another type (a Doc, PDF, image,\nor Excel/CSV file); granting cannot change a type, so for an Excel/CSV file ask the user\nto open it in Google Sheets and use File, Save as Google Sheets, then share the\nconverted file. ``invalid_reference`` is an input that is not a Drive id or link at all;\nask the user to re-check it.",
       "parameters": [
         {
@@ -99,7 +99,7 @@
     {
       "name": "CommentOnSpreadsheet",
       "qualifiedName": "GoogleSheets.CommentOnSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.CommentOnSpreadsheet@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.CommentOnSpreadsheet@8.2.1",
       "description": "Create a comment on a spreadsheet, edit a comment's body, or resolve/reopen it.\n\nComments are created at the file level: the Drive API cannot anchor a NEW Sheets comment to a\nspecific cell or range. Cell/range-anchored comments made in the Sheets UI are still readable\nvia list_spreadsheet_comments (which returns their anchor). Editing a comment's body is\nallowed only for the comment's author.",
       "parameters": [
         {
@@ -209,7 +209,7 @@
     {
       "name": "CreateOrEditSpreadsheet",
       "qualifiedName": "GoogleSheets.CreateOrEditSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@8.2.1",
       "description": "Create a new spreadsheet or batch-edit an existing one.\n\nOmit `spreadsheet_id` to create; provide it to edit. All writes flow through\n`requests[]` — typed operations like updateCells, addSheet, sortRange,\naddConditionalFormatRule, autoResizeDimensions, and more.\n\nFor updateCells use ExtendedValue with an explicit type field (stringValue,\nnumberValue, boolValue, formulaValue).\n\nBy default, build clean, professional-looking tables with restrained, consistent\nformatting and plain-text tab names/headers (no emojis); only use emojis or\ndecorative styling when the user explicitly asks for it.",
       "parameters": [
         {
@@ -660,7 +660,7 @@
     {
       "name": "DeleteComment",
       "qualifiedName": "GoogleSheets.DeleteComment",
-      "fullyQualifiedName": "GoogleSheets.DeleteComment@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.DeleteComment@8.2.1",
       "description": "Delete a comment from a spreadsheet.\n\nOnly the comment's author can delete it (enforced by Google Drive); deleting marks the\nwhole thread (the comment and its replies) as deleted.",
       "parameters": [
         {
@@ -740,7 +740,7 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@8.2.1",
       "description": "Generate a URL where the user can grant this app access to spreadsheets.\n\nOpens Google's first-party Drive picker, filtered to Google Sheets, where the user\nbrowses and selects which spreadsheets to share with this application — it is not a\nsign-in or credential prompt.\n\nUse this when a prior tool reported that a file was not found or access was denied, and\nthe user expects the file to exist. After the user completes the picker flow, retry the\nprior operation.",
       "parameters": [],
       "auth": {
@@ -783,7 +783,7 @@
     {
       "name": "GetSpreadsheetEditHistory",
       "qualifiedName": "GoogleSheets.GetSpreadsheetEditHistory",
-      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@8.2.1",
       "description": "Report who edited a spreadsheet and when, from Google Drive revisions.\n\nReports the \"who\" and \"when\" only — not which cells changed, and it can't revert.\n\n'summary' (default) answers \"who last edited this and when\" (read from the file's head,\nso always accurate), plus per-window aggregates (revisions read, contributors, first\nedit) and a preview of recent edits — computed over a bounded window of history per call.\nThese aggregates describe the whole history only when `is_incomplete` is false; it is\ntrue when the scan was resumed from a token and/or more history remains. To answer\n\"when was this first edited?\" or \"who contributed?\" reliably, call from the beginning\n(no `pagination_token`) and check `is_incomplete` is false. `pagination_token` is\nreturned when more pages remain so you can resume.\n\n'list' returns one page of individual revisions, oldest first. Drive can't sort\nnewest-first, so the most recent individual revisions are on the final page.",
       "parameters": [
         {
@@ -892,7 +892,7 @@
     {
       "name": "InspectSpreadsheet",
       "qualifiedName": "GoogleSheets.InspectSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@8.2.1",
       "description": "Inspect a Google Sheets spreadsheet's structure or read a range of cells.\n\nUse the default 'structure' mode to understand a workbook cheaply before reading.\nSwitch to 'read' mode to pull a range as a grid of rows, optionally with\nper-cell annotations and a rendered markdown/csv/tsv export.\n\nIn 'read' mode the response's per-tab 'sheets' block reports only tab identity and\nthe allocated grid; its scan-derived fields (used_range, populated_cell_count,\nformula_cell_count, first_row, table_regions) are placeholders (0/empty) because read\nmode does not scan the tab — they do NOT mean the tab is empty or that it has no\ntables. The data you read is in the top-level 'range' and 'rows'. Call 'structure'\nmode for those aggregates and for the workbook's charts, merges, protected ranges, and\nconditional formats.\n\nWorkflow for a tab that holds multiple tables, or a table that does not start at A1:\ncall 'structure' first and use that tab's estimated 'table_regions' to choose the\na1_range to read or filter, so you target one table instead of a glued multi-table\nrange.\n\nAlways check the response's top-level 'warnings' list: read mode reports there when a\nresult was capped or trimmed (cell budget, the per-cell annotation cap, or an empty\nfilter scan) and tells you how to recover (page 'next_range', narrow 'a1_range',\n'select_columns', or request fewer annotation kinds).",
       "parameters": [
         {
@@ -1174,7 +1174,7 @@
     {
       "name": "ListSpreadsheetComments",
       "qualifiedName": "GoogleSheets.ListSpreadsheetComments",
-      "fullyQualifiedName": "GoogleSheets.ListSpreadsheetComments@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.ListSpreadsheetComments@8.2.1",
       "description": "List a spreadsheet's comment threads, or the full replies of a single comment.\n\nIn 'comments' mode each comment includes up to a few trimmed reply previews plus the total reply_count; use 'thread' mode for a comment's complete reply list. Without filters/ordering, pagination walks every comment. Client-side filters (has_replies, resolved) and order_by are applied only within a bounded scan of the first 500 comments, so on larger sheets drop them and page through everything with the native (unbounded) pagination. Each comment's Drive anchor is returned when it was cell/range-anchored in the Sheets UI; comments created via the API are file-level. Filtering, ordering, and offset pagination are best-effort: results can drift if comments are added or removed between paginated calls.",
       "parameters": [
         {
@@ -1397,7 +1397,7 @@
     {
       "name": "ReplyToComment",
       "qualifiedName": "GoogleSheets.ReplyToComment",
-      "fullyQualifiedName": "GoogleSheets.ReplyToComment@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.ReplyToComment@8.2.1",
       "description": "Add a reply to an existing comment on a spreadsheet.\n\nTo resolve or reopen the comment instead, use comment_on_spreadsheet with a status.",
       "parameters": [
         {
@@ -1490,7 +1490,7 @@
     {
       "name": "ScanForDataIssues",
       "qualifiedName": "GoogleSheets.ScanForDataIssues",
-      "fullyQualifiedName": "GoogleSheets.ScanForDataIssues@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.ScanForDataIssues@8.2.1",
       "description": "Deterministically flag 'weird'/bad cells in spreadsheet data.\n\nNo LLM judgement: the same input always returns the same flags. Each cell-level finding\ncarries a coord, a 0-based row_index/column_index (ready for a Sheets GridRange), the rule,\na severity (high -> red, medium/low -> yellow), and a note-ready reason — so the output\ndrops straight into an annotate/format recipe. In the default `mode='grouped'` these are\naggregated per rule+column within each table into `groups` (with A1 `coords`); use\n`mode='list'` to get every flagged cell in `flags` with its 0-based indices.\n\nProvide `spreadsheet_id` to scan a live sheet (scan one tab via sheet_id/sheet_title, or\nevery tab when both are omitted). Set `orientation='rows'` for transposed tables whose\nfields run down a column instead of across a row. Findings come back as flags (cell-level,\nhigh certainty) and alerts (table-level, lower certainty), grouped sheet -> table -> rule.\n\nIn all-sheets mode an unreadable tab never aborts the scan: its title is collected in\n`failed_sheets` (and echoed as a `warnings` entry) while every other tab still returns.\n`failed_sheets` is empty for a single-tab scan and whenever every tab reads cleanly.",
       "parameters": [
         {
@@ -1712,7 +1712,7 @@
     {
       "name": "SearchSpreadsheets",
       "qualifiedName": "GoogleSheets.SearchSpreadsheets",
-      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@8.2.1",
       "description": "Searches for spreadsheets in the user's Google Drive based on the titles and content and\nreturns the title, ID, and URL for each matching spreadsheet.\n\nDoes not return the content/data of the sheets in the spreadsheets - only the metadata.\nExcludes spreadsheets that are in the trash.",
       "parameters": [
         {
@@ -1905,7 +1905,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleSheets.WhoAmI",
-      "fullyQualifiedName": "GoogleSheets.WhoAmI@8.2.0",
+      "fullyQualifiedName": "GoogleSheets.WhoAmI@8.2.1",
       "description": "Get comprehensive user profile and Google Sheets environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Sheets access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -1955,6 +1955,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-06-17T12:31:32.590Z",
+  "generatedAt": "2026-06-27T11:38:13.141Z",
   "summary": "**Google Sheets toolkit** integrates Arcade with Google Sheets and Google Drive, enabling LLM-powered agents to read, write, comment on, audit, and search spreadsheets on behalf of authenticated users.\n\n## Capabilities\n\n- **Access pre-flight & file discovery:** Batch-check spreadsheet accessibility before reading, generate Drive picker URLs to grant access, and search spreadsheets by title/content across a user's Drive.\n- **Read & inspect spreadsheets:** Retrieve workbook structure (tabs, charts, merges, protected ranges, conditional formats) or read specific cell ranges with optional markdown/CSV/TSV export and per-cell annotations.\n- **Write & edit spreadsheets:** Create new spreadsheets or apply batch edits to existing ones using typed operations (cell updates, sheet additions, sort, conditional formatting, auto-resize, and more).\n- **Comments & collaboration:** List, create, edit, resolve/reopen, reply to, and delete comment threads; supports both file-level and cell/range-anchored comments.\n- **Data quality scanning:** Deterministically flag bad/weird cells by rule and severity with zero-based grid coordinates ready for downstream annotation or formatting recipes.\n- **Edit history & identity:** Inspect Drive revision history (contributors, timestamps, pagination) and retrieve the authenticated user's profile and permissions.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. Arcade handles the OAuth flow automatically. See the [Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n### `ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`\n\nThis secret controls whether the inline Google Drive picker URL feature is enabled. When set, `CheckSpreadsheetAccess` and `GenerateGoogleFilePickerUrl` will return a ready-to-use picker URL inside the tool response instead of requiring a separate step to generate one. This is a feature-flag-style value configured in your Arcade environment — it is not a credential issued by Google.\n\nObtain or configure this value through your Arcade dashboard at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets).\n\nFor full details on defining and using secrets in Arcade tools, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
 }
