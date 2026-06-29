@@ -354,14 +354,14 @@ function generateLlmsTxt(
   // Header
   lines.push("# Arcade");
   lines.push("");
-  lines.push("> Arcade is the only runtime for MCP");
+  lines.push("> Arcade is the actions runtime for enterprise AI agents.");
   lines.push("");
   lines.push(
-    "As the MCP runtime, Arcade is the only one able to deliver secure agent authorization, high-accuracy tools, and centralized governance. Deploy multi-user AI agents that take actions across any system with granular permissions and complete visibility. No complex infrastructure required. Ship faster and scale with control."
+    "Arcade is the actions runtime for enterprise AI agents. We enforce your security policies on every action, execute reliably across any system, and govern agents centrally in production. Configure once and use any model, framework, and client — deploy the first agent the same way you deploy the hundredth."
   );
   lines.push("");
   lines.push(
-    "Arcade delivers three core capabilities: Deploy agents even your security team will love with authorization-first architecture. Unlock highest accuracy actions across all MCP tools with agent-optimized integrations and the Arcade TDK. Maintain centralized control over production MCP without slowing down AI development. Access 1000s of pre-built MCP servers or bring your own, with unified governance across all tools."
+    "Arcade delivers three capabilities. Enforce (Agent Authorization): deploy agents your security team approves — your existing IdP, DLP, SIEM, and compliance policies plus per-action authorization enforced at runtime. Execute (Agent-Optimized Tools): the largest catalog of agent-optimized tools — 7,500+ across 81 MCP servers, built for reliable execution at scale, not thin API wrappers. Govern (Agent Lifecycle Governance): a central control plane with a shared registry, version control, visibility filtering, and OpenTelemetry audit logs."
   );
   lines.push("");
 
