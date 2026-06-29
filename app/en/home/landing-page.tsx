@@ -240,9 +240,10 @@ export function LandingPage() {
                 delay: ANIMATION_DELAYS.initial,
               }}
             >
-              Enforce your security policies on every action, execute reliably
-              across 7,500+ agent-optimized tools, and govern agents centrally —
-              so your agents take real action in production.
+              Arcade handles OAuth and manages user tokens, enforces your
+              security policies on every action, executes reliably across 7,500+
+              agent-optimized tools, and governs agents centrally — so your
+              agents take real action in production.
             </motion.p>
             <motion.div
               animate={{ opacity: 1, y: 0 }}
@@ -579,7 +580,7 @@ export function LandingPage() {
           </div>
           <div className="mt-12 grid grid-cols-1 gap-8 min-[1062px]:grid-cols-3">
             <QuickStartCard
-              description="Deploy agents your security team approves. Enforce your existing IdP, DLP, and compliance policies plus per-action agent authorization at runtime — handling OAuth, API keys, and tokens for tools like Gmail and Google Drive."
+              description="Deploy agents your security team approves. Arcade handles OAuth and manages user tokens, API keys, and secrets for tools like Gmail and Google Drive — then enforces your existing IdP, DLP, and compliance policies plus per-action authorization at runtime."
               href="/guides/tool-calling/custom-apps/auth-tool-calling"
               icon={Shield}
               title="Enforce — Agent Authorization"

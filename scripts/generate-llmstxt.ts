@@ -361,7 +361,7 @@ function generateLlmsTxt(
   );
   lines.push("");
   lines.push(
-    "Arcade delivers three capabilities. Enforce (Agent Authorization): deploy agents your security team approves — your existing IdP, DLP, SIEM, and compliance policies plus per-action authorization enforced at runtime. Execute (Agent-Optimized Tools): the largest catalog of agent-optimized tools — 7,500+ across 81 MCP servers, built for reliable execution at scale, not thin API wrappers. Govern (Agent Lifecycle Governance): a central control plane with a shared registry, version control, visibility filtering, and OpenTelemetry audit logs."
+    "Arcade delivers three capabilities. Enforce (Agent Authorization): deploy agents your security team approves — Arcade handles OAuth and manages user tokens, API keys, and secrets, then enforces your existing IdP, DLP, SIEM, and compliance policies plus per-action authorization at runtime. Execute (Agent-Optimized Tools): the largest catalog of agent-optimized tools — 7,500+ across 81 MCP servers, built for reliable execution at scale, not thin API wrappers. Govern (Agent Lifecycle Governance): a central control plane with a shared registry, version control, visibility filtering, and OpenTelemetry audit logs."
   );
   lines.push("");
 
