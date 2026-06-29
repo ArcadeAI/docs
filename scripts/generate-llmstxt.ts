@@ -354,10 +354,10 @@ function generateLlmsTxt(
   // Header
   lines.push("# Arcade");
   lines.push("");
-  lines.push("> Arcade is the actions runtime for enterprise AI agents.");
+  lines.push("> Arcade is the enterprise-ready actions runtime for AI agents.");
   lines.push("");
   lines.push(
-    "Arcade is the actions runtime for enterprise AI agents. We enforce your security policies on every action, execute reliably across any system, and govern agents centrally in production. Configure once and use any model, framework, and client — deploy the first agent the same way you deploy the hundredth."
+    "Arcade is the enterprise-ready actions runtime for AI agents. We enforce your security policies on every action, execute reliably across any system, and govern agents centrally in production. Configure once and use any model, framework, and client — deploy the first agent the same way you deploy the hundredth."
   );
   lines.push("");
   lines.push(

@@ -229,7 +229,7 @@ export function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               transition={{ duration: ANIMATION_DURATION }}
             >
-              The actions runtime for enterprise AI agents.
+              The enterprise-ready actions runtime for AI agents.
             </motion.h1>
             <motion.p
               animate={{ opacity: 1, y: 0 }}
@@ -575,7 +575,7 @@ export function LandingPage() {
               How Arcade Works
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
-              Three pillars that power enterprise AI agents.
+              Three pillars that power AI agents in production.
             </p>
           </div>
           <div className="mt-12 grid grid-cols-1 gap-8 min-[1062px]:grid-cols-3">
