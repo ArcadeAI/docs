@@ -12,7 +12,8 @@ export function PlaceholderReplacer() {
     // 2. If Ory email is available, use that (highest priority)
     // 3. If no Ory email but cookie exists, use cookie value
     // 4. Otherwise, use original placeholder
-    const getCookieEmail = () => getCookie("last_arcadedev_account_email");
+    // Canonical name set by Identity UI and read by the website navbar.
+    const getCookieEmail = () => getCookie("last_arcade_account_email");
 
     const replacement = loading
       ? "{arcade_user_id}" // Keep original while loading
