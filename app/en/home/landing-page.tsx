@@ -229,7 +229,7 @@ export function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               transition={{ duration: ANIMATION_DURATION }}
             >
-              MCP Runtime for AI agents that get things done.
+              The enterprise-ready actions runtime for AI agents.
             </motion.h1>
             <motion.p
               animate={{ opacity: 1, y: 0 }}
@@ -240,9 +240,10 @@ export function LandingPage() {
                 delay: ANIMATION_DELAYS.initial,
               }}
             >
-              Arcade handles OAuth, manages user tokens, and gives you 7,000+
-              pre-built integrations so your agents can take real action in
-              production.
+              Arcade handles OAuth and manages user tokens, enforces your
+              security policies on every action, executes reliably across 7,500+
+              agent-optimized tools, and governs agents centrally — so your
+              agents take real action in production.
             </motion.p>
             <motion.div
               animate={{ opacity: 1, y: 0 }}
@@ -319,7 +320,7 @@ export function LandingPage() {
             {/* Pre-built Integrations — desktop: col 1 row 2 */}
             <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-2">
               <QuickStartCard
-                description="Browse 7,000+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
+                description="Browse 7,500+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
                 href={INTEGRATIONS_PAGE_HREF}
                 icon={Puzzle}
                 logos={[
@@ -459,7 +460,7 @@ export function LandingPage() {
               }
               variant="outline"
             >
-              See all 7,000+
+              See all 7,500+
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -574,27 +575,27 @@ export function LandingPage() {
               How Arcade Works
             </h2>
             <p className="text-gray-600 dark:text-gray-300">
-              Three core components that power your AI agents.
+              Three pillars that power AI agents in production.
             </p>
           </div>
           <div className="mt-12 grid grid-cols-1 gap-8 min-[1062px]:grid-cols-3">
             <QuickStartCard
-              description="Your MCP server and agentic tool provider. Manages authentication, tool registration, and execution."
-              href="/get-started/about-arcade"
-              icon={Cog}
-              title="Runtime"
-            />
-            <QuickStartCard
-              description="Catalog of pre-built tools and integrations. Browse 7,000+ ready-to-use MCP servers."
-              href={INTEGRATIONS_PAGE_HREF}
-              icon={ToolCase}
-              title="Tool Catalog"
-            />
-            <QuickStartCard
-              description="Let agents act on behalf of users. Handle OAuth, API keys, and tokens for tools like Gmail and Google Drive."
+              description="Deploy agents your security team approves. Arcade handles OAuth and manages user tokens, API keys, and secrets for tools like Gmail and Google Drive — then enforces your existing IdP, DLP, and compliance policies plus per-action authorization at runtime."
               href="/guides/tool-calling/custom-apps/auth-tool-calling"
               icon={Shield}
-              title="Agent Authorization"
+              title="Enforce — Agent Authorization"
+            />
+            <QuickStartCard
+              description="Agents that work across every business system. Browse 7,500+ agent-optimized tools across 81 MCP servers, built for reliable execution at scale — not thin API wrappers."
+              href={INTEGRATIONS_PAGE_HREF}
+              icon={ToolCase}
+              title="Execute — Agent-Optimized Tools"
+            />
+            <QuickStartCard
+              description="Scale agents across your org from a central control plane. Shared registry, version control, visibility filtering, and OpenTelemetry audit logs."
+              href="/get-started/about-arcade"
+              icon={Cog}
+              title="Govern — Agent Lifecycle Governance"
             />
           </div>
         </div>

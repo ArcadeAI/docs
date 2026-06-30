@@ -50,7 +50,8 @@ export function generateMetadata() {
       default: "Arcade Docs",
       template: "%s | Arcade Docs",
     },
-    description: "Arcade - AI platform for developers",
+    description:
+      "Arcade is the enterprise-ready actions runtime for AI agents — enforce your security policies on every action, execute reliably across any system, and govern agents centrally in production.",
     metadataBase: new URL("https://docs.arcade.dev"),
     manifest: "/site.webmanifest",
     icons: {
