@@ -1,7 +1,7 @@
 {
   "id": "Telegram",
   "label": "Telegram",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Arcade.dev LLM tools for Telegram",
   "metadata": {
     "category": "social",
@@ -18,7 +18,7 @@
     {
       "name": "GetChatInfo",
       "qualifiedName": "Telegram.GetChatInfo",
-      "fullyQualifiedName": "Telegram.GetChatInfo@1.0.1",
+      "fullyQualifiedName": "Telegram.GetChatInfo@1.1.0",
       "description": "Get metadata about a Telegram chat, group, or channel.\n\nReturns information including the chat type, title, description, and member count.\nThe bot must be a member of the chat to retrieve its information.",
       "parameters": [
         {
@@ -78,7 +78,7 @@
     {
       "name": "GetMessages",
       "qualifiedName": "Telegram.GetMessages",
-      "fullyQualifiedName": "Telegram.GetMessages@1.0.1",
+      "fullyQualifiedName": "Telegram.GetMessages@1.1.0",
       "description": "Get recent private-chat messages sent to the bot via Telegram's getUpdates API.\n\nReturns messages from private (1:1) chats only. Group and channel messages are\nexcluded for security — any group member could inject content into the response.\nOnly pending (unacknowledged) updates are returned.\n\nThe limit parameter controls how many raw Telegram updates are fetched, not how\nmany messages are returned. After filtering to private-chat messages for the\nrequested chat_id, the result may contain fewer items. has_more indicates whether\nmore updates exist on the server, not whether more messages exist for this chat.\n\nNote: This retrieves updates delivered to the bot, not the full history of a chat.\nPassing a non-zero offset permanently confirms all earlier updates — they cannot be\nretrieved again. Returns newest messages last.",
       "parameters": [
         {
@@ -165,8 +165,8 @@
     {
       "name": "SendMessage",
       "qualifiedName": "Telegram.SendMessage",
-      "fullyQualifiedName": "Telegram.SendMessage@1.0.1",
-      "description": "Send a text message to a Telegram chat, group, or channel.\n\nThe bot must be a member of the target chat or have permission to send messages\nto the specified channel.",
+      "fullyQualifiedName": "Telegram.SendMessage@1.1.0",
+      "description": "Send a text message to a Telegram chat, group, or channel.\n\nThe bot must be a member of the target chat or have permission to send messages to the\nspecified channel.\n\nWhen the message asks the recipient a question, prefer attaching the possible answers as inline\n`buttons` rather than asking in free text. With buttons and wait_for_response (the default),\nthis call waits for the user to tap one and returns it as `selected_option` — the toolkit\ncollapses the keyboard to the choice automatically, so you do not react to the tap yourself. If\nno tap arrives in the wait window, `timed_out` is true and `next_offset` lets you resume waiting\nwithout re-sending. Reserve a plain (button-less) message for statements or genuinely\nopen-ended questions.",
       "parameters": [
         {
           "name": "chat_id",
@@ -203,6 +203,23 @@
           "description": "Send the message silently without a notification sound. Defaults to false.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "buttons",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "A list of answer options to present as tappable inline buttons below the message (one per row). STRONGLY PREFER this whenever the message asks a question with a known set of answers (confirmations, yes/no, or any multiple-choice) — it turns the reply into a single tap instead of free-form text. Each label must be at most 64 bytes. Leave empty (None) only for a statement or a genuinely open-ended question that needs a free-text answer.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "wait_for_response",
+          "type": "boolean",
+          "required": false,
+          "description": "When the message has buttons, wait for the user to tap one and return the chosen option as selected_option in this same call (the toolkit collapses the keyboard to the choice automatically — you do not react to the tap yourself). Defaults to true. Has no effect when there are no buttons. If no tap arrives within the wait window, the result has timed_out=true with a next_offset cursor to resume waiting from.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": null,
@@ -229,17 +246,31 @@
             "required": true
           },
           "text": {
-            "value": "Hello! This is a test message sent via the Telegram Bot API.",
+            "value": "Would you like to confirm your appointment for tomorrow at 10:00 AM?",
             "type": "string",
             "required": true
           },
           "parse_mode": {
-            "value": "Markdown",
+            "value": "MARKDOWN",
             "type": "string",
             "required": false
           },
           "disable_notification": {
             "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "buttons": {
+            "value": [
+              "✅ Yes, confirm",
+              "❌ No, cancel",
+              "🔄 Reschedule"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "wait_for_response": {
+            "value": true,
             "type": "boolean",
             "required": false
           }
@@ -255,7 +286,8 @@
         },
         "behavior": {
           "operations": [
-            "create"
+            "create",
+            "update"
           ],
           "readOnly": false,
           "destructive": false,
@@ -268,7 +300,7 @@
     {
       "name": "SendTtsAudio",
       "qualifiedName": "Telegram.SendTtsAudio",
-      "fullyQualifiedName": "Telegram.SendTtsAudio@1.0.1",
+      "fullyQualifiedName": "Telegram.SendTtsAudio@1.1.0",
       "description": "Convert text to speech using OpenAI TTS and send it as an audio message on Telegram.\n\nGenerates an MP3 audio file from the provided text using OpenAI's text-to-speech API,\nthen sends it to the specified Telegram chat.",
       "parameters": [
         {
@@ -406,9 +438,183 @@
       }
     },
     {
+      "name": "WaitForButtonPress",
+      "qualifiedName": "Telegram.WaitForButtonPress",
+      "fullyQualifiedName": "Telegram.WaitForButtonPress@1.1.0",
+      "description": "Resume waiting for an inline-button tap on a message that was already sent with buttons.\n\nUse this only to keep waiting after an earlier attempt's wait window elapsed without a tap — it\ndoes NOT send anything. It is a bounded long-poll on Telegram's getUpdates: it waits a short\nwindow for a tap on the given message, and when one happens the toolkit acknowledges it and\ncollapses the keyboard to the chosen option (no agent round-trip), returning the choice as\nselected_option. If the window elapses with no tap, it returns timed_out=true with a\nnext_offset cursor to resume from again.\n\nCannot be used while the bot has an active webhook, because getUpdates and webhooks are\nmutually exclusive.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": true,
+          "description": "The numeric chat ID where the buttoned message was sent.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "integer",
+          "required": true,
+          "description": "The message_id of the buttoned message to keep watching for a tap (from a prior send_message result).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Update ID cursor to resume from — pass the next_offset from the prior response. Leave 0 to start a fresh wait. WARNING: advancing the cursor permanently confirms (removes) all updates with a lower update ID across all chats.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "TELEGRAM_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Telegram.WaitForButtonPress",
+        "parameters": {
+          "chat_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "offset": {
+            "value": 98765,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WaitForNewMessage",
+      "qualifiedName": "Telegram.WaitForNewMessage",
+      "fullyQualifiedName": "Telegram.WaitForNewMessage@1.1.0",
+      "description": "Wait for the next new message in a Telegram private chat, returning as soon as one arrives.\n\nThis is a bounded long-poll built on Telegram's getUpdates: it waits up to timeout_seconds\nfor a new message in the given chat. If one or more arrive, they are returned immediately\nwith timed_out set to false. If the budget elapses with nothing, it returns an empty message\nlist with timed_out set to true and a next_offset cursor, so you can call again with that\nnext_offset to keep waiting.\n\nOn the first call, leave offset at 0: the tool skips any already-pending backlog and waits for\nmessages that arrive after the call begins. To read pending messages without waiting, use\nget_messages instead.\n\nReturns messages from private (1:1) chats only — group and channel messages are excluded for\nsecurity, since any group member could inject content. This tool cannot be used while the bot\nhas an active webhook, because getUpdates and webhooks are mutually exclusive.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": true,
+          "description": "The numeric chat ID to wait for a new message in. Only messages from this private chat are returned.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of seconds to wait for a new message before returning a timed-out result. Defaults to 20. Maximum is 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Update ID cursor to resume from. Leave 0 on the first call to wait for the next message arriving after this call; the pending backlog is skipped. On a timed-out re-call, pass the next_offset from the previous response to keep waiting without missing messages. WARNING: advancing the cursor permanently confirms (removes) all updates with a lower update ID across all chats.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "TELEGRAM_BOT_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Telegram.WaitForNewMessage",
+        "parameters": {
+          "chat_id": {
+            "value": "987654321",
+            "type": "string",
+            "required": true
+          },
+          "timeout_seconds": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "WhoAmI",
       "qualifiedName": "Telegram.WhoAmI",
-      "fullyQualifiedName": "Telegram.WhoAmI@1.0.1",
+      "fullyQualifiedName": "Telegram.WhoAmI@1.1.0",
       "description": "Get information about the Telegram bot.\n\nReturns the bot's identity including its ID, username, and capabilities.",
       "parameters": [],
       "auth": null,
@@ -454,6 +660,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-04-30T11:39:05.060Z",
-  "summary": "**Telegram toolkit** provides Arcade tools for interacting with Telegram via a bot, enabling LLMs to send messages, retrieve chat data, and deliver AI-generated audio in Telegram chats, groups, and channels.\n\n## Capabilities\n\n- **Bot identity & chat metadata** — Retrieve the bot's own profile and capabilities, and look up metadata (type, title, description, member count) for any chat the bot belongs to.\n- **Message retrieval** — Fetch pending private-chat messages delivered to the bot via Telegram's `getUpdates` API; group/channel messages are excluded by design. Offset handling permanently acknowledges earlier updates.\n- **Messaging** — Send text messages to any chat, group, or channel where the bot has send permissions.\n- **Text-to-speech audio** — Convert text to an MP3 using OpenAI TTS and deliver it as an audio message to a Telegram chat.\n\n## Secrets\n\nThis toolkit requires two secrets:\n\n- **`TELEGRAM_BOT_TOKEN`** — The API token that authenticates your Telegram bot. Create a bot and obtain its token by messaging [@BotFather](https://t.me/BotFather) on Telegram, using the `/newbot` command (or `/token` for an existing bot). BotFather returns a token in the format `123456789:ABC-...`. No special account tier is required. See [Telegram Bot API docs](https://core.telegram.org/bots/tutorial#obtain-your-bot-token) for details.\n\n- **`OPENAI_API_KEY`** — An OpenAI API key used to call the TTS endpoint for `Telegram.SendTtsAudio`. Generate one in the [OpenAI platform dashboard](https://platform.openai.com/api-keys) under **API keys**. The key needs access to the `tts-1` or `tts-1-hd` model; ensure your account has an active billing plan, as TTS is not available on the free tier.\n\nConfigure secrets in Arcade at https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets or via the dashboard at https://api.arcade.dev/dashboard/auth/secrets."
+  "generatedAt": "2026-07-01T12:07:55.509Z",
+  "summary": "# Telegram Toolkit\n\nThe Telegram toolkit lets you build Arcade-powered agents that interact with Telegram bots — sending messages, polling for replies, delivering audio, and inspecting chats — using Telegram's Bot API and OpenAI TTS.\n\n## Capabilities\n\n- **Bot identity & chat metadata**: Retrieve the bot's own profile and inspect any chat, group, or channel the bot belongs to (type, title, description, member count).\n- **Messaging**: Send text messages to any chat, group, or channel the bot has access to; attach inline keyboard buttons and optionally block until a button is tapped, returning the selected option automatically.\n- **Polling for incoming messages**: Long-poll for new private-chat messages or resume a timed-out wait with a `next_offset` cursor; fetch pending unacknowledged updates from private chats via `getUpdates`.\n- **Button-tap resumption**: Continue waiting for an inline-button press on a previously sent message without re-sending it, with automatic keyboard collapse on selection.\n- **Text-to-speech audio**: Convert text to MP3 using OpenAI TTS and deliver it as an audio message to a Telegram chat.\n\n## Secrets\n\n`TELEGRAM_BOT_TOKEN` — The authentication token for your Telegram bot. Create a bot by messaging [@BotFather](https://t.me/BotFather) on Telegram (`/newbot`), then copy the token it returns (format: `123456789:ABCDefgh...`). The bot must be added to any group or channel before it can send or read messages there. Webhooks must **not** be set on the bot when using polling-based tools (`GetMessages`, `WaitForNewMessage`, `WaitForButtonPress`), because Telegram's `getUpdates` and webhooks are mutually exclusive. See [Telegram Bot API docs](https://core.telegram.org/bots#how-do-i-create-a-bot).\n\n`OPENAI_API_KEY` — An OpenAI API key used exclusively by `SendTtsAudio` to call OpenAI's text-to-speech API. Obtain it from the [OpenAI API keys page](https://platform.openai.com/api-keys) in your OpenAI account dashboard. The key must have access to the TTS endpoint (`tts-1` or `tts-1-hd`); a standard paid-tier key is sufficient. No additional organization-level permissions beyond default API access are required.\n\nStore both secrets via the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }
