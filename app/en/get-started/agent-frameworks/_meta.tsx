@@ -10,6 +10,9 @@ export const meta: MetaRecord = {
   ag2: {
     title: "AG2",
   },
+  copilotkit: {
+    title: "CopilotKit",
+  },
   crewai: {
     title: "CrewAI",
   },
