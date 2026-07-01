@@ -1,7 +1,7 @@
 {
   "id": "GoogleCalendar",
   "label": "Google Calendar",
-  "version": "3.4.0",
+  "version": "3.5.0",
   "description": "Arcade.dev LLM tools for Google Calendar",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "GoogleCalendar.CreateEvent",
-      "fullyQualifiedName": "GoogleCalendar.CreateEvent@3.4.0",
+      "fullyQualifiedName": "GoogleCalendar.CreateEvent@3.5.0",
       "description": "Create a new event/meeting/sync/meetup in the specified calendar.\n\nPass `recurrence` to create a repeating event.",
       "parameters": [
         {
@@ -235,7 +235,7 @@
     {
       "name": "DeleteEvent",
       "qualifiedName": "GoogleCalendar.DeleteEvent",
-      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@3.4.0",
+      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@3.5.0",
       "description": "Delete an event from Google Calendar.",
       "parameters": [
         {
@@ -325,7 +325,7 @@
     {
       "name": "FindTimeSlotsWhenEveryoneIsFree",
       "qualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree",
-      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@3.4.0",
+      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@3.5.0",
       "description": "Provides time slots when everyone is free within a given date range and time boundaries.",
       "parameters": [
         {
@@ -441,7 +441,7 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "GoogleCalendar.ListCalendars",
-      "fullyQualifiedName": "GoogleCalendar.ListCalendars@3.4.0",
+      "fullyQualifiedName": "GoogleCalendar.ListCalendars@3.5.0",
       "description": "List all calendars accessible by the user.",
       "parameters": [
         {
@@ -541,7 +541,7 @@
     {
       "name": "ListEvents",
       "qualifiedName": "GoogleCalendar.ListEvents",
-      "fullyQualifiedName": "GoogleCalendar.ListEvents@3.4.0",
+      "fullyQualifiedName": "GoogleCalendar.ListEvents@3.5.0",
       "description": "List events from the specified calendar within the given datetime range.\n\nmin_end_datetime serves as the lower bound (exclusive) for an event's end time.\nmax_start_datetime serves as the upper bound (exclusive) for an event's start time.\n\nFor example:\nIf min_end_datetime is set to 2024-09-15T09:00:00 and max_start_datetime\nis set to 2024-09-16T17:00:00, the function will return events that:\n1. End after 09:00 on September 15, 2024 (exclusive)\n2. Start before 17:00 on September 16, 2024 (exclusive)\nThis means an event starting at 08:00 on September 15 and\nending at 10:00 on September 15 would be included, but an\nevent starting at 17:00 on September 16 would not be included.",
       "parameters": [
         {
@@ -639,9 +639,115 @@
       }
     },
     {
+      "name": "RespondToEvent",
+      "qualifiedName": "GoogleCalendar.RespondToEvent",
+      "fullyQualifiedName": "GoogleCalendar.RespondToEvent@3.5.0",
+      "description": "Accept or decline (RSVP to) a meeting invitation on the authenticated user's behalf.\n\nSets the user's responseStatus for an event they were invited to.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the event to respond to. Use the event id from list_events to respond to a single occurrence of a recurring event, or its recurringEventId to respond to the whole series.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "response",
+          "type": "string",
+          "required": true,
+          "description": "The RSVP response: accepted or declined.",
+          "enum": [
+            "accepted",
+            "declined"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the calendar containing the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_updates",
+          "type": "string",
+          "required": false,
+          "description": "Should attendees be notified of the response? (none, all, external_only)",
+          "enum": [
+            "none",
+            "all",
+            "externalOnly"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "A confirmation message with the new RSVP status and event details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.RespondToEvent",
+        "parameters": {
+          "event_id": {
+            "value": "7q3k2p1abc456def789ghi_20240315T140000Z",
+            "type": "string",
+            "required": true
+          },
+          "response": {
+            "value": "accepted",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "user@example.com",
+            "type": "string",
+            "required": false
+          },
+          "send_updates": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "UpdateEvent",
       "qualifiedName": "GoogleCalendar.UpdateEvent",
-      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@3.4.0",
+      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@3.5.0",
       "description": "Update an existing event in the specified calendar with the provided details.\nOnly the provided fields will be updated; others will remain unchanged.\n\n`updated_start_datetime` and `updated_end_datetime` are\nindependent and can be provided separately.",
       "parameters": [
         {
@@ -880,7 +986,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleCalendar.WhoAmI",
-      "fullyQualifiedName": "GoogleCalendar.WhoAmI@3.4.0",
+      "fullyQualifiedName": "GoogleCalendar.WhoAmI@3.5.0",
       "description": "Get comprehensive user profile and Google Calendar environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Calendar access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -945,6 +1051,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-06-05T12:08:01.475Z",
-  "summary": "The Google Calendar toolkit for Arcade integrates with Google Calendar via OAuth, enabling LLMs to read, create, update, and delete calendar data on behalf of authenticated users.\n\n## Capabilities\n\n- **Calendar discovery & user context:** List all calendars accessible to the user and retrieve the authenticated user's profile, email, and Calendar access permissions.\n- **Event querying:** List events within a datetime range using precise exclusive bounds on both start and end times, supporting complex filtering across one or more days.\n- **Event management:** Create single or recurring events (via recurrence rules), update individual fields of existing events without overwriting unchanged fields, and delete events.\n- **Scheduling assistance:** Find available time slots when all specified participants are free within a given date range and time boundaries.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details, required API enablement, and scope coverage."
+  "generatedAt": "2026-07-01T12:07:52.574Z",
+  "summary": "**Google Calendar toolkit** connects Arcade-powered LLMs to Google Calendar, enabling agents to read, create, modify, and delete calendar data on behalf of authenticated users.\n\n## Capabilities\n\n- **Calendar discovery & user context** — list all accessible calendars and retrieve the authenticated user's profile, email, permissions, and environment details.\n- **Event querying** — list events within precise datetime ranges using independent lower/upper bounds on end and start times, supporting complex overlap queries.\n- **Event creation & recurrence** — create one-off or repeating events/meetings with full recurrence rule support.\n- **Event management** — update individual fields of existing events (start/end times are independently settable), delete events, and RSVP (accept or decline) on the user's behalf.\n- **Availability analysis** — find free time slots across multiple attendees within a specified date range and daily time boundaries.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for configuration details, required scopes, and setup instructions."
 }
