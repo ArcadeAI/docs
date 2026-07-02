@@ -4,7 +4,6 @@ description: "Deploy and run the Arcade platform yourself on your own Kubernetes
 ---
 
 import { Callout, Steps } from "nextra/components";
-import IdentityProviderSetup from "@/app/_components/identity-provider-setup";
 
 # Self-host Arcade with Helm
 
@@ -28,10 +27,12 @@ The chart installs the complete platform — Engine, Coordinator, Worker, Dashbo
 
 ## Set up your identity provider
 
-<IdentityProviderSetup
-  credentialInput="in your Helm values"
-  redirectSource="for your hostname's /signin/oidc/callback path"
-/>
+Arcade signs users in through your OpenID Connect (OIDC) identity provider. The provider authenticates dashboard users and backs the tokens that MCP gateways validate, so set it up before you deploy.
+
+1. Register an application with your identity provider. Arcade works with [Microsoft Entra ID, Okta, Auth0, or Keycloak](/references/auth-providers), or any standards-compliant OIDC provider.
+2. Copy the application's client ID, generate a client secret, and note the issuer URL. For Microsoft Entra ID, use the v2.0 issuer `https://login.microsoftonline.com/<tenant-id>/v2.0`.
+3. Provide the client ID, client secret, and issuer in your Helm values.
+4. After you deploy, register the redirect URI for your hostname's `/signin/oidc/callback` path on the application, then sign in to the dashboard.
 
 ## Install the chart
 
