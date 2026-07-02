@@ -14,15 +14,24 @@ const meta: MetaRecord = {
   "arcade-cloud": {
     title: "Arcade Cloud",
   },
+  azure: {
+    title: "Azure Marketplace",
+  },
+  aws: {
+    title: "AWS Marketplace",
+  },
+  gcp: {
+    title: "GCP (coming soon)",
+  },
+  helm: {
+    title: "Self-host with Helm",
+  },
   "on-prem": {
-    title: "On-premises MCP servers",
+    title: "Hybrid MCP servers",
   },
   "warp-pipes": {
     title: "Warp Pipes",
     display: "hidden",
-  },
-  "configure-engine": {
-    title: "Configure Arcade's engine",
   },
   "arcade-deploy": {
     title: "Arcade Deploy",

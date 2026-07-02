@@ -1,0 +1,68 @@
+---
+title: "Deploy on AWS"
+description: "Deploy Arcade into your own AWS account through a private offer"
+---
+
+import { Callout, Steps } from "nextra/components";
+import IdentityProviderSetup from "@/app/_components/identity-provider-setup";
+
+# Deploy Arcade on AWS
+
+Arcade runs on AWS as a full platform deployment into **your own AWS account**. The AWS offering is currently available through a **private offer** rather than a public self-serve listing.
+
+<Callout type="info">
+AWS is available by private offer today. [Request access](https://www.arcade.dev/contact){/* TODO: replace with the exact AWS private-offer / contact URL */} and we'll share a private offer and the deployment details for your account. If you'd rather manage the platform yourself, see [Self-host with Helm](/guides/deployment-hosting/helm).
+</Callout>
+
+## What gets deployed
+
+The AWS deployment stands up the complete Arcade platform — Engine, Coordinator, Worker, Dashboard, and Experience API — in your account, using managed AWS services:
+
+| AWS service | Role |
+| --- | --- |
+| **Amazon EKS** | Runs the Arcade services |
+| **Amazon RDS for PostgreSQL** | Primary datastore |
+| **Amazon ElastiCache** | Cache and streams |
+| **VPC + private subnets** | Private networking |
+
+## Before you begin
+
+- **AWS account** with permission to accept a Marketplace private offer and deploy the stack.
+- **Region.** Confirm the offer targets your preferred region.
+- **Identity provider.** Have an [OIDC identity provider](/references/auth-providers) ready — see below.
+
+<Callout type="warning">
+The exact prerequisites, parameters, and deployment steps for AWS are being finalized. The steps below are a high-level outline — [contact us](https://www.arcade.dev/contact){/* TODO: replace with the exact AWS private-offer / contact URL */} for the current, account-specific instructions.
+</Callout>
+
+## Set up your identity provider
+
+<IdentityProviderSetup credentialInput="in the deployment parameters" />
+
+## Deploy
+
+<Steps>
+
+### Accept the private offer
+
+Follow the private-offer link we share to subscribe to the Arcade listing in AWS Marketplace.
+
+### Launch the deployment
+
+Launch the deployment and provide your parameters, including your identity provider's **client ID**, **client secret**, and **issuer**.
+
+### Register the redirect URI
+
+Once the deployment finishes and reports your hostname, register the redirect URI on your identity provider application, as described in [Set up your identity provider](#set-up-your-identity-provider).
+
+### Verify your deployment
+
+Open the dashboard URL from the deployment output and sign in with your identity provider.
+
+</Steps>
+
+## Next steps
+
+- [Create an MCP Gateway](/guides/mcp-gateways) to scope tools and auth for each client
+- [Connect an MCP client](/get-started/mcp-clients) to a gateway URL
+- [Set up a User Source](/guides/user-sources) to authenticate end users with your own identity provider

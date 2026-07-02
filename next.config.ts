@@ -592,7 +592,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/deployment/engine-configuration",
-          destination: "/:locale/guides/deployment-hosting/configure-engine",
+          destination: "/:locale/guides/deployment-hosting/helm",
           permanent: true,
         },
         {
@@ -812,7 +812,12 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/guides/deployment-hosting/engine-configuration",
-          destination: "/:locale/guides/deployment-hosting/configure-engine",
+          destination: "/:locale/guides/deployment-hosting/helm",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/deployment-hosting/configure-engine",
+          destination: "/:locale/guides/deployment-hosting/helm",
           permanent: true,
         },
         {

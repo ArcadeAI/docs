@@ -1,0 +1,81 @@
+---
+title: "Self-host with Helm"
+description: "Deploy and run the Arcade platform yourself on your own Kubernetes cluster"
+---
+
+import { Callout, Steps } from "nextra/components";
+import IdentityProviderSetup from "@/app/_components/identity-provider-setup";
+
+# Self-host Arcade with Helm
+
+The Arcade Helm chart deploys the full Arcade platform onto a Kubernetes cluster you manage. It's the bring-your-own-Kubernetes alternative to the cloud marketplaces: you control the cluster, the data, and the upgrade cadence.
+
+<Callout type="info">
+If you'd rather not manage Kubernetes yourself, the [Azure](/guides/deployment-hosting/azure) and [AWS](/guides/deployment-hosting/aws) marketplace deployments run the same platform as turnkey, Arcade-operated deployments in your own cloud account.
+</Callout>
+
+## What it deploys
+
+The chart installs the complete platform — Engine, Coordinator, Worker, Dashboard, and Experience API — into a namespace on your cluster, along with the supporting controllers it needs.
+
+## Prerequisites
+
+- **Kubernetes** 1.30 or later
+- **Helm** 3.8 or later (for OCI chart support)
+- **PostgreSQL** and **Redis** — bundled by the chart, or bring your own managed instances
+- An [OIDC identity provider](/references/auth-providers)
+- An ingress controller or Gateway API implementation, TLS certificates, and a DNS hostname
+
+## Set up your identity provider
+
+<IdentityProviderSetup
+  credentialInput="in your Helm values"
+  hostnameSource="your ingress hostname"
+/>
+
+## Install the chart
+
+<Steps>
+
+### Install from the OCI registry
+
+The chart is published as an OCI artifact, so there's no repository to add — install it directly. Provide your configuration in a `values.yaml` file (see [Configuration](#configuration)).
+
+```bash
+helm install arcade \
+  oci://public.ecr.aws/s5i6x9d1/charts/arcade \
+  --version 1.9.0 \
+  --namespace arcade --create-namespace \
+  -f values.yaml
+```
+
+### Verify the deployment
+
+Once the pods are running, open your configured hostname and sign in through your identity provider to confirm the platform is up.
+
+</Steps>
+
+## Configuration
+
+Configure the platform through Helm values. The chart covers:
+
+- **Components** — Engine, Coordinator, Worker, Dashboard, and Experience API
+- **Identity** — your OIDC identity provider and [OAuth providers](/references/auth-providers)
+- **Data stores** — bundled or external PostgreSQL and Redis
+- **Networking** — ingress or Gateway API, TLS, and the `engine.ssrfAllowlist` for reaching internal services
+- **Security** — encryption keys, network policies, and RBAC
+- **Telemetry** — OpenTelemetry (OTLP) logs, metrics, and traces
+
+<Callout type="info">
+The full, versioned values reference lives on [Artifact Hub](https://artifacthub.io/packages/helm/arcade/arcade). Use it as the source of truth for every value and default.
+</Callout>
+
+## Upgrade and roll back
+
+Upgrade to a new chart version with `helm upgrade`, and roll back with `helm rollback` if needed. See the [Artifact Hub listing](https://artifacthub.io/packages/helm/arcade/arcade) for version-specific upgrade notes.
+
+## Next steps
+
+- [Create an MCP Gateway](/guides/mcp-gateways) to scope tools and auth for each client
+- [Connect external clients with Warp Pipes](/guides/deployment-hosting/warp-pipes)
+- [Set up a User Source](/guides/user-sources) to authenticate end users with your own identity provider

@@ -1,0 +1,100 @@
+---
+title: "Deploy on Azure"
+description: "Deploy Arcade into your own Azure subscription from the Azure Marketplace"
+---
+
+import { Callout, Steps } from "nextra/components";
+import IdentityProviderSetup from "@/app/_components/identity-provider-setup";
+
+# Deploy Arcade on Azure
+
+Arcade is available on the Azure Marketplace as a managed application. You deploy it into **your own Azure subscription**, and Arcade operates it for you across tenants. Your data and the services that run Arcade stay in your subscription; Arcade handles upgrades and day-to-day operations.
+
+<Callout type="info">
+The Azure Marketplace deployment is a **full platform deployment** — it stands up the complete Arcade platform in your cloud. If you'd rather manage the platform yourself on an existing Kubernetes cluster, see [Self-host with Helm](/guides/deployment-hosting/helm).
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+A production Arcade platform running in your own Azure subscription, deployed from the Azure Marketplace and operated by Arcade.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An Azure subscription with the **Owner** role
+- A Microsoft Entra tenant (personal Microsoft accounts aren't supported)
+- An [OIDC identity provider](/references/auth-providers)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- What the managed application deploys into your subscription
+- How to set up your identity provider
+- How to deploy the offer and verify it
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## What gets deployed
+
+The managed application provisions everything Arcade needs inside a managed resource group in your subscription:
+
+| Azure service | Role |
+| --- | --- |
+| **Azure Kubernetes Service (AKS)** | Private cluster that runs the Arcade services (Engine, Coordinator, Worker, Dashboard, Experience API) |
+| **Azure Key Vault** | Stores database, cache, identity-provider, and encryption secrets |
+| **Azure Database for PostgreSQL Flexible Server** | Primary datastore |
+| **Azure Managed Redis** | Cache and streams |
+| **Virtual network + private endpoints** | Private networking with NAT-gateway egress |
+| **Log Analytics, Container Insights, Microsoft Defender** | Monitoring and security |
+
+## Before you begin
+
+- **Subscription and role.** Deploy into a subscription where you hold the **Owner** role, with the spending limit turned off.
+- **Microsoft Entra tenant.** The deployment federates sign-in to your Entra tenant. Personal Microsoft accounts aren't supported.
+- **Region and quota.** Confirm the offer is available in your target region and that the subscription has enough vCPU quota to run an AKS cluster. If you're unsure, [contact us](/resources/contact-us).
+- **DNS.** You can bring your own custom domain or use an Arcade-managed hostname assigned at deploy time.
+- **Identity provider.** Have an [OIDC identity provider](/references/auth-providers) ready — see the next section.
+
+## Set up your identity provider
+
+<IdentityProviderSetup credentialInput="in the create form" />
+
+## Deploy from the Azure Marketplace
+
+<Steps>
+
+### Find the Arcade offer
+
+Open the [Arcade offering in the Azure Marketplace](https://azuremarketplace.microsoft.com/marketplace/apps){/* TODO: replace with the exact Arcade listing URL */} and select **Get it now**. Choose the standard plan for a production, single-tenant deployment.
+
+### Complete the create form
+
+Fill in the deployment form:
+
+- **Region** and **resource group** for the deployment
+- Your identity provider's **client ID**, **client secret**, and **issuer** from the previous section
+- Optionally, a model provider API key (for example, Anthropic) to enable chat in the dashboard
+
+### Deploy
+
+Start the deployment. It takes roughly 30–45 minutes to provision the cluster and supporting services. When it finishes, the deployment outputs your **hostname**, **dashboard URL**, and **redirect URI**.
+
+### Register the redirect URI
+
+Add the redirect URI from the deployment output to your identity provider application, as described in [Set up your identity provider](#set-up-your-identity-provider).
+
+</Steps>
+
+## Verify your deployment
+
+Open the dashboard URL from the deployment output and sign in with your identity provider. A successful sign-in confirms the platform is running and your identity provider is wired up correctly.
+
+## Next steps
+
+- [Create an MCP Gateway](/guides/mcp-gateways) to scope tools and auth for each client
+- [Connect an MCP client](/get-started/mcp-clients) to a gateway URL
+- [Set up a User Source](/guides/user-sources) to authenticate end users with your own identity provider
