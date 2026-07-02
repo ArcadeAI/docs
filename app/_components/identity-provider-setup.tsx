@@ -1,21 +1,20 @@
-import { Callout } from "nextra/components";
 import type React from "react";
 
 type IdentityProviderSetupProps = {
   /** Where the user enters the OIDC credentials, e.g. "in the deployment form" or "in your Helm values". */
   credentialInput?: string;
-  /** Where the deployed hostname / redirect URI comes from, e.g. "the deployment output". */
-  hostnameSource?: string;
+  /** Describes where the redirect URIs come from, e.g. "shown in the deployment outputs". */
+  redirectSource?: string;
 };
 
 /**
  * Shared "set up your identity provider" step used by every platform deployment
- * guide (Azure, AWS, GCP, and Helm). Renders the body only — each guide supplies
- * its own heading so it appears in the page table of contents.
+ * guide (Azure, AWS, and Helm). Renders the body only — each guide supplies its
+ * own heading so it appears in the page table of contents.
  */
 const IdentityProviderSetup: React.FC<IdentityProviderSetupProps> = ({
   credentialInput = "in the deployment form",
-  hostnameSource = "the deployment output",
+  redirectSource = "shown in the deployment outputs",
 }) => (
   <>
     <p>
@@ -41,23 +40,10 @@ const IdentityProviderSetup: React.FC<IdentityProviderSetupProps> = ({
         Provide the client ID, client secret, and issuer {credentialInput}.
       </li>
       <li>
-        After the deployment finishes, register the redirect URI from{" "}
-        {hostnameSource} — typically{" "}
-        <code>
-          https://coordinator.&lt;your-hostname&gt;/signin/oidc/callback
-        </code>{" "}
-        — as a redirect (reply) URI on the application, then sign in to the
-        dashboard.
+        After you deploy, register the redirect URIs {redirectSource} on the
+        application, then sign in to the dashboard.
       </li>
     </ol>
-    <Callout type="warning">
-      If sign-in fails with{" "}
-      <code>
-        AADSTS500113: No reply address is registered for the application
-      </code>
-      , the redirect URI has not been added to your identity provider
-      application yet. Add it and try again.
-    </Callout>
   </>
 );
 

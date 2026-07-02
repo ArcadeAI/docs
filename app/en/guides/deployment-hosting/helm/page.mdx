@@ -22,7 +22,7 @@ The chart installs the complete platform — Engine, Coordinator, Worker, Dashbo
 
 - **Kubernetes** 1.30 or later
 - **Helm** 3.8 or later (for OCI chart support)
-- **PostgreSQL** and **Redis** — bundled by the chart, or bring your own managed instances
+- **PostgreSQL** and **Redis** — bundled by the chart for proof-of-concept, or bring your own managed instances for production
 - An [OIDC identity provider](/references/auth-providers)
 - An ingress controller or Gateway API implementation, TLS certificates, and a DNS hostname
 
@@ -30,7 +30,7 @@ The chart installs the complete platform — Engine, Coordinator, Worker, Dashbo
 
 <IdentityProviderSetup
   credentialInput="in your Helm values"
-  hostnameSource="your ingress hostname"
+  redirectSource="for your hostname's /signin/oidc/callback path"
 />
 
 ## Install the chart
@@ -44,7 +44,6 @@ The chart is published as an OCI artifact, so there's no repository to add — i
 ```bash
 helm install arcade \
   oci://public.ecr.aws/s5i6x9d1/charts/arcade \
-  --version 1.9.0 \
   --namespace arcade --create-namespace \
   -f values.yaml
 ```
