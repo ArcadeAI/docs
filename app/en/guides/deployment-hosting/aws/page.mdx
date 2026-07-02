@@ -1,0 +1,69 @@
+---
+title: "Deploy on AWS"
+description: "Deploy Arcade into your own AWS account through a private offer"
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Deploy Arcade on AWS
+
+Arcade runs on AWS as a full platform deployment into **your own AWS account**. The AWS offering is currently available through a **private offer** rather than a public self-serve listing.
+
+<Callout type="info">
+AWS is available through a private offer. View the [Arcade listing on AWS Marketplace](https://aws.amazon.com/marketplace/seller-profile?id=seller-qbstsdnxkltx6) and [contact us](https://www.arcade.dev/contact) to receive a private offer for your account. If you'd rather manage the platform yourself, see [Self-host with Helm](/guides/deployment-hosting/helm).
+</Callout>
+
+## What gets deployed
+
+The AWS deployment stands up the complete Arcade platform — Engine, Coordinator, Worker, Dashboard, and Experience API — in your account, using managed AWS services:
+
+| AWS service | Role |
+| --- | --- |
+| **Amazon EKS** | Runs the Arcade services |
+| **Amazon RDS for PostgreSQL** | Primary datastore |
+| **Amazon ElastiCache** | Cache and streams |
+| **VPC + private subnets** | Private networking |
+
+## Before you begin
+
+- **AWS account** with permission to accept a Marketplace private offer and deploy the stack.
+- **Region.** Confirm the offer targets your preferred region.
+- **DNS.** Arcade assigns a managed hostname at deploy time, in the form `<id>.aws.myarcade.dev`.
+- **Identity provider.** Have an [OIDC identity provider](/references/auth-providers) ready — see below.
+
+## Set up your identity provider
+
+Arcade signs users in through your OpenID Connect (OIDC) identity provider. The provider authenticates dashboard users and backs the tokens that MCP gateways validate, so set it up before you deploy.
+
+1. Register an application with your identity provider. Arcade works with [Microsoft Entra ID, Okta, Auth0, or Keycloak](/references/auth-providers), or any standards-compliant OIDC provider.
+2. Copy the application's client ID, generate a client secret, and note the issuer URL. For Microsoft Entra ID, use the v2.0 issuer `https://login.microsoftonline.com/<tenant-id>/v2.0`.
+3. Provide the client ID, client secret, and issuer in the deployment parameters.
+4. After you deploy, register the redirect URIs shown in the deployment outputs on the application, then sign in to the dashboard.
+
+## Deploy
+
+<Steps>
+
+### Accept the private offer
+
+Follow the private-offer link we share to subscribe to the Arcade listing in AWS Marketplace.
+
+### Launch the deployment
+
+Launch the deployment and provide your parameters, including your identity provider's **client ID**, **client secret**, and **issuer**.
+
+### Register the redirect URIs
+
+Once the deployment finishes, register the redirect URIs shown in the deployment outputs on your identity provider application, as described in [Set up your identity provider](#set-up-your-identity-provider).
+
+### Verify your deployment
+
+Open the dashboard URL from the deployment output and sign in with your identity provider.
+
+</Steps>
+
+## Next steps
+
+- [Create an MCP Gateway](/guides/mcp-gateways) to scope tools and auth for each client
+- [Connect an MCP client](/get-started/mcp-clients) to a gateway URL
+- [Set up a User Source](/guides/user-sources) to authenticate end users with your own identity provider

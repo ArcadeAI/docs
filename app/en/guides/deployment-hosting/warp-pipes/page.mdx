@@ -10,7 +10,7 @@ import { Callout, Steps, Tabs } from "nextra/components";
 
 Connecting AI agents to private tools is two problems. The first is **networking**: your internal MCP servers and services aren't reachable from the public internet, by design. The second is **governance**: a tunnel only moves bytes, so authentication, per-user credentials, access scoping, and audit are a separate problem that the tunnel products leave to you.
 
-The Arcade runtime already solves governance. **Warp Pipes** is a managed service that solves the networking — Arcade hands you a public MCP URL and forwards traffic to your private runtime, so you don't run the connection yourself.
+The Arcade runtime already solves governance. **Warp Pipes** is a managed service that solves the networking — Arcade hands you a public MCP URL and forwards traffic to your private runtime, so you don't run the connection yourself. Warp Pipes front-ends a runtime you've already deployed; it isn't itself a way to deploy the Arcade platform.
 
 <Callout type="info">
 **Warp Pipes is in early access.** [Request access](https://www.arcade.dev/contact) to have Arcade manage the connection from your AI clients to your runtime. You can also connect clients today with your own reverse proxy — see [Bring your own reverse proxy](#bring-your-own-reverse-proxy).
@@ -25,8 +25,8 @@ Connect external AI clients to private MCP servers through a self-hosted Arcade 
 
 <GuideOverview.Prerequisites>
 
-- A [self-hosted Arcade runtime](/guides/deployment-hosting/on-prem)
-- Access to your [engine.yaml configuration](/guides/deployment-hosting/configure-engine)
+- A [self-hosted Arcade runtime](/guides/deployment-hosting/helm)
+- Access to your [Arcade configuration](/guides/deployment-hosting/helm#configuration) (Helm values)
 - The private hostnames or IP ranges of your internal MCP servers
 
 </GuideOverview.Prerequisites>
@@ -83,7 +83,7 @@ For Claude, through the Messages API or managed agents, use **Arcade Auth** or *
 
 ## Connect to internal MCP servers
 
-Your internal MCP servers live at private hostnames or IP addresses. Configure the `ssrf_allowlist` in `engine.yaml` to tell the runtime which internal addresses it's permitted to call, then register each MCP server URI as a worker.
+Your internal MCP servers live at private hostnames or IP addresses. Configure the runtime's SSRF allowlist through your Helm values to tell the runtime which internal addresses it's permitted to call, then register each MCP server URI as a worker.
 
 The runtime calls these servers directly over your private network, by their internal addresses. No inbound ports, and no tunnel, are required.
 
@@ -96,34 +96,16 @@ The runtime calls these servers directly over your private network, by their int
   unoptimized
 />
 
-Add the allowlist and workers to the `tools.directors` section of `engine.yaml`:
+Set the allowlist in your Helm values:
 
-```yaml filename="engine.yaml"
-tools:
-  directors:
-    - id: default
-      ssrf_allowlist:
-        - "*.corp.internal"       # any subdomain
-        - "10.10.0.0/16"          # IP range
-      workers:
-        - id: bloomberg
-          enabled: true
-          http:
-            uri: "http://bloomberg.corp.internal:8000"
-            secret: "${env:BLOOMBERG_SECRET}"
-        - id: sap
-          enabled: true
-          http:
-            uri: "http://sap.corp.internal:8080"
-            secret: "${env:SAP_SECRET}"
-        - id: github-enterprise
-          enabled: true
-          http:
-            uri: "http://github.corp.internal"
-            secret: "${env:GITHUB_SECRET}"
+```yaml filename="values.yaml"
+engine:
+  ssrfAllowlist:
+    - "*.corp.internal"       # any subdomain
+    - "10.10.0.0/16"          # IP range
 ```
 
-For the rest of the `tools.directors` and worker options, see [runtime configuration](/guides/deployment-hosting/configure-engine#tools-configuration).
+Then register each internal MCP server as a worker so the runtime can route tool calls to it. For the full set of worker and allowlist values, see the [values reference](https://artifacthub.io/packages/helm/arcade/arcade) and [Self-host with Helm](/guides/deployment-hosting/helm#configuration).
 
 ### Allowlist entry types
 
@@ -140,12 +122,12 @@ Keep these rules in mind when you write allowlist entries:
 - CIDR entries match against the resolved IP. For split-horizon DNS, where a hostname resolves to different IPs inside and outside the network, use exact-host or wildcard entries instead.
 - Malformed entries cause the runtime to fail at startup.
 
-### Configure the allowlist with Helm
+### Set the allowlist with `--set`
 
-If you deploy the runtime with the Arcade Helm chart, set the allowlist with `--set`:
+You can also set the allowlist imperatively when you install or upgrade the chart:
 
 ```bash
-helm upgrade arcade monorepo/deploy/charts/arcade/ \
+helm upgrade arcade oci://public.ecr.aws/s5i6x9d1/charts/arcade \
   --set engine.ssrfAllowlist[0]="*.corp.internal" \
   --set engine.ssrfAllowlist[1]="10.10.0.0/16"
 ```
@@ -303,7 +285,7 @@ The path `/mcp/{slug}` must also pass through intact. The runtime routes by gate
 
 ## Next steps
 
-- [Configure the Arcade runtime](/guides/deployment-hosting/configure-engine) for the full `engine.yaml` reference
+- [Self-host with Helm](/guides/deployment-hosting/helm) for the full configuration reference
 - [Create an MCP Gateway](/guides/mcp-gateways) to scope tools and auth for each client
 - [Set up a User Source](/guides/user-sources) to authenticate end users with your own identity provider
 - [Connect your MCP client](/get-started/mcp-clients) to a gateway URL
