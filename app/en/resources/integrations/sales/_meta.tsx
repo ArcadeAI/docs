@@ -17,6 +17,10 @@ const meta: MetaRecord = {
     title: "HubSpot",
     href: "/en/resources/integrations/sales/hubspot",
   },
+  insightly: {
+    title: "Insightly",
+    href: "/en/resources/integrations/sales/insightly",
+  },
   salesforce: {
     title: "Salesforce",
     href: "/en/resources/integrations/sales/salesforce",
