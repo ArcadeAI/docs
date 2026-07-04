@@ -29,6 +29,10 @@ const meta: MetaRecord = {
     title: "Figma",
     href: "/en/resources/integrations/productivity/figma",
   },
+  fireflies: {
+    title: "Fireflies",
+    href: "/en/resources/integrations/productivity/fireflies",
+  },
   forkable: {
     title: "Forkable",
     href: "/en/resources/integrations/productivity/forkable",
