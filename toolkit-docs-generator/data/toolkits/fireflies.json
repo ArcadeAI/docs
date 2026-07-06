@@ -1,0 +1,1586 @@
+{
+  "id": "Fireflies",
+  "label": "Fireflies",
+  "version": "0.3.0",
+  "description": "Arcade.dev tools for interacting with Fireflies",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/fireflies.svg",
+    "isBYOC": true,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/fireflies",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AddNotetakerToLiveMeeting",
+      "qualifiedName": "Fireflies.AddNotetakerToLiveMeeting",
+      "fullyQualifiedName": "Fireflies.AddNotetakerToLiveMeeting@0.3.0",
+      "description": "Send the Fireflies notetaker into a live meeting to capture it.\n\nThe bot can take up to a minute to join after a successful dispatch.",
+      "parameters": [
+        {
+          "name": "meeting_link",
+          "type": "string",
+          "required": true,
+          "description": "The live meeting URL for the notetaker to join.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Title for the meeting. Leave empty to let Fireflies infer one.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "duration",
+          "type": "integer",
+          "required": false,
+          "description": "Minutes the notetaker should stay (15-120). Defaults to 60.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "required": false,
+          "description": "Spoken-language code (e.g. 'en'). Leave empty for auto-detection.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.AddNotetakerToLiveMeeting",
+        "parameters": {
+          "meeting_link": {
+            "value": "https://zoom.us/j/95431234567?pwd=aB3cDeFgHiJkLmNoPqRsTuVwXyZ",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Q3 Product Strategy Sync",
+            "type": "string",
+            "required": false
+          },
+          "duration": {
+            "value": 45,
+            "type": "integer",
+            "required": false
+          },
+          "language": {
+            "value": "en",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "AnalyzeTeamMeetings",
+      "qualifiedName": "Fireflies.AnalyzeTeamMeetings",
+      "fullyQualifiedName": "Fireflies.AnalyzeTeamMeetings@0.3.0",
+      "description": "Aggregate team conversation metrics and a per-speaker breakdown over a date range.\n\nUse this to spot team-level trends across meetings in a window no wider than 30 days.\nAggregates are rolled up from each meeting's own analytics, so the sentiment and\ntalk-time reflect every call in the window (not just the calls of mapped team users).\nThe most recent 50 meetings in the range are aggregated; when more fall in the range the\nresult's ``truncated`` flag is set so partial aggregates are not read as complete.",
+      "parameters": [
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": true,
+          "description": "Start of the range to aggregate over (ISO 8601 UTC, YYYY-MM-DD or full date-time). The range from_date..to_date may span at most 30 days.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": true,
+          "description": "End of the range to aggregate over (ISO 8601 UTC, YYYY-MM-DD or full date-time). Must be on or after from_date, and the window may span at most 30 days. A date-only value includes the whole named day (meetings through end of that day), which counts toward the 30-day span.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.AnalyzeTeamMeetings",
+        "parameters": {
+          "from_date": {
+            "value": "2024-06-01",
+            "type": "string",
+            "required": true
+          },
+          "to_date": {
+            "value": "2024-06-28",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "AskAboutMeeting",
+      "qualifiedName": "Fireflies.AskAboutMeeting",
+      "fullyQualifiedName": "Fireflies.AskAboutMeeting@0.3.0",
+      "description": "Ask a grounded question about a meeting and get an AI answer with suggested follow-ups.\n\nPrefer this over reading the full transcript when the user has a specific question.\nPass the returned thread id back as thread_id to continue the same conversation.",
+      "parameters": [
+        {
+          "name": "question",
+          "type": "string",
+          "required": true,
+          "description": "The plain-language question to answer from the meeting.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": false,
+          "description": "The meeting to ask about. Required when starting a new conversation; leave empty when continuing an existing thread.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "thread_id",
+          "type": "string",
+          "required": false,
+          "description": "Continue a prior conversation by passing the thread id from an earlier answer. Leave empty to start a new conversation about the meeting.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.AskAboutMeeting",
+        "parameters": {
+          "question": {
+            "value": "What were the main action items discussed in the meeting?",
+            "type": "string",
+            "required": true
+          },
+          "transcript_id": {
+            "value": "trans_a1b2c3d4e5f6",
+            "type": "string",
+            "required": false
+          },
+          "thread_id": {
+            "value": "thread_9z8y7x6w5v4u",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateSoundbite",
+      "qualifiedName": "Fireflies.CreateSoundbite",
+      "fullyQualifiedName": "Fireflies.CreateSoundbite@0.3.0",
+      "description": "Clip a soundbite from a time range within a recorded meeting.\n\nThe new clip processes asynchronously; the result reports its initial processing\nstate. Use the soundbite read tools to retrieve it once ready.",
+      "parameters": [
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's transcript id to clip from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "number",
+          "required": true,
+          "description": "Clip start, in seconds from the start of the recording.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "number",
+          "required": true,
+          "description": "Clip end, in seconds from the start of the recording.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Name for the soundbite. Leave empty to let Fireflies pick one.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "media_type",
+          "type": "string",
+          "required": false,
+          "description": "Format of the clip. Defaults to video. A video clip requested from an audio-only recording is automatically created as audio instead (the result detail notes the switch), so the clip never silently fails to process.",
+          "enum": [
+            "audio",
+            "video"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.CreateSoundbite",
+        "parameters": {
+          "transcript_id": {
+            "value": "abc123xyz789",
+            "type": "string",
+            "required": true
+          },
+          "start_time": {
+            "value": 142.5,
+            "type": "integer",
+            "required": true
+          },
+          "end_time": {
+            "value": 187,
+            "type": "integer",
+            "required": true
+          },
+          "name": {
+            "value": "Key Product Decision",
+            "type": "string",
+            "required": false
+          },
+          "media_type": {
+            "value": "video",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMeetingAnalytics",
+      "qualifiedName": "Fireflies.GetMeetingAnalytics",
+      "fullyQualifiedName": "Fireflies.GetMeetingAnalytics@0.3.0",
+      "description": "Get per-speaker talk-time and pace plus the sentiment breakdown for one meeting.\n\nUse this to gauge how a call went -- who dominated, speaking pace, and overall\nsentiment. Analytics may be sparse or empty for very short calls.",
+      "parameters": [
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's transcript id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.GetMeetingAnalytics",
+        "parameters": {
+          "transcript_id": {
+            "value": "tr_4f8a2b1c9e3d7f06",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMeetingSummary",
+      "qualifiedName": "Fireflies.GetMeetingSummary",
+      "fullyQualifiedName": "Fireflies.GetMeetingSummary@0.3.0",
+      "description": "Get Fireflies' AI-generated notes for a meeting: overview, action items, keywords, outline.\n\nUse this single call to answer \"what were the takeaways / action items from this\ncall?\"; it is far cheaper and more reliable than reading the verbatim transcript.",
+      "parameters": [
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's transcript id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.GetMeetingSummary",
+        "parameters": {
+          "transcript_id": {
+            "value": "tr_a1b2c3d4e5f67890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMeetingTranscript",
+      "qualifiedName": "Fireflies.GetMeetingTranscript",
+      "fullyQualifiedName": "Fireflies.GetMeetingTranscript@0.3.0",
+      "description": "Get the verbatim spoken lines of a meeting, in chronological order with speaker attribution.\n\nFireflies serves a meeting's lines only as a whole, so each call retrieves the full\ntranscript; limit, offset, and the from_time/to_time window then bound what is returned\nto keep the response small (they do not reduce what is fetched upstream). Transcripts can\nrun to thousands of lines, so request a narrow window. To quote a moment found via the AI\nquestion or notes tools (which report timestamps in seconds), pass from_time and/or to_time;\noffset and limit then apply within that window. For takeaways or action items, prefer the AI\nmeeting-notes tool over reading raw lines.",
+      "parameters": [
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's transcript id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum lines to return, starting from the beginning of the recording (1-500). Defaults to 200.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of lines to skip from the start (0-indexed). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_time",
+          "type": "number",
+          "required": false,
+          "description": "Only return lines spoken at or after this many seconds into the recording. Leave unset for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_time",
+          "type": "number",
+          "required": false,
+          "description": "Only return lines spoken at or before this many seconds into the recording. Leave unset for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.GetMeetingTranscript",
+        "parameters": {
+          "transcript_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "from_time": {
+            "value": 120.5,
+            "type": "integer",
+            "required": false
+          },
+          "to_time": {
+            "value": 600,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetSoundbite",
+      "qualifiedName": "Fireflies.GetSoundbite",
+      "fullyQualifiedName": "Fireflies.GetSoundbite@0.3.0",
+      "description": "Get a single soundbite by id.\n\nReturns a graceful not-found result instead of raising for an unknown or\ninaccessible id, so lookups compose like the list/search tools.",
+      "parameters": [
+        {
+          "name": "bite_id",
+          "type": "string",
+          "required": true,
+          "description": "The soundbite's id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.GetSoundbite",
+        "parameters": {
+          "bite_id": {
+            "value": "sb_a1b2c3d4e5f6",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListActionItems",
+      "qualifiedName": "Fireflies.ListActionItems",
+      "fullyQualifiedName": "Fireflies.ListActionItems@0.3.0",
+      "description": "Gather follow-ups from recent meetings into one flat list to answer \"what do I owe?\".\n\nEach meeting's AI action-items notes are flattened into individual, owner-attributed\nitems so the caller's outstanding follow-ups across many calls surface in one request\nrather than by opening each meeting. Prefer this over reading each call's notes\nseparately when triaging open commitments; set assigned_to_me to narrow to the caller's\nown follow-ups, or assignee_email to narrow to a specific teammate's.",
+      "parameters": [
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings on or after this UTC date-time (ISO 8601). Leave empty for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings on or before this UTC date-time (ISO 8601). A date-only value (YYYY-MM-DD) includes the whole named day. Leave empty for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assigned_to_me",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, return only follow-ups attributed to the caller. Defaults to false (every meeting's follow-ups, each flagged with whether it is the caller's).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_email",
+          "type": "string",
+          "required": false,
+          "description": "Only include follow-ups attributed to this person, matched by their email handle and name (so 'shawnee@acme.com' matches items owned by 'Shawnee'). Use this to triage what a specific teammate owes. Leave empty for no assignee filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum recent meetings to scan for follow-ups (1-50). Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of recent meetings to skip before scanning (0-indexed). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.ListActionItems",
+        "parameters": {
+          "from_date": {
+            "value": "2024-10-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "2024-10-31",
+            "type": "string",
+            "required": false
+          },
+          "assigned_to_me": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "assignee_email": {
+            "value": "shawnee@acme.com",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListChannels",
+      "qualifiedName": "Fireflies.ListChannels",
+      "fullyQualifiedName": "Fireflies.ListChannels@0.3.0",
+      "description": "List the channels meetings are filed into.\n\nA channel's id can be passed to a meeting search to narrow results to that channel, so\nthis is the lookup behind that filter as well as a view of how the account organizes\nits calls.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum channels to return (1-50). Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of channels to skip from the start (0-indexed). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.ListChannels",
+        "parameters": {
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListContacts",
+      "qualifiedName": "Fireflies.ListContacts",
+      "fullyQualifiedName": "Fireflies.ListContacts@0.3.0",
+      "description": "List the people the caller has met with, most recent first.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum contacts to return (1-50). Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of contacts to skip from the start (0-indexed). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.ListContacts",
+        "parameters": {
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListSoundbites",
+      "qualifiedName": "Fireflies.ListSoundbites",
+      "fullyQualifiedName": "Fireflies.ListSoundbites@0.3.0",
+      "description": "List soundbites, optionally scoped to your own, your team's, or a single meeting's.",
+      "parameters": [
+        {
+          "name": "mine",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, return only soundbites the caller created. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "my_team",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, include soundbites shared across the caller's team. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": false,
+          "description": "Keep only soundbites clipped from this meeting, applied to each fetched page. Leave empty to not filter by meeting.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum soundbites to return (1-50). Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position; number of soundbites to skip. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.ListSoundbites",
+        "parameters": {
+          "mine": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "my_team": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "transcript_id": {
+            "value": "trans_4f8a2b1c9e3d7056",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RevokeMeetingAccess",
+      "qualifiedName": "Fireflies.RevokeMeetingAccess",
+      "fullyQualifiedName": "Fireflies.RevokeMeetingAccess@0.3.0",
+      "description": "Remove a previously granted teammate's access to a meeting.\n\nYou can only manage sharing on a meeting you own or manage. Revoking an email that\ndoes not currently have access is not a silent no-op: Fireflies may return a\n``failed`` status, so treat a failed result as \"no change was made\" rather than a hard\nerror.",
+      "parameters": [
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's transcript id to revoke access to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "description": "The email address whose access should be removed.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.RevokeMeetingAccess",
+        "parameters": {
+          "transcript_id": {
+            "value": "tr_9f3kLmX2pQw8vYcN",
+            "type": "string",
+            "required": true
+          },
+          "email": {
+            "value": "teammate@example.com",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchMeetings",
+      "qualifiedName": "Fireflies.SearchMeetings",
+      "fullyQualifiedName": "Fireflies.SearchMeetings@0.3.0",
+      "description": "Find a recorded meeting by its title, the people on it, when it happened, or its topic.\n\nUse this single call to locate a past call; results are newest first. By default the\nkeyword matches the meeting title only; switch match to content to find a call by its\nspoken topics -- that scans each recent meeting's AI notes (gist, summary, keywords,\ntopics, action items) and keeps the ones whose notes or title contain the keyword.\nEach result carries a one-line AI gist for triage; set include_notes to also pull each\ncall's short summary and action items in the same request (the standup-prep digest).",
+      "parameters": [
+        {
+          "name": "keyword",
+          "type": "string",
+          "required": false,
+          "description": "Text to match. Matched against the meeting title, or against what was discussed (the AI notes) when content matching is selected. Leave empty for no keyword filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings on or after this UTC date-time (ISO 8601). Leave empty for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings on or before this UTC date-time (ISO 8601). A date-only value (YYYY-MM-DD) includes the whole named day. Leave empty for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "host_email",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings hosted by this email. Leave empty to not filter by host.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organizer_email",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings organized by this email. Leave empty to not filter by organizer.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "participant_email",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings this email participated in. Leave empty to not filter by participant.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings filed under this channel id. Leave empty to not filter by channel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mine",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, restrict to the caller's own meetings. Defaults to false (all accessible).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "match",
+          "type": "string",
+          "required": false,
+          "description": "How the keyword is matched. Defaults to matching the meeting title (fast, exact, across all history). Switch to content matching to find a call by what was discussed when the title is generic or unknown; content matching scans the AI notes of the most recent meetings in the requested window.",
+          "enum": [
+            "title",
+            "content"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "include_notes",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, also return each meeting's short summary and action items so a 'catch me up since <date>' digest can be built in one call. Defaults to false (only the one-line gist).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum meetings to return (1-50). Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of matching meetings to skip (0-indexed). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.SearchMeetings",
+        "parameters": {
+          "keyword": {
+            "value": "product roadmap",
+            "type": "string",
+            "required": false
+          },
+          "from_date": {
+            "value": "2024-03-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "2024-03-31",
+            "type": "string",
+            "required": false
+          },
+          "host_email": {
+            "value": "alice.johnson@example.com",
+            "type": "string",
+            "required": false
+          },
+          "organizer_email": {
+            "value": "bob.smith@example.com",
+            "type": "string",
+            "required": false
+          },
+          "participant_email": {
+            "value": "carol.white@example.com",
+            "type": "string",
+            "required": false
+          },
+          "channel_id": {
+            "value": "ch_7f3a2b9e4d1c",
+            "type": "string",
+            "required": false
+          },
+          "mine": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "match": {
+            "value": "content",
+            "type": "string",
+            "required": false
+          },
+          "include_notes": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ShareMeeting",
+      "qualifiedName": "Fireflies.ShareMeeting",
+      "fullyQualifiedName": "Fireflies.ShareMeeting@0.3.0",
+      "description": "Grant one or more teammates access to a meeting's notes and recording.\n\nYou can only share a meeting you own or manage. Re-sharing an email that already has\naccess is not a silent no-op: Fireflies may return a ``failed`` status, so treat a\nfailed result as \"no change was made\" rather than relying on this call to idempotently\nensure access.",
+      "parameters": [
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's transcript id to share.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "emails",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Email addresses to grant access to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "expiry_days",
+          "type": "integer",
+          "required": false,
+          "description": "Days until the granted access expires. Use 0 for access that never expires; a negative value is rejected. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.ShareMeeting",
+        "parameters": {
+          "transcript_id": {
+            "value": "trans_4f8a2b1c9d3e7f05",
+            "type": "string",
+            "required": true
+          },
+          "emails": {
+            "value": [
+              "alice@example.com",
+              "bob@example.com",
+              "carol@teamname.org"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "expiry_days": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UploadRecording",
+      "qualifiedName": "Fireflies.UploadRecording",
+      "fullyQualifiedName": "Fireflies.UploadRecording@0.3.0",
+      "description": "Queue an already-recorded audio or video file for Fireflies transcription.\n\nUse this for a recording that exists elsewhere; use the live-notetaker tool to\ncapture a meeting happening now. Transcription runs asynchronously after queuing.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string",
+          "required": true,
+          "description": "Publicly accessible https URL of the audio or video recording to transcribe.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Title for the recording. Leave empty to let Fireflies infer one.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "required": false,
+          "description": "Spoken-language code (e.g. 'en'). Leave empty for auto-detection.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "save_video",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, retain the source video alongside the transcript. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.UploadRecording",
+        "parameters": {
+          "url": {
+            "value": "https://storage.example.com/recordings/team-standup-2024-06-15.mp4",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Team Standup Meeting - June 15 2024",
+            "type": "string",
+            "required": false
+          },
+          "language": {
+            "value": "en",
+            "type": "string",
+            "required": false
+          },
+          "save_video": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Fireflies.WhoAmI",
+      "fullyQualifiedName": "Fireflies.WhoAmI@0.3.0",
+      "description": "Get the caller's own Fireflies identity and usage summary.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "FIREFLIES_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIREFLIES_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Fireflies.WhoAmI",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-07-06T12:24:24.253Z",
+  "summary": "Fireflies is an AI meeting-intelligence platform. This toolkit lets Arcade agents record, transcribe, search, and analyze meetings via the Fireflies GraphQL API.\n\n## Capabilities\n\n- **Meeting capture & recording** — dispatch the Fireflies notetaker bot into a live meeting or upload an existing audio/video file for async transcription.\n- **Transcript & notes retrieval** — fetch verbatim, speaker-attributed transcripts with time-windowing, or pull AI-generated summaries, action items, keywords, and outlines in a single call.\n- **Conversational Q&A** — ask grounded questions about a specific meeting and continue threaded conversations with follow-up turns.\n- **Analytics & team insights** — retrieve per-speaker talk-time, pace, and sentiment for individual meetings, or aggregate team-level conversation metrics across a rolling 30-day window.\n- **Search & organization** — find past meetings by title, participants, date, or spoken topics; list channels, contacts, and soundbites; clip new soundbites from recordings.\n- **Access & identity management** — share or revoke teammate access to meetings, look up the caller's own Fireflies identity, and manage action-item triage across meetings.\n\n## Secrets\n\n- **`FIREFLIES_API_KEY`** — A personal or service API key issued by Fireflies. Obtain it from your [Fireflies API settings page](https://app.fireflies.ai/integrations/custom/fireflies) (requires a Fireflies account; some API features require a paid plan). The key is passed as a Bearer token on every GraphQL request. Treat it as a long-lived credential with full access to the account's meetings, transcripts, and sharing controls — scope it to a dedicated service account if possible.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to store secrets, and manage them at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}
