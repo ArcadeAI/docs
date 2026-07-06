@@ -1,0 +1,3580 @@
+{
+  "id": "Insightly",
+  "label": "Insightly",
+  "version": "0.1.0",
+  "description": "Arcade.dev tools for interacting with Insightly",
+  "metadata": {
+    "category": "sales",
+    "iconUrl": "https://design-system.arcade.dev/icons/insightly.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/sales/insightly",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "ConvertLead",
+      "qualifiedName": "Insightly.ConvertLead",
+      "fullyQualifiedName": "Insightly.ConvertLead@0.1.0",
+      "description": "Convert a qualified lead into a contact (when the lead names a person), an organization\n(when the lead names one), and optionally an opportunity, then mark the lead converted.\n\nThe lead's name, email, phone, and title carry onto the contact, and its name/phone/website\nonto the organization. A lead with only a last name becomes a contact under that name, since\nInsightly stores a single-name person in the contact's first-name field. Insightly leaves the\nlead's notes on the lead, so by default they are copied onto the new contact (or organization).\n\nFails if the lead has already been converted. Conversion is several creates followed by the\nfinal lead update; it is not idempotent, so if a later step fails the lead stays unconverted\nand any records already created remain. Check the lead in Insightly before retrying a failed\nconversion so a retry does not duplicate records.",
+      "parameters": [
+        {
+          "name": "lead_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the lead to convert.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "create_opportunity",
+          "type": "boolean",
+          "required": false,
+          "description": "Also create an opportunity (true) or only a contact and org (false). Default false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_name",
+          "type": "string",
+          "required": false,
+          "description": "Name for the created opportunity. Used only when create_opportunity is true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": false,
+          "description": "Pipeline id for the created opportunity. Used only when create_opportunity is true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "stage_id",
+          "type": "string",
+          "required": false,
+          "description": "Stage id for the created opportunity. Used only when create_opportunity is true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "required": false,
+          "description": "Monetary value to size the created opportunity. Used only when create_opportunity is true; omit to leave the value unset.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "forecast_close_date",
+          "type": "string",
+          "required": false,
+          "description": "Forecast close date (YYYY-MM-DD) for the created opportunity. Used only when create_opportunity is true; empty to leave it unset.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "responsible_user_id",
+          "type": "integer",
+          "required": false,
+          "description": "User id to own the created opportunity. Used only when create_opportunity is true; omit to leave it unset.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "copy_notes",
+          "type": "boolean",
+          "required": false,
+          "description": "Carry the lead's notes onto the new record (true) so the converted contact keeps the context that lived on the lead, or leave them on the lead only (false). Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.ConvertLead",
+        "parameters": {
+          "lead_id": {
+            "value": "LEAD-00482931",
+            "type": "string",
+            "required": true
+          },
+          "create_opportunity": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "opportunity_name": {
+            "value": "Acme Corp Enterprise License Deal",
+            "type": "string",
+            "required": false
+          },
+          "pipeline_id": {
+            "value": "PIPELINE-0012",
+            "type": "string",
+            "required": false
+          },
+          "stage_id": {
+            "value": "STAGE-0034",
+            "type": "string",
+            "required": false
+          },
+          "value": {
+            "value": 47500,
+            "type": "integer",
+            "required": false
+          },
+          "forecast_close_date": {
+            "value": "2025-09-30",
+            "type": "string",
+            "required": false
+          },
+          "responsible_user_id": {
+            "value": 10287,
+            "type": "integer",
+            "required": false
+          },
+          "copy_notes": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateNote",
+      "qualifiedName": "Insightly.CreateNote",
+      "fullyQualifiedName": "Insightly.CreateNote@0.1.0",
+      "description": "Log a note against one CRM record. Provide exactly one record id to attach it to.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The note text, such as a call summary or meeting recap.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Short subject line for the note. Empty derives it from the body's first line.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": false,
+          "description": "Attach the note to this contact. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Attach the note to this opportunity. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Attach the note to this organization. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": false,
+          "description": "Attach the note to this project. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_id",
+          "type": "string",
+          "required": false,
+          "description": "Attach the note to this lead. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.CreateNote",
+        "parameters": {
+          "body": {
+            "value": "Had a 30-minute discovery call with the client today. They expressed strong interest in our Enterprise plan and requested a formal proposal by end of week. Key pain points discussed: lack of reporting visibility and manual data entry overhead. Follow-up scheduled for Thursday at 2 PM.",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Discovery Call Summary – Enterprise Plan Interest",
+            "type": "string",
+            "required": false
+          },
+          "contact_id": {
+            "value": "123456",
+            "type": "string",
+            "required": false
+          },
+          "opportunity_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "project_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "lead_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetContact",
+      "qualifiedName": "Insightly.GetContact",
+      "fullyQualifiedName": "Insightly.GetContact@0.1.0",
+      "description": "Retrieve a single contact by its identifier.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the contact.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetContact",
+        "parameters": {
+          "contact_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCurrentUser",
+      "qualifiedName": "Insightly.GetCurrentUser",
+      "fullyQualifiedName": "Insightly.GetCurrentUser@0.1.0",
+      "description": "Return the identity of the authenticated Insightly user (the \"who am I\" for this account).\n\nCall this first to confirm who actions will be attributed to.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetCurrentUser",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetLead",
+      "qualifiedName": "Insightly.GetLead",
+      "fullyQualifiedName": "Insightly.GetLead@0.1.0",
+      "description": "Retrieve a single lead by its identifier.",
+      "parameters": [
+        {
+          "name": "lead_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the lead.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetLead",
+        "parameters": {
+          "lead_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMyOpenWork",
+      "qualifiedName": "Insightly.GetMyOpenWork",
+      "fullyQualifiedName": "Insightly.GetMyOpenWork@0.1.0",
+      "description": "Roll up one user's open deals and open tasks in a single call.\n\nDefaults to the caller (the authenticated user), so \"what's on my plate\" is one read instead\nof a separate pipeline summary and task search. The summed open-deal value covers every\nmatched deal, not just the returned window.",
+      "parameters": [
+        {
+          "name": "responsible_user_id",
+          "type": "integer",
+          "required": false,
+          "description": "Roll up the open work owned by this user id. 0 (the default) resolves the caller's own id, giving a 'what's on my plate' view.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum open opportunities to include, soonest forecast close first (1-100). Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "task_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum open tasks to include, soonest due first (1-100). Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetMyOpenWork",
+        "parameters": {
+          "responsible_user_id": {
+            "value": 482731,
+            "type": "integer",
+            "required": false
+          },
+          "opportunity_limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "task_limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetOpportunity",
+      "qualifiedName": "Insightly.GetOpportunity",
+      "fullyQualifiedName": "Insightly.GetOpportunity@0.1.0",
+      "description": "Retrieve a single opportunity by its identifier.",
+      "parameters": [
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the opportunity.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetOpportunity",
+        "parameters": {
+          "opportunity_id": {
+            "value": "987654321",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetOrganization",
+      "qualifiedName": "Insightly.GetOrganization",
+      "fullyQualifiedName": "Insightly.GetOrganization@0.1.0",
+      "description": "Retrieve a single organization by its identifier.",
+      "parameters": [
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the organization.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetOrganization",
+        "parameters": {
+          "organization_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetProject",
+      "qualifiedName": "Insightly.GetProject",
+      "fullyQualifiedName": "Insightly.GetProject@0.1.0",
+      "description": "Retrieve a single project by its identifier.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the project.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetProject",
+        "parameters": {
+          "project_id": {
+            "value": "987654",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetRecordActivity",
+      "qualifiedName": "Insightly.GetRecordActivity",
+      "fullyQualifiedName": "Insightly.GetRecordActivity@0.1.0",
+      "description": "Gather one record's recent notes and open tasks in one call, plus the deal stage.\n\nProvide exactly one record id. Use this single call to prepare for a call or recap an\naccount instead of running separate note and task searches. When the record is an\nopportunity, the response also carries that deal's current stage, state, and value; when\nit is a project, it carries the project's parent opportunity and that deal's organization\nso a delivery kickoff brief is one read; when it is a contact or organization, the response\nalso carries the opportunities and delivery projects that touch the account.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": false,
+          "description": "Gather activity for this contact. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Gather activity for this opportunity. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Gather activity for this organization. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": false,
+          "description": "Gather activity for this project. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_id",
+          "type": "string",
+          "required": false,
+          "description": "Gather activity for this lead. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "exclude_system_notes",
+          "type": "boolean",
+          "required": false,
+          "description": "Exclude Insightly's auto-generated stage/state/status-change notes so the brief shows only human-logged notes. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "note_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum notes to include, most recent first (1-100). Defaults to 10. The response's note_count is the full match total; when it exceeds the notes returned, raise this to include more.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "task_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum open tasks to include, soonest due first (1-100). Defaults to 10. The response's open_task_count is the full match total; when it exceeds the tasks returned, raise this to include more.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "linked_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum linked opportunities and projects to include for a contact or organization, most recently updated first (1-100). Defaults to 10. The response's linked_opportunity_count / linked_project_count are the full match totals; when either exceeds the items returned, raise this to include more.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetRecordActivity",
+        "parameters": {
+          "contact_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "opportunity_id": {
+            "value": "OPP-00482",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "project_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "lead_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "exclude_system_notes": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "note_limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "task_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "linked_limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTask",
+      "qualifiedName": "Insightly.GetTask",
+      "fullyQualifiedName": "Insightly.GetTask@0.1.0",
+      "description": "Retrieve a single task by its identifier.",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the task.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.GetTask",
+        "parameters": {
+          "task_id": {
+            "value": "1234567",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListLeadFieldOptions",
+      "qualifiedName": "Insightly.ListLeadFieldOptions",
+      "fullyQualifiedName": "Insightly.ListLeadFieldOptions@0.1.0",
+      "description": "List the account's configured lead statuses and lead sources so a natural-language\nstatus or source name maps to the id that save_lead expects.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.ListLeadFieldOptions",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPipelines",
+      "qualifiedName": "Insightly.ListPipelines",
+      "fullyQualifiedName": "Insightly.ListPipelines@0.1.0",
+      "description": "List the configured pipelines, optionally filtered to opportunity or project pipelines.",
+      "parameters": [
+        {
+          "name": "for_opportunities",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter to opportunity pipelines (true) or non-opportunity (false). Omit for all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "for_projects",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter to project pipelines (true) or non-project (false). Omit for all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.ListPipelines",
+        "parameters": {
+          "for_opportunities": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "for_projects": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPipelineStages",
+      "qualifiedName": "Insightly.ListPipelineStages",
+      "fullyQualifiedName": "Insightly.ListPipelineStages@0.1.0",
+      "description": "List a pipeline's stages in their defined order, so stage moves target real stages.",
+      "parameters": [
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": true,
+          "description": "The pipeline id whose stages to list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.ListPipelineStages",
+        "parameters": {
+          "pipeline_id": {
+            "value": "847392",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListUsers",
+      "qualifiedName": "Insightly.ListUsers",
+      "fullyQualifiedName": "Insightly.ListUsers@0.1.0",
+      "description": "List the users in the account, for attributing and assigning records.",
+      "parameters": [
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Only return users whose email contains this text (case-insensitive). Empty matches all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum users to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.ListUsers",
+        "parameters": {
+          "email": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SaveContact",
+      "qualifiedName": "Insightly.SaveContact",
+      "fullyQualifiedName": "Insightly.SaveContact@0.1.0",
+      "description": "Create or update a contact. Omit contact_id to create (a first or last name is required).",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": false,
+          "description": "Omit to create a new contact; provide an existing id to update that contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": false,
+          "description": "First name. Sets the value when creating; changes it when updating, or leave omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": false,
+          "description": "Last name. Sets the value when creating; changes it when updating, or leave omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Email address. Provide to set or change it; empty string clears it; omit to leave it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "Phone number. Provide to set or change it; empty string clears it; omit to leave it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Job title. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Organization id to link the contact to. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "background",
+          "type": "string",
+          "required": false,
+          "description": "Freeform background notes. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SaveContact",
+        "parameters": {
+          "contact_id": {
+            "value": "1234567",
+            "type": "string",
+            "required": false
+          },
+          "first_name": {
+            "value": "Jane",
+            "type": "string",
+            "required": false
+          },
+          "last_name": {
+            "value": "Doe",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1-555-867-5309",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Senior Product Manager",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "9876543",
+            "type": "string",
+            "required": false
+          },
+          "background": {
+            "value": "Met at the 2024 tech conference. Interested in enterprise solutions.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SaveLead",
+      "qualifiedName": "Insightly.SaveLead",
+      "fullyQualifiedName": "Insightly.SaveLead@0.1.0",
+      "description": "Create or update a lead. Omit lead_id to create a new lead (supply a last name, an\norganization name, or both).",
+      "parameters": [
+        {
+          "name": "lead_id",
+          "type": "string",
+          "required": false,
+          "description": "Omit to create a new lead; provide an existing id to update that lead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": false,
+          "description": "Last name. When creating, supply this or an organization name (a company-only lead needs no person); when updating, omit to leave it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": false,
+          "description": "First name. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Email address. Provide to set or change it; empty string clears it; omit to leave it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "Phone number. Provide to set or change it; empty string clears it; omit to leave it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_name",
+          "type": "string",
+          "required": false,
+          "description": "The lead's organization name. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Job title. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_status_id",
+          "type": "integer",
+          "required": false,
+          "description": "Lead status id. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_source_id",
+          "type": "integer",
+          "required": false,
+          "description": "Lead source id. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SaveLead",
+        "parameters": {
+          "lead_id": {
+            "value": "987654",
+            "type": "string",
+            "required": false
+          },
+          "last_name": {
+            "value": "Thompson",
+            "type": "string",
+            "required": false
+          },
+          "first_name": {
+            "value": "Rachel",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "rachel.thompson@example.com",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1-555-867-5309",
+            "type": "string",
+            "required": false
+          },
+          "organization_name": {
+            "value": "Apex Solutions Inc.",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Director of Operations",
+            "type": "string",
+            "required": false
+          },
+          "lead_status_id": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          },
+          "lead_source_id": {
+            "value": 7,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SaveOpportunity",
+      "qualifiedName": "Insightly.SaveOpportunity",
+      "fullyQualifiedName": "Insightly.SaveOpportunity@0.1.0",
+      "description": "Create or update an opportunity, including advancing its stage and recording won/lost.\n\nOmit opportunity_id to create (a name is required). A new opportunity created without a\npipeline_id and stage_id is left unplaced: it still rolls up in the forecast under the\n\"(no stage)\" bucket but cannot advance through a stage-based pipeline, so set pipeline_id\nand stage_id together when you know the deal's pipeline and stage.",
+      "parameters": [
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Omit to create a new opportunity; provide an existing id to update it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Opportunity name. Sets it when creating; changes it when updating, or leave omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Organization id to link the opportunity to. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": false,
+          "description": "Place the opportunity on this pipeline id. Combine with stage_id to also set the stage.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "stage_id",
+          "type": "string",
+          "required": false,
+          "description": "Move the opportunity to this stage id (advance the deal). Omit to leave the stage as is.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "number",
+          "required": false,
+          "description": "Monetary value of the deal. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Record this lifecycle state (for example mark won or lost). Omit to leave unchanged.",
+          "enum": [
+            "OPEN",
+            "WON",
+            "LOST",
+            "ABANDONED",
+            "SUSPENDED"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "forecast_close_date",
+          "type": "string",
+          "required": false,
+          "description": "Forecast close date (YYYY-MM-DD). Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "responsible_user_id",
+          "type": "integer",
+          "required": false,
+          "description": "User id responsible for the opportunity. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SaveOpportunity",
+        "parameters": {
+          "opportunity_id": {
+            "value": "987654321",
+            "type": "string",
+            "required": false
+          },
+          "name": {
+            "value": "Acme Corp Enterprise License Deal",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "112233445",
+            "type": "string",
+            "required": false
+          },
+          "pipeline_id": {
+            "value": "56789",
+            "type": "string",
+            "required": false
+          },
+          "stage_id": {
+            "value": "23456",
+            "type": "string",
+            "required": false
+          },
+          "value": {
+            "value": 85000,
+            "type": "integer",
+            "required": false
+          },
+          "state": {
+            "value": "WON",
+            "type": "string",
+            "required": false
+          },
+          "forecast_close_date": {
+            "value": "2025-09-30",
+            "type": "string",
+            "required": false
+          },
+          "responsible_user_id": {
+            "value": 100042,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SaveOrganization",
+      "qualifiedName": "Insightly.SaveOrganization",
+      "fullyQualifiedName": "Insightly.SaveOrganization@0.1.0",
+      "description": "Create or update an organization. Omit organization_id to create (a name is required).",
+      "parameters": [
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Omit to create a new organization; provide an existing id to update it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Organization name. Sets it when creating; changes it when updating, or leave omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "Phone number. Provide to set or change it; empty string clears it; omit to leave it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "website",
+          "type": "string",
+          "required": false,
+          "description": "Website URL. Provide to set or change it; empty string clears it; omit to leave it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "background",
+          "type": "string",
+          "required": false,
+          "description": "Freeform background notes. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SaveOrganization",
+        "parameters": {
+          "organization_id": {
+            "value": "987654",
+            "type": "string",
+            "required": false
+          },
+          "name": {
+            "value": "Acme Corporation",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1-555-867-5309",
+            "type": "string",
+            "required": false
+          },
+          "website": {
+            "value": "https://www.acmecorp.com",
+            "type": "string",
+            "required": false
+          },
+          "background": {
+            "value": "Long-standing enterprise client in the manufacturing sector. Key contact is Jane Doe.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SaveProject",
+      "qualifiedName": "Insightly.SaveProject",
+      "fullyQualifiedName": "Insightly.SaveProject@0.1.0",
+      "description": "Create or update a delivery project, including advancing its stage.\n\nOmit project_id to create (a name is required).",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": false,
+          "description": "Omit to create a new project; provide an existing id to update it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Project name. Sets it when creating; changes it when updating, or leave omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Project status (for example mark completed). When creating, defaults to NOT_STARTED; when updating, omit to leave unchanged.",
+          "enum": [
+            "not_started",
+            "in_progress",
+            "completed",
+            "deferred",
+            "abandoned"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": false,
+          "description": "Place the project on this pipeline id. Combine with stage_id to also set the stage.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "stage_id",
+          "type": "string",
+          "required": false,
+          "description": "Move the project to this stage id (advance it). Omit to leave the stage as is.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Opportunity id to link the project to. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "responsible_user_id",
+          "type": "integer",
+          "required": false,
+          "description": "User id responsible for the project. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SaveProject",
+        "parameters": {
+          "project_id": {
+            "value": "987654",
+            "type": "string",
+            "required": false
+          },
+          "name": {
+            "value": "Website Redesign Q3 2024",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "IN_PROGRESS",
+            "type": "string",
+            "required": false
+          },
+          "pipeline_id": {
+            "value": "112233",
+            "type": "string",
+            "required": false
+          },
+          "stage_id": {
+            "value": "445566",
+            "type": "string",
+            "required": false
+          },
+          "opportunity_id": {
+            "value": "778899",
+            "type": "string",
+            "required": false
+          },
+          "responsible_user_id": {
+            "value": 302,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SaveTask",
+      "qualifiedName": "Insightly.SaveTask",
+      "fullyQualifiedName": "Insightly.SaveTask@0.1.0",
+      "description": "Create or update a task, optionally linked to a deal, project, contact, or org.\n\nOmit task_id to create (a title is required).",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": false,
+          "description": "Omit to create a new task; provide an existing id to update it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Task title. Sets it when creating; changes it when updating, or leave omitted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Task status; set it to COMPLETED to complete the task or a non-completed value to reopen it. Omit to leave unchanged.",
+          "enum": [
+            "not_started",
+            "in_progress",
+            "waiting",
+            "completed",
+            "deferred"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "When the task is due (YYYY-MM-DD). Empty string clears it; omit to leave it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Task priority. Omit to leave unchanged (defaults to NORMAL on create).",
+          "enum": [
+            "LOW",
+            "NORMAL",
+            "HIGH"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "responsible_user_id",
+          "type": "integer",
+          "required": false,
+          "description": "User id responsible for the task. Omit to leave unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": false,
+          "description": "Link the task to this project id. Omit to skip.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Link the task to this opportunity id. Omit to skip.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": false,
+          "description": "Link the task to this contact id. Omit to skip.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Link the task to this organization id. Omit to skip.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SaveTask",
+        "parameters": {
+          "task_id": {
+            "value": "987654",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Follow up with client about contract renewal",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "IN_PROGRESS",
+            "type": "string",
+            "required": false
+          },
+          "due_date": {
+            "value": "2024-08-15",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "HIGH",
+            "type": "string",
+            "required": false
+          },
+          "responsible_user_id": {
+            "value": 42,
+            "type": "integer",
+            "required": false
+          },
+          "project_id": {
+            "value": "112233",
+            "type": "string",
+            "required": false
+          },
+          "opportunity_id": {
+            "value": "445566",
+            "type": "string",
+            "required": false
+          },
+          "contact_id": {
+            "value": "778899",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "334455",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchContacts",
+      "qualifiedName": "Insightly.SearchContacts",
+      "fullyQualifiedName": "Insightly.SearchContacts@0.1.0",
+      "description": "Find contacts by name, email, or organization. Returns the account's default order.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Match against contact name or email (case-insensitive substring). Empty matches all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Only return contacts whose email contains this text. Empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return contacts linked to this organization id. Empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_after",
+          "type": "string",
+          "required": false,
+          "description": "Contacts updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SearchContacts",
+        "parameters": {
+          "query": {
+            "value": "john smith",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "gmail.com",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "482910",
+            "type": "string",
+            "required": false
+          },
+          "updated_after": {
+            "value": "2024-01-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchLeads",
+      "qualifiedName": "Insightly.SearchLeads",
+      "fullyQualifiedName": "Insightly.SearchLeads@0.1.0",
+      "description": "Find leads by name, email, conversion state, or status. Returns the account's default\norder.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Match against lead name, organization, or email (substring). Empty matches all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Only return leads whose email contains this text. Empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "converted",
+          "type": "boolean",
+          "required": false,
+          "description": "true for converted leads only, false for unconverted only. Omit for both.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_status_id",
+          "type": "integer",
+          "required": false,
+          "description": "Only return leads in this status (its id). 0 for no status filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_after",
+          "type": "string",
+          "required": false,
+          "description": "Leads updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SearchLeads",
+        "parameters": {
+          "query": {
+            "value": "John Smith",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "gmail.com",
+            "type": "string",
+            "required": false
+          },
+          "converted": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "lead_status_id": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          },
+          "updated_after": {
+            "value": "2024-01-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchNotes",
+      "qualifiedName": "Insightly.SearchNotes",
+      "fullyQualifiedName": "Insightly.SearchNotes@0.1.0",
+      "description": "Read notes most recently created first within the scanned window, account-wide or for one\nrecord.\n\nOmit every record id for an account-wide activity feed (combine owner_user_id and the\ncreated_after / created_before window for a standup-style recap), or provide exactly one\nrecord id to read the notes on that single record. Date bounds are inclusive.\n\nNotes are gathered by scanning the collection up to a ceiling and ordering that scanned set\nmost-recently-created first; when scan_truncated is true the scan stopped before reaching the\nwhole collection, so the newest notes may lie beyond the scanned window. Narrow with a record\nid, owner, or a created_after / created_before window to bring the result within that window.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": false,
+          "description": "Read notes attached to this contact. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Read notes attached to this opportunity. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Read notes attached to this organization. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": false,
+          "description": "Read notes attached to this project. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_id",
+          "type": "string",
+          "required": false,
+          "description": "Read notes attached to this lead. Empty for none.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_types",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Only return notes attached to a record of one of these kinds (for example to exclude auto-logged opportunity stage-change chatter from a recap). Omit for any kind.",
+          "enum": [
+            "CONTACT",
+            "OPPORTUNITY",
+            "ORGANISATION",
+            "PROJECT",
+            "LEAD"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "exclude_system_notes",
+          "type": "boolean",
+          "required": false,
+          "description": "Exclude Insightly's auto-generated stage/state/status-change notes (across opportunities, projects, and tasks) so a recap shows only human-logged notes. Defaults to false (every note is returned).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Match this text against the note title or body (case-insensitive substring). Empty matches all notes in scope.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "owner_user_id",
+          "type": "integer",
+          "required": false,
+          "description": "Only return notes authored by this user id. 0 for no owner filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_after",
+          "type": "string",
+          "required": false,
+          "description": "Only return notes created on or after this UTC date (YYYY-MM-DD). Empty for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_before",
+          "type": "string",
+          "required": false,
+          "description": "Only return notes created on or before this UTC date (YYYY-MM-DD). Empty for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SearchNotes",
+        "parameters": {
+          "contact_id": {
+            "value": "123456",
+            "type": "string",
+            "required": false
+          },
+          "opportunity_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "project_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "lead_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "record_types": {
+            "value": [
+              "contact",
+              "opportunity"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "exclude_system_notes": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "query": {
+            "value": "follow-up",
+            "type": "string",
+            "required": false
+          },
+          "owner_user_id": {
+            "value": 78910,
+            "type": "integer",
+            "required": false
+          },
+          "created_after": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "created_before": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchOpportunities",
+      "qualifiedName": "Insightly.SearchOpportunities",
+      "fullyQualifiedName": "Insightly.SearchOpportunities@0.1.0",
+      "description": "Find opportunities by name, state, pipeline, or organization. Returns the default order.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Match against the opportunity name (case-insensitive substring). Empty matches all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Only return opportunities in this state. Omit for any state.",
+          "enum": [
+            "OPEN",
+            "WON",
+            "LOST",
+            "ABANDONED",
+            "SUSPENDED"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return opportunities on this pipeline id. Empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return opportunities linked to this organization id. Empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_after",
+          "type": "string",
+          "required": false,
+          "description": "Opportunities updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SearchOpportunities",
+        "parameters": {
+          "query": {
+            "value": "cloud migration",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "Open",
+            "type": "string",
+            "required": false
+          },
+          "pipeline_id": {
+            "value": "pipeline_4821",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "org_39047",
+            "type": "string",
+            "required": false
+          },
+          "updated_after": {
+            "value": "2024-01-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchOrganizations",
+      "qualifiedName": "Insightly.SearchOrganizations",
+      "fullyQualifiedName": "Insightly.SearchOrganizations@0.1.0",
+      "description": "Find organizations by name or domain. Returns records in the account's default order.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Match against the organization name (case-insensitive substring). Empty matches all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "domain",
+          "type": "string",
+          "required": false,
+          "description": "Only return orgs whose website contains this domain. Empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_after",
+          "type": "string",
+          "required": false,
+          "description": "Organizations updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SearchOrganizations",
+        "parameters": {
+          "query": {
+            "value": "Acme",
+            "type": "string",
+            "required": false
+          },
+          "domain": {
+            "value": "acmecorp.com",
+            "type": "string",
+            "required": false
+          },
+          "updated_after": {
+            "value": "2024-01-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchProjects",
+      "qualifiedName": "Insightly.SearchProjects",
+      "fullyQualifiedName": "Insightly.SearchProjects@0.1.0",
+      "description": "Find projects by name, status, or pipeline. Returns the account's default order.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Match against the project name (case-insensitive substring). Empty matches all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Only return projects in this status. Omit for any status.",
+          "enum": [
+            "not_started",
+            "in_progress",
+            "completed",
+            "deferred",
+            "abandoned"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return projects on this pipeline id. Empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_after",
+          "type": "string",
+          "required": false,
+          "description": "Projects updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SearchProjects",
+        "parameters": {
+          "query": {
+            "value": "website redesign",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "IN PROGRESS",
+            "type": "string",
+            "required": false
+          },
+          "pipeline_id": {
+            "value": "482931",
+            "type": "string",
+            "required": false
+          },
+          "updated_after": {
+            "value": "2024-01-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchTasks",
+      "qualifiedName": "Insightly.SearchTasks",
+      "fullyQualifiedName": "Insightly.SearchTasks@0.1.0",
+      "description": "Find tasks by title, status, completion, due date, owner, or link. Due bounds inclusive.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Match this text against the task title (case-insensitive substring). Empty matches all.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks in this status. Omit for any status.",
+          "enum": [
+            "not_started",
+            "in_progress",
+            "waiting",
+            "completed",
+            "deferred"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "completed",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by completion: false for open tasks, true for completed. Omit for both.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_before",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks due on or before this date (YYYY-MM-DD). Empty for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_after",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks due on or after this date (YYYY-MM-DD). Empty for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "responsible_user_id",
+          "type": "integer",
+          "required": false,
+          "description": "Only return tasks assigned to this user id. 0 for no owner filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks linked to this project id. Empty for no project filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks linked to this opportunity id. Empty for no opportunity filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks linked to this contact id. Empty for no contact filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks linked to this organization id. Empty for no organization filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SearchTasks",
+        "parameters": {
+          "query": {
+            "value": "follow up",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "IN_PROGRESS",
+            "type": "string",
+            "required": false
+          },
+          "completed": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "due_before": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "due_after": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "responsible_user_id": {
+            "value": 102,
+            "type": "integer",
+            "required": false
+          },
+          "project_id": {
+            "value": "PRJ-4521",
+            "type": "string",
+            "required": false
+          },
+          "opportunity_id": {
+            "value": "OPP-7834",
+            "type": "string",
+            "required": false
+          },
+          "contact_id": {
+            "value": "CON-3391",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "ORG-1105",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SummarizePipeline",
+      "qualifiedName": "Insightly.SummarizePipeline",
+      "fullyQualifiedName": "Insightly.SummarizePipeline@0.1.0",
+      "description": "Roll up opportunities by pipeline stage with a count and summed value per stage.\n\nA forecast view for closing out the week: groups are ordered by the stage's defined order.",
+      "parameters": [
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Roll up only opportunities in this state. Defaults to OPEN (the live forecast); pass null to include every state.",
+          "enum": [
+            "OPEN",
+            "WON",
+            "LOST",
+            "ABANDONED",
+            "SUSPENDED"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": false,
+          "description": "Roll up only opportunities on this pipeline id. Empty for all pipelines.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organization_id",
+          "type": "string",
+          "required": false,
+          "description": "Roll up only opportunities linked to this organization id. Empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "responsible_user_id",
+          "type": "integer",
+          "required": false,
+          "description": "Roll up only opportunities owned by this user id (the caller's own id gives a 'my pipeline' view). 0 for every owner.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_empty_stages",
+          "type": "boolean",
+          "required": false,
+          "description": "Also list configured stages that hold no opportunities in scope, with a count and value of 0, so the forecast covers every stage rather than only the populated ones. Scoped to pipeline_id when set, otherwise every pipeline's stages. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "INSIGHTLY_API_KEY",
+        "INSIGHTLY_API_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "INSIGHTLY_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "INSIGHTLY_API_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Insightly.SummarizePipeline",
+        "parameters": {
+          "state": {
+            "value": "OPEN",
+            "type": "string",
+            "required": false
+          },
+          "pipeline_id": {
+            "value": "pipeline_8821",
+            "type": "string",
+            "required": false
+          },
+          "organization_id": {
+            "value": "org_4453",
+            "type": "string",
+            "required": false
+          },
+          "responsible_user_id": {
+            "value": 310247,
+            "type": "integer",
+            "required": false
+          },
+          "include_empty_stages": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-07-06T12:24:26.041Z",
+  "summary": "Insightly is a CRM platform; this toolkit gives Arcade agents full read/write access to contacts, leads, organizations, opportunities, projects, tasks, notes, and pipelines inside an Insightly account.\n\n## Capabilities\n\n- **Record management** — Create and update core CRM objects (contacts, leads, organizations, opportunities, projects, tasks) with upsert-style tools that create on missing ID and update on presence.\n- **Lead conversion** — Convert qualified leads into contacts and organizations (with optional opportunity), carrying over key fields and notes in a single orchestrated workflow.\n- **Search and lookup** — Query any object type by name, email, domain, status, pipeline, stage, owner, or date range; retrieve individual records by ID.\n- **Activity and pipeline intelligence** — Fetch a record's recent notes and open tasks in one call, roll up a user's open deals and tasks, and get a per-stage forecast summary for any pipeline.\n- **Reference data** — List pipelines, pipeline stages, lead statuses/sources, and account users to resolve human-readable names to the IDs that write operations require.\n- **Note logging** — Attach notes to any single CRM record; search notes account-wide or per-record with date and owner filters.\n\n## Secrets\n\n`INSIGHTLY_API_KEY`\nThe API key that authenticates every request to the Insightly REST API. Retrieve it from your Insightly account under **User Settings → API Key** (accessible via your avatar in the top-right corner of the Insightly UI). The key is tied to the user account that generated it, so all actions are attributed to that user — use a dedicated service or admin account in production. Insightly's own documentation on locating the key: [Insightly API Authentication](https://support.insightly.com/hc/en-us/articles/204864594).\n\n`INSIGHTLY_API_URL`\nThe base URL for the Insightly API endpoint (e.g., `https://api.na1.insightly.com/v3.1`). The correct URL depends on the data-residency region your Insightly account was provisioned in (North America, Europe, Australia, etc.). Find your region's base URL in **User Settings → API** within Insightly, or in the [Insightly API documentation](https://api.insightly.com/v3.1/Help). Supply the full versioned base URL without a trailing slash.\n\nStore both secrets in the Arcade secrets manager: https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets — or add them directly at https://api.arcade.dev/dashboard/auth/secrets."
+}
