@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftExcel",
   "label": "Microsoft Excel",
-  "version": "0.2.0",
+  "version": "1.1.1",
   "description": "Arcade.dev LLM tools for Microsoft Excel",
   "metadata": {
     "category": "productivity",
@@ -24,10 +24,10 @@
   },
   "tools": [
     {
-      "name": "AddWorksheet",
-      "qualifiedName": "MicrosoftExcel.AddWorksheet",
-      "fullyQualifiedName": "MicrosoftExcel.AddWorksheet@0.2.0",
-      "description": "Add a new worksheet to the workbook.\n\nNote: The new worksheet name may not be immediately visible to other\ntools due to a brief Graph API propagation delay (up to ~10 s). Pass\nthe returned ``session_id`` to subsequent calls that reference the new\nworksheet to mitigate this.",
+      "name": "AggregateWorksheet",
+      "qualifiedName": "MicrosoftExcel.AggregateWorksheet",
+      "fullyQualifiedName": "MicrosoftExcel.AggregateWorksheet@1.1.1",
+      "description": "Summarize a worksheet by grouping rows and computing per-group aggregates in one call.\n\nUse this instead of reading and paginating raw rows when you need totals, averages, counts,\nor min/max broken down by one or more columns (e.g. revenue by region). Columns can be\nreferenced by letter (group_by) or by header name (group_by_headers) — use whichever is\nmore convenient. Groups are returned in first-seen order and capped by ``limit``.\n\nAlways check each aggregate's ``numeric_count`` field: non-numeric and formula-error cells\nare silently skipped for sum/average/min/max, so a clean-looking total may exclude rows —\nthe ``warnings`` list will name every column and group where this occurred.",
       "parameters": [
         {
           "name": "item_id",
@@ -38,10 +38,77 @@
           "inferrable": true
         },
         {
-          "name": "name",
+          "name": "group_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Column letters to group rows by (e.g. ['A'] groups by column A). Omit for a single grand-total group over the whole sheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by_headers",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Header names to group rows by (e.g. ['Region']). Alternative to group_by when has_header is true — column letters are resolved automatically from the header row. Can be combined with group_by. Requires has_header=true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "aggregations",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Aggregates to compute per group, each a column letter plus a function. Omit to return only each group's row count.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
           "type": "string",
           "required": false,
-          "description": "Name for the new worksheet. If omitted, Excel generates a default name.",
+          "description": "Worksheet name to aggregate. If omitted, uses the first worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cell_range",
+          "type": "string",
+          "required": false,
+          "description": "Limit aggregation to a bounded A1 range such as 'A3:F20' instead of the full used range. Use this when the sheet has a decorative title row above the data headers (e.g. title in row 1, headers in row 3 → cell_range='A3:F100'). When omitted the full used range is aggregated.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "has_header",
+          "type": "boolean",
+          "required": false,
+          "description": "Treat the first row as a header and exclude it from the data. The header label is returned with each aggregate. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_column",
+          "type": "string",
+          "required": false,
+          "description": "Column letter to filter rows on before grouping (used with filter_contains). If omitted, no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_contains",
+          "type": "string",
+          "required": false,
+          "description": "Keep only rows whose filter_column cell contains this text (case-insensitive). If omitted, no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of groups to return (1-1000). Defaults to 100. When more groups exist the result is marked truncated.",
           "enum": null,
           "inferrable": true
         },
@@ -66,36 +133,99 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Files.ReadWrite"
+          "Files.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The created worksheet info."
+        "description": "Per-group aggregates computed over the worksheet's used range."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "MicrosoftExcel.AddWorksheet",
+        "toolName": "MicrosoftExcel.AggregateWorksheet",
         "parameters": {
           "item_id": {
-            "value": "01T5ABCDEF123456789!123",
+            "value": "01BYE5RZ6QN3ZWBTUQPBF2QABMY77CLKJ4",
             "type": "string",
             "required": true
           },
-          "name": {
-            "value": "Quarterly Report Q2 2026",
+          "group_by": {
+            "value": [
+              "A",
+              "B"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "group_by_headers": {
+            "value": [
+              "Region",
+              "Category"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "aggregations": {
+            "value": [
+              {
+                "column": "D",
+                "function": "sum"
+              },
+              {
+                "column": "E",
+                "function": "average"
+              },
+              {
+                "column": "F",
+                "function": "max"
+              },
+              {
+                "column": "C",
+                "function": "count"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "worksheet": {
+            "value": "SalesData",
             "type": "string",
             "required": false
           },
+          "cell_range": {
+            "value": "A3:F500",
+            "type": "string",
+            "required": false
+          },
+          "has_header": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "filter_column": {
+            "value": "G",
+            "type": "string",
+            "required": false
+          },
+          "filter_contains": {
+            "value": "confirmed",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          },
           "drive_id": {
-            "value": "b!a1B2c3D4e5F6g7H8I9J0",
+            "value": "b!Tz8cuBmlGUi7DsDFSEp0O1234abcXYZW9",
             "type": "string",
             "required": false
           },
           "session_id": {
-            "value": "b4f5c6d7-89ab-4cde-0123-456789abcdef",
+            "value": "session-7f3a2e91-4c1b-4d8e-9b0f-ae21c3d45678",
             "type": "string",
             "required": false
           }
@@ -112,27 +242,52 @@
         },
         "behavior": {
           "operations": [
-            "create"
+            "read"
           ],
-          "readOnly": false,
+          "readOnly": true,
           "destructive": false,
-          "idempotent": false,
+          "idempotent": true,
           "openWorld": true
         },
         "extras": null
       }
     },
     {
-      "name": "CreateWorkbook",
-      "qualifiedName": "MicrosoftExcel.CreateWorkbook",
-      "fullyQualifiedName": "MicrosoftExcel.CreateWorkbook@0.2.0",
-      "description": "Create a new Excel workbook (.xlsx) in OneDrive for Business.\n\nOnly .xlsx files are supported. OneDrive Consumer (personal accounts) is NOT supported.",
+      "name": "CreateOrEditWorkbook",
+      "qualifiedName": "MicrosoftExcel.CreateOrEditWorkbook",
+      "fullyQualifiedName": "MicrosoftExcel.CreateOrEditWorkbook@1.1.1",
+      "description": "Create a new .xlsx workbook or edit an existing one in OneDrive for Business.\n\nOmit `item_id` to create (an empty workbook is created from `filename`, then the\noperations are applied); provide `item_id` to edit. To create a populated workbook, pass\n`filename` plus set_values operations; name the target tab via `worksheet` (or reference\none consistent sheet name in the operations) and the new workbook's initial sheet is\nrenamed to match. For a finished file with formatting/charts intact, upload the bytes\ninstead of rebuilding cell-by-cell.\n\nEach entry in `operations` selects a behavior via its `type`: write/clear cells, format\ncells (font, fill, borders, alignment, wrap, row height), size rows and columns,\nsort, add/restyle tables (style, totals, banding, filter), add/move/restyle charts (anchor\ncell, size, title, legend, axis titles), manage worksheets and named ranges, protect a\nsheet, and recalculate. See the `operations` parameter for the per-type fields.",
       "parameters": [
+        {
+          "name": "operations",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Ordered edits to apply. Each entry's 'type' selects which fields are read. Operations run in order and the batch is non-atomic, so inspect 'operation_results'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": false,
+          "description": "Workbook to edit. Omit to create a new workbook (then 'filename' is used).",
+          "enum": null,
+          "inferrable": true
+        },
         {
           "name": "filename",
           "type": "string",
-          "required": true,
-          "description": "File name for the new workbook. The .xlsx extension is added automatically if not provided.",
+          "required": false,
+          "description": "File name for a new workbook (the .xlsx extension is added if missing). Used only when creating; ignored when editing.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": false,
+          "description": "Default worksheet for operations that omit their own 'worksheet'. If omitted, the first worksheet is used. When creating a new workbook, the initial sheet is renamed to this name so operations targeting it succeed in the same call.",
           "enum": null,
           "inferrable": true
         },
@@ -140,93 +295,7 @@
           "name": "parent_folder_id",
           "type": "string",
           "required": false,
-          "description": "Parent folder ID. If omitted, the workbook is created in the root of OneDrive.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "initial_data",
-          "type": "string",
-          "required": false,
-          "description": "Optional JSON string for initial data in the first worksheet. Format: data[ROW][COL] = VALUE where ROW is a row number as string, COL is a column letter (uppercase), VALUE is string/number/boolean/null. Type: dict[str, dict[str, str | int | float | bool | None]].",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "Files.ReadWrite"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The created Excel workbook metadata with session ID."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftExcel.CreateWorkbook",
-        "parameters": {
-          "filename": {
-            "value": "Q1_2026_Report",
-            "type": "string",
-            "required": true
-          },
-          "parent_folder_id": {
-            "value": "01ABCDXYZ123!456",
-            "type": "string",
-            "required": false
-          },
-          "initial_data": {
-            "value": "{\"1\":{\"A\":\"Region\",\"B\":\"Sales\",\"C\":\"Growth\"},\"2\":{\"A\":\"North\",\"B\":120000.5,\"C\":0.05},\"3\":{\"A\":\"South\",\"B\":95000,\"C\":-0.02},\"4\":{\"A\":\"Total\",\"B\":215000.5,\"C\":null}}",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "spreadsheets"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "DeleteWorksheet",
-      "qualifiedName": "MicrosoftExcel.DeleteWorksheet",
-      "fullyQualifiedName": "MicrosoftExcel.DeleteWorksheet@0.2.0",
-      "description": "Delete a worksheet from the workbook.\n\nCannot delete the last worksheet in a workbook.\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
-      "parameters": [
-        {
-          "name": "item_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the Excel workbook.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "worksheet",
-          "type": "string",
-          "required": true,
-          "description": "Name of the worksheet to delete.",
+          "description": "Parent folder ID for a new workbook. If omitted, it is created in the OneDrive root.",
           "enum": null,
           "inferrable": true
         },
@@ -234,7 +303,7 @@
           "name": "drive_id",
           "type": "string",
           "required": false,
-          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "description": "Drive ID for shared items. If omitted, uses the user's default OneDrive.",
           "enum": null,
           "inferrable": true
         },
@@ -242,7 +311,7 @@
           "name": "session_id",
           "type": "string",
           "required": false,
-          "description": "Optional session ID from a previous operation for better performance.",
+          "description": "Session ID returned by a previous call against the same workbook, for consistency and performance. If omitted, one is created.",
           "enum": null,
           "inferrable": true
         }
@@ -258,29 +327,87 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Confirmation of the worksheet deletion."
+        "description": "Workbook state and per-operation results."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "MicrosoftExcel.DeleteWorksheet",
+        "toolName": "MicrosoftExcel.CreateOrEditWorkbook",
         "parameters": {
+          "operations": {
+            "value": [
+              {
+                "type": "set_values",
+                "worksheet": "Sales Data",
+                "range": "A1:C3",
+                "values": [
+                  [
+                    "Product",
+                    "Units Sold",
+                    "Revenue"
+                  ],
+                  [
+                    "Widget A",
+                    150,
+                    4500
+                  ],
+                  [
+                    "Widget B",
+                    200,
+                    6000
+                  ]
+                ]
+              },
+              {
+                "type": "format_cells",
+                "worksheet": "Sales Data",
+                "range": "A1:C1",
+                "font": {
+                  "bold": true,
+                  "size": 12
+                },
+                "fill": {
+                  "color": "#4472C4"
+                }
+              },
+              {
+                "type": "add_table",
+                "worksheet": "Sales Data",
+                "range": "A1:C3",
+                "style": "TableStyleMedium9",
+                "totals": true,
+                "banded_rows": true
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
           "item_id": {
-            "value": "01ABCD2EFGHIJKL3456789!101",
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPEY2F5HD37",
             "type": "string",
-            "required": true
+            "required": false
+          },
+          "filename": {
+            "value": "Q2_Sales_Report",
+            "type": "string",
+            "required": false
           },
           "worksheet": {
-            "value": "Expenses 2026",
+            "value": "Sales Data",
             "type": "string",
-            "required": true
+            "required": false
+          },
+          "parent_folder_id": {
+            "value": "01BYE5RZ4Y2GOVW7725BZO354PWSELRRZ",
+            "type": "string",
+            "required": false
           },
           "drive_id": {
-            "value": "b!a1b2c3d4e5f6g7h8i9j0k",
+            "value": "b!ds9Ur4GJK0S8NqpNMbPBnlhJjHfX1pBDsYtK9QeZo3M",
             "type": "string",
             "required": false
           },
           "session_id": {
-            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "value": "cluster=EU1&session=14.a38e7a9b-1234-5678-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -297,11 +424,13 @@
         },
         "behavior": {
           "operations": [
+            "create",
+            "update",
             "delete"
           ],
           "readOnly": false,
           "destructive": true,
-          "idempotent": true,
+          "idempotent": false,
           "openWorld": true
         },
         "extras": null
@@ -310,8 +439,8 @@
     {
       "name": "GetWorkbookMetadata",
       "qualifiedName": "MicrosoftExcel.GetWorkbookMetadata",
-      "fullyQualifiedName": "MicrosoftExcel.GetWorkbookMetadata@0.2.0",
-      "description": "Get metadata about an Excel workbook including worksheet list.\n\nReturns workbook name, URL, and all worksheets with their names, positions, and visibility.",
+      "fullyQualifiedName": "MicrosoftExcel.GetWorkbookMetadata@1.1.1",
+      "description": "Get a workbook's structure: worksheets, named ranges, and optionally extents and objects.\n\nCall this first when exploring an unfamiliar workbook: it surfaces hidden worksheets,\nworkbook-scoped named ranges, tables, charts, and (with the flags) used ranges, protection\nstate, and worksheet-local named ranges, so you can target reads precisely and avoid\nmistaking a stale dashboard sheet for the source data. Use `include_used_ranges` to learn\nwhere data lives before reading, and `include_objects` to enumerate tables and charts. Both\nadd a per-worksheet fan-out, so leave them off for a quick worksheet listing.",
       "parameters": [
         {
           "name": "item_id",
@@ -322,10 +451,26 @@
           "inferrable": true
         },
         {
+          "name": "include_used_ranges",
+          "type": "boolean",
+          "required": false,
+          "description": "Also report each worksheet's used range, dimensions, first-row preview, protection state, and worksheet-local named ranges. Adds a per-worksheet fan-out. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_objects",
+          "type": "boolean",
+          "required": false,
+          "description": "Also enumerate tables and charts with their locations. Adds a per-worksheet fan-out. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
           "name": "drive_id",
           "type": "string",
           "required": false,
-          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "description": "Drive ID for shared items. If omitted, uses the user's default OneDrive.",
           "enum": null,
           "inferrable": true
         },
@@ -333,7 +478,7 @@
           "name": "session_id",
           "type": "string",
           "required": false,
-          "description": "Optional session ID from a previous operation for better performance.",
+          "description": "Session ID from a previous operation for consistency and performance.",
           "enum": null,
           "inferrable": true
         }
@@ -349,24 +494,34 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Workbook metadata including worksheet list."
+        "description": "Workbook structure overview."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftExcel.GetWorkbookMetadata",
         "parameters": {
           "item_id": {
-            "value": "01A2B3C4D5E6F7G8!123",
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPEY2DYGABF",
             "type": "string",
             "required": true
           },
+          "include_used_ranges": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_objects": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
           "drive_id": {
-            "value": "b!xYzAbCdEfGhIjKlMnOp",
+            "value": "b!dGVzdERyaXZlSURleGFtcGxlMTIz",
             "type": "string",
             "required": false
           },
           "session_id": {
-            "value": "session_9f8e7d6c5b4a3",
+            "value": "cluster=EU1&session=eyJhbGciOiJIUzI1NiJ9.session123",
             "type": "string",
             "required": false
           }
@@ -394,10 +549,122 @@
       }
     },
     {
-      "name": "GetWorksheetData",
-      "qualifiedName": "MicrosoftExcel.GetWorksheetData",
-      "fullyQualifiedName": "MicrosoftExcel.GetWorksheetData@0.2.0",
-      "description": "Read cell values from a worksheet.\n\nReturns data in sparse dict format where data[ROW][COL] has userEnteredValue\nand formattedValue for each non-empty cell. Includes pagination hints if more\ndata exists beyond the requested range.\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "name": "ListWorkbookComments",
+      "qualifiedName": "MicrosoftExcel.ListWorkbookComments",
+      "fullyQualifiedName": "MicrosoftExcel.ListWorkbookComments@1.1.1",
+      "description": "List a workbook's comments, or the replies on a specific comment thread.\n\nProvide a comment ID to retrieve that thread's replies instead of the top-level comments.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": false,
+          "description": "When omitted, lists the workbook's comments. When provided, lists the replies on that comment thread in the order they were posted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-50). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The paginated comments or replies for the workbook."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.ListWorkbookComments",
+        "parameters": {
+          "item_id": {
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "1.1.7f3e2a94-bc44-4e1d-9b2f-abc123def456",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "drive_id": {
+            "value": "b!dGhpcyBpcyBhIGZha2UgZHJpdmUgaWQ",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ReadWorksheet",
+      "qualifiedName": "MicrosoftExcel.ReadWorksheet",
+      "fullyQualifiedName": "MicrosoftExcel.ReadWorksheet@1.1.1",
+      "description": "Read a worksheet range with the detail you choose, with guardrails for large sheets.\n\nRequest `annotations` for formulas, cell types, number formats, or the range's\nfill/font/borders; `filter_column` + `filter_contains` to keep matching rows; `columns` to\nproject a subset; `export` for csv/tsv. Reads are bounded to the used range and capped by a\nrow limit and cell budget, paginating via `next_range` rather than returning a whole large\nsheet at once.\n\nSet `row_format=\"records\"` (with `has_header=true`) to get a `record` dict on each data\nrow, keying cell values by the header row (the top row of the worksheet's used range) —\nuseful when agents need to map values to named columns without tracking positional indices.\nThe header is carried across pages, so paginated reads via `next_range` stay correctly\nkeyed. Each row still includes `values`.\n\nTo verify formulas, types, or number patterns in the returned cells, pass `annotations`\n(e.g. `[\"formulas\", \"types\"]`); annotation values land under `annotations` keyed by A1\naddress alongside the displayed values.",
       "parameters": [
         {
           "name": "item_id",
@@ -411,39 +678,368 @@
           "name": "worksheet",
           "type": "string",
           "required": false,
-          "description": "Worksheet name to read from. If omitted, reads from the first worksheet.",
+          "description": "Worksheet to read. If omitted, reads the first worksheet.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "start_row",
-          "type": "integer",
-          "required": false,
-          "description": "Starting row number (1-indexed). Defaults to 1.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "start_col",
+          "name": "cell_range",
           "type": "string",
           "required": false,
-          "description": "Starting column letter. Defaults to A.",
+          "description": "Bounded A1 range to read (e.g. 'A1:D50'). Entire-row/column ranges and an omitted range are bounded to the worksheet's populated extent.",
           "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "annotations",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Extra detail to attach. formulas/types/number_formats are per-cell (under 'annotations'); fill/font/borders report the range's overall formatting (under 'range_format'). If omitted, only displayed values are returned.",
+          "enum": [
+            "formulas",
+            "types",
+            "number_formats",
+            "fill",
+            "font",
+            "borders"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "filter_column",
+          "type": "string",
+          "required": false,
+          "description": "Column letter to filter rows on (used with filter_contains). If omitted, no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_contains",
+          "type": "string",
+          "required": false,
+          "description": "Keep only rows whose filter_column cell contains this text (case-insensitive, matched against the full untruncated value). If omitted, no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "has_header",
+          "type": "boolean",
+          "required": false,
+          "description": "When true and a filter is active, the first row is treated as a column header and always included in the output regardless of the filter value. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "row_format",
+          "type": "string",
+          "required": false,
+          "description": "Shape of each row in the response. 'array' (default) returns positional cell values under 'values'. 'records' additionally attaches a 'record' dict to each data row, keying values by their column header; requires has_header=true. Blank headers become 'column_<LETTER>' and duplicate headers are disambiguated with a numeric suffix.",
+          "enum": [
+            "array",
+            "records"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "columns",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Column letters to return, in this order. Projecting fewer columns also raises how many rows fit in one page. If omitted, all columns in the range are returned.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "export",
+          "type": "string",
+          "required": false,
+          "description": "Also return the range rendered as delimited text under 'export'. If omitted, no export.",
+          "enum": [
+            "csv",
+            "tsv"
+          ],
           "inferrable": true
         },
         {
           "name": "max_rows",
           "type": "integer",
           "required": false,
-          "description": "Maximum rows to return. Defaults to 1000, maximum allowed is 1000.",
+          "description": "Maximum rows to scan for this page (1-1000). Defaults to 200. This is an upper bound, not a guarantee: a page may return fewer rows than this and set next_range to continue. On wide sheets a per-page cell budget (rows x columns) caps the window below max_rows, so raising max_rows alone may not enlarge the page; project fewer columns to fit more rows. With a filter, a page returns only the matching rows scanned within this bound.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "max_cols",
+          "name": "max_length",
           "type": "integer",
           "required": false,
-          "description": "Maximum columns to return. Defaults to 100, maximum allowed is 100.",
+          "description": "Per-cell display length cap; longer values are truncated with an overflow marker. Set to 0 to disable truncation. Defaults to 200.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Session ID from a previous operation for consistency and performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Worksheet slice with optional annotations and export."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.ReadWorksheet",
+        "parameters": {
+          "item_id": {
+            "value": "01BYE5RZ6QN3ZWBTURAMDR3S5BGKRNXPGE",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Sales Data",
+            "type": "string",
+            "required": false
+          },
+          "cell_range": {
+            "value": "A1:F100",
+            "type": "string",
+            "required": false
+          },
+          "annotations": {
+            "value": [
+              "formulas",
+              "types",
+              "number_formats"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "filter_column": {
+            "value": "C",
+            "type": "string",
+            "required": false
+          },
+          "filter_contains": {
+            "value": "North America",
+            "type": "string",
+            "required": false
+          },
+          "has_header": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "row_format": {
+            "value": "records",
+            "type": "string",
+            "required": false
+          },
+          "columns": {
+            "value": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "F"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "export": {
+            "value": "csv",
+            "type": "string",
+            "required": false
+          },
+          "max_rows": {
+            "value": 500,
+            "type": "integer",
+            "required": false
+          },
+          "max_length": {
+            "value": 150,
+            "type": "integer",
+            "required": false
+          },
+          "drive_id": {
+            "value": "b!T4R5g2k9Lk6vXdPqHjNmOw1cZsYeWbFIlMoJ3rUaTiCzDhVnpBxEsGfKuQ",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "cluster=PROD&session=eyJlIjoiMTY5MDAwMDAwMCIsInMiOiJTZXNzaW9uMTIzNDU2In0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ReplyToWorkbookComment",
+      "qualifiedName": "MicrosoftExcel.ReplyToWorkbookComment",
+      "fullyQualifiedName": "MicrosoftExcel.ReplyToWorkbookComment@1.1.1",
+      "description": "Post a plain-text reply to an existing comment thread on a workbook.\n\nThe reply is appended to the end of the thread.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the comment thread to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "The plain-text body of the reply. Cannot be empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The newly created reply on the comment thread."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.ReplyToWorkbookComment",
+        "parameters": {
+          "item_id": {
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "1-ZmMwYTU4NTAtNmYxMC00YTZhLThkNjMtNTZjYjc4NzQ2ZmM3",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "Thanks for the update! I've reviewed the figures and they look correct to me.",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "b!eHubwBR9cEuBhBzLdBuLtQ",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ScanForDataIssues",
+      "qualifiedName": "MicrosoftExcel.ScanForDataIssues",
+      "fullyQualifiedName": "MicrosoftExcel.ScanForDataIssues@1.1.1",
+      "description": "Scan a worksheet (or the whole workbook) for data-quality problems as a structured list.\n\nEach issue carries a ``severity`` field (``\"high\"``, ``\"medium\"``, or ``\"low\"``) and the\nlist is ordered high → low before any truncation cap is applied, so critical findings are\nnever dropped in favour of lower-priority ones.\n\nBy default the scan is sheet-scoped (the named worksheet, or the first sheet when\n``worksheet`` is omitted). Pass ``worksheet='*'`` for a workbook-wide audit: every sheet\nis scanned in one call and each issue carries its own ``worksheet`` field.\n\nDetects formula-error cells (``severity=\"high\"``), type outliers within a column —\na column mostly one type with a few cells of another — (``severity=\"medium\"``),\ninconsistent_column for a column that mixes cell types without a strong majority\n(``severity=\"medium\"``), accidental duplicate values in mostly-unique columns\n(``severity=\"medium\"``), and blank cells inside an otherwise-populated region\n(``severity=\"low\"``). Categorical columns (where repetition is expected) are not flagged\nas duplicates, and the header row is excluded from type-outlier and duplicate checks.\nA clean sheet returns an empty issues list. Detection is deterministic.\nResults are capped; when the cap is reached ``truncated`` is True and a warning is added.\n\nMerged cells are a known limitation: Microsoft Graph reports only the merge anchor as\npopulated and every covered cell as empty, so cells hidden under a merge may be flagged as\nblanks. A worksheet cannot be scanned when its used range exceeds an internal cell limit\n(this tool takes no range argument): a single-sheet scan raises an error asking you to\nreduce the data, while a whole-workbook scan skips the oversized sheet and names it in a\nwarning so the rest of the workbook is still scanned.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": false,
+          "description": "Worksheet name to scan, or '*' to scan every worksheet in the workbook in one call. If omitted, scans the first worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "has_header",
+          "type": "boolean",
+          "required": false,
+          "description": "Treat the first row as a header and exclude it from type-outlier and duplicate checks. Defaults to true.",
           "enum": null,
           "inferrable": true
         },
@@ -475,49 +1071,34 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Worksheet data in sparse dict format with pagination."
+        "description": "Structured list of data-quality issues found in the used range."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "MicrosoftExcel.GetWorksheetData",
+        "toolName": "MicrosoftExcel.ScanForDataIssues",
         "parameters": {
           "item_id": {
-            "value": "01ABCDabcd2345EF!678",
+            "value": "01BYE5RZ6QN3ZWBZBKJBGKOQV7PZAQOEEF",
             "type": "string",
             "required": true
           },
           "worksheet": {
-            "value": "Sales Q1",
+            "value": "SalesData",
             "type": "string",
             "required": false
           },
-          "start_row": {
-            "value": 2,
-            "type": "integer",
-            "required": false
-          },
-          "start_col": {
-            "value": "B",
-            "type": "string",
-            "required": false
-          },
-          "max_rows": {
-            "value": 250,
-            "type": "integer",
-            "required": false
-          },
-          "max_cols": {
-            "value": 10,
-            "type": "integer",
+          "has_header": {
+            "value": true,
+            "type": "boolean",
             "required": false
           },
           "drive_id": {
-            "value": "b!2aB3cD4EfGhIjK",
+            "value": "b!dGhpcyBpcyBhIGZha2UgZHJpdmUgaWQ",
             "type": "string",
             "required": false
           },
           "session_id": {
-            "value": "3f7a9b2c-4d1e-11ee-8c99-0242ac120002",
+            "value": "cluster=EU&session=eyJhbGciOiJub25lIn0.eyJzaWQiOiIxMjM0NTY3ODkwIn0.",
             "type": "string",
             "required": false
           }
@@ -545,160 +1126,40 @@
       }
     },
     {
-      "name": "RenameWorksheet",
-      "qualifiedName": "MicrosoftExcel.RenameWorksheet",
-      "fullyQualifiedName": "MicrosoftExcel.RenameWorksheet@0.2.0",
-      "description": "Rename an existing worksheet in the workbook.\n\nNote: The new name may not be immediately visible to other tools due\nto a brief Graph API propagation delay (up to ~10 s). Pass the returned\n``session_id`` to subsequent calls that reference the renamed worksheet\nto mitigate this. If referencing a recently added worksheet as the source,\nthe same delay applies; retry with the ``session_id`` if a\nWorksheetNotFoundError occurs.",
+      "name": "SearchWorkbooks",
+      "qualifiedName": "MicrosoftExcel.SearchWorkbooks",
+      "fullyQualifiedName": "MicrosoftExcel.SearchWorkbooks@1.1.1",
+      "description": "Find Excel workbooks in OneDrive by keyword or folder, returning their item_ids.\n\nProvide `query` to search the whole drive by name/content, or leave it empty and pass\n`parent_folder_id` to list one folder; only .xlsx files are returned. Use a returned\n`item_id` to read, edit, scan, or comment on a workbook you did not create this session.",
       "parameters": [
         {
-          "name": "item_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the Excel workbook.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "worksheet",
-          "type": "string",
-          "required": true,
-          "description": "Current name of the worksheet to rename.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "new_name",
-          "type": "string",
-          "required": true,
-          "description": "New name for the worksheet.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "drive_id",
+          "name": "query",
           "type": "string",
           "required": false,
-          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "description": "Keyword to match against the workbook name or contents across the whole drive. Leave empty to list workbooks in a folder instead. Defaults to empty.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "session_id",
+          "name": "parent_folder_id",
           "type": "string",
           "required": false,
-          "description": "Optional session ID from a previous operation for better performance.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "Files.ReadWrite"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The renamed worksheet info."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftExcel.RenameWorksheet",
-        "parameters": {
-          "item_id": {
-            "value": "01234567-89ab-cdef-0123-456789abcdef",
-            "type": "string",
-            "required": true
-          },
-          "worksheet": {
-            "value": "Sheet1",
-            "type": "string",
-            "required": true
-          },
-          "new_name": {
-            "value": "Summary Q1 2026",
-            "type": "string",
-            "required": true
-          },
-          "drive_id": {
-            "value": "b!A1B2C3D4E5F6G7H8I9J0K",
-            "type": "string",
-            "required": false
-          },
-          "session_id": {
-            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "spreadsheets"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "UpdateCell",
-      "qualifiedName": "MicrosoftExcel.UpdateCell",
-      "fullyQualifiedName": "MicrosoftExcel.UpdateCell@0.2.0",
-      "description": "Update a single cell value in an Excel workbook.\n\nSupports strings, numbers, booleans, and formulas (values starting with '=').\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
-      "parameters": [
-        {
-          "name": "item_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the Excel workbook.",
+          "description": "Folder to list workbooks from when no query is given. If omitted, the OneDrive root is listed.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "column",
-          "type": "string",
-          "required": true,
-          "description": "Column letter or letters (e.g., 'A', 'BC').",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "row",
+          "name": "limit",
           "type": "integer",
-          "required": true,
-          "description": "Row number (1-indexed).",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "value",
-          "type": "string",
-          "required": true,
-          "description": "The value to set. Supports strings, numbers, booleans, and formulas (e.g., '=SUM(A1:A10)').",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "worksheet",
-          "type": "string",
           "required": false,
-          "description": "Worksheet name to update. If omitted, updates the first worksheet.",
+          "description": "Maximum workbooks to return (1-50). Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed position of the first workbook to return. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -706,15 +1167,7 @@
           "name": "drive_id",
           "type": "string",
           "required": false,
-          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "session_id",
-          "type": "string",
-          "required": false,
-          "description": "Optional session ID from a previous operation for better performance.",
+          "description": "Drive ID for shared items. If omitted, uses the user's default OneDrive.",
           "enum": null,
           "inferrable": true
         }
@@ -723,51 +1176,41 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Files.ReadWrite"
+          "Files.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Confirmation of the cell update."
+        "description": "Matching .xlsx workbooks with their item_ids."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "MicrosoftExcel.UpdateCell",
+        "toolName": "MicrosoftExcel.SearchWorkbooks",
         "parameters": {
-          "item_id": {
-            "value": "01234567-89ab-cdef-0123-456789abcdef",
+          "query": {
+            "value": "Q3 Financial Report",
             "type": "string",
-            "required": true
+            "required": false
           },
-          "column": {
-            "value": "C",
+          "parent_folder_id": {
+            "value": "01BYE5RZ56Y2GOVW7725BZO354PWSELRRZ",
             "type": "string",
-            "required": true
+            "required": false
           },
-          "row": {
-            "value": 5,
+          "limit": {
+            "value": 10,
             "type": "integer",
-            "required": true
+            "required": false
           },
-          "value": {
-            "value": "=SUM(C1:C10)",
-            "type": "string",
-            "required": true
-          },
-          "worksheet": {
-            "value": "Quarterly Budget",
-            "type": "string",
+          "offset": {
+            "value": 0,
+            "type": "integer",
             "required": false
           },
           "drive_id": {
-            "value": "b!a1B2c3D4e5F6g7H8",
-            "type": "string",
-            "required": false
-          },
-          "session_id": {
-            "value": "session-123e4567-e89b-12d3-a456-426614174000",
+            "value": "b!dGVzdERyaXZlSWQxMjM0NTY3ODkwYWJj",
             "type": "string",
             "required": false
           }
@@ -784,9 +1227,9 @@
         },
         "behavior": {
           "operations": [
-            "update"
+            "read"
           ],
-          "readOnly": false,
+          "readOnly": true,
           "destructive": false,
           "idempotent": true,
           "openWorld": true
@@ -795,32 +1238,32 @@
       }
     },
     {
-      "name": "UpdateRange",
-      "qualifiedName": "MicrosoftExcel.UpdateRange",
-      "fullyQualifiedName": "MicrosoftExcel.UpdateRange@0.2.0",
-      "description": "Update multiple cells in a worksheet using sparse dict format.\n\nOnly specified cells are updated; unspecified cells remain unchanged.\nThe data format is the same as Google Sheets update_cells.\n\nInternally, a single PATCH request is sent covering the bounding box\nof all specified cells.  Cells within the box that are not in the\ninput are sent as ``null``, which the Graph API treats as \"skip\".\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "name": "UploadWorkbook",
+      "qualifiedName": "MicrosoftExcel.UploadWorkbook",
+      "fullyQualifiedName": "MicrosoftExcel.UploadWorkbook@1.1.1",
+      "description": "Upload a complete .xlsx file into OneDrive for Business, preserving it byte-for-byte.\n\nUse this instead of rebuilding a finished file cell-by-cell. Large files are uploaded\nvia a resumable upload session automatically.",
       "parameters": [
         {
-          "name": "item_id",
+          "name": "filename",
           "type": "string",
           "required": true,
-          "description": "The ID of the Excel workbook.",
+          "description": "Destination file name (the .xlsx extension is added if missing).",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "data",
+          "name": "file_content_base64",
           "type": "string",
           "required": true,
-          "description": "JSON string where data[ROW][COL] = VALUE. ROW is a row number as string, COL is a column letter (uppercase), VALUE is string/number/boolean/null. Type: dict[str, dict[str, str | int | float | bool | None]].",
+          "description": "The complete .xlsx file contents, base64-encoded. Uploaded intact so formatting, formulas, charts, and tables are preserved.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "worksheet",
+          "name": "parent_folder_id",
           "type": "string",
           "required": false,
-          "description": "Worksheet name to update. If omitted, updates the first worksheet.",
+          "description": "Parent folder ID. If omitted, the file is uploaded to the OneDrive root.",
           "enum": null,
           "inferrable": true
         },
@@ -828,15 +1271,15 @@
           "name": "drive_id",
           "type": "string",
           "required": false,
-          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "description": "Drive ID for shared items (e.g. a SharePoint library). If omitted, uses the user's default OneDrive.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "session_id",
-          "type": "string",
+          "name": "overwrite",
+          "type": "boolean",
           "required": false,
-          "description": "Optional session ID from a previous operation for better performance.",
+          "description": "If true, replace an existing file with the same name; if false, reject the upload when the name already exists. Defaults to false.",
           "enum": null,
           "inferrable": true
         }
@@ -852,35 +1295,35 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Confirmation of the range update with cell count."
+        "description": "The stored workbook and its worksheets."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "MicrosoftExcel.UpdateRange",
+        "toolName": "MicrosoftExcel.UploadWorkbook",
         "parameters": {
-          "item_id": {
-            "value": "01234567-89ab-cdef-0123-456789abcdef",
+          "filename": {
+            "value": "Q3_Sales_Report",
             "type": "string",
             "required": true
           },
-          "data": {
-            "value": "{\"1\":{\"A\":\"Name\",\"B\":\"Amount\"},\"2\":{\"A\":\"Alice\",\"B\":1234.56,\"C\":true},\"3\":{\"A\":\"Bob\",\"B\":null,\"C\":false},\"10\":{\"D\":\"Note\"}}",
+          "file_content_base64": {
+            "value": "UEsDBBQABgAIAAAAIQDfpNJsWgEAACAFAAATAAgCW0NvbnRlbnRfVHlwZXNdLnhtbCCiBAIooAAC",
             "type": "string",
             "required": true
           },
-          "worksheet": {
-            "value": "Expenses",
+          "parent_folder_id": {
+            "value": "01BYE5RZ56Y2GOVW7725BZO354PWSELRRZ",
             "type": "string",
             "required": false
           },
           "drive_id": {
-            "value": "b!aBcD_ExampleDriveId123",
+            "value": "b!dGbmKpY2hEqZ3F1xNkL8cAbCdEfGhIjKlMnOpQrStUvWxYz1234567890ABCD",
             "type": "string",
             "required": false
           },
-          "session_id": {
-            "value": "session_01ab23",
-            "type": "string",
+          "overwrite": {
+            "value": true,
+            "type": "boolean",
             "required": false
           }
         },
@@ -896,11 +1339,12 @@
         },
         "behavior": {
           "operations": [
+            "create",
             "update"
           ],
           "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
+          "destructive": true,
+          "idempotent": false,
           "openWorld": true
         },
         "extras": null
@@ -909,7 +1353,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftExcel.WhoAmI",
-      "fullyQualifiedName": "MicrosoftExcel.WhoAmI@0.2.0",
+      "fullyQualifiedName": "MicrosoftExcel.WhoAmI@1.1.1",
       "description": "Get information about the current user and their Microsoft Excel environment.",
       "parameters": [],
       "auth": {
@@ -955,6 +1399,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.414Z",
-  "summary": "Microsoft Excel toolkit for Arcade.dev lets LLMs operate on Excel workbooks stored in OneDrive for Business via the Microsoft Graph API. It enables creating workbooks, managing worksheets, reading workbook and worksheet metadata, and reading/updating cells and ranges using sparse formats and pagination.\n\n**Capabilities**\n- Manage workbook and worksheet lifecycle (create, add, rename, delete) with session_id support to mitigate Graph propagation delays.\n- Inspect workbook metadata and worksheet lists including visibility and positions.\n- Read sparse cell data with pagination hints and update single cells or sparse ranges (strings, numbers, booleans, formulas).\n- Handle consistency and retry patterns around short propagation windows.\n\n**OAuth**\nProvider: microsoft\nScopes: Files.Read, Files.ReadWrite, User.Read"
+  "generatedAt": "2026-07-09T12:12:37.268Z",
+  "summary": "**Microsoft Excel toolkit** connects Arcade to Microsoft Excel via the Microsoft Graph API, enabling LLMs to read, write, analyze, and manage Excel workbooks stored in OneDrive for Business.\n\n## Capabilities\n\n- **Workbook & worksheet management** — create, edit, or upload `.xlsx` workbooks; rename, protect, and manage worksheets; manage named ranges and recalculate.\n- **Reading & querying data** — read worksheet ranges with filtering, column projection, pagination, and row-as-records output; aggregate rows into grouped summaries (sum, average, count, min/max) without fetching raw data.\n- **Formatting & structure** — apply fonts, fills, borders, alignment, row/column sizing, tables (with banding, totals, filters), and charts (anchor, size, title, legend, axes).\n- **Data quality & discovery** — scan worksheets or entire workbooks for formula errors, type outliers, duplicates, and blank cells with severity rankings; retrieve workbook metadata including hidden sheets, named ranges, tables, and charts.\n- **Search & navigation** — search OneDrive for `.xlsx` files by keyword or folder; resolve item IDs for subsequent read/edit/scan operations.\n- **Comments & identity** — list and reply to comment threads; retrieve current user and environment info.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 delegated auth via **Microsoft**. Arcade manages the token flow automatically.\n\nSee the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
 }
