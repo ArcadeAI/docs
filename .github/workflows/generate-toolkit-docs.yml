@@ -110,7 +110,10 @@ jobs:
             - Deploy env: ${{ github.event.client_payload.env || 'unknown' }}
             - Deploy SHA: ${{ github.event.client_payload.deploy_sha || 'unknown' }}
             - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          branch: automation/toolkit-docs-${{ github.run_id }}
+          # Stable branch so later runs update the open auto-PR instead of
+          # opening a new one each time. create-pull-request force-pushes the
+          # latest generated docs onto this branch.
+          branch: automation/toolkit-docs
           delete-branch: true
 
       - name: Request team review
