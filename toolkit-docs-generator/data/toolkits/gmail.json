@@ -1,7 +1,7 @@
 {
   "id": "Gmail",
   "label": "Gmail",
-  "version": "7.5.1",
+  "version": "8.0.1",
   "description": "Arcade.dev LLM tools for Gmail",
   "metadata": {
     "category": "productivity",
@@ -30,7 +30,7 @@
     {
       "name": "ChangeEmailLabels",
       "qualifiedName": "Gmail.ChangeEmailLabels",
-      "fullyQualifiedName": "Gmail.ChangeEmailLabels@7.5.1",
+      "fullyQualifiedName": "Gmail.ChangeEmailLabels@8.0.1",
       "description": "Add and remove labels from an email using the Gmail API.",
       "parameters": [
         {
@@ -124,7 +124,7 @@
     {
       "name": "CreateLabel",
       "qualifiedName": "Gmail.CreateLabel",
-      "fullyQualifiedName": "Gmail.CreateLabel@7.5.1",
+      "fullyQualifiedName": "Gmail.CreateLabel@8.0.1",
       "description": "Create a new label in the user's mailbox.",
       "parameters": [
         {
@@ -184,7 +184,7 @@
     {
       "name": "DeleteDraftEmail",
       "qualifiedName": "Gmail.DeleteDraftEmail",
-      "fullyQualifiedName": "Gmail.DeleteDraftEmail@7.5.1",
+      "fullyQualifiedName": "Gmail.DeleteDraftEmail@8.0.1",
       "description": "Delete a draft email using the Gmail API.",
       "parameters": [
         {
@@ -244,7 +244,7 @@
     {
       "name": "GetThread",
       "qualifiedName": "Gmail.GetThread",
-      "fullyQualifiedName": "Gmail.GetThread@7.5.1",
+      "fullyQualifiedName": "Gmail.GetThread@8.0.1",
       "description": "Get the specified thread by ID.",
       "parameters": [
         {
@@ -304,7 +304,7 @@
     {
       "name": "ListDraftEmails",
       "qualifiedName": "Gmail.ListDraftEmails",
-      "fullyQualifiedName": "Gmail.ListDraftEmails@7.5.1",
+      "fullyQualifiedName": "Gmail.ListDraftEmails@8.0.1",
       "description": "Lists draft emails in the user's draft mailbox using the Gmail API.",
       "parameters": [
         {
@@ -312,6 +312,14 @@
           "type": "integer",
           "required": false,
           "description": "Number of draft emails to read (Min 1, Max 100, Default 25)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Page token to retrieve a specific page of results in the list",
           "enum": null,
           "inferrable": true
         }
@@ -336,6 +344,11 @@
           "n_drafts": {
             "value": 10,
             "type": "integer",
+            "required": false
+          },
+          "page_token": {
+            "value": "ABcdEfGhIjKlMnOpQrStUvWxYz1234567890",
+            "type": "string",
             "required": false
           }
         },
@@ -364,7 +377,7 @@
     {
       "name": "ListEmails",
       "qualifiedName": "Gmail.ListEmails",
-      "fullyQualifiedName": "Gmail.ListEmails@7.5.1",
+      "fullyQualifiedName": "Gmail.ListEmails@8.0.1",
       "description": "Read emails from a Gmail account and extract plain text content.\n\nBy default, obvious automated emails are excluded from results using\nno-reply sender patterns and Gmail's non-primary category filters\n(promotions, social, updates, forums). Set exclude_automated=False to\ninclude all emails regardless of source.",
       "parameters": [
         {
@@ -372,6 +385,14 @@
           "type": "integer",
           "required": false,
           "description": "Number of emails to read (Min 1, Max 100, Default 25)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Page token to retrieve a specific page of results in the list",
           "enum": null,
           "inferrable": true
         },
@@ -406,6 +427,11 @@
             "type": "integer",
             "required": false
           },
+          "page_token": {
+            "value": "04616518786520307889",
+            "type": "string",
+            "required": false
+          },
           "exclude_automated": {
             "value": true,
             "type": "boolean",
@@ -437,38 +463,42 @@
     {
       "name": "ListEmailsByHeader",
       "qualifiedName": "Gmail.ListEmailsByHeader",
-      "fullyQualifiedName": "Gmail.ListEmailsByHeader@7.5.1",
-      "description": "Search for emails by header using the Gmail API.\n\nBy default, obvious automated emails are excluded from results using\nno-reply sender patterns and Gmail's non-primary category filters\n(promotions, social, updates, forums). Set exclude_automated=False to\ninclude all emails regardless of source.",
+      "fullyQualifiedName": "Gmail.ListEmailsByHeader@8.0.1",
+      "description": "Search for emails by header using the Gmail API.",
       "parameters": [
         {
           "name": "sender",
-          "type": "string",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "The name or email address of the sender of the email",
+          "description": "Sender names or email addresses to match. A message matches if it is from ANY value in the list (the values are OR-combined). Put each distinct person or address in its own list element; do not split one person's name across elements. A single-word element or an email address matches broadly (a first name can match that person's address); a multi-word element matches as one phrase. Omit or pass an empty list to not filter by sender.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "recipient",
-          "type": "string",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "The name or email address of the recipient",
+          "description": "Recipient names or email addresses to match. A message matches if it was sent to ANY value in the list (OR-combined). Put each distinct person or address in its own element. A single-word element or an email address matches broadly; a multi-word element matches as one phrase. Omit to not filter by recipient.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "subject",
-          "type": "string",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "Words to find in the subject of the email",
+          "description": "Subject search terms. A message matches if its subject contains ANY value in the list (OR-combined). A single-word element matches broadly; a multi-word element matches as one phrase in the subject. Omit to not filter by subject.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "body",
-          "type": "string",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "Words to find in the body of the email",
+          "description": "Body search terms searched anywhere in the message text. A message matches if the body contains ANY value in the list (OR-combined). A single element is treated as free text (all of its words must appear); pass multiple elements to match any of several terms. Omit to not filter by body.",
           "enum": null,
           "inferrable": true
         },
@@ -492,7 +522,7 @@
           "name": "label",
           "type": "string",
           "required": false,
-          "description": "The label name to filter by",
+          "description": "Label name to filter by. When this is a user-created label (not INBOX, SENT, or CATEGORY_*), category-based automated filters are skipped so labeled messages are not hidden by mistake. System labels such as INBOX keep the full automated filter behavior.",
           "enum": null,
           "inferrable": true
         },
@@ -500,7 +530,15 @@
           "name": "max_results",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of emails to return (Min 1, Max 100, Default 25)",
+          "description": "The maximum number of emails to return (Min 1, Max 100, Default 25). Requests above 100 are clamped; the response includes limit_clamped_to_max=True when that happens.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Page token to retrieve a specific page of results in the list",
           "enum": null,
           "inferrable": true
         },
@@ -508,7 +546,7 @@
           "name": "exclude_automated",
           "type": "boolean",
           "required": false,
-          "description": "Exclude obvious automated email using no-reply sender patterns and Gmail non-primary categories (promotions, social, updates, forums). Set to False when the user wants automated content like calendar invites, marketing emails, or other filtered categories.",
+          "description": "Exclude obvious automated email using no-reply sender patterns and Gmail non-primary categories (promotions, social, updates, forums). Set to False when the user wants automated content like calendar invites or marketing emails. When label is a user-created label, category exclusions are skipped automatically; noreply sender patterns still apply.",
           "enum": null,
           "inferrable": true
         }
@@ -531,38 +569,55 @@
         "toolName": "Gmail.ListEmailsByHeader",
         "parameters": {
           "sender": {
-            "value": "john.doe@example.com",
-            "type": "string",
+            "value": [
+              "alice@example.com",
+              "Bob Smith"
+            ],
+            "type": "array",
             "required": false
           },
           "recipient": {
-            "value": "jane.smith@example.com",
-            "type": "string",
+            "value": [
+              "john.doe@example.com",
+              "Jane"
+            ],
+            "type": "array",
             "required": false
           },
           "subject": {
-            "value": "project update",
-            "type": "string",
+            "value": [
+              "Project Update",
+              "invoice"
+            ],
+            "type": "array",
             "required": false
           },
           "body": {
-            "value": "quarterly review",
-            "type": "string",
+            "value": [
+              "please find attached",
+              "meeting agenda"
+            ],
+            "type": "array",
             "required": false
           },
           "date_range": {
-            "value": "2024-01-01 to 2024-03-31",
+            "value": "2024-01-01..2024-06-30",
             "type": "string",
             "required": false
           },
           "label": {
-            "value": "work",
+            "value": "Work",
             "type": "string",
             "required": false
           },
           "max_results": {
-            "value": 10,
+            "value": 20,
             "type": "integer",
+            "required": false
+          },
+          "page_token": {
+            "value": "0496744213968580",
+            "type": "string",
             "required": false
           },
           "exclude_automated": {
@@ -596,7 +651,7 @@
     {
       "name": "ListLabels",
       "qualifiedName": "Gmail.ListLabels",
-      "fullyQualifiedName": "Gmail.ListLabels@7.5.1",
+      "fullyQualifiedName": "Gmail.ListLabels@8.0.1",
       "description": "List all the labels in the user's mailbox.",
       "parameters": [],
       "auth": {
@@ -641,7 +696,7 @@
     {
       "name": "ListThreads",
       "qualifiedName": "Gmail.ListThreads",
-      "fullyQualifiedName": "Gmail.ListThreads@7.5.1",
+      "fullyQualifiedName": "Gmail.ListThreads@8.0.1",
       "description": "List threads in the user's mailbox.\n\nBy default, obvious automated threads are excluded from results using\nno-reply sender patterns and Gmail's non-primary category filters\n(promotions, social, updates, forums). Set exclude_automated=False to\ninclude all threads regardless of source.",
       "parameters": [
         {
@@ -740,7 +795,7 @@
     {
       "name": "ReplyToEmail",
       "qualifiedName": "Gmail.ReplyToEmail",
-      "fullyQualifiedName": "Gmail.ReplyToEmail@7.5.1",
+      "fullyQualifiedName": "Gmail.ReplyToEmail@8.0.1",
       "description": "Send a reply to an email message, optionally with one or more file attachments.\n\nTo attach files, pass ``attachments`` and give each file's local path as a\n``file://`` URI in ``source`` (formatted ``file:///absolute/path/to/file``). The\nfile's bytes are read and substituted on the client before the request is sent, so\nthe contents never pass through this conversation. Do not read, encode, or inline\nthe bytes yourself.",
       "parameters": [
         {
@@ -905,8 +960,8 @@
     {
       "name": "SearchThreads",
       "qualifiedName": "Gmail.SearchThreads",
-      "fullyQualifiedName": "Gmail.SearchThreads@7.5.1",
-      "description": "Search for threads in the user's mailbox.\n\nBy default, obvious automated threads are excluded from results using\nno-reply sender patterns and Gmail's non-primary category filters\n(promotions, social, updates, forums). Set exclude_automated=False to\ninclude all threads regardless of source.",
+      "fullyQualifiedName": "Gmail.SearchThreads@8.0.1",
+      "description": "Search for threads in the user's mailbox.",
       "parameters": [
         {
           "name": "page_token",
@@ -920,7 +975,7 @@
           "name": "max_results",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of threads to return (Min 1, Max 100, Default 25)",
+          "description": "The maximum number of threads to return (Min 1, Max 100, Default 25). Requests above 100 are clamped; the response includes limit_clamped_to_max=True when that happens.",
           "enum": null,
           "inferrable": true
         },
@@ -937,39 +992,43 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "The IDs of labels to filter by",
+          "description": "Label IDs to filter by. When every ID is a user-created label (not INBOX, SENT, or CATEGORY_*), category-based automated filters are skipped so labeled messages are not hidden by mistake. System label IDs such as INBOX keep the full automated filter behavior.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "sender",
-          "type": "string",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "The name or email address of the sender of the email",
+          "description": "Sender names or email addresses to match. A thread matches if it is from ANY value in the list (the values are OR-combined). Put each distinct person or address in its own list element; do not split one person's name across elements. A single-word element or an email address matches broadly (a first name can match that person's address); a multi-word element matches as one phrase. Omit or pass an empty list to not filter by sender.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "recipient",
-          "type": "string",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "The name or email address of the recipient",
+          "description": "Recipient names or email addresses to match. A thread matches if it was sent to ANY value in the list (OR-combined). Put each distinct person or address in its own element. A single-word element or an email address matches broadly; a multi-word element matches as one phrase. Omit to not filter by recipient.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "subject",
-          "type": "string",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "Words to find in the subject of the email",
+          "description": "Subject search terms. A thread matches if its subject contains ANY value in the list (OR-combined). A single-word element matches broadly; a multi-word element matches as one phrase in the subject. Omit to not filter by subject.",
           "enum": null,
           "inferrable": true
         },
         {
           "name": "body",
-          "type": "string",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "Words to find in the body of the email",
+          "description": "Body search terms searched anywhere in the message text. A thread matches if the body contains ANY value in the list (OR-combined). A single element is treated as free text (all of its words must appear); pass multiple elements to match any of several terms. Omit to not filter by body.",
           "enum": null,
           "inferrable": true
         },
@@ -993,7 +1052,7 @@
           "name": "exclude_automated",
           "type": "boolean",
           "required": false,
-          "description": "Exclude obvious automated email using no-reply sender patterns and Gmail non-primary categories (promotions, social, updates, forums). Set to False when the user wants automated content like calendar invites, marketing emails, or other filtered categories.",
+          "description": "Exclude obvious automated email using no-reply sender patterns and Gmail non-primary categories (promotions, social, updates, forums). Set to False when the user wants automated content like calendar invites or marketing emails. When every label_ids entry is a user-created label, category exclusions are skipped automatically; noreply sender patterns still apply.",
           "enum": null,
           "inferrable": true
         }
@@ -1016,7 +1075,7 @@
         "toolName": "Gmail.SearchThreads",
         "parameters": {
           "page_token": {
-            "value": "08534199247523835116:3344178171920213670",
+            "value": "04614400133889728",
             "type": "string",
             "required": false
           },
@@ -1033,33 +1092,45 @@
           "label_ids": {
             "value": [
               "INBOX",
-              "IMPORTANT"
+              "Label_12345"
             ],
             "type": "array",
             "required": false
           },
           "sender": {
-            "value": "alice@example.com",
-            "type": "string",
+            "value": [
+              "Alice Johnson",
+              "bob@example.com"
+            ],
+            "type": "array",
             "required": false
           },
           "recipient": {
-            "value": "bob@example.com",
-            "type": "string",
+            "value": [
+              "Carol Smith",
+              "dave@company.org"
+            ],
+            "type": "array",
             "required": false
           },
           "subject": {
-            "value": "project update",
-            "type": "string",
+            "value": [
+              "Project Update",
+              "invoice"
+            ],
+            "type": "array",
             "required": false
           },
           "body": {
-            "value": "quarterly report",
-            "type": "string",
+            "value": [
+              "please find attached",
+              "meeting agenda"
+            ],
+            "type": "array",
             "required": false
           },
           "date_range": {
-            "value": "after:2024/01/01 before:2024/06/30",
+            "value": "after:2024-01-01 before:2024-06-30",
             "type": "string",
             "required": false
           },
@@ -1094,7 +1165,7 @@
     {
       "name": "SendDraftEmail",
       "qualifiedName": "Gmail.SendDraftEmail",
-      "fullyQualifiedName": "Gmail.SendDraftEmail@7.5.1",
+      "fullyQualifiedName": "Gmail.SendDraftEmail@8.0.1",
       "description": "Send a draft email using the Gmail API.",
       "parameters": [
         {
@@ -1154,7 +1225,7 @@
     {
       "name": "SendEmail",
       "qualifiedName": "Gmail.SendEmail",
-      "fullyQualifiedName": "Gmail.SendEmail@7.5.1",
+      "fullyQualifiedName": "Gmail.SendEmail@8.0.1",
       "description": "Send an email using the Gmail API, optionally with one or more file attachments.\n\nTo attach files, pass ``attachments`` and give each file's local path as a\n``file://`` URI in ``source`` (formatted ``file:///absolute/path/to/file``). The\nfile's bytes are read and substituted on the client before the request is sent, so\nthe contents never pass through this conversation. Do not read, encode, or inline\nthe bytes yourself.",
       "parameters": [
         {
@@ -1315,7 +1386,7 @@
     {
       "name": "TrashEmail",
       "qualifiedName": "Gmail.TrashEmail",
-      "fullyQualifiedName": "Gmail.TrashEmail@7.5.1",
+      "fullyQualifiedName": "Gmail.TrashEmail@8.0.1",
       "description": "Move an email to the trash folder using the Gmail API.",
       "parameters": [
         {
@@ -1375,7 +1446,7 @@
     {
       "name": "UpdateDraftEmail",
       "qualifiedName": "Gmail.UpdateDraftEmail",
-      "fullyQualifiedName": "Gmail.UpdateDraftEmail@7.5.1",
+      "fullyQualifiedName": "Gmail.UpdateDraftEmail@8.0.1",
       "description": "Update an existing email draft using the Gmail API.\n\nSingle-part ``text/plain`` and single-part ``text/html`` drafts both support full\nbody replacement; the rebuild follows the existing draft's content type, so a\nplain draft stays plain and an HTML draft stays HTML. Plain-text input supplied\nagainst an HTML draft is auto-converted to HTML, and HTML input supplied against\na plain draft is stored verbatim as ``text/plain``. Reply drafts preserve their\nreply-quote tail (``> `` lines for plain, ``<blockquote>`` for HTML) when the\nbody is supplied as a top-only update.\n\nMultipart drafts and drafts with attachments still fail when the body changes;\nin those cases the tool succeeds only when the effective body is unchanged\n(metadata-only update preserving the existing MIME tree). Edit those drafts in\nGmail directly.\n\nFor each of subject, body, recipient, cc, and bcc, omitting the parameter or passing\n``None`` leaves that part of the draft unchanged (for cc/bcc, existing headers are kept;\npass an empty list to clear).",
       "parameters": [
         {
@@ -1507,7 +1578,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Gmail.WhoAmI",
-      "fullyQualifiedName": "Gmail.WhoAmI@7.5.1",
+      "fullyQualifiedName": "Gmail.WhoAmI@8.0.1",
       "description": "Get comprehensive user profile and Gmail account information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Gmail account statistics, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -1554,7 +1625,7 @@
     {
       "name": "WriteDraftEmail",
       "qualifiedName": "Gmail.WriteDraftEmail",
-      "fullyQualifiedName": "Gmail.WriteDraftEmail@7.5.1",
+      "fullyQualifiedName": "Gmail.WriteDraftEmail@8.0.1",
       "description": "Compose a new email draft using the Gmail API, optionally with file attachments.\n\nTo attach files, pass ``attachments`` and give each file's local path as a\n``file://`` URI in ``source`` (formatted ``file:///absolute/path/to/file``). The\nfile's bytes are read and substituted on the client before the request is sent, so\nthe contents never pass through this conversation. Do not read, encode, or inline\nthe bytes yourself.",
       "parameters": [
         {
@@ -1715,7 +1786,7 @@
     {
       "name": "WriteDraftReplyEmail",
       "qualifiedName": "Gmail.WriteDraftReplyEmail",
-      "fullyQualifiedName": "Gmail.WriteDraftReplyEmail@7.5.1",
+      "fullyQualifiedName": "Gmail.WriteDraftReplyEmail@8.0.1",
       "description": "Compose a draft reply to an email message, optionally with one or more file attachments.\n\nTo attach files, pass ``attachments`` and give each file's local path as a\n``file://`` URI in ``source`` (formatted ``file:///absolute/path/to/file``). The\nfile's bytes are read and substituted on the client before the request is sent, so\nthe contents never pass through this conversation. Do not read, encode, or inline\nthe bytes yourself.",
       "parameters": [
         {
@@ -1899,6 +1970,6 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-06-29T12:37:13.647Z",
-  "summary": "# Gmail Toolkit\n\nArcade's Gmail toolkit provides LLM-ready tools for interacting with Gmail via the Gmail API, enabling agents to read, compose, send, organize, and search email on behalf of authenticated users.\n\n## Capabilities\n\n- **Reading & searching:** List and search emails, threads, and drafts with built-in automated-email filtering (no-reply senders, non-primary categories); filtering can be disabled via `exclude_automated=False`. Retrieve threads by ID and search by header.\n- **Composing & drafts:** Create, update, and delete drafts (plain-text or HTML, with smart body-replacement rules); compose draft replies with preserved reply-quote tails.\n- **Sending:** Send new emails or existing drafts; reply to messages directly. All send operations support file attachments via `file://` URIs — file bytes are resolved client-side before the request, never passed through the conversation.\n- **Label management:** List, create, and apply or remove labels on messages; move messages to trash.\n- **Account introspection:** Retrieve the authenticated user's profile, email address, Gmail statistics, and profile picture via `WhoAmI`.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details."
+  "generatedAt": "2026-07-10T12:06:06.482Z",
+  "summary": "The Gmail toolkit provides Arcade LLM tools for interacting with Gmail via the Google Gmail API. It enables agents to read, compose, send, organize, and manage email on behalf of authenticated users.\n\n## Capabilities\n\n- **Reading & searching mail:** List emails, threads, and drafts with built-in automated-mail filtering (no-reply patterns, non-primary categories); search or query threads; retrieve individual threads by ID; look up emails by header.\n- **Composing & drafting:** Create new drafts or draft replies; update existing drafts (subject, body, recipients, cc/bcc) with smart MIME-type preservation; attach local files via `file://` URIs (bytes are resolved client-side and never passed through the conversation).\n- **Sending mail:** Send emails or draft replies directly, or promote an existing draft to sent; all send operations support file attachments using the same `file://` URI pattern.\n- **Label & organization management:** List, create, and apply or remove labels; trash individual emails.\n- **Account introspection:** Retrieve the authenticated user's profile, email address, account statistics, and avatar via `WhoAmI`.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 delegated access via **Google**. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup instructions, required consent screen configuration, and available permission scopes."
 }
