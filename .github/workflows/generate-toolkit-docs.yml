@@ -4,7 +4,7 @@ name: Generate toolkit docs
 # 1) Build the toolkit docs generator
 # 2) Generate toolkit JSON into toolkit-docs-generator/data/toolkits
 # 3) Sync integrations sidebar _meta.tsx from toolkit-docs-generator/data/toolkits
-# 4) Open a PR if changes were produced
+# 4) Create or update a PR if changes were produced
 
 on:
   repository_dispatch:
@@ -17,6 +17,10 @@ on:
 permissions:
   contents: write
   pull-requests: write
+
+concurrency:
+  group: generate-toolkit-docs
+  cancel-in-progress: true
 
 jobs:
   generate:
@@ -84,17 +88,7 @@ jobs:
       - name: Sync toolkit sidebar navigation
         run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
-      - name: Check for changes
-        id: check-changes
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create pull request
-        if: steps.check-changes.outputs.has_changes == 'true'
         id: cpr
         uses: peter-evans/create-pull-request@v7
         env:
@@ -110,11 +104,14 @@ jobs:
             - Deploy env: ${{ github.event.client_payload.env || 'unknown' }}
             - Deploy SHA: ${{ github.event.client_payload.deploy_sha || 'unknown' }}
             - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          branch: automation/toolkit-docs-${{ github.run_id }}
+          # Stable branch so later runs update the open auto-PR instead of
+          # opening a new one each time. create-pull-request force-pushes the
+          # latest generated docs onto this branch.
+          branch: automation/toolkit-docs
           delete-branch: true
 
       - name: Request team review
-        if: steps.check-changes.outputs.has_changes == 'true' && steps.cpr.outputs.pull-request-number != ''
+        if: steps.cpr.outputs.pull-request-number != ''
         continue-on-error: true
         run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
         env:
