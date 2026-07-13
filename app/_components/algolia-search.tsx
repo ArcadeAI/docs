@@ -52,6 +52,33 @@ export const ALGOLIA_SEARCH_CONFIG = {
 export const ALGOLIA_SEARCH_DEBOUNCE_MS = 150;
 
 type SearchStatus = "idle" | "loading" | "stalled" | "error";
+type SearchTimer = ReturnType<typeof setTimeout>;
+
+type ScheduleSearchOptions = {
+  query: string;
+  search: (nextQuery: string) => void;
+  setTypedQuery: (nextQuery: string) => void;
+  currentTimer: SearchTimer | null;
+  delayMs?: number;
+};
+
+export function scheduleSearch({
+  query,
+  search,
+  setTypedQuery,
+  currentTimer,
+  delayMs = ALGOLIA_SEARCH_DEBOUNCE_MS,
+}: ScheduleSearchOptions): SearchTimer | null {
+  setTypedQuery(query);
+  if (currentTimer) {
+    clearTimeout(currentTimer);
+  }
+  if (!query.trim()) {
+    search(query);
+    return null;
+  }
+  return setTimeout(() => search(query), delayMs);
+}
 
 export function searchResultsAreCurrent(
   query: string,
@@ -211,18 +238,12 @@ function SearchContent() {
   const [typedQuery, setTypedQuery] = useState("");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queryHook = useCallback<SearchQueryHook>((query, search) => {
-    setTypedQuery(query);
-    if (searchTimerRef.current) {
-      clearTimeout(searchTimerRef.current);
-    }
-    if (!query.trim()) {
-      search(query);
-      return;
-    }
-    searchTimerRef.current = setTimeout(
-      () => search(query),
-      ALGOLIA_SEARCH_DEBOUNCE_MS
-    );
+    searchTimerRef.current = scheduleSearch({
+      query,
+      search,
+      setTypedQuery,
+      currentTimer: searchTimerRef.current,
+    });
   }, []);
 
   useEffect(
