@@ -26,7 +26,10 @@ jobs:
   llmstxt:
     name: Generate LLMSTXT
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: >
+      github.actor != 'github-actions[bot]' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
 
     permissions:
       contents: write
