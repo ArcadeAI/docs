@@ -69,5 +69,7 @@ test("workflow dispatch can create an isolated verification PR", () => {
   expect(workflowContents).toContain(
     "inputs.pr_branch || 'automation/toolkit-docs'"
   );
-  expect(workflowContents).toMatch(/base:\s+\$\{\{\s*github\.ref_name\s*\}\}/);
+  expect(workflowContents).toContain(
+    "inputs.pr_branch && github.ref_name || github.event.repository.default_branch || 'main'"
+  );
 });
