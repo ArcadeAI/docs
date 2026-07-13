@@ -1049,6 +1049,11 @@ export class DataMerger {
       return result;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      if (this.requireCompleteData) {
+        throw new Error(`Failed to process ${toolkitId}: ${message}`, {
+          cause: error,
+        });
+      }
       const previousToolkit = this.getPreviousToolkit(toolkitId);
       return this.buildMergeErrorResult(toolkitId, message, previousToolkit);
     }

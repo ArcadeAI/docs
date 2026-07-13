@@ -19,30 +19,29 @@ The generator merges three inputs into one JSON output per toolkit:
 
 It also reads the previous output when you use `--skip-unchanged` or `--previous-output`.
 
-When `--skip-unchanged` runs against the tool metadata API, the generator calls
-the summary endpoint (`/v1/tool_metadata_summary`) first to decide which toolkits
-need updates. It only fetches full tool metadata from `/v1/tool_metadata` for
-toolkits with version changes. The Engine API guarantees that tool definitions
-do not change unless the toolkit version changes.
+When `--skip-unchanged` runs against the tool metadata API, the generator fetches
+one complete snapshot from `/v1/tool_metadata`. It reuses that snapshot for
+change detection, progress calculation, and generation so a run cannot compare
+different API states. Only changed toolkits are regenerated.
 
 ## GitHub workflow: generate and sync
 
 The workflow file is `/.github/workflows/generate-toolkit-docs.yml`.
 It runs these steps:
 
-1. Generate toolkit JSON using `toolkit-docs-generator` and the Engine API.
-2. Sync sidebar navigation from `toolkit-docs-generator/data/toolkits` to the `_meta.tsx` files.
-3. Create a pull request if there are changes.
+1. Type-check and test the toolkit docs generator.
+2. Generate toolkit JSON using `toolkit-docs-generator` and the Engine API.
+3. Sync sidebar navigation from `toolkit-docs-generator/data/toolkits` to the `_meta.tsx` files.
+4. Create or update a pull request if there are changes.
 
 Required secrets:
 
 - `ENGINE_API_URL`, `ENGINE_API_KEY`
-- `OPENAI_API_KEY` for LLM examples and summaries
+- `ANTHROPIC_API_KEY` for examples, summaries, and secret-coherence edits
 
 Optional secrets:
 
-- `OPENAI_MODEL` (defaults in the workflow)
-- `ANTHROPIC_API_KEY` enables the secret-coherence editor (see below). Without it the workflow still runs; the scanners emit warnings but no LLM edits are applied.
+- `ANTHROPIC_MODEL` (defaults to `claude-sonnet-4-6` in the workflow)
 - `ANTHROPIC_EDITOR_MODEL` (defaults to `claude-sonnet-4-6` in the workflow)
 
 ## Rendering pipeline (docs site)

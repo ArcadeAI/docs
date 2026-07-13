@@ -1,7 +1,7 @@
 name: Generate toolkit docs
 # Description: Generate toolkit JSON from Engine API, then sync sidebar navigation.
 # Flow:
-# 1) Build the toolkit docs generator
+# 1) Type-check and test the toolkit docs generator
 # 2) Generate toolkit JSON into toolkit-docs-generator/data/toolkits
 # 3) Sync integrations sidebar _meta.tsx from toolkit-docs-generator/data/toolkits
 # 4) Create or update a PR if changes were produced
@@ -48,9 +48,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build toolkit docs generator
-        run: pnpm build
-        working-directory: toolkit-docs-generator
+      - name: Validate toolkit docs generator
+        run: pnpm run toolkit-docs:check
 
       - name: Generate toolkit docs
         run: |

@@ -20,6 +20,9 @@ test("porter workflow includes required triggers", () => {
 });
 
 test("porter workflow generates docs and opens a PR", () => {
+  expect(workflowContents).toContain("pnpm run toolkit-docs:check");
+  expect(workflowContents).not.toContain("run: pnpm build");
+  expect(workflowContents).not.toContain("name: Build toolkit docs generator");
   expect(workflowContents).toContain("pnpm dlx tsx src/cli/index.ts generate");
   expect(workflowContents).toContain("--skip-unchanged");
   expect(workflowContents).toContain("--require-complete");

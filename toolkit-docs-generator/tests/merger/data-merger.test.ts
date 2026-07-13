@@ -2053,6 +2053,27 @@ describe("DataMerger", () => {
       expect(results[0]?.toolkit.id).toBe("Github");
     });
 
+    it("fails strict runs when a complete toolkit cannot be merged", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: {
+          getCustomSections: async () => {
+            throw new Error("Custom sections source unavailable");
+          },
+        },
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
+      });
+
+      await expect(merger.mergeAllToolkits()).rejects.toThrow(
+        "Failed to process Github: Custom sections source unavailable"
+      );
+    });
+
     it("should return empty array when no tools", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([]),

@@ -26,7 +26,15 @@ const writeIndex = async (
     {
       generatedAt: "2026-01-15T00:00:00.000Z",
       version: "1.0.0",
-      toolkits,
+      toolkits: toolkits.map(({ id, category }) => ({
+        id,
+        label: id,
+        version: "1.0.0",
+        category: category ?? "others",
+        type: "arcade",
+        toolCount: 1,
+        authType: "none",
+      })),
     },
     null,
     2

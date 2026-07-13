@@ -22,6 +22,18 @@ test("sitemap lists expected URLs", async () => {
     // Known page should be present
     expect(urls).toContain("https://example.test/en/references/changelog");
 
+    const { listToolkitRoutes } = await import(
+      "../app/_lib/toolkit-static-params"
+    );
+    const toolkitUrls = (await listToolkitRoutes()).map(
+      ({ category, toolkitId }) =>
+        `https://example.test/en/resources/integrations/${category}/${toolkitId}`
+    );
+    expect(toolkitUrls.length).toBeGreaterThan(0);
+    for (const toolkitUrl of toolkitUrls) {
+      expect(urls).toContain(toolkitUrl);
+    }
+
     // No duplicates
     const duplicates = urls.filter(
       (url, index, arr) => arr.indexOf(url) !== index

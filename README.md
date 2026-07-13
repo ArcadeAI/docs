@@ -54,11 +54,11 @@ The `vale:fix` command requires an API key in `.env.local`. Without one, you can
 - [STYLEGUIDE.md](./STYLEGUIDE.md) - Writing standards for voice, tone, and structure
 - [AGENTS.md](./AGENTS.md) - Instructions for AI assistants working on docs
 
-## llms.txt Generation
+## llms.txt generation
 
-The project includes a Next.js plugin that automatically generates an `llms.txt` file following the [llms.txt specification](https://llmstxt.org/). This file helps LLMs understand and navigate the documentation.
+The project includes a script that generates an `llms.txt` file following the [llms.txt specification](https://llmstxt.org/). This file helps LLMs understand and navigate the documentation.
 
-**Automatic generation**: Runs during production builds (`pnpm build`)
+**Automatic generation**: Runs in the `Generate LLMs.txt` GitHub workflow
 
 **Manual generation**: Run `pnpm llmstxt` to regenerate the file
 

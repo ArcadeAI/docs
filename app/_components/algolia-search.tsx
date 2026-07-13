@@ -138,28 +138,40 @@ function SearchHit({ hit }: { hit: DocSearchRecord }) {
   );
 }
 
-function EmptyQuery() {
-  const { indexUiState } = useInstantSearch();
-  if (indexUiState.query) {
-    return null;
+function SearchResults() {
+  const { indexUiState, results, status } = useInstantSearch();
+  if (!indexUiState.query?.trim()) {
+    return (
+      <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+        Start typing to search the docs…
+      </p>
+    );
   }
-  return (
-    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-      Start typing to search the docs…
-    </p>
-  );
-}
 
-function NoResults() {
-  const { results } = useInstantSearch();
-  if (!results?.query || results.nbHits > 0) {
-    return null;
+  if (!results || status === "loading" || status === "stalled") {
+    return (
+      <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+        Searching…
+      </p>
+    );
   }
+
+  if (results.nbHits === 0) {
+    return (
+      <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+        No results for{" "}
+        <strong className="text-foreground">"{results.query}"</strong>
+      </p>
+    );
+  }
+
   return (
-    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-      No results for{" "}
-      <strong className="text-foreground">"{results.query}"</strong>
-    </p>
+    <Hits
+      classNames={{ item: "", list: "space-y-0.5", root: "" }}
+      hitComponent={({ hit }) => (
+        <SearchHit hit={hit as unknown as DocSearchRecord} />
+      )}
+    />
   );
 }
 
@@ -245,14 +257,7 @@ export function AlgoliaSearch() {
                   />
                 </div>
                 <div className="max-h-[60vh] overflow-y-auto p-2">
-                  <EmptyQuery />
-                  <NoResults />
-                  <Hits
-                    classNames={{ item: "", list: "space-y-0.5", root: "" }}
-                    hitComponent={({ hit }) => (
-                      <SearchHit hit={hit as unknown as DocSearchRecord} />
-                    )}
-                  />
+                  <SearchResults />
                 </div>
               </InstantSearch>
             ) : (

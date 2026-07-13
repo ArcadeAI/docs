@@ -73,6 +73,18 @@ describe("toolkit data loader", () => {
     });
   });
 
+  it("rejects malformed toolkit index entries", async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, "index.json"),
+        JSON.stringify({ toolkits: [{ category: "development" }] }),
+        "utf-8"
+      );
+
+      await expect(readToolkitIndex({ dataDir: dir })).resolves.toBeNull();
+    });
+  });
+
   it("finds toolkit data by docsLink slug when file name doesn't match", async () => {
     await withTempDir(async (dir) => {
       // File is named posthogapi.json (normalized) but we look up by the

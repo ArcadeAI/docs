@@ -17,6 +17,47 @@ import {
   type ToolkitReadResult,
 } from "./output-verifier.js";
 
+const SAFE_TOOLKIT_ID = /^[a-z0-9][a-z0-9_-]*$/i;
+const RESERVED_TOOLKIT_ID = "index";
+
+const getToolkitFileName = (toolkitId: string): string => {
+  const normalizedId = toolkitId.toLowerCase();
+  if (normalizedId === RESERVED_TOOLKIT_ID) {
+    throw new Error(`"${toolkitId}" is a reserved toolkit ID`);
+  }
+  if (!SAFE_TOOLKIT_ID.test(toolkitId)) {
+    throw new Error(`Unsafe toolkit ID: "${toolkitId}"`);
+  }
+  return `${normalizedId}.json`;
+};
+
+const validateToolkitFileNames = (
+  toolkits: readonly MergedToolkit[]
+): string[] => {
+  const errors: string[] = [];
+  const toolkitIdsByFile = new Map<string, string[]>();
+
+  for (const toolkit of toolkits) {
+    try {
+      const fileName = getToolkitFileName(toolkit.id);
+      const toolkitIds = toolkitIdsByFile.get(fileName) ?? [];
+      toolkitIdsByFile.set(fileName, [...toolkitIds, toolkit.id]);
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  for (const [fileName, toolkitIds] of toolkitIdsByFile) {
+    if (toolkitIds.length > 1) {
+      errors.push(
+        `Toolkit IDs collide on ${fileName}: ${toolkitIds.join(", ")}`
+      );
+    }
+  }
+
+  return errors;
+};
+
 // ============================================================================
 // Generator Configuration
 // ============================================================================
@@ -86,7 +127,7 @@ export class JsonGenerator {
       }
     }
 
-    const fileName = `${toolkit.id.toLowerCase()}.json`;
+    const fileName = getToolkitFileName(toolkit.id);
     const filePath = join(this.outputDir, fileName);
 
     // Ensure directory exists
@@ -105,9 +146,9 @@ export class JsonGenerator {
    * Check if a toolkit file already exists in the output directory
    */
   async hasToolkitFile(toolkitId: string): Promise<boolean> {
-    const fileName = `${toolkitId.toLowerCase()}.json`;
-    const filePath = join(this.outputDir, fileName);
     try {
+      const fileName = getToolkitFileName(toolkitId);
+      const filePath = join(this.outputDir, fileName);
       const stats = await stat(filePath);
       return stats.isFile();
     } catch {
@@ -137,9 +178,9 @@ export class JsonGenerator {
    * Load an existing toolkit file
    */
   async loadToolkitFile(toolkitId: string): Promise<MergedToolkit | null> {
-    const fileName = `${toolkitId.toLowerCase()}.json`;
-    const filePath = join(this.outputDir, fileName);
     try {
+      const fileName = getToolkitFileName(toolkitId);
+      const filePath = join(this.outputDir, fileName);
       const content = await readFile(filePath, "utf-8");
       const parsed = JSON.parse(content) as unknown;
       const result = MergedToolkitSchema.safeParse(parsed);
@@ -160,7 +201,10 @@ export class JsonGenerator {
     toolkits: readonly MergedToolkit[]
   ): Promise<GeneratorResult> {
     const filesWritten: string[] = [];
-    const errors: string[] = [];
+    const errors = validateToolkitFileNames(toolkits);
+    if (errors.length > 0) {
+      return { filesWritten, errors };
+    }
 
     // Generate per-toolkit files
     for (const toolkit of toolkits) {
