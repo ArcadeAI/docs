@@ -2,7 +2,7 @@
 
 import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Configure,
   Highlight,
@@ -49,6 +49,7 @@ export const ALGOLIA_SEARCH_CONFIG = {
   hitsPerPage: 15,
   snippetEllipsisText: "…",
 };
+export const ALGOLIA_SEARCH_DEBOUNCE_MS = 150;
 
 type SearchStatus = "idle" | "loading" | "stalled" | "error";
 
@@ -208,10 +209,30 @@ type SearchQueryHook = (
 
 function SearchContent() {
   const [typedQuery, setTypedQuery] = useState("");
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queryHook = useCallback<SearchQueryHook>((query, search) => {
     setTypedQuery(query);
-    search(query);
+    if (searchTimerRef.current) {
+      clearTimeout(searchTimerRef.current);
+    }
+    if (!query.trim()) {
+      search(query);
+      return;
+    }
+    searchTimerRef.current = setTimeout(
+      () => search(query),
+      ALGOLIA_SEARCH_DEBOUNCE_MS
+    );
   }, []);
+
+  useEffect(
+    () => () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    },
+    []
+  );
 
   return (
     <>
