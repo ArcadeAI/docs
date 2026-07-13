@@ -56,6 +56,15 @@ const getOpenAIClient = (): OpenAI => {
   return openai;
 };
 
+const stripLlmsMetadata = (content: string): string =>
+  content.replace(METADATA_REGEX, "").trimStart();
+
+export const hasLlmsBodyChanged = (
+  existingContent: string,
+  nextContent: string
+): boolean =>
+  stripLlmsMetadata(existingContent) !== stripLlmsMetadata(nextContent);
+
 /**
  * Gets the current git SHA
  */
@@ -620,7 +629,7 @@ async function main() {
     const pages = await discoverPages();
 
     // Step 2: Determine which pages need summarization and identify deleted pages
-    const { pagesToSummarize, pagesToKeep, hasChanges } =
+    const { pagesToSummarize, pagesToKeep } =
       determinePagesToSummarize(pages, previousMetadata, existingSummaries);
 
     // Step 3: Summarize changed/new pages using OpenAI
@@ -641,26 +650,29 @@ async function main() {
 
     // Step 5: Generate llms.txt content
     console.log(pc.blue("\n✍️  Generating llms.txt content..."));
-    // Only update metadata if there are changes, otherwise keep previous metadata
-    const metadata: LlmsTxtMetadata = hasChanges
-      ? {
-          gitSha: currentSha,
-          generationDate: new Date().toISOString(),
-        }
-      : previousMetadata || {
-          gitSha: currentSha,
-          generationDate: new Date().toISOString(),
-        };
-    const content = generateLlmsTxt(sections, metadata);
+    const currentMetadata: LlmsTxtMetadata = {
+      gitSha: currentSha,
+      generationDate: new Date().toISOString(),
+    };
+    let content = generateLlmsTxt(sections, currentMetadata);
+    const existingContent = await fs
+      .readFile(OUTPUT_PATH, "utf-8")
+      .catch(() => null);
+    const bodyChanged =
+      existingContent === null || hasLlmsBodyChanged(existingContent, content);
+    if (!(bodyChanged || !previousMetadata)) {
+      content = generateLlmsTxt(sections, previousMetadata);
+    }
+    const outputChanged = existingContent === null || existingContent !== content;
 
     // Step 6: Write to file
-    await fs.writeFile(OUTPUT_PATH, content, "utf-8");
-    if (hasChanges) {
+    if (outputChanged) {
+      await fs.writeFile(OUTPUT_PATH, content, "utf-8");
       console.log(pc.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
     } else {
       console.log(
         pc.gray(
-          "✓ No changes detected, llms.txt unchanged (SHA and date preserved)"
+          "✓ No content changes detected; llms.txt metadata remains unchanged"
         )
       );
     }
