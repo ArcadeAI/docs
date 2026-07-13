@@ -2,6 +2,7 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   ALGOLIA_SEARCH_CONFIG,
   ALGOLIA_SEARCH_DEBOUNCE_MS,
+  getSearchErrorMessage,
   scheduleSearch,
   searchResultsAreCurrent,
 } from "../app/_components/algolia-search";
@@ -53,5 +54,12 @@ describe("Algolia search configuration", () => {
     expect(searchResultsAreCurrent("slack", "slack", "loading")).toBe(false);
     expect(searchResultsAreCurrent("slack", "slack", "stalled")).toBe(false);
     expect(searchResultsAreCurrent("slack", "slack", "idle")).toBe(true);
+  });
+
+  test("surfaces failed searches instead of leaving a loading state", () => {
+    expect(getSearchErrorMessage("error")).toBe(
+      "Search failed. Check your connection and try again."
+    );
+    expect(getSearchErrorMessage("loading")).toBeNull();
   });
 });

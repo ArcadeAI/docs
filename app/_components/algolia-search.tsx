@@ -54,6 +54,12 @@ export const ALGOLIA_SEARCH_DEBOUNCE_MS = 150;
 type SearchStatus = "idle" | "loading" | "stalled" | "error";
 type SearchTimer = ReturnType<typeof setTimeout>;
 
+export function getSearchErrorMessage(status: SearchStatus): string | null {
+  return status === "error"
+    ? "Search failed. Check your connection and try again."
+    : null;
+}
+
 type ScheduleSearchOptions = {
   query: string;
   search: (nextQuery: string) => void;
@@ -191,11 +197,23 @@ function SearchHit({ hit }: { hit: DocSearchRecord }) {
 }
 
 function SearchResults({ query }: { query: string }) {
-  const { results, status } = useInstantSearch();
+  const { results, status } = useInstantSearch({ catchError: true });
   if (!query.trim()) {
     return (
       <p className="px-4 py-8 text-center text-sm text-muted-foreground">
         Start typing to search the docs…
+      </p>
+    );
+  }
+
+  const errorMessage = getSearchErrorMessage(status);
+  if (errorMessage) {
+    return (
+      <p
+        className="px-4 py-8 text-center text-sm text-muted-foreground"
+        role="alert"
+      >
+        {errorMessage}
       </p>
     );
   }

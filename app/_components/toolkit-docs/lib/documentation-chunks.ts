@@ -3,9 +3,15 @@ import type { DocumentationChunk } from "../types";
 const DEFAULT_CHUNK_PRIORITY = 100;
 const HEADER_PREFIX_REGEX = /^#+\s*/;
 
-function compareByHeader(
-  left: DocumentationChunk,
-  right: DocumentationChunk
+type SortableDocumentationChunk = Pick<
+  DocumentationChunk,
+  "header" | "priority"
+> &
+  Partial<Pick<DocumentationChunk, "content">>;
+
+function compareByHeader<T extends SortableDocumentationChunk>(
+  left: T,
+  right: T
 ): number | null {
   const leftHeader = (left.header ?? "")
     .replace(HEADER_PREFIX_REGEX, "")
@@ -26,9 +32,9 @@ function compareByHeader(
   return null;
 }
 
-export function sortDocumentationChunks(
-  chunks: readonly DocumentationChunk[]
-): DocumentationChunk[] {
+export function sortDocumentationChunks<T extends SortableDocumentationChunk>(
+  chunks: readonly T[]
+): T[] {
   return [...chunks].sort((left, right) => {
     const priorityDifference =
       (left.priority ?? DEFAULT_CHUNK_PRIORITY) -
@@ -42,6 +48,6 @@ export function sortDocumentationChunks(
       return headerDifference;
     }
 
-    return left.content.localeCompare(right.content);
+    return (left.content ?? "").localeCompare(right.content ?? "");
   });
 }
