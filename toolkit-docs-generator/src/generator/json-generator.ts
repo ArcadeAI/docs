@@ -3,7 +3,8 @@
  *
  * Outputs merged toolkit data as JSON files.
  */
-import { mkdir, readFile, stat, writeFile } from "fs/promises";
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
 import type {
@@ -56,6 +57,19 @@ const validateToolkitFileNames = (
   }
 
   return errors;
+};
+
+const writeFileAtomically = async (
+  filePath: string,
+  content: string
+): Promise<void> => {
+  const tempPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(tempPath, content, "utf-8");
+    await rename(tempPath, filePath);
+  } finally {
+    await rm(tempPath, { force: true });
+  }
 };
 
 // ============================================================================
@@ -138,7 +152,7 @@ export class JsonGenerator {
       ? JSON.stringify(toolkit, null, 2)
       : JSON.stringify(toolkit);
 
-    await writeFile(filePath, content, "utf-8");
+    await writeFileAtomically(filePath, content);
     return filePath;
   }
 
@@ -243,15 +257,21 @@ export class JsonGenerator {
   private async generateIndexFile(
     toolkits: readonly MergedToolkit[]
   ): Promise<string> {
-    const entries: ToolkitIndexEntry[] = toolkits.map((t) => ({
-      id: t.id,
-      label: t.label,
-      version: t.version,
-      category: t.metadata.category,
-      type: t.metadata.type,
-      toolCount: t.tools.length,
-      authType: t.auth?.type ?? "none",
-    }));
+    const entries: ToolkitIndexEntry[] = toolkits
+      .map((t) => ({
+        id: t.id,
+        label: t.label,
+        version: t.version,
+        category: t.metadata.category,
+        type: t.metadata.type,
+        toolCount: t.tools.length,
+        authType: t.auth?.type ?? "none",
+      }))
+      .sort(
+        (left, right) =>
+          left.id.toLowerCase().localeCompare(right.id.toLowerCase()) ||
+          left.id.localeCompare(right.id)
+      );
 
     const index: ToolkitIndex = {
       generatedAt: new Date().toISOString(),
@@ -267,7 +287,7 @@ export class JsonGenerator {
       ? JSON.stringify(index, null, 2)
       : JSON.stringify(index);
 
-    await writeFile(filePath, content, "utf-8");
+    await writeFileAtomically(filePath, content);
     return filePath;
   }
 

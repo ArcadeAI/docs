@@ -22,6 +22,15 @@ const fixture: ToolkitData = {
     docsLink: "",
   },
   auth: null,
+  documentationChunks: [
+    {
+      type: "markdown",
+      location: "description",
+      position: "after",
+      content: "## Toolkit setup\n\nConfigure the toolkit first.",
+      priority: 10,
+    },
+  ],
   customImports: [],
   subPages: [],
   tools: [
@@ -43,7 +52,15 @@ const fixture: ToolkitData = {
       secrets: ["API_KEY"],
       secretsInfo: [],
       output: { type: "json", description: "The result" },
-      documentationChunks: [],
+      documentationChunks: [
+        {
+          type: "warning",
+          location: "parameters",
+          position: "before",
+          content: "Use a verified recipient.",
+          priority: 20,
+        },
+      ],
       codeExample: {
         toolName: "Demo.DoThing",
         parameters: {
@@ -71,5 +88,34 @@ describe("toToolkitMarkdown", () => {
     expect(md).toContain("scope.a");
     expect(md).toContain("API_KEY");
     expect(md).toContain("Example input");
+  });
+
+  test("includes toolkit and tool documentation chunks", () => {
+    expect(md).toContain("## Toolkit setup");
+    expect(md).toContain("Configure the toolkit first.");
+    expect(md).toContain("Use a verified recipient.");
+  });
+
+  test("preserves repeated chunk content at different locations", () => {
+    const repeated = "Repeat this guidance.";
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "info",
+          location: "description",
+          position: "after",
+          content: repeated,
+        },
+        {
+          type: "warning",
+          location: "auth",
+          position: "before",
+          content: repeated,
+        },
+      ],
+    });
+
+    expect(output.split(repeated)).toHaveLength(3);
   });
 });

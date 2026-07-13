@@ -31,6 +31,13 @@ export type ToolkitRouteEntry = {
   category: IntegrationCategory;
 };
 
+const sortToolkitRoutes = (routes: ToolkitRouteEntry[]): ToolkitRouteEntry[] =>
+  routes.sort(
+    (left, right) =>
+      left.category.localeCompare(right.category) ||
+      left.toolkitId.localeCompare(right.toolkitId)
+  );
+
 const DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES: ToolkitCatalogEntry[] =
   DESIGN_SYSTEM_TOOLKITS.map((toolkit) => ({
     id: toolkit.id,
@@ -125,7 +132,7 @@ const listToolkitRoutesFromDataDir = async (options?: {
     }
   }
 
-  return [...unique.values()];
+  return sortToolkitRoutes([...unique.values()]);
 };
 
 const resolveToolkitRoute = async (
@@ -192,7 +199,7 @@ export async function listToolkitRoutes(options?: {
     unique.set(route.toolkitId, route);
   }
 
-  return [...unique.values()];
+  return sortToolkitRoutes([...unique.values()]);
 }
 
 export async function getToolkitStaticParamsForCategory(

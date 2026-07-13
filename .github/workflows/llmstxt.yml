@@ -9,12 +9,14 @@ on:
       - "app/en/**/*.mdx"
       - "app/en/**/_meta.tsx"
       - "scripts/generate-llmstxt.ts"
+      - "toolkit-docs-generator/data/toolkits/**"
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
       - "app/en/**/*.mdx"
       - "app/en/**/_meta.tsx"
       - "scripts/generate-llmstxt.ts"
+      - "toolkit-docs-generator/data/toolkits/**"
 
 permissions:
   contents: write
@@ -24,6 +26,7 @@ jobs:
   llmstxt:
     name: Generate LLMSTXT
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
 
     permissions:
       contents: write
@@ -40,6 +43,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref || github.ref }}
           token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+          fetch-depth: 0
 
       - name: Install dependencies
         run: npm install -g pnpm

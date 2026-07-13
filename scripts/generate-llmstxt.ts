@@ -4,11 +4,17 @@ import path from "node:path";
 import glob from "fast-glob";
 import OpenAI from "openai";
 import pc from "picocolors";
+import { readToolkitData } from "../app/_lib/toolkit-data";
+import { listToolkitRoutes } from "../app/_lib/toolkit-static-params";
 
 type PageMetadata = {
   path: string;
   url: string;
   content: string;
+  summary?: {
+    title: string;
+    description: string;
+  };
 };
 
 type Section = {
@@ -43,10 +49,12 @@ const MAX_CONTENT_LENGTH = 4000;
 const BATCH_DELAY_MS = 1000;
 const SHA_SHORT_LENGTH = 7;
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openai: OpenAI | null = null;
+
+const getOpenAIClient = (): OpenAI => {
+  openai ??= new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return openai;
+};
 
 /**
  * Gets the current git SHA
@@ -154,9 +162,22 @@ async function extractExistingSummaries(): Promise<
 /**
  * Discovers all pages in the documentation
  */
-async function discoverPages(): Promise<PageMetadata[]> {
+export async function discoverPages(): Promise<PageMetadata[]> {
   console.log(pc.blue("📄 Discovering pages from raw MDX..."));
-  return discoverMdxPages();
+  const [mdxPages, toolkitPages] = await Promise.all([
+    discoverMdxPages(),
+    discoverToolkitPages(),
+  ]);
+  const pagesByUrl = new Map(
+    [...mdxPages, ...toolkitPages].map((page) => [page.url, page])
+  );
+  const pages = [...pagesByUrl.values()];
+  console.log(
+    pc.green(
+      `✓ Found ${mdxPages.length} authored pages and ${toolkitPages.length} generated toolkit pages`
+    )
+  );
+  return pages;
 }
 
 /**
@@ -171,6 +192,9 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
   const pages: PageMetadata[] = [];
 
   for (const filePath of mdxFiles) {
+    if (filePath.includes("[")) {
+      continue;
+    }
     const fullPath = path.join(process.cwd(), filePath);
     const content = await fs.readFile(fullPath, "utf-8");
 
@@ -189,8 +213,40 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
     });
   }
 
-  console.log(pc.green(`✓ Found ${pages.length} pages (raw MDX)`));
   return pages;
+}
+
+async function discoverToolkitPages(): Promise<PageMetadata[]> {
+  const routes = await listToolkitRoutes();
+  const pages = await Promise.all(
+    routes.map(async ({ category, toolkitId }) => {
+      const data = await readToolkitData(toolkitId);
+      if (!data) {
+        return null;
+      }
+
+      const title = data.label || data.id;
+      const sourceDescription =
+        data.summary ??
+        data.description ??
+        "Generated MCP server documentation.";
+      const description = sourceDescription
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 500);
+
+      return {
+        path: `toolkit-docs-generator/data/toolkits/${data.id.toLowerCase()}.json`,
+        url: `${BASE_URL}/en/resources/integrations/${category}/${toolkitId}`,
+        content: `# ${title}\n\n${sourceDescription}`,
+        summary: { title, description },
+      } satisfies PageMetadata;
+    })
+  );
+
+  return pages.filter(
+    (page): page is NonNullable<(typeof pages)[number]> => page !== null
+  );
 }
 
 /**
@@ -218,7 +274,7 @@ async function summarizePage(
 
     contentForSummary = contentForSummary.slice(0, MAX_CONTENT_LENGTH);
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -443,6 +499,17 @@ function determinePagesToSummarize(
       const url = page.url;
       const existingSummary = existingSummaries.get(url);
 
+      if (page.summary) {
+        pagesToKeep.push({ ...page, ...page.summary });
+        if (
+          existingSummary?.title !== page.summary.title ||
+          existingSummary.description !== page.summary.description
+        ) {
+          hasChanges = true;
+        }
+        continue;
+      }
+
       // Check if this page's file was changed
       const isChanged = changedFiles.has(page.path);
 
@@ -470,7 +537,13 @@ function determinePagesToSummarize(
     console.log(
       pc.yellow("⚠ No previous generation found, summarizing all pages")
     );
-    pagesToSummarize.push(...pages);
+    for (const page of pages) {
+      if (page.summary) {
+        pagesToKeep.push({ ...page, ...page.summary });
+      } else {
+        pagesToSummarize.push(page);
+      }
+    }
     hasChanges = true; // Always regenerate if no previous metadata
   }
 
@@ -528,12 +601,6 @@ async function summarizePagesInBatches(
 async function main() {
   console.log(pc.bold(pc.blue("\n🚀 Generating llms.txt file...\n")));
 
-  // Check for OpenAI API key
-  if (!process.env.OPENAI_API_KEY) {
-    console.error(pc.red("✗ OPENAI_API_KEY environment variable is required"));
-    process.exit(1);
-  }
-
   try {
     // Step 0: Get current git SHA and check for previous generation
     const currentSha = getCurrentGitSha();
@@ -557,6 +624,11 @@ async function main() {
       determinePagesToSummarize(pages, previousMetadata, existingSummaries);
 
     // Step 3: Summarize changed/new pages using OpenAI
+    if (pagesToSummarize.length > 0 && !process.env.OPENAI_API_KEY) {
+      throw new Error(
+        "OPENAI_API_KEY is required when authored pages need new summaries."
+      );
+    }
     const summarizedPages = await summarizePagesInBatches(
       pagesToSummarize,
       pagesToKeep

@@ -93,6 +93,7 @@ export interface MergeResult {
   toolkit: MergedToolkit;
   warnings: string[];
   failedTools: FailedTool[];
+  error?: string;
 }
 
 export interface ToolExampleResult {
@@ -987,6 +988,15 @@ export class DataMerger {
     message: string,
     previousToolkit?: MergedToolkit
   ): MergeResult {
+    if (previousToolkit) {
+      return {
+        toolkit: previousToolkit,
+        warnings: [`Error processing toolkit: ${message}`],
+        failedTools: [],
+        error: message,
+      };
+    }
+
     return {
       toolkit: {
         id: toolkitId,
@@ -1005,13 +1015,14 @@ export class DataMerger {
         },
         auth: null,
         tools: [],
-        documentationChunks: previousToolkit?.documentationChunks ?? [],
-        customImports: previousToolkit?.customImports ?? [],
-        subPages: previousToolkit?.subPages ?? [],
+        documentationChunks: [],
+        customImports: [],
+        subPages: [],
         generatedAt: new Date().toISOString(),
       },
       warnings: [`Error processing toolkit: ${message}`],
       failedTools: [],
+      error: message,
     };
   }
 

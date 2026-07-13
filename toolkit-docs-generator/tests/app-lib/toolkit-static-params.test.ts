@@ -86,6 +86,27 @@ describe("toolkit static params", () => {
     });
   });
 
+  it("returns toolkit routes in deterministic category and slug order", async () => {
+    await withTempDir(async (dir) => {
+      await writeIndex(dir, [
+        { id: "Slack", category: "social" },
+        { id: "Gmail", category: "productivity" },
+        { id: "Github", category: "development" },
+      ]);
+
+      const routes = await listToolkitRoutes({
+        dataDir: dir,
+        toolkitsCatalog: [],
+      });
+
+      expect(routes).toEqual([
+        { toolkitId: "github", category: "development" },
+        { toolkitId: "gmail", category: "productivity" },
+        { toolkitId: "slack", category: "social" },
+      ]);
+    });
+  });
+
   it("uses catalog category as fallback when JSON file is absent", async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [{ id: "Github", category: "development" }]);

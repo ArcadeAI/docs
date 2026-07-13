@@ -1,4 +1,5 @@
 import type {
+  DocumentationChunk,
   ToolDefinition,
   ToolkitData,
   ToolParameter,
@@ -12,6 +13,32 @@ import type {
  * independent of the rendered HTML.
  */
 const JSON_INDENT = 2;
+const DEFAULT_CHUNK_PRIORITY = 100;
+
+function documentationBlocks(
+  chunks: readonly DocumentationChunk[] | null | undefined
+): string[] {
+  const blocks: string[] = [];
+  const sorted = [...(chunks ?? [])].sort(
+    (left, right) =>
+      (left.priority ?? DEFAULT_CHUNK_PRIORITY) -
+        (right.priority ?? DEFAULT_CHUNK_PRIORITY) ||
+      (left.header ?? "").localeCompare(right.header ?? "") ||
+      left.content.localeCompare(right.content)
+  );
+
+  for (const chunk of sorted) {
+    const content = chunk.content.trim();
+    if (!content) {
+      continue;
+    }
+    blocks.push(
+      chunk.type === "code" ? `\`\`\`text\n${content}\n\`\`\`` : content
+    );
+  }
+
+  return blocks;
+}
 
 /** Collapse newlines and escape pipes so a value is safe inside a table cell. */
 function cell(value: string | null | undefined): string {
@@ -51,6 +78,7 @@ function toolBlock(tool: ToolDefinition): string {
   if (tool.description) {
     blocks.push(tool.description.trim());
   }
+  blocks.push(...documentationBlocks(tool.documentationChunks));
 
   const scopes = tool.auth?.scopes ?? [];
   if (scopes.length > 0) {
@@ -97,6 +125,7 @@ export function toToolkitMarkdown(data: ToolkitData): string {
   if (data.summary) {
     blocks.push(data.summary.trim());
   }
+  blocks.push(...documentationBlocks(data.documentationChunks));
 
   const tools = data.tools ?? [];
   blocks.push(`## Tools (${tools.length})`);

@@ -469,4 +469,21 @@ describe("JsonGenerator toolkit file paths", () => {
       ).rejects.toThrow();
     });
   });
+
+  it("sorts index entries by normalized toolkit ID", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      await generator.generateAll([slackToolkit, githubToolkit]);
+
+      const index = JSON.parse(
+        await readFile(join(dir, "index.json"), "utf-8")
+      ) as { toolkits: Array<{ id: string }> };
+      expect(index.toolkits.map(({ id }) => id)).toEqual(["Github", "Slack"]);
+    });
+  });
 });

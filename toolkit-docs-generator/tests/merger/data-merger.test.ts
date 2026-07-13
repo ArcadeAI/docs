@@ -1928,7 +1928,8 @@ describe("DataMerger", () => {
       const results = await merger.mergeAllToolkits();
       const result = results[0];
 
-      // Error result must preserve previous custom sections, not return empty arrays
+      expect(result?.error).toBe("Custom sections source unavailable");
+      expect(result?.toolkit).toEqual(previousResult.toolkit);
       expect(result?.toolkit.documentationChunks).toHaveLength(1);
       expect(result?.toolkit.documentationChunks[0]?.content).toBe(
         "Critical: GitHub Apps only."
@@ -1955,6 +1956,7 @@ describe("DataMerger", () => {
       const results = await merger.mergeAllToolkits();
       const result = results[0];
 
+      expect(result?.error).toBe("Custom sections source unavailable");
       expect(result?.toolkit.documentationChunks).toHaveLength(0);
       expect(result?.toolkit.customImports).toHaveLength(0);
       expect(result?.toolkit.subPages).toHaveLength(0);
