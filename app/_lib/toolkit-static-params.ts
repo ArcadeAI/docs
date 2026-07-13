@@ -77,6 +77,9 @@ export function getToolkitCanonicalPath(toolkit: {
 }): string {
   const category = normalizeCategory(toolkit.category);
   const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
+  if (!slug) {
+    throw new Error(`Cannot build a canonical path for toolkit: ${toolkit.id}`);
+  }
   return `/en/resources/integrations/${category}/${slug}`;
 }
 
@@ -125,6 +128,9 @@ const listToolkitRoutesFromDataDir = async (options?: {
         id: parsed.id,
         docsLink: parsed.metadata?.docsLink,
       });
+      if (!slug) {
+        continue;
+      }
       const category = normalizeCategory(parsed.metadata?.category);
       unique.set(slug, { toolkitId: slug, category });
     } catch {
@@ -159,6 +165,9 @@ const resolveToolkitRoute = async (
     id: toolkit.id,
     docsLink: data?.metadata?.docsLink ?? catalogEntry?.docsLink,
   });
+  if (!slug) {
+    return null;
+  }
   // JSON file is the source of truth for category. The generator is responsible
   // for writing the correct value; the design system catalog and index.json are
   // only used as a last resort when the JSON is missing.

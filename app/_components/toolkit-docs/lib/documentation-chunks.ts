@@ -1,0 +1,47 @@
+import type { DocumentationChunk } from "../types";
+
+const DEFAULT_CHUNK_PRIORITY = 100;
+const HEADER_PREFIX_REGEX = /^#+\s*/;
+
+function compareByHeader(
+  left: DocumentationChunk,
+  right: DocumentationChunk
+): number | null {
+  const leftHeader = (left.header ?? "")
+    .replace(HEADER_PREFIX_REGEX, "")
+    .trim();
+  const rightHeader = (right.header ?? "")
+    .replace(HEADER_PREFIX_REGEX, "")
+    .trim();
+
+  if (leftHeader && rightHeader) {
+    return leftHeader.localeCompare(rightHeader);
+  }
+  if (leftHeader) {
+    return -1;
+  }
+  if (rightHeader) {
+    return 1;
+  }
+  return null;
+}
+
+export function sortDocumentationChunks(
+  chunks: readonly DocumentationChunk[]
+): DocumentationChunk[] {
+  return [...chunks].sort((left, right) => {
+    const priorityDifference =
+      (left.priority ?? DEFAULT_CHUNK_PRIORITY) -
+      (right.priority ?? DEFAULT_CHUNK_PRIORITY);
+    if (priorityDifference !== 0) {
+      return priorityDifference;
+    }
+
+    const headerDifference = compareByHeader(left, right);
+    if (headerDifference !== null) {
+      return headerDifference;
+    }
+
+    return left.content.localeCompare(right.content);
+  });
+}

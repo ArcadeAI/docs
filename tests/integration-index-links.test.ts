@@ -99,6 +99,16 @@ describe("resolveIndexToolkits (logic)", () => {
     ).toHaveLength(1);
     expect(links.length).toBe(new Set(links).size);
   });
+
+  test("drops catalog entries whose IDs cannot form a route slug", () => {
+    const invalid = {
+      ...makeToolkit("---", "development", "invalid"),
+      id: "---",
+      docsLink: null,
+    };
+
+    expect(resolveIndexToolkits([invalid], new Set())).toEqual([]);
+  });
 });
 
 describe("integrations index links (live data)", () => {

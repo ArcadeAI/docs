@@ -188,4 +188,8 @@ describe("getToolkitSlug", () => {
     };
     expect(getToolkitSlug(source)).toBe("slack");
   });
+
+  it("returns null when neither docsLink nor toolkit ID can form a slug", () => {
+    expect(getToolkitSlug({ id: "---", docsLink: null })).toBeNull();
+  });
 });

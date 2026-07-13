@@ -48,7 +48,10 @@ const extractSlugFromPath = (path: string): string | null => {
   return slug && SAFE_SLUG.test(slug) ? slug : null;
 };
 
-export function getToolkitSlug({ id, docsLink }: ToolkitSlugSource): string {
+export function getToolkitSlug({
+  id,
+  docsLink,
+}: ToolkitSlugSource): string | null {
   if (docsLink) {
     try {
       const url = new URL(docsLink);
@@ -65,5 +68,9 @@ export function getToolkitSlug({ id, docsLink }: ToolkitSlugSource): string {
   }
 
   const kebabId = toKebabCase(id);
-  return SAFE_SLUG.test(kebabId) ? kebabId : normalizeToolkitId(id);
+  if (SAFE_SLUG.test(kebabId)) {
+    return kebabId;
+  }
+  const normalizedId = normalizeToolkitId(id);
+  return normalizedId || null;
 }

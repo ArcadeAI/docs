@@ -94,6 +94,10 @@ describe("toToolkitMarkdown", () => {
     expect(md).toContain("## Toolkit setup");
     expect(md).toContain("Configure the toolkit first.");
     expect(md).toContain("Use a verified recipient.");
+    expect(md.indexOf("## Toolkit setup")).toBeLessThan(md.indexOf("## Tools"));
+    expect(md.indexOf("Use a verified recipient.")).toBeLessThan(
+      md.indexOf("**Parameters**")
+    );
   });
 
   test("preserves repeated chunk content at different locations", () => {
@@ -117,5 +121,83 @@ describe("toToolkitMarkdown", () => {
     });
 
     expect(output.split(repeated)).toHaveLength(3);
+  });
+
+  test("uses replacement chunks instead of the default section", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      tools: [
+        {
+          ...fixture.tools[0],
+          documentationChunks: [
+            {
+              type: "markdown",
+              location: "parameters",
+              position: "replace",
+              content: "Custom parameter guidance.",
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(output).toContain("Custom parameter guidance.");
+    expect(output).not.toContain("| Name | Type | Required | Description |");
+  });
+
+  test("empty replacement chunks still suppress the default section", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      tools: [
+        {
+          ...fixture.tools[0],
+          documentationChunks: [
+            {
+              type: "markdown",
+              location: "parameters",
+              position: "replace",
+              content: "   ",
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(output).not.toContain("| Name | Type | Required | Description |");
+  });
+
+  test("sorts headed chunks before unheaded chunks like the page renderer", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "before",
+          content: "No header",
+        },
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "before",
+          content: "Section B",
+          header: "## B",
+        },
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "before",
+          content: "Section A",
+          header: "## A",
+        },
+      ],
+    });
+
+    expect(output.indexOf("Section A")).toBeLessThan(
+      output.indexOf("Section B")
+    );
+    expect(output.indexOf("Section B")).toBeLessThan(
+      output.indexOf("No header")
+    );
   });
 });

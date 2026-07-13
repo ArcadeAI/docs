@@ -321,7 +321,7 @@ async function summarizePage(
 /**
  * Organizes pages into sections based on their path
  */
-function organizeSections(
+export function organizeSections(
   pages: Array<PageMetadata & { title: string; description: string }>
 ): Section[] {
   const sectionMap = new Map<string, Section>();
@@ -341,6 +341,10 @@ function organizeSections(
       } else {
         sectionName = "Getting Started";
       }
+    } else if (parts[0] === "resources" && parts[1] === "integrations") {
+      sectionName = parts[2]
+        ? `Integrations - ${formatSectionName(parts[2])}`
+        : "Integrations";
     } else if (parts[0] === "mcp-servers") {
       // Organize MCP servers by category
       if (parts.length > 1) {

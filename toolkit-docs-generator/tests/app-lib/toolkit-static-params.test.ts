@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { normalizeToolkitId } from "../../../app/_lib/toolkit-slug";
 import {
+  getToolkitCanonicalPath,
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
   type ToolkitCatalogEntry,
@@ -63,6 +64,29 @@ describe("toolkit static params", () => {
   it("normalizes toolkit IDs into URL-safe slugs", () => {
     expect(normalizeToolkitId("GithubApi")).toBe("githubapi");
     expect(normalizeToolkitId("GitHub API")).toBe("githubapi");
+  });
+
+  it("rejects canonical paths for toolkit IDs without a valid slug", () => {
+    expect(() =>
+      getToolkitCanonicalPath({ id: "---", category: "development" })
+    ).toThrow("Cannot build a canonical path");
+  });
+
+  it("skips toolkit files whose IDs cannot form a route slug", async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, "invalid.json"),
+        JSON.stringify({
+          id: "---",
+          label: "Invalid",
+          metadata: { category: "development" },
+        })
+      );
+
+      await expect(
+        listToolkitRoutes({ dataDir: dir, toolkitsCatalog: [] })
+      ).resolves.toEqual([]);
+    });
   });
 
   it("lists toolkit routes from the index", async () => {

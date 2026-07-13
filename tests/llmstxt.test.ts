@@ -1,7 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { discoverPages, hasLlmsBodyChanged } from "../scripts/generate-llmstxt";
+import {
+  discoverPages,
+  hasLlmsBodyChanged,
+  organizeSections,
+} from "../scripts/generate-llmstxt";
 
 describe("llms.txt page discovery", () => {
   test("expands generated toolkit routes instead of template URLs", async () => {
@@ -12,6 +16,31 @@ describe("llms.txt page discovery", () => {
     expect(urls).toContain(
       "https://docs.arcade.dev/en/resources/integrations/productivity/gmail"
     );
+  });
+
+  test("groups generated toolkit pages by integration category", () => {
+    const sections = organizeSections([
+      {
+        path: "toolkit-docs-generator/data/toolkits/gmail.json",
+        url: "https://docs.arcade.dev/en/resources/integrations/productivity/gmail",
+        content: "# Gmail",
+        title: "Gmail",
+        description: "Gmail tools",
+      },
+    ]);
+
+    expect(sections).toEqual([
+      {
+        name: "Integrations - Productivity",
+        pages: [
+          {
+            title: "Gmail",
+            url: "https://docs.arcade.dev/en/resources/integrations/productivity/gmail",
+            description: "Gmail tools",
+          },
+        ],
+      },
+    ]);
   });
 
   test("ignores metadata-only changes that would cause commit loops", () => {

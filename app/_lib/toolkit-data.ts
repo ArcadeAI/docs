@@ -132,9 +132,9 @@ const findToolkitDataBySlug = async (
     const candidateSlug = getToolkitSlug({
       id: data.id,
       docsLink: data.metadata?.docsLink,
-    }).toLowerCase();
+    })?.toLowerCase();
 
-    if (candidateSlug === slugKey) {
+    if (candidateSlug && candidateSlug === slugKey) {
       return data;
     }
   }
