@@ -63,3 +63,11 @@ test("workflow dispatch keeps default full-run behavior", () => {
   expect(workflowContents).not.toContain("inputs.providers");
   expect(workflowContents).not.toContain("PROVIDERS_INPUT=");
 });
+
+test("workflow dispatch can create an isolated verification PR", () => {
+  expect(workflowContents).toContain("pr_branch:");
+  expect(workflowContents).toContain(
+    "inputs.pr_branch || 'automation/toolkit-docs'"
+  );
+  expect(workflowContents).toMatch(/base:\s+\$\{\{\s*github\.ref_name\s*\}\}/);
+});
