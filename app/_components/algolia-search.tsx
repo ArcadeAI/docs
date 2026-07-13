@@ -2,7 +2,7 @@
 
 import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Configure,
   Highlight,
@@ -40,6 +40,30 @@ const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME;
 
 const searchClient =
   appId && searchKey ? algoliasearch(appId, searchKey) : null;
+
+export const ALGOLIA_SEARCH_CONFIG = {
+  attributesToSnippet: ["content:20"],
+  distinct: true,
+  highlightPreTag: "__ais-highlight__",
+  highlightPostTag: "__/ais-highlight__",
+  hitsPerPage: 15,
+  snippetEllipsisText: "…",
+};
+
+type SearchStatus = "idle" | "loading" | "stalled" | "error";
+
+export function searchResultsAreCurrent(
+  query: string,
+  resultsQuery: string,
+  status: SearchStatus
+): boolean {
+  const normalizedQuery = query.trim();
+  return (
+    normalizedQuery.length > 0 &&
+    status === "idle" &&
+    resultsQuery.trim() === normalizedQuery
+  );
+}
 
 function safeHref(url: string | undefined): string {
   if (!url) {
@@ -138,9 +162,9 @@ function SearchHit({ hit }: { hit: DocSearchRecord }) {
   );
 }
 
-function SearchResults() {
-  const { indexUiState, results, status } = useInstantSearch();
-  if (!indexUiState.query?.trim()) {
+function SearchResults({ query }: { query: string }) {
+  const { results, status } = useInstantSearch();
+  if (!query.trim()) {
     return (
       <p className="px-4 py-8 text-center text-sm text-muted-foreground">
         Start typing to search the docs…
@@ -148,7 +172,9 @@ function SearchResults() {
     );
   }
 
-  if (!results || status === "loading" || status === "stalled") {
+  if (
+    !(results && searchResultsAreCurrent(query, results.query ?? "", status))
+  ) {
     return (
       <p className="px-4 py-8 text-center text-sm text-muted-foreground">
         Searching…
@@ -172,6 +198,45 @@ function SearchResults() {
         <SearchHit hit={hit as unknown as DocSearchRecord} />
       )}
     />
+  );
+}
+
+type SearchQueryHook = (
+  query: string,
+  search: (nextQuery: string) => void
+) => void;
+
+function SearchContent() {
+  const [typedQuery, setTypedQuery] = useState("");
+  const queryHook = useCallback<SearchQueryHook>((query, search) => {
+    setTypedQuery(query);
+    search(query);
+  }, []);
+
+  return (
+    <>
+      <Configure {...ALGOLIA_SEARCH_CONFIG} />
+      <div className="flex items-center border-b border-border px-4">
+        <Search className="size-4 shrink-0 text-muted-foreground" />
+        <SearchBox
+          autoFocus
+          classNames={{
+            form: "flex flex-1",
+            input:
+              "w-full bg-transparent px-3 py-4 text-sm text-foreground placeholder:text-muted-foreground outline-none",
+            loadingIndicator: "hidden",
+            reset: "hidden",
+            root: "flex-1",
+            submit: "hidden",
+          }}
+          placeholder="Search docs…"
+          queryHook={queryHook}
+        />
+      </div>
+      <div className="max-h-[60vh] min-h-24 overflow-y-auto p-2">
+        <SearchResults query={typedQuery} />
+      </div>
+    </>
   );
 }
 
@@ -234,31 +299,7 @@ export function AlgoliaSearch() {
           <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-popover shadow-2xl">
             {searchClient && indexName ? (
               <InstantSearch indexName={indexName} searchClient={searchClient}>
-                <Configure
-                  attributesToSnippet={["content:20"]}
-                  distinct={true}
-                  hitsPerPage={15}
-                  snippetEllipsisText="…"
-                />
-                <div className="flex items-center border-b border-border px-4">
-                  <Search className="size-4 shrink-0 text-muted-foreground" />
-                  <SearchBox
-                    autoFocus
-                    classNames={{
-                      form: "flex flex-1",
-                      input:
-                        "w-full bg-transparent px-3 py-4 text-sm text-foreground placeholder:text-muted-foreground outline-none",
-                      loadingIndicator: "hidden",
-                      reset: "hidden",
-                      root: "flex-1",
-                      submit: "hidden",
-                    }}
-                    placeholder="Search docs…"
-                  />
-                </div>
-                <div className="max-h-[60vh] overflow-y-auto p-2">
-                  <SearchResults />
-                </div>
+                <SearchContent />
               </InstantSearch>
             ) : (
               <SearchUnavailable />
