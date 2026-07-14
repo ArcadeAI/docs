@@ -1,6 +1,5 @@
 "use client";
 
-import { Mail } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
@@ -12,7 +11,7 @@ import { useEffect, useState } from "react";
 const CONTACT_PAGE = "/en/resources/contact-us";
 
 const linkClassName =
-  "inline-flex items-center gap-1 text-brand-accent underline decoration-from-font [text-underline-position:from-font]";
+  "text-brand-accent underline decoration-from-font [text-underline-position:from-font]";
 
 type ContactEmailProps = {
   /** Local part of the address, e.g. "security" for security@arcade.dev. */
@@ -22,15 +21,6 @@ type ContactEmailProps = {
   /** Visible link text. Keep it free of the raw address (see below). */
   children: ReactNode;
 };
-
-function LinkContent({ children }: { children: ReactNode }) {
-  return (
-    <>
-      {children}
-      <Mail aria-hidden className="size-3.5 shrink-0" />
-    </>
-  );
-}
 
 /**
  * A mailto link whose address is assembled only after hydration.
@@ -53,14 +43,14 @@ export function ContactEmail({ user, domain, children }: ContactEmailProps) {
   if (address) {
     return (
       <a className={linkClassName} href={`mailto:${address}`}>
-        <LinkContent>{children}</LinkContent>
+        {children}
       </a>
     );
   }
 
   return (
     <Link className={linkClassName} href={CONTACT_PAGE}>
-      <LinkContent>{children}</LinkContent>
+      {children}
     </Link>
   );
 }
