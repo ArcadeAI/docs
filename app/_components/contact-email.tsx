@@ -10,6 +10,9 @@ import { useEffect, useState } from "react";
 // (e.g. via usePathname) and point at /<locale>/resources/contact-us.
 const CONTACT_PAGE = "/en/resources/contact-us";
 
+const linkClassName =
+  "text-brand-accent underline decoration-from-font [text-underline-position:from-font]";
+
 type ContactEmailProps = {
   /** Local part of the address, e.g. "security" for security@arcade.dev. */
   user: string;
@@ -38,8 +41,16 @@ export function ContactEmail({ user, domain, children }: ContactEmailProps) {
   }, [user, domain]);
 
   if (address) {
-    return <a href={`mailto:${address}`}>{children}</a>;
+    return (
+      <a className={linkClassName} href={`mailto:${address}`}>
+        {children}
+      </a>
+    );
   }
 
-  return <Link href={CONTACT_PAGE}>{children}</Link>;
+  return (
+    <Link className={linkClassName} href={CONTACT_PAGE}>
+      {children}
+    </Link>
+  );
 }
