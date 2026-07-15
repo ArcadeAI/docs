@@ -1,0 +1,1260 @@
+{
+  "id": "MicrosoftPowerbi",
+  "label": "Microsoft Power BI",
+  "version": "0.3.0",
+  "description": "Arcade MCP toolkit for Microsoft Power BI",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/microsoft-power-bi.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/microsoft-power-bi",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft-powerbi",
+    "allScopes": [
+      "https://analysis.windows.net/powerbi/api/Dataset.Read.All",
+      "https://analysis.windows.net/powerbi/api/Dataset.ReadWrite.All",
+      "https://analysis.windows.net/powerbi/api/Report.Read.All",
+      "https://analysis.windows.net/powerbi/api/Workspace.Read.All"
+    ]
+  },
+  "tools": [
+    {
+      "name": "DatasetGatewayHealth",
+      "qualifiedName": "MicrosoftPowerbi.DatasetGatewayHealth",
+      "fullyQualifiedName": "MicrosoftPowerbi.DatasetGatewayHealth@0.3.0",
+      "description": "Report whether each of a dataset's gateway-bound data sources is currently\nreachable.\n\nPoint this at a dataset whose refresh failed to tell whether the gateway path is\nhealthy before escalating. Stored credentials are never returned.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id (or a pasted app.powerbi.com link) of the dataset to check.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dataset_id",
+          "type": "string",
+          "required": true,
+          "description": "A dataset id (or pasted link) whose gateway-bound data sources should be probed for connectivity.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The connectivity status of the dataset's gateway-bound data sources."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.DatasetGatewayHealth",
+        "parameters": {
+          "workspace_id": {
+            "value": "f4b8c2d1-3e7a-4f09-bc12-9a6d5e081234",
+            "type": "string",
+            "required": true
+          },
+          "dataset_id": {
+            "value": "a1d3f592-7b4e-4c08-ae21-3f6b8d902e47",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetDatasetRefreshHistory",
+      "qualifiedName": "MicrosoftPowerbi.GetDatasetRefreshHistory",
+      "fullyQualifiedName": "MicrosoftPowerbi.GetDatasetRefreshHistory@0.3.0",
+      "description": "Get the most recent refresh runs of a semantic model, with status and timing.\n\nReturns each run newest first with its status, type, start/end time, and any error.\nPower BI reports a run's status as 'Unknown' while it is still in progress or its\noutcome is not yet known, so each run also carries `is_terminal`: false while the run\nis still running (status 'Unknown'), true once it has settled ('Completed', 'Failed',\nor 'Disabled'). Re-poll this tool while the newest run is not terminal to obtain its\nfinal status.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id containing the semantic model.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dataset_id",
+          "type": "string",
+          "required": true,
+          "description": "The semantic model (dataset) id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "How many recent refresh runs to return (default 20, max 50).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Recent refresh runs for the semantic model."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.GetDatasetRefreshHistory",
+        "parameters": {
+          "workspace_id": {
+            "value": "3d9b93c6-7b6d-4801-a491-1738910904fd",
+            "type": "string",
+            "required": true
+          },
+          "dataset_id": {
+            "value": "cfafbeb1-8037-4d0c-896e-a46fb27ff229",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetReport",
+      "qualifiedName": "MicrosoftPowerbi.GetReport",
+      "fullyQualifiedName": "MicrosoftPowerbi.GetReport@0.3.0",
+      "description": "Get a single Power BI report's detail, including the semantic model (dataset) it is built on.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace (group) id containing the report.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "report_id",
+          "type": "string",
+          "required": true,
+          "description": "The report id to read.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Report.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The report's detail, including its dataset id and embed URL."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.GetReport",
+        "parameters": {
+          "workspace_id": {
+            "value": "3d9b93c6-7b6d-4801-a491-1738910904fd",
+            "type": "string",
+            "required": true
+          },
+          "report_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetSchema",
+      "qualifiedName": "MicrosoftPowerbi.GetSchema",
+      "fullyQualifiedName": "MicrosoftPowerbi.GetSchema@0.3.0",
+      "description": "Get the full structure of a Power BI semantic model.\n\nReturns each table with its columns and measures and the relationships between tables,\nso a caller can compose valid DAX that references real table and column names. Each\nmeasure carries its DAX expression when the model exposes it; a read-only caller may\nnot receive measure formulas, in which case expression_available is false.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id containing the semantic model.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dataset_id",
+          "type": "string",
+          "required": true,
+          "description": "The semantic model (dataset) id to inspect.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The model's tables, columns, measures, and relationships."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.GetSchema",
+        "parameters": {
+          "workspace_id": {
+            "value": "a3f1b2c4-d5e6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          },
+          "dataset_id": {
+            "value": "b7e2d3f5-a1c4-4e8b-9f0d-123456789abc",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "InspectDataset",
+      "qualifiedName": "MicrosoftPowerbi.InspectDataset",
+      "fullyQualifiedName": "MicrosoftPowerbi.InspectDataset@0.3.0",
+      "description": "Inspect one dataset in a single call: where it pulls data from, what parameters\ndrive it, when it refreshes, and its core detail (owner, storage mode, refreshable).\n\nUse this to diagnose a dataset that \"looks wrong\" without three separate calls.\nStored credentials are never returned for any data source.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id (or a pasted app.powerbi.com link) containing the dataset.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dataset_id",
+          "type": "string",
+          "required": true,
+          "description": "The dataset (semantic model) id, or a pasted app.powerbi.com link to it.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The dataset's core detail, data sources, parameters, and schedule."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.InspectDataset",
+        "parameters": {
+          "workspace_id": {
+            "value": "f4b8c2d1-3a7e-4f92-b6d5-8e1c0a9f2b34",
+            "type": "string",
+            "required": true
+          },
+          "dataset_id": {
+            "value": "a1d3e5f7-2c4b-4890-9e6d-7b0f1a2c3d45",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListDatasets",
+      "qualifiedName": "MicrosoftPowerbi.ListDatasets",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListDatasets@0.3.0",
+      "description": "List the Power BI semantic models (datasets) in a workspace.\n\nResults are paginated: when next_cursor is non-empty, pass it back verbatim to fetch\nthe next page.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace (group) id to list datasets in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum datasets to return (default 20, max 50).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Opaque pagination token from a prior call's next_cursor; omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The Power BI semantic models (datasets) in the workspace."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.ListDatasets",
+        "parameters": {
+          "workspace_id": {
+            "value": "f089354e-8366-4e18-aea3-4cb4a3a50b48",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJza2lwIjoyNSwidG9rZW4iOiJhYmNkZWYxMjM0NTY3ODkwIn0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListGateways",
+      "qualifiedName": "MicrosoftPowerbi.ListGateways",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListGateways@0.3.0",
+      "description": "List the data gateways the caller administers, with the id needed to reference\neach one.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The data gateways the caller administers."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.ListGateways",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListReports",
+      "qualifiedName": "MicrosoftPowerbi.ListReports",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListReports@0.3.0",
+      "description": "List the Power BI reports in a workspace, each with the semantic model (dataset) it is built on.\n\nResults are paginated: when next_cursor is non-empty, pass it back verbatim to fetch\nthe next page.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace (group) id to list reports in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum reports to return (default 20, max 50).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Opaque pagination token from a prior call's next_cursor; omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Report.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The Power BI reports in the workspace, each with its dataset id."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.ListReports",
+        "parameters": {
+          "workspace_id": {
+            "value": "3d9b93c6-7b6d-4801-a491-1738910904fd",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJza2lwIjoyNSwidG9rZW4iOiJhYmNkZWYxMjM0NTYifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListWorkspaceMembers",
+      "qualifiedName": "MicrosoftPowerbi.ListWorkspaceMembers",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListWorkspaceMembers@0.3.0",
+      "description": "List who can access a workspace and the role each principal holds, for an\naccess review.\n\nA single call returns one consistent snapshot of the page it serves, in a stable\nsorted order (by principal identifier) so pages are deterministic. The default limit\nis the maximum (50), so a definitive access review should fit in one page; when\nnext_cursor is non-empty the listing was truncated and multi-page reads are best-effort\n(membership changes between pages can skip or duplicate principals) -- the warning field\nflags this. Only what the Power BI portal itself shows for a member is returned; no\nsecrets.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id, or a pasted app.powerbi.com link to the workspace.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum members to return (default 50, max 50). The default is the maximum so a typical access review fits in one page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Opaque pagination token from a prior call's next_cursor; omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Workspace.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The workspace's members and the role each holds."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.ListWorkspaceMembers",
+        "parameters": {
+          "workspace_id": {
+            "value": "3d9b93c6-7b6d-4801-a491-1738910904fd",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJza2lwIjoyNX0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListWorkspaces",
+      "qualifiedName": "MicrosoftPowerbi.ListWorkspaces",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListWorkspaces@0.3.0",
+      "description": "List the Power BI workspaces (groups) the calling user can access.\n\nReturns each workspace's id and name. Results are paginated: when next_cursor is\nnon-empty, pass it back verbatim to fetch the next page.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum workspaces to return (default 20, max 50).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Opaque pagination token from a prior call's next_cursor; omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Workspace.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The Power BI workspaces the calling user can access."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.ListWorkspaces",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJza2lwIjoyMCwidG9rZW4iOiJhYmMxMjMifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RunDax",
+      "qualifiedName": "MicrosoftPowerbi.RunDax",
+      "fullyQualifiedName": "MicrosoftPowerbi.RunDax@0.3.0",
+      "description": "Run a DAX query against a semantic model and return the rows as structured data.\n\nThe query must be a DAX EVALUATE statement, for example:\n  EVALUATE TOPN(100, 'Sales')\n  EVALUATE SUMMARIZECOLUMNS('Date'[Year], \"Revenue\", SUM('Sales'[Amount]))\n  EVALUATE FILTER('Product', 'Product'[Category] = \"Bikes\")\nResults are capped at max_rows and a size budget; when capped, truncated is true,\nso narrow the query rather than assume the rows are complete. columns lists the full\nprojection the query returned even when a wide row is size-trimmed, so a column may\nappear in columns without a matching key in every returned row. Invalid DAX is\nreported as a clear error.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id containing the semantic model.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dataset_id",
+          "type": "string",
+          "required": true,
+          "description": "The semantic model (dataset) id to query.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dax_query",
+          "type": "string",
+          "required": true,
+          "description": "A DAX query beginning with EVALUATE.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_rows",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum rows to return (default 100, capped at 100).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The query's rows, with truncation flagged."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.RunDax",
+        "parameters": {
+          "workspace_id": {
+            "value": "a3f1d2e4-7b89-4c23-9d56-1e2f3a4b5c6d",
+            "type": "string",
+            "required": true
+          },
+          "dataset_id": {
+            "value": "b7c8e9f0-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+            "type": "string",
+            "required": true
+          },
+          "dax_query": {
+            "value": "EVALUATE SUMMARIZECOLUMNS('Date'[Year], 'Product'[Category], \"TotalRevenue\", SUM('Sales'[Amount]), \"UnitsSold\", SUM('Sales'[Quantity]))",
+            "type": "string",
+            "required": true
+          },
+          "max_rows": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "TriggerDatasetRefresh",
+      "qualifiedName": "MicrosoftPowerbi.TriggerDatasetRefresh",
+      "fullyQualifiedName": "MicrosoftPowerbi.TriggerDatasetRefresh@0.3.0",
+      "description": "Start an on-demand refresh of a semantic model.\n\nA refresh can take a long time (minutes or more for a large model), so this\nreturns as soon as the refresh is accepted rather than waiting for it to finish.\nThe run's progress and final success or failure are recorded in the model's\nrefresh history.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id containing the semantic model.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dataset_id",
+          "type": "string",
+          "required": true,
+          "description": "The semantic model (dataset) id to refresh.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The accepted refresh job handle."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.TriggerDatasetRefresh",
+        "parameters": {
+          "workspace_id": {
+            "value": "3d9b93c6-7b6d-4801-a491-1738910904fd",
+            "type": "string",
+            "required": true
+          },
+          "dataset_id": {
+            "value": "cfafbeb1-8037-4d0c-896e-a46fb27ff229",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateDatasetSettings",
+      "qualifiedName": "MicrosoftPowerbi.UpdateDatasetSettings",
+      "fullyQualifiedName": "MicrosoftPowerbi.UpdateDatasetSettings@0.3.0",
+      "description": "Repoint a dataset's parameters and/or change its refresh timing in one request.\n\nUpsert/patch semantics: only the fields supplied are applied; everything else is\nleft untouched. Setting a parameter the dataset does not define is refused with the\nlist of parameter names it actually exposes, rather than reported as a false success.\nPower BI ignores day/time edits while scheduled refresh is disabled, so set\nrefresh_enabled=true in the same call when you want new times to take effect.\nEach applied parameter is returned with the previous_value observed just before the\nwrite, so the change is auditable and the prior value can be restored. A committed\nparameter change only updates the model definition -- run trigger_dataset_refresh\nafterwards so query and report results reflect the new values.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id (or a pasted app.powerbi.com link) containing the dataset.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dataset_id",
+          "type": "string",
+          "required": true,
+          "description": "The dataset (semantic model) id, or a pasted app.powerbi.com link to it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parameters",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Parameter values to set. Only the listed parameters change; the rest are left untouched. Omit to change no parameters.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "refresh_days",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Days the refresh runs on. Provide to replace the scheduled days; omit to leave the days unchanged.",
+          "enum": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "refresh_times",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Times the refresh runs at, each as HH:MM on the hour or half-hour (e.g. 08:00, 08:30). Provide to replace the scheduled times; omit to leave them unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "refresh_enabled",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether scheduled refresh is on. Provide to toggle it; omit to leave it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "refresh_local_time_zone_id",
+          "type": "string",
+          "required": false,
+          "description": "The schedule's time zone id (e.g. 'UTC', 'Pacific Standard Time'). Provide to change it; omit to leave it unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Which parameters were set and whether the schedule changed."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.UpdateDatasetSettings",
+        "parameters": {
+          "workspace_id": {
+            "value": "d4e5f6a7-b8c9-4d0e-a1f2-3b4c5d6e7f8a",
+            "type": "string",
+            "required": true
+          },
+          "dataset_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          },
+          "parameters": {
+            "value": [
+              {
+                "name": "ServerName",
+                "newValue": "prod-sql-server.database.windows.net"
+              },
+              {
+                "name": "DatabaseName",
+                "newValue": "SalesDataWarehouse"
+              },
+              {
+                "name": "SchemaName",
+                "newValue": "dbo"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "refresh_days": {
+            "value": [
+              "Monday",
+              "Wednesday",
+              "Friday"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "refresh_times": {
+            "value": [
+              "06:00",
+              "12:00",
+              "18:30"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "refresh_enabled": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "refresh_local_time_zone_id": {
+            "value": "Eastern Standard Time",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ValidateDax",
+      "qualifiedName": "MicrosoftPowerbi.ValidateDax",
+      "fullyQualifiedName": "MicrosoftPowerbi.ValidateDax@0.3.0",
+      "description": "Check whether a DAX query is valid for a semantic model without returning its rows.\n\nReturns valid=true when the query is accepted, or valid=false with a short error\nwhen it is not. Transient, auth, and server errors are raised (not reported as\ninvalid) so the caller retries rather than rewriting valid DAX.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace id containing the semantic model.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dataset_id",
+          "type": "string",
+          "required": true,
+          "description": "The semantic model (dataset) id to validate against.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dax_query",
+          "type": "string",
+          "required": true,
+          "description": "The DAX query to validate, beginning with EVALUATE.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Dataset.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Whether the DAX is valid, with any errors found."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.ValidateDax",
+        "parameters": {
+          "workspace_id": {
+            "value": "d4e5f6a7-b8c9-4d2e-a1f3-789012345678",
+            "type": "string",
+            "required": true
+          },
+          "dataset_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          },
+          "dax_query": {
+            "value": "EVALUATE SUMMARIZECOLUMNS(Sales[Region], \"Total Sales\", SUM(Sales[Amount]))",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "MicrosoftPowerbi.WhoAmI",
+      "fullyQualifiedName": "MicrosoftPowerbi.WhoAmI@0.3.0",
+      "description": "Report the Microsoft account the toolkit is acting as: id, name, UPN, and tenant.\n\nUse this to confirm which user the current connection authenticates as before\nreading or changing anything. Identity is read from the signed-in user's own Power\nBI access token (Power BI has no current-user endpoint); it is for display and\nconfirmation only, not an authorization decision, and the fields are best-effort.\nBecause identity is derived from the token's claims, it is unavailable when Microsoft\nissues an opaque or encrypted (non-JWT) access token -- Microsoft is rolling out\nencrypted access tokens for Microsoft-owned APIs -- in which case this tool fails with\na clear error while every other Power BI tool keeps working.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft-powerbi",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://analysis.windows.net/powerbi/api/Workspace.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The signed-in Microsoft user's identity."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerbi.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft-powerbi",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "business_intelligence"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-07-15T11:37:33.875Z",
+  "summary": "Arcade toolkit for Microsoft Power BI, enabling programmatic access to workspaces, semantic models, reports, gateways, and DAX execution via the Power BI REST API.\n\n## Capabilities\n\n- **Discovery & navigation:** List and inspect workspaces, reports, datasets (semantic models), and gateways; enumerate workspace members for access reviews; identify the authenticated user.\n- **Schema & data access:** Retrieve the full structure of a semantic model (tables, columns, measures, relationships) and run or validate arbitrary DAX `EVALUATE` queries against it.\n- **Dataset diagnostics:** Inspect a dataset in one call (data sources, parameters, refresh schedule, ownership); check gateway/data-source reachability; retrieve paginated refresh history with terminal/in-progress status.\n- **Dataset management:** Trigger on-demand refreshes; update dataset parameters and scheduled-refresh settings with patch semantics and auditable before/after values.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 using the **Microsoft Power BI** provider. See the [Microsoft Power BI auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft-powerbi) for setup details, required permissions, and token configuration."
+}

@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftExcel",
   "label": "Microsoft Excel",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Arcade.dev LLM tools for Microsoft Excel",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "AggregateWorksheet",
       "qualifiedName": "MicrosoftExcel.AggregateWorksheet",
-      "fullyQualifiedName": "MicrosoftExcel.AggregateWorksheet@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.AggregateWorksheet@1.1.2",
       "description": "Summarize a worksheet by grouping rows and computing per-group aggregates in one call.\n\nUse this instead of reading and paginating raw rows when you need totals, averages, counts,\nor min/max broken down by one or more columns (e.g. revenue by region). Columns can be\nreferenced by letter (group_by) or by header name (group_by_headers) — use whichever is\nmore convenient. Groups are returned in first-seen order and capped by ``limit``.\n\nAlways check each aggregate's ``numeric_count`` field: non-numeric and formula-error cells\nare silently skipped for sum/average/min/max, so a clean-looking total may exclude rows —\nthe ``warnings`` list will name every column and group where this occurred.",
       "parameters": [
         {
@@ -259,7 +259,7 @@
     {
       "name": "CreateOrEditWorkbook",
       "qualifiedName": "MicrosoftExcel.CreateOrEditWorkbook",
-      "fullyQualifiedName": "MicrosoftExcel.CreateOrEditWorkbook@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.CreateOrEditWorkbook@1.1.2",
       "description": "Create a new .xlsx workbook or edit an existing one in OneDrive for Business.\n\nOmit `item_id` to create (an empty workbook is created from `filename`, then the\noperations are applied); provide `item_id` to edit. To create a populated workbook, pass\n`filename` plus set_values operations; name the target tab via `worksheet` (or reference\none consistent sheet name in the operations) and the new workbook's initial sheet is\nrenamed to match. For a finished file with formatting/charts intact, upload the bytes\ninstead of rebuilding cell-by-cell.\n\nEach entry in `operations` selects a behavior via its `type`: write/clear cells, format\ncells (font, fill, borders, alignment, wrap, row height), size rows and columns,\nsort, add/restyle tables (style, totals, banding, filter), add/move/restyle charts (anchor\ncell, size, title, legend, axis titles), manage worksheets and named ranges, protect a\nsheet, and recalculate. See the `operations` parameter for the per-type fields.",
       "parameters": [
         {
@@ -443,8 +443,8 @@
     {
       "name": "GetWorkbookMetadata",
       "qualifiedName": "MicrosoftExcel.GetWorkbookMetadata",
-      "fullyQualifiedName": "MicrosoftExcel.GetWorkbookMetadata@1.1.1",
-      "description": "Get a workbook's structure: worksheets, named ranges, and optionally extents and objects.\n\nCall this first when exploring an unfamiliar workbook: it surfaces hidden worksheets,\nworkbook-scoped named ranges, tables, charts, and (with the flags) used ranges, protection\nstate, and worksheet-local named ranges, so you can target reads precisely and avoid\nmistaking a stale dashboard sheet for the source data. Use `include_used_ranges` to learn\nwhere data lives before reading, and `include_objects` to enumerate tables and charts. Both\nadd a per-worksheet fan-out, so leave them off for a quick worksheet listing.",
+      "fullyQualifiedName": "MicrosoftExcel.GetWorkbookMetadata@1.1.2",
+      "description": "Get a workbook's structure: worksheets, named ranges, and optionally extents and objects.\n\nCall this first when exploring an unfamiliar workbook: it surfaces hidden worksheets and\nworkbook-scoped named ranges. Use `include_used_ranges` to also learn where data lives\n(used ranges, protection state, and worksheet-local named ranges) before reading, and\n`include_objects` to enumerate tables and charts. Both add a per-worksheet fan-out, so leave\nthem off for a quick worksheet listing.",
       "parameters": [
         {
           "name": "item_id",
@@ -555,7 +555,7 @@
     {
       "name": "ListWorkbookComments",
       "qualifiedName": "MicrosoftExcel.ListWorkbookComments",
-      "fullyQualifiedName": "MicrosoftExcel.ListWorkbookComments@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.ListWorkbookComments@1.1.2",
       "description": "List a workbook's comments, or the replies on a specific comment thread.\n\nProvide a comment ID to retrieve that thread's replies instead of the top-level comments.",
       "parameters": [
         {
@@ -667,7 +667,7 @@
     {
       "name": "ReadWorksheet",
       "qualifiedName": "MicrosoftExcel.ReadWorksheet",
-      "fullyQualifiedName": "MicrosoftExcel.ReadWorksheet@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.ReadWorksheet@1.1.2",
       "description": "Read a worksheet range with the detail you choose, with guardrails for large sheets.\n\nRequest `annotations` for formulas, cell types, number formats, or the range's\nfill/font/borders; `filter_column` + `filter_contains` to keep matching rows; `columns` to\nproject a subset; `export` for csv/tsv. Reads are bounded to the used range and capped by a\nrow limit and cell budget, paginating via `next_range` rather than returning a whole large\nsheet at once.\n\nSet `row_format=\"records\"` (with `has_header=true`) to get a `record` dict on each data\nrow, keying cell values by the header row (the top row of the worksheet's used range) —\nuseful when agents need to map values to named columns without tracking positional indices.\nThe header is carried across pages, so paginated reads via `next_range` stay correctly\nkeyed. Each row still includes `values`.\n\nTo verify formulas, types, or number patterns in the returned cells, pass `annotations`\n(e.g. `[\"formulas\", \"types\"]`); annotation values land under `annotations` keyed by A1\naddress alongside the displayed values.",
       "parameters": [
         {
@@ -921,7 +921,7 @@
     {
       "name": "ReplyToWorkbookComment",
       "qualifiedName": "MicrosoftExcel.ReplyToWorkbookComment",
-      "fullyQualifiedName": "MicrosoftExcel.ReplyToWorkbookComment@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.ReplyToWorkbookComment@1.1.2",
       "description": "Post a plain-text reply to an existing comment thread on a workbook.\n\nThe reply is appended to the end of the thread.",
       "parameters": [
         {
@@ -1020,7 +1020,7 @@
     {
       "name": "ScanForDataIssues",
       "qualifiedName": "MicrosoftExcel.ScanForDataIssues",
-      "fullyQualifiedName": "MicrosoftExcel.ScanForDataIssues@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.ScanForDataIssues@1.1.2",
       "description": "Scan a worksheet (or the whole workbook) for data-quality problems as a structured list.\n\nEach issue carries a ``severity`` field (``\"high\"``, ``\"medium\"``, or ``\"low\"``) and the\nlist is ordered high → low before any truncation cap is applied, so critical findings are\nnever dropped in favour of lower-priority ones.\n\nBy default the scan is sheet-scoped (the named worksheet, or the first sheet when\n``worksheet`` is omitted). Pass ``worksheet='*'`` for a workbook-wide audit: every sheet\nis scanned in one call and each issue carries its own ``worksheet`` field.\n\nDetects formula-error cells (``severity=\"high\"``), type outliers within a column —\na column mostly one type with a few cells of another — (``severity=\"medium\"``),\ninconsistent_column for a column that mixes cell types without a strong majority\n(``severity=\"medium\"``), accidental duplicate values in mostly-unique columns\n(``severity=\"medium\"``), and blank cells inside an otherwise-populated region\n(``severity=\"low\"``). Categorical columns (where repetition is expected) are not flagged\nas duplicates, and the header row is excluded from type-outlier and duplicate checks.\nA clean sheet returns an empty issues list. Detection is deterministic.\nResults are capped; when the cap is reached ``truncated`` is True and a warning is added.\n\nMerged cells are a known limitation: Microsoft Graph reports only the merge anchor as\npopulated and every covered cell as empty, so cells hidden under a merge may be flagged as\nblanks. A worksheet cannot be scanned when its used range exceeds an internal cell limit\n(this tool takes no range argument): a single-sheet scan raises an error asking you to\nreduce the data, while a whole-workbook scan skips the oversized sheet and names it in a\nwarning so the rest of the workbook is still scanned.",
       "parameters": [
         {
@@ -1132,7 +1132,7 @@
     {
       "name": "SearchWorkbooks",
       "qualifiedName": "MicrosoftExcel.SearchWorkbooks",
-      "fullyQualifiedName": "MicrosoftExcel.SearchWorkbooks@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.SearchWorkbooks@1.1.2",
       "description": "Find Excel workbooks in OneDrive by keyword or folder, returning their item_ids.\n\nProvide `query` to search the whole drive by name/content, or leave it empty and pass\n`parent_folder_id` to list one folder; only .xlsx files are returned. Use a returned\n`item_id` to read, edit, scan, or comment on a workbook you did not create this session.",
       "parameters": [
         {
@@ -1244,7 +1244,7 @@
     {
       "name": "UploadWorkbook",
       "qualifiedName": "MicrosoftExcel.UploadWorkbook",
-      "fullyQualifiedName": "MicrosoftExcel.UploadWorkbook@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.UploadWorkbook@1.1.2",
       "description": "Upload a complete .xlsx file into OneDrive for Business, preserving it byte-for-byte.\n\nUse this instead of rebuilding a finished file cell-by-cell. Large files are uploaded\nvia a resumable upload session automatically.",
       "parameters": [
         {
@@ -1357,7 +1357,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftExcel.WhoAmI",
-      "fullyQualifiedName": "MicrosoftExcel.WhoAmI@1.1.1",
+      "fullyQualifiedName": "MicrosoftExcel.WhoAmI@1.1.2",
       "description": "Get information about the current user and their Microsoft Excel environment.",
       "parameters": [],
       "auth": {
@@ -1403,6 +1403,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-07-10T12:06:11.185Z",
-  "summary": "**Microsoft Excel toolkit** connects Arcade to Microsoft Excel via the Microsoft Graph API, enabling agents to read, write, audit, and collaborate on `.xlsx` workbooks stored in OneDrive for Business.\n\n## Capabilities\n\n- **Workbook discovery & metadata** — search OneDrive for workbooks by keyword or folder, retrieve full workbook structure (worksheets, named ranges, tables, charts, protection state, used-range extents), and identify the current user's environment.\n- **Reading & analysis** — read worksheet ranges with pagination, column projection, row filtering, CSV/TSV export, and per-cell annotations (formulas, types, number formats, fill/font/borders); aggregate data by grouping rows with sum, average, count, min, or max.\n- **Writing & editing** — create new workbooks or edit existing ones with a rich operation set: write/clear cells, format cells, resize rows/columns, sort, manage tables and charts, rename/add/protect worksheets, manage named ranges, and recalculate.\n- **Data quality** — scan a single worksheet or an entire workbook for formula errors, type outliers, inconsistent columns, accidental duplicates, and blank cells, with severity-ordered results.\n- **File upload** — upload a complete `.xlsx` file byte-for-byte into OneDrive (resumable for large files), avoiding the need to rebuild complex files cell-by-cell.\n- **Comments & collaboration** — list comment threads (or replies on a specific thread) and post plain-text replies to existing comment threads.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 delegated authorization via **Microsoft**. Arcade handles the OAuth flow automatically. See the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details."
+  "generatedAt": "2026-07-15T11:37:29.796Z",
+  "summary": "The Microsoft Excel toolkit for Arcade provides LLM-ready tools for reading, writing, auditing, and managing Excel workbooks stored in OneDrive for Business via the Microsoft Graph API.\n\n## Capabilities\n\n- **Discovery & navigation**: Search OneDrive for workbooks by keyword or folder, retrieve workbook metadata (worksheets, named ranges, tables, charts, extents, protection state), and identify the current user's environment.\n- **Reading & analysis**: Read worksheet ranges with filtering, column projection, pagination, and optional annotations (formulas, types, number formats, styles); aggregate data by group with sum/average/count/min/max in a single call.\n- **Writing & editing**: Create new `.xlsx` workbooks or edit existing ones with a rich operation set — write/clear cells, apply formatting, resize rows/columns, sort, manage tables and charts, handle worksheets and named ranges, protect sheets, and recalculate.\n- **File-level upload**: Upload a complete `.xlsx` file byte-for-byte (with automatic resumable upload for large files), bypassing cell-by-cell reconstruction.\n- **Data quality scanning**: Audit a worksheet or entire workbook for formula errors, type outliers, inconsistent columns, accidental duplicates, and blank cells — results are severity-ordered so critical issues are never truncated first.\n- **Comments & collaboration**: List comment threads (or replies on a specific thread) and post plain-text replies to existing threads.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Microsoft. Arcade manages the OAuth flow; see the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details."
 }
