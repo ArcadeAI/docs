@@ -4,6 +4,7 @@ import path from "node:path";
 import glob from "fast-glob";
 import OpenAI from "openai";
 import pc from "picocolors";
+import { getToolkitCanonicalPath } from "../app/_lib/toolkit-static-params";
 
 type PageMetadata = {
   path: string;
@@ -199,6 +200,117 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
   return pages;
 }
 
+const TOOLKIT_DATA_DIR = path.join(
+  process.cwd(),
+  "toolkit-docs-generator",
+  "data",
+  "toolkits"
+);
+const MAX_TOOLKIT_DESCRIPTION = 280;
+const MARKDOWN_LINK_REGEX = /\[([^\]]+)\]\([^)]+\)/g;
+const MARKDOWN_NOISE_REGEX = /[#*`>]/g;
+const WHITESPACE_REGEX = /\s+/g;
+
+type ToolkitData = {
+  id?: string;
+  label?: string;
+  description?: string;
+  summary?: string;
+  tools?: unknown[];
+  metadata?: {
+    category?: string;
+    docsLink?: string;
+    isHidden?: boolean;
+    isComingSoon?: boolean;
+  };
+};
+
+/**
+ * Builds a concise, deterministic description for a toolkit from its own
+ * metadata (no OpenAI): its summary/description with markdown stripped, or a
+ * label + tool-count fallback.
+ */
+function buildToolkitDescription(data: ToolkitData): string {
+  const source = (data.summary || data.description || "").trim();
+  if (source) {
+    const cleaned = source
+      .replace(MARKDOWN_LINK_REGEX, "$1")
+      .replace(MARKDOWN_NOISE_REGEX, " ")
+      .replace(WHITESPACE_REGEX, " ")
+      .trim();
+    if (cleaned.length <= MAX_TOOLKIT_DESCRIPTION) {
+      return cleaned;
+    }
+    const truncated = cleaned.slice(0, MAX_TOOLKIT_DESCRIPTION);
+    const lastSpace = truncated.lastIndexOf(" ");
+    const cut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
+    return `${cut.trim()}…`;
+  }
+  const label = data.label || data.id || "This";
+  const toolCount = Array.isArray(data.tools) ? data.tools.length : 0;
+  return toolCount > 0
+    ? `${label} MCP server documentation and its ${toolCount} Arcade tools.`
+    : `${label} MCP server documentation.`;
+}
+
+/**
+ * Discovers toolkit (integration) pages from generated toolkit data. These are
+ * dynamic routes, so the MDX glob can't find them; build them straight from the
+ * toolkit JSON, reusing the app's canonical path logic so URLs match the real
+ * pages. Descriptions are templated (no OpenAI call).
+ */
+async function discoverToolkitPages(): Promise<
+  Array<PageMetadata & { title: string; description: string }>
+> {
+  let entries: string[];
+  try {
+    entries = await fs.readdir(TOOLKIT_DATA_DIR);
+  } catch {
+    console.warn(pc.yellow("⚠ No toolkit data dir; skipping toolkit pages"));
+    return [];
+  }
+
+  const pages: Array<PageMetadata & { title: string; description: string }> =
+    [];
+  const seenUrls = new Set<string>();
+
+  for (const entry of entries) {
+    if (!entry.endsWith(".json") || entry === "index.json") {
+      continue;
+    }
+    try {
+      const filePath = path.join(TOOLKIT_DATA_DIR, entry);
+      const data = JSON.parse(
+        await fs.readFile(filePath, "utf-8")
+      ) as ToolkitData;
+      if (!data.id || data.metadata?.isHidden || data.metadata?.isComingSoon) {
+        continue;
+      }
+      const url = `${BASE_URL}${getToolkitCanonicalPath({
+        id: data.id,
+        category: data.metadata?.category,
+        docsLink: data.metadata?.docsLink,
+      })}`;
+      if (seenUrls.has(url)) {
+        continue;
+      }
+      seenUrls.add(url);
+      pages.push({
+        path: path.relative(process.cwd(), filePath),
+        url,
+        content: "",
+        title: (data.label || data.id).trim(),
+        description: buildToolkitDescription(data),
+      });
+    } catch {
+      // Ignore malformed toolkit data files.
+    }
+  }
+
+  console.log(pc.green(`✓ Found ${pages.length} toolkit pages`));
+  return pages;
+}
+
 /**
  * Summarizes a page using OpenAI
  */
@@ -289,6 +401,8 @@ function organizeSections(
       } else {
         sectionName = "MCP Servers";
       }
+    } else if (parts[0] === "resources" && parts[1] === "integrations") {
+      sectionName = "Integrations";
     } else if (parts[0] === "references") {
       sectionName = "API Reference";
     } else {
@@ -417,7 +531,8 @@ function generateLlmsTxt(
 function determinePagesToSummarize(
   pages: PageMetadata[],
   previousMetadata: LlmsTxtMetadata | null,
-  existingSummaries: Map<string, { title: string; description: string }>
+  existingSummaries: Map<string, { title: string; description: string }>,
+  toolkitPages: Array<PageMetadata & { title: string; description: string }>
 ): {
   pagesToSummarize: PageMetadata[];
   pagesToKeep: Array<PageMetadata & { title: string; description: string }>;
@@ -438,8 +553,11 @@ function determinePagesToSummarize(
       )
     );
 
-    // Create a set of current page URLs for quick lookup
-    const currentPageUrls = new Set(pages.map((page) => page.url));
+    // Create a set of current page URLs for quick lookup. Include toolkit pages
+    // so they aren't mistaken for deleted pages (they aren't in `pages`).
+    const currentPageUrls = new Set(
+      [...pages, ...toolkitPages].map((page) => page.url)
+    );
 
     // Identify deleted pages (pages that exist in previous llms.txt but not in current filesystem)
     const deletedPageUrls = Array.from(existingSummaries.keys()).filter(
@@ -474,6 +592,19 @@ function determinePagesToSummarize(
           title: existingSummary.title,
           description: existingSummary.description,
         });
+      }
+    }
+
+    // Toolkit pages are rebuilt every run (no OpenAI). Flag a change if any is
+    // new or its title/description differs from the previous output.
+    for (const toolkitPage of toolkitPages) {
+      const existing = existingSummaries.get(toolkitPage.url);
+      if (
+        !existing ||
+        existing.title !== toolkitPage.title ||
+        existing.description !== toolkitPage.description
+      ) {
+        hasChanges = true;
       }
     }
 
@@ -566,12 +697,18 @@ async function main() {
       );
     }
 
-    // Step 1: Discover all pages
+    // Step 1: Discover all pages (MDX pages, plus toolkit pages from data)
     const pages = await discoverPages();
+    const toolkitPages = await discoverToolkitPages();
 
     // Step 2: Determine which pages need summarization and identify deleted pages
     const { pagesToSummarize, pagesToKeep, hasChanges } =
-      determinePagesToSummarize(pages, previousMetadata, existingSummaries);
+      determinePagesToSummarize(
+        pages,
+        previousMetadata,
+        existingSummaries,
+        toolkitPages
+      );
 
     // Step 3: Summarize changed/new pages using OpenAI
     const summarizedPages = await summarizePagesInBatches(
@@ -579,9 +716,12 @@ async function main() {
       pagesToKeep
     );
 
+    // Toolkit pages already have templated title/description (no OpenAI).
+    const allPages = [...summarizedPages, ...toolkitPages];
+
     // Step 4: Organize into sections
     console.log(pc.blue("\n📂 Organizing sections..."));
-    const sections = organizeSections(summarizedPages);
+    const sections = organizeSections(allPages);
     console.log(pc.green(`✓ Created ${sections.length} sections`));
 
     // Step 5: Generate llms.txt content
