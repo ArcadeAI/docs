@@ -1662,7 +1662,10 @@ program
         }
 
         const mergeFailures = allResults.filter((result) => result.error);
-        const writableResults = allResults.filter((result) => !result.error);
+        // Error results can still carry a last-known-good toolkit fallback from
+        // the merger. Keep them in the batch output so one failed merge cannot
+        // silently remove that toolkit from index.json.
+        const writableResults = allResults;
 
         // Generate output files (batch mode if not incremental)
         if (!useIncremental && writableResults.length > 0) {
