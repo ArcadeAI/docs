@@ -93,6 +93,10 @@ const meta: MetaRecord = {
     title: "Microsoft Outlook Mail",
     href: "/en/resources/integrations/productivity/microsoft-outlook-mail",
   },
+  "microsoft-power-bi": {
+    title: "Microsoft Power BI",
+    href: "/en/resources/integrations/productivity/microsoft-power-bi",
+  },
   "microsoft-powerpoint": {
     title: "Microsoft PowerPoint",
     href: "/en/resources/integrations/productivity/microsoft-powerpoint",

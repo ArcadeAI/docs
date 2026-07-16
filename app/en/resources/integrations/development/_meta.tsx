@@ -49,6 +49,10 @@ const meta: MetaRecord = {
     title: "PostHog",
     href: "/en/resources/integrations/development/posthog",
   },
+  postman: {
+    title: "Postman",
+    href: "/en/resources/integrations/development/postman",
+  },
   vercel: {
     title: "Vercel",
     href: "/en/resources/integrations/development/vercel",
