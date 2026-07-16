@@ -2382,7 +2382,10 @@ program
           spinner.start(progressTracker.getProgressString());
           const results = await merger.mergeAllToolkits();
           const mergeFailures = results.filter((result) => result.error);
-          const writableResults = results.filter((result) => !result.error);
+          // Error results can still carry a last-known-good toolkit fallback.
+          // Preserve it in batch output rather than letting --clear-output
+          // remove the prior JSON artifact.
+          const writableResults = results;
           const summary = progressTracker.getSummary();
           spinner.succeed(
             `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
