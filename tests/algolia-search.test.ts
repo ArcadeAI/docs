@@ -4,6 +4,7 @@ import {
   ALGOLIA_SEARCH_DEBOUNCE_MS,
   getSearchErrorMessage,
   scheduleSearch,
+  searchErrorIsCurrent,
   searchResultsAreCurrent,
 } from "../app/_components/algolia-search";
 
@@ -61,5 +62,10 @@ describe("Algolia search configuration", () => {
       "Search failed. Check your connection and try again."
     );
     expect(getSearchErrorMessage("loading")).toBeNull();
+  });
+
+  test("does not show an old error for a newly typed query", () => {
+    expect(searchErrorIsCurrent("slack", "github", "error")).toBe(false);
+    expect(searchErrorIsCurrent("slack", "slack", "error")).toBe(true);
   });
 });

@@ -60,6 +60,18 @@ export function getSearchErrorMessage(status: SearchStatus): string | null {
     : null;
 }
 
+export function searchErrorIsCurrent(
+  query: string,
+  resultsQuery: string,
+  status: SearchStatus
+): boolean {
+  return (
+    status === "error" &&
+    query.trim().length > 0 &&
+    resultsQuery.trim() === query.trim()
+  );
+}
+
 type ScheduleSearchOptions = {
   query: string;
   search: (nextQuery: string) => void;
@@ -206,7 +218,10 @@ function SearchResults({ query }: { query: string }) {
     );
   }
 
-  const errorMessage = getSearchErrorMessage(status);
+  const errorMessage =
+    results && searchErrorIsCurrent(query, results.query ?? "", status)
+      ? getSearchErrorMessage(status)
+      : null;
   if (errorMessage) {
     return (
       <p
