@@ -2744,6 +2744,11 @@ program
         const loadPreviousDurationMs = Date.now() - loadPreviousStartedAt;
         const previousToolkits = previousToolkitLoad.toolkits;
 
+        assertSafeCurrentToolkitSnapshot(
+          currentToolkitDataForDiff.size,
+          previousToolkits.size
+        );
+
         // Detect changes
         spinner.text = "Comparing tool definitions...";
         const compareStartedAt = Date.now();
