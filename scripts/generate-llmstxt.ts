@@ -342,15 +342,7 @@ async function summarizePage(
   page: PageMetadata
 ): Promise<{ title: string; description: string }> {
   try {
-    // Extract title: H1 > frontmatter title > path-derived fallback.
-    const titleMatch = page.content.match(TITLE_H1_REGEX);
-    const frontmatterTitle = page.content
-      .match(FRONTMATTER_REGEX)?.[1]
-      ?.match(FRONTMATTER_TITLE_REGEX)?.[1]
-      ?.trim();
-    const title = titleMatch
-      ? titleMatch[1].trim()
-      : (frontmatterTitle ?? deriveTitleFromPath(page.path));
+    const title = extractPageTitle(page.content, page.path);
 
     // Prepare content for summarization (remove code blocks and imports).
     let contentForSummary = page.content.replace(
@@ -387,13 +379,8 @@ async function summarizePage(
     return { title, description };
   } catch (error) {
     console.error(pc.red(`✗ Error summarizing ${page.path}:`), error);
-    // Fallback to extracting title from content
-    const titleMatch = page.content.match(TITLE_H1_REGEX);
-    const title = titleMatch
-      ? titleMatch[1].trim()
-      : deriveTitleFromPath(page.path);
     return {
-      title,
+      title: extractPageTitle(page.content, page.path),
       description: "Documentation page",
     };
   }
@@ -496,6 +483,22 @@ function deriveTitleFromPath(filePath: string): string {
 }
 
 /**
+ * Resolves a page title from MDX content: H1 > frontmatter title > path fallback.
+ */
+function extractPageTitle(content: string, filePath: string): string {
+  const titleMatch = content.match(TITLE_H1_REGEX);
+  if (titleMatch) {
+    return titleMatch[1].trim();
+  }
+  const frontmatterTitle = content
+    .match(FRONTMATTER_REGEX)?.[1]
+    ?.match(FRONTMATTER_TITLE_REGEX)?.[1]
+    ?.trim()
+    ?.replace(/^['"](.*)['"]$/, "$1");
+  return frontmatterTitle ?? deriveTitleFromPath(filePath);
+}
+
+/**
  * Generates the llms.txt file content
  */
 function generateLlmsTxt(
@@ -581,6 +584,9 @@ function determinePagesToSummarize(
       )
     );
 
+    // MDX-authored pages take precedence over toolkit JSON at merge time.
+    const mdxPageUrls = new Set(pages.map((page) => page.url));
+
     // Create a set of current page URLs for quick lookup. Include toolkit pages
     // so they aren't mistaken for deleted pages (they aren't in `pages`).
     const currentPageUrls = new Set(
@@ -618,7 +624,7 @@ function determinePagesToSummarize(
         // that older generations produced for pages without an H1.
         const title =
           existingSummary.title === "page"
-            ? deriveTitleFromPath(page.path)
+            ? extractPageTitle(page.content, page.path)
             : existingSummary.title;
         if (title !== existingSummary.title) {
           hasChanges = true;
@@ -632,8 +638,13 @@ function determinePagesToSummarize(
     }
 
     // Toolkit pages are rebuilt every run (no OpenAI). Flag a change if any is
-    // new or its title/description differs from the previous output.
+    // new or its title/description differs from the previous output. Skip URLs
+    // already covered by MDX pages — those win at merge and their summaries
+    // are tracked in the MDX loop above.
     for (const toolkitPage of toolkitPages) {
+      if (mdxPageUrls.has(toolkitPage.url)) {
+        continue;
+      }
       const existing = existingSummaries.get(toolkitPage.url);
       if (
         !existing ||
