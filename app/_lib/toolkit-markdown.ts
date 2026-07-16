@@ -154,32 +154,20 @@ export function toToolkitMarkdown(data: ToolkitData): string {
   const blocks: string[] = [`# ${data.label || data.id}`];
   const chunks = data.documentationChunks;
 
-  blocks.push(...documentationBlocks(chunks, "header", "before"));
+  blocks.push(...sectionBlocks(chunks, "header", null));
   blocks.push(
     ...sectionBlocks(chunks, "description", data.description?.trim() ?? null)
   );
-  blocks.push(...documentationBlocks(chunks, "header", "replace"));
-  blocks.push(...documentationBlocks(chunks, "header", "after"));
   if (data.summary) {
     blocks.push(data.summary.trim());
   }
-  blocks.push(...documentationBlocks(chunks, "auth", "before"));
-  blocks.push(...documentationBlocks(chunks, "auth", "after"));
-  blocks.push(
-    ...documentationBlocks(chunks, "before_available_tools", "before")
-  );
-  blocks.push(
-    ...documentationBlocks(chunks, "before_available_tools", "after")
-  );
-  blocks.push(...documentationBlocks(chunks, "custom_section", "before"));
-  blocks.push(...documentationBlocks(chunks, "custom_section", "after"));
+  blocks.push(...sectionBlocks(chunks, "auth", null));
+  blocks.push(...sectionBlocks(chunks, "before_available_tools", null));
+  blocks.push(...sectionBlocks(chunks, "custom_section", null));
 
   const tools = data.tools ?? [];
   blocks.push(`## Tools (${tools.length})`);
-  blocks.push(
-    ...documentationBlocks(chunks, "after_available_tools", "before")
-  );
-  blocks.push(...documentationBlocks(chunks, "after_available_tools", "after"));
+  blocks.push(...sectionBlocks(chunks, "after_available_tools", null));
   for (const tool of tools) {
     blocks.push(toolBlock(tool));
   }

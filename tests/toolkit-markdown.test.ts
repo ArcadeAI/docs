@@ -182,6 +182,67 @@ describe("toToolkitMarkdown", () => {
     );
   });
 
+  test("renders replacement chunks at toolkit-level locations", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "header",
+          position: "before",
+          content: "Header first.",
+        },
+        {
+          type: "markdown",
+          location: "header",
+          position: "replace",
+          content: "Header replacement.",
+        },
+        {
+          type: "markdown",
+          location: "header",
+          position: "after",
+          content: "Header last.",
+        },
+        {
+          type: "markdown",
+          location: "auth",
+          position: "replace",
+          content: "Custom auth guidance.",
+        },
+        {
+          type: "markdown",
+          location: "before_available_tools",
+          position: "replace",
+          content: "Custom tool introduction.",
+        },
+        {
+          type: "markdown",
+          location: "after_available_tools",
+          position: "replace",
+          content: "Custom tool footer.",
+        },
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "replace",
+          content: "Custom section.",
+        },
+      ],
+    });
+
+    expect(output).toContain("Custom auth guidance.");
+    expect(output).toContain("Custom tool introduction.");
+    expect(output).toContain("Custom tool footer.");
+    expect(output).toContain("Custom section.");
+    expect(output.indexOf("Header first.")).toBeLessThan(
+      output.indexOf("Header replacement.")
+    );
+    expect(output.indexOf("Header replacement.")).toBeLessThan(
+      output.indexOf("Header last.")
+    );
+  });
+
   test("empty replacement chunks still suppress the default section", () => {
     const output = toToolkitMarkdown({
       ...fixture,
