@@ -1,4 +1,6 @@
+import { sortDocumentationChunks } from "@/app/_components/toolkit-docs/lib/documentation-chunks";
 import type {
+  DocumentationChunk,
   ToolDefinition,
   ToolkitData,
   ToolParameter,
@@ -12,6 +14,51 @@ import type {
  * independent of the rendered HTML.
  */
 const JSON_INDENT = 2;
+
+function documentationBlocks(
+  chunks: readonly DocumentationChunk[] | null | undefined,
+  location: DocumentationChunk["location"],
+  position: DocumentationChunk["position"]
+): string[] {
+  const blocks: string[] = [];
+  const sorted = sortDocumentationChunks(
+    (chunks ?? []).filter(
+      (chunk) => chunk.location === location && chunk.position === position
+    )
+  );
+
+  for (const chunk of sorted) {
+    const content = chunk.content.trim();
+    if (!content) {
+      continue;
+    }
+    blocks.push(
+      chunk.type === "code" ? `\`\`\`text\n${content}\n\`\`\`` : content
+    );
+  }
+
+  return blocks;
+}
+
+function sectionBlocks(
+  chunks: readonly DocumentationChunk[] | null | undefined,
+  location: DocumentationChunk["location"],
+  defaultBlock: string | null
+): string[] {
+  const before = documentationBlocks(chunks, location, "before");
+  const replacement = documentationBlocks(chunks, location, "replace");
+  const after = documentationBlocks(chunks, location, "after");
+  const hasReplacement = (chunks ?? []).some(
+    (chunk) => chunk.location === location && chunk.position === "replace"
+  );
+  let content: string[] = [];
+  if (hasReplacement) {
+    content = replacement;
+  } else if (defaultBlock) {
+    content = [defaultBlock];
+  }
+  return [...before, ...content, ...after];
+}
 
 /** Collapse newlines and escape pipes so a value is safe inside a table cell. */
 function cell(value: string | null | undefined): string {
@@ -48,37 +95,52 @@ function exampleBlock(tool: ToolDefinition): string | null {
 function toolBlock(tool: ToolDefinition): string {
   const blocks: string[] = [`### ${tool.qualifiedName}`];
 
-  if (tool.description) {
-    blocks.push(tool.description.trim());
-  }
+  blocks.push(
+    ...sectionBlocks(
+      tool.documentationChunks,
+      "description",
+      tool.description?.trim() ?? null
+    )
+  );
 
-  const scopes = tool.auth?.scopes ?? [];
-  if (scopes.length > 0) {
-    blocks.push(
-      `**Required OAuth scopes:** ${scopes.map((s) => `\`${s}\``).join(", ")}`
-    );
-  }
+  const parameterBlock =
+    tool.parameters && tool.parameters.length > 0
+      ? `**Parameters**\n\n${[
+          "| Name | Type | Required | Description |",
+          "| --- | --- | --- | --- |",
+          ...tool.parameters.map(parameterRow),
+        ].join("\n")}`
+      : "_No parameters._";
+  blocks.push(
+    ...sectionBlocks(tool.documentationChunks, "parameters", parameterBlock)
+  );
 
   const secrets = tool.secrets ?? [];
-  if (secrets.length > 0) {
-    blocks.push(`**Secrets:** ${secrets.map((s) => `\`${s}\``).join(", ")}`);
-  }
+  const secretsBlock =
+    secrets.length > 0
+      ? `**Secrets:** ${secrets.map((secret) => `\`${secret}\``).join(", ")}`
+      : null;
+  blocks.push(
+    ...sectionBlocks(tool.documentationChunks, "secrets", secretsBlock)
+  );
 
-  if (tool.parameters && tool.parameters.length > 0) {
-    const rows = [
-      "| Name | Type | Required | Description |",
-      "| --- | --- | --- | --- |",
-      ...tool.parameters.map(parameterRow),
-    ];
-    blocks.push(`**Parameters**\n\n${rows.join("\n")}`);
-  } else {
-    blocks.push("_No parameters._");
-  }
+  const scopes = tool.auth?.scopes ?? [];
+  const scopesBlock =
+    scopes.length > 0
+      ? `**Required OAuth scopes:** ${scopes
+          .map((scope) => `\`${scope}\``)
+          .join(", ")}`
+      : null;
+  blocks.push(...sectionBlocks(tool.documentationChunks, "auth", scopesBlock));
 
-  if (tool.output) {
-    const desc = tool.output.description ? ` — ${tool.output.description}` : "";
-    blocks.push(`**Output:** \`${tool.output.type}\`${desc}`);
-  }
+  const outputBlock = tool.output
+    ? `**Output:** \`${tool.output.type}\`${
+        tool.output.description ? ` — ${tool.output.description}` : ""
+      }`
+    : null;
+  blocks.push(
+    ...sectionBlocks(tool.documentationChunks, "output", outputBlock)
+  );
 
   const example = exampleBlock(tool);
   if (example) {
@@ -90,19 +152,42 @@ function toolBlock(tool: ToolDefinition): string {
 
 export function toToolkitMarkdown(data: ToolkitData): string {
   const blocks: string[] = [`# ${data.label || data.id}`];
+  const chunks = data.documentationChunks;
 
   if (data.description) {
     blocks.push(data.description.trim());
   }
+  blocks.push(...documentationBlocks(chunks, "header", "before"));
+  blocks.push(...documentationBlocks(chunks, "description", "before"));
+  blocks.push(...documentationBlocks(chunks, "description", "after"));
+  blocks.push(...documentationBlocks(chunks, "header", "replace"));
+  blocks.push(...documentationBlocks(chunks, "header", "after"));
   if (data.summary) {
     blocks.push(data.summary.trim());
   }
+  blocks.push(...documentationBlocks(chunks, "auth", "before"));
+  blocks.push(...documentationBlocks(chunks, "auth", "after"));
+  blocks.push(
+    ...documentationBlocks(chunks, "before_available_tools", "before")
+  );
+  blocks.push(
+    ...documentationBlocks(chunks, "before_available_tools", "after")
+  );
+  blocks.push(...documentationBlocks(chunks, "custom_section", "before"));
+  blocks.push(...documentationBlocks(chunks, "custom_section", "after"));
 
   const tools = data.tools ?? [];
   blocks.push(`## Tools (${tools.length})`);
+  blocks.push(
+    ...documentationBlocks(chunks, "after_available_tools", "before")
+  );
+  blocks.push(...documentationBlocks(chunks, "after_available_tools", "after"));
   for (const tool of tools) {
     blocks.push(toolBlock(tool));
   }
+  blocks.push(...documentationBlocks(chunks, "footer", "before"));
+  blocks.push(...documentationBlocks(chunks, "footer", "replace"));
+  blocks.push(...documentationBlocks(chunks, "footer", "after"));
 
   return `${blocks.join("\n\n")}\n`;
 }
