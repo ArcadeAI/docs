@@ -1,0 +1,41 @@
+name: Reindex Algolia after production deploy
+
+# Triggers a full Algolia Crawler reindex whenever a Vercel *production*
+# deployment succeeds, so newly published docs pages appear in search right
+# away instead of waiting for the crawler's scheduled run.
+#
+# Vercel's Git integration posts a GitHub deployment status of
+# state=success / environment=Production once the deploy is live, which is
+# what this workflow keys off of (preview and staging deploys are ignored).
+#
+# Requires (repo Settings -> Secrets and variables -> Actions):
+#   - Variable ALGOLIA_CRAWLER_ID       (fe95aa31-abbb-40ea-a31b-04a9ccd176b4)
+#   - Secret   ALGOLIA_CRAWLER_USER_ID  (from Algolia dashboard -> Crawler -> API credentials)
+#   - Secret   ALGOLIA_CRAWLER_API_KEY  (from Algolia dashboard -> Crawler -> API credentials)
+
+on:
+  deployment_status:
+
+concurrency:
+  group: algolia-reindex
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  reindex:
+    if: >
+      github.event.deployment_status.state == 'success' &&
+      github.event.deployment_status.environment == 'Production'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Algolia Crawler reindex
+        env:
+          CRAWLER_ID: ${{ vars.ALGOLIA_CRAWLER_ID }}
+          CRAWLER_USER_ID: ${{ secrets.ALGOLIA_CRAWLER_USER_ID }}
+          CRAWLER_API_KEY: ${{ secrets.ALGOLIA_CRAWLER_API_KEY }}
+        run: |
+          echo "Triggering reindex for crawler ${CRAWLER_ID}"
+          curl -sS --fail-with-body -X POST \
+            "https://crawler.algolia.com/api/1/crawlers/${CRAWLER_ID}/reindex" \
+            -u "${CRAWLER_USER_ID}:${CRAWLER_API_KEY}"

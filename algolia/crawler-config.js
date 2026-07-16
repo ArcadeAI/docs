@@ -1,0 +1,81 @@
+/**
+ * Algolia Crawler configuration — source of truth for the docs search index.
+ *
+ * The live crawler config is edited in the Algolia dashboard
+ * (Data Sources -> Crawler -> Editor). This file mirrors it so changes are
+ * reviewable in git instead of only living in the dashboard.
+ *
+ * To apply a change to the live crawler, copy the object below into the
+ * dashboard editor wrapped in `new Crawler({ ...crawlerConfig, apiKey })`,
+ * then run a crawl. (A future CI job can push this via the Crawler API.)
+ *
+ * The crawler API key is intentionally NOT stored here — it lives only in the
+ * Algolia dashboard and in CI secrets (see .github/workflows/algolia-reindex.yml).
+ *
+ * App ID:     BJB8PBSQ9T
+ * Index:      docs_arcade_dev_bjb8pbsq9t_docsearch
+ * Crawler ID: fe95aa31-abbb-40ea-a31b-04a9ccd176b4
+ */
+export const crawlerConfig = {
+  appId: "BJB8PBSQ9T",
+  indexPrefix: "",
+  rateLimit: 8,
+  maxUrls: null,
+  schedule: "every 1 day",
+  startUrls: ["https://docs.arcade.dev"],
+  sitemaps: ["https://docs.arcade.dev/sitemap.xml"],
+  saveBackup: false,
+  ignoreQueryParams: ["source", "utm_*"],
+  exclusionPatterns: ["**/cdn-cgi/**"],
+  actions: [
+    {
+      indexName: "docs_arcade_dev_bjb8pbsq9t_docsearch",
+      pathsToMatch: ["https://docs.arcade.dev/**"],
+      recordExtractor: ({ $, helpers }) => {
+        // Strip site chrome so nav/sidebar/toc are not indexed as content.
+        $(
+          "nav, header, footer, aside, .nextra-navbar, .nextra-sidebar, .nextra-toc, .nextra-banner, .nextra-mobile-nav, .nextra-skip-nav"
+        ).remove();
+
+        return helpers.docsearch({
+          recordProps: {
+            lvl0: { selectors: "article h1", defaultValue: "Arcade Docs" },
+            lvl1: "article h2",
+            lvl2: "article h3",
+            lvl3: "article h4",
+            lvl4: "article h5",
+            lvl5: "article h6",
+            content: "article p, article li, article td",
+          },
+          indexHeadings: true,
+          aggregateContent: true,
+        });
+      },
+    },
+  ],
+  initialIndexSettings: {
+    docs_arcade_dev_bjb8pbsq9t_docsearch: {
+      distinct: true,
+      attributeForDistinct: "url_without_anchor",
+      searchableAttributes: [
+        "unordered(hierarchy.lvl0)",
+        "unordered(hierarchy.lvl1)",
+        "unordered(hierarchy.lvl2)",
+        "unordered(hierarchy.lvl3)",
+        "unordered(hierarchy.lvl4)",
+        "unordered(hierarchy.lvl5)",
+        "content",
+      ],
+      customRanking: ["asc(anchor)"],
+      attributesToRetrieve: [
+        "hierarchy",
+        "content",
+        "anchor",
+        "url",
+        "url_without_anchor",
+        "type",
+      ],
+      attributesForFaceting: ["type", "lang"],
+    },
+  },
+};
