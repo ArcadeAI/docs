@@ -32,6 +32,8 @@ const OUTPUT_PATH = path.join(process.cwd(), "public", "llms.txt");
 const APP_EN_PREFIX_REGEX = /^app\/en\//;
 const PAGE_MDX_SUFFIX_REGEX = /\/page\.mdx$/;
 const MDX_SUFFIX_REGEX = /\.mdx$/;
+// Matches a Next.js dynamic route segment, e.g. "[toolkitId]".
+const DYNAMIC_SEGMENT_REGEX = /\[[^/]+\]/;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
 const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const METADATA_REGEX =
@@ -163,10 +165,14 @@ async function discoverPages(): Promise<PageMetadata[]> {
  * Discovers pages from raw MDX files (fallback)
  */
 async function discoverMdxPages(): Promise<PageMetadata[]> {
-  const mdxFiles = glob.sync("app/en/**/*.mdx", {
-    cwd: process.cwd(),
-    ignore: ["**/node_modules/**", "**/_*.mdx"],
-  });
+  const mdxFiles = glob
+    .sync("app/en/**/*.mdx", {
+      cwd: process.cwd(),
+      ignore: ["**/node_modules/**", "**/_*.mdx"],
+    })
+    // Skip dynamic-route templates (e.g. ".../[toolkitId]/page.mdx"): their
+    // path isn't a real URL, so they'd produce dead "[toolkitId]" links.
+    .filter((filePath) => !DYNAMIC_SEGMENT_REGEX.test(filePath));
 
   const pages: PageMetadata[] = [];
 
@@ -204,7 +210,7 @@ async function summarizePage(
     const titleMatch = page.content.match(TITLE_H1_REGEX);
     const title = titleMatch
       ? titleMatch[1].trim()
-      : path.basename(page.path, ".mdx");
+      : deriveTitleFromPath(page.path);
 
     // Prepare content for summarization (remove code blocks and imports).
     let contentForSummary = page.content.replace(
@@ -245,7 +251,7 @@ async function summarizePage(
     const titleMatch = page.content.match(TITLE_H1_REGEX);
     const title = titleMatch
       ? titleMatch[1].trim()
-      : path.basename(page.path, ".mdx");
+      : deriveTitleFromPath(page.path);
     return {
       title,
       description: "Documentation page",
@@ -334,6 +340,17 @@ function formatSectionName(segment: string): string {
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+/**
+ * Derives a readable title from a page's file path, used when the MDX has no
+ * H1. For ".../<slug>/page.mdx" this title-cases the parent directory
+ * (e.g. "examples" -> "Examples") instead of the literal filename "page".
+ */
+function deriveTitleFromPath(filePath: string): string {
+  const base = path.basename(filePath, ".mdx");
+  const slug = base === "page" ? path.basename(path.dirname(filePath)) : base;
+  return formatSectionName(slug);
 }
 
 /**
