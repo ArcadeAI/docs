@@ -238,13 +238,15 @@ function buildToolkitDescription(data: ToolkitData): string {
       .replace(MARKDOWN_NOISE_REGEX, " ")
       .replace(WHITESPACE_REGEX, " ")
       .trim();
-    if (cleaned.length <= MAX_TOOLKIT_DESCRIPTION) {
-      return cleaned;
+    if (cleaned) {
+      if (cleaned.length <= MAX_TOOLKIT_DESCRIPTION) {
+        return cleaned;
+      }
+      const truncated = cleaned.slice(0, MAX_TOOLKIT_DESCRIPTION);
+      const lastSpace = truncated.lastIndexOf(" ");
+      const cut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
+      return `${cut.trim()}…`;
     }
-    const truncated = cleaned.slice(0, MAX_TOOLKIT_DESCRIPTION);
-    const lastSpace = truncated.lastIndexOf(" ");
-    const cut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
-    return `${cut.trim()}…`;
   }
   const label = data.label || data.id || "This";
   const toolCount = Array.isArray(data.tools) ? data.tools.length : 0;
