@@ -243,6 +243,22 @@ describe("toToolkitMarkdown", () => {
     );
   });
 
+  test("ignores malformed chunks without content", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "description",
+          position: "before",
+          content: undefined,
+        } as unknown as (typeof fixture.documentationChunks)[number],
+      ],
+    });
+
+    expect(output).toContain("A demo toolkit.");
+  });
+
   test("empty replacement chunks still suppress the default section", () => {
     const output = toToolkitMarkdown({
       ...fixture,

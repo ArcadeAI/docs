@@ -28,7 +28,8 @@ function documentationBlocks(
   );
 
   for (const chunk of sorted) {
-    const content = chunk.content.trim();
+    const content =
+      typeof chunk.content === "string" ? chunk.content.trim() : "";
     if (!content) {
       continue;
     }
