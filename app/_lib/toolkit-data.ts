@@ -65,14 +65,40 @@ const DEFAULT_DATA_DIR = join(
 const resolveDataDir = (options?: ToolkitDataOptions): string =>
   options?.dataDir ?? process.env.TOOLKIT_DATA_DIR ?? DEFAULT_DATA_DIR;
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
 const isValidToolkitData = (parsed: unknown): parsed is ToolkitData =>
-  typeof parsed === "object" &&
-  parsed !== null &&
+  isRecord(parsed) &&
   "id" in parsed &&
   ("label" in parsed || "name" in parsed) &&
   "metadata" in parsed &&
-  typeof (parsed as Record<string, unknown>).metadata === "object" &&
-  (parsed as Record<string, unknown>).metadata !== null;
+  isRecord(parsed.metadata);
+
+const isToolkitIndexEntry = (value: unknown): value is ToolkitIndexEntry => {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  return (
+    typeof value.id === "string" &&
+    typeof value.label === "string" &&
+    typeof value.version === "string" &&
+    typeof value.category === "string" &&
+    (value.type === undefined || typeof value.type === "string") &&
+    typeof value.toolCount === "number" &&
+    Number.isInteger(value.toolCount) &&
+    value.toolCount >= 0 &&
+    typeof value.authType === "string"
+  );
+};
+
+const isToolkitIndex = (value: unknown): value is ToolkitIndex =>
+  isRecord(value) &&
+  typeof value.generatedAt === "string" &&
+  typeof value.version === "string" &&
+  Array.isArray(value.toolkits) &&
+  value.toolkits.every(isToolkitIndexEntry);
 
 const readToolkitFile = async (
   filePath: string
@@ -106,9 +132,9 @@ const findToolkitDataBySlug = async (
     const candidateSlug = getToolkitSlug({
       id: data.id,
       docsLink: data.metadata?.docsLink,
-    }).toLowerCase();
+    })?.toLowerCase();
 
-    if (candidateSlug === slugKey) {
+    if (candidateSlug && candidateSlug === slugKey) {
       return data;
     }
   }
@@ -148,17 +174,11 @@ export const readToolkitIndex = async (
     const content = await readFile(filePath, "utf-8");
     const parsed: unknown = JSON.parse(content);
 
-    // Basic runtime validation - ensure it's an object with required fields
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      !("toolkits" in parsed) ||
-      !Array.isArray((parsed as { toolkits: unknown }).toolkits)
-    ) {
+    if (!isToolkitIndex(parsed)) {
       return null;
     }
 
-    return parsed as ToolkitIndex;
+    return parsed;
   } catch {
     return null;
   }
