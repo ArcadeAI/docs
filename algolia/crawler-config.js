@@ -30,7 +30,10 @@ export const crawlerConfig = {
   sitemaps: ["https://docs.arcade.dev/sitemap.xml"],
   saveBackup: false,
   ignoreQueryParams: ["source", "utm_*"],
-  exclusionPatterns: ["**/cdn-cgi/**"],
+  // llms.txt is markdown ("- [title](url): description" lines). Crawling it
+  // makes the crawler mis-parse those lines into bogus URLs that 404, so keep
+  // it out of the crawl — it's a machine-readable export, not a page.
+  exclusionPatterns: ["**/cdn-cgi/**", "**/llms.txt", "**/llms-full.txt"],
   actions: [
     {
       indexName: "docs_arcade_dev_bjb8pbsq9t_docsearch",
