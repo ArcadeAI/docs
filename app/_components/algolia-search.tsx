@@ -2,7 +2,7 @@
 
 import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Configure,
   Highlight,
@@ -40,6 +40,64 @@ const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME;
 
 const searchClient =
   appId && searchKey ? algoliasearch(appId, searchKey) : null;
+
+export const ALGOLIA_SEARCH_CONFIG = {
+  attributesToSnippet: ["content:20"],
+  distinct: true,
+  highlightPreTag: "__ais-highlight__",
+  highlightPostTag: "__/ais-highlight__",
+  hitsPerPage: 15,
+  snippetEllipsisText: "…",
+};
+export const ALGOLIA_SEARCH_DEBOUNCE_MS = 150;
+
+type SearchStatus = "idle" | "loading" | "stalled" | "error";
+type SearchTimer = ReturnType<typeof setTimeout>;
+
+export function getSearchErrorMessage(status: SearchStatus): string | null {
+  return status === "error"
+    ? "Search failed. Check your connection and try again."
+    : null;
+}
+
+type ScheduleSearchOptions = {
+  query: string;
+  search: (nextQuery: string) => void;
+  setTypedQuery: (nextQuery: string) => void;
+  currentTimer: SearchTimer | null;
+  delayMs?: number;
+};
+
+export function scheduleSearch({
+  query,
+  search,
+  setTypedQuery,
+  currentTimer,
+  delayMs = ALGOLIA_SEARCH_DEBOUNCE_MS,
+}: ScheduleSearchOptions): SearchTimer | null {
+  setTypedQuery(query);
+  if (currentTimer) {
+    clearTimeout(currentTimer);
+  }
+  if (!query.trim()) {
+    search(query);
+    return null;
+  }
+  return setTimeout(() => search(query), delayMs);
+}
+
+export function searchResultsAreCurrent(
+  query: string,
+  resultsQuery: string,
+  status: SearchStatus
+): boolean {
+  const normalizedQuery = query.trim();
+  return (
+    normalizedQuery.length > 0 &&
+    status === "idle" &&
+    resultsQuery.trim() === normalizedQuery
+  );
+}
 
 function safeHref(url: string | undefined): string {
   if (!url) {
@@ -138,28 +196,107 @@ function SearchHit({ hit }: { hit: DocSearchRecord }) {
   );
 }
 
-function EmptyQuery() {
-  const { indexUiState } = useInstantSearch();
-  if (indexUiState.query) {
-    return null;
+function SearchResults({ query }: { query: string }) {
+  const { results, status } = useInstantSearch({ catchError: true });
+  if (!query.trim()) {
+    return (
+      <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+        Start typing to search the docs…
+      </p>
+    );
   }
+
+  const errorMessage = getSearchErrorMessage(status);
+  if (errorMessage) {
+    return (
+      <p
+        className="px-4 py-8 text-center text-sm text-muted-foreground"
+        role="alert"
+      >
+        {errorMessage}
+      </p>
+    );
+  }
+
+  if (
+    !(results && searchResultsAreCurrent(query, results.query ?? "", status))
+  ) {
+    return (
+      <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+        Searching…
+      </p>
+    );
+  }
+
+  if (results.nbHits === 0) {
+    return (
+      <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+        No results for{" "}
+        <strong className="text-foreground">"{results.query}"</strong>
+      </p>
+    );
+  }
+
   return (
-    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-      Start typing to search the docs…
-    </p>
+    <Hits
+      classNames={{ item: "", list: "space-y-0.5", root: "" }}
+      hitComponent={({ hit }) => (
+        <SearchHit hit={hit as unknown as DocSearchRecord} />
+      )}
+    />
   );
 }
 
-function NoResults() {
-  const { results } = useInstantSearch();
-  if (!results?.query || results.nbHits > 0) {
-    return null;
-  }
+type SearchQueryHook = (
+  query: string,
+  search: (nextQuery: string) => void
+) => void;
+
+function SearchContent() {
+  const [typedQuery, setTypedQuery] = useState("");
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const queryHook = useCallback<SearchQueryHook>((query, search) => {
+    searchTimerRef.current = scheduleSearch({
+      query,
+      search,
+      setTypedQuery,
+      currentTimer: searchTimerRef.current,
+    });
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (searchTimerRef.current) {
+        clearTimeout(searchTimerRef.current);
+      }
+    },
+    []
+  );
+
   return (
-    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-      No results for{" "}
-      <strong className="text-foreground">"{results.query}"</strong>
-    </p>
+    <>
+      <Configure {...ALGOLIA_SEARCH_CONFIG} />
+      <div className="flex items-center border-b border-border px-4">
+        <Search className="size-4 shrink-0 text-muted-foreground" />
+        <SearchBox
+          autoFocus
+          classNames={{
+            form: "flex flex-1",
+            input:
+              "w-full bg-transparent px-3 py-4 text-sm text-foreground placeholder:text-muted-foreground outline-none",
+            loadingIndicator: "hidden",
+            reset: "hidden",
+            root: "flex-1",
+            submit: "hidden",
+          }}
+          placeholder="Search docs…"
+          queryHook={queryHook}
+        />
+      </div>
+      <div className="max-h-[60vh] min-h-24 overflow-y-auto p-2">
+        <SearchResults query={typedQuery} />
+      </div>
+    </>
   );
 }
 
@@ -222,38 +359,7 @@ export function AlgoliaSearch() {
           <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-popover shadow-2xl">
             {searchClient && indexName ? (
               <InstantSearch indexName={indexName} searchClient={searchClient}>
-                <Configure
-                  attributesToSnippet={["content:20"]}
-                  distinct={true}
-                  hitsPerPage={15}
-                  snippetEllipsisText="…"
-                />
-                <div className="flex items-center border-b border-border px-4">
-                  <Search className="size-4 shrink-0 text-muted-foreground" />
-                  <SearchBox
-                    autoFocus
-                    classNames={{
-                      form: "flex flex-1",
-                      input:
-                        "w-full bg-transparent px-3 py-4 text-sm text-foreground placeholder:text-muted-foreground outline-none",
-                      loadingIndicator: "hidden",
-                      reset: "hidden",
-                      root: "flex-1",
-                      submit: "hidden",
-                    }}
-                    placeholder="Search docs…"
-                  />
-                </div>
-                <div className="max-h-[60vh] overflow-y-auto p-2">
-                  <EmptyQuery />
-                  <NoResults />
-                  <Hits
-                    classNames={{ item: "", list: "space-y-0.5", root: "" }}
-                    hitComponent={({ hit }) => (
-                      <SearchHit hit={hit as unknown as DocSearchRecord} />
-                    )}
-                  />
-                </div>
+                <SearchContent />
               </InstantSearch>
             ) : (
               <SearchUnavailable />
