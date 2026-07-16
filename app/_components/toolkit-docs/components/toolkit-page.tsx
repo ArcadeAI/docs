@@ -641,7 +641,10 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
 
         {data.summary && (
           <div className="prose prose-sm dark:prose-invert mt-6 max-w-none text-foreground">
-            <ReactMarkdown rehypePlugins={[rehypeNeutralizeEmails]}>
+            <ReactMarkdown
+              components={{ h1: "h2" }}
+              rehypePlugins={[rehypeNeutralizeEmails]}
+            >
               {data.summary}
             </ReactMarkdown>
           </div>
