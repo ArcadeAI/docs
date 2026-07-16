@@ -270,9 +270,29 @@ async function discoverToolkitPages(): Promise<
     return [];
   }
 
-  const pages: Array<PageMetadata & { title: string; description: string }> =
-    [];
-  const seenUrls = new Set<string>();
+  // Read index.json if present — it is the source of truth for which toolkit
+  // IDs the app pre-renders. Only process IDs listed there so llms.txt never
+  // links to routes that would 404 in the live app.
+  let allowedIds: Set<string> | null = null;
+  try {
+    const indexPath = path.join(TOOLKIT_DATA_DIR, "index.json");
+    const indexData = JSON.parse(
+      await fs.readFile(indexPath, "utf-8")
+    ) as { toolkits?: Array<{ id: string }> };
+    if (indexData.toolkits && indexData.toolkits.length > 0) {
+      allowedIds = new Set(indexData.toolkits.map((t) => t.id));
+    }
+  } catch {
+    // No index.json — fall back to scanning all JSON files.
+  }
+
+  // Use a Map keyed by canonical URL so that when two JSON files resolve to
+  // the same URL, the last one processed wins — matching the app's behaviour
+  // in listToolkitRoutes/listToolkitRoutesFromDataDir (Map.set overwrites).
+  const pagesByUrl = new Map<
+    string,
+    PageMetadata & { title: string; description: string }
+  >();
 
   for (const entry of entries) {
     if (!entry.endsWith(".json") || entry === "index.json") {
@@ -286,16 +306,15 @@ async function discoverToolkitPages(): Promise<
       if (!data.id || data.metadata?.isHidden || data.metadata?.isComingSoon) {
         continue;
       }
+      if (allowedIds && !allowedIds.has(data.id)) {
+        continue;
+      }
       const url = `${BASE_URL}${getToolkitCanonicalPath({
         id: data.id,
         category: data.metadata?.category,
         docsLink: data.metadata?.docsLink,
       })}`;
-      if (seenUrls.has(url)) {
-        continue;
-      }
-      seenUrls.add(url);
-      pages.push({
+      pagesByUrl.set(url, {
         path: path.relative(process.cwd(), filePath),
         url,
         content: "",
@@ -307,6 +326,7 @@ async function discoverToolkitPages(): Promise<
     }
   }
 
+  const pages = [...pagesByUrl.values()];
   console.log(pc.green(`✓ Found ${pages.length} toolkit pages`));
   return pages;
 }
@@ -725,7 +745,17 @@ async function main() {
     );
 
     // Toolkit pages already have templated title/description (no OpenAI).
-    const allPages = [...summarizedPages, ...toolkitPages];
+    // Deduplicate by URL: MDX-authored pages take precedence over toolkit JSON
+    // pages so a static page (e.g. resources/integrations/search/tavily) that
+    // appears in both sets doesn't emit two entries in llms.txt.
+    const seenUrls = new Set<string>();
+    const allPages: Array<PageMetadata & { title: string; description: string }> = [];
+    for (const page of [...summarizedPages, ...toolkitPages]) {
+      if (!seenUrls.has(page.url)) {
+        seenUrls.add(page.url);
+        allPages.push(page);
+      }
+    }
 
     // Step 4: Organize into sections
     console.log(pc.blue("\n📂 Organizing sections..."));
