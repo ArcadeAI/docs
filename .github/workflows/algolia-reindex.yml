@@ -38,14 +38,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.deployment_status.deployment.sha }}
+          ref: ${{ github.event.deployment.sha }}
           fetch-depth: 2
 
       - name: Check whether docs content changed
         id: changed
         run: |
           files=$(git diff-tree --no-commit-id --name-only -r HEAD)
-          if echo "$files" | grep -qE '^app/en/|^toolkit-docs-generator/data/toolkits/'; then
+          if echo "$files" | grep -qE '^app/en/|^toolkit-docs-generator/data/toolkits/|^algolia/crawler-config\.js$|^scripts/sync-crawler-config\.ts$'; then
             echo "docs=true" >> "$GITHUB_OUTPUT"
             echo "Docs content changed — will reindex."
           else

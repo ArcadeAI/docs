@@ -64,6 +64,11 @@ if (!configResponse.ok) {
 }
 console.log("Crawler config updated.");
 
+if (process.env.SKIP_REINDEX === "true") {
+  console.log("Skipping reindex — will be triggered after deployment.");
+  process.exit(0);
+}
+
 const reindexResponse = await fetch(
   `${API_BASE}/crawlers/${CRAWLER_ID}/reindex`,
   { method: "POST", headers: { Authorization: authHeader } }

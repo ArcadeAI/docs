@@ -42,4 +42,8 @@ jobs:
           ALGOLIA_CRAWLER_ID: ${{ vars.ALGOLIA_CRAWLER_ID }}
           ALGOLIA_CRAWLER_USER_ID: ${{ secrets.ALGOLIA_CRAWLER_USER_ID }}
           ALGOLIA_CRAWLER_API_KEY: ${{ secrets.ALGOLIA_CRAWLER_API_KEY }}
+          # On push, skip the reindex here — algolia-reindex.yml fires after the
+          # Vercel production deploy so pages are live before the crawl starts.
+          # On workflow_dispatch there is no pending deploy, so reindex immediately.
+          SKIP_REINDEX: ${{ github.event_name == 'push' }}
         run: pnpm sync-crawler-config
