@@ -20,11 +20,12 @@ name: Reindex Algolia after production deploy
 on:
   deployment_status:
 
-# Debounce rapid successive deploys: a newer production deploy supersedes a
-# pending reindex — a full crawl covers the final state anyway.
+# Serialize reindexes so a non-docs deploy doesn't cancel an in-flight crawl
+# triggered by an earlier docs deploy. Queued runs each check their own commit;
+# only runs whose commit touched docs content actually trigger a crawl.
 concurrency:
   group: algolia-reindex
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -45,7 +46,7 @@ jobs:
         id: changed
         run: |
           files=$(git diff-tree --no-commit-id --name-only -r HEAD)
-          if echo "$files" | grep -qE '^app/en/|^toolkit-docs-generator/data/toolkits/|^algolia/crawler-config\.js$|^scripts/sync-crawler-config\.ts$'; then
+          if echo "$files" | grep -qE '^app/en/|^toolkit-docs-generator/data/toolkits/|^app/_components/toolkit-docs/|^app/_lib/toolkit-|^algolia/crawler-config\.js$|^scripts/sync-crawler-config\.ts$'; then
             echo "docs=true" >> "$GITHUB_OUTPUT"
             echo "Docs content changed — will reindex."
           else
