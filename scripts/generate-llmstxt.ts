@@ -588,12 +588,16 @@ function determinePagesToSummarize(
       } else {
         // Keep existing summary, but repair the stale "page" fallback title
         // that older generations produced for pages without an H1.
+        const title =
+          existingSummary.title === "page"
+            ? deriveTitleFromPath(page.path)
+            : existingSummary.title;
+        if (title !== existingSummary.title) {
+          hasChanges = true;
+        }
         pagesToKeep.push({
           ...page,
-          title:
-            existingSummary.title === "page"
-              ? deriveTitleFromPath(page.path)
-              : existingSummary.title,
+          title,
           description: existingSummary.description,
         });
       }
