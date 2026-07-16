@@ -29,7 +29,7 @@ pnpm vitest run tests/broken-link-check.test.ts
 - **`toolkit-docs-generator/`** — Generates MCP toolkit documentation from server metadata JSON files in `toolkit-docs-generator/data/toolkits/`.
 - **`scripts/`** — Build/CI scripts (Vale style fixes, redirect checking, llms.txt generation, i18n sync).
 - **`tests/`** — Vitest tests (broken links, internal link validation, sitemap, smoke tests).
-- **`lib/`** — Next.js utilities (glossary remark plugin, llmstxt plugin).
+- **`lib/`** — Next.js utilities (glossary remark plugin).
 - **`next.config.ts`** — Contains ~138 redirect rules.
 
 ## Content Authoring
