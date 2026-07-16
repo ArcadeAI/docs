@@ -146,6 +146,24 @@ describe("getToolkitSlug", () => {
     expect(getToolkitSlug(source)).toBe("gmail");
   });
 
+  it("falls back when docsLink contains an unsafe encoded slug", () => {
+    expect(
+      getToolkitSlug({
+        id: "UnsafeToolkit",
+        docsLink: "https://docs.arcade.dev/bad%2Fslug",
+      })
+    ).toBe("unsafe-toolkit");
+  });
+
+  it("falls back for prototype-like docsLink slugs", () => {
+    expect(
+      getToolkitSlug({
+        id: "Github",
+        docsLink: "https://docs.arcade.dev/__proto__",
+      })
+    ).toBe("github");
+  });
+
   it("converts mixed-case IDs to kebab-case in fallback", () => {
     const source: ToolkitSlugSource = {
       id: "GoogleDrive",
@@ -169,5 +187,9 @@ describe("getToolkitSlug", () => {
       docsLink: "https://docs.arcade.dev/",
     };
     expect(getToolkitSlug(source)).toBe("slack");
+  });
+
+  it("returns null when neither docsLink nor toolkit ID can form a slug", () => {
+    expect(getToolkitSlug({ id: "---", docsLink: null })).toBeNull();
   });
 });

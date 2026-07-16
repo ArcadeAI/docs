@@ -2,6 +2,7 @@ import type { Toolkit } from "@arcadeai/design-system";
 
 const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]+/g;
 const CAMEL_BOUNDARY = /([a-z0-9])([A-Z])/g;
+const SAFE_SLUG = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
 
 export type ToolkitSlugSource = {
   id: string;
@@ -43,10 +44,14 @@ export function toKebabCase(value: string): string {
 
 const extractSlugFromPath = (path: string): string | null => {
   const segments = path.split("/").filter(Boolean);
-  return segments.at(-1) ?? null;
+  const slug = segments.at(-1);
+  return slug && SAFE_SLUG.test(slug) ? slug : null;
 };
 
-export function getToolkitSlug({ id, docsLink }: ToolkitSlugSource): string {
+export function getToolkitSlug({
+  id,
+  docsLink,
+}: ToolkitSlugSource): string | null {
   if (docsLink) {
     try {
       const url = new URL(docsLink);
@@ -62,5 +67,10 @@ export function getToolkitSlug({ id, docsLink }: ToolkitSlugSource): string {
     }
   }
 
-  return toKebabCase(id);
+  const kebabId = toKebabCase(id);
+  if (SAFE_SLUG.test(kebabId)) {
+    return kebabId;
+  }
+  const normalizedId = normalizeToolkitId(id);
+  return normalizedId || null;
 }

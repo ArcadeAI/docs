@@ -13,6 +13,9 @@ export function toIntegrationLink(toolkit: {
   category?: string | null;
 }): string {
   const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
+  if (!slug) {
+    throw new Error(`Cannot build an integration link for: ${toolkit.id}`);
+  }
   const category = toolkit.category ?? "others";
   return `${INTEGRATIONS_BASE}/${category}/${slug}`;
 }
@@ -47,7 +50,12 @@ export function resolveIndexToolkits(
       continue;
     }
 
-    const link = toIntegrationLink(toolkit);
+    let link: string;
+    try {
+      link = toIntegrationLink(toolkit);
+    } catch {
+      continue;
+    }
     const hasPage = validLinks.has(link);
 
     // A bare duplicate of a real "-api" toolkit: drop it; the real card stays.
