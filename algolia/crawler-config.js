@@ -21,7 +21,9 @@ export const crawlerConfig = {
   indexPrefix: "",
   rateLimit: 8,
   maxUrls: null,
-  schedule: "every 1 day",
+  // Weekly backstop only — freshness is driven by reindex-on-publish
+  // (.github/workflows/algolia-reindex.yml).
+  schedule: "every 1 week",
   startUrls: ["https://docs.arcade.dev"],
   sitemaps: ["https://docs.arcade.dev/sitemap.xml"],
   saveBackup: false,

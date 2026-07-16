@@ -8,6 +8,10 @@ name: Reindex Algolia after production deploy
 # state=success / environment=Production once the deploy is live, which is
 # what this workflow keys off of (preview and staging deploys are ignored).
 #
+# To avoid unnecessary crawls, the reindex is skipped when the deployed commit
+# didn't touch docs content. `main` is squash-merged, so `git diff-tree HEAD`
+# lists exactly the files that publish changed.
+#
 # Requires (repo Settings -> Secrets and variables -> Actions):
 #   - Variable ALGOLIA_CRAWLER_ID       (fe95aa31-abbb-40ea-a31b-04a9ccd176b4)
 #   - Secret   ALGOLIA_CRAWLER_USER_ID  (from Algolia dashboard -> Crawler -> API credentials)
@@ -16,11 +20,14 @@ name: Reindex Algolia after production deploy
 on:
   deployment_status:
 
+# Debounce rapid successive deploys: a newer production deploy supersedes a
+# pending reindex — a full crawl covers the final state anyway.
 concurrency:
   group: algolia-reindex
-  cancel-in-progress: false
+  cancel-in-progress: true
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   reindex:
@@ -29,7 +36,25 @@ jobs:
       github.event.deployment_status.environment == 'Production'
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.deployment_status.deployment.sha }}
+          fetch-depth: 2
+
+      - name: Check whether docs content changed
+        id: changed
+        run: |
+          files=$(git diff-tree --no-commit-id --name-only -r HEAD)
+          if echo "$files" | grep -qE '^app/en/|^toolkit-docs-generator/data/toolkits/'; then
+            echo "docs=true" >> "$GITHUB_OUTPUT"
+            echo "Docs content changed — will reindex."
+          else
+            echo "docs=false" >> "$GITHUB_OUTPUT"
+            echo "No docs content changed — skipping reindex."
+          fi
+
       - name: Trigger Algolia Crawler reindex
+        if: steps.changed.outputs.docs == 'true'
         env:
           CRAWLER_ID: ${{ vars.ALGOLIA_CRAWLER_ID }}
           CRAWLER_USER_ID: ${{ secrets.ALGOLIA_CRAWLER_USER_ID }}
