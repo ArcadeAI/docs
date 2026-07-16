@@ -21,16 +21,19 @@ describe("Algolia search configuration", () => {
   test("debounces search requests while typing", () => {
     vi.useFakeTimers();
     const search = vi.fn();
+    const setDispatchedQuery = vi.fn();
     const setTypedQuery = vi.fn();
     let timer = scheduleSearch({
       query: "g",
       search,
+      setDispatchedQuery,
       setTypedQuery,
       currentTimer: null,
     });
     timer = scheduleSearch({
       query: "github",
       search,
+      setDispatchedQuery,
       setTypedQuery,
       currentTimer: timer,
     });
@@ -40,10 +43,12 @@ describe("Algolia search configuration", () => {
     vi.advanceTimersByTime(ALGOLIA_SEARCH_DEBOUNCE_MS);
     expect(search).toHaveBeenCalledOnce();
     expect(search).toHaveBeenCalledWith("github");
+    expect(setDispatchedQuery).toHaveBeenCalledWith("github");
 
     scheduleSearch({
       query: "",
       search,
+      setDispatchedQuery,
       setTypedQuery,
       currentTimer: timer,
     });

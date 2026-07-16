@@ -62,13 +62,13 @@ export function getSearchErrorMessage(status: SearchStatus): string | null {
 
 export function searchErrorIsCurrent(
   query: string,
-  resultsQuery: string,
+  dispatchedQuery: string,
   status: SearchStatus
 ): boolean {
   return (
     status === "error" &&
     query.trim().length > 0 &&
-    resultsQuery.trim() === query.trim()
+    dispatchedQuery.trim() === query.trim()
   );
 }
 
@@ -76,6 +76,7 @@ type ScheduleSearchOptions = {
   query: string;
   search: (nextQuery: string) => void;
   setTypedQuery: (nextQuery: string) => void;
+  setDispatchedQuery?: (nextQuery: string) => void;
   currentTimer: SearchTimer | null;
   delayMs?: number;
 };
@@ -84,6 +85,7 @@ export function scheduleSearch({
   query,
   search,
   setTypedQuery,
+  setDispatchedQuery,
   currentTimer,
   delayMs = ALGOLIA_SEARCH_DEBOUNCE_MS,
 }: ScheduleSearchOptions): SearchTimer | null {
@@ -92,10 +94,14 @@ export function scheduleSearch({
     clearTimeout(currentTimer);
   }
   if (!query.trim()) {
+    setDispatchedQuery?.(query);
     search(query);
     return null;
   }
-  return setTimeout(() => search(query), delayMs);
+  return setTimeout(() => {
+    setDispatchedQuery?.(query);
+    search(query);
+  }, delayMs);
 }
 
 export function searchResultsAreCurrent(
@@ -208,7 +214,13 @@ function SearchHit({ hit }: { hit: DocSearchRecord }) {
   );
 }
 
-function SearchResults({ query }: { query: string }) {
+function SearchResults({
+  query,
+  dispatchedQuery,
+}: {
+  query: string;
+  dispatchedQuery: string;
+}) {
   const { results, status } = useInstantSearch({ catchError: true });
   if (!query.trim()) {
     return (
@@ -218,10 +230,9 @@ function SearchResults({ query }: { query: string }) {
     );
   }
 
-  const errorMessage =
-    results && searchErrorIsCurrent(query, results.query ?? "", status)
-      ? getSearchErrorMessage(status)
-      : null;
+  const errorMessage = searchErrorIsCurrent(query, dispatchedQuery, status)
+    ? getSearchErrorMessage(status)
+    : null;
   if (errorMessage) {
     return (
       <p
@@ -269,12 +280,14 @@ type SearchQueryHook = (
 
 function SearchContent() {
   const [typedQuery, setTypedQuery] = useState("");
+  const [dispatchedQuery, setDispatchedQuery] = useState("");
   const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queryHook = useCallback<SearchQueryHook>((query, search) => {
     searchTimerRef.current = scheduleSearch({
       query,
       search,
       setTypedQuery,
+      setDispatchedQuery,
       currentTimer: searchTimerRef.current,
     });
   }, []);
@@ -309,7 +322,7 @@ function SearchContent() {
         />
       </div>
       <div className="max-h-[60vh] min-h-24 overflow-y-auto p-2">
-        <SearchResults query={typedQuery} />
+        <SearchResults dispatchedQuery={dispatchedQuery} query={typedQuery} />
       </div>
     </>
   );
