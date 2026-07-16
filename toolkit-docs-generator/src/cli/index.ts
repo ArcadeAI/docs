@@ -13,7 +13,7 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
-import { readdir, readFile, rm } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
 import ora from "ora";
 import { join, resolve } from "path";
 import {
@@ -46,13 +46,23 @@ import { createMockMetadataSource } from "../sources/mock-metadata.js";
 import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver.js";
 import {
   createArcadeToolkitDataSource,
+  createCachedToolkitDataSource,
   createEngineToolkitDataSource,
   createMockToolkitDataSource,
   type IToolkitDataSource,
   type ToolkitData,
 } from "../sources/toolkit-data-source.js";
+import {
+  type MergedToolkit,
+  type ProviderVersion,
+  ProviderVersionSchema,
+} from "../types/index.js";
 import { readExclusionList } from "../utils/exclusion-list.js";
 import { readIgnoreList } from "../utils/ignore-list.js";
+import {
+  clearSafeOutputDir,
+  resolveDefaultOutputDir,
+} from "../utils/output-dir.js";
 import {
   createProgressTracker,
   formatToolkitComplete,
@@ -63,26 +73,14 @@ import {
   readFailedToolsReport,
   writeFailedToolsReport,
 } from "../utils/run-logs.js";
+import { type ApiSource, resolveApiSource } from "./api-source.js";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
 import {
+  assertSafeCurrentToolkitSnapshot,
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
 } from "./generate-flow.js";
-
-/**
- * Supported API sources:
- * - "list-tools": Uses /v1/tools endpoint (production Arcade API)
- * - "tool-metadata": Uses /v1/tool_metadata endpoint (Engine API)
- * - "mock": Uses local mock data files
- */
-type ApiSource = "list-tools" | "tool-metadata" | "mock";
-
-import {
-  type MergedToolkit,
-  type ProviderVersion,
-  ProviderVersionSchema,
-} from "../types/index.js";
 
 const program = new Command();
 
@@ -117,17 +115,6 @@ const parseProviders = (input: string): ProviderVersion[] => {
  * Get the default fixture paths (for mock mode)
  */
 const getDefaultMockDataDir = (): string => join(process.cwd(), "mock-data");
-
-/**
- * Get the default output directory for docs JSON.
- */
-const getDefaultOutputDir = (): string => {
-  const cwd = process.cwd();
-  if (cwd.endsWith("toolkit-docs-generator")) {
-    return resolve(cwd, "..", "data", "toolkits");
-  }
-  return resolve(cwd, "data", "toolkits");
-};
 
 const getDefaultVerificationDir = (): string => {
   const cwd = process.cwd();
@@ -265,12 +252,7 @@ const clearOutputDir = async (
   outputDir: string,
   verbose: boolean
 ): Promise<void> => {
-  const resolvedDir = resolve(outputDir);
-  const repoRoot = resolve(process.cwd());
-  if (resolvedDir === "/" || resolvedDir === repoRoot) {
-    throw new Error(`Refusing to overwrite output directory: ${resolvedDir}`);
-  }
-  await rm(resolvedDir, { recursive: true, force: true });
+  const resolvedDir = await clearSafeOutputDir(outputDir);
   if (verbose) {
     console.log(chalk.dim(`Cleared output directory: ${resolvedDir}`));
   }
@@ -483,51 +465,6 @@ const resolveSecretEditGenerator = (
       : {}),
     maxTokens: options.llmEditorMaxTokens ?? DEFAULT_EDITOR_MAX_TOKENS,
   });
-};
-
-const resolveApiSource = (options: {
-  apiSource?: string;
-  toolMetadataUrl?: string;
-  toolMetadataKey?: string;
-  listToolsUrl?: string;
-  listToolsKey?: string;
-}): ApiSource => {
-  // Explicit source takes precedence
-  if (options.apiSource) {
-    const source = options.apiSource.toLowerCase();
-    // Support both old and new names for backwards compatibility
-    if (source === "list-tools" || source === "arcade") {
-      return "list-tools";
-    }
-    if (source === "tool-metadata" || source === "engine") {
-      return "tool-metadata";
-    }
-    if (source === "mock") {
-      return "mock";
-    }
-    throw new Error(
-      `Invalid --api-source "${options.apiSource}". Use "list-tools", "tool-metadata", or "mock".`
-    );
-  }
-
-  // Auto-detect based on provided credentials
-  const hasListToolsKey = !!(
-    options.listToolsKey ?? process.env.ARCADE_API_KEY
-  );
-  const hasToolMetadataKey = !!(
-    options.toolMetadataKey ?? process.env.ENGINE_API_KEY
-  );
-  const hasToolMetadataUrl = !!(
-    options.toolMetadataUrl ?? process.env.ENGINE_API_URL
-  );
-
-  if (hasListToolsKey) {
-    return "list-tools";
-  }
-  if (hasToolMetadataKey && hasToolMetadataUrl) {
-    return "tool-metadata";
-  }
-  return "mock";
 };
 
 interface ToolkitDataSourceOptions {
@@ -855,6 +792,10 @@ const processProviders = async (
       }
     } catch (error) {
       spinner.fail(`${pv.provider}: ${error}`);
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to process ${pv.provider}: ${message}`, {
+        cause: error,
+      });
     }
   }
 
@@ -878,7 +819,7 @@ program
     "Path to failed tools report to rerun only impacted toolkits"
   )
   .option("--all", "Generate documentation for all toolkits", false)
-  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
   .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
   .option("--metadata-file <file>", "Path to metadata JSON file")
@@ -1209,13 +1150,15 @@ program
 
         // Create toolkit data source based on API source
         const apiSource = resolveApiSource(options);
-        const toolkitDataSource = createToolkitDataSourceForApi(
-          apiSource,
-          options,
-          metadataSource,
-          mockDataDir,
-          options.verbose,
-          spinner
+        const toolkitDataSource = createCachedToolkitDataSource(
+          createToolkitDataSourceForApi(
+            apiSource,
+            options,
+            metadataSource,
+            mockDataDir,
+            options.verbose,
+            spinner
+          )
         );
 
         const needsExamples = !options.skipExamples;
@@ -1386,6 +1329,10 @@ program
             }
             currentToolkitDataForDiff.set(id, data);
           }
+          assertSafeCurrentToolkitSnapshot(
+            currentToolkitDataForDiff.size,
+            previousToolkits?.size ?? 0
+          );
 
           // Detect changes
           const compareStartedAt = Date.now();
@@ -1714,11 +1661,14 @@ program
           }
         }
 
+        const mergeFailures = allResults.filter((result) => result.error);
+        const writableResults = allResults.filter((result) => !result.error);
+
         // Generate output files (batch mode if not incremental)
-        if (!useIncremental && allResults.length > 0) {
+        if (!useIncremental && writableResults.length > 0) {
           spinner.start("Writing output files...");
 
-          const toolkits = allResults.map((r) => r.toolkit);
+          const toolkits = writableResults.map((result) => result.toolkit);
           const genResult = await generator.generateAll(toolkits);
 
           filesWritten.push(...genResult.filesWritten);
@@ -1731,13 +1681,15 @@ program
           }
         } else if (useIncremental) {
           // Generate index file for incremental mode
-          if (allResults.length > 0 || skipToolkitIds.size > 0) {
+          if (writableResults.length > 0 || skipToolkitIds.size > 0) {
             spinner.start("Generating index file...");
             try {
               const existingToolkits = await generator.getCompletedToolkitIds();
               const allToolkitIds = new Set([
                 ...existingToolkits,
-                ...allResults.map((r) => r.toolkit.id.toLowerCase()),
+                ...writableResults.map((result) =>
+                  result.toolkit.id.toLowerCase()
+                ),
               ]);
 
               // Load all toolkits for index
@@ -1797,7 +1749,11 @@ program
         }
 
         // Print summary
-        if (filesWritten.length > 0 || writeErrors.length > 0) {
+        if (
+          filesWritten.length > 0 ||
+          writeErrors.length > 0 ||
+          mergeFailures.length > 0
+        ) {
           console.log(chalk.green("\n✓ Generation complete\n"));
           if (options.verbose) {
             console.log(chalk.dim("Files:"));
@@ -1812,6 +1768,14 @@ program
             console.log(chalk.yellow("\nWarnings:"));
             for (const error of writeErrors) {
               console.log(chalk.yellow(`  ${error}`));
+            }
+          }
+          if (mergeFailures.length > 0) {
+            console.log(chalk.red("\nFailed toolkits:"));
+            for (const failure of mergeFailures) {
+              console.log(
+                chalk.red(`  ${failure.toolkit.id}: ${failure.error}`)
+              );
             }
           }
         }
@@ -1846,13 +1810,7 @@ program
           (count, result) => count + result.warnings.length,
           0
         );
-        const failedToolkits = allResults
-          .filter((result) =>
-            result.warnings.some((warning) =>
-              warning.startsWith("Error processing toolkit")
-            )
-          )
-          .map((result) => result.toolkit.id);
+        const failedToolkits = mergeFailures.map((result) => result.toolkit.id);
         const failedTools = allResults.flatMap((result) => result.failedTools);
         const failedToolkitsFromTools = Array.from(
           new Set(failedTools.map((tool) => tool.toolkitId))
@@ -1905,6 +1863,9 @@ program
           title: "generate",
           details: runDetails,
         });
+        if (mergeFailures.length > 0 || writeErrors.length > 0) {
+          process.exitCode = 1;
+        }
       } catch (error) {
         spinner.fail(
           `Error: ${error instanceof Error ? error.message : String(error)}`
@@ -1924,7 +1885,7 @@ program
 program
   .command("generate-all")
   .description("Generate documentation for all toolkits in mock data")
-  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
@@ -2144,13 +2105,15 @@ program
 
         // Create toolkit data source based on API source
         const apiSource = resolveApiSource(options);
-        const toolkitDataSource = createToolkitDataSourceForApi(
-          apiSource,
-          options,
-          metadataSource,
-          mockDataDir,
-          options.verbose,
-          spinner
+        const toolkitDataSource = createCachedToolkitDataSource(
+          createToolkitDataSourceForApi(
+            apiSource,
+            options,
+            metadataSource,
+            mockDataDir,
+            options.verbose,
+            spinner
+          )
         );
 
         const needsExamples = !options.skipExamples;
@@ -2415,6 +2378,8 @@ program
 
           spinner.start(progressTracker.getProgressString());
           const results = await merger.mergeAllToolkits();
+          const mergeFailures = results.filter((result) => result.error);
+          const writableResults = results.filter((result) => !result.error);
           const summary = progressTracker.getSummary();
           spinner.succeed(
             `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
@@ -2435,11 +2400,20 @@ program
               console.log(chalk.dim(`  - ${warning}`));
             }
           }
+          if (mergeFailures.length > 0) {
+            console.log(chalk.red("\nFailed toolkits:"));
+            for (const failure of mergeFailures) {
+              console.log(
+                chalk.red(`  ${failure.toolkit.id}: ${failure.error}`)
+              );
+            }
+            process.exitCode = 1;
+          }
 
           // Generate output (batch mode if not incremental)
-          if (!useIncremental && results.length > 0) {
+          if (!useIncremental && writableResults.length > 0) {
             spinner.start("Writing output files...");
-            const toolkits = results.map((r) => r.toolkit);
+            const toolkits = writableResults.map((result) => result.toolkit);
             const genResult = await generator.generateAll(toolkits);
 
             filesWritten.push(...genResult.filesWritten);
@@ -2461,7 +2435,9 @@ program
               const existingToolkits = await generator.getCompletedToolkitIds();
               const allToolkitIds = new Set([
                 ...existingToolkits,
-                ...results.map((r) => r.toolkit.id.toLowerCase()),
+                ...writableResults.map((result) =>
+                  result.toolkit.id.toLowerCase()
+                ),
               ]);
 
               const toolkitsForIndex: MergedToolkit[] = [];
@@ -2553,6 +2529,7 @@ program
           for (const warning of writeErrors) {
             console.log(chalk.yellow(`  ${warning}`));
           }
+          process.exitCode = 1;
         }
       } catch (error) {
         spinner.fail(
@@ -2627,7 +2604,7 @@ program
 program
   .command("verify-output")
   .description("Verify output directory structure and schema")
-  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
   .option("--verbose", "Show detailed progress", false)
   .action(async (options: { output: string; verbose: boolean }) => {
     const spinner = ora("Verifying output...").start();
@@ -2667,7 +2644,7 @@ program
   .option(
     "-o, --output <dir>",
     "Previous output directory",
-    getDefaultOutputDir()
+    resolveDefaultOutputDir()
   )
   .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
@@ -2727,13 +2704,15 @@ program
         });
 
         const apiSource = resolveApiSource(options);
-        const toolkitDataSource = createToolkitDataSourceForApi(
-          apiSource,
-          options,
-          metadataSource,
-          mockDataDir,
-          false, // not verbose during fetch
-          spinner
+        const toolkitDataSource = createCachedToolkitDataSource(
+          createToolkitDataSourceForApi(
+            apiSource,
+            options,
+            metadataSource,
+            mockDataDir,
+            false, // not verbose during fetch
+            spinner
+          )
         );
 
         // Fetch current data from API

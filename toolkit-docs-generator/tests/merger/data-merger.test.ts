@@ -1928,7 +1928,8 @@ describe("DataMerger", () => {
       const results = await merger.mergeAllToolkits();
       const result = results[0];
 
-      // Error result must preserve previous custom sections, not return empty arrays
+      expect(result?.error).toBe("Custom sections source unavailable");
+      expect(result?.toolkit).toEqual(previousResult.toolkit);
       expect(result?.toolkit.documentationChunks).toHaveLength(1);
       expect(result?.toolkit.documentationChunks[0]?.content).toBe(
         "Critical: GitHub Apps only."
@@ -1955,6 +1956,7 @@ describe("DataMerger", () => {
       const results = await merger.mergeAllToolkits();
       const result = results[0];
 
+      expect(result?.error).toBe("Custom sections source unavailable");
       expect(result?.toolkit.documentationChunks).toHaveLength(0);
       expect(result?.toolkit.customImports).toHaveLength(0);
       expect(result?.toolkit.subPages).toHaveLength(0);
@@ -2051,6 +2053,27 @@ describe("DataMerger", () => {
       expect(count.skipped).toBe(2);
       expect(results).toHaveLength(1);
       expect(results[0]?.toolkit.id).toBe("Github");
+    });
+
+    it("fails strict runs when a complete toolkit cannot be merged", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: {
+          getCustomSections: async () => {
+            throw new Error("Custom sections source unavailable");
+          },
+        },
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
+      });
+
+      await expect(merger.mergeAllToolkits()).rejects.toThrow(
+        "Failed to process Github: Custom sections source unavailable"
+      );
     });
 
     it("should return empty array when no tools", async () => {
