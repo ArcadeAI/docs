@@ -154,12 +154,10 @@ export function toToolkitMarkdown(data: ToolkitData): string {
   const blocks: string[] = [`# ${data.label || data.id}`];
   const chunks = data.documentationChunks;
 
-  if (data.description) {
-    blocks.push(data.description.trim());
-  }
   blocks.push(...documentationBlocks(chunks, "header", "before"));
-  blocks.push(...documentationBlocks(chunks, "description", "before"));
-  blocks.push(...documentationBlocks(chunks, "description", "after"));
+  blocks.push(
+    ...sectionBlocks(chunks, "description", data.description?.trim() ?? null)
+  );
   blocks.push(...documentationBlocks(chunks, "header", "replace"));
   blocks.push(...documentationBlocks(chunks, "header", "after"));
   if (data.summary) {

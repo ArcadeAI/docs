@@ -145,6 +145,43 @@ describe("toToolkitMarkdown", () => {
     expect(output).not.toContain("| Name | Type | Required | Description |");
   });
 
+  test("uses toolkit description chunks around the default description", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "description",
+          position: "before",
+          content: "Read this first.",
+        },
+        {
+          type: "markdown",
+          location: "description",
+          position: "replace",
+          content: "Custom toolkit description.",
+        },
+        {
+          type: "markdown",
+          location: "description",
+          position: "after",
+          content: "Read this last.",
+        },
+      ],
+    });
+
+    expect(output).toContain("Read this first.");
+    expect(output).toContain("Custom toolkit description.");
+    expect(output).toContain("Read this last.");
+    expect(output).not.toContain("A demo toolkit.");
+    expect(output.indexOf("Read this first.")).toBeLessThan(
+      output.indexOf("Custom toolkit description.")
+    );
+    expect(output.indexOf("Custom toolkit description.")).toBeLessThan(
+      output.indexOf("Read this last.")
+    );
+  });
+
   test("empty replacement chunks still suppress the default section", () => {
     const output = toToolkitMarkdown({
       ...fixture,
