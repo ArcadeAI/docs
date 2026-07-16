@@ -1,0 +1,45 @@
+name: Sync Algolia crawler config
+
+# Pushes algolia/crawler-config.js to the Algolia Crawler and triggers a
+# reindex, so the versioned config is the source of truth and no manual
+# dashboard editing is needed.
+#
+# Runs only when the config (or this sync script) changes on main, plus a
+# manual trigger. Content-only publishes are handled by algolia-reindex.yml
+# instead, so the two never double-crawl.
+#
+# Requires (repo Settings -> Secrets and variables -> Actions):
+#   - Variable ALGOLIA_CRAWLER_ID
+#   - Secret   ALGOLIA_CRAWLER_USER_ID
+#   - Secret   ALGOLIA_CRAWLER_API_KEY
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - algolia/crawler-config.js
+      - scripts/sync-crawler-config.ts
+  workflow_dispatch:
+
+concurrency:
+  group: algolia-sync-config
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Sync config and trigger reindex
+        env:
+          ALGOLIA_CRAWLER_ID: ${{ vars.ALGOLIA_CRAWLER_ID }}
+          ALGOLIA_CRAWLER_USER_ID: ${{ secrets.ALGOLIA_CRAWLER_USER_ID }}
+          ALGOLIA_CRAWLER_API_KEY: ${{ secrets.ALGOLIA_CRAWLER_API_KEY }}
+        run: pnpm sync-crawler-config

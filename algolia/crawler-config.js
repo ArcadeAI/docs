@@ -5,9 +5,11 @@
  * (Data Sources -> Crawler -> Editor). This file mirrors it so changes are
  * reviewable in git instead of only living in the dashboard.
  *
- * To apply a change to the live crawler, copy the object below into the
- * dashboard editor wrapped in `new Crawler({ ...crawlerConfig, apiKey })`,
- * then run a crawl. (A future CI job can push this via the Crawler API.)
+ * To apply a change to the live crawler, edit this file — merging it to main
+ * runs `.github/workflows/sync-crawler-config.yml`, which pushes it via the
+ * Crawler API and triggers a reindex (`pnpm sync-crawler-config`). To apply it
+ * by hand instead, wrap the object below in `new Crawler({ ...crawlerConfig,
+ * apiKey })` in the dashboard editor and run a crawl.
  *
  * The crawler API key is intentionally NOT stored here — it lives only in the
  * Algolia dashboard and in CI secrets (see .github/workflows/algolia-reindex.yml).
