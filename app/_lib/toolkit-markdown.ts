@@ -168,10 +168,10 @@ export function toToolkitMarkdown(data: ToolkitData): string {
 
   const tools = data.tools ?? [];
   blocks.push(`## Tools (${tools.length})`);
-  blocks.push(...sectionBlocks(chunks, "after_available_tools", null));
   for (const tool of tools) {
     blocks.push(toolBlock(tool));
   }
+  blocks.push(...sectionBlocks(chunks, "after_available_tools", null));
   blocks.push(...documentationBlocks(chunks, "footer", "before"));
   blocks.push(...documentationBlocks(chunks, "footer", "replace"));
   blocks.push(...documentationBlocks(chunks, "footer", "after"));

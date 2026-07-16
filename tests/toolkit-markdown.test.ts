@@ -241,6 +241,9 @@ describe("toToolkitMarkdown", () => {
     expect(output.indexOf("Header replacement.")).toBeLessThan(
       output.indexOf("Header last.")
     );
+    expect(output.indexOf("Custom tool footer.")).toBeGreaterThan(
+      output.indexOf("### Demo.DoThing")
+    );
   });
 
   test("ignores malformed chunks without content", () => {
