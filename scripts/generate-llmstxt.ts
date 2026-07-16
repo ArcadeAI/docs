@@ -4,6 +4,7 @@ import path from "node:path";
 import glob from "fast-glob";
 import OpenAI from "openai";
 import pc from "picocolors";
+import { getToolkitCanonicalPath } from "../app/_lib/toolkit-static-params";
 
 type PageMetadata = {
   path: string;
@@ -32,7 +33,11 @@ const OUTPUT_PATH = path.join(process.cwd(), "public", "llms.txt");
 const APP_EN_PREFIX_REGEX = /^app\/en\//;
 const PAGE_MDX_SUFFIX_REGEX = /\/page\.mdx$/;
 const MDX_SUFFIX_REGEX = /\.mdx$/;
+// Matches a Next.js dynamic route segment, e.g. "[toolkitId]".
+const DYNAMIC_SEGMENT_REGEX = /\[[^/]+\]/;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
+const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
+const FRONTMATTER_TITLE_REGEX = /^title:\s*(.+)$/m;
 const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const METADATA_REGEX =
   /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
@@ -163,10 +168,14 @@ async function discoverPages(): Promise<PageMetadata[]> {
  * Discovers pages from raw MDX files (fallback)
  */
 async function discoverMdxPages(): Promise<PageMetadata[]> {
-  const mdxFiles = glob.sync("app/en/**/*.mdx", {
-    cwd: process.cwd(),
-    ignore: ["**/node_modules/**", "**/_*.mdx"],
-  });
+  const mdxFiles = glob
+    .sync("app/en/**/*.mdx", {
+      cwd: process.cwd(),
+      ignore: ["**/node_modules/**", "**/_*.mdx"],
+    })
+    // Skip dynamic-route templates (e.g. ".../[toolkitId]/page.mdx"): their
+    // path isn't a real URL, so they'd produce dead "[toolkitId]" links.
+    .filter((filePath) => !DYNAMIC_SEGMENT_REGEX.test(filePath));
 
   const pages: PageMetadata[] = [];
 
@@ -193,6 +202,139 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
   return pages;
 }
 
+const TOOLKIT_DATA_DIR = path.join(
+  process.cwd(),
+  "toolkit-docs-generator",
+  "data",
+  "toolkits"
+);
+const MAX_TOOLKIT_DESCRIPTION = 280;
+const MARKDOWN_LINK_REGEX = /\[([^\]]+)\]\([^)]+\)/g;
+const MARKDOWN_NOISE_REGEX = /[#*`>]/g;
+const WHITESPACE_REGEX = /\s+/g;
+
+type ToolkitData = {
+  id?: string;
+  label?: string;
+  description?: string;
+  summary?: string;
+  tools?: unknown[];
+  metadata?: {
+    category?: string;
+    docsLink?: string;
+    isHidden?: boolean;
+    isComingSoon?: boolean;
+  };
+};
+
+/**
+ * Builds a concise, deterministic description for a toolkit from its own
+ * metadata (no OpenAI): its summary/description with markdown stripped, or a
+ * label + tool-count fallback.
+ */
+function buildToolkitDescription(data: ToolkitData): string {
+  const source = (data.summary || data.description || "").trim();
+  if (source) {
+    const cleaned = source
+      .replace(MARKDOWN_LINK_REGEX, "$1")
+      .replace(MARKDOWN_NOISE_REGEX, " ")
+      .replace(WHITESPACE_REGEX, " ")
+      .trim();
+    if (cleaned) {
+      if (cleaned.length <= MAX_TOOLKIT_DESCRIPTION) {
+        return cleaned;
+      }
+      const truncated = cleaned.slice(0, MAX_TOOLKIT_DESCRIPTION);
+      const lastSpace = truncated.lastIndexOf(" ");
+      const cut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
+      return `${cut.trim()}…`;
+    }
+  }
+  const label = data.label || data.id || "This";
+  const toolCount = Array.isArray(data.tools) ? data.tools.length : 0;
+  return toolCount > 0
+    ? `${label} MCP server documentation and its ${toolCount} Arcade tools.`
+    : `${label} MCP server documentation.`;
+}
+
+/**
+ * Discovers toolkit (integration) pages from generated toolkit data. These are
+ * dynamic routes, so the MDX glob can't find them; build them straight from the
+ * toolkit JSON, reusing the app's canonical path logic so URLs match the real
+ * pages. Descriptions are templated (no OpenAI call).
+ */
+async function discoverToolkitPages(): Promise<
+  Array<PageMetadata & { title: string; description: string }>
+> {
+  let entries: string[];
+  try {
+    entries = await fs.readdir(TOOLKIT_DATA_DIR);
+  } catch {
+    console.warn(pc.yellow("⚠ No toolkit data dir; skipping toolkit pages"));
+    return [];
+  }
+
+  // Read index.json if present — it is the source of truth for which toolkit
+  // IDs the app pre-renders. Only process IDs listed there so llms.txt never
+  // links to routes that would 404 in the live app.
+  let allowedIds: Set<string> | null = null;
+  try {
+    const indexPath = path.join(TOOLKIT_DATA_DIR, "index.json");
+    const indexData = JSON.parse(
+      await fs.readFile(indexPath, "utf-8")
+    ) as { toolkits?: Array<{ id: string }> };
+    if (indexData.toolkits && indexData.toolkits.length > 0) {
+      allowedIds = new Set(indexData.toolkits.map((t) => t.id));
+    }
+  } catch {
+    // No index.json — fall back to scanning all JSON files.
+  }
+
+  // Use a Map keyed by canonical URL so that when two JSON files resolve to
+  // the same URL, the last one processed wins — matching the app's behaviour
+  // in listToolkitRoutes/listToolkitRoutesFromDataDir (Map.set overwrites).
+  const pagesByUrl = new Map<
+    string,
+    PageMetadata & { title: string; description: string }
+  >();
+
+  for (const entry of entries) {
+    if (!entry.endsWith(".json") || entry === "index.json") {
+      continue;
+    }
+    try {
+      const filePath = path.join(TOOLKIT_DATA_DIR, entry);
+      const data = JSON.parse(
+        await fs.readFile(filePath, "utf-8")
+      ) as ToolkitData;
+      if (!data.id || data.metadata?.isHidden || data.metadata?.isComingSoon) {
+        continue;
+      }
+      if (allowedIds && !allowedIds.has(data.id)) {
+        continue;
+      }
+      const url = `${BASE_URL}${getToolkitCanonicalPath({
+        id: data.id,
+        category: data.metadata?.category,
+        docsLink: data.metadata?.docsLink,
+      })}`;
+      pagesByUrl.set(url, {
+        path: path.relative(process.cwd(), filePath),
+        url,
+        content: "",
+        title: (data.label || data.id).trim(),
+        description: buildToolkitDescription(data),
+      });
+    } catch {
+      // Ignore malformed toolkit data files.
+    }
+  }
+
+  const pages = [...pagesByUrl.values()];
+  console.log(pc.green(`✓ Found ${pages.length} toolkit pages`));
+  return pages;
+}
+
 /**
  * Summarizes a page using OpenAI
  */
@@ -200,11 +342,7 @@ async function summarizePage(
   page: PageMetadata
 ): Promise<{ title: string; description: string }> {
   try {
-    // Extract title from content (first H1)
-    const titleMatch = page.content.match(TITLE_H1_REGEX);
-    const title = titleMatch
-      ? titleMatch[1].trim()
-      : path.basename(page.path, ".mdx");
+    const title = extractPageTitle(page.content, page.path);
 
     // Prepare content for summarization (remove code blocks and imports).
     let contentForSummary = page.content.replace(
@@ -241,13 +379,8 @@ async function summarizePage(
     return { title, description };
   } catch (error) {
     console.error(pc.red(`✗ Error summarizing ${page.path}:`), error);
-    // Fallback to extracting title from content
-    const titleMatch = page.content.match(TITLE_H1_REGEX);
-    const title = titleMatch
-      ? titleMatch[1].trim()
-      : path.basename(page.path, ".mdx");
     return {
-      title,
+      title: extractPageTitle(page.content, page.path),
       description: "Documentation page",
     };
   }
@@ -283,6 +416,8 @@ function organizeSections(
       } else {
         sectionName = "MCP Servers";
       }
+    } else if (parts[0] === "resources" && parts[1] === "integrations") {
+      sectionName = "Integrations";
     } else if (parts[0] === "references") {
       sectionName = "API Reference";
     } else {
@@ -334,6 +469,33 @@ function formatSectionName(segment: string): string {
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
+}
+
+/**
+ * Derives a readable title from a page's file path, used when the MDX has no
+ * H1. For ".../<slug>/page.mdx" this title-cases the parent directory
+ * (e.g. "examples" -> "Examples") instead of the literal filename "page".
+ */
+function deriveTitleFromPath(filePath: string): string {
+  const base = path.basename(filePath, ".mdx");
+  const slug = base === "page" ? path.basename(path.dirname(filePath)) : base;
+  return formatSectionName(slug);
+}
+
+/**
+ * Resolves a page title from MDX content: H1 > frontmatter title > path fallback.
+ */
+function extractPageTitle(content: string, filePath: string): string {
+  const titleMatch = content.match(TITLE_H1_REGEX);
+  if (titleMatch) {
+    return titleMatch[1].trim();
+  }
+  const frontmatterTitle = content
+    .match(FRONTMATTER_REGEX)?.[1]
+    ?.match(FRONTMATTER_TITLE_REGEX)?.[1]
+    ?.trim()
+    ?.replace(/^['"](.*)['"]$/, "$1");
+  return frontmatterTitle ?? deriveTitleFromPath(filePath);
 }
 
 /**
@@ -400,7 +562,8 @@ function generateLlmsTxt(
 function determinePagesToSummarize(
   pages: PageMetadata[],
   previousMetadata: LlmsTxtMetadata | null,
-  existingSummaries: Map<string, { title: string; description: string }>
+  existingSummaries: Map<string, { title: string; description: string }>,
+  toolkitPages: Array<PageMetadata & { title: string; description: string }>
 ): {
   pagesToSummarize: PageMetadata[];
   pagesToKeep: Array<PageMetadata & { title: string; description: string }>;
@@ -421,8 +584,14 @@ function determinePagesToSummarize(
       )
     );
 
-    // Create a set of current page URLs for quick lookup
-    const currentPageUrls = new Set(pages.map((page) => page.url));
+    // MDX-authored pages take precedence over toolkit JSON at merge time.
+    const mdxPageUrls = new Set(pages.map((page) => page.url));
+
+    // Create a set of current page URLs for quick lookup. Include toolkit pages
+    // so they aren't mistaken for deleted pages (they aren't in `pages`).
+    const currentPageUrls = new Set(
+      [...pages, ...toolkitPages].map((page) => page.url)
+    );
 
     // Identify deleted pages (pages that exist in previous llms.txt but not in current filesystem)
     const deletedPageUrls = Array.from(existingSummaries.keys()).filter(
@@ -451,12 +620,38 @@ function determinePagesToSummarize(
         pagesToSummarize.push(page);
         hasChanges = true;
       } else {
-        // Keep existing summary
+        // Keep existing summary, but repair the stale "page" fallback title
+        // that older generations produced for pages without an H1.
+        const title =
+          existingSummary.title === "page"
+            ? extractPageTitle(page.content, page.path)
+            : existingSummary.title;
+        if (title !== existingSummary.title) {
+          hasChanges = true;
+        }
         pagesToKeep.push({
           ...page,
-          title: existingSummary.title,
+          title,
           description: existingSummary.description,
         });
+      }
+    }
+
+    // Toolkit pages are rebuilt every run (no OpenAI). Flag a change if any is
+    // new or its title/description differs from the previous output. Skip URLs
+    // already covered by MDX pages — those win at merge and their summaries
+    // are tracked in the MDX loop above.
+    for (const toolkitPage of toolkitPages) {
+      if (mdxPageUrls.has(toolkitPage.url)) {
+        continue;
+      }
+      const existing = existingSummaries.get(toolkitPage.url);
+      if (
+        !existing ||
+        existing.title !== toolkitPage.title ||
+        existing.description !== toolkitPage.description
+      ) {
+        hasChanges = true;
       }
     }
 
@@ -549,12 +744,18 @@ async function main() {
       );
     }
 
-    // Step 1: Discover all pages
+    // Step 1: Discover all pages (MDX pages, plus toolkit pages from data)
     const pages = await discoverPages();
+    const toolkitPages = await discoverToolkitPages();
 
     // Step 2: Determine which pages need summarization and identify deleted pages
     const { pagesToSummarize, pagesToKeep, hasChanges } =
-      determinePagesToSummarize(pages, previousMetadata, existingSummaries);
+      determinePagesToSummarize(
+        pages,
+        previousMetadata,
+        existingSummaries,
+        toolkitPages
+      );
 
     // Step 3: Summarize changed/new pages using OpenAI
     const summarizedPages = await summarizePagesInBatches(
@@ -562,9 +763,22 @@ async function main() {
       pagesToKeep
     );
 
+    // Toolkit pages already have templated title/description (no OpenAI).
+    // Deduplicate by URL: MDX-authored pages take precedence over toolkit JSON
+    // pages so a static page (e.g. resources/integrations/search/tavily) that
+    // appears in both sets doesn't emit two entries in llms.txt.
+    const seenUrls = new Set<string>();
+    const allPages: Array<PageMetadata & { title: string; description: string }> = [];
+    for (const page of [...summarizedPages, ...toolkitPages]) {
+      if (!seenUrls.has(page.url)) {
+        seenUrls.add(page.url);
+        allPages.push(page);
+      }
+    }
+
     // Step 4: Organize into sections
     console.log(pc.blue("\n📂 Organizing sections..."));
-    const sections = organizeSections(summarizedPages);
+    const sections = organizeSections(allPages);
     console.log(pc.green(`✓ Created ${sections.length} sections`));
 
     // Step 5: Generate llms.txt content
