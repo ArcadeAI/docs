@@ -36,6 +36,8 @@ const MDX_SUFFIX_REGEX = /\.mdx$/;
 // Matches a Next.js dynamic route segment, e.g. "[toolkitId]".
 const DYNAMIC_SEGMENT_REGEX = /\[[^/]+\]/;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
+const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
+const FRONTMATTER_TITLE_REGEX = /^title:\s*(.+)$/m;
 const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const METADATA_REGEX =
   /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
@@ -340,11 +342,15 @@ async function summarizePage(
   page: PageMetadata
 ): Promise<{ title: string; description: string }> {
   try {
-    // Extract title from content (first H1)
+    // Extract title: H1 > frontmatter title > path-derived fallback.
     const titleMatch = page.content.match(TITLE_H1_REGEX);
+    const frontmatterTitle = page.content
+      .match(FRONTMATTER_REGEX)?.[1]
+      ?.match(FRONTMATTER_TITLE_REGEX)?.[1]
+      ?.trim();
     const title = titleMatch
       ? titleMatch[1].trim()
-      : deriveTitleFromPath(page.path);
+      : (frontmatterTitle ?? deriveTitleFromPath(page.path));
 
     // Prepare content for summarization (remove code blocks and imports).
     let contentForSummary = page.content.replace(
