@@ -7,7 +7,10 @@
 import { access, readFile } from "fs/promises";
 import { z } from "zod";
 import type { CustomSections } from "../types/index.js";
-import { DocumentationChunkSchema } from "../types/index.js";
+import {
+  DocumentationChunkSchema,
+  ToolkitSubPageSchema,
+} from "../types/index.js";
 import { normalizeId } from "../utils/fp.js";
 import type { ICustomSectionsSource } from "./interfaces.js";
 
@@ -20,7 +23,7 @@ const CustomSectionsFileSchema = z.record(
   z.object({
     documentationChunks: z.array(DocumentationChunkSchema).default([]),
     customImports: z.array(z.string()).default([]),
-    subPages: z.array(z.string()).default([]),
+    subPages: z.array(ToolkitSubPageSchema).default([]),
     toolChunks: z
       .record(z.string(), z.array(DocumentationChunkSchema))
       .default({}),
