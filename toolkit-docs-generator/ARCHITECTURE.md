@@ -58,16 +58,33 @@ It can also verify output consistency with `OutputVerifier`.
 The generator output is consumed by the Next.js app:
 
 - The app loads JSON from `toolkit-docs-generator/data/toolkits/`.
-- Toolkit pages are statically generated using those files.
+- `generateStaticParams` enumerates the toolkit routes and disables unknown dynamic parameters.
 - Custom documentation chunks are rendered as MDX in the UI.
 
 If you need HTML output, add a separate build step in the app. The generator intentionally avoids HTML to keep the pipeline deterministic.
 
-## Static page generation
+## Vercel build
 
-Static generation happens in the app, not in this generator.
+The generator does not run during a Vercel build. The generation workflow commits
+the JSON files and navigation changes through a pull request. Vercel then runs the
+root `pnpm build` command and compiles the committed files with Next.js.
 
-The generator only provides JSON and markdown content. The app turns those into static HTML during its build.
+`app/_lib/toolkit-static-params.ts` enumerates routes from `index.json` and the
+per-toolkit files. `app/_lib/toolkit-data.ts` reads the same files for page
+rendering and the `/api/toolkit-data/[toolkitId]` route. The root layout reads
+request headers, so Vercel reports the docs routes as dynamic even though the
+toolkit parameter set is fixed at build time.
+
+## Search indexing
+
+Search uses an external Algolia crawler. There is no Pagefind or local search
+index build step in this repository. After deployment, the crawler indexes the
+rendered site. `app/_components/algolia-search.tsx` queries that index with the
+public, read-only values configured through these Vercel environment variables:
+
+- `NEXT_PUBLIC_ALGOLIA_APP_ID`
+- `NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY`
+- `NEXT_PUBLIC_ALGOLIA_INDEX_NAME`
 
 ## Key files
 
