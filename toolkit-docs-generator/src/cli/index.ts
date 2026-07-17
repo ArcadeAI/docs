@@ -855,6 +855,10 @@ const processProviders = async (
       }
     } catch (error) {
       spinner.fail(`${pv.provider}: ${error}`);
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to process ${pv.provider}: ${message}`, {
+        cause: error,
+      });
     }
   }
 
@@ -1714,11 +1718,17 @@ program
           }
         }
 
+        const mergeFailures = allResults.filter((result) => result.error);
+        // Error results can still carry a last-known-good toolkit fallback from
+        // the merger. Keep them in the batch output so one failed merge cannot
+        // silently remove that toolkit from index.json.
+        const writableResults = allResults;
+
         // Generate output files (batch mode if not incremental)
-        if (!useIncremental && allResults.length > 0) {
+        if (!useIncremental && writableResults.length > 0) {
           spinner.start("Writing output files...");
 
-          const toolkits = allResults.map((r) => r.toolkit);
+          const toolkits = writableResults.map((result) => result.toolkit);
           const genResult = await generator.generateAll(toolkits);
 
           filesWritten.push(...genResult.filesWritten);
@@ -1731,13 +1741,15 @@ program
           }
         } else if (useIncremental) {
           // Generate index file for incremental mode
-          if (allResults.length > 0 || skipToolkitIds.size > 0) {
+          if (writableResults.length > 0 || skipToolkitIds.size > 0) {
             spinner.start("Generating index file...");
             try {
               const existingToolkits = await generator.getCompletedToolkitIds();
               const allToolkitIds = new Set([
                 ...existingToolkits,
-                ...allResults.map((r) => r.toolkit.id.toLowerCase()),
+                ...writableResults.map((result) =>
+                  result.toolkit.id.toLowerCase()
+                ),
               ]);
 
               // Load all toolkits for index
@@ -1797,7 +1809,11 @@ program
         }
 
         // Print summary
-        if (filesWritten.length > 0 || writeErrors.length > 0) {
+        if (
+          filesWritten.length > 0 ||
+          writeErrors.length > 0 ||
+          mergeFailures.length > 0
+        ) {
           console.log(chalk.green("\n✓ Generation complete\n"));
           if (options.verbose) {
             console.log(chalk.dim("Files:"));
@@ -1812,6 +1828,14 @@ program
             console.log(chalk.yellow("\nWarnings:"));
             for (const error of writeErrors) {
               console.log(chalk.yellow(`  ${error}`));
+            }
+          }
+          if (mergeFailures.length > 0) {
+            console.log(chalk.red("\nFailed toolkits:"));
+            for (const failure of mergeFailures) {
+              console.log(
+                chalk.red(`  ${failure.toolkit.id}: ${failure.error}`)
+              );
             }
           }
         }
@@ -1846,13 +1870,7 @@ program
           (count, result) => count + result.warnings.length,
           0
         );
-        const failedToolkits = allResults
-          .filter((result) =>
-            result.warnings.some((warning) =>
-              warning.startsWith("Error processing toolkit")
-            )
-          )
-          .map((result) => result.toolkit.id);
+        const failedToolkits = mergeFailures.map((result) => result.toolkit.id);
         const failedTools = allResults.flatMap((result) => result.failedTools);
         const failedToolkitsFromTools = Array.from(
           new Set(failedTools.map((tool) => tool.toolkitId))
@@ -1905,6 +1923,9 @@ program
           title: "generate",
           details: runDetails,
         });
+        if (mergeFailures.length > 0 || writeErrors.length > 0) {
+          process.exitCode = 1;
+        }
       } catch (error) {
         spinner.fail(
           `Error: ${error instanceof Error ? error.message : String(error)}`
@@ -2415,6 +2436,11 @@ program
 
           spinner.start(progressTracker.getProgressString());
           const results = await merger.mergeAllToolkits();
+          const mergeFailures = results.filter((result) => result.error);
+          // Error results can still carry a last-known-good toolkit fallback.
+          // Preserve it in batch output rather than letting --clear-output
+          // remove the prior JSON artifact.
+          const writableResults = results;
           const summary = progressTracker.getSummary();
           spinner.succeed(
             `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
@@ -2435,11 +2461,20 @@ program
               console.log(chalk.dim(`  - ${warning}`));
             }
           }
+          if (mergeFailures.length > 0) {
+            console.log(chalk.red("\nFailed toolkits:"));
+            for (const failure of mergeFailures) {
+              console.log(
+                chalk.red(`  ${failure.toolkit.id}: ${failure.error}`)
+              );
+            }
+            process.exitCode = 1;
+          }
 
           // Generate output (batch mode if not incremental)
-          if (!useIncremental && results.length > 0) {
+          if (!useIncremental && writableResults.length > 0) {
             spinner.start("Writing output files...");
-            const toolkits = results.map((r) => r.toolkit);
+            const toolkits = writableResults.map((result) => result.toolkit);
             const genResult = await generator.generateAll(toolkits);
 
             filesWritten.push(...genResult.filesWritten);
@@ -2461,7 +2496,9 @@ program
               const existingToolkits = await generator.getCompletedToolkitIds();
               const allToolkitIds = new Set([
                 ...existingToolkits,
-                ...results.map((r) => r.toolkit.id.toLowerCase()),
+                ...writableResults.map((result) =>
+                  result.toolkit.id.toLowerCase()
+                ),
               ]);
 
               const toolkitsForIndex: MergedToolkit[] = [];
@@ -2553,6 +2590,7 @@ program
           for (const warning of writeErrors) {
             console.log(chalk.yellow(`  ${warning}`));
           }
+          process.exitCode = 1;
         }
       } catch (error) {
         spinner.fail(
