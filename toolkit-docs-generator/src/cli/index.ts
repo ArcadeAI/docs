@@ -51,6 +51,11 @@ import {
   type IToolkitDataSource,
   type ToolkitData,
 } from "../sources/toolkit-data-source.js";
+import {
+  type MergedToolkit,
+  type ProviderVersion,
+  ProviderVersionSchema,
+} from "../types/index.js";
 import { readExclusionList } from "../utils/exclusion-list.js";
 import { readIgnoreList } from "../utils/ignore-list.js";
 import {
@@ -63,26 +68,13 @@ import {
   readFailedToolsReport,
   writeFailedToolsReport,
 } from "../utils/run-logs.js";
+import { type ApiSource, resolveApiSource } from "./api-source.js";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
 import {
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
 } from "./generate-flow.js";
-
-/**
- * Supported API sources:
- * - "list-tools": Uses /v1/tools endpoint (production Arcade API)
- * - "tool-metadata": Uses /v1/tool_metadata endpoint (Engine API)
- * - "mock": Uses local mock data files
- */
-type ApiSource = "list-tools" | "tool-metadata" | "mock";
-
-import {
-  type MergedToolkit,
-  type ProviderVersion,
-  ProviderVersionSchema,
-} from "../types/index.js";
 
 const program = new Command();
 
@@ -483,51 +475,6 @@ const resolveSecretEditGenerator = (
       : {}),
     maxTokens: options.llmEditorMaxTokens ?? DEFAULT_EDITOR_MAX_TOKENS,
   });
-};
-
-const resolveApiSource = (options: {
-  apiSource?: string;
-  toolMetadataUrl?: string;
-  toolMetadataKey?: string;
-  listToolsUrl?: string;
-  listToolsKey?: string;
-}): ApiSource => {
-  // Explicit source takes precedence
-  if (options.apiSource) {
-    const source = options.apiSource.toLowerCase();
-    // Support both old and new names for backwards compatibility
-    if (source === "list-tools" || source === "arcade") {
-      return "list-tools";
-    }
-    if (source === "tool-metadata" || source === "engine") {
-      return "tool-metadata";
-    }
-    if (source === "mock") {
-      return "mock";
-    }
-    throw new Error(
-      `Invalid --api-source "${options.apiSource}". Use "list-tools", "tool-metadata", or "mock".`
-    );
-  }
-
-  // Auto-detect based on provided credentials
-  const hasListToolsKey = !!(
-    options.listToolsKey ?? process.env.ARCADE_API_KEY
-  );
-  const hasToolMetadataKey = !!(
-    options.toolMetadataKey ?? process.env.ENGINE_API_KEY
-  );
-  const hasToolMetadataUrl = !!(
-    options.toolMetadataUrl ?? process.env.ENGINE_API_URL
-  );
-
-  if (hasListToolsKey) {
-    return "list-tools";
-  }
-  if (hasToolMetadataKey && hasToolMetadataUrl) {
-    return "tool-metadata";
-  }
-  return "mock";
 };
 
 interface ToolkitDataSourceOptions {
