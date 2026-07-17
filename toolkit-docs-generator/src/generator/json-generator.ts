@@ -59,6 +59,18 @@ const validateToolkitFileNames = (
   return errors;
 };
 
+const compareToolkitIds = (left: string, right: string): number => {
+  const normalizedLeft = left.toLowerCase();
+  const normalizedRight = right.toLowerCase();
+  if (normalizedLeft !== normalizedRight) {
+    return normalizedLeft < normalizedRight ? -1 : 1;
+  }
+  if (left === right) {
+    return 0;
+  }
+  return left < right ? -1 : 1;
+};
+
 const writeFileAtomically = async (
   filePath: string,
   content: string
@@ -284,11 +296,7 @@ export class JsonGenerator {
         toolCount: t.tools.length,
         authType: t.auth?.type ?? "none",
       }))
-      .sort(
-        (left, right) =>
-          left.id.toLowerCase().localeCompare(right.id.toLowerCase()) ||
-          left.id.localeCompare(right.id)
-      );
+      .sort((left, right) => compareToolkitIds(left.id, right.id));
 
     const index: ToolkitIndex = {
       generatedAt: new Date().toISOString(),

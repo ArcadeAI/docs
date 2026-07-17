@@ -74,6 +74,6 @@ export const clearSafeOutputDir = async (
   options: ResolveOptions = {}
 ): Promise<string> => {
   const safeDir = await resolveSafeOutputDir(outputDir, options);
-  await rm(safeDir, { recursive: true, force: true });
+  await rm(resolve(outputDir), { recursive: true, force: true });
   return safeDir;
 };
