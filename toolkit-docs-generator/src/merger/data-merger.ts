@@ -1066,7 +1066,15 @@ export class DataMerger {
         });
       }
       const previousToolkit = this.getPreviousToolkit(toolkitId);
-      return this.buildMergeErrorResult(toolkitId, message, previousToolkit);
+      const result = this.buildMergeErrorResult(
+        toolkitId,
+        message,
+        previousToolkit
+      );
+      if (this.onToolkitComplete) {
+        await this.onToolkitComplete(result);
+      }
+      return result;
     }
   }
 

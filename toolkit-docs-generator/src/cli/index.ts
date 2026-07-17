@@ -855,10 +855,6 @@ const processProviders = async (
       }
     } catch (error) {
       spinner.fail(`${pv.provider}: ${error}`);
-      const message = error instanceof Error ? error.message : String(error);
-      throw new Error(`Failed to process ${pv.provider}: ${message}`, {
-        cause: error,
-      });
     }
   }
 

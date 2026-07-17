@@ -1917,12 +1917,16 @@ describe("DataMerger", () => {
         }),
         createStubGenerator()
       );
+      const completedToolkitIds: string[] = [];
 
       const merger = new DataMerger({
         toolkitDataSource,
         customSectionsSource: makeFailingCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
         previousToolkits: new Map([["github", previousResult.toolkit]]),
+        onToolkitComplete: async (result) => {
+          completedToolkitIds.push(result.toolkit.id);
+        },
       });
 
       const results = await merger.mergeAllToolkits();
@@ -1939,6 +1943,7 @@ describe("DataMerger", () => {
       expect(result?.warnings[0]).toContain(
         "Custom sections source unavailable"
       );
+      expect(completedToolkitIds).toEqual(["Github"]);
     });
 
     it("returns empty custom sections in error result when no previous toolkit exists", async () => {
