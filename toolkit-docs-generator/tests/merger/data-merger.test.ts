@@ -1951,11 +1951,15 @@ describe("DataMerger", () => {
         toolSource: new InMemoryToolDataSource([githubTool1]),
         metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
+      const completedToolkitIds: string[] = [];
 
       const merger = new DataMerger({
         toolkitDataSource,
         customSectionsSource: makeFailingCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
+        onToolkitComplete: async (result) => {
+          completedToolkitIds.push(result.toolkit.id);
+        },
       });
 
       const results = await merger.mergeAllToolkits();
@@ -1968,6 +1972,7 @@ describe("DataMerger", () => {
       expect(result?.warnings[0]).toContain(
         "Custom sections source unavailable"
       );
+      expect(completedToolkitIds).toEqual([]);
     });
   });
 

@@ -1071,7 +1071,7 @@ export class DataMerger {
         message,
         previousToolkit
       );
-      if (this.onToolkitComplete) {
+      if (this.onToolkitComplete && previousToolkit) {
         await this.onToolkitComplete(result);
       }
       return result;
