@@ -144,10 +144,10 @@ export class JsonGenerator {
 
     const fileName = getToolkitFileName(toolkit.id);
     const filePath = join(this.outputDir, fileName);
-    const existingToolkitId = this.toolkitIdsByFile.get(fileName);
-    if (existingToolkitId && existingToolkitId !== toolkit.id) {
+    const previousToolkitId = this.toolkitIdsByFile.get(fileName);
+    if (previousToolkitId && previousToolkitId !== toolkit.id) {
       throw new Error(
-        `Toolkit IDs collide on ${fileName}: ${existingToolkitId}, ${toolkit.id}`
+        `Toolkit IDs collide on ${fileName}: ${previousToolkitId}, ${toolkit.id}`
       );
     }
     this.toolkitIdsByFile.set(fileName, toolkit.id);
@@ -164,7 +164,11 @@ export class JsonGenerator {
       await writeFileAtomically(filePath, content);
       return filePath;
     } catch (error) {
-      this.toolkitIdsByFile.delete(fileName);
+      if (previousToolkitId) {
+        this.toolkitIdsByFile.set(fileName, previousToolkitId);
+      } else {
+        this.toolkitIdsByFile.delete(fileName);
+      }
       throw error;
     }
   }
