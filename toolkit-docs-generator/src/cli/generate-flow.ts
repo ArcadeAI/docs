@@ -15,6 +15,21 @@ export const collectRemovedToolkitIds = (
       .map((c) => c.toolkitId.toLowerCase())
   );
 
+/**
+ * Protect incremental runs from treating a transient empty API response as a
+ * request to delete every previously generated toolkit.
+ */
+export const assertSafeCurrentToolkitSnapshot = (
+  currentToolkitCount: number,
+  previousToolkitCount: number
+): void => {
+  if (currentToolkitCount === 0 && previousToolkitCount > 0) {
+    throw new Error(
+      `Current toolkit snapshot is empty; refusing to remove all ${previousToolkitCount} existing toolkits.`
+    );
+  }
+};
+
 export interface ProcessingStats {
   totalToolkits: number;
   effectiveSkipped: number;
