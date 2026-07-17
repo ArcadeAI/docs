@@ -83,6 +83,18 @@ describe("resolveSafeOutputDir", () => {
     );
   });
 
+  it("rejects the generator directory when run from that directory", async () => {
+    const generatorDir = join(repoRoot ?? "", "toolkit-docs-generator");
+    await mkdir(generatorDir);
+    const expected = await realpath(generatorDir);
+    process.chdir(generatorDir);
+
+    await expect(clearSafeOutputDir(".")).rejects.toThrow(
+      "unsafe output directory"
+    );
+    expect(await realpath(generatorDir)).toBe(expected);
+  });
+
   it("clears a safe output directory", async () => {
     const outputDir = join(repoRoot ?? "", "output");
     await mkdir(outputDir, { recursive: true });

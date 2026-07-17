@@ -37,6 +37,10 @@ export const resolveSafeOutputDir = async (
   const repoRoot = await realpath(resolvedRepoRoot).catch(
     () => resolvedRepoRoot
   );
+  const resolvedGeneratorRoot = resolve(repoRoot, "toolkit-docs-generator");
+  const generatorRoot = await realpath(resolvedGeneratorRoot).catch(
+    () => resolvedGeneratorRoot
+  );
   const resolvedHomeDir = options.homeDir
     ? resolve(options.homeDir)
     : process.env.HOME
@@ -49,8 +53,9 @@ export const resolveSafeOutputDir = async (
   const realDir = await realpath(resolvedDir).catch(() => resolvedDir);
 
   const containsRepoRoot = isSubpath(realDir, repoRoot);
+  const containsGeneratorRoot = isSubpath(realDir, generatorRoot);
   const containsHomeDir = homeDir ? isSubpath(realDir, homeDir) : false;
-  if (containsRepoRoot || containsHomeDir) {
+  if (containsRepoRoot || containsGeneratorRoot || containsHomeDir) {
     throw new Error(`Refusing to delete unsafe output directory: ${realDir}`);
   }
 

@@ -470,6 +470,22 @@ describe("JsonGenerator toolkit file paths", () => {
     });
   });
 
+  it("rejects case-insensitive toolkit ID collisions during incremental writes", async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      await generator.generateToolkitFile(toolkit);
+
+      await expect(
+        generator.generateToolkitFile({
+          ...toolkit,
+          id: toolkit.id.toUpperCase(),
+        })
+      ).rejects.toThrow("Toolkit IDs collide on github.json");
+    });
+  });
+
   it("sorts index entries by normalized toolkit ID", async () => {
     await withTempDir(async (dir) => {
       const [githubToolkit, slackToolkit] = await Promise.all([

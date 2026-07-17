@@ -118,6 +118,7 @@ export class JsonGenerator {
   private readonly generateIndex: boolean;
   private readonly indexSource: "current" | "output";
   private readonly validateOutput: boolean;
+  private readonly toolkitIdsByFile = new Map<string, string>();
 
   constructor(config: JsonGeneratorConfig) {
     this.outputDir = config.outputDir;
@@ -143,17 +144,29 @@ export class JsonGenerator {
 
     const fileName = getToolkitFileName(toolkit.id);
     const filePath = join(this.outputDir, fileName);
+    const existingToolkitId = this.toolkitIdsByFile.get(fileName);
+    if (existingToolkitId && existingToolkitId !== toolkit.id) {
+      throw new Error(
+        `Toolkit IDs collide on ${fileName}: ${existingToolkitId}, ${toolkit.id}`
+      );
+    }
+    this.toolkitIdsByFile.set(fileName, toolkit.id);
 
     // Ensure directory exists
-    await mkdir(dirname(filePath), { recursive: true });
+    try {
+      await mkdir(dirname(filePath), { recursive: true });
 
-    // Write file
-    const content = this.prettyPrint
-      ? JSON.stringify(toolkit, null, 2)
-      : JSON.stringify(toolkit);
+      // Write file
+      const content = this.prettyPrint
+        ? JSON.stringify(toolkit, null, 2)
+        : JSON.stringify(toolkit);
 
-    await writeFileAtomically(filePath, content);
-    return filePath;
+      await writeFileAtomically(filePath, content);
+      return filePath;
+    } catch (error) {
+      this.toolkitIdsByFile.delete(fileName);
+      throw error;
+    }
   }
 
   /**
