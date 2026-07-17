@@ -53,6 +53,25 @@ describe("CustomSectionsFileSource", () => {
     expect(result?.toolChunks).toEqual({});
   });
 
+  it("loads rich subpage entries supported by generated toolkit output", async () => {
+    tempDir = await createTempDir();
+    const filePath = join(tempDir, "custom-sections.json");
+    const subPage = {
+      type: "mdx",
+      content: "# Setup",
+      relativePath: "setup/page.mdx",
+    };
+    await writeFile(
+      filePath,
+      JSON.stringify({ Github: { subPages: [subPage] } }, null, 2)
+    );
+
+    const source = createCustomSectionsFileSource(filePath);
+    const result = await source.getCustomSections("Github");
+
+    expect(result?.subPages).toEqual([subPage]);
+  });
+
   it("throws a helpful error when JSON is invalid", async () => {
     tempDir = await createTempDir();
     const filePath = join(tempDir, "invalid.json");
@@ -79,6 +98,21 @@ describe("CustomSectionsFileSource", () => {
         null,
         2
       )
+    );
+
+    const source = createCustomSectionsFileSource(filePath);
+
+    await expect(source.getAllCustomSections()).rejects.toThrow(
+      `Custom sections file has invalid schema (${filePath})`
+    );
+  });
+
+  it("rejects malformed rich subpage entries", async () => {
+    tempDir = await createTempDir();
+    const filePath = join(tempDir, "invalid-subpage.json");
+    await writeFile(
+      filePath,
+      JSON.stringify({ Github: { subPages: [{ type: "mdx" }] } }, null, 2)
     );
 
     const source = createCustomSectionsFileSource(filePath);

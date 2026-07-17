@@ -316,13 +316,22 @@ export type ToolCodeExample = z.infer<typeof ToolCodeExampleSchema>;
 // Custom Sections Schema (extracted from MDX)
 // ============================================================================
 
+export const ToolkitSubPageSchema = z.union([
+  z.string(),
+  z.object({
+    type: z.string().min(1),
+    content: z.string(),
+    relativePath: z.string().min(1),
+  }),
+]);
+
 export const CustomSectionsSchema = z.object({
   /** Toolkit-level documentation chunks */
   documentationChunks: z.array(DocumentationChunkSchema).default([]),
   /** Custom imports needed for the MDX file */
   customImports: z.array(z.string()).default([]),
   /** Sub-pages that exist for this toolkit */
-  subPages: z.array(z.string()).default([]),
+  subPages: z.array(ToolkitSubPageSchema).default([]),
   /** Per-tool documentation chunks (keyed by tool name) */
   toolChunks: z
     .record(z.string(), z.array(DocumentationChunkSchema))
@@ -428,9 +437,7 @@ export const MergedToolkitSchema = z.object({
    * Each entry is either a string (legacy slug) or a rich object with
    * { type, content, relativePath } for inline MDX sub-page content.
    */
-  subPages: z
-    .array(z.union([z.string(), z.record(z.string(), z.unknown())]))
-    .default([]),
+  subPages: z.array(ToolkitSubPageSchema).default([]),
   /** Generation metadata */
   generatedAt: z.string().optional(),
 });
