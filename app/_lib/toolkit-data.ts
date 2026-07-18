@@ -51,6 +51,10 @@ export type ToolkitIndex = {
   toolkits: ToolkitIndexEntry[];
 };
 
+type ToolkitIndexEnvelope = Omit<ToolkitIndex, "toolkits"> & {
+  toolkits: unknown[];
+};
+
 type ToolkitDataOptions = {
   dataDir?: string;
 };
@@ -93,12 +97,13 @@ const isToolkitIndexEntry = (value: unknown): value is ToolkitIndexEntry => {
   );
 };
 
-const isToolkitIndex = (value: unknown): value is ToolkitIndex =>
+const isToolkitIndexEnvelope = (
+  value: unknown
+): value is ToolkitIndexEnvelope =>
   isRecord(value) &&
   typeof value.generatedAt === "string" &&
   typeof value.version === "string" &&
-  Array.isArray(value.toolkits) &&
-  value.toolkits.every(isToolkitIndexEntry);
+  Array.isArray(value.toolkits);
 
 const readToolkitFile = async (
   filePath: string
@@ -174,11 +179,14 @@ export const readToolkitIndex = async (
     const content = await readFile(filePath, "utf-8");
     const parsed: unknown = JSON.parse(content);
 
-    if (!isToolkitIndex(parsed)) {
+    if (!isToolkitIndexEnvelope(parsed)) {
       return null;
     }
 
-    return parsed;
+    return {
+      ...parsed,
+      toolkits: parsed.toolkits.filter(isToolkitIndexEntry),
+    };
   } catch {
     return null;
   }

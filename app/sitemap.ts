@@ -46,9 +46,11 @@ async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
 
 async function collectToolkitRoutes(): Promise<MetadataRoute.Sitemap> {
   const routes = await listToolkitRoutes();
-  return routes.map(({ category, toolkitId }) => ({
-    url: `${NORMALIZED_SITE_URL}/en/resources/integrations/${category}/${toolkitId}`,
-  }));
+  return routes
+    .filter(({ category }) => category !== "others")
+    .map(({ category, toolkitId }) => ({
+      url: `${NORMALIZED_SITE_URL}/en/resources/integrations/${category}/${toolkitId}`,
+    }));
 }
 
 export default function sitemap(): Promise<MetadataRoute.Sitemap> {

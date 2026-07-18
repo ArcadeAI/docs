@@ -73,15 +73,35 @@ describe("toolkit data loader", () => {
     });
   });
 
-  it("rejects malformed toolkit index entries", async () => {
+  it("retains valid toolkit index entries when another entry is malformed", async () => {
     await withTempDir(async (dir) => {
       await writeFile(
         join(dir, "index.json"),
-        JSON.stringify({ toolkits: [{ category: "development" }] }),
+        JSON.stringify({
+          generatedAt: "2026-01-15T00:00:00.000Z",
+          version: "1.0.0",
+          toolkits: [
+            {
+              id: "Github",
+              label: "GitHub",
+              version: "1.0.0",
+              category: "development",
+              toolCount: 3,
+              authType: "oauth2",
+            },
+            { category: "development" },
+          ],
+        }),
         "utf-8"
       );
 
-      await expect(readToolkitIndex({ dataDir: dir })).resolves.toBeNull();
+      await expect(readToolkitIndex({ dataDir: dir })).resolves.toMatchObject({
+        toolkits: [
+          {
+            id: "Github",
+          },
+        ],
+      });
     });
   });
 
