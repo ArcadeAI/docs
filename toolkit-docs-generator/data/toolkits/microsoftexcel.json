@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftExcel",
   "label": "Microsoft Excel",
-  "version": "1.1.2",
+  "version": "1.2.0",
   "description": "Arcade.dev LLM tools for Microsoft Excel",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "AggregateWorksheet",
       "qualifiedName": "MicrosoftExcel.AggregateWorksheet",
-      "fullyQualifiedName": "MicrosoftExcel.AggregateWorksheet@1.1.2",
+      "fullyQualifiedName": "MicrosoftExcel.AggregateWorksheet@1.2.0",
       "description": "Summarize a worksheet by grouping rows and computing per-group aggregates in one call.\n\nUse this instead of reading and paginating raw rows when you need totals, averages, counts,\nor min/max broken down by one or more columns (e.g. revenue by region). Columns can be\nreferenced by letter (group_by) or by header name (group_by_headers) — use whichever is\nmore convenient. Groups are returned in first-seen order and capped by ``limit``.\n\nAlways check each aggregate's ``numeric_count`` field: non-numeric and formula-error cells\nare silently skipped for sum/average/min/max, so a clean-looking total may exclude rows —\nthe ``warnings`` list will name every column and group where this occurred.",
       "parameters": [
         {
@@ -259,15 +259,15 @@
     {
       "name": "CreateOrEditWorkbook",
       "qualifiedName": "MicrosoftExcel.CreateOrEditWorkbook",
-      "fullyQualifiedName": "MicrosoftExcel.CreateOrEditWorkbook@1.1.2",
-      "description": "Create a new .xlsx workbook or edit an existing one in OneDrive for Business.\n\nOmit `item_id` to create (an empty workbook is created from `filename`, then the\noperations are applied); provide `item_id` to edit. To create a populated workbook, pass\n`filename` plus set_values operations; name the target tab via `worksheet` (or reference\none consistent sheet name in the operations) and the new workbook's initial sheet is\nrenamed to match. For a finished file with formatting/charts intact, upload the bytes\ninstead of rebuilding cell-by-cell.\n\nEach entry in `operations` selects a behavior via its `type`: write/clear cells, format\ncells (font, fill, borders, alignment, wrap, row height), size rows and columns,\nsort, add/restyle tables (style, totals, banding, filter), add/move/restyle charts (anchor\ncell, size, title, legend, axis titles), manage worksheets and named ranges, protect a\nsheet, and recalculate. See the `operations` parameter for the per-type fields.",
+      "fullyQualifiedName": "MicrosoftExcel.CreateOrEditWorkbook@1.2.0",
+      "description": "Create a new .xlsx workbook or edit an existing one in OneDrive for Business.\n\nOmit `item_id` to create (an empty workbook is created from `filename`, then the\noperations are applied); provide `item_id` to edit. To create a populated workbook, pass\n`filename` plus set_values operations; name the target tab via `worksheet` (or reference\none consistent sheet name in the operations) and the new workbook's initial sheet is\nrenamed to match.\n\nBy default, when creating a workbook for a person to read, build a clean,\nprofessional-looking table rather than a bare value dump: preserve typed numbers and dates,\napply appropriate number formats, turn tabular data into a native Excel table (add_table),\nand ALWAYS resize columns (format_columns with autofit=true over every used column —\nagents usually omit this and labels get truncated). If autofit still clips a long label,\nset an explicit column_width. Keep sheet names and headers plain text (no emojis). Only\nskip the polish when the user asks for raw data or a specific style.\n\nEach entry in `operations` selects a behavior via its `type`: write/clear cells, format\ncells (font, fill, borders, alignment, wrap, row height), size rows and columns,\nsort, add/restyle tables (style, totals, banding, filter), add/move/restyle charts (anchor\ncell, size, title, legend, axis titles), manage worksheets and named ranges, protect a\nsheet, and recalculate. See the `operations` parameter for per-type fields and examples.\n\nFor a workbook you already have as a complete .xlsx file, upload its bytes rather than\nrebuilding it cell-by-cell.",
       "parameters": [
         {
           "name": "operations",
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Ordered edits to apply. Each entry's 'type' selects which fields are read. Operations run in order and the batch is non-atomic, so inspect 'operation_results'.",
+          "description": "An ordered list of edits applied to one workbook. Each entry is an object whose \"type\" selects which other fields are read; fields that don't belong to the type are ignored. Operations run in order and the batch is non-atomic (up to 50 operations sharing a ~25s budget), so inspect operation_results to confirm each one landed.\n\nDEFAULT QUALITY: when creating a workbook for a person to read, produce a clean, professional table by default rather than a bare value dump. The reliable recipe is: write typed values, turn the data into a native Excel table with a restrained built-in style, apply appropriate number formats, and ALWAYS resize columns so every header and label is fully readable. Keep sheet names and headers plain text (no emojis) unless asked. Only skip the polish when the user asks for raw data or a specific style.\n\nRESIZING IS MANDATORY (agents usually skip this — do not): after writing values, end the same call with format_columns autofit=true over every column that has content (e.g. \"A:D\"). Default column widths leave long labels truncated (#### or cut off in the UI). Autofit is the required fix; if a label is still clipped after autofit, follow up with an explicit column_width (points) on that column. Never ship a user-facing workbook without a resizing step.\n\nProfessional table (the default recipe for tabular data — one set_values write, then styling; the last op MUST autofit):\n[{\"type\": \"set_values\", \"worksheet\": \"Sales\", \"values_csv\": \"Region,Units,Revenue\\nEast,120,15000\\nWest,90,11800\\nNorth,75,9600\"}, {\"type\": \"add_table\", \"worksheet\": \"Sales\", \"range\": \"A1:C4\", \"has_header\": true, \"table_style\": \"TableStyleMedium2\", \"show_banded_rows\": true, \"show_filter_button\": true}, {\"type\": \"format_columns\", \"worksheet\": \"Sales\", \"columns\": \"C:C\", \"number_format\": \"$#,##0\"}, {\"type\": \"format_columns\", \"worksheet\": \"Sales\", \"columns\": \"A:C\", \"autofit\": true}]\n\nVALUES AND FORMATTING ARE SEPARATE STEPS: one operation does not carry both cell values and their formatting. Write the data with set_values, then style it with add_table / format_columns / format_cells in later operations of the same call. Autofit must be its own format_columns operation after the values exist — sizing before set_values does nothing useful.\n\nset_values — write typed values and formulas. Prefer values_csv (or values_tsv) for a plain grid; numbers and booleans in the text are stored as such, and a cell beginning with = is a formula. If a value contains the delimiter — e.g. a comma inside a formula like =SUM(A1,B1) when using values_csv — use values_tsv or the values JSON form so it is not split into separate cells. Anchor at the top-left of range if given, else A1:\n{\"type\": \"set_values\", \"worksheet\": \"Q1\", \"values_csv\": \"Item,Price,Qty,Total\\nPen,1.5,10,=B2*C2\\nPad,3.25,4,=B3*C3\"}\nUse values (a JSON-encoded 2D-array string) when you need exact typing, e.g. to keep a leading-zero code as text:\n{\"type\": \"set_values\", \"worksheet\": \"Q1\", \"range\": \"A1\", \"values\": \"[[\\\"SKU\\\",\\\"Qty\\\"],[\\\"007\\\",12]]\"}\n\nappend_rows — add rows after the current used range (rows is a JSON-encoded 2D array):\n{\"type\": \"append_rows\", \"worksheet\": \"Log\", \"rows\": \"[[\\\"2024-05-01\\\", 42]]\"}\n\nformat_cells — style a range: bold, italic, font_color, font_size, fill_color, horizontal_alignment (Left/Center/Right), vertical_alignment (Top/Center/Bottom), border_style, wrap_text, row_height, and number_format. Colors are hex like #4472C4:\n{\"type\": \"format_cells\", \"worksheet\": \"Sales\", \"range\": \"A1:C1\", \"bold\": true, \"fill_color\": \"#4472C4\", \"font_color\": \"#FFFFFF\", \"horizontal_alignment\": \"Center\"}\n{\"type\": \"format_cells\", \"worksheet\": \"Sales\", \"range\": \"C2:C100\", \"number_format\": \"$#,##0.00\"}\nNumber-format codes are standard Excel: \"#,##0\" (grouped integer), \"0.00%\" (percent), \"$#,##0.00\" (currency), \"yyyy-mm-dd\" (date), \"@\" (force text).\n\nformat_columns — ALWAYS autofit (or set an explicit column_width) on every used column before finishing a create/edit for a human reader; also apply number_format down whole columns when needed. Target with columns like \"A:D\" (or range). Autofit example (required closing step of the default recipe):\n{\"type\": \"format_columns\", \"worksheet\": \"Sales\", \"columns\": \"A:D\", \"autofit\": true}\nNumber-format-only example:\n{\"type\": \"format_columns\", \"worksheet\": \"Sales\", \"columns\": \"B:B\", \"number_format\": \"0.00%\"}\n\nadd_table — turn a range into a native Excel table, which gives a styled header, banding, and filter buttons. has_header defaults to true; table_style is a built-in name like \"TableStyleMedium2\". Set show_totals to add a totals row below the table (Excel totals the last column by default) when the data has a column worth totaling:\n{\"type\": \"add_table\", \"worksheet\": \"Sales\", \"range\": \"A1:D20\", \"table_style\": \"TableStyleMedium2\", \"show_banded_rows\": true, \"show_filter_button\": true}\n\nsort — reorder rows by one column; has_header keeps the first row in place:\n{\"type\": \"sort\", \"worksheet\": \"Sales\", \"range\": \"A1:D20\", \"sort_key_column\": \"C\", \"sort_order\": \"descending\", \"has_header\": true}\n\nadd_chart — build a chart from a data range and place it with anchor_cell (plus optional end_cell to size it); title, legend_position, value_axis_title, and category_axis_title refine it:\n{\"type\": \"add_chart\", \"worksheet\": \"Sales\", \"range\": \"A1:B5\", \"chart_type\": \"ColumnClustered\", \"title\": \"Revenue by region\", \"anchor_cell\": \"F2\", \"end_cell\": \"L20\"}\n\nOther operations use the same object shape, selected by type: clear, merge, unmerge, insert_rows, delete_rows, insert_columns, delete_columns, add_worksheet, delete_worksheet, update_worksheet, duplicate_worksheet, update_table, delete_table, update_chart, delete_chart, add_named_range, delete_named_range, protect_worksheet, unprotect_worksheet, recalculate.\n\nNot available as operations: conditional formatting, data-validation dropdowns, and frozen panes. A workbook that needs those must be built as a complete .xlsx file and uploaded, rather than assembled from these operations.\n\nRanges are bounded A1 (e.g. \"A1:D10\"). Each operation may name its own worksheet; if omitted, the call's default worksheet is used.",
           "enum": null,
           "inferrable": true
         },
@@ -443,7 +443,7 @@
     {
       "name": "GetWorkbookMetadata",
       "qualifiedName": "MicrosoftExcel.GetWorkbookMetadata",
-      "fullyQualifiedName": "MicrosoftExcel.GetWorkbookMetadata@1.1.2",
+      "fullyQualifiedName": "MicrosoftExcel.GetWorkbookMetadata@1.2.0",
       "description": "Get a workbook's structure: worksheets, named ranges, and optionally extents and objects.\n\nCall this first when exploring an unfamiliar workbook: it surfaces hidden worksheets and\nworkbook-scoped named ranges. Use `include_used_ranges` to also learn where data lives\n(used ranges, protection state, and worksheet-local named ranges) before reading, and\n`include_objects` to enumerate tables and charts. Both add a per-worksheet fan-out, so leave\nthem off for a quick worksheet listing.",
       "parameters": [
         {
@@ -555,7 +555,7 @@
     {
       "name": "ListWorkbookComments",
       "qualifiedName": "MicrosoftExcel.ListWorkbookComments",
-      "fullyQualifiedName": "MicrosoftExcel.ListWorkbookComments@1.1.2",
+      "fullyQualifiedName": "MicrosoftExcel.ListWorkbookComments@1.2.0",
       "description": "List a workbook's comments, or the replies on a specific comment thread.\n\nProvide a comment ID to retrieve that thread's replies instead of the top-level comments.",
       "parameters": [
         {
@@ -667,7 +667,7 @@
     {
       "name": "ReadWorksheet",
       "qualifiedName": "MicrosoftExcel.ReadWorksheet",
-      "fullyQualifiedName": "MicrosoftExcel.ReadWorksheet@1.1.2",
+      "fullyQualifiedName": "MicrosoftExcel.ReadWorksheet@1.2.0",
       "description": "Read a worksheet range with the detail you choose, with guardrails for large sheets.\n\nRequest `annotations` for formulas, cell types, number formats, or the range's\nfill/font/borders; `filter_column` + `filter_contains` to keep matching rows; `columns` to\nproject a subset; `export` for csv/tsv. Reads are bounded to the used range and capped by a\nrow limit and cell budget, paginating via `next_range` rather than returning a whole large\nsheet at once.\n\nSet `row_format=\"records\"` (with `has_header=true`) to get a `record` dict on each data\nrow, keying cell values by the header row (the top row of the worksheet's used range) —\nuseful when agents need to map values to named columns without tracking positional indices.\nThe header is carried across pages, so paginated reads via `next_range` stay correctly\nkeyed. Each row still includes `values`.\n\nTo verify formulas, types, or number patterns in the returned cells, pass `annotations`\n(e.g. `[\"formulas\", \"types\"]`); annotation values land under `annotations` keyed by A1\naddress alongside the displayed values.",
       "parameters": [
         {
@@ -921,7 +921,7 @@
     {
       "name": "ReplyToWorkbookComment",
       "qualifiedName": "MicrosoftExcel.ReplyToWorkbookComment",
-      "fullyQualifiedName": "MicrosoftExcel.ReplyToWorkbookComment@1.1.2",
+      "fullyQualifiedName": "MicrosoftExcel.ReplyToWorkbookComment@1.2.0",
       "description": "Post a plain-text reply to an existing comment thread on a workbook.\n\nThe reply is appended to the end of the thread.",
       "parameters": [
         {
@@ -1020,7 +1020,7 @@
     {
       "name": "ScanForDataIssues",
       "qualifiedName": "MicrosoftExcel.ScanForDataIssues",
-      "fullyQualifiedName": "MicrosoftExcel.ScanForDataIssues@1.1.2",
+      "fullyQualifiedName": "MicrosoftExcel.ScanForDataIssues@1.2.0",
       "description": "Scan a worksheet (or the whole workbook) for data-quality problems as a structured list.\n\nEach issue carries a ``severity`` field (``\"high\"``, ``\"medium\"``, or ``\"low\"``) and the\nlist is ordered high → low before any truncation cap is applied, so critical findings are\nnever dropped in favour of lower-priority ones.\n\nBy default the scan is sheet-scoped (the named worksheet, or the first sheet when\n``worksheet`` is omitted). Pass ``worksheet='*'`` for a workbook-wide audit: every sheet\nis scanned in one call and each issue carries its own ``worksheet`` field.\n\nDetects formula-error cells (``severity=\"high\"``), type outliers within a column —\na column mostly one type with a few cells of another — (``severity=\"medium\"``),\ninconsistent_column for a column that mixes cell types without a strong majority\n(``severity=\"medium\"``), accidental duplicate values in mostly-unique columns\n(``severity=\"medium\"``), and blank cells inside an otherwise-populated region\n(``severity=\"low\"``). Categorical columns (where repetition is expected) are not flagged\nas duplicates, and the header row is excluded from type-outlier and duplicate checks.\nA clean sheet returns an empty issues list. Detection is deterministic.\nResults are capped; when the cap is reached ``truncated`` is True and a warning is added.\n\nMerged cells are a known limitation: Microsoft Graph reports only the merge anchor as\npopulated and every covered cell as empty, so cells hidden under a merge may be flagged as\nblanks. A worksheet cannot be scanned when its used range exceeds an internal cell limit\n(this tool takes no range argument): a single-sheet scan raises an error asking you to\nreduce the data, while a whole-workbook scan skips the oversized sheet and names it in a\nwarning so the rest of the workbook is still scanned.",
       "parameters": [
         {
@@ -1132,7 +1132,7 @@
     {
       "name": "SearchWorkbooks",
       "qualifiedName": "MicrosoftExcel.SearchWorkbooks",
-      "fullyQualifiedName": "MicrosoftExcel.SearchWorkbooks@1.1.2",
+      "fullyQualifiedName": "MicrosoftExcel.SearchWorkbooks@1.2.0",
       "description": "Find Excel workbooks in OneDrive by keyword or folder, returning their item_ids.\n\nProvide `query` to search the whole drive by name/content, or leave it empty and pass\n`parent_folder_id` to list one folder; only .xlsx files are returned. Use a returned\n`item_id` to read, edit, scan, or comment on a workbook you did not create this session.",
       "parameters": [
         {
@@ -1244,8 +1244,8 @@
     {
       "name": "UploadWorkbook",
       "qualifiedName": "MicrosoftExcel.UploadWorkbook",
-      "fullyQualifiedName": "MicrosoftExcel.UploadWorkbook@1.1.2",
-      "description": "Upload a complete .xlsx file into OneDrive for Business, preserving it byte-for-byte.\n\nUse this instead of rebuilding a finished file cell-by-cell. Large files are uploaded\nvia a resumable upload session automatically.",
+      "fullyQualifiedName": "MicrosoftExcel.UploadWorkbook@1.2.0",
+      "description": "Upload a complete .xlsx file into OneDrive for Business, preserving it byte-for-byte.\n\nUse this to store a workbook you already have as a complete file — one the user provided,\nor one produced elsewhere with formatting, formulas, and charts intact. To build and format\na workbook from data, apply formatting operations when creating it rather than uploading\nbytes. Large files are uploaded via a resumable upload session automatically.",
       "parameters": [
         {
           "name": "filename",
@@ -1357,7 +1357,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftExcel.WhoAmI",
-      "fullyQualifiedName": "MicrosoftExcel.WhoAmI@1.1.2",
+      "fullyQualifiedName": "MicrosoftExcel.WhoAmI@1.2.0",
       "description": "Get information about the current user and their Microsoft Excel environment.",
       "parameters": [],
       "auth": {
@@ -1403,6 +1403,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-07-16T11:38:45.321Z",
-  "summary": "Microsoft Excel toolkit for Arcade enables LLMs to read, write, audit, and manage Excel workbooks stored in OneDrive for Business via the Microsoft Graph API.\n\n## Capabilities\n\n- **Discovery & metadata**: Search for workbooks by keyword or folder, retrieve workbook structure (worksheets, named ranges, tables, charts, used ranges, protection state), and identify the current user's environment.\n- **Reading & querying**: Read worksheet ranges with optional filtering, column projection, pagination, and export (CSV/TSV); map rows to named columns via record mode; inspect formulas, types, and number formats via annotations; aggregate rows into grouped summaries (sum, average, count, min/max) without paginating raw data.\n- **Writing & editing**: Create new `.xlsx` workbooks or edit existing ones with a rich operation set — cell values, formatting (font, fill, borders, alignment, wrap), row/column sizing, sorting, table styling, chart creation and restyling, worksheet management, named ranges, sheet protection, and recalculation.\n- **Upload**: Upload a finished `.xlsx` file byte-for-byte (with automatic resumable upload for large files), preserving all formatting and charts without cell-by-cell reconstruction.\n- **Data quality**: Scan a single worksheet or an entire workbook for formula errors, type outliers, inconsistent columns, accidental duplicates, and blank cells — results are severity-ranked (high → low) and deterministic.\n- **Comments**: List top-level comments or thread replies on a workbook; post plain-text replies to existing threads.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with **Microsoft** as the identity provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details, required permissions, and configuration options."
+  "generatedAt": "2026-07-18T11:27:49.262Z",
+  "summary": "## Microsoft Excel Toolkit\n\nArcade's Microsoft Excel toolkit lets agents read, write, analyze, and manage Excel workbooks stored in OneDrive for Business via the Microsoft Graph API.\n\n## Capabilities\n\n- **Workbook discovery & metadata** — search OneDrive by keyword or folder, retrieve workbook structure (worksheets, named ranges, tables, charts, used ranges, protection state).\n- **Reading & data extraction** — read worksheet ranges with pagination, column projection, row filtering, CSV/TSV export, record-keyed rows, and optional annotations (formulas, types, number formats, borders).\n- **Writing & formatting** — create or edit workbooks with a rich operation set: set values, format cells (font, fill, borders, alignment, wrap), resize rows/columns (including autofit), sort, add/style native Excel tables, add/configure charts, manage worksheets and named ranges, protect sheets, and recalculate.\n- **Data quality & aggregation** — scan worksheets or entire workbooks for formula errors, type outliers, duplicate values, and blank cells ranked by severity; aggregate worksheet rows with grouping and per-group sum/average/count/min/max in a single call.\n- **Uploading** — upload a complete `.xlsx` file byte-for-byte to OneDrive, including large files via resumable sessions.\n- **Collaboration** — list workbook comment threads, retrieve replies on a specific thread, and post plain-text replies.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 using Microsoft as the provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
 }
