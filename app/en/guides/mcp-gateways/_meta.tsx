@@ -10,6 +10,9 @@ export const meta: MetaRecord = {
   "create-via-ai": {
     title: "Create via AI Assistant",
   },
+  "protocol-versions": {
+    title: "Supported protocol versions",
+  },
 };
 
 export default meta;
