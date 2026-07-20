@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { z } from "zod";
 import type {
   ToolkitData,
   ToolkitSummary,
@@ -51,10 +52,6 @@ export type ToolkitIndex = {
   toolkits: ToolkitIndexEntry[];
 };
 
-type ToolkitIndexEnvelope = Omit<ToolkitIndex, "toolkits"> & {
-  toolkits: unknown[];
-};
-
 type ToolkitDataOptions = {
   dataDir?: string;
 };
@@ -69,41 +66,44 @@ const DEFAULT_DATA_DIR = join(
 const resolveDataDir = (options?: ToolkitDataOptions): string =>
   options?.dataDir ?? process.env.TOOLKIT_DATA_DIR ?? DEFAULT_DATA_DIR;
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === "object" && value !== null;
+// App-local Zod schemas (generator schemas live under toolkit-docs-generator and
+// can't be imported here due to module resolution). Keep the index envelope
+// loose so one bad entry is filtered instead of dropping the whole catalog.
+const ToolkitIndexEntrySchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  version: z.string(),
+  category: z.string(),
+  type: z.string().optional(),
+  toolCount: z.number().int().nonnegative(),
+  authType: z.string(),
+});
 
-const isValidToolkitData = (parsed: unknown): parsed is ToolkitData =>
-  isRecord(parsed) &&
-  "id" in parsed &&
-  ("label" in parsed || "name" in parsed) &&
-  "metadata" in parsed &&
-  isRecord(parsed.metadata);
+const ToolkitIndexEnvelopeSchema = z.object({
+  generatedAt: z.string(),
+  version: z.string(),
+  toolkits: z.array(z.unknown()),
+});
 
-const isToolkitIndexEntry = (value: unknown): value is ToolkitIndexEntry => {
-  if (!isRecord(value)) {
-    return false;
-  }
+const ToolkitDataSchema = z
+  .object({
+    id: z.string(),
+    label: z.string().optional(),
+    name: z.string().optional(),
+    metadata: z.object({}).passthrough(),
+  })
+  .passthrough()
+  .refine((value) => value.label !== undefined || value.name !== undefined);
 
-  return (
-    typeof value.id === "string" &&
-    typeof value.label === "string" &&
-    typeof value.version === "string" &&
-    typeof value.category === "string" &&
-    (value.type === undefined || typeof value.type === "string") &&
-    typeof value.toolCount === "number" &&
-    Number.isInteger(value.toolCount) &&
-    value.toolCount >= 0 &&
-    typeof value.authType === "string"
-  );
+const parseToolkitData = (parsed: unknown): ToolkitData | null => {
+  const result = ToolkitDataSchema.safeParse(parsed);
+  return result.success ? (result.data as ToolkitData) : null;
 };
 
-const isToolkitIndexEnvelope = (
-  value: unknown
-): value is ToolkitIndexEnvelope =>
-  isRecord(value) &&
-  typeof value.generatedAt === "string" &&
-  typeof value.version === "string" &&
-  Array.isArray(value.toolkits);
+const parseToolkitIndexEntry = (value: unknown): ToolkitIndexEntry | null => {
+  const result = ToolkitIndexEntrySchema.safeParse(value);
+  return result.success ? result.data : null;
+};
 
 const readToolkitFile = async (
   filePath: string
@@ -111,7 +111,7 @@ const readToolkitFile = async (
   try {
     const content = await readFile(filePath, "utf-8");
     const parsed: unknown = JSON.parse(content);
-    return isValidToolkitData(parsed) ? (parsed as ToolkitData) : null;
+    return parseToolkitData(parsed);
   } catch {
     return null;
   }
@@ -178,14 +178,19 @@ export const readToolkitIndex = async (
   try {
     const content = await readFile(filePath, "utf-8");
     const parsed: unknown = JSON.parse(content);
+    const envelope = ToolkitIndexEnvelopeSchema.safeParse(parsed);
 
-    if (!isToolkitIndexEnvelope(parsed)) {
+    if (!envelope.success) {
       return null;
     }
 
     return {
-      ...parsed,
-      toolkits: parsed.toolkits.filter(isToolkitIndexEntry),
+      generatedAt: envelope.data.generatedAt,
+      version: envelope.data.version,
+      toolkits: envelope.data.toolkits.flatMap((entry) => {
+        const parsedEntry = parseToolkitIndexEntry(entry);
+        return parsedEntry ? [parsedEntry] : [];
+      }),
     };
   } catch {
     return null;

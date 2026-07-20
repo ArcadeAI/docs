@@ -29,6 +29,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import { getToolkitSlug } from "../../app/_lib/toolkit-slug";
+import { normalizeCategory } from "../../app/_lib/toolkit-static-params";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -84,7 +85,6 @@ const CATEGORY_ORDER = [
   "customer-support",
   "others",
 ];
-const CATEGORY_SET = new Set(CATEGORY_ORDER);
 
 const CAPITAL_LETTER_REGEX = /([A-Z])/g;
 const FIRST_CHARACTER_REGEX = /^./;
@@ -109,9 +109,6 @@ function renderObjectKey(key: string): string {
   }
   return JSON.stringify(key);
 }
-
-const normalizeCategory = (category: string | null | undefined): string =>
-  category && CATEGORY_SET.has(category) ? category : "others";
 
 export type ToolkitInfo = {
   id: string;
