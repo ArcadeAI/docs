@@ -13,7 +13,7 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
-import { readdir, readFile, rm } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
 import ora from "ora";
 import { join, resolve } from "path";
 import {
@@ -59,6 +59,10 @@ import {
 } from "../types/index.js";
 import { readExclusionList } from "../utils/exclusion-list.js";
 import { readIgnoreList } from "../utils/ignore-list.js";
+import {
+  clearSafeOutputDir,
+  resolveDefaultOutputDir,
+} from "../utils/output-dir.js";
 import {
   createProgressTracker,
   formatToolkitComplete,
@@ -111,17 +115,6 @@ const parseProviders = (input: string): ProviderVersion[] => {
  * Get the default fixture paths (for mock mode)
  */
 const getDefaultMockDataDir = (): string => join(process.cwd(), "mock-data");
-
-/**
- * Get the default output directory for docs JSON.
- */
-const getDefaultOutputDir = (): string => {
-  const cwd = process.cwd();
-  if (cwd.endsWith("toolkit-docs-generator")) {
-    return resolve(cwd, "..", "data", "toolkits");
-  }
-  return resolve(cwd, "data", "toolkits");
-};
 
 const getDefaultVerificationDir = (): string => {
   const cwd = process.cwd();
@@ -259,12 +252,7 @@ const clearOutputDir = async (
   outputDir: string,
   verbose: boolean
 ): Promise<void> => {
-  const resolvedDir = resolve(outputDir);
-  const repoRoot = resolve(process.cwd());
-  if (resolvedDir === "/" || resolvedDir === repoRoot) {
-    throw new Error(`Refusing to overwrite output directory: ${resolvedDir}`);
-  }
-  await rm(resolvedDir, { recursive: true, force: true });
+  const resolvedDir = await clearSafeOutputDir(outputDir);
   if (verbose) {
     console.log(chalk.dim(`Cleared output directory: ${resolvedDir}`));
   }
@@ -827,7 +815,7 @@ program
     "Path to failed tools report to rerun only impacted toolkits"
   )
   .option("--all", "Generate documentation for all toolkits", false)
-  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
   .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
   .option("--metadata-file <file>", "Path to metadata JSON file")
@@ -1879,7 +1867,7 @@ program
 program
   .command("generate-all")
   .description("Generate documentation for all toolkits in mock data")
-  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
@@ -2584,7 +2572,7 @@ program
 program
   .command("verify-output")
   .description("Verify output directory structure and schema")
-  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
   .option("--verbose", "Show detailed progress", false)
   .action(async (options: { output: string; verbose: boolean }) => {
     const spinner = ora("Verifying output...").start();
@@ -2624,7 +2612,7 @@ program
   .option(
     "-o, --output <dir>",
     "Previous output directory",
-    getDefaultOutputDir()
+    resolveDefaultOutputDir()
   )
   .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")

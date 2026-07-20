@@ -1,9 +1,25 @@
-import { realpath } from "fs/promises";
-import { isAbsolute, resolve, sep } from "path";
+import { realpath, rm } from "fs/promises";
+import { basename, isAbsolute, resolve, sep } from "path";
 
 type ResolveOptions = {
   repoRoot?: string;
   homeDir?: string;
+};
+
+export const resolveRepositoryRoot = (cwd: string = process.cwd()): string =>
+  basename(cwd) === "toolkit-docs-generator"
+    ? resolve(cwd, "..")
+    : resolve(cwd);
+
+export const resolveDefaultOutputDir = (
+  cwd: string = process.cwd()
+): string => {
+  const repoRoot = resolveRepositoryRoot(cwd);
+  const generatorRoot =
+    basename(cwd) === "toolkit-docs-generator"
+      ? cwd
+      : resolve(repoRoot, "toolkit-docs-generator");
+  return resolve(generatorRoot, "data", "toolkits");
 };
 
 const isSubpath = (parent: string, child: string): boolean => {
@@ -15,9 +31,15 @@ export const resolveSafeOutputDir = async (
   outputDir: string,
   options: ResolveOptions = {}
 ): Promise<string> => {
-  const resolvedRepoRoot = resolve(options.repoRoot ?? process.cwd());
+  const resolvedRepoRoot = resolve(
+    options.repoRoot ?? resolveRepositoryRoot(process.cwd())
+  );
   const repoRoot = await realpath(resolvedRepoRoot).catch(
     () => resolvedRepoRoot
+  );
+  const resolvedGeneratorRoot = resolve(repoRoot, "toolkit-docs-generator");
+  const generatorRoot = await realpath(resolvedGeneratorRoot).catch(
+    () => resolvedGeneratorRoot
   );
   const resolvedHomeDir = options.homeDir
     ? resolve(options.homeDir)
@@ -30,12 +52,10 @@ export const resolveSafeOutputDir = async (
   const resolvedDir = resolve(outputDir);
   const realDir = await realpath(resolvedDir).catch(() => resolvedDir);
 
-  const forbidden = new Set<string>(["/", repoRoot]);
-  if (homeDir) {
-    forbidden.add(homeDir);
-  }
-
-  if (forbidden.has(realDir)) {
+  const containsRepoRoot = isSubpath(realDir, repoRoot);
+  const containsGeneratorRoot = isSubpath(realDir, generatorRoot);
+  const containsHomeDir = homeDir ? isSubpath(realDir, homeDir) : false;
+  if (containsRepoRoot || containsGeneratorRoot || containsHomeDir) {
     throw new Error(`Refusing to delete unsafe output directory: ${realDir}`);
   }
 
@@ -47,4 +67,13 @@ export const resolveSafeOutputDir = async (
   }
 
   return realDir;
+};
+
+export const clearSafeOutputDir = async (
+  outputDir: string,
+  options: ResolveOptions = {}
+): Promise<string> => {
+  const safeDir = await resolveSafeOutputDir(outputDir, options);
+  await rm(resolve(outputDir), { recursive: true, force: true });
+  return safeDir;
 };

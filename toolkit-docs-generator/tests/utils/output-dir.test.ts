@@ -1,8 +1,12 @@
 import { mkdir, mkdtemp, realpath, rm } from "fs/promises";
 import { tmpdir } from "os";
-import { join } from "path";
+import { basename, join } from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { resolveSafeOutputDir } from "../../src/utils/output-dir.js";
+import {
+  clearSafeOutputDir,
+  resolveDefaultOutputDir,
+  resolveSafeOutputDir,
+} from "../../src/utils/output-dir.js";
 
 describe("resolveSafeOutputDir", () => {
   const originalCwd = process.cwd();
@@ -64,5 +68,75 @@ describe("resolveSafeOutputDir", () => {
         homeDir: homeDir ?? undefined,
       })
     ).rejects.toThrow("unsafe output directory");
+  });
+
+  it("rejects the repository root when run from the generator directory", async () => {
+    const generatorDir = join(repoRoot ?? "", "toolkit-docs-generator");
+    await mkdir(generatorDir);
+    process.chdir(generatorDir);
+
+    await expect(clearSafeOutputDir(repoRoot ?? "")).rejects.toThrow(
+      "unsafe output directory"
+    );
+    expect(await realpath(repoRoot ?? "")).toContain(
+      basename(repoRoot ?? "repo")
+    );
+  });
+
+  it("rejects the generator directory when run from that directory", async () => {
+    const generatorDir = join(repoRoot ?? "", "toolkit-docs-generator");
+    await mkdir(generatorDir);
+    const expected = await realpath(generatorDir);
+    process.chdir(generatorDir);
+
+    await expect(clearSafeOutputDir(".")).rejects.toThrow(
+      "unsafe output directory"
+    );
+    expect(await realpath(generatorDir)).toBe(expected);
+  });
+
+  it("clears a safe output directory", async () => {
+    const outputDir = join(repoRoot ?? "", "output");
+    await mkdir(outputDir, { recursive: true });
+    const expected = await realpath(outputDir);
+
+    const cleared = await clearSafeOutputDir(outputDir, {
+      repoRoot: repoRoot ?? undefined,
+      homeDir: homeDir ?? undefined,
+    });
+
+    expect(cleared).toBe(expected);
+    await expect(realpath(outputDir)).rejects.toThrow();
+  });
+
+  it("does not clear a relative directory outside the repository", async () => {
+    const outsideName = `${basename(repoRoot ?? "repo")}-outside`;
+    const outsideDir = join(repoRoot ?? "", "..", outsideName);
+    await mkdir(outsideDir);
+    try {
+      await expect(
+        clearSafeOutputDir(`../${outsideName}`, {
+          repoRoot: repoRoot ?? undefined,
+          homeDir: homeDir ?? undefined,
+        })
+      ).rejects.toThrow("outside repo root");
+      expect(await realpath(outsideDir)).toContain(outsideName);
+    } finally {
+      await rm(outsideDir, { recursive: true, force: true });
+    }
+  });
+});
+
+describe("resolveDefaultOutputDir", () => {
+  it("uses the generator data directory from the repository root", () => {
+    expect(resolveDefaultOutputDir("/repo")).toBe(
+      "/repo/toolkit-docs-generator/data/toolkits"
+    );
+  });
+
+  it("uses the local data directory from the generator directory", () => {
+    expect(resolveDefaultOutputDir("/repo/toolkit-docs-generator")).toBe(
+      "/repo/toolkit-docs-generator/data/toolkits"
+    );
   });
 });
