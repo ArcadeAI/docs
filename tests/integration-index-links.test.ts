@@ -8,6 +8,7 @@ import {
   resolveIndexToolkits,
   toIntegrationLink,
 } from "@/app/_lib/integration-index";
+import { INTEGRATION_CATEGORIES } from "@/app/_lib/toolkit-category";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
 import {
   getToolkitSlug,
@@ -15,7 +16,6 @@ import {
 } from "@/app/_lib/toolkit-slug";
 import {
   getToolkitCanonicalPath,
-  INTEGRATION_CATEGORIES,
   listToolkitRoutes,
   listValidIntegrationLinks,
 } from "@/app/_lib/toolkit-static-params";
@@ -91,6 +91,18 @@ describe("resolveIndexToolkits (logic)", () => {
 
   test("excludes hidden toolkits entirely", () => {
     expect(resolved.some((toolkit) => toolkit.id === "Zeta")).toBe(false);
+  });
+
+  test("normalizes unknown categories to others so cards match routes", () => {
+    const link = toIntegrationLink(
+      makeToolkit("Mystery", "not-a-real-category", "mystery")
+    );
+    expect(link).toBe(`${INTEGRATIONS}/others/mystery`);
+  });
+
+  test("treats empty-string category as others", () => {
+    const link = toIntegrationLink(makeToolkit("BlankCat", "", "blank-cat"));
+    expect(link).toBe(`${INTEGRATIONS}/others/blank-cat`);
   });
 
   test("collapses entries that resolve to the same link", () => {

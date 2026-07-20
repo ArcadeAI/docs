@@ -1,3 +1,4 @@
+import { normalizeCategory } from "./toolkit-category";
 import { getToolkitSlug, type ToolkitWithDocsLink } from "./toolkit-slug";
 
 const INTEGRATIONS_BASE = "/en/resources/integrations";
@@ -6,17 +7,19 @@ const INTEGRATIONS_BASE = "/en/resources/integrations";
  * The integrations link a toolkit card points to: `/en/resources/integrations/
  * <category>/<slug>`. Mirrors the slug + category logic used to generate the
  * dynamic `[toolkitId]` routes so cards and pages agree.
+ *
+ * Returns null when the toolkit cannot form a safe slug — callers skip it.
  */
 export function toIntegrationLink(toolkit: {
   id: string;
   docsLink?: string | null;
   category?: string | null;
-}): string {
+}): string | null {
   const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
   if (!slug) {
-    throw new Error(`Cannot build an integration link for: ${toolkit.id}`);
+    return null;
   }
-  const category = toolkit.category ?? "others";
+  const category = normalizeCategory(toolkit.category);
   return `${INTEGRATIONS_BASE}/${category}/${slug}`;
 }
 
@@ -50,10 +53,8 @@ export function resolveIndexToolkits(
       continue;
     }
 
-    let link: string;
-    try {
-      link = toIntegrationLink(toolkit);
-    } catch {
+    const link = toIntegrationLink(toolkit);
+    if (!link) {
       continue;
     }
     const hasPage = validLinks.has(link);

@@ -28,8 +28,8 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
+import { normalizeCategory } from "../../app/_lib/toolkit-category";
 import { getToolkitSlug } from "../../app/_lib/toolkit-slug";
-import { normalizeCategory } from "../../app/_lib/toolkit-static-params";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
