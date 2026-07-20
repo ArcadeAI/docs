@@ -28,6 +28,7 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
+import { normalizeCategory } from "../../app/_lib/toolkit-category";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -306,8 +307,9 @@ function resolveToolkitInfo(
 
   // Keep sidebar routes aligned with static params: toolkit JSON is source of
   // truth for category, with design system as fallback when JSON is missing.
-  const category =
-    jsonData?.metadata?.category ?? designSystemToolkit?.category ?? "others";
+  const category = normalizeCategory(
+    jsonData?.metadata?.category ?? designSystemToolkit?.category
+  );
   const labelFromDesignSystem = designSystemToolkit?.label ?? null;
   const labelFromJson = jsonData?.label ?? jsonData?.name ?? null;
   const typeFromJson = jsonData?.metadata?.type ?? null;
@@ -382,6 +384,7 @@ export function generateCategoryMeta(
   category: string,
   integrationsBasePath: string
 ): string {
+  const safeCategory = normalizeCategory(category);
   const byLabel = (a: ToolkitInfo, b: ToolkitInfo) =>
     a.label.localeCompare(b.label);
 
@@ -397,7 +400,7 @@ export function generateCategoryMeta(
     const escapedLabel = t.label.replace(/"/g, '\\"');
     return `  ${renderObjectKey(t.slug)}: {
     title: "${escapedLabel}",
-    href: "${integrationsBasePath}/${category}/${t.slug}",
+    href: "${integrationsBasePath}/${safeCategory}/${t.slug}",
   }`;
   };
 

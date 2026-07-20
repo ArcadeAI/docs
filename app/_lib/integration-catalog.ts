@@ -14,38 +14,44 @@ const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
 
 /**
  * The full integrations catalog the index renders: design-system toolkits
- * (enriched with a `docsLink` from their data file when the catalog entry
- * lacks one, so the card's slug matches the generated page) plus docs-local
- * partner toolkits.
+ * (enriched with `docsLink` / `category` from their data file when present, so
+ * card URLs match generated routes) plus docs-local partner toolkits.
  */
 export const getToolkitsWithDocsLinks = async (): Promise<
   ToolkitWithDocsLink[]
 > => {
   const docsLinkById = new Map<string, string>();
+  const categoryById = new Map<string, string>();
 
   await Promise.all(
     TOOLKITS.map(async (toolkit) => {
-      const existing = getToolkitDocsLink(toolkit);
-      if (existing) {
+      const data = await readToolkitData(toolkit.id);
+      if (!data) {
         return;
       }
 
-      const data = await readToolkitData(toolkit.id);
-      if (data?.metadata?.docsLink) {
-        docsLinkById.set(
-          normalizeToolkitId(toolkit.id),
-          data.metadata.docsLink
-        );
+      const key = normalizeToolkitId(toolkit.id);
+      if (data.metadata?.docsLink) {
+        docsLinkById.set(key, data.metadata.docsLink);
+      }
+      if (data.metadata?.category) {
+        categoryById.set(key, data.metadata.category);
       }
     })
   );
 
   const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((toolkit) => {
+    const key = normalizeToolkitId(toolkit.id);
     const existing = getToolkitDocsLink(toolkit);
-    const docsLink =
-      existing ?? docsLinkById.get(normalizeToolkitId(toolkit.id));
+    const docsLink = existing ?? docsLinkById.get(key);
+    // Toolkit JSON is source of truth for category (same as route generation).
+    const category = categoryById.get(key) ?? toolkit.category;
 
-    return docsLink ? { ...toolkit, docsLink } : toolkit;
+    return {
+      ...toolkit,
+      ...(docsLink ? { docsLink } : {}),
+      ...(category ? { category } : {}),
+    };
   });
 
   return [...dsToolkits, ...PARTNER_TOOLKITS];

@@ -1,23 +1,13 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
+import {
+  INTEGRATION_CATEGORIES,
+  type IntegrationCategory,
+  normalizeCategory,
+} from "./toolkit-category";
 import { readToolkitData, readToolkitIndex } from "./toolkit-data";
 import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
-
-export const INTEGRATION_CATEGORIES = [
-  "productivity",
-  "social",
-  "entertainment",
-  "development",
-  "payments",
-  "search",
-  "sales",
-  "databases",
-  "customer-support",
-  "others",
-] as const;
-
-export type IntegrationCategory = (typeof INTEGRATION_CATEGORIES)[number];
 
 export type ToolkitCatalogEntry = {
   id: string;
@@ -41,18 +31,6 @@ const DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES: ToolkitCatalogEntry[] =
 
 const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> =>
   DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES;
-
-export function normalizeCategory(
-  value: string | null | undefined
-): IntegrationCategory {
-  if (!value) {
-    return "others";
-  }
-
-  return INTEGRATION_CATEGORIES.includes(value as IntegrationCategory)
-    ? (value as IntegrationCategory)
-    : "others";
-}
 
 /**
  * The canonical docs path for a toolkit: `/en/resources/integrations/<category>/

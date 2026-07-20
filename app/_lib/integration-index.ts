@@ -1,3 +1,4 @@
+import { normalizeCategory } from "./toolkit-category";
 import { getToolkitSlug, type ToolkitWithDocsLink } from "./toolkit-slug";
 
 const INTEGRATIONS_BASE = "/en/resources/integrations";
@@ -13,7 +14,7 @@ export function toIntegrationLink(toolkit: {
   category?: string | null;
 }): string {
   const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
-  const category = toolkit.category ?? "others";
+  const category = normalizeCategory(toolkit.category);
   return `${INTEGRATIONS_BASE}/${category}/${slug}`;
 }
 
