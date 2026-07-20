@@ -46,6 +46,7 @@ import { createMockMetadataSource } from "../sources/mock-metadata.js";
 import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver.js";
 import {
   createArcadeToolkitDataSource,
+  createCachedToolkitDataSource,
   createEngineToolkitDataSource,
   createMockToolkitDataSource,
   type IToolkitDataSource,
@@ -71,6 +72,7 @@ import {
 import { type ApiSource, resolveApiSource } from "./api-source.js";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
 import {
+  assertSafeCurrentToolkitSnapshot,
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
@@ -1156,13 +1158,15 @@ program
 
         // Create toolkit data source based on API source
         const apiSource = resolveApiSource(options);
-        const toolkitDataSource = createToolkitDataSourceForApi(
-          apiSource,
-          options,
-          metadataSource,
-          mockDataDir,
-          options.verbose,
-          spinner
+        const toolkitDataSource = createCachedToolkitDataSource(
+          createToolkitDataSourceForApi(
+            apiSource,
+            options,
+            metadataSource,
+            mockDataDir,
+            options.verbose,
+            spinner
+          )
         );
 
         const needsExamples = !options.skipExamples;
@@ -1333,6 +1337,10 @@ program
             }
             currentToolkitDataForDiff.set(id, data);
           }
+          assertSafeCurrentToolkitSnapshot(
+            currentToolkitDataForDiff.size,
+            previousToolkits?.size ?? 0
+          );
 
           // Detect changes
           const compareStartedAt = Date.now();
@@ -2091,13 +2099,15 @@ program
 
         // Create toolkit data source based on API source
         const apiSource = resolveApiSource(options);
-        const toolkitDataSource = createToolkitDataSourceForApi(
-          apiSource,
-          options,
-          metadataSource,
-          mockDataDir,
-          options.verbose,
-          spinner
+        const toolkitDataSource = createCachedToolkitDataSource(
+          createToolkitDataSourceForApi(
+            apiSource,
+            options,
+            metadataSource,
+            mockDataDir,
+            options.verbose,
+            spinner
+          )
         );
 
         const needsExamples = !options.skipExamples;
@@ -2674,13 +2684,15 @@ program
         });
 
         const apiSource = resolveApiSource(options);
-        const toolkitDataSource = createToolkitDataSourceForApi(
-          apiSource,
-          options,
-          metadataSource,
-          mockDataDir,
-          false, // not verbose during fetch
-          spinner
+        const toolkitDataSource = createCachedToolkitDataSource(
+          createToolkitDataSourceForApi(
+            apiSource,
+            options,
+            metadataSource,
+            mockDataDir,
+            false, // not verbose during fetch
+            spinner
+          )
         );
 
         // Fetch current data from API
@@ -2705,6 +2717,11 @@ program
         );
         const loadPreviousDurationMs = Date.now() - loadPreviousStartedAt;
         const previousToolkits = previousToolkitLoad.toolkits;
+
+        assertSafeCurrentToolkitSnapshot(
+          currentToolkitDataForDiff.size,
+          previousToolkits.size
+        );
 
         // Detect changes
         spinner.text = "Comparing tool definitions...";
