@@ -1,6 +1,7 @@
 import type { Toolkit } from "@arcadeai/design-system";
 import { TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import { PARTNER_TOOLKITS } from "@/app/_data/partner-toolkits";
+import { normalizeCategory } from "./toolkit-category";
 import { readToolkitData } from "./toolkit-data";
 import { normalizeToolkitId, type ToolkitWithDocsLink } from "./toolkit-slug";
 
@@ -16,6 +17,9 @@ const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
  * The full integrations catalog the index renders: design-system toolkits
  * (enriched with `docsLink` / `category` from their data file when present, so
  * card URLs match generated routes) plus docs-local partner toolkits.
+ *
+ * Toolkit JSON wins for both fields when present — same precedence as
+ * `listToolkitRoutes` / `getToolkitSlug`.
  */
 export const getToolkitsWithDocsLinks = async (): Promise<
   ToolkitWithDocsLink[]
@@ -42,15 +46,17 @@ export const getToolkitsWithDocsLinks = async (): Promise<
 
   const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((toolkit) => {
     const key = normalizeToolkitId(toolkit.id);
-    const existing = getToolkitDocsLink(toolkit);
-    const docsLink = existing ?? docsLinkById.get(key);
-    // Toolkit JSON is source of truth for category (same as route generation).
-    const category = categoryById.get(key) ?? toolkit.category;
+    const existingDocsLink = getToolkitDocsLink(toolkit);
+    // JSON first so card slugs match generated routes when DS metadata is stale.
+    const docsLink = docsLinkById.get(key) ?? existingDocsLink;
+    const category = normalizeCategory(
+      categoryById.get(key) ?? toolkit.category
+    );
 
     return {
       ...toolkit,
+      category,
       ...(docsLink ? { docsLink } : {}),
-      ...(category ? { category } : {}),
     };
   });
 
