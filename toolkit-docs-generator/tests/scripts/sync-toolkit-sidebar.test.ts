@@ -270,6 +270,51 @@ describe("buildToolkitInfoList", () => {
     expect(entry?.category).toBe("sales");
   });
 
+  it("maps unknown categories to the safe others directory", () => {
+    createToolkitJson("unsafe", {
+      id: "UnsafeToolkit",
+      label: "Unsafe",
+      metadata: {
+        category: "../../outside",
+        docsLink: "https://docs.arcade.dev/integrations/unsafe",
+      },
+    });
+
+    const [entry] = buildToolkitInfoList(TEST_DATA_DIR);
+
+    expect(entry?.category).toBe("others");
+  });
+
+  it("falls back when docsLink does not end in a safe slug", () => {
+    createToolkitJson("unsafe", {
+      id: "UnsafeToolkit",
+      label: "Unsafe",
+      metadata: {
+        category: "development",
+        docsLink: "https://docs.arcade.dev/bad%2Fslug",
+      },
+    });
+
+    const [entry] = buildToolkitInfoList(TEST_DATA_DIR);
+
+    expect(entry?.slug).toBe("unsafe-toolkit");
+  });
+
+  it("uses the shared normalized fallback for legacy toolkit IDs", () => {
+    createToolkitJson("unsafe", {
+      id: "Unsafe Toolkit",
+      label: "Unsafe",
+      metadata: {
+        category: "development",
+        docsLink: "https://docs.arcade.dev/bad%2Fslug",
+      },
+    });
+
+    const [entry] = buildToolkitInfoList(TEST_DATA_DIR);
+
+    expect(entry?.slug).toBe("unsafetoolkit");
+  });
+
   it("should dedupe entries that share a docsLink slug", () => {
     createToolkitJson("upclickapi", {
       id: "UpclickApi",
@@ -503,6 +548,22 @@ describe("generateCategoryMeta", () => {
     const result = generateCategoryMeta(toolkits, "others", "/preview");
 
     expect(result).toContain('title: "Test \\"Quoted\\" Label"');
+  });
+
+  it("should escape backslashes and newlines in labels", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "test",
+        slug: "test",
+        label: "Test\\Label\nNext",
+        category: "others",
+        navGroup: "optimized",
+      },
+    ];
+
+    const result = generateCategoryMeta(toolkits, "others", "/preview");
+
+    expect(result).toContain('title: "Test\\\\Label\\nNext"');
   });
 
   it("should handle empty array", () => {

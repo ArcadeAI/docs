@@ -28,6 +28,7 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
+import { getToolkitSlug } from "../../app/_lib/toolkit-slug";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -83,20 +84,12 @@ const CATEGORY_ORDER = [
   "customer-support",
   "others",
 ];
+const CATEGORY_SET = new Set(CATEGORY_ORDER);
 
 const CAPITAL_LETTER_REGEX = /([A-Z])/g;
 const FIRST_CHARACTER_REGEX = /^./;
-const CAMEL_BOUNDARY = /([a-z0-9])([A-Z])/g;
 
 const IDENTIFIER_KEY_REGEX = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-
-/**
- * Convert a CamelCase string to kebab-case.
- * Must stay in sync with toKebabCase in app/_lib/toolkit-slug.ts.
- */
-function toKebabCase(value: string): string {
-  return value.replace(CAMEL_BOUNDARY, "$1-$2").toLowerCase();
-}
 
 type ToolkitJson = {
   id?: string;
@@ -114,9 +107,11 @@ function renderObjectKey(key: string): string {
   if (IDENTIFIER_KEY_REGEX.test(key)) {
     return key;
   }
-  const escaped = key.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  return `"${escaped}"`;
+  return JSON.stringify(key);
 }
+
+const normalizeCategory = (category: string | null | undefined): string =>
+  category && CATEGORY_SET.has(category) ? category : "others";
 
 export type ToolkitInfo = {
   id: string;
@@ -231,21 +226,6 @@ function readToolkitJson(dataDir: string, slug: string): ToolkitJson | null {
   return null;
 }
 
-function getDocsSlugFromLink(docsLink?: string | null): string | null {
-  if (!docsLink) {
-    return null;
-  }
-
-  try {
-    const url = new URL(docsLink);
-    const segments = url.pathname.split("/").filter(Boolean);
-    return segments.at(-1) ?? null;
-  } catch {
-    const segments = docsLink.split("/").filter(Boolean);
-    return segments.at(-1) ?? null;
-  }
-}
-
 /**
  * Read toolkit JSON and extract label if available
  */
@@ -294,8 +274,13 @@ function resolveToolkitInfo(
 ): ToolkitInfoEntry | null {
   const jsonData = readToolkitJson(dataDir, slug);
   const toolkitId = jsonData?.id ?? slug;
-  const docsSlug =
-    getDocsSlugFromLink(jsonData?.metadata?.docsLink) ?? toKebabCase(toolkitId);
+  const docsSlug = getToolkitSlug({
+    id: toolkitId,
+    docsLink: jsonData?.metadata?.docsLink,
+  });
+  if (!docsSlug) {
+    return null;
+  }
   const designSystemToolkit = TOOLKITS.find(
     (t) => t.id.toLowerCase() === toolkitId.toLowerCase()
   );
@@ -306,8 +291,9 @@ function resolveToolkitInfo(
 
   // Keep sidebar routes aligned with static params: toolkit JSON is source of
   // truth for category, with design system as fallback when JSON is missing.
-  const category =
-    jsonData?.metadata?.category ?? designSystemToolkit?.category ?? "others";
+  const category = normalizeCategory(
+    jsonData?.metadata?.category ?? designSystemToolkit?.category
+  );
   const labelFromDesignSystem = designSystemToolkit?.label ?? null;
   const labelFromJson = jsonData?.label ?? jsonData?.name ?? null;
   const typeFromJson = jsonData?.metadata?.type ?? null;
@@ -382,6 +368,7 @@ export function generateCategoryMeta(
   category: string,
   integrationsBasePath: string
 ): string {
+  const safeCategory = normalizeCategory(category);
   const byLabel = (a: ToolkitInfo, b: ToolkitInfo) =>
     a.label.localeCompare(b.label);
 
@@ -393,11 +380,10 @@ export function generateCategoryMeta(
     .sort(byLabel);
 
   const renderEntry = (t: ToolkitInfo) => {
-    // Escape any quotes in the label
-    const escapedLabel = t.label.replace(/"/g, '\\"');
+    const href = `${integrationsBasePath}/${safeCategory}/${t.slug}`;
     return `  ${renderObjectKey(t.slug)}: {
-    title: "${escapedLabel}",
-    href: "${integrationsBasePath}/${category}/${t.slug}",
+    title: ${JSON.stringify(t.label)},
+    href: ${JSON.stringify(href)},
   }`;
   };
 
@@ -405,7 +391,7 @@ export function generateCategoryMeta(
     const key = `-- ${title}`;
     return `  ${renderObjectKey(key)}: {
     type: "separator",
-    title: "${title}",
+    title: ${JSON.stringify(title)},
   }`;
   };
 
@@ -460,7 +446,7 @@ export function generateMainMeta(activeCategories: string[]): string {
     .map((cat) => {
       const displayName = CATEGORY_NAMES[cat] || cat;
       return `  ${renderObjectKey(cat)}: {
-    title: "${displayName}",
+    title: ${JSON.stringify(displayName)},
   }`;
     })
     .join(",\n");
