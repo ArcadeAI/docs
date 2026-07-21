@@ -52,11 +52,11 @@ export function getToolkitCanonicalPath(toolkit: {
   id: string;
   category?: string | null;
   docsLink?: string | null;
-}): string {
+}): string | null {
   const category = normalizeCategory(toolkit.category);
   const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
   if (!slug) {
-    throw new Error(`Cannot build a canonical path for toolkit: ${toolkit.id}`);
+    return null;
   }
   return `/en/resources/integrations/${category}/${slug}`;
 }

@@ -1,13 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { MetadataRoute } from "next";
-import { listToolkitRoutes } from "./_lib/toolkit-static-params";
+import { listValidIntegrationLinks } from "./_lib/toolkit-static-params";
 
 const SITE_URL = process.env.SITE_URL ?? "https://docs.arcade.dev";
 const NORMALIZED_SITE_URL = SITE_URL.replace(/\/+$/, "");
 const APP_DIR = path.join(process.cwd(), "app");
 const SKIP_DIRS = new Set(["_meta", "_api", "_redirects", "api"]);
 const INDEX_SUFFIX_REGEX = /\/index$/;
+const OTHERS_INTEGRATION_PATH = "/resources/integrations/others/";
 let cachedRoutes: Promise<MetadataRoute.Sitemap> | null = null;
 
 async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
@@ -45,12 +46,19 @@ async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
 }
 
 async function collectToolkitRoutes(): Promise<MetadataRoute.Sitemap> {
-  const routes = await listToolkitRoutes();
-  return routes
-    .filter(({ category }) => category !== "others")
-    .map(({ category, toolkitId }) => ({
-      url: `${NORMALIZED_SITE_URL}/en/resources/integrations/${category}/${toolkitId}`,
-    }));
+  try {
+    // Reuse the shared valid-link helper so sitemap URLs match index cards.
+    // Drop `others` — those paths redirect away in next.config.ts.
+    const links = await listValidIntegrationLinks();
+    return [...links]
+      .filter((link) => !link.includes(OTHERS_INTEGRATION_PATH))
+      .map((link) => ({
+        url: `${NORMALIZED_SITE_URL}${link}`,
+      }));
+  } catch {
+    // Toolkit data missing/unreadable must not wipe the authored-page sitemap.
+    return [];
+  }
 }
 
 export default function sitemap(): Promise<MetadataRoute.Sitemap> {

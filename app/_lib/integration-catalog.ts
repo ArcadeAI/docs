@@ -35,10 +35,12 @@ export const getToolkitsWithDocsLinks = async (): Promise<
       }
 
       const key = normalizeToolkitId(toolkit.id);
-      if (data.metadata?.docsLink) {
+      // Preserve explicit empty strings so JSON wins over design-system values
+      // the same way route helpers use `??` (empty → others / no docsLink slug).
+      if (data.metadata?.docsLink !== undefined) {
         docsLinkById.set(key, data.metadata.docsLink);
       }
-      if (data.metadata?.category) {
+      if (data.metadata?.category !== undefined) {
         categoryById.set(key, data.metadata.category);
       }
     })
@@ -48,9 +50,11 @@ export const getToolkitsWithDocsLinks = async (): Promise<
     const key = normalizeToolkitId(toolkit.id);
     const existingDocsLink = getToolkitDocsLink(toolkit);
     // JSON first so card slugs match generated routes when DS metadata is stale.
-    const docsLink = docsLinkById.get(key) ?? existingDocsLink;
+    const docsLink = docsLinkById.has(key)
+      ? docsLinkById.get(key)
+      : existingDocsLink;
     const category = normalizeCategory(
-      categoryById.get(key) ?? toolkit.category
+      categoryById.has(key) ? categoryById.get(key) : toolkit.category
     );
 
     return {

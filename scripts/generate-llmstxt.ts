@@ -313,11 +313,15 @@ async function discoverToolkitPages(): Promise<
       if (allowedIds && !allowedIds.has(data.id)) {
         continue;
       }
-      const url = `${BASE_URL}${getToolkitCanonicalPath({
+      const canonical = getToolkitCanonicalPath({
         id: data.id,
         category: data.metadata?.category,
         docsLink: data.metadata?.docsLink,
-      })}`;
+      });
+      if (!canonical) {
+        continue;
+      }
+      const url = `${BASE_URL}${canonical}`;
       pagesByUrl.set(url, {
         path: path.relative(process.cwd(), filePath),
         url,

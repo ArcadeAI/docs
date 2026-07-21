@@ -1,20 +1,23 @@
 import { expect, test, vi } from "vitest";
 
-const { listToolkitRoutes } = vi.hoisted(() => ({
-  listToolkitRoutes: vi.fn(),
+const { listValidIntegrationLinks } = vi.hoisted(() => ({
+  listValidIntegrationLinks: vi.fn(),
 }));
 
 vi.mock("../app/_lib/toolkit-static-params", () => ({
-  listToolkitRoutes,
+  listValidIntegrationLinks,
 }));
 
-test("sitemap excludes toolkit routes that redirect to the integrations index", async () => {
+test("sitemap reuses valid integration links and excludes others", async () => {
   const previousSiteUrl = process.env.SITE_URL;
   process.env.SITE_URL = "https://example.test";
-  listToolkitRoutes.mockResolvedValue([
-    { category: "development", toolkitId: "github" },
-    { category: "others", toolkitId: "unknown-toolkit" },
-  ]);
+  listValidIntegrationLinks.mockResolvedValue(
+    new Set([
+      "/en/resources/integrations/development/github",
+      "/en/resources/integrations/others/unknown-toolkit",
+      "/en/resources/integrations/search/tavily",
+    ])
+  );
 
   try {
     const { default: sitemap } = await import("../app/sitemap");
@@ -22,6 +25,9 @@ test("sitemap excludes toolkit routes that redirect to the integrations index", 
 
     expect(urls).toContain(
       "https://example.test/en/resources/integrations/development/github"
+    );
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/search/tavily"
     );
     expect(urls).not.toContain(
       "https://example.test/en/resources/integrations/others/unknown-toolkit"

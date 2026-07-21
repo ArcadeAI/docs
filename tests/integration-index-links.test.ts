@@ -74,7 +74,9 @@ describe("resolveIndexToolkits (logic)", () => {
   ];
   const resolved = resolveIndexToolkits(catalog, validLinks);
   const byId = (id: string) => resolved.find((toolkit) => toolkit.id === id);
-  const links = resolved.map(toIntegrationLink);
+  const links = resolved
+    .map((toolkit) => toIntegrationLink(toolkit))
+    .filter((link): link is string => link !== null);
 
   test("drops a bare entry when its '-api' sibling owns the page", () => {
     expect(resolved.some((toolkit) => toolkit.id === "Alpha")).toBe(false);
@@ -140,13 +142,15 @@ describe("integrations index links (live data)", () => {
     const brokenClickable = resolved
       .filter((toolkit) => toolkit.hasPage)
       .map((toolkit) => toIntegrationLink(toolkit))
-      .filter((link) => !validLinks.has(link));
+      .filter((link): link is string => link !== null && !validLinks.has(link));
 
     expect(brokenClickable).toEqual([]);
   });
 
   test("every rendered card resolves to a unique link (duplicates collapse)", () => {
-    const links = resolved.map((toolkit) => toIntegrationLink(toolkit));
+    const links = resolved
+      .map((toolkit) => toIntegrationLink(toolkit))
+      .filter((link): link is string => link !== null);
     expect(links.length).toBe(new Set(links).size);
   });
 
@@ -403,8 +407,8 @@ describe("toolkit page canonical hygiene", () => {
           category: parsed.metadata?.category,
           docsLink: parsed.metadata?.docsLink,
         });
-        if (!validLinks.has(canonical)) {
-          orphans.push(`${file} → ${canonical}`);
+        if (!(canonical && validLinks.has(canonical))) {
+          orphans.push(`${file} → ${canonical ?? "(null)"}`);
         }
       }
       expect(orphans).toEqual([]);

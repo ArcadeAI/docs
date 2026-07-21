@@ -66,10 +66,10 @@ describe("toolkit static params", () => {
     expect(normalizeToolkitId("GitHub API")).toBe("githubapi");
   });
 
-  it("rejects canonical paths for toolkit IDs without a valid slug", () => {
-    expect(() =>
+  it("returns null canonical paths for toolkit IDs without a valid slug", () => {
+    expect(
       getToolkitCanonicalPath({ id: "---", category: "development" })
-    ).toThrow("Cannot build a canonical path");
+    ).toBeNull();
   });
 
   it("skips toolkit files whose IDs cannot form a route slug", async () => {

@@ -57,7 +57,7 @@ export function createToolkitDocsPage(category: IntegrationCategory) {
     const metadata: Metadata = {
       title: data.label || data.id,
       description: data.description || "Generated MCP server documentation.",
-      alternates: { canonical },
+      ...(canonical ? { alternates: { canonical } } : {}),
     };
 
     // Hidden toolkits stay reachable via the dynamic route (and render as

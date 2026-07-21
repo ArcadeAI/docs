@@ -22,23 +22,8 @@ test("sitemap lists expected URLs", async () => {
     // Known page should be present
     expect(urls).toContain("https://example.test/en/references/changelog");
 
-    const { listToolkitRoutes } = await import(
-      "../app/_lib/toolkit-static-params"
-    );
-    // Sitemap omits `others` — those paths redirect to the integrations index.
-    const toolkitUrls = (await listToolkitRoutes())
-      .filter(({ category }) => category !== "others")
-      .map(
-        ({ category, toolkitId }) =>
-          `https://example.test/en/resources/integrations/${category}/${toolkitId}`
-      );
-    expect(toolkitUrls.length).toBeGreaterThan(0);
-    for (const toolkitUrl of toolkitUrls) {
-      expect(urls).toContain(toolkitUrl);
-    }
-    expect(
-      urls.some((url) => url.includes("/resources/integrations/others/"))
-    ).toBe(false);
+    // Toolkit URL inclusion / others exclusion is covered in
+    // tests/sitemap-toolkit-routes.test.ts
 
     // No duplicates
     const duplicates = urls.filter(
