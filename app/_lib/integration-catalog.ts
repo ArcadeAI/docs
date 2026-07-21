@@ -13,6 +13,40 @@ const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
   return;
 };
 
+type JsonToolkitMetadata = {
+  docsLink?: string | null;
+  category?: string | null;
+};
+
+/**
+ * Apply toolkit JSON metadata onto a design-system catalog entry.
+ *
+ * Presence is nullish (`typeof === "string"`), not truthy — an explicit empty
+ * string in JSON must win over DS fields, matching `resolveToolkitRoute`'s `??`
+ * so card URLs stay aligned with `listValidIntegrationLinks`.
+ */
+export const mergeToolkitCatalogFields = (
+  toolkit: Toolkit,
+  jsonMetadata?: JsonToolkitMetadata
+): ToolkitWithDocsLink => {
+  const existingDocsLink = getToolkitDocsLink(toolkit);
+  const docsLink =
+    typeof jsonMetadata?.docsLink === "string"
+      ? jsonMetadata.docsLink
+      : existingDocsLink;
+  const category = normalizeCategory(
+    typeof jsonMetadata?.category === "string"
+      ? jsonMetadata.category
+      : toolkit.category
+  );
+
+  return {
+    ...toolkit,
+    category,
+    ...(docsLink !== undefined && docsLink !== null ? { docsLink } : {}),
+  };
+};
+
 /**
  * The full integrations catalog the index renders: design-system toolkits
  * (enriched with `docsLink` / `category` from their data file when present, so
@@ -24,41 +58,28 @@ const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
 export const getToolkitsWithDocsLinks = async (): Promise<
   ToolkitWithDocsLink[]
 > => {
-  const docsLinkById = new Map<string, string>();
-  const categoryById = new Map<string, string>();
+  const metadataById = new Map<string, JsonToolkitMetadata>();
 
   await Promise.all(
     TOOLKITS.map(async (toolkit) => {
       const data = await readToolkitData(toolkit.id);
-      if (!data) {
+      if (!data?.metadata) {
         return;
       }
 
-      const key = normalizeToolkitId(toolkit.id);
-      if (data.metadata?.docsLink) {
-        docsLinkById.set(key, data.metadata.docsLink);
-      }
-      if (data.metadata?.category) {
-        categoryById.set(key, data.metadata.category);
-      }
+      metadataById.set(normalizeToolkitId(toolkit.id), {
+        docsLink: data.metadata.docsLink,
+        category: data.metadata.category,
+      });
     })
   );
 
-  const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((toolkit) => {
-    const key = normalizeToolkitId(toolkit.id);
-    const existingDocsLink = getToolkitDocsLink(toolkit);
-    // JSON first so card slugs match generated routes when DS metadata is stale.
-    const docsLink = docsLinkById.get(key) ?? existingDocsLink;
-    const category = normalizeCategory(
-      categoryById.get(key) ?? toolkit.category
-    );
-
-    return {
-      ...toolkit,
-      category,
-      ...(docsLink ? { docsLink } : {}),
-    };
-  });
+  const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((toolkit) =>
+    mergeToolkitCatalogFields(
+      toolkit,
+      metadataById.get(normalizeToolkitId(toolkit.id))
+    )
+  );
 
   return [...dsToolkits, ...PARTNER_TOOLKITS];
 };
