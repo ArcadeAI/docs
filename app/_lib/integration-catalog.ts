@@ -64,5 +64,11 @@ export const getToolkitsWithDocsLinks = async (): Promise<
     };
   });
 
-  return [...dsToolkits, ...PARTNER_TOOLKITS];
+  return [
+    ...dsToolkits,
+    ...PARTNER_TOOLKITS.map((toolkit) => ({
+      ...toolkit,
+      category: normalizeCategory(toolkit.category),
+    })),
+  ];
 };

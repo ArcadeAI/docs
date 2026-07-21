@@ -1,4 +1,5 @@
 import type { Toolkit } from "@arcadeai/design-system";
+import type { IntegrationCategory } from "./toolkit-category";
 
 const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]+/g;
 const CAMEL_BOUNDARY = /([a-z0-9])([A-Z])/g;
@@ -15,8 +16,12 @@ export type ToolkitSlugSource = {
  * docs-local entries carry them at runtime (e.g. partner toolkits that
  * render a Partner badge on cards). This type makes the properties explicit
  * so both server and client code can share it.
+ *
+ * `category` is widened to `IntegrationCategory` so docs routes can use
+ * `others` (design-system `ToolkitCategory` does not include that value).
  */
-export type ToolkitWithDocsLink = Toolkit & {
+export type ToolkitWithDocsLink = Omit<Toolkit, "category"> & {
+  category: IntegrationCategory;
   docsLink?: string | null;
   isPartner?: boolean;
 };
