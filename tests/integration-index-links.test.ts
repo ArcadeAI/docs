@@ -74,13 +74,23 @@ describe("resolveIndexToolkits (logic)", () => {
   ];
   const resolved = resolveIndexToolkits(catalog, validLinks);
   const byId = (id: string) => resolved.find((toolkit) => toolkit.id === id);
-  const links = resolved
-    .map((toolkit) => toIntegrationLink(toolkit))
-    .filter((link): link is string => link !== null);
+  const links = resolved.map((toolkit) => toolkit.link);
 
   test("drops a bare entry when its '-api' sibling owns the page", () => {
     expect(resolved.some((toolkit) => toolkit.id === "Alpha")).toBe(false);
     expect(byId("AlphaApi")?.hasPage).toBe(true);
+  });
+
+  test("remaps a lone bare entry onto the -api page when no sibling owns it", () => {
+    const loneBare = resolveIndexToolkits(
+      [makeToolkit("Lone", "development", "lone")],
+      new Set([`${INTEGRATIONS}/development/lone-api`])
+    );
+
+    expect(loneBare).toHaveLength(1);
+    expect(loneBare[0]?.id).toBe("Lone");
+    expect(loneBare[0]?.hasPage).toBe(true);
+    expect(loneBare[0]?.link).toBe(`${INTEGRATIONS}/development/lone-api`);
   });
 
   test("keeps a toolkit without a page, but marks it non-clickable", () => {
@@ -141,16 +151,14 @@ describe("integrations index links (live data)", () => {
   test("no clickable card links to a page that does not exist", () => {
     const brokenClickable = resolved
       .filter((toolkit) => toolkit.hasPage)
-      .map((toolkit) => toIntegrationLink(toolkit))
-      .filter((link): link is string => link !== null && !validLinks.has(link));
+      .map((toolkit) => toolkit.link)
+      .filter((link) => !validLinks.has(link));
 
     expect(brokenClickable).toEqual([]);
   });
 
   test("every rendered card resolves to a unique link (duplicates collapse)", () => {
-    const links = resolved
-      .map((toolkit) => toIntegrationLink(toolkit))
-      .filter((link): link is string => link !== null);
+    const links = resolved.map((toolkit) => toolkit.link);
     expect(links.length).toBe(new Set(links).size);
   });
 

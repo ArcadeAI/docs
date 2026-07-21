@@ -5,10 +5,7 @@ import { cn } from "@arcadeai/design-system/lib/utils";
 import { Code2, MessageSquarePlus, Search } from "lucide-react";
 import Link from "next/link";
 import { ComingSoonProvider } from "@/app/_components/coming-soon-context";
-import {
-  type ResolvedIndexToolkit,
-  toIntegrationLink,
-} from "@/app/_lib/integration-index";
+import type { ResolvedIndexToolkit } from "@/app/_lib/integration-index";
 import { FiltersBar } from "./filters-bar";
 import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
@@ -170,10 +167,6 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
                 {filteredToolkits.map((toolkit) => {
-                  const link = toIntegrationLink(toolkit);
-                  if (!link) {
-                    return null;
-                  }
                   // Get icon with fallback for API toolkits (e.g., GithubApi → Github)
                   const IconComponent = getToolkitIconWithFallback(toolkit.id);
                   // Use publicIconUrl from Design System as additional fallback
@@ -195,7 +188,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                       isPartner={toolkit.isPartner}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
-                      link={link}
+                      link={toolkit.link}
                       name={toolkit.label}
                       type={toolkit.type}
                     />
