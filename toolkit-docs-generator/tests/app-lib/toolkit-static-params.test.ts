@@ -6,6 +6,7 @@ import { normalizeToolkitId } from "../../../app/_lib/toolkit-slug";
 import {
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
+  listValidIntegrationLinks,
   type ToolkitCatalogEntry,
 } from "../../../app/_lib/toolkit-static-params";
 
@@ -227,7 +228,7 @@ describe("toolkit static params", () => {
     });
   });
 
-  it('maps unknown categories to "others"', async () => {
+  it('maps unknown categories to "others" in routes', async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [{ id: "Github", category: "weird" }]);
 
@@ -237,6 +238,26 @@ describe("toolkit static params", () => {
       });
 
       expect(routes).toEqual([{ toolkitId: "github", category: "others" }]);
+    });
+  });
+
+  it("excludes others from clickable valid integration links", async () => {
+    await withTempDir(async (dir) => {
+      await writeIndex(dir, [
+        { id: "Github", category: "weird" },
+        { id: "Gmail", category: "productivity" },
+      ]);
+
+      const links = await listValidIntegrationLinks({
+        dataDir: dir,
+        toolkitsCatalog: [],
+      });
+
+      expect(links.has("/en/resources/integrations/productivity/gmail")).toBe(
+        true
+      );
+      expect(links.has("/en/resources/integrations/others/github")).toBe(false);
+      expect([...links].some((link) => link.includes("/others/"))).toBe(false);
     });
   });
 });

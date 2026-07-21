@@ -21,6 +21,25 @@ export const INTEGRATION_CATEGORIES = [
 
 export type IntegrationCategory = (typeof INTEGRATION_CATEGORIES)[number];
 
+/**
+ * Categories that have a real `app/.../integrations/<category>/[toolkitId]`
+ * route. `"others"` remains in `INTEGRATION_CATEGORIES` as the normalize
+ * fallback for stable card identity, but `next.config.ts` redirects
+ * `/integrations/others/*` to the index — so it is never clickable.
+ */
+export const ROUTABLE_INTEGRATION_CATEGORIES = INTEGRATION_CATEGORIES.filter(
+  (category): category is Exclude<IntegrationCategory, "others"> =>
+    category !== "others"
+);
+
+export function isRoutableIntegrationCategory(
+  category: string
+): category is Exclude<IntegrationCategory, "others"> {
+  return (ROUTABLE_INTEGRATION_CATEGORIES as readonly string[]).includes(
+    category
+  );
+}
+
 export function normalizeCategory(
   value: string | null | undefined
 ): IntegrationCategory {

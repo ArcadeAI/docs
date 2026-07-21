@@ -2,9 +2,10 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import {
-  INTEGRATION_CATEGORIES,
   type IntegrationCategory,
+  isRoutableIntegrationCategory,
   normalizeCategory,
+  ROUTABLE_INTEGRATION_CATEGORIES,
 } from "./toolkit-category";
 import { readToolkitData, readToolkitIndex } from "./toolkit-data";
 import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
@@ -198,12 +199,13 @@ const PAGE_FILE_NAMES = new Set(["page.mdx", "page.tsx"]);
  * Authored static integration pages (e.g. partner pages like `search/tavily`
  * and `tool-feedback`) live next to the dynamic `[toolkitId]` routes. They are
  * real pages but are not part of `listToolkitRoutes`, so enumerate them from
- * disk under the known integration categories.
+ * disk under the routable integration categories (never `"others"`, which
+ * redirects to the index).
  */
 const listStaticIntegrationLinks = async (): Promise<string[]> => {
   const links: string[] = [];
 
-  for (const category of INTEGRATION_CATEGORIES) {
+  for (const category of ROUTABLE_INTEGRATION_CATEGORIES) {
     const categoryDir = join(INTEGRATIONS_APP_DIR, category);
     try {
       const slugs = await readdir(categoryDir, { withFileTypes: true });
@@ -228,18 +230,26 @@ const listStaticIntegrationLinks = async (): Promise<string[]> => {
  * The full set of links the integrations index may point at and that actually
  * resolve: dynamic toolkit routes plus authored static pages. Used to decide
  * whether a catalog card should be clickable.
+ *
+ * `"others"` routes are excluded — `next.config.ts` redirects
+ * `/integrations/others/*` to the index, and there is no `[toolkitId]` page
+ * under that category.
  */
 export async function listValidIntegrationLinks(options?: {
   dataDir?: string;
   toolkitsCatalog?: ToolkitCatalogEntry[];
 }): Promise<Set<string>> {
   const routes = await listToolkitRoutes(options);
-  const links = new Set<string>(
-    routes.map(
-      (route) =>
-        `/en/resources/integrations/${route.category}/${route.toolkitId}`
-    )
-  );
+  const links = new Set<string>();
+
+  for (const route of routes) {
+    if (!isRoutableIntegrationCategory(route.category)) {
+      continue;
+    }
+    links.add(
+      `/en/resources/integrations/${route.category}/${route.toolkitId}`
+    );
+  }
 
   for (const staticLink of await listStaticIntegrationLinks()) {
     links.add(staticLink);

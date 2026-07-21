@@ -1,4 +1,7 @@
-import { normalizeCategory } from "./toolkit-category";
+import {
+  isRoutableIntegrationCategory,
+  normalizeCategory,
+} from "./toolkit-category";
 import { getToolkitSlug, type ToolkitWithDocsLink } from "./toolkit-slug";
 
 const INTEGRATIONS_BASE = "/en/resources/integrations";
@@ -7,6 +10,9 @@ const INTEGRATIONS_BASE = "/en/resources/integrations";
  * The integrations link a toolkit card points to: `/en/resources/integrations/
  * <category>/<slug>`. Mirrors the slug + category logic used to generate the
  * dynamic `[toolkitId]` routes so cards and pages agree.
+ *
+ * Unknown categories normalize to `"others"` for a stable identity, but those
+ * URLs are redirect-only (`next.config.ts`) — see `resolveIndexToolkits`.
  */
 export function toIntegrationLink(toolkit: {
   id: string;
@@ -34,6 +40,8 @@ export type ResolvedIndexToolkit = ToolkitWithDocsLink & { hasPage: boolean };
  *   - de-dupes entries that resolve to the same URL (e.g. Notion/NotionToolkit),
  *   - flags the rest with `hasPage` so the caller can render doc-less toolkits
  *     as non-clickable cards instead of as broken links.
+ *   - never marks `"others"` links clickable — that category redirects to the
+ *     integrations index and has no `[toolkitId]` route.
  */
 export function resolveIndexToolkits(
   toolkits: ToolkitWithDocsLink[],
@@ -49,7 +57,10 @@ export function resolveIndexToolkits(
     }
 
     const link = toIntegrationLink(toolkit);
-    const hasPage = validLinks.has(link);
+    const category = normalizeCategory(toolkit.category);
+    // `/others/...` is redirect-only; never treat it as a real page.
+    const hasPage =
+      isRoutableIntegrationCategory(category) && validLinks.has(link);
 
     // A bare duplicate of a real "-api" toolkit: drop it; the real card stays.
     if (!hasPage && validLinks.has(`${link}-api`)) {

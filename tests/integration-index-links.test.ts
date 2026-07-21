@@ -93,7 +93,7 @@ describe("resolveIndexToolkits (logic)", () => {
     expect(resolved.some((toolkit) => toolkit.id === "Zeta")).toBe(false);
   });
 
-  test("normalizes unknown categories to others so cards match routes", () => {
+  test("normalizes unknown categories to others for a stable card identity", () => {
     const link = toIntegrationLink(
       makeToolkit("Mystery", "not-a-real-category", "mystery")
     );
@@ -103,6 +103,18 @@ describe("resolveIndexToolkits (logic)", () => {
   test("treats empty-string category as others", () => {
     const link = toIntegrationLink(makeToolkit("BlankCat", "", "blank-cat"));
     expect(link).toBe(`${INTEGRATIONS}/others/blank-cat`);
+  });
+
+  test("never marks others URLs clickable (redirect-only category)", () => {
+    // Even if validLinks mistakenly includes /others/..., cards must stay
+    // non-clickable — next.config redirects those paths to the index.
+    const mystery = makeToolkit("Mystery", "not-a-real-category", "mystery");
+    const resolvedOthers = resolveIndexToolkits(
+      [mystery],
+      new Set([`${INTEGRATIONS}/others/mystery`])
+    );
+    expect(resolvedOthers).toHaveLength(1);
+    expect(resolvedOthers[0]?.hasPage).toBe(false);
   });
 
   test("collapses entries that resolve to the same link", () => {
