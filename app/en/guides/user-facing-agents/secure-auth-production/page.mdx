@@ -32,11 +32,14 @@ When you authorize a tool, you'll be prompted to sign in to your Arcade.dev acco
 The Arcade.dev user verifier helps keep your auth flows secure while you are building and testing your agent or app. When you're ready to share your work with others, implement a [custom user verifier](#build-a-custom-user-verifier) so your users don't need to sign in to Arcade.dev.
 
 <Callout type="info">
-  Arcade's default OAuth apps can *only* be used with the Arcade user verifier.
-  If you are building a multi-user production app, you must obtain your own
-  OAuth app credentials and add them to Arcade. For example, see our docs on
-  [configuring Google auth in the Arcade
-  Dashboard](/references/auth-providers/google#access-the-arcade-dashboard).
+  Arcade's default OAuth apps can *only* be used with the Arcade user verifier,
+  which requires each end user to sign in to an Arcade account that is a member
+  of your project. This ties end-user authorization to project membership, which
+  is why the default OAuth apps are intended for development and single-tenant
+  use. For a multi-user production app, add your own [OAuth app
+  credentials](/references/auth-providers) and pair them with a [custom user
+  verifier](#build-a-custom-user-verifier), so your end users are verified by
+  your app rather than by project membership.
 </Callout>
 
 ## Build a custom user verifier
@@ -267,8 +270,11 @@ In the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings)
 
 <Callout type="info">
   Arcade's default OAuth apps *only* support the Arcade user verifier.
-  Authorization flows using Arcade's default OAuth apps will use the Arcade user
-  verifier even if you have a custom verifier route set up.
+  Authorization flows that use a default OAuth app always fall back to the Arcade
+  user verifier, even if you have a custom verifier route configured. Because the
+  Arcade user verifier requires the end user to be a signed-in member of your
+  project, authorizations through a default OAuth app are always gated by project
+  membership.
 </Callout>
 
 </Steps>
