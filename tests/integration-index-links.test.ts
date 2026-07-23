@@ -8,6 +8,7 @@ import {
   resolveIndexToolkits,
   toIntegrationLink,
 } from "@/app/_lib/integration-index";
+import { INTEGRATION_CATEGORIES } from "@/app/_lib/toolkit-category";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
 import {
   getToolkitSlug,
@@ -15,7 +16,6 @@ import {
 } from "@/app/_lib/toolkit-slug";
 import {
   getToolkitCanonicalPath,
-  INTEGRATION_CATEGORIES,
   listToolkitRoutes,
   listValidIntegrationLinks,
 } from "@/app/_lib/toolkit-static-params";
@@ -74,11 +74,23 @@ describe("resolveIndexToolkits (logic)", () => {
   ];
   const resolved = resolveIndexToolkits(catalog, validLinks);
   const byId = (id: string) => resolved.find((toolkit) => toolkit.id === id);
-  const links = resolved.map(toIntegrationLink);
+  const links = resolved.map((toolkit) => toolkit.link);
 
   test("drops a bare entry when its '-api' sibling owns the page", () => {
     expect(resolved.some((toolkit) => toolkit.id === "Alpha")).toBe(false);
     expect(byId("AlphaApi")?.hasPage).toBe(true);
+  });
+
+  test("remaps a lone bare entry onto the -api page when no sibling owns it", () => {
+    const loneBare = resolveIndexToolkits(
+      [makeToolkit("Lone", "development", "lone")],
+      new Set([`${INTEGRATIONS}/development/lone-api`])
+    );
+
+    expect(loneBare).toHaveLength(1);
+    expect(loneBare[0]?.id).toBe("Lone");
+    expect(loneBare[0]?.hasPage).toBe(true);
+    expect(loneBare[0]?.link).toBe(`${INTEGRATIONS}/development/lone-api`);
   });
 
   test("keeps a toolkit without a page, but marks it non-clickable", () => {
@@ -93,11 +105,33 @@ describe("resolveIndexToolkits (logic)", () => {
     expect(resolved.some((toolkit) => toolkit.id === "Zeta")).toBe(false);
   });
 
+  test("normalizes unknown categories to others so cards match routes", () => {
+    const link = toIntegrationLink(
+      makeToolkit("Mystery", "not-a-real-category", "mystery")
+    );
+    expect(link).toBe(`${INTEGRATIONS}/others/mystery`);
+  });
+
+  test("treats empty-string category as others", () => {
+    const link = toIntegrationLink(makeToolkit("BlankCat", "", "blank-cat"));
+    expect(link).toBe(`${INTEGRATIONS}/others/blank-cat`);
+  });
+
   test("collapses entries that resolve to the same link", () => {
     expect(
       links.filter((link) => link === `${INTEGRATIONS}/productivity/delta`)
     ).toHaveLength(1);
     expect(links.length).toBe(new Set(links).size);
+  });
+
+  test("drops catalog entries whose IDs cannot form a route slug", () => {
+    const invalid = {
+      ...makeToolkit("---", "development", "invalid"),
+      id: "---",
+      docsLink: null,
+    };
+
+    expect(resolveIndexToolkits([invalid], new Set())).toEqual([]);
   });
 });
 
@@ -117,14 +151,14 @@ describe("integrations index links (live data)", () => {
   test("no clickable card links to a page that does not exist", () => {
     const brokenClickable = resolved
       .filter((toolkit) => toolkit.hasPage)
-      .map((toolkit) => toIntegrationLink(toolkit))
+      .map((toolkit) => toolkit.link)
       .filter((link) => !validLinks.has(link));
 
     expect(brokenClickable).toEqual([]);
   });
 
   test("every rendered card resolves to a unique link (duplicates collapse)", () => {
-    const links = resolved.map((toolkit) => toIntegrationLink(toolkit));
+    const links = resolved.map((toolkit) => toolkit.link);
     expect(links.length).toBe(new Set(links).size);
   });
 
@@ -381,8 +415,8 @@ describe("toolkit page canonical hygiene", () => {
           category: parsed.metadata?.category,
           docsLink: parsed.metadata?.docsLink,
         });
-        if (!validLinks.has(canonical)) {
-          orphans.push(`${file} → ${canonical}`);
+        if (!(canonical && validLinks.has(canonical))) {
+          orphans.push(`${file} → ${canonical ?? "(null)"}`);
         }
       }
       expect(orphans).toEqual([]);

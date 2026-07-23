@@ -22,6 +22,9 @@ test("sitemap lists expected URLs", async () => {
     // Known page should be present
     expect(urls).toContain("https://example.test/en/references/changelog");
 
+    // Toolkit URL inclusion / others exclusion is covered in
+    // tests/sitemap-toolkit-routes.test.ts
+
     // No duplicates
     const duplicates = urls.filter(
       (url, index, arr) => arr.indexOf(url) !== index

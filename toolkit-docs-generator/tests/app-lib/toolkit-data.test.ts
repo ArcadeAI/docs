@@ -73,6 +73,38 @@ describe("toolkit data loader", () => {
     });
   });
 
+  it("retains valid toolkit index entries when another entry is malformed", async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, "index.json"),
+        JSON.stringify({
+          generatedAt: "2026-01-15T00:00:00.000Z",
+          version: "1.0.0",
+          toolkits: [
+            {
+              id: "Github",
+              label: "GitHub",
+              version: "1.0.0",
+              category: "development",
+              toolCount: 3,
+              authType: "oauth2",
+            },
+            { category: "development" },
+          ],
+        }),
+        "utf-8"
+      );
+
+      await expect(readToolkitIndex({ dataDir: dir })).resolves.toMatchObject({
+        toolkits: [
+          {
+            id: "Github",
+          },
+        ],
+      });
+    });
+  });
+
   it("finds toolkit data by docsLink slug when file name doesn't match", async () => {
     await withTempDir(async (dir) => {
       // File is named posthogapi.json (normalized) but we look up by the

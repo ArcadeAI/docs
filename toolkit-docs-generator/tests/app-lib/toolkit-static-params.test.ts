@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { normalizeToolkitId } from "../../../app/_lib/toolkit-slug";
 import {
+  getToolkitCanonicalPath,
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
   type ToolkitCatalogEntry,
@@ -26,7 +27,15 @@ const writeIndex = async (
     {
       generatedAt: "2026-01-15T00:00:00.000Z",
       version: "1.0.0",
-      toolkits,
+      toolkits: toolkits.map(({ id, category }) => ({
+        id,
+        label: id,
+        version: "1.0.0",
+        category: category ?? "others",
+        type: "arcade",
+        toolCount: 1,
+        authType: "none",
+      })),
     },
     null,
     2
@@ -57,6 +66,29 @@ describe("toolkit static params", () => {
     expect(normalizeToolkitId("GitHub API")).toBe("githubapi");
   });
 
+  it("returns null canonical paths for toolkit IDs without a valid slug", () => {
+    expect(
+      getToolkitCanonicalPath({ id: "---", category: "development" })
+    ).toBeNull();
+  });
+
+  it("skips toolkit files whose IDs cannot form a route slug", async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, "invalid.json"),
+        JSON.stringify({
+          id: "---",
+          label: "Invalid",
+          metadata: { category: "development" },
+        })
+      );
+
+      await expect(
+        listToolkitRoutes({ dataDir: dir, toolkitsCatalog: [] })
+      ).resolves.toEqual([]);
+    });
+  });
+
   it("lists toolkit routes from the index", async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [
@@ -75,6 +107,27 @@ describe("toolkit static params", () => {
           { toolkitId: "gmail", category: "productivity" },
         ])
       );
+    });
+  });
+
+  it("returns toolkit routes in deterministic category and slug order", async () => {
+    await withTempDir(async (dir) => {
+      await writeIndex(dir, [
+        { id: "Slack", category: "social" },
+        { id: "Gmail", category: "productivity" },
+        { id: "Github", category: "development" },
+      ]);
+
+      const routes = await listToolkitRoutes({
+        dataDir: dir,
+        toolkitsCatalog: [],
+      });
+
+      expect(routes).toEqual([
+        { toolkitId: "github", category: "development" },
+        { toolkitId: "gmail", category: "productivity" },
+        { toolkitId: "slack", category: "social" },
+      ]);
     });
   });
 
