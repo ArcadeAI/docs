@@ -11,6 +11,7 @@ import { SignupLink } from "../../analytics";
 import TabbedCodeBlock from "../../tabbed-code-block";
 import TableOfContents from "../../table-of-contents";
 import ToolFooter from "../../tool-footer";
+import { sortDocumentationChunks } from "../lib/documentation-chunks";
 import type {
   DocumentationChunk,
   DocumentationChunkLocation,
@@ -240,63 +241,12 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
 }
 
 /**
- * Default priority for chunks without an explicit priority
- */
-const DEFAULT_CHUNK_PRIORITY = 100;
-
-/**
- * Compare two chunks by header alphabetically.
- * Returns a negative/positive number if both have headers,
- * -1 if only a has a header, 1 if only b has a header,
- * or null if neither has a header (fall through to next criterion).
- */
-function compareByHeader(
-  a: DocumentationChunk,
-  b: DocumentationChunk
-): number | null {
-  const headerA = (a.header ?? "").replace(HEADER_PREFIX_REGEX, "").trim();
-  const headerB = (b.header ?? "").replace(HEADER_PREFIX_REGEX, "").trim();
-
-  if (headerA && headerB) {
-    return headerA.localeCompare(headerB);
-  }
-  if (headerA) {
-    return -1;
-  }
-  if (headerB) {
-    return 1;
-  }
-  return null;
-}
-
-/**
  * Sorts documentation chunks deterministically by:
  * 1. Priority (lower = earlier)
  * 2. Header alphabetically (for chunks with same priority)
  * 3. Content string (for chunks with same priority and no header)
  */
-export function sortChunksDeterministically(
-  chunks: readonly DocumentationChunk[]
-): DocumentationChunk[] {
-  return [...chunks].sort((a, b) => {
-    const priorityDiff =
-      (a.priority ?? DEFAULT_CHUNK_PRIORITY) -
-      (b.priority ?? DEFAULT_CHUNK_PRIORITY);
-
-    if (priorityDiff !== 0) {
-      return priorityDiff;
-    }
-
-    const headerResult = compareByHeader(a, b);
-    if (headerResult !== null) {
-      return headerResult;
-    }
-
-    // Finally, sort by content for stability.
-    // Some call sites pass lightweight chunk objects where content is optional.
-    return (a.content ?? "").localeCompare(b.content ?? "");
-  });
-}
+export const sortChunksDeterministically = sortDocumentationChunks;
 
 /**
  * DocumentationChunkRenderer

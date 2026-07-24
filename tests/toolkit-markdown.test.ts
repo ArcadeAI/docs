@@ -22,6 +22,15 @@ const fixture: ToolkitData = {
     docsLink: "",
   },
   auth: null,
+  documentationChunks: [
+    {
+      type: "markdown",
+      location: "description",
+      position: "after",
+      content: "## Toolkit setup\n\nConfigure the toolkit first.",
+      priority: 10,
+    },
+  ],
   customImports: [],
   subPages: [],
   tools: [
@@ -43,7 +52,15 @@ const fixture: ToolkitData = {
       secrets: ["API_KEY"],
       secretsInfo: [],
       output: { type: "json", description: "The result" },
-      documentationChunks: [],
+      documentationChunks: [
+        {
+          type: "warning",
+          location: "parameters",
+          position: "before",
+          content: "Use a verified recipient.",
+          priority: 20,
+        },
+      ],
       codeExample: {
         toolName: "Demo.DoThing",
         parameters: {
@@ -71,5 +88,233 @@ describe("toToolkitMarkdown", () => {
     expect(md).toContain("scope.a");
     expect(md).toContain("API_KEY");
     expect(md).toContain("Example input");
+  });
+
+  test("includes toolkit and tool documentation chunks", () => {
+    expect(md).toContain("## Toolkit setup");
+    expect(md).toContain("Configure the toolkit first.");
+    expect(md).toContain("Use a verified recipient.");
+    expect(md.indexOf("## Toolkit setup")).toBeLessThan(md.indexOf("## Tools"));
+    expect(md.indexOf("Use a verified recipient.")).toBeLessThan(
+      md.indexOf("**Parameters**")
+    );
+  });
+
+  test("preserves repeated chunk content at different locations", () => {
+    const repeated = "Repeat this guidance.";
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "info",
+          location: "description",
+          position: "after",
+          content: repeated,
+        },
+        {
+          type: "warning",
+          location: "auth",
+          position: "before",
+          content: repeated,
+        },
+      ],
+    });
+
+    expect(output.split(repeated)).toHaveLength(3);
+  });
+
+  test("uses replacement chunks instead of the default section", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      tools: [
+        {
+          ...fixture.tools[0],
+          documentationChunks: [
+            {
+              type: "markdown",
+              location: "parameters",
+              position: "replace",
+              content: "Custom parameter guidance.",
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(output).toContain("Custom parameter guidance.");
+    expect(output).not.toContain("| Name | Type | Required | Description |");
+  });
+
+  test("uses toolkit description chunks around the default description", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "description",
+          position: "before",
+          content: "Read this first.",
+        },
+        {
+          type: "markdown",
+          location: "description",
+          position: "replace",
+          content: "Custom toolkit description.",
+        },
+        {
+          type: "markdown",
+          location: "description",
+          position: "after",
+          content: "Read this last.",
+        },
+      ],
+    });
+
+    expect(output).toContain("Read this first.");
+    expect(output).toContain("Custom toolkit description.");
+    expect(output).toContain("Read this last.");
+    expect(output).not.toContain("A demo toolkit.");
+    expect(output.indexOf("Read this first.")).toBeLessThan(
+      output.indexOf("Custom toolkit description.")
+    );
+    expect(output.indexOf("Custom toolkit description.")).toBeLessThan(
+      output.indexOf("Read this last.")
+    );
+  });
+
+  test("renders replacement chunks at toolkit-level locations", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "header",
+          position: "before",
+          content: "Header first.",
+        },
+        {
+          type: "markdown",
+          location: "header",
+          position: "replace",
+          content: "Header replacement.",
+        },
+        {
+          type: "markdown",
+          location: "header",
+          position: "after",
+          content: "Header last.",
+        },
+        {
+          type: "markdown",
+          location: "auth",
+          position: "replace",
+          content: "Custom auth guidance.",
+        },
+        {
+          type: "markdown",
+          location: "before_available_tools",
+          position: "replace",
+          content: "Custom tool introduction.",
+        },
+        {
+          type: "markdown",
+          location: "after_available_tools",
+          position: "replace",
+          content: "Custom tool footer.",
+        },
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "replace",
+          content: "Custom section.",
+        },
+      ],
+    });
+
+    expect(output).toContain("Custom auth guidance.");
+    expect(output).toContain("Custom tool introduction.");
+    expect(output).toContain("Custom tool footer.");
+    expect(output).toContain("Custom section.");
+    expect(output.indexOf("Header first.")).toBeLessThan(
+      output.indexOf("Header replacement.")
+    );
+    expect(output.indexOf("Header replacement.")).toBeLessThan(
+      output.indexOf("Header last.")
+    );
+    expect(output.indexOf("Custom tool footer.")).toBeGreaterThan(
+      output.indexOf("### Demo.DoThing")
+    );
+  });
+
+  test("ignores malformed chunks without content", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "description",
+          position: "before",
+          content: undefined,
+        } as unknown as (typeof fixture.documentationChunks)[number],
+      ],
+    });
+
+    expect(output).toContain("A demo toolkit.");
+  });
+
+  test("empty replacement chunks still suppress the default section", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      tools: [
+        {
+          ...fixture.tools[0],
+          documentationChunks: [
+            {
+              type: "markdown",
+              location: "parameters",
+              position: "replace",
+              content: "   ",
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(output).not.toContain("| Name | Type | Required | Description |");
+  });
+
+  test("sorts headed chunks before unheaded chunks like the page renderer", () => {
+    const output = toToolkitMarkdown({
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "before",
+          content: "No header",
+        },
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "before",
+          content: "Section B",
+          header: "## B",
+        },
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "before",
+          content: "Section A",
+          header: "## A",
+        },
+      ],
+    });
+
+    expect(output.indexOf("Section A")).toBeLessThan(
+      output.indexOf("Section B")
+    );
+    expect(output.indexOf("Section B")).toBeLessThan(
+      output.indexOf("No header")
+    );
   });
 });
