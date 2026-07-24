@@ -9,15 +9,17 @@ const SUPPORTED_LOCALES = ["en", "es", "pt-BR"];
 
 const ATTRIBUTION_COOKIE_MAX_AGE_DAYS = 30;
 
-// Share the cookie across arcade.dev subdomains (docs → identity-ui). Derive the
-// registrable domain from the host: `docs.arcade.dev` → `.arcade.dev`. A
-// single-label host like `localhost` can't carry a Domain attribute, so emit a
-// host-only cookie in local dev.
-// ponytail: eTLD+1 = last two labels — correct for arcade.dev / localhost, not
-// multi-part TLDs (co.uk); revisit if we ever serve on one.
+// Share the signup cookie across arcade.dev subdomains (docs → identity-ui) in
+// production. Everywhere else emit a host-only cookie (undefined domain): a
+// Domain attribute set to a public suffix like `vercel.app` (preview deploys)
+// — or a single-label host like `localhost` — is rejected by the browser.
+// `.arcade.dev` is the only cross-subdomain scope we ever need, so match it
+// explicitly rather than guessing the registrable domain from the host.
+const SHARED_COOKIE_DOMAIN = ".arcade.dev";
 function attributionCookieDomain(hostname: string): string | undefined {
-  const labels = hostname.split(".");
-  return labels.length >= 2 ? `.${labels.slice(-2).join(".")}` : undefined;
+  return hostname === "arcade.dev" || hostname.endsWith(SHARED_COOKIE_DOMAIN)
+    ? SHARED_COOKIE_DOMAIN
+    : undefined;
 }
 
 // Capture signup attribution (utm_*/gclid/referrer) on the first docs page a
