@@ -1,0 +1,156 @@
+---
+title: "Roles & Permissions"
+description: "Who can do what in your Arcade organization and projects: the three built-in roles and exactly what each one can access."
+---
+
+import { Callout } from "nextra/components";
+
+# Roles and permissions
+
+Arcade grants access by role, at one of two levels: your organization, or an individual project. A person's role decides what they can see and change.
+
+Arcade ships three built-in roles:
+
+| Role | Scope | Summary |
+| -- | -- | -- |
+| **Org Admin** | Organization-wide | Runs the organization, and has full admin control over every project inside it. |
+| **Project Admin** | Per project | Owns a single project and everything in it. |
+| **Project Member** | Per project | Builds and runs on a project, but can't govern it. |
+
+## How access is organized
+
+**Your organization** is the top-level account. It holds your projects, your people, and your billing. One elevated role governs it: Org Admin.
+
+**A project** is a workspace for your MCP servers, gateways, tools, secrets, and connected users. Each person on a project is either a Project Admin or a Project Member.
+
+Two defaults shape everything below:
+
+- **Least privilege by default.** Invite a teammate as a Project Member, the lowest role, and grant more deliberately.
+- **Org Admins cover every project.** An Org Admin automatically has full Project Admin authority on every project in the organization, on top of the organization-wide settings. You never need to add them to a project individually.
+
+## The three roles
+
+### Org Admin
+
+Organization-wide. The highest level of access.
+
+- Create and remove projects
+- Manage organization members and their roles
+- Manage billing
+- Read the organization audit log
+- Configure auth providers, contextual access, and user sources once for the whole organization
+- Full Project Admin authority on every project
+
+### Project Admin
+
+Scoped to one project. Full control of that project.
+
+- Manage the project team and invitations
+- Manage API keys, secrets, and security settings
+- Configure MCP servers, gateways, deployments, and integrations
+- Read the project audit log and tool call history
+
+### Project Member
+
+Scoped to one project. The default role for new invitations.
+
+- Browse the tool catalog and run tools
+- Build and manage MCP servers, gateways, and deployments
+- Read secrets and user sources, but not change them
+- No access to API keys, invitations, audit logs, tool call history, auth providers, or contextual access
+
+## Permissions by role
+
+Access levels used in the tables below:
+
+- **View**: see and read
+- **Manage**: create, edit, and delete
+- **Run**: execute tools
+- **Revoke**: disconnect a connected user
+- **None**: no access
+
+### Organization
+
+These are the organization-wide settings. Only an Org Admin can reach them.
+
+| Area | Org Admin | Project Admin | Project Member |
+| -- | -- | -- | -- |
+| Organization settings (name, org-wide config) | View · Manage | None | None |
+| Projects (create and remove) | Manage | None | None |
+| Organization members (people and their roles) | View · Manage | None | None |
+| Billing (plan, usage, payment) | View · Manage | None | None |
+| Audit log (organization-wide activity history) | View | None | None |
+| Auth providers (org-wide OAuth 2.0 integrations) | View · Manage | None | None |
+| Contextual access (org-wide tool guardrails) | View · Manage | None | None |
+| User sources (org-wide end-user identity) | Manage | None | None |
+
+<Callout type="info">
+  Auth providers, contextual access, and user sources can be configured at both
+  levels. Set safe defaults once on the organization, and let individual
+  projects build on top.
+</Callout>
+
+### Within a project
+
+An Org Admin holds these on **every** project in the organization. A Project Admin holds them on the project they administer.
+
+| Area | Org Admin | Project Admin | Project Member |
+| -- | -- | -- | -- |
+| Project settings (name, description, configuration) | View · Manage | View · Manage | View |
+| Members (who is on the project) | View · Manage | View · Manage | View |
+| Invitations (who has been invited) | View · Manage | View · Manage | None |
+| [User verification](/guides/user-facing-agents/secure-auth-production) (end-user authorization checks) | View · Manage | View · Manage | None |
+| API keys (keys for calling Arcade) | View · Manage | View · Manage | None |
+| Audit log (project activity history) | View | View | None |
+| Tool call history (past executions, with inputs and outputs) | View | View | None |
+| Tools (browse the catalog, run tools) | View · Run | View · Run | View · Run |
+| MCP servers (deploy and manage servers) | View · Manage | View · Manage | View · Manage |
+| Deployments (server deployments) | View · Manage | View · Manage | View · Manage |
+| MCP gateways (federated multi-server endpoints) | View · Manage | View · Manage | View · Manage |
+| Secrets (credentials your tools use) | View · Manage | View · Manage | View |
+| Connected users (end users who authorized your app) | View · Revoke | View · Revoke | View · Revoke |
+| User sources (end-user identity providers) | View · Manage | View · Manage | View |
+| Auth providers (OAuth 2.0 integrations for tool access) | View · Manage | View · Manage | None |
+| Contextual access (tool guardrails, logic extensions) | View · Manage | View · Manage | None |
+
+<Callout type="warning">
+  A Project Member can read secrets and run any tool in the project. Treat
+  Project Member as a trusted builder role, not a read-only one. If you need
+  someone to browse without touching credentials, don't add them to a project
+  that holds production secrets.
+</Callout>
+
+Two rows behave differently from the rest:
+
+- **Connected users** support only viewing and revoking. There's nothing to create or edit, because your end users create these connections themselves when they authorize a tool.
+- **Audit log** and **tool call history** are read-only for everyone. Nobody can edit or delete them, by design. See [Audit Logs](/guides/audit-logs) for the dashboard and API.
+
+## How roles behave
+
+**Changes apply immediately.** Grant, change, or revoke a role and it takes effect on the person's next action. There's no waiting period, and no stale access after you remove someone.
+
+**No accidental over-granting.** You can only give someone a role up to your own level. A Project Admin can't mint an Org Admin, and nobody can quietly promote themselves.
+
+**One role per place.** Each person holds a single, clear role in a given organization or project, never a confusing stack of overlapping grants to reason about.
+
+**Least privilege by default.** People you invite arrive as Project Members. They can build and experiment, but governance surfaces stay closed until you deliberately grant more.
+
+## Assigning roles
+
+**Invite someone to a project.** Add teammates by email from the project's Members page, and choose Project Admin or Project Member as you invite.
+
+**Promote someone to Org Admin.** Use the organization's Members page. This grants full control of the whole organization and every project in it, so grant it sparingly.
+
+**Everyone else is an ordinary member.** People without the Org Admin role are ordinary organization members. Their access comes entirely from the project roles you give them. An organization membership on its own grants no project visibility.
+
+<Callout type="info">
+  Removing someone from a project revokes their access to it immediately, but
+  leaves them in the organization. To remove them from Arcade entirely, remove
+  them from the organization's Members page.
+</Callout>
+
+## Related
+
+- [Audit Logs](/guides/audit-logs): every administrative action, with a dashboard and REST API
+- [Contextual Access](/guides/contextual-access): tool guardrails and logic extensions
+- [User Sources](/guides/user-sources): connect Okta, Auth0, Clerk, Stytch, or Microsoft Entra ID
