@@ -1,0 +1,110 @@
+---
+title: "Supported MCP protocol versions"
+description: "Which MCP protocol versions Arcade gateways support, and what changes for clients that adopt 2026-07-28"
+---
+
+import { Callout } from "nextra/components";
+
+# Supported MCP protocol versions
+
+Arcade MCP Gateways support three MCP protocol versions: `2026-07-28`, `2025-11-25`, and `2025-06-18`. All three are fully supported today, none are deprecated, and there's no migration required to keep using the one your client already speaks.
+
+## Supported versions
+
+| Protocol version | Transport | Summary |
+|---|---|---|
+| `2026-07-28` | Sessionless | Tools only (`tools/list`, `tools/call`), including structured output. OAuth authorization challenges come back as an in-band MRTR url-mode elicitation instead of a transport error. |
+| `2025-11-25` | Session-based (`Mcp-Session-Id`) | Tools only. |
+| `2025-06-18` | Session-based (`Mcp-Session-Id`) | Tools only. |
+
+## How version selection works
+
+The gateway serves every version from the same URL. There's no separate endpoint or config flag per version:
+
+```
+https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}
+```
+
+The gateway picks which path to serve a request on from the `MCP-Protocol-Version` header the client sends, not from any project setting. This means:
+
+- Your gateway needs no configuration changes or migration to support any of the three versions.
+- Existing clients on `2025-11-25` or `2025-06-18` see zero behavior change.
+- Adopting `2026-07-28` is a choice you make as a builder, typically by upgrading to a client SDK that speaks it, not something Arcade switches on for you.
+
+## 2026-07-28 capabilities on Arcade gateways
+
+On the `2026-07-28` sessionless path, Arcade gateways support:
+
+- **`tools/list` and `tools/call`**, including structured tool output (`structuredContent` in the result).
+- **OAuth authorization via a url-mode elicitation retry flow.** When a tool call needs end-user authorization, the gateway returns the authorization challenge as part of the tool result rather than failing the request.
+
+The following are explicitly **not** supported on `2026-07-28`:
+
+- `roots`, `sampling`, and `logging` (all deprecated in this protocol revision)
+- Server-initiated streaming or notifications
+- Extensions
+
+### OAuth authorization retry flow
+
+If your client declares the `elicitation.url` capability, a tool call that needs end-user authorization returns an MRTR (Multi-Round Tool Response) result with `resultType: "input_required"` and an `elicitation/create` entry in `inputRequests`:
+
+```json
+// Request: tools/call, with headers
+// MCP-Protocol-Version: 2026-07-28
+// Mcp-Method: tools/call
+// Mcp-Name: Google_SendEmail
+{
+  "jsonrpc": "2.0",
+  "id": 11,
+  "method": "tools/call",
+  "params": {
+    "name": "Google_SendEmail",
+    "arguments": { "to": "someone@example.com", "subject": "Hello" },
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientInfo": { "name": "my-agent", "version": "1.0.0" },
+      "io.modelcontextprotocol/clientCapabilities": { "elicitation": { "url": {} } }
+    }
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 11,
+  "result": {
+    "isError": false,
+    "resultType": "input_required",
+    "inputRequests": {
+      "1": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "url",
+          "url": "https://api.arcade.dev/oauth/authorize?..."
+        }
+      }
+    }
+  }
+}
+```
+
+The client shows the user the elicitation `url`, the user completes authorization in their browser, and the client retries the same `tools/call` request. There's no transport-level error and no `isError: true`: the gateway treats "authorization needed" as a normal step in the tool call, not a failure.
+
+<Callout type="info">
+  A client that doesn't declare `elicitation.url` still gets the authorization link, but as an ordinary (non-error) tool result: an `authorization_url` field inside `structuredContent`, alongside `message` and `llm_instructions` fields describing what to do next. This matches the result shape Arcade already returns for auth-required tools on `2025-11-25` and `2025-06-18`.
+</Callout>
+
+## Legacy notes
+
+- Sessions on `2025-11-25` and `2025-06-18` keep working exactly as before: the gateway issues an `Mcp-Session-Id` on initialize, and later requests carry it.
+- `2026-07-28` requests are sessionless, so the gateway ignores any `Mcp-Session-Id` a client happens to send: there's nothing to reuse or terminate.
+
+## External MCP servers behind gateways
+
+A `2026-07-28` client works the same way against a gateway whose tools come from an external (non-Arcade) MCP server as it does against one built entirely on Arcade. The gateway translates between the client's protocol version and whatever the backing server speaks, so the version mismatch is invisible to the client.
+
+## Next steps
+
+- [Connect to MCP clients](/get-started/mcp-clients)
+- [Add remote MCP servers](/guides/mcp-gateways/add-remote-servers)
