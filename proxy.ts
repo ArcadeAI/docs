@@ -1,6 +1,52 @@
+import {
+  buildAttributionCookie,
+  extractAttribution,
+  SIGNUP_ATTRIBUTION_COOKIE,
+} from "@arcadeai/ui-kit/utils/attribution";
 import { type NextRequest, NextResponse } from "next/server";
 
 const SUPPORTED_LOCALES = ["en", "es", "pt-BR"];
+
+const ATTRIBUTION_COOKIE_MAX_AGE_DAYS = 30;
+
+// Share the cookie across arcade.dev subdomains (docs → identity-ui). Derive the
+// registrable domain from the host: `docs.arcade.dev` → `.arcade.dev`. A
+// single-label host like `localhost` can't carry a Domain attribute, so emit a
+// host-only cookie in local dev.
+// ponytail: eTLD+1 = last two labels — correct for arcade.dev / localhost, not
+// multi-part TLDs (co.uk); revisit if we ever serve on one.
+function attributionCookieDomain(hostname: string): string | undefined {
+  const labels = hostname.split(".");
+  return labels.length >= 2 ? `.${labels.slice(-2).join(".")}` : undefined;
+}
+
+// Capture signup attribution (utm_*/gclid/referrer) on the first docs page a
+// visitor lands on with those params, into a first-party cookie the identity-ui
+// register flow reads back. First-touch wins: skip if the cookie already exists.
+// Attaches to whatever response we return because most first visits hit the
+// locale redirect below, which drops the query string.
+function withAttribution(
+  request: NextRequest,
+  response: NextResponse
+): NextResponse {
+  if (request.cookies.has(SIGNUP_ATTRIBUTION_COOKIE)) {
+    return response;
+  }
+  const attribution = extractAttribution(
+    request.nextUrl.searchParams,
+    request.headers.get("referer")
+  );
+  if (attribution) {
+    response.headers.append(
+      "set-cookie",
+      buildAttributionCookie(attribution, {
+        domain: attributionCookieDomain(request.nextUrl.hostname),
+        maxAgeDays: ATTRIBUTION_COOKIE_MAX_AGE_DAYS,
+      })
+    );
+  }
+  return response;
+}
 
 function getPreferredLocale(_request: NextRequest): string {
   return "en";
@@ -37,19 +83,25 @@ export function proxy(request: NextRequest) {
   if (englishLocaleRedirectPath) {
     const url = request.nextUrl.clone();
     url.pathname = englishLocaleRedirectPath;
-    return NextResponse.redirect(url);
+    return withAttribution(request, NextResponse.redirect(url));
   }
 
   if (pathnameIsMissingLocale(pathname)) {
     const locale = getPreferredLocale(request);
     const redirectPath =
       pathname === "/" ? `/${locale}/home` : `/${locale}${pathname}`;
-    return NextResponse.redirect(new URL(redirectPath, request.url));
+    return withAttribution(
+      request,
+      NextResponse.redirect(new URL(redirectPath, request.url))
+    );
   }
 
   for (const locale of SUPPORTED_LOCALES) {
     if (pathname === `/${locale}`) {
-      return NextResponse.redirect(new URL(`/${locale}/home`, request.url));
+      return withAttribution(
+        request,
+        NextResponse.redirect(new URL(`/${locale}/home`, request.url))
+      );
     }
   }
 
@@ -73,12 +125,15 @@ export function proxy(request: NextRequest) {
   }
 
   if (pathname.includes("/toolkits")) {
-    return NextResponse.redirect(
-      new URL(pathname.replace("/toolkits", "/mcp-servers"), request.url)
+    return withAttribution(
+      request,
+      NextResponse.redirect(
+        new URL(pathname.replace("/toolkits", "/mcp-servers"), request.url)
+      )
     );
   }
 
-  return response;
+  return withAttribution(request, response);
 }
 
 export const config = {
