@@ -1,0 +1,372 @@
+{
+  "id": "Snowflake",
+  "label": "Snowflake",
+  "version": "0.1.0",
+  "description": "Tools to query and explore Snowflake with per-user, per-role access",
+  "metadata": {
+    "category": "databases",
+    "iconUrl": "https://design-system.arcade.dev/icons/snowflake.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/databases/snowflake",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "snowflake",
+    "allScopes": [
+      "refresh_token"
+    ]
+  },
+  "tools": [
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Snowflake.WhoAmI",
+      "fullyQualifiedName": "Snowflake.WhoAmI@0.1.0",
+      "description": "Return the authenticated Snowflake identity and session defaults. Call this FIRST. Grounds who the session acts as (user + current role) and the default warehouse/database/schema a query uses when you do not override them.",
+      "parameters": [],
+      "auth": {
+        "providerId": "snowflake",
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT"
+      ],
+      "secretsInfo": {},
+      "output": {
+        "type": "json",
+        "description": "The Snowflake user, role, account, warehouse, database, and schema in effect."
+      },
+      "documentationChunks": [],
+      "codeExample": null,
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListDatabases",
+      "qualifiedName": "Snowflake.ListDatabases",
+      "fullyQualifiedName": "Snowflake.ListDatabases@0.1.0",
+      "description": "List the databases your role can access. Snowflake returns only databases your current role is granted, so this is already a per-user answer.",
+      "parameters": [],
+      "auth": {
+        "providerId": "snowflake",
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT"
+      ],
+      "secretsInfo": {},
+      "output": {
+        "type": "json",
+        "description": "A list of database names the caller's role can access."
+      },
+      "documentationChunks": [],
+      "codeExample": null,
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListSchemas",
+      "qualifiedName": "Snowflake.ListSchemas",
+      "fullyQualifiedName": "Snowflake.ListSchemas@0.1.0",
+      "description": "List the schemas in a database that your role can access. Call ListDatabases first for a valid database.",
+      "parameters": [
+        {
+          "name": "database",
+          "type": "string",
+          "required": true,
+          "description": "A database name from ListDatabases.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "snowflake",
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT"
+      ],
+      "secretsInfo": {},
+      "output": {
+        "type": "json",
+        "description": "A list of schemas (database, name) the caller's role can access."
+      },
+      "documentationChunks": [],
+      "codeExample": null,
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListTables",
+      "qualifiedName": "Snowflake.ListTables",
+      "fullyQualifiedName": "Snowflake.ListTables@0.1.0",
+      "description": "List the tables and views in a schema that your role can query. Each row includes `fqn`, a ready-to-use quoted fully-qualified name you drop straight into Query.",
+      "parameters": [
+        {
+          "name": "database",
+          "type": "string",
+          "required": true,
+          "description": "A database name from ListDatabases.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": true,
+          "description": "A schema name from ListSchemas.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_views",
+          "type": "boolean",
+          "required": false,
+          "description": "Include views as well as tables. Default is true.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "snowflake",
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT"
+      ],
+      "secretsInfo": {},
+      "output": {
+        "type": "json",
+        "description": "A list of objects (database, schema_name, name, kind, fqn) the role can query."
+      },
+      "documentationChunks": [],
+      "codeExample": null,
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DescribeTable",
+      "qualifiedName": "Snowflake.DescribeTable",
+      "fullyQualifiedName": "Snowflake.DescribeTable@0.1.0",
+      "description": "List a table or view's columns (name, type, nullable, default, comment). Use before writing a query so you can select exact columns instead of SELECT *.",
+      "parameters": [
+        {
+          "name": "database",
+          "type": "string",
+          "required": true,
+          "description": "A database name from ListDatabases.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": true,
+          "description": "A schema name from ListSchemas.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": true,
+          "description": "A table/view name from ListTables.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "snowflake",
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT"
+      ],
+      "secretsInfo": {},
+      "output": {
+        "type": "json",
+        "description": "A list of columns with name, type, nullability, default, and comment."
+      },
+      "documentationChunks": [],
+      "codeExample": null,
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "Query",
+      "qualifiedName": "Snowflake.Query",
+      "fullyQualifiedName": "Snowflake.Query@0.1.0",
+      "description": "Run a SQL query and return the rows, plus the identity Snowflake ran them under. The query executes under your authenticated Snowflake identity, so your role and Snowflake's row/masking policies decide what you can read. Reference tables with the `fqn` from ListTables, or use bare names with database/schema_name.",
+      "parameters": [
+        {
+          "name": "sql",
+          "type": "string",
+          "required": true,
+          "description": "The SQL to run. Reference tables with the fqn from ListTables, or bare names plus database/schema_name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "database",
+          "type": "string",
+          "required": false,
+          "description": "Session database so bare table names resolve. Omit to use your default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": false,
+          "description": "Session schema so bare table names resolve. Omit to use your default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "warehouse",
+          "type": "string",
+          "required": false,
+          "description": "Warehouse to run on. Omit if WhoAmI shows a default warehouse.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_rows",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum rows to return. Default is 100, hard cap 1000.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "description": "Abort the query if it runs longer than this many seconds. Default is 120, up to 3600.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "snowflake",
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT"
+      ],
+      "secretsInfo": {},
+      "output": {
+        "type": "json",
+        "description": "The rows, the columns, the row_count, a truncated flag, and the user/role Snowflake enforced them under."
+      },
+      "documentationChunks": [],
+      "codeExample": null,
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-07-26T19:37:26.000Z",
+  "summary": "## Arcade Snowflake Toolkit\n\nQuery Snowflake from your agents with **per-user, per-role access**. Every end user authenticates as themselves via OAuth, and each query runs under that user's own Snowflake identity, so Snowflake's RBAC, row-access, and masking policies decide what each user sees. Two users running the same query get different data. The toolkit holds **no shared credential** and enforces **no policy of its own**. Snowflake is the boundary.\n\n## How it works\n\n1. A user connects the Snowflake provider once (OAuth). Arcade brokers and silently refreshes a short-lived, per-user access token.\n2. Every tool call opens a connection with `authenticator=oauth` under that user's token, so `CURRENT_USER()` and `CURRENT_ROLE()` are the real person and all governance applies to them.\n3. Agents discover what a user can reach with the `List*`/`DescribeTable` tools (which run Snowflake's own access-filtered `SHOW`/`DESCRIBE`), then run a query.\n\n## Configure on the Arcade side\n\n1. In the Arcade dashboard, add a **Custom OAuth 2.0 provider** with id `snowflake`:\n   - **Authorization URL:** `https://<account>.snowflakecomputing.com/oauth/authorize`\n   - **Token URL:** `https://<account>.snowflakecomputing.com/oauth/token-request`\n   - **Client ID / Secret:** from your Snowflake OAuth security integration (below).\n   - **Scopes:** `refresh_token` (lets Arcade refresh the short-lived access token).\n2. Copy the **Redirect URL** Arcade generates. You register it in Snowflake next.\n3. Set the toolkit secret **`SNOWFLAKE_ACCOUNT`** to your account identifier in connector form, e.g. `AB12345.us-east-1` (the org-account form `MYORG-MYACCOUNT` also works). This is just the address of your account, not a credential.\n\n## Configure on the Snowflake side\n\nRun as `ACCOUNTADMIN`:\n\n```sql\n-- 1) OAuth security integration; register Arcade's redirect URL\nCREATE SECURITY INTEGRATION arcade_oauth\n  TYPE = OAUTH\n  OAUTH_CLIENT = CUSTOM\n  OAUTH_CLIENT_TYPE = 'CONFIDENTIAL'\n  OAUTH_REDIRECT_URI = '<redirect-url-from-arcade>'\n  OAUTH_ISSUE_REFRESH_TOKENS = TRUE\n  OAUTH_REFRESH_TOKEN_VALIDITY = 86400\n  ENABLED = TRUE;\n\n-- Read the client id + secret to paste into the Arcade provider (arg UPPERCASE)\nSELECT SYSTEM$SHOW_OAUTH_CLIENT_SECRETS('ARCADE_OAUTH');\n```\n\nThen give each end user a **read-only role** scoped to exactly the data they may see, and set it as their `DEFAULT_ROLE` (recipes below). The role is the access boundary.\n\n## Read-only and access restrictions\n\nBy default, this integration manages access entirely through **Snowflake roles**. Whatever role a user has is what Arcade enforces for them, so a user bound to a read-only role is read-only. For extra, per-agent restrictions on top, add an Arcade **Contextual Access** prehook policy that can, for example, restrict an agent to read-only queries.\n\n## Admin guidance: Snowflake roles\n\nGive the right role to the right user. Common recipes:\n\n```sql\n-- Create a read-only role scoped to a slice of data\nCREATE ROLE IF NOT EXISTS ANALYST_READ;\nGRANT USAGE  ON DATABASE  MY_DB                      TO ROLE ANALYST_READ;\nGRANT USAGE  ON SCHEMA    MY_DB.MY_SCHEMA            TO ROLE ANALYST_READ;\nGRANT SELECT ON ALL TABLES IN SCHEMA MY_DB.MY_SCHEMA TO ROLE ANALYST_READ;\nGRANT USAGE  ON WAREHOUSE MY_WH                      TO ROLE ANALYST_READ;\n\n-- Finer than a table: expose a view (grant the view, NOT the base table) to\n-- limit columns, or use masking / row-access policies (Enterprise edition) to\n-- limit cells and rows per user.\n\n-- Assign the role to a user and make it their default\nGRANT ROLE ANALYST_READ TO USER SOME_USER;\nALTER USER SOME_USER SET DEFAULT_ROLE = ANALYST_READ DEFAULT_WAREHOUSE = MY_WH;\n\n-- Inspect / analyze roles\nSHOW GRANTS TO ROLE ANALYST_READ;   -- privileges and roles this role holds\nSHOW GRANTS TO USER SOME_USER;       -- roles granted to a user\nSHOW GRANTS OF ROLE ANALYST_READ;    -- who holds this role\nDESC USER SOME_USER;                 -- default role / warehouse / namespace\n```\n\n## Caveats\n\n- Each end user must resolve to a distinct Snowflake identity with an appropriate role; the toolkit differentiates by **identity**, not by query text.\n- The connection **role** determines read-only-ness. A user bound to a write-capable role can write; bind read-only roles for a read-only deployment.\n- `SNOWFLAKE_ACCOUNT` must use the connector form `<locator>.<region>` (or the org-account form). Do not hand-build `<org>-<locator>`.\n- Cell/row governance (masking and row-access policies) requires Snowflake **Enterprise edition** and above.\n"
+}

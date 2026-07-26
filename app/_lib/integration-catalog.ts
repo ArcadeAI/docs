@@ -17,34 +17,45 @@ const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
  * (enriched with a `docsLink` from their data file when the catalog entry
  * lacks one, so the card's slug matches the generated page) plus docs-local
  * partner toolkits.
+ *
+ * A "coming soon" catalog entry that now has a generated data file has real
+ * published docs, so it is promoted to a live, clickable card using the data
+ * file's docsLink and category (the design-system entry may lag until its next
+ * release).
  */
 export const getToolkitsWithDocsLinks = async (): Promise<
   ToolkitWithDocsLink[]
 > => {
-  const docsLinkById = new Map<string, string>();
+  const dataById = new Map<string, { docsLink?: string; category?: string }>();
 
   await Promise.all(
     TOOLKITS.map(async (toolkit) => {
-      const existing = getToolkitDocsLink(toolkit);
-      if (existing) {
-        return;
-      }
-
       const data = await readToolkitData(toolkit.id);
-      if (data?.metadata?.docsLink) {
-        docsLinkById.set(
-          normalizeToolkitId(toolkit.id),
-          data.metadata.docsLink
-        );
+      if (data?.metadata) {
+        dataById.set(normalizeToolkitId(toolkit.id), {
+          docsLink: data.metadata.docsLink ?? undefined,
+          category: data.metadata.category ?? undefined,
+        });
       }
     })
   );
 
   const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((toolkit) => {
+    const data = dataById.get(normalizeToolkitId(toolkit.id));
     const existing = getToolkitDocsLink(toolkit);
-    const docsLink =
-      existing ?? docsLinkById.get(normalizeToolkitId(toolkit.id));
+    const isComingSoon =
+      "isComingSoon" in toolkit && Boolean(toolkit.isComingSoon);
 
+    if (isComingSoon && data?.docsLink) {
+      return {
+        ...toolkit,
+        isComingSoon: false,
+        ...(data.category ? { category: data.category } : {}),
+        docsLink: data.docsLink,
+      };
+    }
+
+    const docsLink = existing ?? data?.docsLink;
     return docsLink ? { ...toolkit, docsLink } : toolkit;
   });
 
