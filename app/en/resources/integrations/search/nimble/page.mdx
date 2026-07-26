@@ -1,0 +1,100 @@
+---
+title: "Nimble"
+description: "Search, extract, crawl, and map the web. Nimble (Nimbleway) is available in Arcade as a Partner MCP server."
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Nimble
+
+This integration is a remote MCP server offered by [Nimble](https://www.nimbleway.com), an Arcade Partner. It exposes Nimble's web data platform so agents can search, extract, crawl, and map the public web. Add it to an [MCP Gateway](/guides/mcp-gateways/add-remote-servers) for central governance, authorization, and access control alongside Arcade's native servers.
+
+## MCP server URL
+
+Register the following URL in Arcade: **Servers → Add server**. Nimble authenticates with an API key sent in an `Authorization` header, so the key is stored as a header secret rather than embedded in the URL (see [Authentication](#authentication)).
+
+```text
+https://mcp.nimbleway.com/mcp
+```
+
+## Authentication
+
+Nimble expects a bearer token in the `Authorization` header on every request. In Arcade, store the key as a header secret and reference it from a custom header, so the value never appears in the URL or in logs.
+
+| Field | Value |
+| --- | --- |
+| Header name | `Authorization` |
+| Header value | `Bearer ${secret:NIMBLE_API_KEY}` |
+| Secret name | `NIMBLE_API_KEY` |
+| Secret value | Your Nimble API key |
+
+Set these under **Advanced settings → Custom headers** when you add the server. See [Add remote MCP servers](/guides/mcp-gateways/add-remote-servers#configure-advanced-settings) for the full reference.
+
+## What you can do
+
+Once you register Nimble in your Arcade project, Arcade discovers its tools automatically. They cover these capabilities:
+
+| Capability | What it does |
+| --- | --- |
+| Search | Real-time web search across multiple engines, with configurable depth and focus. |
+| Extract | Pull structured content from a specific URL, with sync and async extraction. |
+| Crawl | Crawl multiple pages with path filtering, subdomain control, and progress tracking. |
+| Map | Discover the URLs on a site through link-following and sitemaps. |
+| Templates | Run pre-built extraction templates for common websites. |
+
+Arcade namespaces each tool under the server ID you choose when you add the server, so tool names appear as `<your-server-id>.<tool>` in the Playground and gateway tool picker.
+
+Compose these tools with Google Docs, Slack, Salesforce, GitHub, or any of Arcade's native servers in a single MCP Gateway, so an agent can research, draft, and act in one flow, with authorization and audit from Arcade's runtime.
+
+## Caching and cost
+
+Nimble's tools sit behind a cache and a memory layer. The cache stores sources, search history, and responses; the memory layer extracts key learnings after each run and feeds them into the next search plan. Together they retrieve only what an agent needs, which avoids redundant searches and the token cost they add, and refines results for a given domain over time. This behavior runs server-side at Nimble. When you call these tools through an Arcade gateway, Arcade adds per-user authorization and audit on top.
+
+## Add Nimble to your Arcade project
+
+<Steps>
+
+### Get your Nimble API key
+
+Sign in to [Nimble](https://www.nimbleway.com) and open **Account settings → API keys** at [online.nimbleway.com](https://online.nimbleway.com/account-settings/api-keys). Create a key and copy it.
+
+### Add Nimble as a remote MCP server in Arcade
+
+Open the [Arcade Dashboard](https://api.arcade.dev/dashboard/servers) → **Add server**. Set:
+
+- **ID**: a name for the server, for example `nimble`
+- **URI**: `https://mcp.nimbleway.com/mcp`
+
+Under **Advanced settings → Custom headers**, add the `Authorization` header and store your key as described in [Authentication](#authentication), then save.
+
+<Callout type="info">
+  See the full walkthrough in [Add remote MCP servers](/guides/mcp-gateways/add-remote-servers) for advanced settings like connection retries, header secrets, and custom headers.
+</Callout>
+
+### Verify Nimble tools
+
+Confirm that Arcade lists the Nimble tools for your project. They appear in the Playground for this project and in the MCP Gateway tool picker.
+
+### Create an MCP Gateway
+
+Go to **MCP Gateways → Create Gateway**. Select Nimble plus any other MCP servers you want to compose with (for example, Google Docs and Slack). Set the auth mode to **Arcade Auth** so users authenticate with their Arcade account. Copy the gateway URL. This is what your agent connects to.
+
+</Steps>
+
+## Call Nimble tools from your agent
+
+Once you create your gateway, any MCP client that supports Streamable HTTP can use it: Cursor, Claude Desktop, VS Code, or a custom application built with the Vercel AI SDK, LangChain, or OpenAI Agents.
+
+```text
+https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>
+```
+
+Arcade handles authorization, credential handling, and audit logging at runtime.
+
+## Resources
+
+- [Nimble MCP server documentation](https://docs.nimbleway.com/integrations/mcp-server/mcp-server)
+- [Nimble documentation](https://docs.nimbleway.com)
+- [Add remote MCP servers to Arcade](/guides/mcp-gateways/add-remote-servers)
+- [Create an MCP Gateway](/guides/mcp-gateways/create-via-dashboard)
+- [Connect to MCP clients](/get-started/mcp-clients)
