@@ -75,6 +75,30 @@ export interface IToolkitDataSource {
   readonly isAvailable: () => Promise<boolean>;
 }
 
+/**
+ * Reuse one all-toolkit snapshot for the lifetime of a generation run.
+ *
+ * Change detection, progress setup, and merging all consume the same data
+ * instead of issuing independent API reads that can disagree mid-run.
+ */
+export const createCachedToolkitDataSource = (
+  source: IToolkitDataSource
+): IToolkitDataSource => {
+  let allToolkitsSnapshot:
+    | Promise<ReadonlyMap<string, ToolkitData>>
+    | undefined;
+
+  return {
+    fetchToolkitData: (toolkitId, version) =>
+      source.fetchToolkitData(toolkitId, version),
+    fetchAllToolkitsData: () => {
+      allToolkitsSnapshot ??= source.fetchAllToolkitsData();
+      return allToolkitsSnapshot;
+    },
+    isAvailable: () => source.isAvailable(),
+  };
+};
+
 // ============================================================================
 // Combined Implementation (Current: Separate Sources)
 // ============================================================================

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  assertSafeCurrentToolkitSnapshot,
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
@@ -69,6 +70,19 @@ describe("collectRemovedToolkitIds", () => {
 
   it("returns empty set for empty change list", () => {
     expect(collectRemovedToolkitIds(makeResult([])).size).toBe(0);
+  });
+});
+
+describe("assertSafeCurrentToolkitSnapshot", () => {
+  it("rejects an empty current snapshot when previous output exists", () => {
+    expect(() => assertSafeCurrentToolkitSnapshot(0, 115)).toThrow(
+      "refusing to remove all 115 existing toolkits"
+    );
+  });
+
+  it("allows an empty initial snapshot and non-empty updates", () => {
+    expect(() => assertSafeCurrentToolkitSnapshot(0, 0)).not.toThrow();
+    expect(() => assertSafeCurrentToolkitSnapshot(114, 115)).not.toThrow();
   });
 });
 

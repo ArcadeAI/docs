@@ -11,7 +11,11 @@ import {
   InMemoryToolDataSource,
 } from "../../src/sources/in-memory.js";
 import type { IMetadataSource } from "../../src/sources/internal.js";
-import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
+import {
+  createCachedToolkitDataSource,
+  createCombinedToolkitDataSource,
+  type IToolkitDataSource,
+} from "../../src/sources/toolkit-data-source.js";
 import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index.js";
 
 const createTool = (
@@ -404,5 +408,44 @@ describe("CombinedToolkitDataSource", () => {
     const result = await dataSource.fetchAllToolkitsData();
     expect(result.get("Github")?.metadata?.label).toBe("GitHub");
     expect(lookedUpIds).toEqual([]);
+  });
+});
+
+describe("createCachedToolkitDataSource", () => {
+  it("reuses one immutable all-toolkit snapshot within a run", async () => {
+    const snapshot = new Map([
+      [
+        "Github",
+        {
+          tools: [createTool()],
+          metadata: createMetadata(),
+        },
+      ],
+    ]);
+    const githubData = snapshot.get("Github");
+    if (!githubData) {
+      throw new Error("Expected GitHub fixture");
+    }
+    let fetchAllCalls = 0;
+    const source: IToolkitDataSource = {
+      fetchToolkitData: async () => githubData,
+      fetchAllToolkitsData: async () => {
+        fetchAllCalls += 1;
+        return snapshot;
+      },
+      isAvailable: async () => true,
+    };
+    const cached = createCachedToolkitDataSource(source);
+
+    const [first, second, third] = await Promise.all([
+      cached.fetchAllToolkitsData(),
+      cached.fetchAllToolkitsData(),
+      cached.fetchAllToolkitsData(),
+    ]);
+
+    expect(fetchAllCalls).toBe(1);
+    expect(first).toBe(snapshot);
+    expect(second).toBe(first);
+    expect(third).toBe(first);
   });
 });

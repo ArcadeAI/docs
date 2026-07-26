@@ -3,7 +3,8 @@
  *
  * Outputs merged toolkit data as JSON files.
  */
-import { mkdir, readFile, stat, writeFile } from "fs/promises";
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
 import type {
@@ -16,6 +17,72 @@ import {
   readToolkitsFromDir,
   type ToolkitReadResult,
 } from "./output-verifier.js";
+
+const SAFE_TOOLKIT_ID = /^[a-z0-9][a-z0-9_-]*$/i;
+const RESERVED_TOOLKIT_ID = "index";
+
+const getToolkitFileName = (toolkitId: string): string => {
+  const normalizedId = toolkitId.toLowerCase();
+  if (normalizedId === RESERVED_TOOLKIT_ID) {
+    throw new Error(`"${toolkitId}" is a reserved toolkit ID`);
+  }
+  if (!SAFE_TOOLKIT_ID.test(toolkitId)) {
+    throw new Error(`Unsafe toolkit ID: "${toolkitId}"`);
+  }
+  return `${normalizedId}.json`;
+};
+
+const validateToolkitFileNames = (
+  toolkits: readonly MergedToolkit[]
+): string[] => {
+  const errors: string[] = [];
+  const toolkitIdsByFile = new Map<string, string[]>();
+
+  for (const toolkit of toolkits) {
+    try {
+      const fileName = getToolkitFileName(toolkit.id);
+      const toolkitIds = toolkitIdsByFile.get(fileName) ?? [];
+      toolkitIdsByFile.set(fileName, [...toolkitIds, toolkit.id]);
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  for (const [fileName, toolkitIds] of toolkitIdsByFile) {
+    if (toolkitIds.length > 1) {
+      errors.push(
+        `Toolkit IDs collide on ${fileName}: ${toolkitIds.join(", ")}`
+      );
+    }
+  }
+
+  return errors;
+};
+
+const compareToolkitIds = (left: string, right: string): number => {
+  const normalizedLeft = left.toLowerCase();
+  const normalizedRight = right.toLowerCase();
+  if (normalizedLeft !== normalizedRight) {
+    return normalizedLeft < normalizedRight ? -1 : 1;
+  }
+  if (left === right) {
+    return 0;
+  }
+  return left < right ? -1 : 1;
+};
+
+const writeFileAtomically = async (
+  filePath: string,
+  content: string
+): Promise<void> => {
+  const tempPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(tempPath, content, "utf-8");
+    await rename(tempPath, filePath);
+  } finally {
+    await rm(tempPath, { force: true });
+  }
+};
 
 // ============================================================================
 // Generator Configuration
@@ -63,6 +130,7 @@ export class JsonGenerator {
   private readonly generateIndex: boolean;
   private readonly indexSource: "current" | "output";
   private readonly validateOutput: boolean;
+  private readonly toolkitIdsByFile = new Map<string, string>();
 
   constructor(config: JsonGeneratorConfig) {
     this.outputDir = config.outputDir;
@@ -86,28 +154,44 @@ export class JsonGenerator {
       }
     }
 
-    const fileName = `${toolkit.id.toLowerCase()}.json`;
+    const fileName = getToolkitFileName(toolkit.id);
     const filePath = join(this.outputDir, fileName);
+    const previousToolkitId = this.toolkitIdsByFile.get(fileName);
+    if (previousToolkitId && previousToolkitId !== toolkit.id) {
+      throw new Error(
+        `Toolkit IDs collide on ${fileName}: ${previousToolkitId}, ${toolkit.id}`
+      );
+    }
+    this.toolkitIdsByFile.set(fileName, toolkit.id);
 
     // Ensure directory exists
-    await mkdir(dirname(filePath), { recursive: true });
+    try {
+      await mkdir(dirname(filePath), { recursive: true });
 
-    // Write file
-    const content = this.prettyPrint
-      ? JSON.stringify(toolkit, null, 2)
-      : JSON.stringify(toolkit);
+      // Write file
+      const content = this.prettyPrint
+        ? JSON.stringify(toolkit, null, 2)
+        : JSON.stringify(toolkit);
 
-    await writeFile(filePath, content, "utf-8");
-    return filePath;
+      await writeFileAtomically(filePath, content);
+      return filePath;
+    } catch (error) {
+      if (previousToolkitId) {
+        this.toolkitIdsByFile.set(fileName, previousToolkitId);
+      } else {
+        this.toolkitIdsByFile.delete(fileName);
+      }
+      throw error;
+    }
   }
 
   /**
    * Check if a toolkit file already exists in the output directory
    */
   async hasToolkitFile(toolkitId: string): Promise<boolean> {
-    const fileName = `${toolkitId.toLowerCase()}.json`;
-    const filePath = join(this.outputDir, fileName);
     try {
+      const fileName = getToolkitFileName(toolkitId);
+      const filePath = join(this.outputDir, fileName);
       const stats = await stat(filePath);
       return stats.isFile();
     } catch {
@@ -137,9 +221,9 @@ export class JsonGenerator {
    * Load an existing toolkit file
    */
   async loadToolkitFile(toolkitId: string): Promise<MergedToolkit | null> {
-    const fileName = `${toolkitId.toLowerCase()}.json`;
-    const filePath = join(this.outputDir, fileName);
     try {
+      const fileName = getToolkitFileName(toolkitId);
+      const filePath = join(this.outputDir, fileName);
       const content = await readFile(filePath, "utf-8");
       const parsed = JSON.parse(content) as unknown;
       const result = MergedToolkitSchema.safeParse(parsed);
@@ -160,7 +244,10 @@ export class JsonGenerator {
     toolkits: readonly MergedToolkit[]
   ): Promise<GeneratorResult> {
     const filesWritten: string[] = [];
-    const errors: string[] = [];
+    const errors = validateToolkitFileNames(toolkits);
+    if (errors.length > 0) {
+      return { filesWritten, errors };
+    }
 
     // Generate per-toolkit files
     for (const toolkit of toolkits) {
@@ -199,15 +286,17 @@ export class JsonGenerator {
   private async generateIndexFile(
     toolkits: readonly MergedToolkit[]
   ): Promise<string> {
-    const entries: ToolkitIndexEntry[] = toolkits.map((t) => ({
-      id: t.id,
-      label: t.label,
-      version: t.version,
-      category: t.metadata.category,
-      type: t.metadata.type,
-      toolCount: t.tools.length,
-      authType: t.auth?.type ?? "none",
-    }));
+    const entries: ToolkitIndexEntry[] = toolkits
+      .map((t) => ({
+        id: t.id,
+        label: t.label,
+        version: t.version,
+        category: t.metadata.category,
+        type: t.metadata.type,
+        toolCount: t.tools.length,
+        authType: t.auth?.type ?? "none",
+      }))
+      .sort((left, right) => compareToolkitIds(left.id, right.id));
 
     const index: ToolkitIndex = {
       generatedAt: new Date().toISOString(),
@@ -223,7 +312,7 @@ export class JsonGenerator {
       ? JSON.stringify(index, null, 2)
       : JSON.stringify(index);
 
-    await writeFile(filePath, content, "utf-8");
+    await writeFileAtomically(filePath, content);
     return filePath;
   }
 

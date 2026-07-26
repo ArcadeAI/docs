@@ -1,6 +1,6 @@
 import { mkdtemp, readFile, rename, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
-import { join } from "path";
+import { basename, join } from "path";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -407,6 +407,99 @@ describe("JsonGenerator.rebuildIndexFromOutput", () => {
       expect(rebuildResult.readWarnings[0]).toContain(
         "Loaded github.json with fallback parser"
       );
+    });
+  });
+});
+
+describe("JsonGenerator toolkit file paths", () => {
+  it("rejects toolkit IDs that escape the output directory", async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const escapeName = `${basename(dir)}-escape`;
+      const escapePath = join(dir, "..", `${escapeName}.json`);
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      try {
+        await expect(
+          generator.generateToolkitFile({
+            ...toolkit,
+            id: `../${escapeName}`,
+          })
+        ).rejects.toThrow("Unsafe toolkit ID");
+        await expect(readFile(escapePath, "utf-8")).rejects.toThrow();
+      } finally {
+        await rm(escapePath, { force: true });
+      }
+    });
+  });
+
+  it('reserves "index" for the generated index file', async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      await expect(
+        generator.generateToolkitFile({ ...toolkit, id: "INDEX" })
+      ).rejects.toThrow("reserved toolkit ID");
+      await expect(
+        readFile(join(dir, "index.json"), "utf-8")
+      ).rejects.toThrow();
+    });
+  });
+
+  it("rejects case-insensitive toolkit ID collisions before writing", async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      const result = await generator.generateAll([
+        toolkit,
+        { ...toolkit, id: toolkit.id.toUpperCase() },
+      ]);
+
+      expect(result.filesWritten).toEqual([]);
+      expect(result.errors).toEqual([
+        `Toolkit IDs collide on github.json: ${toolkit.id}, ${toolkit.id.toUpperCase()}`,
+      ]);
+      await expect(
+        readFile(join(dir, "github.json"), "utf-8")
+      ).rejects.toThrow();
+      await expect(
+        readFile(join(dir, "index.json"), "utf-8")
+      ).rejects.toThrow();
+    });
+  });
+
+  it("rejects case-insensitive toolkit ID collisions during incremental writes", async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      await generator.generateToolkitFile(toolkit);
+
+      await expect(
+        generator.generateToolkitFile({
+          ...toolkit,
+          id: toolkit.id.toUpperCase(),
+        })
+      ).rejects.toThrow("Toolkit IDs collide on github.json");
+    });
+  });
+
+  it("sorts index entries by normalized toolkit ID", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      await generator.generateAll([slackToolkit, githubToolkit]);
+
+      const index = JSON.parse(
+        await readFile(join(dir, "index.json"), "utf-8")
+      ) as { toolkits: Array<{ id: string }> };
+      expect(index.toolkits.map(({ id }) => id)).toEqual(["Github", "Slack"]);
     });
   });
 });

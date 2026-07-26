@@ -9,6 +9,119 @@ import { Callout } from "nextra/components";
 
 _Here's what's new at Arcade.dev!_
 
+## 2026-07-24
+
+**Arcade MCP Servers**
+
+- `[feature - 🚀]` Optimize Slack message user enrichment by replacing workspace-wide pagination with stable lookups and enhancing error handling.
+- `[feature - 🚀]` Add behavioral spec cases for the `ManageAuthorization` built-in tool, enhancing the authorization process.
+- `[feature - 🚀]` Add secure Gmail unsubscribe tool with various flow outcomes and enhanced validation.
+- `[feature - 🚀]` Add resolve_comment tool to Linear toolkit for managing comment resolution state.
+- `[bugfix - 🐛]` Widened read_worksheet page budget for improved performance on large Excel sheets.
+- `[bugfix - 🐛]` Fix Gmail replies to include safe plain-text alternatives in multipart responses.
+- `[bugfix - 🐛]` Fix SerpAPI call by offloading it from the event loop to a worker thread.
+- `[documentation - 📝]` Updated MCP integration documentation.
+
+**Platform and Engine**
+
+- `[feature - 🚀]` Make MCP tools/list page size configurable.
+- `[feature - 🚀]` Migrates the dashboard Tools page to a catalog-driven, server-side search with lazy loading.
+- `[feature - 🚀]` Add scroll-to-bottom cue for the MCP picker in the UI kit.
+- `[feature - 🚀]` Implement undo toast notification for destructive picker edits in UI.
+- `[feature - 🚀]` Implement a consistent toolkit data snapshot for change detection and progress management in toolkit documentation generation. (docs PR #1078)
+- `[feature - 🚀]` Implement safety checks and atomic operations for toolkit generator output filenames. (docs PR #1077)
+- `[feature - 🚀]` Redesign of the MCP picker cards in the design system and UI kit. (monorepo PR #2234)
+- `[feature - 🚀]` Adds project-scoped tool execution list and detail API for enhanced visibility of tool-execution history.
+- `[bugfix - 🐛]` Polish MCP picker tools-count column and tooltip in design system. (monorepo PR #2276)
+- `[bugfix - 🐛]` Fixes OAuth Authorization Server metadata to advertise support for RFC 9207 'authorization_response_iss_parameter_supported'.
+- `[bugfix - 🐛]` Fix SEP-2575 compliance in engine for structured JSON-RPC errors and version negotiation.
+- `[bugfix - 🐛]` Log OAuth state prefix instead of full authorization URL to prevent leaking sensitive information.
+- `[bugfix - 🐛]` Fix dashboard by removing unused curl/libcurl to address HIGH CVEs.
+- `[bugfix - 🐛]` Clarify OAuth scope allow-list rejection error message.
+- `[bugfix - 🐛]` Fixes structured JSON-RPC errors for invalid envelopes on the sessionful MCP path.
+- `[bugfix - 🐛]` Fix Playground tool errors in Dashboard to provide detailed messages instead of `'[object Object]'`.
+- `[bugfix - 🐛]` Fix negotiation evidence handling for unsupported pre-2026 protocol versions in the engine.
+- `[bugfix - 🐛]` Fix non-date protocol version negotiation on the stateless path for MCP.
+- `[maintenance - 🔧]` Pin dependencies to patch Vanta CVEs and improve security.
+- `[documentation - 📝]` Clarified the project membership trust boundary for authorization in the documentation.
+
+## 2026-07-17
+
+**Arcade MCP Servers**
+
+- `[feature - 🚀]` Add Arcade.ListApps builtin and prefix apps into MCP prompt for better app management.
+- `[feature - 🚀]` Add MCP behavior annotations to Arcade builtin tools.
+- `[feature - 🚀]` Add new Gmail tools for enhanced email handling.
+- `[feature - 🚀]` Adds Gmail tools for label lifecycle management and conversation trash status handling.
+- `[feature - 🚀]` Refactor Google Worker to slim down documentation and improve type annotations for BatchUpdate requests.
+- `[feature - 🚀]` Adds a read tool to retrieve Linear project status updates with pagination.
+- `[bugfix - 🐛]` Fix Excel workbook formatting to match Google Sheets capabilities.
+- `[maintenance - 🔧]` Pins tests to current Gmail toolkit behavior for regression testing.
+- `[maintenance - 🔧]` Enhance visual presentation of ContactEmail links in documentation.
+- `[documentation - 📝]` Updates to MCP Servers documentation.
+
+**Arcade CLI**
+
+- `[maintenance - 🔧]` Refactor CLI API source resolver to eliminate duplication and unify test coverage.
+
+**Platform and Engine**
+
+- `[feature - 🚀]` Validate rich toolkit subpages to ensure schema compliance and support legacy entries.
+- `[feature - 🚀]` Support complex tool input/output schemas across all surfaces.
+- `[feature - 🚀]` Add structured logging for unhandled 5xx exceptions with route and type information.
+- `[feature - 🚀]` MRTR url-mode elicitation for tool OAuth challenges on the stateless MCP path.
+- `[feature - 🚀]` Implements per-request protocol-version dispatch on /mcp and adds a stateless server/discover path.
+- `[feature - 🚀]` Implement stateless MCP tools/list and tools/call on the real catalog.
+- `[bugfix - 🐛]` Fix engine to block tool access for disabled gateways.
+- `[bugfix - 🐛]` Fixes high-severity vulnerabilities by updating dependencies.
+- `[bugfix - 🐛]` Fix issue where dynamic client registration rejected redirect URIs with private IPs, blocking on-prem MCP clients.
+- `[bugfix - 🐛]` Fix login redirect loops and double sign-in on dashboard.
+- `[bugfix - 🐛]` Fixes silent dropping of tools beyond 5,000 in candidate-scope calculation.
+
+**Misc**
+
+- `[bugfix - 🐛]` Fix llms.txt generation by dropping dead dynamic-route links and improving entry titles.
+
+
+## 2026-07-10
+
+
+**Arcade MCP Servers**
+
+- `[feature - 🚀]` Add microsoft_powerbi toolkit for Power BI integrations in Arcade MCP.
+- `[feature - 🚀]` Adds 4 new Power BI management tools, bringing the total to 14 in the toolkit.
+- `[feature - 🚀]` Add Arcade toolkit for Postman API with 30 tools and API-key authentication.
+- `[bugfix - 🐛]` Fix issues with reply/compose header fidelity and recipient errors in the Gmail toolkit.
+- `[bugfix - 🐛]` Allow-list HTML tags for content_type=auto in Gmail integration to enhance security.
+- `[bugfix - 🐛]` Harden message-body parsing in the Gmail toolkit to fix various encoding and hidden-text issues.
+- `[bugfix - 🐛]` Fixes issues in Gmail search/query functionality including quoting, date bounds, and category exclusions.
+- `[bugfix - 🐛]` Reclassifies UpdateDraftEmail guards to raise RetryableToolError with guidance.
+- `[bugfix - 🐛]` Fixes output fidelity issues in Gmail draft/messages and corrects top-level BCC handling.
+- `[bugfix - 🐛]` Fix issues with Gmail Toolkit regarding batch integrity, label handling, and thread modification.
+- `[bugfix - 🐛]` Hardening of the Microsoft Excel toolkit.
+- `[documentation - 📝]` Adds documentation for the new Microsoft Power BI OAuth provider.
+- `[documentation - 📝]` Updates documentation to include Fireflies and Insightly integrations.
+- `[documentation - 📝]` Updating documentation for MCP Servers.
+
+**Platform and Engine**
+
+- `[feature - 🚀]` Introduced dedicated create/edit pages for MCP gateways with new routing and tool selection.
+- `[feature - 🚀]` Enable default RBAC for new Cloud signups.
+- `[feature - 🚀]` Register Microsoft Power BI OAuth provider with configurations.
+- `[feature - 🚀]` Introduce a configurable chat-model selector allowing dynamic selection based on a curated catalog.
+- `[feature - 🚀]` Surface can_invite on org endpoints for RBAC-aware UI.
+- `[feature - 🚀]` Allow project members to leave projects voluntarily.
+- `[feature - 🚀]` Use consolidated org members endpoint for dashboard projects display.
+- `[bugfix - 🐛]` Fixes RBAC check-error/drift monitors to recover correctly after error bursts.
+- `[bugfix - 🐛]` Fix prompt for (re)authorization when MCP token is invalid or missing.
+- `[bugfix - 🐛]` Fix project creation to write RBAC tuples for service-level projects in OIDC-enabled orgs.
+- `[bugfix - 🐛]` Fix OAuth2 destination persistence during Enterprise SSO restart.
+- `[bugfix - 🐛]` Fix stable key ordering in audit log diffs to improve accuracy.
+- `[bugfix - 🐛]` Fixes the dashboard to refresh the Orgs dropdown after accepting an org invite.
+- `[bugfix - 🐛]` Fix minting of gateway slugs to use UUIDs instead of timestamps.
+- `[documentation - 📝]` Simplify Claude Code MCP client setup to remove need for Arcade API key.
+
+
 ## 2026-07-03
 
 
