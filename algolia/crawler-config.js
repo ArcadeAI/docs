@@ -52,7 +52,10 @@ export const crawlerConfig = {
             lvl3: "article h4",
             lvl4: "article h5",
             lvl5: "article h6",
-            content: "article p, article li, article td",
+            // Include `pre` so terms that only appear in code samples
+            // (e.g. `arcade_api_key`, `tool_choice`, `chat.completions`) are
+            // searchable — several no-result queries were code-only terms.
+            content: "article p, article li, article td, article pre",
           },
           indexHeadings: true,
           aggregateContent: true,
@@ -64,6 +67,12 @@ export const crawlerConfig = {
     docs_arcade_dev_bjb8pbsq9t_docsearch: {
       distinct: true,
       attributeForDistinct: "url_without_anchor",
+      // Long, keyword-heavy queries (often from agents/LLMs) used to return
+      // nothing because Algolia's default `removeWordsIfNoResults: "none"`
+      // requires every word to match a single record. Relax to "allOptional"
+      // so a query still surfaces its best partial matches instead of zero.
+      removeWordsIfNoResults: "allOptional",
+      ignorePlurals: true,
       searchableAttributes: [
         "unordered(hierarchy.lvl0)",
         "unordered(hierarchy.lvl1)",
