@@ -47,14 +47,16 @@ Nimble prefixes its own tools with `nimble_`, and Arcade namespaces each tool un
 
 Compose these tools with Google Docs, Slack, Salesforce, GitHub, or any of Arcade's native servers in a single MCP Gateway, so an agent can research, draft, and act in one flow, with authorization and audit from Arcade's runtime.
 
-## Token usage
+## Cost and token usage
 
-Web retrieval returns large payloads, and MCP routes every result through the model's context window, so these tools can consume tokens quickly. Two things help:
+Nimble designs its [MCP server](https://www.nimbleway.com/mcp) around retrieval efficiency. It describes a proprietary index and memory that "gets smarter with every query" to compound accuracy over time, and cutting token costs "by retrieving exactly what's needed," without redundant searches or parsing raw pages through an LLM. Its tools return schema-consistent JSON, so your model spends tokens reasoning over results rather than parsing raw HTML. This behavior runs server-side at Nimble.
+
+Web retrieval still returns large payloads, and MCP routes every result through the model's context window. Two things keep that in check:
 
 - **Expose only the tools you need.** An MCP Gateway sends just the tools you select, so an agent that only searches never loads the crawl and template tool definitions.
-- **Prefer the narrowest tool.** Reach for Search or Extract before Crawl or the web search agent, which return content across many pages.
+- **Prefer the narrowest tool.** Reach for search or extract before crawl or the web search agent, which return content across many pages.
 
-Nimble also documents a [CLI skill](https://docs.nimbleway.com/integrations/agent-skills/web-tools-skills/nimble-web-expert) that it recommends over MCP for typical web retrieval on token-efficiency grounds. Use the MCP server when you want Nimble governed alongside your other tools, with Arcade handling per-user authorization and audit at runtime.
+For high-volume retrieval, Nimble also documents a [CLI skill](https://docs.nimbleway.com/integrations/agent-skills/web-tools-skills/nimble-web-expert) as a more token-efficient path than MCP. Use the MCP server when you want Nimble governed alongside your other tools, with Arcade adding per-user authorization and audit at runtime.
 
 ## Add Nimble to your Arcade project
 
