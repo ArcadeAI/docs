@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ToolkitPage } from "@/app/_components/toolkit-docs";
+import type { IntegrationCategory } from "@/app/_lib/toolkit-category";
 import { readToolkitData, toToolkitSummary } from "@/app/_lib/toolkit-data";
 import { normalizeToolkitId } from "@/app/_lib/toolkit-slug";
 import {
   getToolkitCanonicalPath,
   getToolkitStaticParamsForCategory,
-  type IntegrationCategory,
 } from "@/app/_lib/toolkit-static-params";
 
 type ToolkitDocsParams = {
@@ -57,7 +57,7 @@ export function createToolkitDocsPage(category: IntegrationCategory) {
     const metadata: Metadata = {
       title: data.label || data.id,
       description: data.description || "Generated MCP server documentation.",
-      alternates: { canonical },
+      ...(canonical ? { alternates: { canonical } } : {}),
     };
 
     // Hidden toolkits stay reachable via the dynamic route (and render as

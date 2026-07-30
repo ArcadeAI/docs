@@ -1,10 +1,21 @@
-import type { Toolkit, ToolkitType } from "@arcadeai/design-system";
+import type { ToolkitType } from "@arcadeai/design-system";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useMemo } from "react";
 import { useFilters } from "./use-filters";
 
 const DEFAULT_PRIORITY = 5;
 const DEBOUNCE_TIME = 300;
+
+/** Minimal shape for catalog filtering — allows docs `others` category. */
+type FilterableToolkit = {
+  label: string;
+  category: string;
+  type: string;
+  isHidden?: boolean;
+  isPro?: boolean;
+  isBYOC?: boolean;
+  isComingSoon?: boolean;
+};
 
 const TYPE_PRIORITY: Record<ToolkitType, number> = {
   arcade: 0,
@@ -25,7 +36,7 @@ const TYPE_LABELS: Record<ToolkitType, string> = {
 const getTypePriority = (type: string): number =>
   TYPE_PRIORITY[type as ToolkitType] ?? DEFAULT_PRIORITY;
 
-const compareToolkits = <T extends Toolkit>(a: T, b: T): number => {
+const compareToolkits = <T extends FilterableToolkit>(a: T, b: T): number => {
   // First prioritize available toolkits over coming soon toolkits
   if (a.isComingSoon !== b.isComingSoon) {
     return a.isComingSoon ? 1 : -1;
@@ -45,7 +56,7 @@ const compareToolkits = <T extends Toolkit>(a: T, b: T): number => {
   return a.label.localeCompare(b.label);
 };
 
-export function useToolkitFilters<T extends Toolkit>(toolkits: T[]) {
+export function useToolkitFilters<T extends FilterableToolkit>(toolkits: T[]) {
   const {
     selectedCategory,
     selectedType,

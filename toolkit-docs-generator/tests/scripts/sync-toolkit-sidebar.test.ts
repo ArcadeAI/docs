@@ -505,6 +505,22 @@ describe("generateCategoryMeta", () => {
     expect(result).toContain('title: "Test \\"Quoted\\" Label"');
   });
 
+  it("should escape backslashes and newlines in labels", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "test",
+        slug: "test",
+        label: "Test\\Label\nNext",
+        category: "others",
+        navGroup: "optimized",
+      },
+    ];
+
+    const result = generateCategoryMeta(toolkits, "others", "/preview");
+
+    expect(result).toContain('title: "Test\\\\Label\\nNext"');
+  });
+
   it("should handle empty array", () => {
     const result = generateCategoryMeta([], "productivity", "/preview");
 

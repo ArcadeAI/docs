@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { z } from "zod";
 import type {
   ToolkitData,
   ToolkitSummary,
@@ -65,14 +66,44 @@ const DEFAULT_DATA_DIR = join(
 const resolveDataDir = (options?: ToolkitDataOptions): string =>
   options?.dataDir ?? process.env.TOOLKIT_DATA_DIR ?? DEFAULT_DATA_DIR;
 
-const isValidToolkitData = (parsed: unknown): parsed is ToolkitData =>
-  typeof parsed === "object" &&
-  parsed !== null &&
-  "id" in parsed &&
-  ("label" in parsed || "name" in parsed) &&
-  "metadata" in parsed &&
-  typeof (parsed as Record<string, unknown>).metadata === "object" &&
-  (parsed as Record<string, unknown>).metadata !== null;
+// App-local Zod schemas (generator schemas live under toolkit-docs-generator and
+// can't be imported here due to module resolution). Keep the index envelope
+// loose so one bad entry is filtered instead of dropping the whole catalog.
+const ToolkitIndexEntrySchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  version: z.string(),
+  category: z.string(),
+  type: z.string().optional(),
+  toolCount: z.number().int().nonnegative(),
+  authType: z.string(),
+});
+
+const ToolkitIndexEnvelopeSchema = z.object({
+  generatedAt: z.string(),
+  version: z.string(),
+  toolkits: z.array(z.unknown()),
+});
+
+const ToolkitDataSchema = z
+  .object({
+    id: z.string(),
+    label: z.string().optional(),
+    name: z.string().optional(),
+    metadata: z.object({}).passthrough(),
+  })
+  .passthrough()
+  .refine((value) => value.label !== undefined || value.name !== undefined);
+
+const parseToolkitData = (parsed: unknown): ToolkitData | null => {
+  const result = ToolkitDataSchema.safeParse(parsed);
+  return result.success ? (result.data as ToolkitData) : null;
+};
+
+const parseToolkitIndexEntry = (value: unknown): ToolkitIndexEntry | null => {
+  const result = ToolkitIndexEntrySchema.safeParse(value);
+  return result.success ? result.data : null;
+};
 
 const readToolkitFile = async (
   filePath: string
@@ -80,7 +111,7 @@ const readToolkitFile = async (
   try {
     const content = await readFile(filePath, "utf-8");
     const parsed: unknown = JSON.parse(content);
-    return isValidToolkitData(parsed) ? (parsed as ToolkitData) : null;
+    return parseToolkitData(parsed);
   } catch {
     return null;
   }
@@ -106,9 +137,9 @@ const findToolkitDataBySlug = async (
     const candidateSlug = getToolkitSlug({
       id: data.id,
       docsLink: data.metadata?.docsLink,
-    }).toLowerCase();
+    })?.toLowerCase();
 
-    if (candidateSlug === slugKey) {
+    if (candidateSlug && candidateSlug === slugKey) {
       return data;
     }
   }
@@ -147,18 +178,20 @@ export const readToolkitIndex = async (
   try {
     const content = await readFile(filePath, "utf-8");
     const parsed: unknown = JSON.parse(content);
+    const envelope = ToolkitIndexEnvelopeSchema.safeParse(parsed);
 
-    // Basic runtime validation - ensure it's an object with required fields
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      !("toolkits" in parsed) ||
-      !Array.isArray((parsed as { toolkits: unknown }).toolkits)
-    ) {
+    if (!envelope.success) {
       return null;
     }
 
-    return parsed as ToolkitIndex;
+    return {
+      generatedAt: envelope.data.generatedAt,
+      version: envelope.data.version,
+      toolkits: envelope.data.toolkits.flatMap((entry) => {
+        const parsedEntry = parseToolkitIndexEntry(entry);
+        return parsedEntry ? [parsedEntry] : [];
+      }),
+    };
   } catch {
     return null;
   }
