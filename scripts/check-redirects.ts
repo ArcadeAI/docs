@@ -1,21 +1,32 @@
 #!/usr/bin/env npx tsx
 
 /**
- * Check that deleted/renamed markdown files have corresponding redirects in next.config.ts
+ * Check that deleted/renamed markdown files have corresponding redirects in redirects.ts
  *
  * Usage:
  *   pnpm check-redirects [--auto-fix] [--staged-only] [base_branch]
  *
  * Features:
  * - Detects deleted AND renamed markdown files without redirects
- * - Auto-fix mode: automatically inserts redirect entries into next.config.ts
+ * - Auto-fix mode: automatically inserts redirect entries into redirects.ts
  * - Validates existing redirects for circular references and invalid destinations
  * - Collapses redirect chains automatically
  * - --staged-only: Only check staged changes (for pre-commit hook)
  */
 
 import { execSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
+import { redirects as configuredRedirects } from "../redirects";
+import {
+  checkWildcardMatch,
+  type DynamicRouteMove,
+  dynamicRouteExists,
+  fileToUrl,
+  isMoveCoveredByRedirect,
+  pageExists,
+  parseDynamicRouteMoves,
+  type Redirect,
+} from "./lib/check-redirects-utils";
 
 // Colors for terminal output
 const colors = {
@@ -31,173 +42,18 @@ const autoFix = args.includes("--auto-fix");
 const stagedOnly = args.includes("--staged-only");
 const baseBranch = args.find((arg) => !arg.startsWith("--")) || "main";
 
-const CONFIG_FILE = "next.config.ts";
-
-// Magic number constant for "return [" offset
-const RETURN_BRACKET_LENGTH = 8;
+const REDIRECTS_FILE = "redirects.ts";
 
 // Top-level regex patterns for performance
-const APP_LOCALE_PREFIX_REGEX = /^app\/[a-z]{2}\//;
-const PAGE_FILE_SUFFIX_REGEX = /\/?page\.mdx?$/;
-const LOCALE_PREFIX_REGEX = /^\/:locale\/?/;
 const PAGE_FILE_MATCH_REGEX = /page\.mdx?$/;
 const LOCALE_PATH_PREFIX_REGEX = /^\/:locale\//;
-const WILDCARD_PATH_REGEX = /\/:path\*.*$/;
-const MDX_EXTENSION_REGEX = /\.mdx$/;
 const SPECIAL_REGEX_CHARS_REGEX = /[.*+?^${}()|[\]\\]/g;
-const REDIRECT_REGEX =
-  /\{\s*source:\s*["']([^"']+)["']\s*,\s*destination:\s*["']([^"']+)["']/g;
-const REVERSED_REDIRECT_REGEX =
-  /\{\s*destination:\s*["']([^"']+)["']\s*,\s*source:\s*["']([^"']+)["']/g;
-const DYNAMIC_ROUTE_REGEX = /\[[^\]]+\]/;
-
-type Redirect = {
-  source: string;
-  destination: string;
-  permanent?: boolean;
-};
 
 type RedirectChain = {
   source: string;
   oldDest: string;
   newDest: string;
 };
-
-type DynamicRouteMove = {
-  oldPath: string;
-  newPath: string;
-  oldUrl: string;
-  newUrl: string;
-};
-
-/**
- * Convert file path to URL path
- * e.g., app/en/guides/foo/page.mdx -> /:locale/guides/foo
- */
-function fileToUrl(filePath: string): string {
-  const urlPath = filePath
-    .replace(APP_LOCALE_PREFIX_REGEX, "")
-    .replace(PAGE_FILE_SUFFIX_REGEX, "");
-
-  return urlPath ? `/:locale/${urlPath}` : "/:locale";
-}
-
-/**
- * Convert URL path to file path
- * e.g., /:locale/guides/foo -> app/en/guides/foo/page.mdx
- */
-function urlToFile(urlPath: string): string {
-  const pathWithoutLocale = urlPath.replace(LOCALE_PREFIX_REGEX, "");
-  return pathWithoutLocale
-    ? `app/en/${pathWithoutLocale}/page.mdx`
-    : "app/en/page.mdx";
-}
-
-/**
- * Check if a dynamic route exists that could serve this URL path.
- * e.g., for /resources/integrations/productivity/gmail,
- * check if /resources/integrations/productivity/[toolkitId]/page.mdx exists
- */
-function dynamicRouteExists(urlPath: string): boolean {
-  const pathWithoutLocale = urlPath.replace(LOCALE_PREFIX_REGEX, "");
-  const segments = pathWithoutLocale.split("/").filter(Boolean);
-
-  // Try replacing the last segment with common dynamic route patterns
-  const dynamicPatterns = ["[toolkitId]", "[slug]", "[id]", "[...slug]"];
-
-  for (let i = segments.length - 1; i >= 0; i--) {
-    for (const pattern of dynamicPatterns) {
-      const testSegments = [...segments];
-      testSegments[i] = pattern;
-      const testPath = `app/en/${testSegments.join("/")}/page.mdx`;
-      if (existsSync(testPath)) {
-        return true;
-      }
-      const testPathMd = testPath.replace(MDX_EXTENSION_REGEX, ".md");
-      if (existsSync(testPathMd)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-/**
- * Check if a page exists on disk
- */
-function pageExists(urlPath: string): boolean {
-  if (urlPath.includes(":path*") || urlPath.includes(":path")) {
-    return true;
-  }
-
-  const filePath = urlToFile(urlPath);
-  if (existsSync(filePath)) {
-    return true;
-  }
-
-  const mdPath = filePath.replace(MDX_EXTENSION_REGEX, ".md");
-  if (existsSync(mdPath)) {
-    return true;
-  }
-
-  // Check if a dynamic route could serve this URL
-  if (dynamicRouteExists(urlPath)) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Execute regex and collect all matches (avoids assignment in expression)
- */
-function collectRegexMatches(
-  regex: RegExp,
-  content: string,
-  sourceIndex: number,
-  destIndex: number
-): Array<{ source: string; destination: string }> {
-  const results: Array<{ source: string; destination: string }> = [];
-  regex.lastIndex = 0;
-
-  let match = regex.exec(content);
-  while (match !== null) {
-    results.push({
-      source: match[sourceIndex],
-      destination: match[destIndex],
-    });
-    match = regex.exec(content);
-  }
-
-  return results;
-}
-
-/**
- * Parse redirects from next.config.ts
- */
-function parseRedirects(content: string): Redirect[] {
-  const results: Redirect[] = [];
-
-  // Collect standard format: { source: "...", destination: "..." }
-  const standardMatches = collectRegexMatches(REDIRECT_REGEX, content, 1, 2);
-  for (const m of standardMatches) {
-    results.push(m);
-  }
-
-  // Collect reversed format: { destination: "...", source: "..." }
-  const reversedMatches = collectRegexMatches(
-    REVERSED_REDIRECT_REGEX,
-    content,
-    2,
-    1
-  );
-  for (const m of reversedMatches) {
-    results.push(m);
-  }
-
-  return results;
-}
 
 /**
  * Parse git diff output for deleted and renamed files
@@ -228,77 +84,6 @@ function parseGitDiffOutput(
 }
 
 /**
- * Convert a file path containing a dynamic route to a URL pattern.
- * Replaces [param] with :param and [...param] with :param*
- * e.g., app/en/resources/[toolkitId]/page.mdx -> /:locale/resources/:toolkitId
- */
-function dynamicFileToUrlPattern(filePath: string): string {
-  const urlPath = filePath
-    .replace(APP_LOCALE_PREFIX_REGEX, "")
-    .replace(PAGE_FILE_SUFFIX_REGEX, "");
-
-  // Replace [...param] with :param* (catch-all routes)
-  // Replace [param] with :param (dynamic segments)
-  const patternPath = urlPath
-    .replace(/\[\.\.\.([^\]]+)\]/g, ":$1*")
-    .replace(/\[([^\]]+)\]/g, ":$1");
-
-  return patternPath ? `/:locale/${patternPath}` : "/:locale";
-}
-
-/**
- * Parse git diff output for renamed dynamic route page files.
- * Detects when a page.mdx inside a dynamic route folder is moved.
- */
-function parseDynamicRouteMoves(
-  output: string,
-  moves: DynamicRouteMove[]
-): void {
-  for (const line of output.split("\n")) {
-    if (!line) {
-      continue;
-    }
-    const parts = line.split("\t");
-    const status = parts[0];
-
-    // Only look at renames (R followed by similarity percentage)
-    if (!status?.startsWith("R")) {
-      continue;
-    }
-
-    const oldPath = parts[1];
-    const newPath = parts[2];
-
-    if (!oldPath || !newPath) {
-      continue;
-    }
-
-    // Check if either path contains a dynamic route segment
-    const oldHasDynamic = DYNAMIC_ROUTE_REGEX.test(oldPath);
-    const newHasDynamic = DYNAMIC_ROUTE_REGEX.test(newPath);
-
-    // We care about moves where the URL pattern changes
-    if (!PAGE_FILE_MATCH_REGEX.test(oldPath)) {
-      continue;
-    }
-
-    const oldUrl = dynamicFileToUrlPattern(oldPath);
-    const newUrl = dynamicFileToUrlPattern(newPath);
-
-    // Skip if the URL pattern hasn't actually changed
-    if (oldUrl === newUrl) {
-      continue;
-    }
-
-    // Record the move if either path has a dynamic route
-    // or if the directory structure changed significantly
-    if (oldHasDynamic || newHasDynamic) {
-      moves.push({ oldPath, newPath, oldUrl, newUrl });
-    }
-  }
-}
-
-/**
  * Get moved dynamic routes by comparing branches
  */
 function getMovedDynamicRoutes(
@@ -312,7 +97,7 @@ function getMovedDynamicRoutes(
       const stagedChanges = execSync("git diff --cached --name-status", {
         encoding: "utf-8",
       });
-      parseDynamicRouteMoves(stagedChanges, moves);
+      moves.push(...parseDynamicRouteMoves(stagedChanges));
     } catch {
       // Ignore errors
     }
@@ -324,7 +109,7 @@ function getMovedDynamicRoutes(
         `git diff --name-status ${branch}...HEAD`,
         { encoding: "utf-8" }
       );
-      parseDynamicRouteMoves(committedChanges, moves);
+      moves.push(...parseDynamicRouteMoves(committedChanges));
     } catch {
       // Ignore errors
     }
@@ -333,7 +118,7 @@ function getMovedDynamicRoutes(
       const uncommittedChanges = execSync("git diff --name-status HEAD", {
         encoding: "utf-8",
       });
-      parseDynamicRouteMoves(uncommittedChanges, moves);
+      moves.push(...parseDynamicRouteMoves(uncommittedChanges));
     } catch {
       // Ignore errors
     }
@@ -348,36 +133,6 @@ function getMovedDynamicRoutes(
     seen.add(move.oldUrl);
     return true;
   });
-}
-
-/**
- * Check if a wildcard redirect already covers a dynamic route move
- */
-function isMoveCoveredByRedirect(
-  move: DynamicRouteMove,
-  redirects: Redirect[]
-): boolean {
-  // Check for exact match or wildcard that covers the path
-  for (const redirect of redirects) {
-    // Exact pattern match
-    if (redirect.source === move.oldUrl) {
-      return true;
-    }
-
-    // Check if a wildcard redirect covers this path
-    if (redirect.source.includes(":path*")) {
-      const prefix = redirect.source
-        .replace(WILDCARD_PATH_REGEX, "")
-        .replace(LOCALE_PATH_PREFIX_REGEX, "");
-      const movePrefix = move.oldUrl.replace(LOCALE_PATH_PREFIX_REGEX, "");
-
-      if (movePrefix.startsWith(`${prefix}/`) || movePrefix === prefix) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }
 
 /**
@@ -458,30 +213,6 @@ function getDeletedAndRenamedFiles(
 }
 
 /**
- * Check if a wildcard redirect covers a path
- */
-function checkWildcardMatch(path: string, redirectList: Redirect[]): boolean {
-  const pathWithoutLocale = path.replace(LOCALE_PATH_PREFIX_REGEX, "");
-
-  for (const redirect of redirectList) {
-    if (redirect.source.includes(":path*")) {
-      const prefix = redirect.source
-        .replace(WILDCARD_PATH_REGEX, "")
-        .replace(LOCALE_PATH_PREFIX_REGEX, "");
-
-      if (
-        pathWithoutLocale.startsWith(`${prefix}/`) ||
-        pathWithoutLocale === prefix
-      ) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-/**
  * Find the final destination in a redirect chain (follows all hops)
  * Returns null if the path doesn't redirect anywhere
  */
@@ -510,30 +241,32 @@ function findFinalRedirectDestination(
 }
 
 /**
- * Insert redirect entries into next.config.ts
+ * Insert redirect entries into redirects.ts, just before the closing `];` of
+ * the `redirects` array (i.e. below the "Auto-added redirects" comment).
+ * This is the single append point for every auto-fix run, rather than the
+ * next.config.ts approach of inserting at the top of the array each time.
  */
 function insertRedirects(entries: string[]): void {
-  const content = readFileSync(CONFIG_FILE, "utf-8");
+  const content = readFileSync(REDIRECTS_FILE, "utf-8");
 
-  const insertPoint = content.indexOf("return [");
+  const insertPoint = content.lastIndexOf("\n];");
   if (insertPoint === -1) {
-    console.error(colors.red("ERROR: Could not find 'return [' in config"));
+    console.error(
+      colors.red(`ERROR: Could not find closing '];' in ${REDIRECTS_FILE}`)
+    );
     process.exit(1);
   }
 
-  const beforeReturn = content.substring(
-    0,
-    insertPoint + RETURN_BRACKET_LENGTH
-  );
-  const afterReturn = content.substring(insertPoint + RETURN_BRACKET_LENGTH);
+  const before = content.slice(0, insertPoint);
+  const after = content.slice(insertPoint);
 
-  const newContent = `${beforeReturn}\n        // Auto-added redirects for deleted pages\n${entries.join("\n")}${afterReturn}`;
+  const newContent = `${before}\n${entries.join("\n")}${after}`;
 
-  writeFileSync(CONFIG_FILE, newContent);
+  writeFileSync(REDIRECTS_FILE, newContent);
 }
 
 /**
- * Update a redirect destination in the config
+ * Update a redirect destination in redirects.ts
  */
 function updateRedirectDestination(
   oldDest: string,
@@ -555,8 +288,9 @@ console.log("Checking for deleted markdown files without redirects...");
 console.log(`Comparing current branch to: ${baseBranch}`);
 console.log("");
 
-const configContent = readFileSync(CONFIG_FILE, "utf-8");
-const redirects = parseRedirects(configContent);
+// Copy the imported entries into plain objects so PART 1b can update
+// `destination` in place without mutating the imported module's array.
+const redirects: Redirect[] = configuredRedirects.map((r) => ({ ...r }));
 
 let exitCode = 0;
 const invalidRedirects: string[] = [];
@@ -565,7 +299,9 @@ const chains: RedirectChain[] = [];
 // ============================================================
 // PART 1: Validate existing redirects
 // ============================================================
-console.log(colors.blue(`Validating existing redirects in ${CONFIG_FILE}...`));
+console.log(
+  colors.blue(`Validating existing redirects in ${REDIRECTS_FILE}...`)
+);
 console.log("");
 
 for (const redirect of redirects) {
@@ -624,22 +360,33 @@ if (chains.length > 0) {
     );
     console.log("");
 
-    let updatedConfig = configContent;
+    let updatedRedirectsFile = readFileSync(REDIRECTS_FILE, "utf-8");
     for (const chain of chains) {
       console.log(`${colors.green("  ✓")} ${chain.source}`);
       console.log(`    was: ${chain.oldDest}`);
       console.log(`    now: ${chain.newDest}`);
 
-      updatedConfig = updateRedirectDestination(
+      updatedRedirectsFile = updateRedirectDestination(
         chain.oldDest,
         chain.newDest,
-        updatedConfig
+        updatedRedirectsFile
       );
+
+      // Mirror the same (deliberately global, not source-scoped) replacement
+      // in memory so later parts see the collapsed destinations without
+      // re-reading the file.
+      for (const r of redirects) {
+        if (r.destination === chain.oldDest) {
+          r.destination = chain.newDest;
+        }
+      }
     }
 
-    writeFileSync(CONFIG_FILE, updatedConfig);
+    writeFileSync(REDIRECTS_FILE, updatedRedirectsFile);
     console.log("");
-    console.log(colors.green(`✓ Redirect chains collapsed in ${CONFIG_FILE}`));
+    console.log(
+      colors.green(`✓ Redirect chains collapsed in ${REDIRECTS_FILE}`)
+    );
     console.log("");
   } else {
     console.log(
@@ -678,7 +425,9 @@ console.log("");
 const missingRedirects: string[] = [];
 const suggestedEntries: string[] = [];
 
-const latestRedirects = parseRedirects(readFileSync(CONFIG_FILE, "utf-8"));
+// `redirects` already reflects PART 1b's chain collapses (see above), so it
+// doubles as "the latest known state" without re-reading the file.
+const latestRedirects = redirects;
 
 for (const file of allDeletedOrRenamed) {
   const urlPath = fileToUrl(file);
@@ -701,11 +450,11 @@ for (const file of allDeletedOrRenamed) {
     console.log(colors.red(`✗ Missing redirect for: ${urlPath}`));
     missingRedirects.push(urlPath);
 
-    suggestedEntries.push(`        {
-          source: "${urlPath}",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
-          permanent: true,
-        },`);
+    suggestedEntries.push(`  {
+    source: "${urlPath}",
+    destination: "/:locale/REPLACE_WITH_NEW_PATH",
+    permanent: true,
+  },`);
 
     exitCode = 1;
   }
@@ -725,7 +474,7 @@ if (missingRedirects.length > 0) {
     );
     console.log(
       colors.blue(
-        `Auto-fixing: Adding ${missingRedirects.length} redirect(s) to ${CONFIG_FILE}`
+        `Auto-fixing: Adding ${missingRedirects.length} redirect(s) to ${REDIRECTS_FILE}`
       )
     );
     console.log(
@@ -737,7 +486,7 @@ if (missingRedirects.length > 0) {
 
     insertRedirects(suggestedEntries);
 
-    console.log(colors.green(`✓ Added redirect entries to ${CONFIG_FILE}`));
+    console.log(colors.green(`✓ Added redirect entries to ${REDIRECTS_FILE}`));
     console.log("");
     console.log(
       colors.red(
@@ -764,7 +513,7 @@ if (missingRedirects.length > 0) {
     }
     console.log("");
     console.log(
-      `Open ${CONFIG_FILE} and search for 'REPLACE_WITH_NEW_PATH' to find them.`
+      `Open ${REDIRECTS_FILE} and search for 'REPLACE_WITH_NEW_PATH' to find them.`
     );
     console.log("");
 
@@ -787,7 +536,7 @@ if (missingRedirects.length > 0) {
     );
     console.log("");
     console.log(
-      "When you delete a markdown file, you must add a redirect in next.config.ts"
+      "When you delete a markdown file, you must add a redirect in redirects.ts"
     );
     console.log(
       "to prevent broken links for users who have bookmarked the old URL."
@@ -799,9 +548,7 @@ if (missingRedirects.length > 0) {
     }
     console.log("");
     console.log(
-      colors.yellow(
-        "Add the following to the redirects array in next.config.ts:"
-      )
+      colors.yellow("Add the following to the redirects array in redirects.ts:")
     );
     console.log("");
     for (const entry of suggestedEntries) {
@@ -830,7 +577,7 @@ if (invalidRedirects.length > 0) {
   }
   console.log("");
   console.log(colors.yellow("How to fix:"));
-  console.log("  1. Open next.config.ts");
+  console.log("  1. Open redirects.ts");
   console.log("  2. Find the redirect(s) listed above");
   console.log("  3. Update the destination to a valid page path");
   console.log("     (Check that the path exists under app/en/)");
@@ -871,11 +618,11 @@ if (uncoveredMoves.length > 0) {
     console.log(colors.blue(`    → ${move.newPath}`));
     console.log("");
     console.log(colors.yellow("  Suggested redirect:"));
-    console.log(`        {
-          source: "${move.oldUrl}/:path*",
-          destination: "${move.newUrl}/:path*",
-          permanent: true,
-        },`);
+    console.log(`  {
+    source: "${move.oldUrl}/:path*",
+    destination: "${move.newUrl}/:path*",
+    permanent: true,
+  },`);
     console.log("");
   }
 

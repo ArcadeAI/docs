@@ -7,8 +7,8 @@
  */
 
 import { join } from "path";
+import { isApiSuffixedToolkitId } from "../shared/toolkit-primitives.js";
 import type { ToolDefinition, ToolkitMetadata } from "../types/index.js";
-import { normalizeId } from "../utils/fp.js";
 import { filterToolsByHighestVersion } from "../utils/version-coherence.js";
 import {
   type ArcadeApiSourceConfig,
@@ -142,7 +142,7 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     tools: readonly ToolDefinition[],
     directMetadata: ToolkitMetadata | null
   ): Promise<ToolkitMetadata | null> {
-    if (directMetadata || !normalizeId(toolkitId).endsWith("api")) {
+    if (directMetadata || !isApiSuffixedToolkitId(toolkitId)) {
       return directMetadata;
     }
 

@@ -2,12 +2,12 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { normalizeToolkitId } from "../../../app/_lib/toolkit-slug";
 import {
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
   type ToolkitCatalogEntry,
 } from "../../../app/_lib/toolkit-static-params";
+import { normalizeToolkitId } from "../../src/shared/toolkit-primitives";
 
 const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   const dir = await mkdtemp(join(tmpdir(), "toolkit-static-params-"));
@@ -43,8 +43,29 @@ const writeToolkitData = async (
   }
 ) => {
   const fileName = `${normalizeToolkitId(toolkit.id)}.json`;
+  // Fill in the fields the merged toolkit schema requires but this test
+  // suite doesn't care about, so fixtures stay valid without every call
+  // site restating boilerplate.
   const toolkitFixture = JSON.stringify(
-    { label: toolkit.label ?? toolkit.id, ...toolkit },
+    {
+      version: "1.0.0",
+      description: null,
+      tools: [],
+      auth: null,
+      label: toolkit.label ?? toolkit.id,
+      ...toolkit,
+      metadata: {
+        category: "productivity",
+        iconUrl: "https://design-system.arcade.dev/icons/placeholder.svg",
+        isBYOC: false,
+        isPro: false,
+        type: "arcade",
+        docsLink: "",
+        isComingSoon: false,
+        isHidden: false,
+        ...toolkit.metadata,
+      },
+    },
     null,
     2
   );
@@ -227,16 +248,28 @@ describe("toolkit static params", () => {
     });
   });
 
-  it('maps unknown categories to "others"', async () => {
+  it('throws on an unrecognized category instead of coercing it to "others"', async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [{ id: "Github", category: "weird" }]);
+
+      await expect(
+        listToolkitRoutes({ dataDir: dir, toolkitsCatalog: [] })
+      ).rejects.toThrow(/weird/);
+    });
+  });
+
+  it("skips a toolkit with no category anywhere instead of routing it to a fake bucket", async () => {
+    await withTempDir(async (dir) => {
+      // No JSON file, no catalog entry, and the index entry itself omits
+      // category — nothing to route this toolkit under.
+      await writeIndex(dir, [{ id: "Github" }]);
 
       const routes = await listToolkitRoutes({
         dataDir: dir,
         toolkitsCatalog: [],
       });
 
-      expect(routes).toEqual([{ toolkitId: "github", category: "others" }]);
+      expect(routes).toEqual([]);
     });
   });
 });

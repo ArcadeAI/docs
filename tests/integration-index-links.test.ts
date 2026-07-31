@@ -9,16 +9,17 @@ import {
   toIntegrationLink,
 } from "@/app/_lib/integration-index";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
-import {
-  getToolkitSlug,
-  type ToolkitWithDocsLink,
-} from "@/app/_lib/toolkit-slug";
+import type { ToolkitWithDocsLink } from "@/app/_lib/toolkit-slug";
 import {
   getToolkitCanonicalPath,
-  INTEGRATION_CATEGORIES,
   listToolkitRoutes,
   listValidIntegrationLinks,
 } from "@/app/_lib/toolkit-static-params";
+import {
+  getToolkitSlug,
+  INTEGRATION_CATEGORIES,
+} from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import { redirects } from "../redirects";
 
 const TIMEOUT = 30_000;
 const ROOT = process.cwd();
@@ -198,13 +199,8 @@ const pageFileExists = (path: string): boolean => {
   );
 };
 
-const readRedirectSources = async (): Promise<Set<string>> => {
-  const config = await readFile(join(ROOT, "next.config.ts"), "utf-8");
-  const sources = [...config.matchAll(/source:\s*"([^"]+)"/g)].map(
-    (match) => match[1]
-  );
-  return new Set(sources);
-};
+const readRedirectSources = (): Set<string> =>
+  new Set(redirects.map((redirect) => redirect.source));
 
 const extractInternalHrefs = async (relPath: string): Promise<string[]> => {
   const content = await readFile(join(ROOT, relPath), "utf-8");

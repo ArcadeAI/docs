@@ -13,11 +13,10 @@
  */
 
 import { readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.ts";
 
-const here = dirname(fileURLToPath(import.meta.url));
-const TOOLKITS_DIR = join(here, "..", "data", "toolkits");
+const TOOLKITS_DIR = resolveToolkitDataDir();
 
 type ToolkitShape = {
   id?: unknown;

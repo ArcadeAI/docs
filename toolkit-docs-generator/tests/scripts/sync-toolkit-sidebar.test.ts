@@ -296,13 +296,27 @@ describe("buildToolkitInfoList", () => {
   });
 
   it("keeps sidebar href categories consistent with static params", async () => {
+    // This fixture also flows through getToolkitStaticParamsForCategory
+    // below, which validates it against the full merged toolkit schema —
+    // unlike the other fixtures in this file, it needs every required field,
+    // not just the ones buildToolkitInfoList itself reads.
     createToolkitJson("weaviateapi", {
       id: "WeaviateApi",
       label: "Weaviate API",
+      version: "1.0.0",
+      description: null,
+      auth: null,
+      tools: [],
       metadata: {
         category: "databases",
         docsLink:
           "https://docs.arcade.dev/en/mcp-servers/databases/weaviate-api",
+        iconUrl: "https://design-system.arcade.dev/icons/placeholder.svg",
+        isBYOC: false,
+        isPro: false,
+        type: "arcade",
+        isComingSoon: false,
+        isHidden: false,
       },
     });
 

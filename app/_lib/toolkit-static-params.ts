@@ -1,23 +1,18 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
-import { readToolkitData, readToolkitIndex } from "./toolkit-data";
-import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
-
-export const INTEGRATION_CATEGORIES = [
-  "productivity",
-  "social",
-  "entertainment",
-  "development",
-  "payments",
-  "search",
-  "sales",
-  "databases",
-  "customer-support",
-  "others",
-] as const;
-
-export type IntegrationCategory = (typeof INTEGRATION_CATEGORIES)[number];
+import { resolveToolkitDataDir } from "@/toolkit-docs-generator/src/shared/toolkit-data-dir";
+import {
+  getToolkitSlug,
+  INTEGRATION_CATEGORIES,
+  type IntegrationCategory,
+  normalizeToolkitId,
+} from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import {
+  loadAllToolkitData,
+  readToolkitData,
+  readToolkitIndex,
+} from "./toolkit-data";
 
 export type ToolkitCatalogEntry = {
   id: string;
@@ -42,16 +37,40 @@ const DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES: ToolkitCatalogEntry[] =
 const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> =>
   DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES;
 
+/**
+ * Normalize a category value read from toolkit data into a routable
+ * category, or `null` when there is nothing to route by.
+ *
+ * `undefined`/`null`/empty string means no category information was
+ * available at all — typically a fallback source (the design-system catalog
+ * used only when a toolkit's own JSON file is absent) that simply doesn't
+ * carry one. That's a quiet "nothing to go on," not corruption: callers skip
+ * the toolkit rather than invent a page for it.
+ *
+ * A non-empty string that isn't one of `INTEGRATION_CATEGORIES`, though, is
+ * a real value someone set — most likely a new category introduced upstream
+ * (the Engine / design-system catalog) that this docs site doesn't have a
+ * route for yet. There is no "others" catch-all to silently absorb it (see
+ * INTEGRATION_CATEGORIES's doc comment): every toolkit in an unrecognized
+ * category would otherwise render as a clickable catalog card pointing at a
+ * route that 404s, with nothing failing the build to surface it. So this
+ * throws instead.
+ */
 export function normalizeCategory(
   value: string | null | undefined
-): IntegrationCategory {
+): IntegrationCategory | null {
   if (!value) {
-    return "others";
+    return null;
   }
 
-  return INTEGRATION_CATEGORIES.includes(value as IntegrationCategory)
-    ? (value as IntegrationCategory)
-    : "others";
+  if (INTEGRATION_CATEGORIES.includes(value as IntegrationCategory)) {
+    return value as IntegrationCategory;
+  }
+
+  throw new Error(
+    `Unrecognized integration category "${value}". Expected one of: ${INTEGRATION_CATEGORIES.join(", ")}. ` +
+      "A new category needs a matching app/en/resources/integrations/<category>/[toolkitId] route directory before toolkits can use it."
+  );
 }
 
 /**
@@ -62,6 +81,11 @@ export function normalizeCategory(
  * alias (e.g. `development/pagerduty-api` when its category is `customer-support`)
  * must canonicalize to the one generated, index-linked page instead of
  * orphaning itself. Mirrors the slug + category logic in `listToolkitRoutes`.
+ *
+ * Only called for a toolkit that already has a generated page (it's building
+ * that page's own canonical tag), so a `null` category here means the page
+ * exists but its routing information doesn't — an internal inconsistency,
+ * not a toolkit to quietly skip. That throws too.
  */
 export function getToolkitCanonicalPath(toolkit: {
   id: string;
@@ -69,60 +93,45 @@ export function getToolkitCanonicalPath(toolkit: {
   docsLink?: string | null;
 }): string {
   const category = normalizeCategory(toolkit.category);
+  if (!category) {
+    throw new Error(
+      `Cannot build a canonical path for toolkit "${toolkit.id}": it has no integration category.`
+    );
+  }
   const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
   return `/en/resources/integrations/${category}/${slug}`;
 }
 
-const DEFAULT_DATA_DIR = join(
-  process.cwd(),
-  "toolkit-docs-generator",
-  "data",
-  "toolkits"
-);
-
 const resolveDataDir = (dataDir?: string): string =>
-  dataDir ?? process.env.TOOLKIT_DATA_DIR ?? DEFAULT_DATA_DIR;
+  resolveToolkitDataDir(dataDir);
 
 const listToolkitRoutesFromDataDir = async (options?: {
   dataDir?: string;
 }): Promise<ToolkitRouteEntry[]> => {
   const dataDir = resolveDataDir(options?.dataDir);
-  const entries = await readdir(dataDir);
+
+  // loadAllToolkitData validates every file against MergedToolkitSchema and
+  // throws on a corrupt one (see app/_lib/toolkit-data.ts) — a malformed file
+  // in this directory listing is never legitimately "absent", so it should
+  // fail the build rather than be skipped here.
+  const { byNormalizedId } = await loadAllToolkitData(dataDir);
+
   const unique = new Map<string, ToolkitRouteEntry>();
 
-  for (const entry of entries) {
-    if (!entry.endsWith(".json") || entry === "index.json") {
+  for (const data of byNormalizedId.values()) {
+    if (data.metadata?.isHidden) {
       continue;
     }
 
-    try {
-      const content = await readFile(join(dataDir, entry), "utf-8");
-      const parsed = JSON.parse(content) as {
-        id?: string;
-        metadata?: {
-          category?: string;
-          docsLink?: string;
-          isHidden?: boolean;
-        };
-      };
-
-      if (!parsed?.id) {
-        continue;
-      }
-
-      if (parsed.metadata?.isHidden) {
-        continue;
-      }
-
-      const slug = getToolkitSlug({
-        id: parsed.id,
-        docsLink: parsed.metadata?.docsLink,
-      });
-      const category = normalizeCategory(parsed.metadata?.category);
-      unique.set(slug, { toolkitId: slug, category });
-    } catch {
-      // Ignore malformed toolkit data files.
+    const slug = getToolkitSlug({
+      id: data.id,
+      docsLink: data.metadata?.docsLink,
+    });
+    const category = normalizeCategory(data.metadata?.category);
+    if (!category) {
+      continue;
     }
+    unique.set(slug, { toolkitId: slug, category });
   }
 
   return [...unique.values()];
@@ -158,6 +167,12 @@ const resolveToolkitRoute = async (
   const category = normalizeCategory(
     data?.metadata?.category ?? catalogEntry?.category ?? toolkit.category
   );
+  // No category info anywhere for this toolkit: nothing to route it under.
+  // Skip it quietly (same treatment as a hidden toolkit) rather than
+  // fabricate a page under a category that doesn't exist.
+  if (!category) {
+    return null;
+  }
   return { toolkitId: slug, category };
 };
 
