@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "vitest";
+import { redirects } from "../redirects";
 
 test("sitemap lists expected URLs", async () => {
   const previousSiteUrl = process.env.SITE_URL;
@@ -55,16 +56,15 @@ test("sitemap contains no URL that we redirect away", async () => {
       entry.url.replace("https://example.test", "")
     );
 
-    // Every redirect `source` in next.config.ts is a path we 3xx away, so a live
+    // Every redirect `source` in redirects.ts is a path we 3xx away, so a live
     // page must never sit there — otherwise the sitemap ships a redirecting URL
     // (Ahrefs flags "3XX redirect in sitemap"). Guards against pages left behind
     // after a rename.
-    const config = readFileSync(join(process.cwd(), "next.config.ts"), "utf-8");
     const exactSources = new Set<string>();
     const prefixSources: string[] = [];
 
-    for (const match of config.matchAll(/source:\s*"([^"]+)"/g)) {
-      const normalized = match[1]
+    for (const redirect of redirects) {
+      const normalized = redirect.source
         .replace(/:locale\([^)]*\)/g, "en")
         .replace(/:locale/g, "en");
 
@@ -90,7 +90,7 @@ test("sitemap contains no URL that we redirect away", async () => {
 
     for (const offender of offenders) {
       console.error(
-        `Sitemap includes ${offender}, which matches a redirect source in next.config.ts. ` +
+        `Sitemap includes ${offender}, which matches a redirect source in redirects.ts. ` +
           "Delete the stale page (or remove the redirect) so the sitemap ships no 3XX URLs."
       );
     }

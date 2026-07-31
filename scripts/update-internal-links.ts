@@ -6,12 +6,13 @@
  * Usage:
  *   pnpm update-links [--dry-run]
  *
- * This script reads redirects from next.config.ts and updates any internal links
+ * This script reads redirects from redirects.ts and updates any internal links
  * in MDX/TSX files that point to redirected paths.
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
 import fg from "fast-glob";
+import { redirects as configuredRedirects } from "../redirects";
 
 // Colors for terminal output
 const colors = {
@@ -24,70 +25,14 @@ const colors = {
 // Parse command line arguments
 const dryRun = process.argv.includes("--dry-run");
 
-const CONFIG_FILE = "next.config.ts";
-
 // Top-level regex patterns
 const LOCALE_PREFIX_REGEX = /^\/:locale/;
 const SPECIAL_REGEX_CHARS_REGEX = /[.*+?^${}()|[\]\\]/g;
-const REDIRECT_REGEX =
-  /\{\s*source:\s*["']([^"']+)["']\s*,\s*destination:\s*["']([^"']+)["']/g;
-const REVERSED_REDIRECT_REGEX =
-  /\{\s*destination:\s*["']([^"']+)["']\s*,\s*source:\s*["']([^"']+)["']/g;
 
 type Redirect = {
   source: string;
   destination: string;
 };
-
-/**
- * Execute regex and collect all matches (avoids assignment in expression)
- */
-function collectRegexMatches(
-  regex: RegExp,
-  content: string,
-  sourceIndex: number,
-  destIndex: number
-): Array<{ source: string; destination: string }> {
-  const results: Array<{ source: string; destination: string }> = [];
-  regex.lastIndex = 0;
-
-  let match = regex.exec(content);
-  while (match !== null) {
-    results.push({
-      source: match[sourceIndex],
-      destination: match[destIndex],
-    });
-    match = regex.exec(content);
-  }
-
-  return results;
-}
-
-/**
- * Parse redirects from next.config.ts
- */
-function parseRedirects(content: string): Redirect[] {
-  const results: Redirect[] = [];
-
-  // Collect standard format: { source: "...", destination: "..." }
-  const standardMatches = collectRegexMatches(REDIRECT_REGEX, content, 1, 2);
-  for (const m of standardMatches) {
-    results.push(m);
-  }
-
-  // Collect reversed format: { destination: "...", source: "..." }
-  const reversedMatches = collectRegexMatches(
-    REVERSED_REDIRECT_REGEX,
-    content,
-    2,
-    1
-  );
-  for (const m of reversedMatches) {
-    results.push(m);
-  }
-
-  return results;
-}
 
 /**
  * Filter redirects to only those that can be auto-updated
@@ -199,11 +144,9 @@ if (dryRun) {
   console.log("");
 }
 
-console.log(colors.blue(`Parsing redirects from ${CONFIG_FILE}...`));
+console.log(colors.blue("Parsing redirects from redirects.ts..."));
 
-const configContent = readFileSync(CONFIG_FILE, "utf-8");
-const allRedirects = parseRedirects(configContent);
-const redirects = getUpdatableRedirects(allRedirects);
+const redirects = getUpdatableRedirects(configuredRedirects);
 
 console.log(
   `Found ${colors.green(String(redirects.length))} non-wildcard redirects to check`

@@ -1,4 +1,5 @@
-import { getToolkitSlug, type ToolkitWithDocsLink } from "./toolkit-slug";
+import { getToolkitSlug } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import type { ToolkitWithDocsLink } from "./toolkit-slug";
 
 const INTEGRATIONS_BASE = "/en/resources/integrations";
 

@@ -28,6 +28,16 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.ts";
+import {
+  getToolkitSlug,
+  INTEGRATION_CATEGORIES,
+  isApiSuffixedToolkitId,
+} from "../src/shared/toolkit-primitives.ts";
+import type {
+  MergedToolkit,
+  MergedToolkitMetadata,
+} from "../src/shared/toolkit-schemas.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -51,7 +61,7 @@ const PROJECT_ROOT = resolve(__dirname, "..", "..");
 
 // Configuration
 const CONFIG = {
-  dataDir: join(PROJECT_ROOT, "toolkit-docs-generator/data/toolkits"),
+  dataDir: resolveToolkitDataDir(),
   integrationsDir: join(PROJECT_ROOT, "app/en/resources/integrations"),
   integrationsBasePath: "/en/resources/integrations",
 };
@@ -71,43 +81,24 @@ const CATEGORY_NAMES: Record<string, string> = {
 };
 
 // Category order for main _meta.tsx
-const CATEGORY_ORDER = [
-  "productivity",
-  "social",
-  "entertainment",
-  "development",
-  "payments",
-  "search",
-  "sales",
-  "databases",
-  "customer-support",
-  "others",
-];
+const CATEGORY_ORDER: readonly string[] = INTEGRATION_CATEGORIES;
 
 const CAPITAL_LETTER_REGEX = /([A-Z])/g;
 const FIRST_CHARACTER_REGEX = /^./;
-const CAMEL_BOUNDARY = /([a-z0-9])([A-Z])/g;
 
 const IDENTIFIER_KEY_REGEX = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
 /**
- * Convert a CamelCase string to kebab-case.
- * Must stay in sync with toKebabCase in app/_lib/toolkit-slug.ts.
+ * This script only reads a handful of fields off each toolkit JSON file (it
+ * doesn't validate the whole document), so it declares the subset it needs
+ * as a `Pick` off the real generator schema types rather than re-describing
+ * the shape by hand.
  */
-function toKebabCase(value: string): string {
-  return value.replace(CAMEL_BOUNDARY, "$1-$2").toLowerCase();
-}
-
-type ToolkitJson = {
-  id?: string;
-  label?: string;
+type ToolkitJson = Partial<Pick<MergedToolkit, "id" | "label">> & {
   name?: string;
-  metadata?: {
-    category?: string;
-    docsLink?: string;
-    isHidden?: boolean;
-    type?: string;
-  };
+  metadata?: Partial<
+    Pick<MergedToolkitMetadata, "category" | "docsLink" | "isHidden" | "type">
+  >;
 };
 
 function renderObjectKey(key: string): string {
@@ -231,21 +222,6 @@ function readToolkitJson(dataDir: string, slug: string): ToolkitJson | null {
   return null;
 }
 
-function getDocsSlugFromLink(docsLink?: string | null): string | null {
-  if (!docsLink) {
-    return null;
-  }
-
-  try {
-    const url = new URL(docsLink);
-    const segments = url.pathname.split("/").filter(Boolean);
-    return segments.at(-1) ?? null;
-  } catch {
-    const segments = docsLink.split("/").filter(Boolean);
-    return segments.at(-1) ?? null;
-  }
-}
-
 /**
  * Read toolkit JSON and extract label if available
  */
@@ -275,7 +251,7 @@ export function inferNavGroup(
   }
 
   // Heuristic fallback: "*Api" toolkits are starter.
-  return toolkitIdOrSlug.toLowerCase().endsWith("api")
+  return isApiSuffixedToolkitId(toolkitIdOrSlug)
     ? ("starter" as const)
     : ("optimized" as const);
 }
@@ -294,8 +270,10 @@ function resolveToolkitInfo(
 ): ToolkitInfoEntry | null {
   const jsonData = readToolkitJson(dataDir, slug);
   const toolkitId = jsonData?.id ?? slug;
-  const docsSlug =
-    getDocsSlugFromLink(jsonData?.metadata?.docsLink) ?? toKebabCase(toolkitId);
+  const docsSlug = getToolkitSlug({
+    id: toolkitId,
+    docsLink: jsonData?.metadata?.docsLink,
+  });
   const designSystemToolkit = TOOLKITS.find(
     (t) => t.id.toLowerCase() === toolkitId.toLowerCase()
   );

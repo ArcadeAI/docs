@@ -1,29 +1,31 @@
 /**
- * Utility functions for check-redirects.ts
- * Extracted for testability.
+ * Shared helpers for scripts/check-redirects.ts.
+ *
+ * Split out so the logic that maps file paths to URLs, checks whether a
+ * page still exists on disk, and matches redirects against moved files can
+ * be unit tested without shelling out to git or touching the real
+ * filesystem.
  */
 
 import { existsSync } from "node:fs";
 
-// Regex patterns
-export const APP_LOCALE_PREFIX_REGEX = /^app\/[a-z]{2}\//;
-export const PAGE_FILE_SUFFIX_REGEX = /\/?page\.mdx?$/;
-export const LOCALE_PREFIX_REGEX = /^\/:locale\/?/;
-export const PAGE_FILE_MATCH_REGEX = /page\.mdx?$/;
-export const LOCALE_PATH_PREFIX_REGEX = /^\/:locale\//;
-export const WILDCARD_PATH_REGEX = /\/:path\*.*$/;
-export const MDX_EXTENSION_REGEX = /\.mdx$/;
-export const DYNAMIC_ROUTE_REGEX = /\[[^\]]+\]/;
-export const REDIRECT_REGEX =
-  /\{\s*source:\s*["']([^"']+)["']\s*,\s*destination:\s*["']([^"']+)["']/g;
-export const REVERSED_REDIRECT_REGEX =
-  /\{\s*destination:\s*["']([^"']+)["']\s*,\s*source:\s*["']([^"']+)["']/g;
-
+// `permanent` is optional here (unlike redirects.ts's `Redirect`, where it's
+// required) because none of these helpers read it — they only match on
+// `source`/`destination`. A `redirects.ts` entry satisfies this type as-is.
 export type Redirect = {
   source: string;
   destination: string;
   permanent?: boolean;
 };
+
+const APP_LOCALE_PREFIX_REGEX = /^app\/[a-z]{2}\//;
+const PAGE_FILE_SUFFIX_REGEX = /\/?page\.mdx?$/;
+const LOCALE_PREFIX_REGEX = /^\/:locale\/?/;
+const PAGE_FILE_MATCH_REGEX = /page\.mdx?$/;
+const LOCALE_PATH_PREFIX_REGEX = /^\/:locale\//;
+const WILDCARD_PATH_REGEX = /\/:path\*.*$/;
+const MDX_EXTENSION_REGEX = /\.mdx$/;
+const DYNAMIC_ROUTE_REGEX = /\[[^\]]+\]/;
 
 export type DynamicRouteMove = {
   oldPath: string;
@@ -200,10 +202,10 @@ export function parseDynamicRouteMoves(output: string): DynamicRouteMove[] {
  */
 export function isMoveCoveredByRedirect(
   move: DynamicRouteMove,
-  redirects: Redirect[]
+  redirectList: Redirect[]
 ): boolean {
   // Check for exact match or wildcard that covers the path
-  for (const redirect of redirects) {
+  for (const redirect of redirectList) {
     // Exact pattern match
     if (redirect.source === move.oldUrl) {
       return true;
@@ -223,56 +225,6 @@ export function isMoveCoveredByRedirect(
   }
 
   return false;
-}
-
-/**
- * Execute regex and collect all matches
- */
-export function collectRegexMatches(
-  regex: RegExp,
-  content: string,
-  sourceIndex: number,
-  destIndex: number
-): Array<{ source: string; destination: string }> {
-  const results: Array<{ source: string; destination: string }> = [];
-  regex.lastIndex = 0;
-
-  let match = regex.exec(content);
-  while (match !== null) {
-    results.push({
-      source: match[sourceIndex],
-      destination: match[destIndex],
-    });
-    match = regex.exec(content);
-  }
-
-  return results;
-}
-
-/**
- * Parse redirects from next.config.ts content
- */
-export function parseRedirects(content: string): Redirect[] {
-  const results: Redirect[] = [];
-
-  // Collect standard format: { source: "...", destination: "..." }
-  const standardMatches = collectRegexMatches(REDIRECT_REGEX, content, 1, 2);
-  for (const m of standardMatches) {
-    results.push(m);
-  }
-
-  // Collect reversed format: { destination: "...", source: "..." }
-  const reversedMatches = collectRegexMatches(
-    REVERSED_REDIRECT_REGEX,
-    content,
-    2,
-    1
-  );
-  for (const m of reversedMatches) {
-    results.push(m);
-  }
-
-  return results;
 }
 
 /**
