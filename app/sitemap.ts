@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { MetadataRoute } from "next";
+import { listValidIntegrationLinks } from "./_lib/toolkit-static-params";
 
 const SITE_URL = process.env.SITE_URL ?? "https://docs.arcade.dev";
 const NORMALIZED_SITE_URL = SITE_URL.replace(/\/+$/, "");
@@ -43,12 +44,66 @@ async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
   return entries;
 }
 
+/**
+ * `[toolkitId]` directories are skipped above because they aren't literal
+ * URLs — but `listValidIntegrationLinks()` (the same enumeration the
+ * integrations index page uses) already resolves every toolkit that dynamic
+ * route serves, plus a handful of authored static partner pages living
+ * alongside it. Skip any link the directory walk already found (the static
+ * ones) so it isn't listed twice.
+ */
+async function collectToolkitRoutes(
+  existingPaths: Set<string>
+): Promise<MetadataRoute.Sitemap> {
+  const links = await listValidIntegrationLinks();
+  const entries: MetadataRoute.Sitemap = [];
+  const categoryPageMtime = new Map<string, Date>();
+
+  for (const link of links) {
+    if (existingPaths.has(link)) {
+      continue;
+    }
+
+    const category = link.split("/").at(-2) ?? "";
+    let mtime = categoryPageMtime.get(category);
+    if (!mtime) {
+      const pageFile = path.join(
+        APP_DIR,
+        "en",
+        "resources",
+        "integrations",
+        category,
+        "[toolkitId]",
+        "page.mdx"
+      );
+      mtime = (await fs.stat(pageFile)).mtime;
+      categoryPageMtime.set(category, mtime);
+    }
+
+    entries.push({
+      url: `${NORMALIZED_SITE_URL}${link}`,
+      lastModified: mtime,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    });
+  }
+
+  return entries;
+}
+
 export default function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!cachedRoutes) {
-    cachedRoutes = collectRoutes(APP_DIR).then((routes) => {
-      routes.sort((a, b) => a.url.localeCompare(b.url));
-      return routes;
-    });
+    cachedRoutes = (async () => {
+      const routes = await collectRoutes(APP_DIR);
+      const existingPaths = new Set(
+        routes.map((route) => route.url.slice(NORMALIZED_SITE_URL.length))
+      );
+      const toolkitRoutes = await collectToolkitRoutes(existingPaths);
+
+      const allRoutes = [...routes, ...toolkitRoutes];
+      allRoutes.sort((a, b) => a.url.localeCompare(b.url));
+      return allRoutes;
+    })();
   }
 
   return cachedRoutes;

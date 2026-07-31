@@ -22,6 +22,14 @@ test("sitemap lists expected URLs", async () => {
     // Known page should be present
     expect(urls).toContain("https://example.test/en/references/changelog");
 
+    // Generated toolkit pages (served by the `[toolkitId]` dynamic route,
+    // which the directory walk above can't see) must still make it into the
+    // sitemap. This fails if the toolkit-route merge in app/sitemap.ts is
+    // reverted.
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/development/github"
+    );
+
     // No duplicates
     const duplicates = urls.filter(
       (url, index, arr) => arr.indexOf(url) !== index
