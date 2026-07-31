@@ -2136,6 +2136,41 @@ describe("DataMerger", () => {
       );
     });
 
+    it("fails strict runs for toolkits in skipToolkitIds when metadata is missing", async () => {
+      const missingMetadataToolkitData: ToolkitData = {
+        tools: [
+          createTool({
+            name: "Lookup",
+            qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
+          }),
+        ],
+        metadata: null,
+      };
+
+      const toolkitDataSource: IToolkitDataSource = {
+        fetchToolkitData: async () => missingMetadataToolkitData,
+        fetchAllToolkitsData: async () =>
+          new Map([["Unknown", missingMetadataToolkitData]]),
+        isAvailable: async () => true,
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
+        skipToolkitIds: new Set(["unknown"]),
+      });
+
+      await expect(merger.mergeAllToolkits()).rejects.toThrow(
+        /missing design-system metadata.*Unknown/s
+      );
+      await expect(merger.getToolkitCount()).rejects.toThrow(
+        /missing design-system metadata.*Unknown/s
+      );
+    });
+
     it("does not skip or fail toolkits missing metadata when requireCompleteData is false", async () => {
       // Without --require-complete, generation must still complete — the
       // toolkit falls back to getDefaultMetadata (hidden placeholder

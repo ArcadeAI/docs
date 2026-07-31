@@ -6,6 +6,8 @@ import {
   filterProvidersBySkipIds,
 } from "../../src/cli/generate-flow.js";
 import type { ChangeDetectionResult } from "../../src/diff/index.js";
+import { assertRequireCompleteMetadata } from "../../src/merger/data-merger.js";
+import type { ToolkitData } from "../../src/sources/toolkit-data-source.js";
 
 // ── Minimal ChangeDetectionResult builder ─────────────────────────────────────
 
@@ -213,5 +215,55 @@ describe("filterProvidersBySkipIds", () => {
     const providerNames = providersToProcess.map((p) => p.provider);
     expect(providerNames).toContain("Slack");
     expect(providerNames).toContain("Jira");
+  });
+});
+
+describe("assertRequireCompleteMetadata", () => {
+  it("throws when any toolkit is missing design-system metadata", () => {
+    const complete: ToolkitData = {
+      tools: [],
+      metadata: {
+        id: "Github",
+        label: "Github",
+        category: "development",
+        iconUrl: "https://example.com/icon.svg",
+        isBYOC: false,
+        isPro: false,
+        type: "arcade",
+        docsLink: "https://docs.example.com",
+        isComingSoon: false,
+        isHidden: false,
+      },
+    };
+    const missing: ToolkitData = { tools: [], metadata: null };
+
+    expect(() =>
+      assertRequireCompleteMetadata([
+        ["Github", complete],
+        ["Unknown", missing],
+      ])
+    ).toThrow(/missing design-system metadata.*Unknown/);
+  });
+
+  it("passes when every toolkit has metadata", () => {
+    const complete: ToolkitData = {
+      tools: [],
+      metadata: {
+        id: "Github",
+        label: "Github",
+        category: "development",
+        iconUrl: "https://example.com/icon.svg",
+        isBYOC: false,
+        isPro: false,
+        type: "arcade",
+        docsLink: "https://docs.example.com",
+        isComingSoon: false,
+        isHidden: false,
+      },
+    };
+
+    expect(() =>
+      assertRequireCompleteMetadata([["Github", complete]])
+    ).not.toThrow();
   });
 });

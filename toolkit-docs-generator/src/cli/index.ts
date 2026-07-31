@@ -38,7 +38,10 @@ import {
   LlmToolkitSummaryGenerator,
 } from "../llm/index.js";
 import type { MergeResult } from "../merger/data-merger.js";
-import { createDataMerger } from "../merger/data-merger.js";
+import {
+  assertRequireCompleteMetadata,
+  createDataMerger,
+} from "../merger/data-merger.js";
 import { createCustomSectionsFileSource } from "../sources/custom-sections-file.js";
 import { createDesignSystemMetadataSource } from "../sources/design-system-metadata.js";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory.js";
@@ -132,13 +135,6 @@ const buildLogPaths = (logDir: string) => ({
   changeLogPath: join(logDir, "changes.log"),
   failedToolsPath: join(logDir, "failed-tools.json"),
 });
-
-const getToolkitIdsWithoutMetadata = (
-  toolkitsData: ReadonlyMap<string, ToolkitData>
-): string[] =>
-  Array.from(toolkitsData.entries())
-    .filter(([, toolkitData]) => toolkitData.metadata === null)
-    .map(([toolkitId]) => toolkitId);
 
 const createMetadataSource = async (options: {
   metadataFile: string;
@@ -1303,28 +1299,16 @@ program
             );
           }
 
-          const metadataExcludedToolkitIds = requireComplete
-            ? getToolkitIdsWithoutMetadata(currentToolkitsData)
-            : [];
-          const metadataExcludedToolkitIdSet = new Set(
-            metadataExcludedToolkitIds.map((id) => id.toLowerCase())
-          );
-          if (options.verbose && metadataExcludedToolkitIds.length > 0) {
-            console.log(
-              chalk.dim(
-                `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata before change detection`
-              )
+          if (requireComplete) {
+            assertRequireCompleteMetadata(
+              Array.from(currentToolkitsData.entries())
             );
           }
 
           // Build map of toolkit ID -> current toolkit data for comparison
-          const currentToolkitDataForDiff = new Map<string, ToolkitData>();
-          for (const [id, data] of currentToolkitsData) {
-            if (metadataExcludedToolkitIdSet.has(id.toLowerCase())) {
-              continue;
-            }
-            currentToolkitDataForDiff.set(id, data);
-          }
+          const currentToolkitDataForDiff = new Map<string, ToolkitData>(
+            currentToolkitsData
+          );
           assertSafeCurrentToolkitSnapshot(
             currentToolkitDataForDiff.size,
             previousToolkits?.size ?? 0

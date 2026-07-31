@@ -122,6 +122,25 @@ export interface ToolkitSummaryGenerator {
   generate: (toolkit: MergedToolkit) => Promise<string>;
 }
 
+/**
+ * Under `--require-complete`, every toolkit must have design-system metadata.
+ * Fails the run with every affected toolkit named in one error.
+ */
+export const assertRequireCompleteMetadata = (
+  toolkitEntries: ReadonlyArray<readonly [string, ToolkitData]>
+): void => {
+  const missing = toolkitEntries
+    .filter(([, toolkitData]) => toolkitData.metadata === null)
+    .map(([toolkitId]) => toolkitId);
+
+  if (missing.length > 0) {
+    throw new Error(
+      `--require-complete: missing design-system metadata for ${missing.length} toolkit(s): ${missing.join(", ")}. ` +
+        "Add the toolkit to the design system catalog, or drop --require-complete to continue with a hidden placeholder record."
+    );
+  }
+};
+
 interface MergeToolkitOptions {
   previousToolkit?: MergedToolkit;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
@@ -1395,20 +1414,7 @@ export class DataMerger {
       return;
     }
 
-    const missing = toolkitEntries
-      .filter(
-        ([toolkitId, toolkitData]) =>
-          !this.skipToolkitIds.has(toolkitId.toLowerCase()) &&
-          toolkitData.metadata === null
-      )
-      .map(([toolkitId]) => toolkitId);
-
-    if (missing.length > 0) {
-      throw new Error(
-        `--require-complete: missing design-system metadata for ${missing.length} toolkit(s): ${missing.join(", ")}. ` +
-          "Add the toolkit to the design system catalog, or drop --require-complete to continue with a hidden placeholder record."
-      );
-    }
+    assertRequireCompleteMetadata(toolkitEntries);
   }
 
   /**
