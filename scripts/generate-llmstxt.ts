@@ -1,9 +1,9 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
+import chalk from "chalk";
 import glob from "fast-glob";
 import OpenAI from "openai";
-import pc from "picocolors";
 import { getToolkitCanonicalPath } from "../app/_lib/toolkit-static-params";
 
 type PageMetadata = {
@@ -61,7 +61,7 @@ function getCurrentGitSha(): string {
     return execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
   } catch (_error) {
     console.error(
-      pc.red("✗ Could not get git SHA. Make sure you're in a git repository.")
+      chalk.red("✗ Could not get git SHA. Make sure you're in a git repository.")
     );
     throw new Error("Failed to get git SHA");
   }
@@ -124,7 +124,7 @@ function getChangedFilesSince(lastSha: string): Set<string> {
     return allChanged;
   } catch (_error) {
     console.warn(
-      pc.yellow(
+      chalk.yellow(
         `⚠ Could not get changed files since ${lastSha}, processing all files`
       )
     );
@@ -160,7 +160,7 @@ async function extractExistingSummaries(): Promise<
  * Discovers all pages in the documentation
  */
 async function discoverPages(): Promise<PageMetadata[]> {
-  console.log(pc.blue("📄 Discovering pages from raw MDX..."));
+  console.log(chalk.blue("📄 Discovering pages from raw MDX..."));
   return discoverMdxPages();
 }
 
@@ -198,7 +198,7 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
     });
   }
 
-  console.log(pc.green(`✓ Found ${pages.length} pages (raw MDX)`));
+  console.log(chalk.green(`✓ Found ${pages.length} pages (raw MDX)`));
   return pages;
 }
 
@@ -270,7 +270,7 @@ async function discoverToolkitPages(): Promise<
   try {
     entries = await fs.readdir(TOOLKIT_DATA_DIR);
   } catch {
-    console.warn(pc.yellow("⚠ No toolkit data dir; skipping toolkit pages"));
+    console.warn(chalk.yellow("⚠ No toolkit data dir; skipping toolkit pages"));
     return [];
   }
 
@@ -331,7 +331,7 @@ async function discoverToolkitPages(): Promise<
   }
 
   const pages = [...pagesByUrl.values()];
-  console.log(pc.green(`✓ Found ${pages.length} toolkit pages`));
+  console.log(chalk.green(`✓ Found ${pages.length} toolkit pages`));
   return pages;
 }
 
@@ -378,7 +378,7 @@ async function summarizePage(
 
     return { title, description };
   } catch (error) {
-    console.error(pc.red(`✗ Error summarizing ${page.path}:`), error);
+    console.error(chalk.red(`✗ Error summarizing ${page.path}:`), error);
     return {
       title: extractPageTitle(page.content, page.path),
       description: "Documentation page",
@@ -579,7 +579,7 @@ function determinePagesToSummarize(
     // Get changed files since last generation
     const changedFiles = getChangedFilesSince(previousMetadata.gitSha);
     console.log(
-      pc.blue(
+      chalk.blue(
         `\n📊 Found ${changedFiles.size} changed files since last generation`
       )
     );
@@ -601,7 +601,7 @@ function determinePagesToSummarize(
     if (deletedPageUrls.length > 0) {
       hasChanges = true;
       console.log(
-        pc.yellow(
+        chalk.yellow(
           `\n🗑️  Found ${deletedPageUrls.length} deleted pages (will be removed from output)`
         )
       );
@@ -656,14 +656,14 @@ function determinePagesToSummarize(
     }
 
     console.log(
-      pc.green(
+      chalk.green(
         `✓ ${pagesToKeep.length} pages unchanged, ${pagesToSummarize.length} pages to summarize${deletedPageUrls.length > 0 ? `, ${deletedPageUrls.length} pages deleted` : ""}`
       )
     );
   } else {
     // No previous generation or can't determine, summarize all pages
     console.log(
-      pc.yellow("⚠ No previous generation found, summarizing all pages")
+      chalk.yellow("⚠ No previous generation found, summarizing all pages")
     );
     pagesToSummarize.push(...pages);
     hasChanges = true; // Always regenerate if no previous metadata
@@ -687,7 +687,7 @@ async function summarizePagesInBatches(
     return summarizedPages;
   }
 
-  console.log(pc.blue("\n📝 Summarizing pages with OpenAI..."));
+  console.log(chalk.blue("\n📝 Summarizing pages with OpenAI..."));
   // Process in batches to avoid rate limits
   const batchSize = 5;
   for (let i = 0; i < pagesToSummarize.length; i += batchSize) {
@@ -702,7 +702,7 @@ async function summarizePagesInBatches(
     }
 
     console.log(
-      pc.gray(
+      chalk.gray(
         `  Processed ${Math.min(i + batchSize, pagesToSummarize.length)}/${pagesToSummarize.length} pages`
       )
     );
@@ -713,7 +713,7 @@ async function summarizePagesInBatches(
     }
   }
 
-  console.log(pc.green(`✓ Summarized ${pagesToSummarize.length} pages`));
+  console.log(chalk.green(`✓ Summarized ${pagesToSummarize.length} pages`));
   return summarizedPages;
 }
 
@@ -721,11 +721,11 @@ async function summarizePagesInBatches(
  * Main execution function
  */
 async function main() {
-  console.log(pc.bold(pc.blue("\n🚀 Generating llms.txt file...\n")));
+  console.log(chalk.bold(chalk.blue("\n🚀 Generating llms.txt file...\n")));
 
   // Check for OpenAI API key
   if (!process.env.OPENAI_API_KEY) {
-    console.error(pc.red("✗ OPENAI_API_KEY environment variable is required"));
+    console.error(chalk.red("✗ OPENAI_API_KEY environment variable is required"));
     process.exit(1);
   }
 
@@ -735,10 +735,10 @@ async function main() {
     const previousMetadata = await parseLlmsTxtMetadata();
     const existingSummaries = await extractExistingSummaries();
 
-    console.log(pc.blue(`📌 Current git SHA: ${currentSha}`));
+    console.log(chalk.blue(`📌 Current git SHA: ${currentSha}`));
     if (previousMetadata) {
       console.log(
-        pc.gray(
+        chalk.gray(
           `   Previous generation: ${previousMetadata.generationDate} (SHA: ${previousMetadata.gitSha.substring(0, SHA_SHORT_LENGTH)})`
         )
       );
@@ -777,12 +777,12 @@ async function main() {
     }
 
     // Step 4: Organize into sections
-    console.log(pc.blue("\n📂 Organizing sections..."));
+    console.log(chalk.blue("\n📂 Organizing sections..."));
     const sections = organizeSections(allPages);
-    console.log(pc.green(`✓ Created ${sections.length} sections`));
+    console.log(chalk.green(`✓ Created ${sections.length} sections`));
 
     // Step 5: Generate llms.txt content
-    console.log(pc.blue("\n✍️  Generating llms.txt content..."));
+    console.log(chalk.blue("\n✍️  Generating llms.txt content..."));
     // Only update metadata if there are changes, otherwise keep previous metadata
     const metadata: LlmsTxtMetadata = hasChanges
       ? {
@@ -798,18 +798,18 @@ async function main() {
     // Step 6: Write to file
     await fs.writeFile(OUTPUT_PATH, content, "utf-8");
     if (hasChanges) {
-      console.log(pc.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
+      console.log(chalk.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
     } else {
       console.log(
-        pc.gray(
+        chalk.gray(
           "✓ No changes detected, llms.txt unchanged (SHA and date preserved)"
         )
       );
     }
 
-    console.log(pc.bold(pc.green("\n✨ Done!\n")));
+    console.log(chalk.bold(chalk.green("\n✨ Done!\n")));
   } catch (error) {
-    console.error(pc.red("\n✗ Error generating llms.txt:"), error);
+    console.error(chalk.red("\n✗ Error generating llms.txt:"), error);
     process.exit(1);
   }
 }

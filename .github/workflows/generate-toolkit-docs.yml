@@ -48,10 +48,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build toolkit docs generator
-        run: pnpm build
-        working-directory: toolkit-docs-generator
-
       - name: Generate toolkit docs
         run: |
           pnpm dlx tsx src/cli/index.ts generate \
@@ -71,8 +67,8 @@ jobs:
             --llm-editor-api-key "$ANTHROPIC_API_KEY" \
             --toolkit-concurrency 8 \
             --llm-concurrency 15 \
-            --exclude-file ./excluded-toolkits.txt \
-            --ignore-file ./ignored-toolkits.txt \
+            --exclude-file ./remove-toolkits.txt \
+            --ignore-file ./skip-toolkits.txt \
             --output data/toolkits
         working-directory: toolkit-docs-generator
         env:

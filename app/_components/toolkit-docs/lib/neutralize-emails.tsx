@@ -1,4 +1,6 @@
+import type { Element, Root, Text } from "hast";
 import { Fragment, type ReactNode } from "react";
+import { visit } from "unist-util-visit";
 
 /**
  * Matches the email-like text runs that Cloudflare's Email Obfuscation (Scrape
@@ -46,22 +48,10 @@ export function splitEmails(text: string): ReactNode {
   return nodes;
 }
 
-/** Structural view over hast nodes — avoids depending on `unist-util-visit`. */
-type WalkNode = {
-  type: string;
-  value?: string;
-  tagName?: string;
-  properties?: Record<string, unknown>;
-  children?: WalkNode[];
-};
-
-function neutralizeTextValue(value: string): WalkNode[] {
+/** Splits `value` into text/`<wbr>` element pairs at each email `@` break. */
+function neutralizeTextValue(value: string): Array<Text | Element> {
   const breaks = atBreakOffsets(value);
-  if (breaks.length === 0) {
-    return [{ type: "text", value }];
-  }
-
-  const out: WalkNode[] = [];
+  const out: Array<Text | Element> = [];
   let cursor = 0;
   for (const offset of breaks) {
     out.push({ type: "text", value: value.slice(cursor, offset) });
@@ -72,30 +62,23 @@ function neutralizeTextValue(value: string): WalkNode[] {
   return out;
 }
 
-function walk(node: WalkNode): void {
-  if (!node.children) {
-    return;
-  }
-  const next: WalkNode[] = [];
-  for (const child of node.children) {
-    if (child.type === "text" && typeof child.value === "string") {
-      next.push(...neutralizeTextValue(child.value));
-    } else {
-      walk(child);
-      next.push(child);
-    }
-  }
-  node.children = next;
-}
-
 /**
  * rehype plugin (for react-markdown) that applies the same `<wbr>` break to
  * email-like text inside rendered markdown — e.g. a toolkit `summary` that
  * contains a `mongodb+srv://user:pass@host.tld` connection string.
- *
- * Typed structurally against the hast tree (a `WalkNode`) to avoid a direct
- * dependency on `@types/hast`, which pnpm only exposes transitively.
  */
 export function rehypeNeutralizeEmails() {
-  return (tree: WalkNode): void => walk(tree);
+  return (tree: Root): void => {
+    visit(tree, "text", (node, index, parent) => {
+      if (index === undefined || !parent) {
+        return;
+      }
+      const replacement = neutralizeTextValue(node.value);
+      if (replacement.length <= 1) {
+        return;
+      }
+      parent.children.splice(index, 1, ...replacement);
+      return index + replacement.length;
+    });
+  };
 }

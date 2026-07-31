@@ -908,11 +908,11 @@ program
   )
   .option(
     "--exclude-file <file>",
-    "Path to a .txt file with toolkit IDs to exclude from generation (one per line)"
+    "Path to a .txt file with toolkit IDs to skip and delete existing output for (one per line, e.g. remove-toolkits.txt)"
   )
   .option(
     "--ignore-file <file>",
-    "Path to a .txt file with toolkit IDs to skip during generation (one per line)"
+    "Path to a .txt file with toolkit IDs to skip during generation, leaving existing output untouched (one per line, e.g. skip-toolkits.txt)"
   )
   .option("--verbose", "Enable verbose logging", false)
   .option(
@@ -1971,11 +1971,11 @@ program
   )
   .option(
     "--exclude-file <file>",
-    "Path to a .txt file with toolkit IDs to exclude from generation (one per line)"
+    "Path to a .txt file with toolkit IDs to skip and delete existing output for (one per line, e.g. remove-toolkits.txt)"
   )
   .option(
     "--ignore-file <file>",
-    "Path to a .txt file with toolkit IDs to skip during generation (one per line)"
+    "Path to a .txt file with toolkit IDs to skip during generation, leaving existing output untouched (one per line, e.g. skip-toolkits.txt)"
   )
   .option("--verbose", "Enable verbose logging", false)
   .option(

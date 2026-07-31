@@ -313,7 +313,7 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
   });
 
   it("merging removed IDs with pre-existing exclusions deletes each file exactly once", async () => {
-    // OldKit is in excluded-toolkits.txt (static list) AND removed from the API.
+    // OldKit is in remove-toolkits.txt (static list) AND removed from the API.
     // Set.add() is idempotent — the file must be deleted exactly once.
     const { dir, generator } = await setupOutputDir(["Github", "OldKit"]);
 
