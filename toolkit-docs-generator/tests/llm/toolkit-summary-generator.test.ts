@@ -53,6 +53,7 @@ const createToolkit = (
 describe("LlmToolkitSummaryGenerator", () => {
   it("parses summary from a JSON response", async () => {
     const client: LlmClient = {
+      provider: "openai",
       generateText: async () => '```json\n{"summary":"Concise summary."}\n```',
     };
     const generator = new LlmToolkitSummaryGenerator({
@@ -68,6 +69,7 @@ describe("LlmToolkitSummaryGenerator", () => {
   it("includes tool descriptions and auth info in the prompt", async () => {
     let capturedPrompt = "";
     const client: LlmClient = {
+      provider: "openai",
       generateText: async ({ prompt }) => {
         capturedPrompt = prompt;
         return '{"summary":"OK"}';

@@ -6,8 +6,10 @@ import {
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
   type ToolkitCatalogEntry,
-} from "../../../app/_lib/toolkit-static-params";
-import { normalizeToolkitId } from "../../src/shared/toolkit-primitives";
+} from "@/app/_lib/toolkit-static-params";
+import { normalizeToolkitId } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+
+const UNRECOGNIZED_CATEGORY_ERROR = /weird/;
 
 const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   const dir = await mkdtemp(join(tmpdir(), "toolkit-static-params-"));
@@ -254,7 +256,7 @@ describe("toolkit static params", () => {
 
       await expect(
         listToolkitRoutes({ dataDir: dir, toolkitsCatalog: [] })
-      ).rejects.toThrow(/weird/);
+      ).rejects.toThrow(UNRECOGNIZED_CATEGORY_ERROR);
     });
   });
 

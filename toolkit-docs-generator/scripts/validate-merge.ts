@@ -13,8 +13,8 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.ts";
-import type { MergedToolkit } from "../src/shared/toolkit-schemas.ts";
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.js";
+import type { MergedToolkit } from "../src/shared/toolkit-schemas.js";
 
 const DATA_DIR = resolveToolkitDataDir();
 

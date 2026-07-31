@@ -25,7 +25,6 @@ const createValidToolkit = (): MergedToolkit => ({
       qualifiedName: "Github.CreateIssue",
       fullyQualifiedName: "Github.CreateIssue@1.0.0",
       description: null,
-      toolkitDescription: null,
       parameters: [
         {
           name: "title",

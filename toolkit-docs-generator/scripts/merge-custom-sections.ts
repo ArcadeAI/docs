@@ -59,13 +59,15 @@ const parseArgs = (args: string[]): MergeOptions => {
   let verbose = false;
 
   for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--custom-sections" && args[i + 1]) {
-      customSectionsPath = args[i + 1];
+    const arg = args[i];
+    const next = args[i + 1];
+    if (arg === "--custom-sections" && next) {
+      customSectionsPath = next;
       i++;
-    } else if (args[i] === "--toolkits-dir" && args[i + 1]) {
-      toolkitsDir = args[i + 1];
+    } else if (arg === "--toolkits-dir" && next) {
+      toolkitsDir = next;
       i++;
-    } else if (args[i] === "--verbose" || args[i] === "-v") {
+    } else if (arg === "--verbose" || arg === "-v") {
       verbose = true;
     }
   }

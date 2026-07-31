@@ -8,10 +8,28 @@ import {
   resolveSafeOutputDir,
 } from "../../src/utils/output-dir.js";
 
+type ResolveOptions = { repoRoot?: string; homeDir?: string };
+
 describe("resolveSafeOutputDir", () => {
   const originalCwd = process.cwd();
   let repoRoot: string | null = null;
   let homeDir: string | null = null;
+
+  /**
+   * `repoRoot`/`homeDir` are optional properties without `exactOptionalPropertyTypes`
+   * allowing an explicit `undefined` value, so this only sets a key when the
+   * corresponding temp dir has actually been created for the current test.
+   */
+  const dirOptions = (): ResolveOptions => {
+    const opts: ResolveOptions = {};
+    if (repoRoot) {
+      opts.repoRoot = repoRoot;
+    }
+    if (homeDir) {
+      opts.homeDir = homeDir;
+    }
+    return opts;
+  };
 
   beforeEach(async () => {
     repoRoot = await mkdtemp(join(tmpdir(), "generator-repo-"));
@@ -35,8 +53,7 @@ describe("resolveSafeOutputDir", () => {
     await mkdir(join(repoRoot ?? "", "output"), { recursive: true });
 
     const resolved = await resolveSafeOutputDir("output", {
-      repoRoot: repoRoot ?? undefined,
-      homeDir: homeDir ?? undefined,
+      ...dirOptions(),
     });
 
     const expected = await realpath(join(repoRoot ?? "", "output"));
@@ -46,8 +63,7 @@ describe("resolveSafeOutputDir", () => {
   it("rejects relative paths that escape the repo root", async () => {
     await expect(
       resolveSafeOutputDir("../outside", {
-        repoRoot: repoRoot ?? undefined,
-        homeDir: homeDir ?? undefined,
+        ...dirOptions(),
       })
     ).rejects.toThrow("outside repo root");
   });
@@ -55,8 +71,7 @@ describe("resolveSafeOutputDir", () => {
   it("rejects deleting the filesystem root", async () => {
     await expect(
       resolveSafeOutputDir("/", {
-        repoRoot: repoRoot ?? undefined,
-        homeDir: homeDir ?? undefined,
+        ...dirOptions(),
       })
     ).rejects.toThrow("unsafe output directory");
   });
@@ -64,8 +79,7 @@ describe("resolveSafeOutputDir", () => {
   it("rejects deleting the home directory", async () => {
     await expect(
       resolveSafeOutputDir(homeDir ?? "", {
-        repoRoot: repoRoot ?? undefined,
-        homeDir: homeDir ?? undefined,
+        ...dirOptions(),
       })
     ).rejects.toThrow("unsafe output directory");
   });
@@ -101,8 +115,7 @@ describe("resolveSafeOutputDir", () => {
     const expected = await realpath(outputDir);
 
     const cleared = await clearSafeOutputDir(outputDir, {
-      repoRoot: repoRoot ?? undefined,
-      homeDir: homeDir ?? undefined,
+      ...dirOptions(),
     });
 
     expect(cleared).toBe(expected);
@@ -116,8 +129,7 @@ describe("resolveSafeOutputDir", () => {
     try {
       await expect(
         clearSafeOutputDir(`../${outsideName}`, {
-          repoRoot: repoRoot ?? undefined,
-          homeDir: homeDir ?? undefined,
+          ...dirOptions(),
         })
       ).rejects.toThrow("outside repo root");
       expect(await realpath(outsideDir)).toContain(outsideName);

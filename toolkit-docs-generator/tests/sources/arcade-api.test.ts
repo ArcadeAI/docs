@@ -1,3 +1,4 @@
+import type { Mock } from "vitest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   ArcadeApiSource,
@@ -214,11 +215,27 @@ const mockToolWithSecrets: ArcadeToolsResponse["items"][0] = {
 // Tests
 // ============================================================================
 
+/**
+ * ArcadeApiSource only reads `.ok`, `.status`, `.statusText`, `.headers.get(...)`,
+ * and `.json()` off the fetch response, so tests mock that subset and assert
+ * it as a `Response` rather than constructing a real one.
+ */
+type FetchResponseLike = {
+  ok: boolean;
+  status?: number;
+  statusText?: string;
+  headers?: { get(name: string): string | null | undefined };
+  json?: () => Promise<unknown>;
+};
+
+const asResponse = (value: FetchResponseLike): Response =>
+  value as unknown as Response;
+
 describe("ArcadeApiSource", () => {
-  let mockFetch: ReturnType<typeof vi.fn>;
+  let mockFetch: Mock<typeof fetch>;
 
   beforeEach(() => {
-    mockFetch = vi.fn();
+    mockFetch = vi.fn<typeof fetch>();
   });
 
   describe("constructor and configuration", () => {
@@ -232,10 +249,12 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should normalize base URL with trailing slash", () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(createMockArcadeResponse([])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () => Promise.resolve(createMockArcadeResponse([])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev/",
@@ -252,10 +271,12 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should handle base URL with /v1 suffix", () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(createMockArcadeResponse([])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () => Promise.resolve(createMockArcadeResponse([])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev/v1",
@@ -272,10 +293,12 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should cap page size at maximum", () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(createMockArcadeResponse([])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () => Promise.resolve(createMockArcadeResponse([])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -293,13 +316,18 @@ describe("ArcadeApiSource", () => {
 
   describe("fetchAllTools", () => {
     it("should fetch and transform tools correctly", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve(
-            createMockArcadeResponse([mockAirtableTool, mockGoogleCalendarTool])
-          ),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve(
+              createMockArcadeResponse([
+                mockAirtableTool,
+                mockGoogleCalendarTool,
+              ])
+            ),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -362,11 +390,13 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should handle tools with array parameters", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve(createMockArcadeResponse([mockGoogleCalendarTool])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve(createMockArcadeResponse([mockGoogleCalendarTool])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -391,11 +421,13 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should extract secrets from requirements", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve(createMockArcadeResponse([mockToolWithSecrets])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve(createMockArcadeResponse([mockToolWithSecrets])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -412,17 +444,19 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should filter by toolkit ID client-side", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve(
-            createMockArcadeResponse([
-              mockAirtableTool,
-              mockGoogleCalendarTool,
-              mockToolWithSecrets,
-            ])
-          ),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve(
+              createMockArcadeResponse([
+                mockAirtableTool,
+                mockGoogleCalendarTool,
+                mockToolWithSecrets,
+              ])
+            ),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -437,11 +471,13 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should filter by toolkit ID case-insensitively", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve(createMockArcadeResponse([mockGoogleCalendarTool])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve(createMockArcadeResponse([mockGoogleCalendarTool])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -455,17 +491,19 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should filter by version", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve(
-            createMockArcadeResponse([
-              mockAirtableTool, // @4.0.0
-              mockGoogleCalendarTool, // @1.0.0
-              mockToolWithSecrets, // @2.0.0
-            ])
-          ),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve(
+              createMockArcadeResponse([
+                mockAirtableTool, // @4.0.0
+                mockGoogleCalendarTool, // @1.0.0
+                mockToolWithSecrets, // @2.0.0
+              ])
+            ),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -485,28 +523,32 @@ describe("ArcadeApiSource", () => {
   describe("pagination", () => {
     it("should handle pagination correctly", async () => {
       // First page
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            items: [mockAirtableTool],
-            limit: 1,
-            offset: 0,
-            total_count: 2,
-          }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              items: [mockAirtableTool],
+              limit: 1,
+              offset: 0,
+              total_count: 2,
+            }),
+        })
+      );
 
       // Second page
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            items: [mockGoogleCalendarTool],
-            limit: 1,
-            offset: 1,
-            total_count: 2,
-          }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              items: [mockGoogleCalendarTool],
+              limit: 1,
+              offset: 1,
+              total_count: 2,
+            }),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -522,27 +564,31 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should stop pagination when no more items", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            items: [mockAirtableTool],
-            limit: 100,
-            offset: 0,
-            total_count: 100, // Says 100 but only returns 1
-          }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              items: [mockAirtableTool],
+              limit: 100,
+              offset: 0,
+              total_count: 100, // Says 100 but only returns 1
+            }),
+        })
+      );
 
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            items: [],
-            limit: 100,
-            offset: 1,
-            total_count: 100,
-          }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve({
+              items: [],
+              limit: 100,
+              offset: 1,
+              total_count: 100,
+            }),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -558,11 +604,13 @@ describe("ArcadeApiSource", () => {
 
   describe("fetchToolsByToolkit", () => {
     it("should call fetchAllTools with toolkit filter", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () =>
-          Promise.resolve(createMockArcadeResponse([mockGoogleCalendarTool])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () =>
+            Promise.resolve(createMockArcadeResponse([mockGoogleCalendarTool])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -579,10 +627,12 @@ describe("ArcadeApiSource", () => {
 
   describe("isAvailable", () => {
     it("should return true when API is accessible", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(createMockArcadeResponse([])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () => Promise.resolve(createMockArcadeResponse([])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -595,11 +645,13 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should return false when API returns error", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        statusText: "Unauthorized",
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: false,
+          status: 401,
+          statusText: "Unauthorized",
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -627,13 +679,15 @@ describe("ArcadeApiSource", () => {
 
   describe("error handling", () => {
     it("should throw on API error with JSON detail", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 401,
-        statusText: "Unauthorized",
-        headers: new Map([["content-type", "application/json"]]),
-        json: () => Promise.resolve({ detail: "Invalid API key" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: false,
+          status: 401,
+          statusText: "Unauthorized",
+          headers: new Map([["content-type", "application/json"]]),
+          json: () => Promise.resolve({ detail: "Invalid API key" }),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -647,12 +701,14 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should throw on API error without JSON detail", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        statusText: "Internal Server Error",
-        headers: new Map([["content-type", "text/plain"]]),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: false,
+          status: 500,
+          statusText: "Internal Server Error",
+          headers: new Map([["content-type", "text/plain"]]),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -666,10 +722,12 @@ describe("ArcadeApiSource", () => {
     });
 
     it("should throw on invalid response schema", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve({ invalid: "response" }),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () => Promise.resolve({ invalid: "response" }),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
@@ -685,10 +743,12 @@ describe("ArcadeApiSource", () => {
 
   describe("authorization header", () => {
     it("should include Bearer token in request", async () => {
-      mockFetch.mockResolvedValueOnce({
-        ok: true,
-        json: () => Promise.resolve(createMockArcadeResponse([])),
-      });
+      mockFetch.mockResolvedValueOnce(
+        asResponse({
+          ok: true,
+          json: () => Promise.resolve(createMockArcadeResponse([])),
+        })
+      );
 
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",

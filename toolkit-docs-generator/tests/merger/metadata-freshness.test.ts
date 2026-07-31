@@ -34,7 +34,7 @@ const createMetadata = (
 });
 
 const createPreviousToolkit = (
-  overrides: Partial<MergedToolkit> & {
+  overrides: Omit<Partial<MergedToolkit>, "metadata"> & {
     metadata?: Partial<MergedToolkitMetadata>;
     label?: string;
   } = {}

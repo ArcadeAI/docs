@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params";
+import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params.js";
 import {
   buildToolkitInfoList,
   generateCategoryMeta,
@@ -23,7 +23,7 @@ import {
   setToolkitsForTesting,
   syncToolkitSidebar,
   type ToolkitInfo,
-} from "../../scripts/sync-toolkit-sidebar";
+} from "../../scripts/sync-toolkit-sidebar.js";
 
 setToolkitsForTesting([
   { id: "Gmail", label: "Gmail", category: "productivity" },
@@ -370,12 +370,25 @@ describe("buildToolkitInfoList", () => {
 describe("groupByCategory", () => {
   it("should group toolkits by category", () => {
     const toolkits: ToolkitInfo[] = [
-      { id: "gmail", slug: "gmail", label: "Gmail", category: "productivity" },
-      { id: "slack", slug: "slack", label: "Slack", category: "social" },
+      {
+        id: "gmail",
+        slug: "gmail",
+        label: "Gmail",
+        navGroup: "optimized",
+        category: "productivity",
+      },
+      {
+        id: "slack",
+        slug: "slack",
+        label: "Slack",
+        navGroup: "optimized",
+        category: "social",
+      },
       {
         id: "dropbox",
         slug: "dropbox",
         label: "Dropbox",
+        navGroup: "optimized",
         category: "productivity",
       },
     ];
@@ -389,9 +402,27 @@ describe("groupByCategory", () => {
 
   it("should sort toolkits alphabetically by label", () => {
     const toolkits: ToolkitInfo[] = [
-      { id: "zoom", slug: "zoom", label: "Zoom", category: "social" },
-      { id: "slack", slug: "slack", label: "Slack", category: "social" },
-      { id: "discord", slug: "discord", label: "Discord", category: "social" },
+      {
+        id: "zoom",
+        slug: "zoom",
+        label: "Zoom",
+        navGroup: "optimized",
+        category: "social",
+      },
+      {
+        id: "slack",
+        slug: "slack",
+        label: "Slack",
+        navGroup: "optimized",
+        category: "social",
+      },
+      {
+        id: "discord",
+        slug: "discord",
+        label: "Discord",
+        navGroup: "optimized",
+        category: "social",
+      },
     ];
 
     const result = groupByCategory(toolkits);
@@ -409,7 +440,13 @@ describe("groupByCategory", () => {
 
   it("should handle 'others' category", () => {
     const toolkits: ToolkitInfo[] = [
-      { id: "custom", slug: "custom", label: "Custom", category: "others" },
+      {
+        id: "custom",
+        slug: "custom",
+        label: "Custom",
+        navGroup: "optimized",
+        category: "others",
+      },
     ];
 
     const result = groupByCategory(toolkits);
@@ -479,11 +516,18 @@ describe("remove empty section flags", () => {
 describe("generateCategoryMeta", () => {
   it("should generate valid _meta.tsx content", () => {
     const toolkits: ToolkitInfo[] = [
-      { id: "gmail", slug: "gmail", label: "Gmail", category: "productivity" },
+      {
+        id: "gmail",
+        slug: "gmail",
+        label: "Gmail",
+        navGroup: "optimized",
+        category: "productivity",
+      },
       {
         id: "dropbox",
         slug: "dropbox",
         label: "Dropbox",
+        navGroup: "optimized",
         category: "productivity",
       },
     ];
@@ -510,6 +554,7 @@ describe("generateCategoryMeta", () => {
         id: "test",
         slug: "test",
         label: 'Test "Quoted" Label',
+        navGroup: "optimized",
         category: "others",
       },
     ];
@@ -529,7 +574,13 @@ describe("generateCategoryMeta", () => {
 
   it("should handle single toolkit", () => {
     const toolkits: ToolkitInfo[] = [
-      { id: "gmail", slug: "gmail", label: "Gmail", category: "productivity" },
+      {
+        id: "gmail",
+        slug: "gmail",
+        label: "Gmail",
+        navGroup: "optimized",
+        category: "productivity",
+      },
     ];
 
     const result = generateCategoryMeta(toolkits, "productivity", "/preview");

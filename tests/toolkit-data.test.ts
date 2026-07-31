@@ -3,13 +3,13 @@ import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import {
-  readToolkitData,
-  readToolkitIndex,
-} from "../../../app/_lib/toolkit-data";
+import { readToolkitData, readToolkitIndex } from "@/app/_lib/toolkit-data";
 
 const loadFixture = async (fileName: string): Promise<string> => {
-  const fixturesDir = new URL("../fixtures/", import.meta.url);
+  const fixturesDir = new URL(
+    "../toolkit-docs-generator/tests/fixtures/",
+    import.meta.url
+  );
   const filePath = new URL(fileName, fixturesDir);
   return await readFile(filePath, "utf-8");
 };

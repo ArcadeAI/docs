@@ -4,7 +4,7 @@ import {
   normalizeToolkitId,
   type ToolkitSlugSource,
   toKebabCase,
-} from "../../src/shared/toolkit-primitives";
+} from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 
 // ============================================================================
 // normalizeToolkitId

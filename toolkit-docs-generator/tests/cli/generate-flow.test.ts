@@ -162,7 +162,7 @@ describe("filterProvidersBySkipIds", () => {
     );
 
     expect(providersToProcess).toHaveLength(1);
-    expect(providersToProcess[0].provider).toBe("Slack");
+    expect(providersToProcess[0]?.provider).toBe("Slack");
     expect(skippedProviders).toHaveLength(2);
   });
 

@@ -39,7 +39,7 @@ type ToolMetadataItem = {
       provider_id: string | null;
       provider_type: string | null;
       scopes: string[];
-    }>;
+    }> | null;
     secrets: Array<{ key: string }>;
   } | null;
   metadata?: {
@@ -111,7 +111,7 @@ const createItems = (): ToolMetadataItem[] => [
 
 const createFetchStub =
   (items: ToolMetadataItem[], status = 200) =>
-  async (input: RequestInfo | URL) => {
+  async (input: string | URL | Request) => {
     if (status !== 200) {
       return new Response("error", { status });
     }
@@ -162,7 +162,7 @@ const createErrorFetchStub = (status: number, payload: unknown) => async () =>
 
 const createInspectFetchStub =
   (inspect: (params: URLSearchParams) => void) =>
-  async (input: RequestInfo | URL) => {
+  async (input: string | URL | Request) => {
     const url = new URL(input.toString());
     inspect(url.searchParams);
     return new Response(
@@ -179,7 +179,7 @@ const createInspectFetchStub =
 
 const createSummaryFetchStub =
   (payload: unknown, inspect?: (url: URL) => void) =>
-  async (input: RequestInfo | URL) => {
+  async (input: string | URL | Request) => {
     const url = new URL(input.toString());
     inspect?.(url);
     return new Response(JSON.stringify(payload), {
@@ -228,7 +228,7 @@ describe("EngineApiSource", () => {
           description: "GitHub toolkit",
         },
         input: { parameters: [] },
-        output: {} as ToolMetadataItem["output"],
+        output: {} as NonNullable<ToolMetadataItem["output"]>,
         requirements: {
           authorization: null,
           secrets: [],

@@ -1,3 +1,4 @@
+import type { Element, Root, RootContent } from "hast";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
 import {
@@ -39,27 +40,23 @@ describe("splitEmails", () => {
   });
 });
 
-type HastNode = {
-  type: string;
-  value?: string;
-  tagName?: string;
-  properties?: Record<string, unknown>;
-  children?: HastNode[];
+const collectText = (node: Root | RootContent): string => {
+  if (node.type === "text") {
+    return node.value;
+  }
+  return "children" in node ? node.children.map(collectText).join("") : "";
 };
 
-const collectText = (node: HastNode): string =>
-  node.type === "text"
-    ? (node.value ?? "")
-    : (node.children ?? []).map(collectText).join("");
-
-const hasContiguousEmail = (node: HastNode): boolean =>
-  node.type === "text"
-    ? EMAIL.test(node.value ?? "")
-    : (node.children ?? []).some(hasContiguousEmail);
+const hasContiguousEmail = (node: Root | RootContent): boolean => {
+  if (node.type === "text") {
+    return EMAIL.test(node.value);
+  }
+  return "children" in node ? node.children.some(hasContiguousEmail) : false;
+};
 
 describe("rehypeNeutralizeEmails", () => {
   test("splits email text nodes and inserts a <wbr>, losslessly", () => {
-    const tree: HastNode = {
+    const tree: Root = {
       type: "root",
       children: [
         {
@@ -73,10 +70,12 @@ describe("rehypeNeutralizeEmails", () => {
 
     rehypeNeutralizeEmails()(tree);
 
-    const paragraph = tree.children?.[0];
-    expect(paragraph?.children?.some((child) => child.tagName === "wbr")).toBe(
-      true
-    );
+    const paragraph = tree.children[0] as Element;
+    expect(
+      paragraph.children.some(
+        (child) => child.type === "element" && child.tagName === "wbr"
+      )
+    ).toBe(true);
     // No single text node still holds a full email...
     expect(hasContiguousEmail(tree)).toBe(false);
     // ...and the concatenated text is unchanged.

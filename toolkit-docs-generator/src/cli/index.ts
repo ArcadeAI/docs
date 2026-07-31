@@ -1501,20 +1501,12 @@ program
             );
           }
 
-          if (requireComplete) {
-            const metadataExcludedToolkitIds =
-              getToolkitIdsWithoutMetadata(toolkitList);
-            for (const toolkitId of metadataExcludedToolkitIds) {
-              skipToolkitIds.add(toolkitId.toLowerCase());
-            }
-            if (options.verbose && metadataExcludedToolkitIds.length > 0) {
-              console.log(
-                chalk.dim(
-                  `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata`
-                )
-              );
-            }
-          }
+          // requireComplete no longer silently drops toolkits without
+          // design-system metadata into skipToolkitIds here. Silently
+          // excluding them was just as opaque as fabricating metadata for
+          // them — DataMerger.assertNoMissingMetadata (run from inside
+          // mergeAllToolkits below) now fails the whole run and names every
+          // affected toolkit instead.
 
           // If --skip-unchanged, only process changed toolkits
           // Add unchanged toolkits to skipToolkitIds
@@ -1814,6 +1806,17 @@ program
         const failedToolkitsFromTools = Array.from(
           new Set(failedTools.map((tool) => tool.toolkitId))
         );
+        // Toolkits that fell back to getDefaultMetadata's guessed category,
+        // icon, and docsLink because the design system had no entry for
+        // them. --require-complete would have already failed the run for
+        // these (see DataMerger.assertNoMissingMetadata), so reaching here
+        // means requireComplete was off. The per-toolkit warning text
+        // already goes to stdout above; naming these explicitly in the run
+        // log means the omission survives past the CI log window instead
+        // of only ever being visible in real time.
+        const toolkitsWithDefaultMetadata = allResults
+          .filter((result) => result.usedDefaultMetadata)
+          .map((result) => result.toolkit.id);
 
         const runDetails = [
           `output=${resolve(options.output)}`,
@@ -1825,6 +1828,12 @@ program
           `warnings=${warningCount}`,
           `writeErrors=${writeErrors.length}`,
         ];
+
+        if (toolkitsWithDefaultMetadata.length > 0) {
+          runDetails.push(
+            `toolkitsWithDefaultMetadata=${toolkitsWithDefaultMetadata.join(", ")}`
+          );
+        }
 
         if (!runAll && providers) {
           runDetails.push(
@@ -2276,20 +2285,12 @@ program
           );
         }
 
-        if (requireComplete) {
-          const metadataExcludedToolkitIds =
-            getToolkitIdsWithoutMetadata(toolkitList);
-          for (const toolkitId of metadataExcludedToolkitIds) {
-            skipToolkitIds.add(toolkitId.toLowerCase());
-          }
-          if (options.verbose && metadataExcludedToolkitIds.length > 0) {
-            console.log(
-              chalk.dim(
-                `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata`
-              )
-            );
-          }
-        }
+        // requireComplete no longer silently drops toolkits without
+        // design-system metadata into skipToolkitIds here. Silently
+        // excluding them was just as opaque as fabricating metadata for
+        // them — DataMerger.assertNoMissingMetadata (run from inside
+        // mergeAllToolkits below) now fails the whole run and names every
+        // affected toolkit instead.
 
         const processingStats = computeProcessingStats(
           toolkitList,

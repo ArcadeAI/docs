@@ -5,8 +5,8 @@
  * regardless of cwd and honors the TOOLKIT_DATA_DIR env var override.
  */
 
-import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.ts";
-import { collectToolMetadataStats } from "../src/utils/tool-metadata-audit.ts";
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.js";
+import { collectToolMetadataStats } from "../src/utils/tool-metadata-audit.js";
 
 const DATA_DIR = resolveToolkitDataDir();
 
