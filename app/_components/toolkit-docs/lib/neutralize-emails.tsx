@@ -49,7 +49,7 @@ export function splitEmails(text: string): ReactNode {
 }
 
 /** Splits `value` into text/`<wbr>` element pairs at each email `@` break. */
-function neutralizeTextValue(value: string): Array<Text | Element> {
+export function splitEmailText(value: string): Array<Text | Element> {
   const breaks = atBreakOffsets(value);
   const out: Array<Text | Element> = [];
   let cursor = 0;
@@ -73,7 +73,7 @@ export function rehypeNeutralizeEmails() {
       if (index === undefined || !parent) {
         return;
       }
-      const replacement = neutralizeTextValue(node.value);
+      const replacement = splitEmailText(node.value);
       if (replacement.length <= 1) {
         return;
       }

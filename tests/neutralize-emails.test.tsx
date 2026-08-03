@@ -4,6 +4,7 @@ import { describe, expect, test } from "vitest";
 import {
   rehypeNeutralizeEmails,
   splitEmails,
+  splitEmailText,
 } from "@/app/_components/toolkit-docs/lib/neutralize-emails";
 
 /**
@@ -37,6 +38,34 @@ describe("splitEmails", () => {
       </span>
     );
     expect(html).not.toMatch(EMAIL);
+  });
+});
+
+describe("splitEmailText", () => {
+  test("returns one text node when there are no emails", () => {
+    expect(splitEmailText("just some text")).toEqual([
+      { type: "text", value: "just some text" },
+    ]);
+  });
+
+  test("splits every email while preserving the text", () => {
+    const nodes = splitEmailText(
+      "contact jane@example.com or sam@example.org today"
+    );
+
+    expect(nodes).toEqual([
+      { type: "text", value: "contact jane" },
+      { type: "element", tagName: "wbr", properties: {}, children: [] },
+      { type: "text", value: "@example.com or sam" },
+      { type: "element", tagName: "wbr", properties: {}, children: [] },
+      { type: "text", value: "@example.org today" },
+    ]);
+    expect(
+      nodes
+        .filter((node) => node.type === "text")
+        .map((node) => node.value)
+        .join("")
+    ).toBe("contact jane@example.com or sam@example.org today");
   });
 });
 
@@ -80,5 +109,33 @@ describe("rehypeNeutralizeEmails", () => {
     expect(hasContiguousEmail(tree)).toBe(false);
     // ...and the concatenated text is unchanged.
     expect(collectText(tree)).toBe("reach user@example.com now");
+  });
+
+  test("visits nested elements and every matching text node", () => {
+    const tree: Root = {
+      type: "root",
+      children: [
+        {
+          type: "element",
+          tagName: "blockquote",
+          properties: {},
+          children: [
+            {
+              type: "element",
+              tagName: "em",
+              properties: {},
+              children: [{ type: "text", value: "jane@example.com" }],
+            },
+            { type: "text", value: " and sam@example.org" },
+          ],
+        },
+      ],
+    };
+
+    rehypeNeutralizeEmails()(tree);
+
+    expect(hasContiguousEmail(tree)).toBe(false);
+    expect(collectText(tree)).toBe("jane@example.com and sam@example.org");
+    expect(JSON.stringify(tree).match(/"tagName":"wbr"/g)).toHaveLength(2);
   });
 });
