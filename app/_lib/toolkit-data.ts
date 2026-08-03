@@ -15,7 +15,7 @@ import {
 import {
   MergedToolkitSchema,
   type ToolkitIndexEntrySchema,
-  type ToolkitIndexSchema,
+  ToolkitIndexSchema,
 } from "@/toolkit-docs-generator/src/shared/toolkit-schemas";
 
 /**
@@ -121,17 +121,14 @@ type ToolkitDataMap = {
 };
 
 /**
- * One process-wide load per data directory. Keyed by directory (not a single
- * flat variable) because tests point `TOOLKIT_DATA_DIR` at scratch fixtures
- * and must not see another test's cached data.
- *
- * A failed load (a corrupt file — see readToolkitFile) is kept in this map
- * rather than retried: the underlying files are static build output that
- * only change on a new deploy, so a bad file stays bad for the rest of this
- * process's life, and re-scanning 21.6 MB on every subsequent lookup hoping
- * it healed itself would only add cost without ever succeeding.
+ * The production data directory is immutable for the lifetime of a process,
+ * so retain one successful load for it. Explicit fixture/override directories
+ * are intentionally not retained here: callers can point them at arbitrary
+ * paths, and keeping every path would turn test and dev runs into an
+ * unbounded process-global cache.
  */
 const loadsByDataDir = new Map<string, Promise<ToolkitDataMap>>();
+const DEFAULT_DATA_DIR = resolveToolkitDataDir();
 
 const loadAllToolkitDataUncached = async (
   dataDir: string
@@ -187,10 +184,23 @@ const loadAllToolkitDataUncached = async (
  */
 export const loadAllToolkitData = cache(
   async (dataDir: string): Promise<ToolkitDataMap> => {
+    if (dataDir !== DEFAULT_DATA_DIR) {
+      return await loadAllToolkitDataUncached(dataDir);
+    }
+
     let promise = loadsByDataDir.get(dataDir);
     if (!promise) {
       promise = loadAllToolkitDataUncached(dataDir);
       loadsByDataDir.set(dataDir, promise);
+
+      // A transient read or deployment error must not poison the process
+      // forever. Keep successful loads warm, but allow the next lookup to
+      // retry after a failed load.
+      promise.catch(() => {
+        if (loadsByDataDir.get(dataDir) === promise) {
+          loadsByDataDir.delete(dataDir);
+        }
+      });
     }
     return await promise;
   }
@@ -209,6 +219,16 @@ export const readToolkitData = async (
   }
 
   const dataDir = resolveDataDir(options);
+  // The API route normally receives the normalized toolkit id. Keep that
+  // common path O(1), especially on a cold serverless instance: eagerly
+  // loading every toolkit JSON file just to serve one toolkit adds tens of
+  // megabytes of parsing and memory overhead. The full directory index below
+  // is reserved for slug lookups and build-time enumeration.
+  const direct = await readToolkitFile(join(dataDir, `${normalizedId}.json`));
+  if (direct) {
+    return direct;
+  }
+
   const { byNormalizedId, bySlug } = await loadAllToolkitData(dataDir);
 
   return (
@@ -244,24 +264,12 @@ export const readToolkitIndex = async (
     );
   }
 
-  // Deliberately looser than a full ToolkitIndexSchema.safeParse: unlike
-  // per-toolkit data, entries here are only ever used to look up a
-  // toolkit's id/category, with the toolkit's own JSON file as the real
-  // source of truth (see resolveToolkitRoute in toolkit-static-params.ts).
-  // Rejecting the whole index over one entry missing a field the callers
-  // don't read would cost every route on the site, not just one page. But
-  // the file as a whole not even having the shape of an index is
-  // corruption, not a missing-field nuance, so that still throws.
-  if (
-    typeof parsed !== "object" ||
-    parsed === null ||
-    !("toolkits" in parsed) ||
-    !Array.isArray((parsed as { toolkits: unknown }).toolkits)
-  ) {
+  const result = ToolkitIndexSchema.safeParse(parsed);
+  if (!result.success) {
     throw new Error(
-      `Invalid toolkit index shape in ${filePath}: expected an object with a "toolkits" array.`
+      `Invalid toolkit index schema in ${filePath}: ${result.error.message}`
     );
   }
 
-  return parsed as ToolkitIndex;
+  return result.data;
 };
