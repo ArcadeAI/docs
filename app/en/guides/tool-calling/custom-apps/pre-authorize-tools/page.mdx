@@ -1,0 +1,276 @@
+---
+title: "Pre-authorize Tools for Background and Autonomous Agents"
+description: "Authorize a planned set of tools before an unattended agent starts"
+---
+
+import { Callout, Tabs } from "nextra/components";
+
+# Pre-authorize tools for background and autonomous agents
+
+Pre-authorize the tools that a background or autonomous agent will use during an interactive setup flow. Then, verify that every tool is ready before you start unattended work. This recipe uses the same Arcade APIs as [authorized tool calling](/guides/tool-calling/custom-apps/auth-tool-calling), but moves user consent from tool execution to onboarding.
+
+## Prerequisites
+
+- An Arcade API key and a configured Arcade client
+- The names of the tools your agent can call
+- A stable `user_id` that identifies the same user during setup and runtime
+- An interactive setup surface where the user can open authorization URLs
+- Configured [auth providers](/references/auth-providers) for the tools
+
+For a production app, configure a [custom user verifier](/guides/user-facing-agents/secure-auth-production) before you send authorization links to users.
+
+<Callout type="info">
+  Pre-authorization changes when consent happens, not how the agent calls
+  Arcade. The first authorization is not headless: the user must open the URL
+  returned by Arcade and approve the provider's consent request.
+</Callout>
+
+## Choose an authorization strategy
+
+Use the narrowest authorization strategy that meets your agent's needs:
+
+| Strategy | Permission boundary | Runtime behavior |
+| --- | --- | --- |
+| Authorize on first tool call | Scopes for one tool | Requests the fewest scopes up front, but can interrupt an unattended run |
+| Pre-authorize a planned tool set | Union of scopes for the selected tools | Keeps planned runs uninterrupted without authorizing unused tools |
+| Pre-authorize an entire toolkit | Union of scopes for every tool in the toolkit | Reduces setup work, but may request scopes the agent never uses |
+
+For most background agents, enumerate the tools the agent can call and pre-authorize only that set. If you add a tool or its required scopes change, run the interactive setup again before enabling it for unattended use.
+
+## Pre-authorize one tool
+
+Call `tools.authorize` during setup instead of waiting for the first execution. Arcade returns `completed` when the user already has the required authorization. Otherwise, present the returned URL to the user and wait for consent.
+
+<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python
+from arcadepy import Arcade
+
+client = Arcade()
+user_id = "{arcade_user_id}"
+
+auth_response = client.tools.authorize(
+    tool_name="Gmail.ListEmails",
+    user_id=user_id,
+)
+
+if auth_response.status != "completed":
+    if not auth_response.url:
+        raise RuntimeError("Arcade did not return an authorization URL")
+    print(f"Open this URL to authorize Gmail: {auth_response.url}")
+    auth_response = client.auth.wait_for_completion(auth_response)
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```typescript
+import Arcade from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+const userId = "{arcade_user_id}";
+
+let authResponse = await client.tools.authorize({
+  tool_name: "Gmail.ListEmails",
+  user_id: userId,
+});
+
+if (authResponse.status !== "completed") {
+  if (!authResponse.url) {
+    throw new Error("Arcade did not return an authorization URL");
+  }
+  console.log(`Open this URL to authorize Gmail: ${authResponse.url}`);
+  authResponse = await client.auth.waitForCompletion(authResponse);
+}
+```
+
+</Tabs.Tab>
+</Tabs>
+
+Run this code in an onboarding request, setup command, or deployment workflow where the user can complete the authorization challenge.
+
+## Group tools by OAuth provider
+
+An OAuth authorization grants scopes for one provider. Tools that report the same `provider_id` can share one authorization flow. Union their required scopes and call `auth.start` once for that provider. Start a separate flow for every other provider.
+
+For example, Gmail, Google Calendar, and Google Drive tools can share a Google authorization when their tool definitions use the same Google provider. Slack tools use a separate Slack flow. Inspect each tool's authorization requirement instead of assuming that toolkit names map to the same provider.
+
+The following setup scripts group a planned set of tools by `provider_id` and request the union of their OAuth scopes:
+
+<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python
+from collections import defaultdict
+
+from arcadepy import Arcade
+
+client = Arcade()
+user_id = "{arcade_user_id}"
+tool_names = [
+    "Gmail.ListEmails",
+    "GoogleCalendar.ListEvents",
+    "GoogleDrive.SearchFiles",
+    "Slack.SendMessage",
+]
+
+scopes_by_provider: dict[str, set[str]] = defaultdict(set)
+
+for tool_name in tool_names:
+    tool = client.tools.get(tool_name=tool_name)
+    requirements = tool.requirements
+    authorization = requirements.authorization if requirements else None
+
+    if not authorization:
+        continue
+    if authorization.provider_type != "oauth2" or not authorization.provider_id:
+        raise RuntimeError(f"{tool_name} does not use a configured OAuth provider")
+
+    oauth_scopes = authorization.oauth2.scopes if authorization.oauth2 else []
+    scopes_by_provider[authorization.provider_id].update(oauth_scopes or [])
+
+for provider_id, scopes in scopes_by_provider.items():
+    auth_response = client.auth.start(
+        user_id=user_id,
+        provider=provider_id,
+        scopes=sorted(scopes),
+    )
+
+    if auth_response.status != "completed":
+        if not auth_response.url:
+            raise RuntimeError(f"Arcade did not return a URL for {provider_id}")
+        print(f"Open this URL to authorize {provider_id}: {auth_response.url}")
+        client.auth.wait_for_completion(auth_response)
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```typescript
+import Arcade from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+const userId = "{arcade_user_id}";
+const toolNames = [
+  "Gmail.ListEmails",
+  "GoogleCalendar.ListEvents",
+  "GoogleDrive.SearchFiles",
+  "Slack.SendMessage",
+];
+
+const scopesByProvider = new Map<string, Set<string>>();
+
+for (const toolName of toolNames) {
+  const tool = await client.tools.get(toolName);
+  const authorization = tool.requirements?.authorization;
+
+  if (!authorization) {
+    continue;
+  }
+  if (authorization.provider_type !== "oauth2" || !authorization.provider_id) {
+    throw new Error(`${toolName} does not use a configured OAuth provider`);
+  }
+
+  const scopes = scopesByProvider.get(authorization.provider_id) ?? new Set<string>();
+  for (const scope of authorization.oauth2?.scopes ?? []) {
+    scopes.add(scope);
+  }
+  scopesByProvider.set(authorization.provider_id, scopes);
+}
+
+for (const [providerId, scopes] of scopesByProvider) {
+  let authResponse = await client.auth.start(userId, providerId, {
+    scopes: [...scopes].sort(),
+  });
+
+  if (authResponse.status !== "completed") {
+    if (!authResponse.url) {
+      throw new Error(`Arcade did not return a URL for ${providerId}`);
+    }
+    console.log(`Open this URL to authorize ${providerId}: ${authResponse.url}`);
+    authResponse = await client.auth.waitForCompletion(authResponse);
+  }
+}
+```
+
+</Tabs.Tab>
+</Tabs>
+
+<Callout type="warning">
+  The union becomes the permission boundary for that provider. Review the final
+  scope set before requesting consent, especially when you include an entire
+  toolkit or add write-capable tools.
+</Callout>
+
+## Check readiness before starting the agent
+
+After the user completes every provider flow, fetch each tool with the same `user_id` that the agent will use. Start unattended work only after Arcade reports every tool ready. This check includes user authorization and any required secrets.
+
+<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python
+unready_tools = []
+
+for tool_name in tool_names:
+    tool = client.tools.get(tool_name=tool_name, user_id=user_id)
+    if tool.requirements and tool.requirements.met is not True:
+        auth = tool.requirements.authorization
+        token_status = auth.token_status if auth else "not required"
+        unready_tools.append(f"{tool_name} (token status: {token_status})")
+
+if unready_tools:
+    raise RuntimeError(f"Tools are not ready: {', '.join(unready_tools)}")
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```typescript
+const unreadyTools: string[] = [];
+
+for (const toolName of toolNames) {
+  const tool = await client.tools.get(toolName, { user_id: userId });
+  if (tool.requirements && tool.requirements.met !== true) {
+    const tokenStatus = tool.requirements.authorization?.token_status ?? "not required";
+    unreadyTools.push(`${toolName} (token status: ${tokenStatus})`);
+  }
+}
+
+if (unreadyTools.length > 0) {
+  throw new Error(`Tools are not ready: ${unreadyTools.join(", ")}`);
+}
+```
+
+</Tabs.Tab>
+</Tabs>
+
+See [checking tool authorization status](/guides/tool-calling/custom-apps/check-auth-status) for the full authorization, token, and secret requirement fields.
+
+## Handle authorization changes at runtime
+
+Pre-authorization reduces interruptions, but authorization can change later. A user can revoke consent, a token can expire without a usable refresh token, or a new tool version can require additional scopes.
+
+Keep the ordinary authorization path in your runtime:
+
+1. Call `tools.authorize` for the tool before a job executes it, or when Arcade returns an authorization-required response.
+2. Execute the tool only when the authorization status is `completed`.
+3. For `not_started` or `pending`, move the job to a `needs_user_authorization` state and send the URL to an interactive surface. Do not leave an unattended worker waiting for consent.
+4. For `failed`, record the failure and let the user restart authorization interactively.
+5. Run the readiness gate again before retrying the job.
+
+Arcade manages token storage and refresh when the auth provider supports refresh tokens. Your app must still recover when refresh is unavailable or the user revokes consent. See [tool error handling](/guides/tool-calling/error-handling) for execution error patterns.
+
+<Callout type="warning">
+  Setup and runtime must use the same Arcade project or Engine environment and
+  the same `user_id`. Otherwise, Arcade cannot resolve the authorization granted
+  during setup.
+</Callout>
+
+## Next steps
+
+- Review the standard [authorized tool-calling flow](/guides/tool-calling/custom-apps/auth-tool-calling).
+- Add a [deployment readiness check](/guides/tool-calling/custom-apps/check-auth-status) for all tool requirements.
+- Configure and brand [secure production authorization](/guides/user-facing-agents/secure-auth-production).
+- Compare [server-level and tool-level authorization](/learn/server-level-vs-tool-level-auth).

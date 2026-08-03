@@ -14,6 +14,9 @@ const meta: MetaRecord = {
   "auth-tool-calling": {
     title: "Authorize tool calling",
   },
+  "pre-authorize-tools": {
+    title: "Pre-authorize tools",
+  },
   "check-auth-status": {
     title: "Check authorization status",
   },
