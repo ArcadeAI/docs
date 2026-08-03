@@ -30,6 +30,8 @@ graph TD
     Build --> Exports[Markdown export, llms.txt, sitemap]
 ```
 
+![Rendered toolkit documentation pipeline showing the data sources, merge step, committed artifacts, and build outputs](./assets/toolkit-docs-pipeline.png)
+
 The dotted edge is the most important thing on this diagram: **the output directory is also
 an input.** See [Source-of-truth rules](#source-of-truth-rules).
 
