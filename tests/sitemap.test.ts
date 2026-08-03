@@ -1,6 +1,14 @@
 import { readFileSync } from "node:fs";
+import { readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, test } from "vitest";
+
+const toolkitDataDir = join(
+  process.cwd(),
+  "toolkit-docs-generator",
+  "data",
+  "toolkits"
+);
 
 test("sitemap lists expected URLs", async () => {
   const previousSiteUrl = process.env.SITE_URL;
@@ -29,6 +37,36 @@ test("sitemap lists expected URLs", async () => {
     expect(urls).toContain(
       "https://example.test/en/resources/integrations/development/github"
     );
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/productivity/gmail"
+    );
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/search/exa-api"
+    );
+
+    // Hidden catalog entries must not become indexable sitemap URLs.
+    expect(urls).not.toContain(
+      "https://example.test/en/resources/integrations/productivity/notion"
+    );
+
+    const toolkitJson = await readdir(toolkitDataDir, {
+      withFileTypes: true,
+    });
+    const toolkitMtimes = await Promise.all(
+      toolkitJson
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+        .map((entry) => stat(join(toolkitDataDir, entry.name)))
+    );
+    const latestToolkitMtime = toolkitMtimes.reduce(
+      (latest, current) => (current.mtime > latest ? current.mtime : latest),
+      new Date(0)
+    );
+    const github = entries.find(
+      (entry) =>
+        entry.url ===
+        "https://example.test/en/resources/integrations/development/github"
+    );
+    expect(github?.lastModified).toEqual(latestToolkitMtime);
 
     // No duplicates
     const duplicates = urls.filter(
