@@ -39,27 +39,47 @@ const listToolkitFiles = (): string[] => {
   }
 };
 
+const readToolkit = (file: string): ToolkitShape | null => {
+  try {
+    return JSON.parse(
+      readFileSync(join(TOOLKITS_DIR, file), "utf8")
+    ) as ToolkitShape;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(`✗ Cannot parse ${file}: ${message}`);
+    return null;
+  }
+};
+
+const getStaleFinding = (
+  file: string,
+  toolkit: ToolkitShape
+): { file: string; id: string; reason: string } | null => {
+  if (toolkit.summaryStale !== true) {
+    return null;
+  }
+
+  return {
+    file,
+    id: typeof toolkit.id === "string" ? toolkit.id : file,
+    reason:
+      typeof toolkit.summaryStaleReason === "string"
+        ? toolkit.summaryStaleReason
+        : "unknown",
+  };
+};
+
 const main = (): number => {
   const stale: Array<{ file: string; id: string; reason: string }> = [];
   for (const file of listToolkitFiles()) {
-    let toolkit: ToolkitShape;
-    try {
-      const raw = readFileSync(join(TOOLKITS_DIR, file), "utf8");
-      toolkit = JSON.parse(raw) as ToolkitShape;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`✗ Cannot parse ${file}: ${message}`);
+    const toolkit = readToolkit(file);
+    if (!toolkit) {
       return 1;
     }
-    if (toolkit.summaryStale === true) {
-      stale.push({
-        file,
-        id: typeof toolkit.id === "string" ? toolkit.id : file,
-        reason:
-          typeof toolkit.summaryStaleReason === "string"
-            ? toolkit.summaryStaleReason
-            : "unknown",
-      });
+
+    const finding = getStaleFinding(file, toolkit);
+    if (finding) {
+      stale.push(finding);
     }
   }
 

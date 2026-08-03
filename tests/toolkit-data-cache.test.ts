@@ -1,7 +1,7 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
 
 /**
@@ -73,6 +73,32 @@ describe("readToolkitData against a clean fixture directory", () => {
   test("an absent toolkit id yields null, not a throw", async () => {
     const data = await readToolkitData("no-such-toolkit-at-all", { dataDir });
     expect(data).toBeNull();
+  });
+
+  test("development reads see regenerated files and preserve new fields", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+
+    try {
+      await readToolkitData("ValidToolkitOne", { dataDir });
+      writeFileSync(
+        join(dataDir, "validtoolkitone.json"),
+        JSON.stringify({
+          ...JSON.parse(
+            readFileSync(join(dataDir, "validtoolkitone.json"), "utf8")
+          ),
+          label: "RegeneratedToolkit",
+          futureGeneratorField: "preserved",
+        })
+      );
+
+      const data = await readToolkitData("ValidToolkitOne", { dataDir });
+      expect(data?.label).toBe("RegeneratedToolkit");
+      expect(
+        (data as unknown as Record<string, unknown>).futureGeneratorField
+      ).toBe("preserved");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 

@@ -259,6 +259,29 @@ type FallbackToolkitResult = {
   droppedParameterCount: number;
 };
 
+const getOptionalString = (
+  record: Record<string, unknown>,
+  key: string
+): string | undefined =>
+  typeof record[key] === "string" ? record[key] : undefined;
+
+const getFallbackCustomSections = (
+  record: Record<string, unknown>
+): Pick<
+  MergedToolkit,
+  "documentationChunks" | "customImports" | "subPages"
+> => ({
+  documentationChunks: Array.isArray(record.documentationChunks)
+    ? (record.documentationChunks as MergedToolkit["documentationChunks"])
+    : [],
+  customImports: Array.isArray(record.customImports)
+    ? (record.customImports as MergedToolkit["customImports"])
+    : [],
+  subPages: Array.isArray(record.subPages)
+    ? (record.subPages as MergedToolkit["subPages"])
+    : [],
+});
+
 const buildFallbackToolkit = (
   record: Record<string, unknown>,
   fallbackId: string
@@ -274,29 +297,12 @@ const buildFallbackToolkit = (
 
   const metadataResult = MergedToolkitMetadataSchema.safeParse(record.metadata);
   const authResult = MergedToolkitAuthSchema.safeParse(record.auth);
-  const summary =
-    typeof record.summary === "string" ? record.summary : undefined;
+  const summary = getOptionalString(record, "summary");
   const summaryStale =
     typeof record.summaryStale === "boolean" ? record.summaryStale : undefined;
-  const summaryStaleReason =
-    typeof record.summaryStaleReason === "string"
-      ? record.summaryStaleReason
-      : undefined;
-  const generatedAt =
-    typeof record.generatedAt === "string" ? record.generatedAt : undefined;
-
-  // Carry forward custom sections even when strict schema parse fails.
-  // These are hand-authored fields — losing them silently on any schema
-  // mismatch would permanently wipe content on the next write.
-  const documentationChunks = Array.isArray(record.documentationChunks)
-    ? (record.documentationChunks as MergedToolkit["documentationChunks"])
-    : [];
-  const customImports = Array.isArray(record.customImports)
-    ? (record.customImports as MergedToolkit["customImports"])
-    : [];
-  const subPages = Array.isArray(record.subPages)
-    ? (record.subPages as MergedToolkit["subPages"])
-    : [];
+  const summaryStaleReason = getOptionalString(record, "summaryStaleReason");
+  const generatedAt = getOptionalString(record, "generatedAt");
+  const customSections = getFallbackCustomSections(record);
 
   return {
     toolkit: {
@@ -316,9 +322,7 @@ const buildFallbackToolkit = (
         secretsInfo: [],
         documentationChunks: [],
       })),
-      documentationChunks,
-      customImports,
-      subPages,
+      ...customSections,
       ...(generatedAt ? { generatedAt } : {}),
     },
     droppedToolCount,

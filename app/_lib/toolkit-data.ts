@@ -104,7 +104,11 @@ export const readToolkitFile = async (
     );
   }
 
-  return result.data;
+  // Zod object schemas strip unknown keys from their parsed result. Return the
+  // original validated object so a newly added generator field is preserved by
+  // the app until the shared schema is updated, rather than silently deleting
+  // it from API responses or page data.
+  return parsed as ToolkitData;
 };
 
 /**
@@ -121,7 +125,7 @@ type ToolkitDataMap = {
 };
 
 /**
- * One process-wide load per data directory. Keyed by directory (not a single
+ * One process-wide load per data directory in production. Keyed by directory (not a single
  * flat variable) because tests point `TOOLKIT_DATA_DIR` at scratch fixtures
  * and must not see another test's cached data.
  *
@@ -129,7 +133,9 @@ type ToolkitDataMap = {
  * rather than retried: the underlying files are static build output that
  * only change on a new deploy, so a bad file stays bad for the rest of this
  * process's life, and re-scanning 21.6 MB on every subsequent lookup hoping
- * it healed itself would only add cost without ever succeeding.
+ * it healed itself would only add cost without ever succeeding. Development
+ * is deliberately excluded from this cache: the generator can update JSON
+ * while `next dev` is running, and a refresh should see that new snapshot.
  */
 const loadsByDataDir = new Map<string, Promise<ToolkitDataMap>>();
 
@@ -187,6 +193,10 @@ const loadAllToolkitDataUncached = async (
  */
 export const loadAllToolkitData = cache(
   async (dataDir: string): Promise<ToolkitDataMap> => {
+    if (process.env.NODE_ENV === "development") {
+      return await loadAllToolkitDataUncached(dataDir);
+    }
+
     let promise = loadsByDataDir.get(dataDir);
     if (!promise) {
       promise = loadAllToolkitDataUncached(dataDir);
