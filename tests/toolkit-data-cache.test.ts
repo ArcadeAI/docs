@@ -74,6 +74,13 @@ describe("readToolkitData against a clean fixture directory", () => {
     const data = await readToolkitData("no-such-toolkit-at-all", { dataDir });
     expect(data).toBeNull();
   });
+
+  test("materializes defaults from the shared schema", async () => {
+    const data = await readToolkitData("ValidToolkitOne", { dataDir });
+    expect(data?.documentationChunks).toEqual([]);
+    expect(data?.customImports).toEqual([]);
+    expect(data?.subPages).toEqual([]);
+  });
 });
 
 describe("readToolkitData against a directory with one corrupt file", () => {

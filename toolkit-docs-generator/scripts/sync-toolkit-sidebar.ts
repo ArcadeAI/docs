@@ -6,7 +6,7 @@
  * 1. Reads all toolkit JSON files from data/toolkits/
  * 2. Maps each toolkit to its category from the design system
  * 3. Creates/updates _meta.tsx files for each category
- * 4. Handles an "others" category for toolkits without a recognized category
+ * 4. Skips toolkits without a recognized category
  * 5. Updates the main integrations _meta.tsx if needed
  *
  * Usage:
@@ -77,7 +77,6 @@ const CATEGORY_NAMES: Record<string, string> = {
   sales: "Sales",
   entertainment: "Entertainment",
   payments: "Payments & Finance",
-  others: "Others",
 };
 
 // Category order for main _meta.tsx
@@ -285,7 +284,15 @@ function resolveToolkitInfo(
   // Keep sidebar routes aligned with static params: toolkit JSON is source of
   // truth for category, with design system as fallback when JSON is missing.
   const category =
-    jsonData?.metadata?.category ?? designSystemToolkit?.category ?? "others";
+    jsonData?.metadata?.category ?? designSystemToolkit?.category;
+  if (!category) {
+    return null;
+  }
+  if (!(INTEGRATION_CATEGORIES as readonly string[]).includes(category)) {
+    throw new Error(
+      `Unrecognized integration category "${category}" for toolkit "${toolkitId}".`
+    );
+  }
   const labelFromDesignSystem = designSystemToolkit?.label ?? null;
   const labelFromJson = jsonData?.label ?? jsonData?.name ?? null;
   const typeFromJson = jsonData?.metadata?.type ?? null;
@@ -418,8 +425,12 @@ export default meta;
  * Generate main integrations _meta.tsx content
  */
 export function generateMainMeta(activeCategories: string[]): string {
+  const supportedCategories = activeCategories.filter((category) =>
+    (INTEGRATION_CATEGORIES as readonly string[]).includes(category)
+  );
+
   // Sort categories by defined order
-  const sortedCategories = [...activeCategories].sort((a, b) => {
+  const sortedCategories = [...supportedCategories].sort((a, b) => {
     const indexA = CATEGORY_ORDER.indexOf(a);
     const indexB = CATEGORY_ORDER.indexOf(b);
     if (indexA === -1 && indexB === -1) {
