@@ -56,6 +56,7 @@ describe("toolkit data loader", () => {
               label: "GitHub",
               version: "1.0.0",
               category: "development",
+              type: "arcade",
               toolCount: 3,
               authType: "oauth2",
             },

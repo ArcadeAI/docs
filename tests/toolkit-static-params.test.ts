@@ -9,7 +9,7 @@ import {
 } from "@/app/_lib/toolkit-static-params";
 import { normalizeToolkitId } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 
-const UNRECOGNIZED_CATEGORY_ERROR = /weird/;
+const INVALID_TOOLKIT_INDEX_SCHEMA_ERROR = /Invalid toolkit index schema/;
 
 const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   const dir = await mkdtemp(join(tmpdir(), "toolkit-static-params-"));
@@ -24,11 +24,20 @@ const writeIndex = async (
   dir: string,
   toolkits: Array<{ id: string; category?: string }>
 ) => {
+  const entries = toolkits.map((toolkit) => ({
+    id: toolkit.id,
+    label: toolkit.id,
+    version: "1.0.0",
+    category: toolkit.category ?? "development",
+    type: "arcade",
+    toolCount: 0,
+    authType: "none",
+  }));
   const indexFixture = JSON.stringify(
     {
       generatedAt: "2026-01-15T00:00:00.000Z",
       version: "1.0.0",
-      toolkits,
+      toolkits: entries,
     },
     null,
     2
@@ -250,21 +259,20 @@ describe("toolkit static params", () => {
     });
   });
 
-  it('throws on an unrecognized category instead of coercing it to "others"', async () => {
+  it("rejects an unrecognized category in the index schema", async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [{ id: "Github", category: "weird" }]);
 
       await expect(
         listToolkitRoutes({ dataDir: dir, toolkitsCatalog: [] })
-      ).rejects.toThrow(UNRECOGNIZED_CATEGORY_ERROR);
+      ).rejects.toThrow(INVALID_TOOLKIT_INDEX_SCHEMA_ERROR);
     });
   });
 
-  it("skips a toolkit with no category anywhere instead of routing it to a fake bucket", async () => {
+  it("skips a toolkit with no category when the index is absent", async () => {
     await withTempDir(async (dir) => {
-      // No JSON file, no catalog entry, and the index entry itself omits
-      // category — nothing to route this toolkit under.
-      await writeIndex(dir, [{ id: "Github" }]);
+      // No JSON file, no catalog entry, and no index — nothing to route this
+      // toolkit under.
 
       const routes = await listToolkitRoutes({
         dataDir: dir,
