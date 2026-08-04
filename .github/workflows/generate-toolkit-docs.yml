@@ -1,10 +1,9 @@
 name: Generate toolkit docs
 # Description: Generate toolkit JSON from Engine API, then sync sidebar navigation.
 # Flow:
-# 1) Build the toolkit docs generator
-# 2) Generate toolkit JSON into toolkit-docs-generator/data/toolkits
-# 3) Sync integrations sidebar _meta.tsx from toolkit-docs-generator/data/toolkits
-# 4) Create or update a PR if changes were produced
+# 1) Generate toolkit JSON into toolkit-docs-generator/data/toolkits
+# 2) Sync integrations sidebar _meta.tsx from toolkit-docs-generator/data/toolkits
+# 3) Create or update a PR if changes were produced
 
 on:
   repository_dispatch:
@@ -48,10 +47,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build toolkit docs generator
-        run: pnpm build
-        working-directory: toolkit-docs-generator
-
       - name: Generate toolkit docs
         run: |
           pnpm dlx tsx src/cli/index.ts generate \
@@ -71,8 +66,8 @@ jobs:
             --llm-editor-api-key "$ANTHROPIC_API_KEY" \
             --toolkit-concurrency 8 \
             --llm-concurrency 15 \
-            --exclude-file ./excluded-toolkits.txt \
-            --ignore-file ./ignored-toolkits.txt \
+            --exclude-file ./remove-toolkits.txt \
+            --ignore-file ./skip-toolkits.txt \
             --output data/toolkits
         working-directory: toolkit-docs-generator
         env:

@@ -6,7 +6,7 @@ Arcade documentation site built with Next.js + Nextra (App Router), using pnpm a
 
 ```bash
 pnpm dev              # Local dev server (port 3000)
-pnpm build            # Full production build (toolkit-markdown → next build → pagefind)
+pnpm build            # Production build (next build --webpack)
 pnpm lint             # Lint with Ultracite (Biome-based)
 pnpm format           # Auto-format with Ultracite
 pnpm test             # Run all Vitest tests
@@ -27,7 +27,7 @@ pnpm vitest run tests/broken-link-check.test.ts
 - **`app/_lib/`** — Data-fetching utilities (toolkit catalog, slug generation, static params).
 - **`app/api/`** — API routes (markdown export, toolkit-data, glossary).
 - **`toolkit-docs-generator/`** — Generates MCP toolkit documentation from server metadata JSON files in `toolkit-docs-generator/data/toolkits/`.
-- **`scripts/`** — Build/CI scripts (Vale style fixes, redirect checking, pagefind indexing, i18n sync).
+- **`scripts/`** — Build/CI scripts (Vale style fixes, redirect checking, llms.txt generation, Algolia crawler config, i18n sync).
 - **`tests/`** — Vitest tests (broken links, internal link validation, sitemap, smoke tests).
 - **`lib/`** — Next.js utilities (glossary remark plugin, llmstxt plugin).
 - **`next.config.ts`** — Contains ~138 redirect rules.
@@ -41,6 +41,13 @@ Follow **STYLEGUIDE.md** for writing standards and **AUTHORING.md** for formatti
 - Use "Arcade Engine" (capitalized), "MCP server" (lowercase server), "tool" (lowercase), "auth provider".
 - Code snippets: 4 spaces for Python, 2 spaces for other languages.
 - Run `pnpm vale:check` before submitting docs changes.
+
+Vale is a Go binary with no npm dependency, so a clean checkout does not have it. Install it once, then fetch the style packages (`styles/Google/`, `styles/alex/`, `styles/write-good/` are gitignored):
+
+```bash
+brew install vale   # or see https://vale.sh/docs/install
+pnpm vale:sync
+```
 
 ## Pre-commit Hooks
 

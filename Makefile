@@ -21,9 +21,6 @@ test: ## Run the tests
 run: ## Run the docs site locally
 	@pnpm dev
 
-mcp-server-docs: ## Generate documentation for an MCP Server toolkit
-	@cd make_toolkit_docs && uv sync && uv run python __main__.py
-
 ruin:
 	@echo "\033[31m\033[1m💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️\033[0m"
 	@echo "\033[31m\033[1m👻                                          👻\033[0m"

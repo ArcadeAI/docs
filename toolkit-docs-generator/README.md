@@ -181,7 +181,7 @@ pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
 Pass `--ignore-file <path>` to skip specific toolkits during generation. Existing
 output files for ignored toolkits are left unchanged — nothing is deleted.
 
-A default empty template ships at `ignored-toolkits.txt` in the generator root.
+A default empty template ships at `skip-toolkits.txt` in the generator root.
 Add one toolkit ID per line:
 
 ```text
@@ -191,7 +191,7 @@ SomeInternalTool
 
 ```bash
 pnpm dlx tsx src/cli/index.ts generate --all \
-  --ignore-file ./ignored-toolkits.txt
+  --ignore-file ./skip-toolkits.txt
 ```
 
 The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
@@ -218,7 +218,7 @@ The parser ignores blank lines and lines starting with `#`. IDs are case-insensi
 
 ```bash
 pnpm dlx tsx src/cli/index.ts generate --all \
-  --exclude-file ./excluded-toolkits.txt
+  --exclude-file ./remove-toolkits.txt
 ```
 
 If a toolkit in the file already has an output `.json` file, the generator

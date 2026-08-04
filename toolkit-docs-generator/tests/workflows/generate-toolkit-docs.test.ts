@@ -31,11 +31,23 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("--llm-model");
   expect(workflowContents).toContain("--llm-api-key");
   expect(workflowContents).toContain("--llm-max-tokens 8192");
+  expect(workflowContents).toContain("--exclude-file ./remove-toolkits.txt");
+  expect(workflowContents).toContain("--ignore-file ./skip-toolkits.txt");
   expect(workflowContents).toContain("--remove-empty-sections=false");
   expect(workflowContents).toContain("peter-evans/create-pull-request");
   expect(workflowContents).toContain("HUSKY: 0");
   expect(workflowContents).toContain("[AUTO] Adding MCP Servers docs update");
   expect(workflowContents).toContain("pull-requests: write");
+});
+
+test("porter workflow does not build the docs generator before running it", () => {
+  // toolkit-docs-generator has no package.json, so a `pnpm build` step
+  // there resolves to the root manifest's `next build --webpack` — a full
+  // Next.js production build that the tsx-executed CLI below doesn't need.
+  expect(workflowContents).not.toContain("Build toolkit docs generator");
+  expect(workflowContents).not.toMatch(
+    /run: pnpm build\s*\n\s*working-directory: toolkit-docs-generator/
+  );
 });
 
 test("porter workflow wires the secret-coherence editor", () => {
