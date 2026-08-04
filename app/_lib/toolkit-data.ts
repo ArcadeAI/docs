@@ -128,7 +128,22 @@ type ToolkitDataMap = {
  * unbounded process-global cache.
  */
 const loadsByDataDir = new Map<string, Promise<ToolkitDataMap>>();
+/**
+ * One in-flight/resolved read per (dataDir, normalized lookup key) in
+ * production. `readToolkitData`'s direct-file fast path re-reads and
+ * re-parses on every call without this — `loadAllToolkitData` only caches
+ * the directory scan fallback, so generateMetadata + Page for the same
+ * toolkit would each pay for a full file read during static generation.
+ *
+ * Skipped in development (generator can refresh JSON while `next dev` runs)
+ * and when callers pass an explicit `dataDir` (tests use scratch fixtures
+ * and expect fresh reads after mutating files).
+ */
+const readsByLookupKey = new Map<string, Promise<ToolkitData | null>>();
 const DEFAULT_DATA_DIR = resolveToolkitDataDir();
+
+const readLookupCacheKey = (dataDir: string, toolkitId: string): string =>
+  `${dataDir}\0${normalizeToolkitId(toolkitId)}`;
 
 const loadAllToolkitDataUncached = async (
   dataDir: string
@@ -206,19 +221,13 @@ export const loadAllToolkitData = cache(
   }
 );
 
-export const readToolkitData = async (
+const readToolkitDataUncached = async (
   toolkitId: string,
-  options?: ToolkitDataOptions
+  dataDir: string
 ): Promise<ToolkitData | null> => {
   // Normalize the toolkit ID to lowercase alphanumeric
   const normalizedId = normalizeToolkitId(toolkitId);
 
-  // Guard against empty normalized ID (e.g., input was only special characters)
-  if (!normalizedId) {
-    return null;
-  }
-
-  const dataDir = resolveDataDir(options);
   // The API route normally receives the normalized toolkit id. Keep that
   // common path O(1), especially on a cold serverless instance: eagerly
   // loading every toolkit JSON file just to serve one toolkit adds tens of
@@ -237,6 +246,41 @@ export const readToolkitData = async (
     null
   );
 };
+
+export function readToolkitData(
+  toolkitId: string,
+  options?: ToolkitDataOptions
+): Promise<ToolkitData | null> {
+  const normalizedId = normalizeToolkitId(toolkitId);
+
+  // Guard against empty normalized ID (e.g., input was only special characters)
+  if (!normalizedId) {
+    return Promise.resolve(null);
+  }
+
+  const dataDir = resolveDataDir(options);
+
+  if (
+    process.env.NODE_ENV === "development" ||
+    options?.dataDir !== undefined
+  ) {
+    return readToolkitDataUncached(toolkitId, dataDir);
+  }
+
+  const key = readLookupCacheKey(dataDir, toolkitId);
+  let promise = readsByLookupKey.get(key);
+  if (!promise) {
+    promise = readToolkitDataUncached(toolkitId, dataDir);
+    readsByLookupKey.set(key, promise);
+
+    promise.catch(() => {
+      if (readsByLookupKey.get(key) === promise) {
+        readsByLookupKey.delete(key);
+      }
+    });
+  }
+  return promise;
+}
 
 export const readToolkitIndex = async (
   options?: ToolkitDataOptions

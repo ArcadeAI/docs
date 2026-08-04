@@ -418,14 +418,14 @@ describe("groupByCategory", () => {
     expect(result.size).toBe(0);
   });
 
-  it("should handle 'others' category", () => {
+  it("should group toolkits by category", () => {
     const toolkits: ToolkitInfo[] = [
-      { id: "custom", slug: "custom", label: "Custom", category: "others" },
+      { id: "custom", slug: "custom", label: "Custom", category: "payments" },
     ];
 
     const result = groupByCategory(toolkits);
-    expect(result.has("others")).toBe(true);
-    expect(result.get("others")).toHaveLength(1);
+    expect(result.has("payments")).toBe(true);
+    expect(result.get("payments")).toHaveLength(1);
   });
 });
 
@@ -521,11 +521,11 @@ describe("generateCategoryMeta", () => {
         id: "test",
         slug: "test",
         label: 'Test "Quoted" Label',
-        category: "others",
+        category: "productivity",
       },
     ];
 
-    const result = generateCategoryMeta(toolkits, "others", "/preview");
+    const result = generateCategoryMeta(toolkits, "productivity", "/preview");
 
     expect(result).toContain('title: "Test \\"Quoted\\" Label"');
   });

@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import { readToolkitData, readToolkitIndex } from "@/app/_lib/toolkit-data";
 
 /**
@@ -128,6 +128,57 @@ describe("readToolkitData direct-file fast path", () => {
   test("a normalized id does not scan or parse corrupt sibling files", async () => {
     const data = await readToolkitData("ValidToolkitOne", { dataDir });
     expect(data?.id).toBe("ValidToolkitOne");
+  });
+});
+
+describe("readToolkitData production lookup cache", () => {
+  test("repeated lookups for the same toolkit share one in-flight promise", async () => {
+    const dataDir = makeFixtureDir();
+    dirsToClean.push(dataDir);
+
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      const firstPromise = readToolkitData("ValidToolkitOne");
+      const secondPromise = readToolkitData("ValidToolkitOne");
+
+      expect(firstPromise).toBe(secondPromise);
+
+      const [first, second] = await Promise.all([firstPromise, secondPromise]);
+      expect(first?.id).toBe("ValidToolkitOne");
+      expect(second?.id).toBe("ValidToolkitOne");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  test("a transient direct read failure can recover after the file is repaired", async () => {
+    const dataDir = makeFixtureDir();
+    dirsToClean.push(dataDir);
+    writeFileSync(
+      join(dataDir, "corrupttoolkit.json"),
+      "{ this is not valid json"
+    );
+
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      await expect(readToolkitData("CorruptToolkit")).rejects.toThrow(
+        join(dataDir, "corrupttoolkit.json")
+      );
+
+      writeFileSync(
+        join(dataDir, "corrupttoolkit.json"),
+        validToolkitJson("RecoveredToolkit", "recovered-toolkit")
+      );
+
+      const recovered = await readToolkitData("RecoveredToolkit");
+      expect(recovered?.id).toBe("RecoveredToolkit");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 
