@@ -41,7 +41,7 @@ const INTEGRATIONS = "/en/resources/integrations";
 // `id`, `category`, `docsLink`, and `isHidden`.
 const makeToolkit = (
   id: string,
-  category: string,
+  category: string | null,
   slug: string,
   isHidden = false
 ): ToolkitWithDocsLink =>
@@ -54,7 +54,9 @@ const makeToolkit = (
     isComingSoon: false,
     isBYOC: false,
     isPro: false,
-    docsLink: `https://docs.arcade.dev${INTEGRATIONS}/${category}/${slug}`,
+    docsLink: category
+      ? `https://docs.arcade.dev${INTEGRATIONS}/${category}/${slug}`
+      : undefined,
   }) as unknown as ToolkitWithDocsLink;
 
 describe("resolveIndexToolkits (logic)", () => {
@@ -100,6 +102,14 @@ describe("resolveIndexToolkits (logic)", () => {
     ).toHaveLength(1);
     expect(links.length).toBe(new Set(links).size);
   });
+
+  test("does not manufacture an others link for a missing category", () => {
+    const toolkit = makeToolkit("NoCategory", null, "no-category");
+    const [resolvedToolkit] = resolveIndexToolkits([toolkit], validLinks);
+
+    expect(toIntegrationLink(toolkit)).toBeNull();
+    expect(resolvedToolkit?.hasPage).toBe(false);
+  });
 });
 
 describe("integrations index links (live data)", () => {
@@ -119,7 +129,7 @@ describe("integrations index links (live data)", () => {
     const brokenClickable = resolved
       .filter((toolkit) => toolkit.hasPage)
       .map((toolkit) => toIntegrationLink(toolkit))
-      .filter((link) => !validLinks.has(link));
+      .filter((link): link is string => link !== null && !validLinks.has(link));
 
     expect(brokenClickable).toEqual([]);
   });

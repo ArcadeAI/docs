@@ -191,7 +191,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                       isPartner={toolkit.isPartner}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
-                      link={toIntegrationLink(toolkit)}
+                      link={toIntegrationLink(toolkit) ?? undefined}
                       name={toolkit.label}
                       type={toolkit.type}
                     />
