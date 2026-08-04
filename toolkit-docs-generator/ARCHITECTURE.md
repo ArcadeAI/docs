@@ -69,12 +69,6 @@ The generator does not run during a Vercel build. The generation workflow commit
 the JSON files and navigation changes through a pull request. Vercel then runs the
 root `pnpm build` command and compiles the committed files with Next.js.
 
-`app/_lib/toolkit-static-params.ts` enumerates routes from `index.json` and the
-per-toolkit files. `app/_lib/toolkit-data.ts` reads the same files for page
-rendering and the `/api/toolkit-data/[toolkitId]` route. The root layout reads
-request headers, so Vercel reports the docs routes as dynamic even though the
-toolkit parameter set is fixed at build time.
-
 ## Search indexing
 
 Search uses an external Algolia crawler. There is no Pagefind or local search

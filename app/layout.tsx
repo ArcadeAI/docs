@@ -10,7 +10,6 @@ import { TranslationBanner } from "@/app/_components/translation-banner";
 import "@/app/globals.css";
 import { Discord, Github } from "@arcadeai/design-system";
 import { GoogleTagManager } from "@next/third-parties/google";
-import { headers } from "next/headers";
 import Link from "next/link";
 import Script from "next/script";
 import { Head } from "nextra/components";
@@ -21,8 +20,6 @@ import {
   Navbar,
   Footer as NextraFooter,
 } from "nextra-theme-docs";
-
-const REGEX_LOCALE = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/;
 
 /**
  * Nextra's active-state detection only checks `item.route`, never `item.href`.
@@ -94,19 +91,21 @@ export function generateMetadata() {
   };
 }
 
-function getLocaleFromPathname(pathname: string): string {
-  const localeMatch = pathname.match(REGEX_LOCALE);
-  return localeMatch?.[1] || "en";
-}
-
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "/";
-  const lang = getLocaleFromPathname(pathname);
+  // proxy.ts redirects every request to a "/en/..." path — "es" and
+  // "pt-BR" routes bounce to their "/en" equivalent and unlocaled routes
+  // pick up "/en" from getPreferredLocale, which is hardcoded to return
+  // "en" unconditionally. So this layout only ever renders under "/en",
+  // and reading the locale here can be a constant instead of a header
+  // lookup. Awaiting headers() in the root layout previously forced the
+  // entire route tree into dynamic rendering. Restoring real i18n means
+  // moving this layout under an `app/[lang]/` route segment so the
+  // locale comes from routing params, not a request header.
+  const lang = "en";
 
   const dictionary = await getDictionary(lang);
   const rawPageMap = await getPageMap(`/${lang}`);
