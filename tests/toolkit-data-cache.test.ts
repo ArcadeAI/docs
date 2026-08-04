@@ -2,7 +2,7 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, test } from "vitest";
-import { readToolkitData } from "@/app/_lib/toolkit-data";
+import { readToolkitData, readToolkitIndex } from "@/app/_lib/toolkit-data";
 
 /**
  * loadAllToolkitData (app/_lib/toolkit-data.ts) reads and validates every
@@ -90,29 +90,56 @@ describe("readToolkitData against a directory with one corrupt file", () => {
     ).rejects.toThrow(join(dataDir, "corrupttoolkit.json"));
   });
 
-  test("the failure is cached, not retried: a second request throws the same way", async () => {
-    // Confirms the deliberate choice to cache a failed load rather than
-    // re-scanning the directory on every subsequent call: this directory's
-    // corruption doesn't heal between calls, so re-reading it every time
-    // would only add cost without ever succeeding.
+  test("a transient scan failure can recover after the file is repaired", async () => {
     await expect(
       readToolkitData("CorruptToolkit", { dataDir })
     ).rejects.toThrow(join(dataDir, "corrupttoolkit.json"));
+
+    writeFileSync(
+      join(dataDir, "corrupttoolkit.json"),
+      validToolkitJson("RecoveredToolkit", "recovered-toolkit")
+    );
+
+    const recovered = await readToolkitData("recovered-toolkit", { dataDir });
+    expect(recovered?.id).toBe("RecoveredToolkit");
   });
 
-  // A pre-existing property of the old scan-on-miss implementation too, not
-  // a regression introduced by the shared cache: any lookup that needs to
-  // rule out every file in the directory (a genuinely absent id, or a slug
-  // reached only via the full scan) surfaces a sibling file's corruption,
-  // because "is this id absent" can't be answered without reading everything.
-  // A healthy toolkit's *direct* id-shaped lookup, though, is unaffected by
-  // corruption elsewhere in the directory only when that toolkit was already
-  // resident in a load that happened before the corruption — once the whole
-  // directory's load has failed once, it stays failed (see the caching test
-  // above), so every subsequent lookup against this dataDir throws too.
-  test("a healthy toolkit id in the same directory also throws once the directory load has failed", async () => {
-    await expect(
-      readToolkitData("ValidToolkitOne", { dataDir })
-    ).rejects.toThrow(join(dataDir, "corrupttoolkit.json"));
+  test("a healthy toolkit id still uses the direct file after a failed scan", async () => {
+    const data = await readToolkitData("ValidToolkitOne", { dataDir });
+    expect(data?.id).toBe("ValidToolkitOne");
+  });
+});
+
+describe("readToolkitData direct-file fast path", () => {
+  const dataDir = makeFixtureDir();
+  dirsToClean.push(dataDir);
+  writeFileSync(
+    join(dataDir, "corrupttoolkit.json"),
+    "{ this is not valid json"
+  );
+
+  test("a normalized id does not scan or parse corrupt sibling files", async () => {
+    const data = await readToolkitData("ValidToolkitOne", { dataDir });
+    expect(data?.id).toBe("ValidToolkitOne");
+  });
+});
+
+describe("readToolkitIndex schema validation", () => {
+  const dataDir = mkdtempSync(join(tmpdir(), "toolkit-index-schema-test-"));
+  dirsToClean.push(dataDir);
+
+  test("rejects malformed index entries instead of casting them", async () => {
+    writeFileSync(
+      join(dataDir, "index.json"),
+      JSON.stringify({
+        generatedAt: "2026-01-01T00:00:00Z",
+        version: "1",
+        toolkits: [{ id: "missing-required-fields" }],
+      })
+    );
+
+    await expect(readToolkitIndex({ dataDir })).rejects.toThrow(
+      join(dataDir, "index.json")
+    );
   });
 });
