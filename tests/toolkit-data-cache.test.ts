@@ -182,6 +182,93 @@ describe("readToolkitData production lookup cache", () => {
   });
 });
 
+/**
+ * `readToolkitDataUncached` resolves a lookup from two different forms of the
+ * input: the normalized id (direct file, `byNormalizedId`) and the raw
+ * lowercased string (`bySlug`). A cache keyed on only the normalized form
+ * therefore collapses inputs that resolve differently — "no-tion" and "notion"
+ * both normalize to "notion", but only "notion" matches NotionToolkit's docs
+ * slug. `/api/toolkit-data/[toolkitId]` takes arbitrary ids, so whichever
+ * variant a warm instance saw first would decide the answer for all of them.
+ */
+describe("readToolkitData cache keys distinguish slug variants", () => {
+  const notionToolkit = () =>
+    JSON.stringify({
+      id: "NotionToolkit",
+      label: "Notion",
+      version: "1.0.0",
+      description: "A test toolkit fixture.",
+      metadata: {
+        category: "productivity",
+        iconUrl: "https://example.com/icon.svg",
+        isBYOC: false,
+        isPro: false,
+        type: "arcade",
+        docsLink:
+          "https://docs.arcade.dev/en/resources/integrations/productivity/notion",
+        isComingSoon: false,
+        isHidden: false,
+      },
+      auth: null,
+      tools: [],
+    });
+
+  const makeNotionDir = (): string => {
+    const dir = mkdtempSync(join(tmpdir(), "toolkit-data-slug-variant-"));
+    dirsToClean.push(dir);
+    // Named for the normalized id, so "notion" resolves only via the slug map.
+    writeFileSync(join(dir, "notiontoolkit.json"), notionToolkit());
+    return dir;
+  };
+
+  test("a miss on a variant does not pin null for the real slug", async () => {
+    const dataDir = makeNotionDir();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      expect(await readToolkitData("no-tion")).toBeNull();
+      expect((await readToolkitData("notion"))?.id).toBe("NotionToolkit");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  test("a hit on the real slug does not make a variant resolve", async () => {
+    const dataDir = makeNotionDir();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      expect((await readToolkitData("notion"))?.id).toBe("NotionToolkit");
+      expect(await readToolkitData("no-tion")).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  test("an absent toolkit is not retained in the lookup cache", async () => {
+    const dataDir = makeNotionDir();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      expect(await readToolkitData("not-generated-yet")).toBeNull();
+
+      writeFileSync(
+        join(dataDir, "notgeneratedyet.json"),
+        validToolkitJson("NotGeneratedYet", "not-generated-yet")
+      );
+
+      expect((await readToolkitData("not-generated-yet"))?.id).toBe(
+        "NotGeneratedYet"
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});
+
 describe("readToolkitIndex schema validation", () => {
   const dataDir = mkdtempSync(join(tmpdir(), "toolkit-index-schema-test-"));
   dirsToClean.push(dataDir);

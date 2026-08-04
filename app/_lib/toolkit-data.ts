@@ -129,11 +129,11 @@ type ToolkitDataMap = {
  */
 const loadsByDataDir = new Map<string, Promise<ToolkitDataMap>>();
 /**
- * One in-flight/resolved read per (dataDir, normalized lookup key) in
- * production. `readToolkitData`'s direct-file fast path re-reads and
- * re-parses on every call without this — `loadAllToolkitData` only caches
- * the directory scan fallback, so generateMetadata + Page for the same
- * toolkit would each pay for a full file read during static generation.
+ * One in-flight/resolved read per (dataDir, lookup id) in production.
+ * `readToolkitData`'s direct-file fast path re-reads and re-parses on every
+ * call without this — `loadAllToolkitData` only caches the directory scan
+ * fallback, so generateMetadata + Page for the same toolkit would each pay
+ * for a full file read during static generation.
  *
  * Skipped in development (generator can refresh JSON while `next dev` runs)
  * and when callers pass an explicit `dataDir` (tests use scratch fixtures
@@ -142,8 +142,17 @@ const loadsByDataDir = new Map<string, Promise<ToolkitDataMap>>();
 const readsByLookupKey = new Map<string, Promise<ToolkitData | null>>();
 const DEFAULT_DATA_DIR = resolveToolkitDataDir();
 
+/**
+ * Keyed on the lowercased id exactly as given, NOT on its normalized form.
+ * `readToolkitDataUncached` resolves a lookup from both forms — the normalized
+ * id for the direct file and `byNormalizedId`, the lowercased raw string for
+ * `bySlug` — so the raw string is what actually determines the answer.
+ * Normalizing here would collapse variants that resolve differently: "no-tion"
+ * and "notion" share a normalized form, but only "notion" matches
+ * NotionToolkit's docs slug.
+ */
 const readLookupCacheKey = (dataDir: string, toolkitId: string): string =>
-  `${dataDir}\0${normalizeToolkitId(toolkitId)}`;
+  `${dataDir}\0${toolkitId.toLowerCase()}`;
 
 const loadAllToolkitDataUncached = async (
   dataDir: string
@@ -273,11 +282,21 @@ export function readToolkitData(
     promise = readToolkitDataUncached(toolkitId, dataDir);
     readsByLookupKey.set(key, promise);
 
-    promise.catch(() => {
+    // Retain only lookups that found data. Concurrent callers still share the
+    // in-flight promise, but a resolved miss is dropped: a transient error
+    // must not poison the process, an absent toolkit must stay absent only
+    // until it is generated, and `/api/toolkit-data/[toolkitId]` accepts
+    // arbitrary ids — retaining every miss would grow this map without bound.
+    const forget = () => {
       if (readsByLookupKey.get(key) === promise) {
         readsByLookupKey.delete(key);
       }
-    });
+    };
+    promise.then((data) => {
+      if (!data) {
+        forget();
+      }
+    }, forget);
   }
   return promise;
 }
