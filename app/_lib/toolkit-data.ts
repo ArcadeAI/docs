@@ -104,11 +104,7 @@ export const readToolkitFile = async (
     );
   }
 
-  // Zod object schemas strip unknown keys from their parsed result. Return the
-  // original validated object so a newly added generator field is preserved by
-  // the app until the shared schema is updated, rather than silently deleting
-  // it from API responses or page data.
-  return parsed as ToolkitData;
+  return result.data;
 };
 
 /**

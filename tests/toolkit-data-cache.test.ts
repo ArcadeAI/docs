@@ -75,7 +75,7 @@ describe("readToolkitData against a clean fixture directory", () => {
     expect(data).toBeNull();
   });
 
-  test("development reads see regenerated files and preserve new fields", async () => {
+  test("development reads see regenerated files and materialize defaults", async () => {
     vi.stubEnv("NODE_ENV", "development");
 
     try {
@@ -87,15 +87,14 @@ describe("readToolkitData against a clean fixture directory", () => {
             readFileSync(join(dataDir, "validtoolkitone.json"), "utf8")
           ),
           label: "RegeneratedToolkit",
-          futureGeneratorField: "preserved",
         })
       );
 
       const data = await readToolkitData("ValidToolkitOne", { dataDir });
       expect(data?.label).toBe("RegeneratedToolkit");
-      expect(
-        (data as unknown as Record<string, unknown>).futureGeneratorField
-      ).toBe("preserved");
+      expect(data?.documentationChunks).toEqual([]);
+      expect(data?.customImports).toEqual([]);
+      expect(data?.subPages).toEqual([]);
     } finally {
       vi.unstubAllEnvs();
     }

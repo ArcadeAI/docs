@@ -222,10 +222,21 @@ describe("buildToolkitInfoList", () => {
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
 
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(2);
     expect(result[0].label).toBe("Gmail");
     expect(result[1].label).toBe("Slack");
-    expect(result[2].label).toBe("Unknown Toolkit");
+    expect(result.some((item) => item.label === "Unknown Toolkit")).toBe(false);
+  });
+
+  it("rejects an unrecognized category instead of routing it to others", () => {
+    createToolkitJson("unknowncategory", {
+      label: "Unknown Category",
+      metadata: { category: "weird" },
+    });
+
+    expect(() => buildToolkitInfoList(TEST_DATA_DIR)).toThrow(
+      'Unrecognized integration category "weird"'
+    );
   });
 
   it("should skip hidden toolkits", () => {
@@ -725,20 +736,14 @@ describe("generateMainMeta", () => {
     expect(developmentIndex).toBeLessThan(salesIndex);
   });
 
-  it("should include 'others' category when present", () => {
+  it("should omit the removed 'others' category", () => {
     const result = generateMainMeta(["productivity", "others"]);
-
-    expect(result).toContain("others: {");
-    expect(result).toContain('title: "Others"');
-  });
-
-  it("should place 'others' at the end", () => {
-    const result = generateMainMeta(["others", "productivity"]);
 
     const productivityIndex = result.indexOf("productivity:");
     const othersIndex = result.indexOf("others:");
 
-    expect(productivityIndex).toBeLessThan(othersIndex);
+    expect(productivityIndex).toBeGreaterThan(-1);
+    expect(othersIndex).toBe(-1);
   });
 
   it("should handle empty categories", () => {
