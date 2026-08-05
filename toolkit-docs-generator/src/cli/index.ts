@@ -885,7 +885,10 @@ program
   .option("--skip-examples", "Skip LLM example generation", false)
   .option("--skip-summary", "Skip LLM summary generation", false)
   .option("--no-verify-output", "Skip output verification")
-  .option("--custom-sections <file>", "Path to custom sections JSON")
+  .option(
+    "--custom-sections <path>",
+    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file"
+  )
   .option(
     "--resume",
     "Resume from previous run, skipping already-generated toolkits",
@@ -1953,7 +1956,10 @@ program
   .option("--skip-examples", "Skip LLM example generation", false)
   .option("--skip-summary", "Skip LLM summary generation", false)
   .option("--no-verify-output", "Skip output verification")
-  .option("--custom-sections <file>", "Path to custom sections JSON")
+  .option(
+    "--custom-sections <path>",
+    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file"
+  )
   .option(
     "--resume",
     "Resume from previous run, skipping already-generated toolkits",

@@ -1,16 +1,23 @@
 /**
  * Custom Sections File Source
  *
- * Loads custom documentation sections from a JSON file.
- * This file is produced by the one-time MDX extraction script.
+ * Loads hand-authored documentation sections that have no upstream source
+ * (documentation chunks, custom imports, sub-pages). Two layouts are
+ * supported:
+ *
+ * - A directory (e.g. `curation/`) of per-toolkit files, one file per
+ *   toolkit named `<toolkitId>.json`, each holding a single
+ *   `CustomSections` object. This is the layout the generator reads today;
+ *   one file per toolkit keeps prose edits to reviewable, single-toolkit
+ *   diffs.
+ * - A single JSON file that maps toolkit id to `CustomSections`. This is the
+ *   legacy shape produced by the one-time MDX extraction.
  */
-import { access, readFile } from "fs/promises";
+import { access, readdir, readFile, stat } from "fs/promises";
+import { basename, join } from "path";
 import { z } from "zod";
 import type { CustomSections } from "../types/index.js";
-import {
-  DocumentationChunkSchema,
-  ToolkitSubPageSchema,
-} from "../types/index.js";
+import { CustomSectionsSchema } from "../types/index.js";
 import { normalizeId } from "../utils/fp.js";
 import type { ICustomSectionsSource } from "./interfaces.js";
 
@@ -18,32 +25,25 @@ import type { ICustomSectionsSource } from "./interfaces.js";
 // File Schema
 // ============================================================================
 
-const CustomSectionsFileSchema = z.record(
-  z.string(),
-  z.object({
-    documentationChunks: z.array(DocumentationChunkSchema).default([]),
-    customImports: z.array(z.string()).default([]),
-    subPages: z.array(ToolkitSubPageSchema).default([]),
-    toolChunks: z
-      .record(z.string(), z.array(DocumentationChunkSchema))
-      .default({}),
-  })
-);
+/** A single JSON file mapping toolkit id -> custom sections (legacy layout). */
+const CustomSectionsFileSchema = z.record(z.string(), CustomSectionsSchema);
 
-type CustomSectionsFile = z.infer<typeof CustomSectionsFileSchema>;
+type CustomSectionsData = Record<string, CustomSections>;
 
 // ============================================================================
 // Custom Sections File Source
 // ============================================================================
 
 export interface CustomSectionsFileConfig {
+  /** Path to either a directory of per-toolkit files or a single JSON file. */
   filePath: string;
 }
 
-const parseCustomSectionsFile = (
+const parseJsonWithSchema = <T>(
   content: string,
-  filePath: string
-): CustomSectionsFile => {
+  filePath: string,
+  schema: z.ZodType<T>
+): T => {
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(content) as unknown;
@@ -54,7 +54,7 @@ const parseCustomSectionsFile = (
     );
   }
 
-  const parsed = CustomSectionsFileSchema.safeParse(parsedJson);
+  const parsed = schema.safeParse(parsedJson);
   if (!parsed.success) {
     throw new Error(
       `Custom sections file has invalid schema (${filePath}): ${parsed.error.message}`
@@ -65,29 +65,54 @@ const parseCustomSectionsFile = (
 };
 
 /**
- * Source that loads custom documentation sections from a JSON file
+ * Source that loads custom documentation sections from disk.
  */
 export class CustomSectionsFileSource implements ICustomSectionsSource {
   private readonly filePath: string;
-  private cachedData: CustomSectionsFile | null = null;
+  private cachedData: CustomSectionsData | null = null;
 
   constructor(config: CustomSectionsFileConfig) {
     this.filePath = config.filePath;
   }
 
-  private async loadFile(): Promise<CustomSectionsFile> {
+  private async loadDirectory(dirPath: string): Promise<CustomSectionsData> {
+    const entries = (await readdir(dirPath)).filter((name) =>
+      name.endsWith(".json")
+    );
+
+    const data: CustomSectionsData = {};
+    for (const entry of entries) {
+      const entryPath = join(dirPath, entry);
+      const content = await readFile(entryPath, "utf-8");
+      const toolkitId = basename(entry, ".json");
+      data[toolkitId] = parseJsonWithSchema(
+        content,
+        entryPath,
+        CustomSectionsSchema
+      );
+    }
+    return data;
+  }
+
+  private async loadData(): Promise<CustomSectionsData> {
     if (this.cachedData !== null) {
       return this.cachedData;
     }
 
     try {
       await access(this.filePath);
-      const content = await readFile(this.filePath, "utf-8");
-      this.cachedData = parseCustomSectionsFile(content, this.filePath);
+      const stats = await stat(this.filePath);
+      this.cachedData = stats.isDirectory()
+        ? await this.loadDirectory(this.filePath)
+        : parseJsonWithSchema(
+            await readFile(this.filePath, "utf-8"),
+            this.filePath,
+            CustomSectionsFileSchema
+          );
       return this.cachedData;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        // File doesn't exist - return empty data
+        // Path doesn't exist - return empty data
         this.cachedData = {};
         return this.cachedData;
       }
@@ -96,7 +121,7 @@ export class CustomSectionsFileSource implements ICustomSectionsSource {
   }
 
   async getCustomSections(toolkitId: string): Promise<CustomSections | null> {
-    const data = await this.loadFile();
+    const data = await this.loadData();
 
     // Try exact match
     if (data[toolkitId]) {
@@ -115,8 +140,7 @@ export class CustomSectionsFileSource implements ICustomSectionsSource {
   async getAllCustomSections(): Promise<
     Readonly<Record<string, CustomSections>>
   > {
-    const data = await this.loadFile();
-    return data;
+    return this.loadData();
   }
 }
 
