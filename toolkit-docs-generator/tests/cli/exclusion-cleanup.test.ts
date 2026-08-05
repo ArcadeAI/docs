@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { cleanupExcludedToolkitOutput } from "../../src/cli/exclusion-cleanup.js";
+import { cleanupExcludedToolkitOutput } from "../../src/cli/exclusion-cleanup";
 
 let tmpDir: string;
 

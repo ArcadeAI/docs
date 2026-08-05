@@ -6,8 +6,8 @@ import { describe, expect, it } from "vitest";
 import {
   createJsonGenerator,
   verifyOutputDir,
-} from "../../src/generator/index.js";
-import type { MergedToolkit } from "../../src/types/index.js";
+} from "../../src/generator/index";
+import type { MergedToolkit } from "../../src/types/index";
 
 const loadFixture = async (fileName: string): Promise<MergedToolkit> => {
   const fixturesDir = new URL("../fixtures/", import.meta.url);

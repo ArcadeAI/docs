@@ -5,16 +5,16 @@
  * into the final MergedToolkit format.
  */
 
-import type { ISecretEditGenerator } from "../llm/secret-edit-generator.js";
+import type { ISecretEditGenerator } from "../llm/secret-edit-generator";
 import {
   isApiSuffixedToolkitId,
   normalizeToolkitId,
-} from "../shared/toolkit-primitives.js";
-import type { ICustomSectionsSource } from "../sources/interfaces.js";
+} from "../shared/toolkit-primitives";
+import type { ICustomSectionsSource } from "../sources/interfaces";
 import type {
   IToolkitDataSource,
   ToolkitData,
-} from "../sources/toolkit-data-source.js";
+} from "../sources/toolkit-data-source";
 import type {
   CustomSections,
   DocumentationChunk,
@@ -26,13 +26,13 @@ import type {
   ToolDefinition,
   ToolkitAuthType,
   ToolkitMetadata,
-} from "../types/index.js";
-import { mapWithConcurrency } from "../utils/concurrency.js";
-import { extractVersion } from "../utils/fp.js";
+} from "../types/index";
+import { mapWithConcurrency } from "../utils/concurrency";
+import { extractVersion } from "../utils/fp";
 import {
   detectMetadataChanges,
   formatFreshnessWarnings,
-} from "./metadata-freshness.js";
+} from "./metadata-freshness";
 import {
   collectToolkitSecrets,
   detectSecretCoherenceIssues,
@@ -40,7 +40,7 @@ import {
   hasCoherenceIssues,
   type SecretCoherenceIssues,
   type StaleSecretEditTarget,
-} from "./secret-coherence.js";
+} from "./secret-coherence";
 
 // ============================================================================
 // Merger Configuration

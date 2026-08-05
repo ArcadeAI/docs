@@ -4,8 +4,8 @@ import {
   ArcadeApiSource,
   createArcadeApiSource,
   createProductionArcadeApiSource,
-} from "../../src/sources/arcade-api.js";
-import type { ArcadeToolsResponse } from "../../src/sources/arcade-api-types.js";
+} from "../../src/sources/arcade-api";
+import type { ArcadeToolsResponse } from "../../src/sources/arcade-api-types";
 
 // ============================================================================
 // Test Fixtures

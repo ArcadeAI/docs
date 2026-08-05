@@ -4,10 +4,10 @@ import {
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
-} from "../../src/cli/generate-flow.js";
-import type { ChangeDetectionResult } from "../../src/diff/index.js";
-import { assertRequireCompleteMetadata } from "../../src/merger/data-merger.js";
-import type { ToolkitData } from "../../src/sources/toolkit-data-source.js";
+} from "../../src/cli/generate-flow";
+import type { ChangeDetectionResult } from "../../src/diff/index";
+import { assertRequireCompleteMetadata } from "../../src/merger/data-merger";
+import type { ToolkitData } from "../../src/sources/toolkit-data-source";
 
 // ── Minimal ChangeDetectionResult builder ─────────────────────────────────────
 

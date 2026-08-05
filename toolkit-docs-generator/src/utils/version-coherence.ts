@@ -1,5 +1,5 @@
-import type { ToolDefinition } from "../types/index.js";
-import { extractVersion } from "./fp.js";
+import type { ToolDefinition } from "../types/index";
+import { extractVersion } from "./fp";
 
 interface ParsedSemver {
   readonly core: readonly number[];

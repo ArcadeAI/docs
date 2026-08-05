@@ -5,7 +5,7 @@
  * the merge logic works correctly.
  */
 import { describe, expect, it, vi } from "vitest";
-import type { ISecretEditGenerator } from "../../src/llm/secret-edit-generator.js";
+import type { ISecretEditGenerator } from "../../src/llm/secret-edit-generator";
 import {
   computeAllScopes,
   DataMerger,
@@ -15,25 +15,25 @@ import {
   mergeToolkit,
   type ToolExampleGenerator,
   type ToolkitSummaryGenerator,
-} from "../../src/merger/data-merger.js";
+} from "../../src/merger/data-merger";
 import {
   EmptyCustomSectionsSource,
   InMemoryCustomSectionsSource,
   InMemoryMetadataSource,
   InMemoryToolDataSource,
-} from "../../src/sources/in-memory.js";
-import type { ICustomSectionsSource } from "../../src/sources/interfaces.js";
+} from "../../src/sources/in-memory";
+import type { ICustomSectionsSource } from "../../src/sources/interfaces";
 import {
   createCombinedToolkitDataSource,
   type IToolkitDataSource,
   type ToolkitData,
-} from "../../src/sources/toolkit-data-source.js";
+} from "../../src/sources/toolkit-data-source";
 import type {
   CustomSections,
   ToolDefinition,
   ToolkitMetadata,
-} from "../../src/types/index.js";
-import { extractVersion } from "../../src/utils/index.js";
+} from "../../src/types/index";
+import { extractVersion } from "../../src/utils/index";
 
 // ============================================================================
 // Test Fixtures - Realistic data matching production schema

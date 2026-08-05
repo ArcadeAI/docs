@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { LlmClient } from "../../src/llm/client.js";
-import { LlmToolkitSummaryGenerator } from "../../src/llm/toolkit-summary-generator.js";
-import type { MergedToolkit } from "../../src/types/index.js";
+import type { LlmClient } from "../../src/llm/client";
+import { LlmToolkitSummaryGenerator } from "../../src/llm/toolkit-summary-generator";
+import type { MergedToolkit } from "../../src/types/index";
 
 const createToolkit = (
   overrides: Partial<MergedToolkit> = {}

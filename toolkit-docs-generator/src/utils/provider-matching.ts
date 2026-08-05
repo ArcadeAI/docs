@@ -10,7 +10,7 @@
  * toolkit metadata IDs.
  */
 
-import type { ProviderVersion } from "../types/index.js";
+import type { ProviderVersion } from "../types/index";
 
 const PROVIDER_LOOKUP_KEY_REGEX = /[^a-z0-9]/g;
 

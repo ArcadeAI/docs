@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params.js";
+import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params";
 import {
   buildToolkitInfoList,
   generateCategoryMeta,
@@ -23,7 +23,7 @@ import {
   setToolkitsForTesting,
   syncToolkitSidebar,
   type ToolkitInfo,
-} from "../../scripts/sync-toolkit-sidebar.js";
+} from "../../scripts/sync-toolkit-sidebar";
 
 setToolkitsForTesting([
   { id: "Gmail", label: "Gmail", category: "productivity" },

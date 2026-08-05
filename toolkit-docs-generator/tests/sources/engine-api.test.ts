@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { EngineApiSource } from "../../src/sources/engine-api.js";
+import { EngineApiSource } from "../../src/sources/engine-api";
 
 type ToolMetadataItem = {
   fully_qualified_name: string;

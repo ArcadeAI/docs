@@ -7,20 +7,20 @@
  */
 
 import { join } from "path";
-import { isApiSuffixedToolkitId } from "../shared/toolkit-primitives.js";
-import type { ToolDefinition, ToolkitMetadata } from "../types/index.js";
-import { filterToolsByHighestVersion } from "../utils/version-coherence.js";
+import { isApiSuffixedToolkitId } from "../shared/toolkit-primitives";
+import type { ToolDefinition, ToolkitMetadata } from "../types/index";
+import { filterToolsByHighestVersion } from "../utils/version-coherence";
 import {
   type ArcadeApiSourceConfig,
   createArcadeApiSource,
-} from "./arcade-api.js";
+} from "./arcade-api";
 import {
   createEngineApiSource,
   type EngineApiSourceConfig,
-} from "./engine-api.js";
-import type { IMetadataSource, IToolDataSource } from "./internal.js";
-import { createMockEngineApiSource } from "./mock-engine-api.js";
-import { createMockMetadataSource } from "./mock-metadata.js";
+} from "./engine-api";
+import type { IMetadataSource, IToolDataSource } from "./internal";
+import { createMockEngineApiSource } from "./mock-engine-api";
+import { createMockMetadataSource } from "./mock-metadata";
 
 // ============================================================================
 // Unified Toolkit Data Interface

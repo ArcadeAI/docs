@@ -14,7 +14,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.js";
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir";
 
 const TOOLKITS_DIR = resolveToolkitDataDir();
 

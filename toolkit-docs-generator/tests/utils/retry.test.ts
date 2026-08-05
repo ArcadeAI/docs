@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { createRetryWrapper, withRetry } from "../../src/utils/retry.js";
+import { createRetryWrapper, withRetry } from "../../src/utils/retry";
 
 describe("withRetry", () => {
   it("should succeed on first attempt if no error", async () => {

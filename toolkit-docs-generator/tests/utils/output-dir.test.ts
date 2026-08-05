@@ -6,7 +6,7 @@ import {
   clearSafeOutputDir,
   resolveDefaultOutputDir,
   resolveSafeOutputDir,
-} from "../../src/utils/output-dir.js";
+} from "../../src/utils/output-dir";
 
 type ResolveOptions = { repoRoot?: string; homeDir?: string };
 

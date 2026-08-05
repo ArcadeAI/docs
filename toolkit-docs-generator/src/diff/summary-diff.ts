@@ -3,8 +3,8 @@
  *
  * Compares tool metadata summaries with previous output to detect version changes.
  */
-import type { MergedToolkit } from "../types/index.js";
-import { normalizeId } from "../utils/fp.js";
+import type { MergedToolkit } from "../types/index";
+import { normalizeId } from "../utils/fp";
 
 export type SummaryToolkit = {
   name: string;

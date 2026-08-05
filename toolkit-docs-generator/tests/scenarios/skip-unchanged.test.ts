@@ -9,9 +9,9 @@ import {
   detectChanges,
   getChangedToolkitIds,
   hasChanges,
-} from "../../src/diff/index.js";
-import type { CurrentToolkitDiffInput } from "../../src/diff/toolkit-diff.js";
-import type { MergedToolkit, ToolDefinition } from "../../src/types/index.js";
+} from "../../src/diff/index";
+import type { CurrentToolkitDiffInput } from "../../src/diff/toolkit-diff";
+import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
 
 const createTool = (
   overrides: Partial<ToolDefinition> = {}

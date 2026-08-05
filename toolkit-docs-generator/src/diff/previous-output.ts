@@ -5,7 +5,7 @@ import {
   MergedToolkitSchema,
   type ToolDefinition,
   ToolDefinitionSchema,
-} from "../types/index.js";
+} from "../types/index";
 
 const DEFAULT_PREVIOUS_TOOLKIT_METADATA = {
   category: "development" as const,

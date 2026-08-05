@@ -28,16 +28,16 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
-import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.js";
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir";
 import {
   getToolkitSlug,
   INTEGRATION_CATEGORIES,
   isApiSuffixedToolkitId,
-} from "../src/shared/toolkit-primitives.js";
+} from "../src/shared/toolkit-primitives";
 import type {
   MergedToolkit,
   MergedToolkitMetadata,
-} from "../src/shared/toolkit-schemas.js";
+} from "../src/shared/toolkit-schemas";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

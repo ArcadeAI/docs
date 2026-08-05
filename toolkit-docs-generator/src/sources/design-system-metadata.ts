@@ -8,10 +8,10 @@
  */
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import { z } from "zod";
-import { normalizeToolkitId } from "../shared/toolkit-primitives.js";
-import type { ToolkitMetadata } from "../types/index.js";
-import { ToolkitMetadataSchema } from "../types/index.js";
-import type { IMetadataSource } from "./internal.js";
+import { normalizeToolkitId } from "../shared/toolkit-primitives";
+import type { ToolkitMetadata } from "../types/index";
+import { ToolkitMetadataSchema } from "../types/index";
+import type { IMetadataSource } from "./internal";
 
 // ============================================================================
 // Types

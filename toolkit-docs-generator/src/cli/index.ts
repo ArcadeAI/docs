@@ -22,13 +22,13 @@ import {
   formatDetailedChanges,
   getChangedToolkitIds,
   hasChanges,
-} from "../diff/index.js";
-import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
+} from "../diff/index";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output";
 import {
   createJsonGenerator,
   type VerificationProgress,
   verifyOutputDir,
-} from "../generator/index.js";
+} from "../generator/index";
 import {
   createLlmClient,
   type LlmClient,
@@ -36,17 +36,17 @@ import {
   LlmSecretEditGenerator,
   LlmToolExampleGenerator,
   LlmToolkitSummaryGenerator,
-} from "../llm/index.js";
-import type { MergeResult } from "../merger/data-merger.js";
+} from "../llm/index";
+import type { MergeResult } from "../merger/data-merger";
 import {
   assertRequireCompleteMetadata,
   createDataMerger,
-} from "../merger/data-merger.js";
-import { createCustomSectionsFileSource } from "../sources/custom-sections-file.js";
-import { createDesignSystemMetadataSource } from "../sources/design-system-metadata.js";
-import { createEmptyCustomSectionsSource } from "../sources/in-memory.js";
-import { createMockMetadataSource } from "../sources/mock-metadata.js";
-import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver.js";
+} from "../merger/data-merger";
+import { createCustomSectionsFileSource } from "../sources/custom-sections-file";
+import { createDesignSystemMetadataSource } from "../sources/design-system-metadata";
+import { createEmptyCustomSectionsSource } from "../sources/in-memory";
+import { createMockMetadataSource } from "../sources/mock-metadata";
+import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
 import {
   createArcadeToolkitDataSource,
   createCachedToolkitDataSource,
@@ -54,36 +54,36 @@ import {
   createMockToolkitDataSource,
   type IToolkitDataSource,
   type ToolkitData,
-} from "../sources/toolkit-data-source.js";
+} from "../sources/toolkit-data-source";
 import {
   type MergedToolkit,
   type ProviderVersion,
   ProviderVersionSchema,
-} from "../types/index.js";
-import { readExclusionList } from "../utils/exclusion-list.js";
-import { readIgnoreList } from "../utils/ignore-list.js";
+} from "../types/index";
+import { readExclusionList } from "../utils/exclusion-list";
+import { readIgnoreList } from "../utils/ignore-list";
 import {
   clearSafeOutputDir,
   resolveDefaultOutputDir,
-} from "../utils/output-dir.js";
+} from "../utils/output-dir";
 import {
   createProgressTracker,
   formatToolkitComplete,
-} from "../utils/progress.js";
-import { resolveProviderIdsFromMetadata } from "../utils/provider-matching.js";
+} from "../utils/progress";
+import { resolveProviderIdsFromMetadata } from "../utils/provider-matching";
 import {
   appendLogEntry,
   readFailedToolsReport,
   writeFailedToolsReport,
-} from "../utils/run-logs.js";
-import { type ApiSource, resolveApiSource } from "./api-source.js";
-import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
+} from "../utils/run-logs";
+import { type ApiSource, resolveApiSource } from "./api-source";
+import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup";
 import {
   assertSafeCurrentToolkitSnapshot,
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
-} from "./generate-flow.js";
+} from "./generate-flow";
 
 const program = new Command();
 
@@ -2532,7 +2532,7 @@ program
   .description("Validate a generated JSON file against the schema")
   .action(async (file: string) => {
     const { readFile } = await import("fs/promises");
-    const { MergedToolkitSchema } = await import("../types/index.js");
+    const { MergedToolkitSchema } = await import("../types/index");
 
     try {
       const content = await readFile(file, "utf-8");

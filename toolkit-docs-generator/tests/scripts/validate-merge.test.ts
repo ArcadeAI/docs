@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   buildValidationOutputLines,
   validateMergedCustomSections,
-} from "../../scripts/validate-merge.js";
+} from "../../scripts/validate-merge";
 
 const JSON_INDENT_SPACES = 2;
 const ZERO = 0;

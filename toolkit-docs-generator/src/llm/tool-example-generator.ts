@@ -1,15 +1,15 @@
 import type {
   ToolExampleGenerator,
   ToolExampleResult,
-} from "../merger/data-merger.js";
+} from "../merger/data-merger";
 import {
   type ExampleParameterValue,
   type SecretType,
   SecretTypeSchema,
   type ToolDefinition,
   type ToolSecret,
-} from "../types/index.js";
-import type { LlmClient } from "./client.js";
+} from "../types/index";
+import type { LlmClient } from "./client";
 
 export interface LlmToolExampleGeneratorConfig {
   readonly client: LlmClient;
