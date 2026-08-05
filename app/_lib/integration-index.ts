@@ -1,4 +1,5 @@
-import { getToolkitSlug, type ToolkitWithDocsLink } from "./toolkit-slug";
+import { getToolkitSlug } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import type { ToolkitWithDocsLink } from "./toolkit-slug";
 
 const INTEGRATIONS_BASE = "/en/resources/integrations";
 
@@ -11,9 +12,12 @@ export function toIntegrationLink(toolkit: {
   id: string;
   docsLink?: string | null;
   category?: string | null;
-}): string {
+}): string | null {
   const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
-  const category = toolkit.category ?? "others";
+  const category = toolkit.category;
+  if (!category) {
+    return null;
+  }
   return `${INTEGRATIONS_BASE}/${category}/${slug}`;
 }
 
@@ -48,18 +52,20 @@ export function resolveIndexToolkits(
     }
 
     const link = toIntegrationLink(toolkit);
-    const hasPage = validLinks.has(link);
+    const hasPage = link !== null && validLinks.has(link);
 
     // A bare duplicate of a real "-api" toolkit: drop it; the real card stays.
-    if (!hasPage && validLinks.has(`${link}-api`)) {
+    if (link && !hasPage && validLinks.has(`${link}-api`)) {
       continue;
     }
 
     // Collapse multiple catalog entries that point at the same URL.
-    if (seen.has(link)) {
-      continue;
+    if (link) {
+      if (seen.has(link)) {
+        continue;
+      }
+      seen.add(link);
     }
-    seen.add(link);
     resolved.push({ ...toolkit, hasPage });
   }
 

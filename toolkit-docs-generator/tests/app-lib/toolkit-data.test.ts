@@ -56,6 +56,7 @@ describe("toolkit data loader", () => {
               label: "GitHub",
               version: "1.0.0",
               category: "development",
+              type: "arcade",
               toolCount: 3,
               authType: "oauth2",
             },
@@ -80,10 +81,20 @@ describe("toolkit data loader", () => {
       const toolkitData = {
         id: "PosthogApi",
         label: "PostHog API",
+        version: "1.0.0",
+        description: null,
         tools: [],
+        auth: null,
         metadata: {
+          category: "development",
+          iconUrl: "https://design-system.arcade.dev/icons/posthog.svg",
+          isBYOC: false,
+          isPro: false,
+          type: "arcade_starter",
           docsLink:
             "https://docs.arcade.dev/en/mcp-servers/development/posthog-api",
+          isComingSoon: false,
+          isHidden: false,
         },
       };
       await writeFile(

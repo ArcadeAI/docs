@@ -1,14 +1,13 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { MetadataRoute } from "next";
+import { resolveToolkitDataDir } from "@/toolkit-docs-generator/src/shared/toolkit-data-dir";
 import { listValidIntegrationLinks } from "./_lib/toolkit-static-params";
 
 const SITE_URL = process.env.SITE_URL ?? "https://docs.arcade.dev";
 const NORMALIZED_SITE_URL = SITE_URL.replace(/\/+$/, "");
 const APP_DIR = path.join(process.cwd(), "app");
-const TOOLKIT_DATA_DIR =
-  process.env.TOOLKIT_DATA_DIR ??
-  path.join(process.cwd(), "toolkit-docs-generator", "data", "toolkits");
+const TOOLKIT_DATA_DIR = resolveToolkitDataDir();
 const SKIP_DIRS = new Set(["_meta", "_api", "_redirects", "api"]);
 const INDEX_SUFFIX_REGEX = /\/index$/;
 let cachedRoutes: Promise<MetadataRoute.Sitemap> | null = null;

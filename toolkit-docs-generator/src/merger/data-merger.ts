@@ -6,6 +6,10 @@
  */
 
 import type { ISecretEditGenerator } from "../llm/secret-edit-generator.js";
+import {
+  isApiSuffixedToolkitId,
+  normalizeToolkitId,
+} from "../shared/toolkit-primitives.js";
 import type { ICustomSectionsSource } from "../sources/interfaces.js";
 import type {
   IToolkitDataSource,
@@ -366,13 +370,9 @@ export const getProviderId = (
 /**
  * Create default metadata for toolkits not found in Design System
  */
-const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]/g;
 const TOOLKIT_ID_ACRONYM_BOUNDARY = /([A-Z]+)([A-Z][a-z])/g;
 const TOOLKIT_ID_WORD_BOUNDARY = /([a-z0-9])([A-Z])/g;
 const TOOLKIT_DESCRIPTION_LABEL_PREFIX = "Arcade.dev LLM tools for ";
-
-const normalizeToolkitId = (toolkitId: string): string =>
-  toolkitId.toLowerCase().replace(TOOLKIT_ID_NORMALIZER, "");
 
 const humanizeToolkitId = (toolkitId: string): string =>
   toolkitId
@@ -415,9 +415,6 @@ const resolveToolkitLabel = (options: {
   extractLabelFromDescription(options.description) ??
   humanizeToolkitId(options.toolkitId);
 
-const isStarterToolkitId = (toolkitId: string): boolean =>
-  normalizeToolkitId(toolkitId).endsWith("api");
-
 const getDefaultIconId = (toolkitId: string): string => {
   const normalized = normalizeToolkitId(toolkitId);
   // Prefer provider icons for "*Api" toolkits when possible.
@@ -436,7 +433,7 @@ const applyToolkitTypeOverrides = (
   toolkitId: string,
   metadata: MergedToolkitMetadata
 ): MergedToolkitMetadata => {
-  if (isStarterToolkitId(toolkitId) && metadata.type === "arcade") {
+  if (isApiSuffixedToolkitId(toolkitId) && metadata.type === "arcade") {
     return { ...metadata, type: "arcade_starter" };
   }
   return metadata;
@@ -1008,7 +1005,7 @@ export class DataMerger {
           iconUrl: "",
           isBYOC: false,
           isPro: false,
-          type: isStarterToolkitId(toolkitId) ? "arcade_starter" : "arcade",
+          type: isApiSuffixedToolkitId(toolkitId) ? "arcade_starter" : "arcade",
           docsLink: "",
           isComingSoon: false,
           isHidden: false,

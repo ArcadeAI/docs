@@ -21,7 +21,7 @@ type ToolCardProps = {
   name: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
   iconUrl?: string;
-  link: string;
+  link?: string;
   type: ToolkitType;
   isComingSoon?: boolean;
   isByoc?: boolean;
@@ -152,7 +152,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
 
   return (
     <>
-      {isComingSoon ? (
+      {isComingSoon || !link ? (
         <button
           aria-label={`${toolName} - Coming Soon`}
           className="w-full cursor-pointer text-left"

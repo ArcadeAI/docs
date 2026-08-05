@@ -56,7 +56,7 @@ The docs site consumes the generated JSON directly:
 
 ## Sidebar sync step (required for navigation)
 
-`.github/scripts/sync-toolkit-sidebar.ts` keeps sidebar navigation aligned with generated JSON:
+`toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts` keeps sidebar navigation aligned with generated JSON:
 
 - Reads `toolkit-docs-generator/data/toolkits` for available toolkits.
 - Uses the design system for category and label, with JSON label fallback.
@@ -173,7 +173,7 @@ pnpm dlx tsx src/cli/index.ts generate \
 Sync sidebar navigation locally:
 
 ```bash
-pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
+pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
 ```
 
 ## Ignoring toolkits

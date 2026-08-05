@@ -1,11 +1,22 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { cache } from "react";
+import type { z } from "zod";
 import type {
   ToolkitData,
   ToolkitSummary,
   ToolSummary,
 } from "@/app/_components/toolkit-docs/types";
-import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
+import { resolveToolkitDataDir } from "@/toolkit-docs-generator/src/shared/toolkit-data-dir";
+import {
+  getToolkitSlug,
+  normalizeToolkitId,
+} from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import {
+  MergedToolkitSchema,
+  type ToolkitIndexEntrySchema,
+  ToolkitIndexSchema,
+} from "@/toolkit-docs-generator/src/shared/toolkit-schemas";
 
 /**
  * Strip each tool's heavy fields (parameters, output, codeExample) so the
@@ -35,131 +46,293 @@ export function toToolkitSummary(data: ToolkitData): ToolkitSummary {
   };
 }
 
-export type ToolkitIndexEntry = {
-  id: string;
-  label: string;
-  version: string;
-  category: string;
-  type?: string;
-  toolCount: number;
-  authType: string;
-};
-
-export type ToolkitIndex = {
-  generatedAt: string;
-  version: string;
-  toolkits: ToolkitIndexEntry[];
-};
+export type ToolkitIndexEntry = z.infer<typeof ToolkitIndexEntrySchema>;
+export type ToolkitIndex = z.infer<typeof ToolkitIndexSchema>;
 
 type ToolkitDataOptions = {
   dataDir?: string;
 };
 
-const DEFAULT_DATA_DIR = join(
-  process.cwd(),
-  "toolkit-docs-generator",
-  "data",
-  "toolkits"
-);
-
 const resolveDataDir = (options?: ToolkitDataOptions): string =>
-  options?.dataDir ?? process.env.TOOLKIT_DATA_DIR ?? DEFAULT_DATA_DIR;
+  resolveToolkitDataDir(options?.dataDir);
 
-const isValidToolkitData = (parsed: unknown): parsed is ToolkitData =>
-  typeof parsed === "object" &&
-  parsed !== null &&
-  "id" in parsed &&
-  ("label" in parsed || "name" in parsed) &&
-  "metadata" in parsed &&
-  typeof (parsed as Record<string, unknown>).metadata === "object" &&
-  (parsed as Record<string, unknown>).metadata !== null;
+const isEnoent = (error: unknown): boolean =>
+  error instanceof Error && (error as NodeJS.ErrnoException).code === "ENOENT";
 
-const readToolkitFile = async (
+const describeError = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
+/**
+ * Read and validate a single merged-toolkit JSON file.
+ *
+ * A missing file is a legitimate, quiet outcome (`null`) — not every toolkit
+ * has generated docs yet. Anything else wrong with the file — unreadable,
+ * not valid JSON, or valid JSON that doesn't match `MergedToolkitSchema` — is
+ * corruption, not absence, and throws with the file path and the underlying
+ * error so a bad nightly-generated file fails `next build` loudly instead of
+ * quietly dropping the toolkit from the site. Mirrors the read/parse/schema
+ * split in toolkit-docs-generator/src/generator/output-verifier.ts.
+ */
+export const readToolkitFile = async (
   filePath: string
 ): Promise<ToolkitData | null> => {
+  let content: string;
   try {
-    const content = await readFile(filePath, "utf-8");
-    const parsed: unknown = JSON.parse(content);
-    return isValidToolkitData(parsed) ? (parsed as ToolkitData) : null;
-  } catch {
-    return null;
+    content = await readFile(filePath, "utf-8");
+  } catch (error) {
+    if (isEnoent(error)) {
+      return null;
+    }
+    throw new Error(
+      `Failed to read toolkit file ${filePath}: ${describeError(error)}`
+    );
   }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch (error) {
+    throw new Error(
+      `Invalid JSON in toolkit file ${filePath}: ${describeError(error)}`
+    );
+  }
+
+  const result = MergedToolkitSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error(
+      `Invalid toolkit schema in ${filePath}: ${result.error.message}`
+    );
+  }
+
+  return result.data;
 };
 
-const findToolkitDataBySlug = async (
-  dataDir: string,
-  slug: string
-): Promise<ToolkitData | null> => {
-  const entries = await readdir(dataDir);
-  const slugKey = slug.toLowerCase();
+/**
+ * Every toolkit's data, indexed two ways: by the normalized id its filename
+ * is derived from (the common case — an id-shaped lookup), and by its docs
+ * slug (a hand-authored `docsLink` can diverge from the id, e.g. a route
+ * reached by "posthog-api" for a file whose id normalizes differently).
+ * `readToolkitData` below tries the id map first, then the slug map, mirroring
+ * the direct-file-then-scan order the old implementation used.
+ */
+type ToolkitDataMap = {
+  byNormalizedId: Map<string, ToolkitData>;
+  bySlug: Map<string, ToolkitData>;
+};
+
+/**
+ * The production data directory is immutable for the lifetime of a process,
+ * so retain one successful load for it. Explicit fixture/override directories
+ * are intentionally not retained here: callers can point them at arbitrary
+ * paths, and keeping every path would turn test and dev runs into an
+ * unbounded process-global cache.
+ */
+const loadsByDataDir = new Map<string, Promise<ToolkitDataMap>>();
+/**
+ * One in-flight/resolved read per (dataDir, lookup id) in production.
+ * `readToolkitData`'s direct-file fast path re-reads and re-parses on every
+ * call without this — `loadAllToolkitData` only caches the directory scan
+ * fallback, so generateMetadata + Page for the same toolkit would each pay
+ * for a full file read during static generation.
+ *
+ * Skipped in development (generator can refresh JSON while `next dev` runs)
+ * and when callers pass an explicit `dataDir` (tests use scratch fixtures
+ * and expect fresh reads after mutating files).
+ */
+const readsByLookupKey = new Map<string, Promise<ToolkitData | null>>();
+const DEFAULT_DATA_DIR = resolveToolkitDataDir();
+
+/**
+ * Keyed on the lowercased id exactly as given, NOT on its normalized form.
+ * `readToolkitDataUncached` resolves a lookup from both forms — the normalized
+ * id for the direct file and `byNormalizedId`, the lowercased raw string for
+ * `bySlug` — so the raw string is what actually determines the answer.
+ * Normalizing here would collapse variants that resolve differently: "no-tion"
+ * and "notion" share a normalized form, but only "notion" matches
+ * NotionToolkit's docs slug.
+ */
+const readLookupCacheKey = (dataDir: string, toolkitId: string): string =>
+  `${dataDir}\0${toolkitId.toLowerCase()}`;
+
+const loadAllToolkitDataUncached = async (
+  dataDir: string
+): Promise<ToolkitDataMap> => {
+  let entries: string[];
+  try {
+    entries = await readdir(dataDir);
+  } catch (error) {
+    throw new Error(
+      `Failed to read toolkit data directory ${dataDir}: ${describeError(error)}`
+    );
+  }
+
+  const byNormalizedId = new Map<string, ToolkitData>();
+  const bySlug = new Map<string, ToolkitData>();
 
   for (const entry of entries) {
     if (!entry.endsWith(".json") || entry === "index.json") {
       continue;
     }
 
+    // Throws on a corrupt file (see readToolkitFile) — a malformed file here
+    // is never legitimately "absent", so it fails the build/request loudly
+    // rather than being dropped from the map.
     const data = await readToolkitFile(join(dataDir, entry));
     if (!data) {
       continue;
     }
 
-    const candidateSlug = getToolkitSlug({
+    byNormalizedId.set(normalizeToolkitId(data.id), data);
+    const slug = getToolkitSlug({
       id: data.id,
       docsLink: data.metadata?.docsLink,
-    }).toLowerCase();
-
-    if (candidateSlug === slugKey) {
-      return data;
-    }
+    });
+    bySlug.set(slug.toLowerCase(), data);
   }
 
-  return null;
+  return { byNormalizedId, bySlug };
 };
 
-export const readToolkitData = async (
+/**
+ * Load every toolkit's data from `dataDir` into one shared map, read once per
+ * process rather than once per caller.
+ *
+ * Wrapped in React's `cache()` so, when a live cache scope exists (build-time
+ * static generation, a Route Handler, a Server Component render), concurrent
+ * callers within that same scope share one in-flight read rather than each
+ * independently reading the directory. `cache()` is a no-op outside a cache
+ * scope (Vitest, plain scripts) — see its implementation in
+ * react/cjs/react.react-server.development.js — so `loadsByDataDir` is the
+ * mechanism that actually guarantees one read per directory everywhere, with
+ * `cache()` as the layer that also dedupes concurrent build-time work.
+ */
+export const loadAllToolkitData = cache(
+  async (dataDir: string): Promise<ToolkitDataMap> => {
+    if (dataDir !== DEFAULT_DATA_DIR) {
+      return await loadAllToolkitDataUncached(dataDir);
+    }
+
+    let promise = loadsByDataDir.get(dataDir);
+    if (!promise) {
+      promise = loadAllToolkitDataUncached(dataDir);
+      loadsByDataDir.set(dataDir, promise);
+
+      // A transient read or deployment error must not poison the process
+      // forever. Keep successful loads warm, but allow the next lookup to
+      // retry after a failed load.
+      promise.catch(() => {
+        if (loadsByDataDir.get(dataDir) === promise) {
+          loadsByDataDir.delete(dataDir);
+        }
+      });
+    }
+    return await promise;
+  }
+);
+
+const readToolkitDataUncached = async (
   toolkitId: string,
-  options?: ToolkitDataOptions
+  dataDir: string
 ): Promise<ToolkitData | null> => {
   // Normalize the toolkit ID to lowercase alphanumeric
   const normalizedId = normalizeToolkitId(toolkitId);
 
-  // Guard against empty normalized ID (e.g., input was only special characters)
-  if (!normalizedId) {
-    return null;
-  }
-
-  const fileName = `${normalizedId}.json`;
-  const dataDir = resolveDataDir(options);
-  const filePath = join(dataDir, fileName);
-  const direct = await readToolkitFile(filePath);
+  // The API route normally receives the normalized toolkit id. Keep that
+  // common path O(1), especially on a cold serverless instance: eagerly
+  // loading every toolkit JSON file just to serve one toolkit adds tens of
+  // megabytes of parsing and memory overhead. The full directory index below
+  // is reserved for slug lookups and build-time enumeration.
+  const direct = await readToolkitFile(join(dataDir, `${normalizedId}.json`));
   if (direct) {
     return direct;
   }
 
-  return await findToolkitDataBySlug(dataDir, toolkitId);
+  const { byNormalizedId, bySlug } = await loadAllToolkitData(dataDir);
+
+  return (
+    byNormalizedId.get(normalizedId) ??
+    bySlug.get(toolkitId.toLowerCase()) ??
+    null
+  );
 };
+
+export function readToolkitData(
+  toolkitId: string,
+  options?: ToolkitDataOptions
+): Promise<ToolkitData | null> {
+  const normalizedId = normalizeToolkitId(toolkitId);
+
+  // Guard against empty normalized ID (e.g., input was only special characters)
+  if (!normalizedId) {
+    return Promise.resolve(null);
+  }
+
+  const dataDir = resolveDataDir(options);
+
+  if (
+    process.env.NODE_ENV === "development" ||
+    options?.dataDir !== undefined
+  ) {
+    return readToolkitDataUncached(toolkitId, dataDir);
+  }
+
+  const key = readLookupCacheKey(dataDir, toolkitId);
+  let promise = readsByLookupKey.get(key);
+  if (!promise) {
+    promise = readToolkitDataUncached(toolkitId, dataDir);
+    readsByLookupKey.set(key, promise);
+
+    // Retain only lookups that found data. Concurrent callers still share the
+    // in-flight promise, but a resolved miss is dropped: a transient error
+    // must not poison the process, an absent toolkit must stay absent only
+    // until it is generated, and `/api/toolkit-data/[toolkitId]` accepts
+    // arbitrary ids — retaining every miss would grow this map without bound.
+    const forget = () => {
+      if (readsByLookupKey.get(key) === promise) {
+        readsByLookupKey.delete(key);
+      }
+    };
+    promise.then((data) => {
+      if (!data) {
+        forget();
+      }
+    }, forget);
+  }
+  return promise;
+}
 
 export const readToolkitIndex = async (
   options?: ToolkitDataOptions
 ): Promise<ToolkitIndex | null> => {
   const filePath = join(resolveDataDir(options), "index.json");
 
+  let content: string;
   try {
-    const content = await readFile(filePath, "utf-8");
-    const parsed: unknown = JSON.parse(content);
-
-    // Basic runtime validation - ensure it's an object with required fields
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      !("toolkits" in parsed) ||
-      !Array.isArray((parsed as { toolkits: unknown }).toolkits)
-    ) {
+    content = await readFile(filePath, "utf-8");
+  } catch (error) {
+    if (isEnoent(error)) {
       return null;
     }
-
-    return parsed as ToolkitIndex;
-  } catch {
-    return null;
+    throw new Error(
+      `Failed to read toolkit index ${filePath}: ${describeError(error)}`
+    );
   }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch (error) {
+    throw new Error(
+      `Invalid JSON in toolkit index ${filePath}: ${describeError(error)}`
+    );
+  }
+
+  const result = ToolkitIndexSchema.safeParse(parsed);
+  if (!result.success) {
+    throw new Error(
+      `Invalid toolkit index schema in ${filePath}: ${result.error.message}`
+    );
+  }
+
+  return result.data;
 };

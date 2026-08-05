@@ -111,3 +111,34 @@ jobs:
         run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
         env:
           GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+
+  alert:
+    name: Alert on generation failure
+    if: ${{ always() && needs.generate.result == 'failure' }}
+    needs: generate
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Notify #proj-docs in Slack
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PROJ_DOCS_WEBHOOK_URL }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TRIGGER: ${{ github.event_name }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::error::SLACK_PROJ_DOCS_WEBHOOK_URL is not configured"
+            exit 1
+          fi
+
+          payload=$(jq -n \
+            --arg run_url "$RUN_URL" \
+            --arg trigger "$TRIGGER" \
+            --arg commit "$COMMIT" \
+            '{text: (":rotating_light: Toolkit docs generation failed\n\n*Workflow run:* <" + $run_url + "|Open failed run>\n*Trigger:* " + $trigger + "\n*Commit:* " + $commit + "\n\nThe failed run contains the exact file path and validation error.")}')
+
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Content-Type: application/json" \
+            --data "$payload" \
+            "$SLACK_WEBHOOK_URL"
