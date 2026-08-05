@@ -20,7 +20,12 @@ test("porter workflow includes required triggers", () => {
 });
 
 test("porter workflow generates docs and opens a PR", () => {
-  expect(workflowContents).toContain("pnpm dlx tsx src/cli/index.ts generate");
+  expect(workflowContents).toContain(
+    "../node_modules/.bin/tsx src/cli/index.ts generate"
+  );
+  // pnpm dlx resolves an unpinned tsx from the registry on every run, so the
+  // nightly's TypeScript runtime would drift outside the lockfile.
+  expect(workflowContents).not.toContain("pnpm dlx");
   expect(workflowContents).toContain("--skip-unchanged");
   expect(workflowContents).toContain("--require-complete");
   expect(workflowContents).toContain("--verbose");

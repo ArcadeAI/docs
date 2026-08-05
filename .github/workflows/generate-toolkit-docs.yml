@@ -48,8 +48,10 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate toolkit docs
+        # Invoked by path rather than through `pnpm exec`, which would reset the
+        # working directory to the repo root and break the relative paths below.
         run: |
-          pnpm dlx tsx src/cli/index.ts generate \
+          ../node_modules/.bin/tsx src/cli/index.ts generate \
             --all \
             --skip-unchanged \
             --require-complete \
@@ -81,7 +83,7 @@ jobs:
           ANTHROPIC_EDITOR_MODEL: ${{ secrets.ANTHROPIC_EDITOR_MODEL || 'claude-sonnet-4-6' }}
 
       - name: Sync toolkit sidebar navigation
-        run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
+        run: pnpm exec tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
       - name: Create pull request
         id: cpr
