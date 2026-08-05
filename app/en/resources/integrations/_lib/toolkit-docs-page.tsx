@@ -13,11 +13,6 @@ type ToolkitDocsParams = {
 };
 
 export function createToolkitDocsPage(category: IntegrationCategory) {
-  // readToolkitData is itself backed by a shared, process-wide cache (see
-  // loadAllToolkitData in app/_lib/toolkit-data.ts), so generateMetadata and
-  // Page below calling it separately for the same toolkitId costs one map
-  // lookup each rather than a second file read — no per-factory cache needed
-  // here.
   const getToolkitData = (toolkitId: string) => readToolkitData(toolkitId);
 
   const generateStaticParams = async () =>

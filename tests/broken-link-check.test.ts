@@ -3,6 +3,10 @@ import { join } from "node:path";
 import fg from "fast-glob";
 import { scanURLs, validateFiles } from "next-validate-link";
 import { expect, test } from "vitest";
+import {
+  INTEGRATION_CATEGORIES,
+  normalizeToolkitId,
+} from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 
 const TIMEOUT = 30_000;
 
@@ -14,9 +18,8 @@ const toolkitDataDir = join(
   "data",
   "toolkits"
 );
-const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]+/g;
 const normalizeToolkitSlug = (value: string): string =>
-  value.toLowerCase().replace(TOOLKIT_ID_NORMALIZER, "");
+  normalizeToolkitId(value);
 
 function getDocsLinkSlug(docsLink?: string | null): string | null {
   if (!docsLink) {
@@ -113,18 +116,6 @@ function toToolAnchorId(value: string): string {
 }
 
 const SUPPORTED_LOCALES = ["en", "es", "pt-BR"] as const;
-const SUPPORTED_INTEGRATION_CATEGORIES = [
-  "productivity",
-  "development",
-  "social",
-  "databases",
-  "search",
-  "sales",
-  "payments",
-  "customer-support",
-  "entertainment",
-  "others",
-] as const;
 
 function validateToolkitIntegrationRoute(
   urlPath: string,
@@ -155,9 +146,7 @@ function validateToolkitIntegrationRoute(
     return false;
   }
 
-  if (
-    !(SUPPORTED_INTEGRATION_CATEGORIES as readonly string[]).includes(category)
-  ) {
+  if (!(INTEGRATION_CATEGORIES as readonly string[]).includes(category)) {
     return false;
   }
 

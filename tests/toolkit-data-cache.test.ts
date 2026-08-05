@@ -1,7 +1,7 @@
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, describe, expect, test } from "vitest";
+import { afterAll, describe, expect, test, vi } from "vitest";
 import { readToolkitData, readToolkitIndex } from "@/app/_lib/toolkit-data";
 
 /**
@@ -128,6 +128,144 @@ describe("readToolkitData direct-file fast path", () => {
   test("a normalized id does not scan or parse corrupt sibling files", async () => {
     const data = await readToolkitData("ValidToolkitOne", { dataDir });
     expect(data?.id).toBe("ValidToolkitOne");
+  });
+});
+
+describe("readToolkitData production lookup cache", () => {
+  test("repeated lookups for the same toolkit share one in-flight promise", async () => {
+    const dataDir = makeFixtureDir();
+    dirsToClean.push(dataDir);
+
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      const firstPromise = readToolkitData("ValidToolkitOne");
+      const secondPromise = readToolkitData("ValidToolkitOne");
+
+      expect(firstPromise).toBe(secondPromise);
+
+      const [first, second] = await Promise.all([firstPromise, secondPromise]);
+      expect(first?.id).toBe("ValidToolkitOne");
+      expect(second?.id).toBe("ValidToolkitOne");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  test("a transient direct read failure can recover after the file is repaired", async () => {
+    const dataDir = makeFixtureDir();
+    dirsToClean.push(dataDir);
+    writeFileSync(
+      join(dataDir, "corrupttoolkit.json"),
+      "{ this is not valid json"
+    );
+
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      await expect(readToolkitData("CorruptToolkit")).rejects.toThrow(
+        join(dataDir, "corrupttoolkit.json")
+      );
+
+      writeFileSync(
+        join(dataDir, "corrupttoolkit.json"),
+        validToolkitJson("RecoveredToolkit", "recovered-toolkit")
+      );
+
+      const recovered = await readToolkitData("RecoveredToolkit");
+      expect(recovered?.id).toBe("RecoveredToolkit");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});
+
+/**
+ * `readToolkitDataUncached` resolves a lookup from two different forms of the
+ * input: the normalized id (direct file, `byNormalizedId`) and the raw
+ * lowercased string (`bySlug`). A cache keyed on only the normalized form
+ * therefore collapses inputs that resolve differently — "no-tion" and "notion"
+ * both normalize to "notion", but only "notion" matches NotionToolkit's docs
+ * slug. `/api/toolkit-data/[toolkitId]` takes arbitrary ids, so whichever
+ * variant a warm instance saw first would decide the answer for all of them.
+ */
+describe("readToolkitData cache keys distinguish slug variants", () => {
+  const notionToolkit = () =>
+    JSON.stringify({
+      id: "NotionToolkit",
+      label: "Notion",
+      version: "1.0.0",
+      description: "A test toolkit fixture.",
+      metadata: {
+        category: "productivity",
+        iconUrl: "https://example.com/icon.svg",
+        isBYOC: false,
+        isPro: false,
+        type: "arcade",
+        docsLink:
+          "https://docs.arcade.dev/en/resources/integrations/productivity/notion",
+        isComingSoon: false,
+        isHidden: false,
+      },
+      auth: null,
+      tools: [],
+    });
+
+  const makeNotionDir = (): string => {
+    const dir = mkdtempSync(join(tmpdir(), "toolkit-data-slug-variant-"));
+    dirsToClean.push(dir);
+    // Named for the normalized id, so "notion" resolves only via the slug map.
+    writeFileSync(join(dir, "notiontoolkit.json"), notionToolkit());
+    return dir;
+  };
+
+  test("a miss on a variant does not pin null for the real slug", async () => {
+    const dataDir = makeNotionDir();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      expect(await readToolkitData("no-tion")).toBeNull();
+      expect((await readToolkitData("notion"))?.id).toBe("NotionToolkit");
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  test("a hit on the real slug does not make a variant resolve", async () => {
+    const dataDir = makeNotionDir();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      expect((await readToolkitData("notion"))?.id).toBe("NotionToolkit");
+      expect(await readToolkitData("no-tion")).toBeNull();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  test("an absent toolkit is not retained in the lookup cache", async () => {
+    const dataDir = makeNotionDir();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TOOLKIT_DATA_DIR", dataDir);
+
+    try {
+      expect(await readToolkitData("not-generated-yet")).toBeNull();
+
+      writeFileSync(
+        join(dataDir, "notgeneratedyet.json"),
+        validToolkitJson("NotGeneratedYet", "not-generated-yet")
+      );
+
+      expect((await readToolkitData("not-generated-yet"))?.id).toBe(
+        "NotGeneratedYet"
+      );
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 });
 
