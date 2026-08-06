@@ -53,6 +53,10 @@ const meta: MetaRecord = {
     title: "Postman",
     href: "/en/resources/integrations/development/postman",
   },
+  snowflake: {
+    title: "Snowflake",
+    href: "/en/resources/integrations/development/snowflake",
+  },
   vercel: {
     title: "Vercel",
     href: "/en/resources/integrations/development/vercel",
