@@ -222,14 +222,24 @@ export const firstDifference = (
 // ============================================================================
 
 /** Read the curation layer out of a committed/merged toolkit. */
-export const curationFromToolkit = (
-  toolkit: MergedToolkit
-): CustomSections => ({
-  documentationChunks: toolkit.documentationChunks ?? [],
-  customImports: toolkit.customImports ?? [],
-  subPages: toolkit.subPages ?? [],
-  toolChunks: {},
-});
+export const curationFromToolkit = (toolkit: MergedToolkit): CustomSections => {
+  const toolChunks: Record<
+    string,
+    NonNullable<CustomSections["toolChunks"]>[string]
+  > = {};
+  for (const tool of toolkit.tools ?? []) {
+    if (tool.documentationChunks && tool.documentationChunks.length > 0) {
+      toolChunks[tool.qualifiedName] = tool.documentationChunks;
+    }
+  }
+
+  return {
+    documentationChunks: toolkit.documentationChunks ?? [],
+    customImports: toolkit.customImports ?? [],
+    subPages: toolkit.subPages ?? [],
+    toolChunks,
+  };
+};
 
 export type JoinParams = {
   toolkitId: string;

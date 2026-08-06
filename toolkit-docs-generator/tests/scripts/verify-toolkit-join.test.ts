@@ -118,6 +118,37 @@ describe("missingCatalogTools", () => {
   });
 });
 
+describe("curationFromToolkit", () => {
+  it("keeps per-tool documentation chunks in the curation layer", () => {
+    const sections = curationFromToolkit({
+      tools: [
+        {
+          qualifiedName: "Github.CreateIssue",
+          documentationChunks: [
+            {
+              type: "warning",
+              location: "description",
+              position: "after",
+              content: "Use a narrow repository scope.",
+            },
+          ],
+        },
+      ],
+    } as MergedToolkit);
+
+    expect(sections.toolChunks).toEqual({
+      "Github.CreateIssue": [
+        {
+          type: "warning",
+          location: "description",
+          position: "after",
+          content: "Use a narrow repository scope.",
+        },
+      ],
+    });
+  });
+});
+
 describe("raw /v1/tool_metadata reshape", () => {
   it("turns API items into pre-merge tools (value_schema.val_type -> type)", () => {
     const raw = JSON.parse(
