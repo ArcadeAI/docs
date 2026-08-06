@@ -2,12 +2,12 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { normalizeToolkitId } from "../../../app/_lib/toolkit-slug";
 import {
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
   type ToolkitCatalogEntry,
 } from "../../../app/_lib/toolkit-static-params";
+import { normalizeToolkitId } from "../../src/shared/toolkit-primitives";
 
 const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   const dir = await mkdtemp(join(tmpdir(), "toolkit-static-params-"));
@@ -22,11 +22,20 @@ const writeIndex = async (
   dir: string,
   toolkits: Array<{ id: string; category?: string }>
 ) => {
+  const entries = toolkits.map((toolkit) => ({
+    id: toolkit.id,
+    label: toolkit.id,
+    version: "1.0.0",
+    category: toolkit.category ?? "development",
+    type: "arcade",
+    toolCount: 0,
+    authType: "none",
+  }));
   const indexFixture = JSON.stringify(
     {
       generatedAt: "2026-01-15T00:00:00.000Z",
       version: "1.0.0",
-      toolkits,
+      toolkits: entries,
     },
     null,
     2
@@ -43,8 +52,29 @@ const writeToolkitData = async (
   }
 ) => {
   const fileName = `${normalizeToolkitId(toolkit.id)}.json`;
+  // Fill in the fields the merged toolkit schema requires but this test
+  // suite doesn't care about, so fixtures stay valid without every call
+  // site restating boilerplate.
   const toolkitFixture = JSON.stringify(
-    { label: toolkit.label ?? toolkit.id, ...toolkit },
+    {
+      version: "1.0.0",
+      description: null,
+      tools: [],
+      auth: null,
+      label: toolkit.label ?? toolkit.id,
+      ...toolkit,
+      metadata: {
+        category: "productivity",
+        iconUrl: "https://design-system.arcade.dev/icons/placeholder.svg",
+        isBYOC: false,
+        isPro: false,
+        type: "arcade",
+        docsLink: "",
+        isComingSoon: false,
+        isHidden: false,
+        ...toolkit.metadata,
+      },
+    },
     null,
     2
   );
@@ -227,16 +257,27 @@ describe("toolkit static params", () => {
     });
   });
 
-  it('maps unknown categories to "others"', async () => {
+  it("rejects an unrecognized category in the index schema", async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [{ id: "Github", category: "weird" }]);
+
+      await expect(
+        listToolkitRoutes({ dataDir: dir, toolkitsCatalog: [] })
+      ).rejects.toThrow(/Invalid toolkit index schema/);
+    });
+  });
+
+  it("skips a toolkit with no category when the index is absent", async () => {
+    await withTempDir(async (dir) => {
+      // No JSON file, no catalog entry, and no index — nothing to route this
+      // toolkit under.
 
       const routes = await listToolkitRoutes({
         dataDir: dir,
         toolkitsCatalog: [],
       });
 
-      expect(routes).toEqual([{ toolkitId: "github", category: "others" }]);
+      expect(routes).toEqual([]);
     });
   });
 });

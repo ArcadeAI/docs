@@ -1,7 +1,7 @@
 {
   "id": "NotionToolkit",
   "label": "Notion",
-  "version": "1.3.4",
+  "version": "2.0.0",
   "description": "Arcade.dev LLM tools for Notion",
   "metadata": {
     "category": "productivity",
@@ -22,7 +22,7 @@
     {
       "name": "AppendContentToEndOfPage",
       "qualifiedName": "NotionToolkit.AppendContentToEndOfPage",
-      "fullyQualifiedName": "NotionToolkit.AppendContentToEndOfPage@1.3.4",
+      "fullyQualifiedName": "NotionToolkit.AppendContentToEndOfPage@2.0.0",
       "description": "Append markdown content to the end of a Notion page by its ID or title",
       "parameters": [
         {
@@ -93,7 +93,7 @@
     {
       "name": "CreatePage",
       "qualifiedName": "NotionToolkit.CreatePage",
-      "fullyQualifiedName": "NotionToolkit.CreatePage@1.3.4",
+      "fullyQualifiedName": "NotionToolkit.CreatePage@2.0.0",
       "description": "Create a new Notion page by the title of the new page's parent.",
       "parameters": [
         {
@@ -175,10 +175,68 @@
       }
     },
     {
+      "name": "GetObjectLocation",
+      "qualifiedName": "NotionToolkit.GetObjectLocation",
+      "fullyQualifiedName": "NotionToolkit.GetObjectLocation@2.0.0",
+      "description": "Find the breadcrumb path for one page or database.\n\nA `complete` path starts at a workspace root. An incomplete path is still the real prefix\nof the object's location: `stop_reason` says what ended the walk, and for a rate limit\n`retry_after_seconds` carries Notion's own backoff.",
+      "parameters": [
+        {
+          "name": "object_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID or Notion URL of the page or database to locate. Titles are not accepted.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A root-first path to the requested object, whether it reaches the workspace root, and why the walk stopped when it does not."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.GetObjectLocation",
+        "parameters": {
+          "object_id": {
+            "value": "https://www.notion.so/My-Workspace-Page-1a2b3c4d5e6f7890abcd1234567890ef",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetObjectMetadata",
       "qualifiedName": "NotionToolkit.GetObjectMetadata",
-      "fullyQualifiedName": "NotionToolkit.GetObjectMetadata@1.3.4",
-      "description": "Get the metadata of a Notion object (page or database) from its title or ID.\n\nOne of `object_title` or `object_id` MUST be provided, but both cannot be provided.\nPrefer `object_id` for exact lookup; use `object_title` (with optional `object_type`)\nwhen only a name is known. The title is case-insensitive and outer whitespace is ignored.\n\nThe returned metadata includes a top-level `object` field (`'page'` or `'database'`)\nthat identifies the type, plus id, timestamps, properties, URL, and more.",
+      "fullyQualifiedName": "NotionToolkit.GetObjectMetadata@2.0.0",
+      "description": "Get the metadata of a Notion object (page or database) from its title or ID.\n\nOne of `object_title` or `object_id` MUST be provided, but both cannot be provided.\nPrefer `object_id` for exact lookup; use `object_title` (with optional `object_type`)\nwhen only a name is known. The title is case-insensitive and outer whitespace is ignored.\n\nReturns all exact title matches in a bounded search window, or a one-item list by ID.\nObject metadata includes its ID, timestamps, properties, URL, and more.",
       "parameters": [
         {
           "name": "object_title",
@@ -216,15 +274,15 @@
       "secrets": [],
       "secretsInfo": [],
       "output": {
-        "type": "json",
-        "description": "The object's metadata as returned by Notion. The top-level `object` field is `'page'` or `'database'` and identifies the object type; also includes id, timestamps, properties, URL, and more."
+        "type": "array",
+        "description": "Metadata for the matching objects"
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "NotionToolkit.GetObjectMetadata",
         "parameters": {
           "object_title": {
-            "value": "Project Plan",
+            "value": "Q3 Marketing Strategy",
             "type": "string",
             "required": false
           },
@@ -264,7 +322,7 @@
     {
       "name": "GetPageContentById",
       "qualifiedName": "NotionToolkit.GetPageContentById",
-      "fullyQualifiedName": "NotionToolkit.GetPageContentById@1.3.4",
+      "fullyQualifiedName": "NotionToolkit.GetPageContentById@2.0.0",
       "description": "Get the content of a Notion page as markdown with the page's ID",
       "parameters": [
         {
@@ -322,7 +380,7 @@
     {
       "name": "GetPageContentByTitle",
       "qualifiedName": "NotionToolkit.GetPageContentByTitle",
-      "fullyQualifiedName": "NotionToolkit.GetPageContentByTitle@1.3.4",
+      "fullyQualifiedName": "NotionToolkit.GetPageContentByTitle@2.0.0",
       "description": "Get the content of a Notion page as markdown with the page's title",
       "parameters": [
         {
@@ -380,8 +438,8 @@
     {
       "name": "GetWorkspaceStructure",
       "qualifiedName": "NotionToolkit.GetWorkspaceStructure",
-      "fullyQualifiedName": "NotionToolkit.GetWorkspaceStructure@1.3.4",
-      "description": "Get the workspace structure of the user's Notion workspace.\nIdeal for finding where an object is located in the workspace.",
+      "fullyQualifiedName": "NotionToolkit.GetWorkspaceStructure@2.0.0",
+      "description": "Get up to 100 recently edited pages and databases as a tree.\n\nThe 100 counts pages and databases only: database rows are skipped (they are not sidebar\nstructure) and reported as omitted_database_rows. This is a recency-limited sample, not a\ncomplete listing: a specific object you are looking for may not appear here at all — search\nfor it by name and get its location instead. A truncated response means more workspace\nobjects exist. When sampled_objects is 0 while omitted_database_rows is high, the workspace\nis busy with database row edits rather than empty — search by title instead of concluding\nthe workspace has no content. Unplaced objects are not transitively reachable from a\nworkspace root in this sample — for example block-nested objects, objects whose parent was\nomitted from the sample, or descendants of those. They are not attached under a possibly\nincorrect workspace root. Navigate an unplaced object by passing its own `id` (not\n`parent_id` or `containing_block_id`) to GetObjectLocation or ListChildObjects.",
       "parameters": [],
       "auth": {
         "providerId": "notion",
@@ -392,7 +450,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The workspace structure"
+        "description": "The workspace tree for objects transitively reachable from a workspace root in this recent sample, a list of unplaced objects that are not (block-nested, missing-parent, or descendants of those), a truncated flag that is true when the workspace has more objects than were returned, a stop_reason (with Notion's retry_after_seconds when it is a rate limit) when the scan ended early, and the counts describing what the bounded scan sampled, skipped, and spent."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -421,9 +479,93 @@
       }
     },
     {
+      "name": "ListChildObjects",
+      "qualifiedName": "NotionToolkit.ListChildObjects",
+      "fullyQualifiedName": "NotionToolkit.ListChildObjects@2.0.0",
+      "description": "List direct child pages and databases without counting an entire subtree.\n\nPage children of the requested object come first, then children nested inside its\ncontainers (toggles, columns, callouts). Continue by passing `next_cursor` back; when\n`next_cursor` is null there is nothing further to fetch.\n\n`truncated` means the walk stopped before enumerating everything, with `stop_reason` saying\nwhy. If `next_cursor` is also set, continue from it. If `next_cursor` is null, more windows\ncannot recover what was missed — every call re-walks the same bounded budget — so do not\nkeep paging: call this tool again on a narrower parent (a specific child page), or use\nGetObjectLocation for one object you already know about. For a rate limit, wait\n`retry_after_seconds` before retrying.",
+      "parameters": [
+        {
+          "name": "parent_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID or Notion URL of the page or database whose direct children to list. Titles are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum children to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The `next_cursor` from a previous call for this same parent. Omit to start at the first child. Cursors are not interchangeable between parents.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A window of direct child pages and databases, a cursor for the next window when one exists, and whether children were left unenumerated; counting all children is not supported."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.ListChildObjects",
+        "parameters": {
+          "parent_id": {
+            "value": "https://www.notion.so/My-Project-Hub-1a2b3c4d5e6f7890abcd1234ef567890",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsYXN0X2lkIjoiM2E0YjVjNmQ3ZThmOTBhYiIsImRpcmVjdGlvbiI6Im5leHQifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "SearchByTitle",
       "qualifiedName": "NotionToolkit.SearchByTitle",
-      "fullyQualifiedName": "NotionToolkit.SearchByTitle@1.3.4",
+      "fullyQualifiedName": "NotionToolkit.SearchByTitle@2.0.0",
       "description": "Search for similar titles of pages, databases, or both within the user's workspace.\nDoes not include content.",
       "parameters": [
         {
@@ -526,7 +668,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "NotionToolkit.WhoAmI",
-      "fullyQualifiedName": "NotionToolkit.WhoAmI@1.3.4",
+      "fullyQualifiedName": "NotionToolkit.WhoAmI@2.0.0",
       "description": "Get information about the current user and their Notion workspace.\n\nThis tool provides detailed information about the authenticated user's\nNotion workspace including workspace statistics, user context, and\nintegration details.",
       "parameters": [],
       "auth": {
@@ -577,6 +719,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-07-24T11:39:02.121Z",
-  "summary": "## Notion Toolkit\n\nProvides Arcade tools for interacting with Notion workspaces, enabling LLMs to read, search, and write Notion content on behalf of authenticated users.\n\n## Capabilities\n\n- **Workspace exploration:** Retrieve workspace structure, search pages and databases by title, and look up object metadata (ID, timestamps, properties, URL, type) by name or ID.\n- **Page reading:** Fetch full page content as Markdown by page ID or title.\n- **Page writing:** Append Markdown content to existing pages or create new pages under a specified parent.\n- **User and workspace context:** Retrieve authenticated user info, workspace statistics, and integration details.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the [Notion auth provider](https://docs.arcade.dev/en/references/auth-providers/notion). Users authorize Arcade to access their Notion workspace through Notion's standard OAuth flow. Refer to the provider page for scope and configuration details."
+  "generatedAt": "2026-08-06T11:47:14.364Z",
+  "summary": "## Notion Toolkit\n\nThe Notion toolkit connects Arcade to Notion workspaces, enabling LLMs to read, navigate, create, and update Notion content on behalf of authenticated users.\n\n## Capabilities\n\n- **Workspace navigation & discovery:** Retrieve up to 100 recently edited pages and databases as a tree, search by title, list direct child objects within any page or database, and resolve the breadcrumb path to any object.\n- **Page reading:** Fetch full page content as Markdown by page ID or title; retrieve metadata (ID, timestamps, properties, URL) by title or ID.\n- **Page writing:** Create new pages under a named parent; append Markdown content to the end of any existing page.\n- **Object & user context:** Look up the authenticated user's workspace statistics, integration details, and user identity; retrieve metadata for any page or database.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the [Notion auth provider](https://docs.arcade.dev/en/references/auth-providers/notion). Arcade handles the OAuth flow, token storage, and refresh automatically. See the provider page for required scopes and setup instructions."
 }

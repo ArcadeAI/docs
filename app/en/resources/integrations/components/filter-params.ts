@@ -1,25 +1,26 @@
 import type { ToolkitCategory, ToolkitType } from "@arcadeai/design-system";
+import { CATEGORIES } from "@arcadeai/design-system/metadata/toolkits";
 
-const TOOLKIT_TYPES: readonly ToolkitType[] = [
-  "arcade",
-  "arcade_starter",
-  "verified",
-  "community",
-  "auth",
-];
+// The design system exports CATEGORIES (id + display name) as the runtime
+// source of truth for ToolkitCategory. Derive the filter list from it
+// instead of hand-copying the ids, so a new category can't silently drop
+// out of this list the way it could with a separately maintained array.
+const TOOLKIT_CATEGORIES: readonly ToolkitCategory[] = CATEGORIES.map(
+  (category) => category.id
+);
 
-const TOOLKIT_CATEGORIES: readonly ToolkitCategory[] = [
-  "all",
-  "productivity",
-  "social",
-  "development",
-  "entertainment",
-  "search",
-  "payments",
-  "sales",
-  "databases",
-  "customer-support",
-];
+// ToolkitType has no runtime export from the design system, so this list is
+// hand-maintained. `satisfies` turns a missing or extra entry into a
+// compile error the next time the union changes, instead of a silent drop.
+const TOOLKIT_TYPE_MEMBERSHIP = {
+  arcade: true,
+  arcade_starter: true,
+  verified: true,
+  community: true,
+  auth: true,
+} satisfies Record<ToolkitType, true>;
+
+const TOOLKIT_TYPES = Object.keys(TOOLKIT_TYPE_MEMBERSHIP) as ToolkitType[];
 
 export const PARAM_CATEGORY = "category";
 export const PARAM_TYPE = "type";

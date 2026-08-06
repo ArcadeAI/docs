@@ -1,16 +1,14 @@
 #!/usr/bin/env node
 /**
  * CLI script to report tool metadata coverage and distinct enum values.
- * Resolves data directory relative to this script, so it works regardless of cwd.
+ * Resolves the data directory via resolveToolkitDataDir, which works
+ * regardless of cwd and honors the TOOLKIT_DATA_DIR env var override.
  */
 
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.ts";
 import { collectToolMetadataStats } from "../src/utils/tool-metadata-audit.ts";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = join(__dirname, "..", "data", "toolkits");
+const DATA_DIR = resolveToolkitDataDir();
 
 async function main(): Promise<void> {
   const stats = await collectToolMetadataStats({ dataDir: DATA_DIR });

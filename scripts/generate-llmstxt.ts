@@ -5,6 +5,11 @@ import chalk from "chalk";
 import glob from "fast-glob";
 import OpenAI from "openai";
 import { getToolkitCanonicalPath } from "../app/_lib/toolkit-static-params";
+import { resolveToolkitDataDir } from "../toolkit-docs-generator/src/shared/toolkit-data-dir";
+import type {
+  MergedToolkit,
+  MergedToolkitMetadata,
+} from "../toolkit-docs-generator/src/shared/toolkit-schemas";
 
 type PageMetadata = {
   path: string;
@@ -202,29 +207,28 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
   return pages;
 }
 
-const TOOLKIT_DATA_DIR = path.join(
-  process.cwd(),
-  "toolkit-docs-generator",
-  "data",
-  "toolkits"
-);
+const TOOLKIT_DATA_DIR = resolveToolkitDataDir();
 const MAX_TOOLKIT_DESCRIPTION = 280;
 const MARKDOWN_LINK_REGEX = /\[([^\]]+)\]\([^)]+\)/g;
 const MARKDOWN_NOISE_REGEX = /[#*`>]/g;
 const WHITESPACE_REGEX = /\s+/g;
 
-type ToolkitData = {
-  id?: string;
-  label?: string;
-  description?: string;
-  summary?: string;
+/**
+ * This script only reads a handful of fields off each toolkit JSON file (it
+ * doesn't validate the whole document), so it declares the subset it needs
+ * as a `Pick` off the real generator schema types rather than re-describing
+ * the shape by hand.
+ */
+type ToolkitData = Partial<
+  Pick<MergedToolkit, "id" | "label" | "description" | "summary">
+> & {
   tools?: unknown[];
-  metadata?: {
-    category?: string;
-    docsLink?: string;
-    isHidden?: boolean;
-    isComingSoon?: boolean;
-  };
+  metadata?: Partial<
+    Pick<
+      MergedToolkitMetadata,
+      "category" | "docsLink" | "isHidden" | "isComingSoon"
+    >
+  >;
 };
 
 /**

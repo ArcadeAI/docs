@@ -8,10 +8,9 @@ import {
   isMoveCoveredByRedirect,
   pageExists,
   parseDynamicRouteMoves,
-  parseRedirects,
   type Redirect,
   urlToFile,
-} from "../../scripts/check-redirects-utils";
+} from "../../scripts/lib/check-redirects-utils";
 
 describe("fileToUrl", () => {
   it("converts file path to URL path", () => {
@@ -310,79 +309,6 @@ describe("isMoveCoveredByRedirect", () => {
     ];
 
     expect(isMoveCoveredByRedirect(move, redirects)).toBe(true);
-  });
-});
-
-describe("parseRedirects", () => {
-  it("parses standard format redirects", () => {
-    const content = `
-      {
-        source: "/:locale/old",
-        destination: "/:locale/new",
-        permanent: true,
-      },
-    `;
-
-    const redirects = parseRedirects(content);
-
-    expect(redirects).toHaveLength(1);
-    expect(redirects[0]).toEqual({
-      source: "/:locale/old",
-      destination: "/:locale/new",
-    });
-  });
-
-  it("parses reversed format redirects", () => {
-    const content = `
-      {
-        destination: "/:locale/new",
-        source: "/:locale/old",
-        permanent: true,
-      },
-    `;
-
-    const redirects = parseRedirects(content);
-
-    expect(redirects).toHaveLength(1);
-    expect(redirects[0]).toEqual({
-      source: "/:locale/old",
-      destination: "/:locale/new",
-    });
-  });
-
-  it("parses multiple redirects", () => {
-    const content = `
-      {
-        source: "/:locale/a",
-        destination: "/:locale/b",
-      },
-      {
-        source: "/:locale/c",
-        destination: "/:locale/d",
-      },
-    `;
-
-    const redirects = parseRedirects(content);
-
-    expect(redirects).toHaveLength(2);
-  });
-
-  it("handles single quotes", () => {
-    const content = `
-      {
-        source: '/:locale/old',
-        destination: '/:locale/new',
-      },
-    `;
-
-    const redirects = parseRedirects(content);
-
-    expect(redirects).toHaveLength(1);
-    expect(redirects[0].source).toBe("/:locale/old");
-  });
-
-  it("handles empty content", () => {
-    expect(parseRedirects("")).toHaveLength(0);
   });
 });
 

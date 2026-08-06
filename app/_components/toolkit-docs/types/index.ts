@@ -1,214 +1,97 @@
 /**
  * Type definitions for toolkit documentation MDX components
  *
- * These types are designed for React component props and are compatible
- * with the JSON data structure from toolkit-docs-generator.
+ * The data-shape types below (everything through `ToolkitData`) are
+ * `z.infer` types derived from the Zod schemas in
+ * toolkit-docs-generator/src/shared/toolkit-schemas.ts — the same schemas
+ * the generator validates its JSON output against. Only `import type` is
+ * used here: this file is imported by client components, and a runtime
+ * import of the Zod schemas would ship the Zod library to the browser for
+ * no benefit (the client only needs the types, never runs `.parse()`).
+ *
+ * Everything below `ToolkitData` (ToolSummary, ToolkitSummary, and the
+ * component prop types) is app-specific shaping of that data for React
+ * props and has no generator equivalent.
  */
+import type { z } from "zod";
+import type {
+  DocumentationChunkSchema,
+  ExampleParameterValueSchema,
+  MergedToolkitAuthSchema,
+  MergedToolkitMetadataSchema,
+  MergedToolkitSchema,
+  MergedToolSchema,
+  SecretTypeSchema,
+  ToolAuthSchema,
+  ToolCodeExampleSchema,
+  ToolkitAuthTypeSchema,
+  ToolkitCategorySchema,
+  ToolkitTypeSchema,
+  ToolMetadataBehaviorSchema,
+  ToolMetadataClassificationSchema,
+  ToolMetadataSchema,
+  ToolOutputSchema,
+  ToolParameterSchema,
+  ToolSecretSchema,
+} from "@/toolkit-docs-generator/src/shared/toolkit-schemas";
 
 // ============================================================================
 // Documentation Chunk Types
 // ============================================================================
 
-/**
- * Type of documentation chunk content
- */
-export type DocumentationChunkType =
-  | "callout"
-  | "markdown"
-  | "code"
-  | "warning"
-  | "info"
-  | "tip"
-  | "section";
-
-/**
- * Location where the chunk should be injected
- */
-export type DocumentationChunkLocation =
-  | "header"
-  | "description"
-  | "parameters"
-  | "auth"
-  | "secrets"
-  | "output"
-  | "footer"
-  | "before_available_tools"
-  | "after_available_tools"
-  | "custom_section";
-
-/**
- * Position relative to the location
- */
-export type DocumentationChunkPosition = "before" | "after" | "replace";
-
-/**
- * Callout variant for styling
- */
-export type DocumentationChunkVariant =
-  | "default"
-  | "destructive"
-  | "warning"
-  | "info"
-  | "success";
-
-/**
- * A documentation chunk represents custom content to inject into docs
- */
-export type DocumentationChunk = {
-  /** Type of content */
-  type: DocumentationChunkType;
-  /** Where to inject the content */
-  location: DocumentationChunkLocation;
-  /** Position relative to location */
-  position: DocumentationChunkPosition;
-  /** The actual content (markdown string) */
-  content: string;
-  /** Optional title for callouts */
-  title?: string;
-  /** Optional variant for styling */
-  variant?: DocumentationChunkVariant;
-  /** Optional section header for sidebar navigation (e.g., "## Auth Setup") */
-  header?: string;
-  /** Optional priority for ordering (lower = earlier, default = 100) */
-  priority?: number;
-};
+export type DocumentationChunk = z.infer<typeof DocumentationChunkSchema>;
+export type DocumentationChunkType = DocumentationChunk["type"];
+export type DocumentationChunkLocation = DocumentationChunk["location"];
+export type DocumentationChunkPosition = DocumentationChunk["position"];
+export type DocumentationChunkVariant = NonNullable<
+  DocumentationChunk["variant"]
+>;
 
 // ============================================================================
 // Tool Parameter Types
 // ============================================================================
 
-/**
- * Tool parameter definition
- */
-export type ToolParameter = {
-  /** Parameter name */
-  name: string;
-  /** Parameter type (string, integer, boolean, array, object) */
-  type: string;
-  /** For array types, the inner element type */
-  innerType?: string;
-  /** Whether the parameter is required */
-  required: boolean;
-  /** Parameter description */
-  description: string | null;
-  /** Enum values if this is an enum parameter */
-  enum: string[] | null;
-  /** Whether the parameter can be inferred by an LLM */
-  inferrable?: boolean;
-  /** Default value if not provided */
-  default?: unknown;
-};
+export type ToolParameter = z.infer<typeof ToolParameterSchema>;
 
 // ============================================================================
 // Tool Auth Types
 // ============================================================================
 
-/**
- * Tool-level authentication requirements
- */
-export type ToolAuth = {
-  /** Auth provider ID (e.g., "github", "google") */
-  providerId: string | null;
-  /** Provider type (e.g., "oauth2", "api_key") */
-  providerType: string;
-  /** Required OAuth scopes for this specific tool */
-  scopes: string[];
-};
+export type ToolAuth = z.infer<typeof ToolAuthSchema>;
 
 // ============================================================================
 // Tool Output Types
 // ============================================================================
 
-/**
- * Tool output schema
- */
-export type ToolOutput = {
-  /** Output type (object, array, string, etc.) */
-  type: string;
-  /** Output description */
-  description: string | null;
-};
+export type ToolOutput = z.infer<typeof ToolOutputSchema>;
 
 // ============================================================================
 // Tool Secrets Types
 // ============================================================================
 
-export type SecretType =
-  | "api_key"
-  | "token"
-  | "client_secret"
-  | "webhook_secret"
-  | "private_key"
-  | "password"
-  | "unknown";
-
-export type ToolSecret = {
-  /** Secret name */
-  name: string;
-  /** Secret type classification */
-  type: SecretType;
-};
+export type SecretType = z.infer<typeof SecretTypeSchema>;
+export type ToolSecret = z.infer<typeof ToolSecretSchema>;
 
 // ============================================================================
 // Code Example Types
 // ============================================================================
 
-/**
- * Parameter value with type information for code generation
- */
-export type ExampleParameterValue = {
-  /** The example value to use in generated code */
-  value: unknown;
-  /** Parameter type for proper serialization */
-  type: "string" | "integer" | "boolean" | "array" | "object";
-  /** Whether this parameter is required */
-  required: boolean;
-};
-
-/**
- * Tool code example configuration
- * Used to generate Python/JavaScript example code
- */
-export type ToolCodeExample = {
-  /** Full tool name (e.g., "Github.SetStarred") */
-  toolName: string;
-  /** Parameter values with type info */
-  parameters: Record<string, ExampleParameterValue>;
-  /** Whether this tool requires user authorization */
-  requiresAuth: boolean;
-  /** Auth provider ID if auth is required */
-  authProvider?: string;
-  /** Optional tab label for the code example */
-  tabLabel?: string;
-};
+export type ExampleParameterValue = z.infer<typeof ExampleParameterValueSchema>;
+export type ToolCodeExample = z.infer<typeof ToolCodeExampleSchema>;
 
 // ============================================================================
 // Tool Metadata Types
 // ============================================================================
 
-export type ToolMetadataClassification = {
-  serviceDomains: string[];
-};
+export type ToolMetadataClassification = z.infer<
+  typeof ToolMetadataClassificationSchema
+>;
+export type ToolMetadataBehavior = z.infer<typeof ToolMetadataBehaviorSchema>;
 
-export type ToolMetadataBehavior = {
-  operations: string[];
-  readOnly?: boolean;
-  destructive?: boolean;
-  idempotent?: boolean;
-  openWorld?: boolean;
-};
+/** UI-only helper: the boolean behavior flags, excluding `operations`. */
+export type BehaviorFlagKey = Exclude<keyof ToolMetadataBehavior, "operations">;
 
-export type BehaviorFlagKey =
-  | "readOnly"
-  | "destructive"
-  | "idempotent"
-  | "openWorld";
-
-export type ToolMetadata = {
-  classification: ToolMetadataClassification;
-  behavior: ToolMetadataBehavior;
-  extras?: Record<string, unknown> | null;
-};
+export type ToolMetadata = z.infer<typeof ToolMetadataSchema>;
 
 // ============================================================================
 // Tool Definition Types
@@ -217,32 +100,7 @@ export type ToolMetadata = {
 /**
  * Complete tool definition with all documentation data
  */
-export type ToolDefinition = {
-  /** Tool name (e.g., "CreateIssue") */
-  name: string;
-  /** Qualified name (e.g., "Github.CreateIssue") */
-  qualifiedName: string;
-  /** Fully qualified name with version (e.g., "Github.CreateIssue@1.0.0") */
-  fullyQualifiedName: string;
-  /** Tool description */
-  description: string | null;
-  /** Tool parameters */
-  parameters: ToolParameter[];
-  /** Tool authentication requirements */
-  auth: ToolAuth | null;
-  /** Required secrets */
-  secrets: string[];
-  /** Classified secrets (LLM-generated) */
-  secretsInfo?: ToolSecret[];
-  /** Tool output schema */
-  output: ToolOutput | null;
-  /** Per-tool metadata from Engine API */
-  metadata?: ToolMetadata | null;
-  /** Custom documentation chunks for this tool */
-  documentationChunks: DocumentationChunk[];
-  /** Generated code example configuration */
-  codeExample?: ToolCodeExample;
-};
+export type ToolDefinition = z.infer<typeof MergedToolSchema>;
 
 /**
  * A tool with its heavy detail fields stripped — everything needed to render the
@@ -258,72 +116,16 @@ export type ToolSummary = Omit<
 // Toolkit Metadata Types
 // ============================================================================
 
-/**
- * Toolkit category for navigation grouping
- */
-export type ToolkitCategory =
-  | "productivity"
-  | "social"
-  | "development"
-  | "entertainment"
-  | "search"
-  | "payments"
-  | "sales"
-  | "databases"
-  | "customer-support";
-
-/**
- * Toolkit type classification
- */
-export type ToolkitType =
-  | "arcade"
-  | "arcade_starter"
-  | "verified"
-  | "community"
-  | "auth";
-
-/**
- * Toolkit metadata from Design System
- */
-export type ToolkitMetadata = {
-  /** Category for navigation grouping */
-  category: ToolkitCategory;
-  /** Icon URL */
-  iconUrl: string;
-  /** Whether this toolkit requires BYOC (Bring Your Own Credentials) */
-  isBYOC: boolean;
-  /** Whether this is a Pro feature */
-  isPro: boolean;
-  /** Toolkit type classification */
-  type: ToolkitType;
-  /** Link to documentation */
-  docsLink: string;
-  /** Whether this toolkit is coming soon */
-  isComingSoon?: boolean;
-  /** Whether this toolkit is hidden */
-  isHidden?: boolean;
-};
+export type ToolkitCategory = z.infer<typeof ToolkitCategorySchema>;
+export type ToolkitType = z.infer<typeof ToolkitTypeSchema>;
+export type ToolkitMetadata = z.infer<typeof MergedToolkitMetadataSchema>;
 
 // ============================================================================
 // Toolkit Auth Types
 // ============================================================================
 
-/**
- * Toolkit-level authentication type
- */
-export type ToolkitAuthType = "oauth2" | "api_key" | "mixed" | "none";
-
-/**
- * Toolkit-level authentication summary
- */
-export type ToolkitAuth = {
-  /** Auth type */
-  type: ToolkitAuthType;
-  /** Auth provider ID */
-  providerId: string | null;
-  /** Union of all scopes required by tools in this toolkit */
-  allScopes: string[];
-};
+export type ToolkitAuthType = z.infer<typeof ToolkitAuthTypeSchema>;
+export type ToolkitAuth = z.infer<typeof MergedToolkitAuthSchema>;
 
 // ============================================================================
 // Complete Toolkit Data Type
@@ -333,38 +135,7 @@ export type ToolkitAuth = {
  * Complete toolkit data structure for rendering documentation
  * This is the main type consumed by the ToolkitPage component
  */
-export type ToolkitData = {
-  /** Unique toolkit ID (e.g., "Github") */
-  id: string;
-  /** Human-readable label (e.g., "GitHub") */
-  label: string;
-  /** Toolkit version (e.g., "1.0.0") */
-  version: string;
-  /** Toolkit description */
-  description: string | null;
-  /** LLM-generated summary */
-  summary?: string;
-  /** Metadata from Design System */
-  metadata: ToolkitMetadata;
-  /** Authentication requirements */
-  auth: ToolkitAuth | null;
-  /** All tools in this toolkit */
-  tools: ToolDefinition[];
-  /** Toolkit-level documentation chunks */
-  documentationChunks?: DocumentationChunk[];
-  /** Custom imports for MDX */
-  customImports: string[];
-  /**
-   * Sub-pages that exist for this toolkit.
-   * Each entry is either a string (legacy slug) or a rich object with
-   * { type, content, relativePath } for inline MDX sub-page content.
-   */
-  subPages: (string | Record<string, unknown>)[];
-  /** Optional pip package name override */
-  pipPackageName?: string;
-  /** Generation timestamp */
-  generatedAt?: string;
-};
+export type ToolkitData = z.infer<typeof MergedToolkitSchema>;
 
 /**
  * Toolkit data with each tool's heavy detail fields stripped. This is what the

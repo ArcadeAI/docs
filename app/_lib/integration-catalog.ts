@@ -1,8 +1,9 @@
 import type { Toolkit } from "@arcadeai/design-system";
 import { TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import { PARTNER_TOOLKITS } from "@/app/_data/partner-toolkits";
+import { normalizeToolkitId } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 import { readToolkitData } from "./toolkit-data";
-import { normalizeToolkitId, type ToolkitWithDocsLink } from "./toolkit-slug";
+import type { ToolkitWithDocsLink } from "./toolkit-slug";
 
 const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
   if ("docsLink" in toolkit) {

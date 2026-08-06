@@ -64,6 +64,16 @@ test("porter workflow opts JS actions into Node 24 to unblock the 2026-06-02 dep
   );
 });
 
+test("porter workflow alerts Slack when generation fails", () => {
+  expect(workflowContents).toContain("needs.generate.result == 'failure'");
+  expect(workflowContents).toContain("SLACK_PROJ_DOCS_WEBHOOK_URL");
+  // The jq program is single-quoted, so the shell passes backslashes through
+  // untouched. `\n` reaches jq as a newline escape; `\\n` would reach it as an
+  // escaped backslash followed by "n" and Slack would print a literal "\n".
+  expect(workflowContents).toContain("generation failed\\n\\n*Workflow run:*");
+  expect(workflowContents).not.toContain("\\\\n");
+});
+
 test("workflow dispatch keeps default full-run behavior", () => {
   expect(workflowContents).toContain("workflow_dispatch:");
   expect(workflowContents).toContain("--all");

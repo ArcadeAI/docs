@@ -8,6 +8,7 @@
  */
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import { z } from "zod";
+import { normalizeToolkitId } from "../shared/toolkit-primitives.js";
 import type { ToolkitMetadata } from "../types/index.js";
 import { ToolkitMetadataSchema } from "../types/index.js";
 import type { IMetadataSource } from "./internal.js";
@@ -37,12 +38,6 @@ type DesignSystemToolkit = z.infer<typeof DesignSystemToolkitSchema>;
 // ============================================================================
 // Helpers
 // ============================================================================
-
-const LOOKUP_KEY_REGEX = /[^a-z0-9]/g;
-
-function normalizeLookupKey(value: string): string {
-  return value.toLowerCase().replace(LOOKUP_KEY_REGEX, "");
-}
 
 function toToolkitMetadata(entry: DesignSystemToolkit): ToolkitMetadata | null {
   const iconUrl = entry.publicIconUrl ?? entry.iconUrl;
@@ -83,18 +78,18 @@ export class DesignSystemMetadataSource implements IMetadataSource {
     this.indexByIdOrLabel = new Map<string, ToolkitMetadata>();
 
     for (const toolkit of toolkits) {
-      this.indexByIdOrLabel.set(normalizeLookupKey(toolkit.id), toolkit);
-      this.indexByIdOrLabel.set(normalizeLookupKey(toolkit.label), toolkit);
+      this.indexByIdOrLabel.set(normalizeToolkitId(toolkit.id), toolkit);
+      this.indexByIdOrLabel.set(normalizeToolkitId(toolkit.label), toolkit);
     }
   }
 
   async getToolkitMetadata(toolkitId: string): Promise<ToolkitMetadata | null> {
-    const key = normalizeLookupKey(toolkitId);
+    const key = normalizeToolkitId(toolkitId);
     const direct = this.indexByIdOrLabel.get(key);
     if (direct) return direct;
 
     // Fallback 1: "github-api" / "github_api" style inputs.
-    // (normalizeLookupKey already strips separators)
+    // (normalizeToolkitId already strips separators)
 
     // Fallback 2: If this looks like an API toolkit, try the base provider.
     if (key.endsWith("api")) {

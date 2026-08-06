@@ -2,33 +2,18 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ToolkitPage } from "@/app/_components/toolkit-docs";
 import { readToolkitData, toToolkitSummary } from "@/app/_lib/toolkit-data";
-import { normalizeToolkitId } from "@/app/_lib/toolkit-slug";
 import {
   getToolkitCanonicalPath,
   getToolkitStaticParamsForCategory,
-  type IntegrationCategory,
 } from "@/app/_lib/toolkit-static-params";
+import type { IntegrationCategory } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 
 type ToolkitDocsParams = {
   toolkitId: string;
 };
 
 export function createToolkitDocsPage(category: IntegrationCategory) {
-  const dataCache = new Map<string, ReturnType<typeof readToolkitData>>();
-
-  const getToolkitData = async (toolkitId: string) => {
-    const cacheKey = normalizeToolkitId(toolkitId);
-    const cached = dataCache.get(cacheKey);
-    if (cached) {
-      return await cached;
-    }
-
-    // Pass the original toolkitId (not normalized) so readToolkitData's
-    // findToolkitDataBySlug fallback can match hyphenated slugs like "posthog-api".
-    const promise = readToolkitData(toolkitId);
-    dataCache.set(cacheKey, promise);
-    return await promise;
-  };
+  const getToolkitData = (toolkitId: string) => readToolkitData(toolkitId);
 
   const generateStaticParams = async () =>
     await getToolkitStaticParamsForCategory(category);

@@ -6,16 +6,16 @@ This script synchronizes the sidebar navigation with available toolkit JSON data
 
 ```bash
 # Run the sync (updates sidebar navigation)
-npx tsx .github/scripts/sync-toolkit-sidebar.ts
+npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
 
 # Dry run (shows what would change without making changes)
-npx tsx .github/scripts/sync-toolkit-sidebar.ts --dry-run
+npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --dry-run
 
 # Verbose output
-npx tsx .github/scripts/sync-toolkit-sidebar.ts --verbose
+npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --verbose
 
 # Both flags
-npx tsx .github/scripts/sync-toolkit-sidebar.ts --dry-run --verbose
+npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --dry-run --verbose
 ```
 
 ## What it does
@@ -23,7 +23,7 @@ npx tsx .github/scripts/sync-toolkit-sidebar.ts --dry-run --verbose
 1. Reads toolkit JSON files from `toolkit-docs-generator/data/toolkits/`.
 2. Maps toolkits to categories using the design system catalog.
 3. Creates or updates `_meta.tsx` files for each category folder.
-4. Handles the "Others" category for toolkits not in the design system.
+4. Skips toolkits without a recognized integration category.
 5. Updates the main integrations `_meta.tsx`.
 
 ## When to run
@@ -37,7 +37,8 @@ Run this script when:
 
 ## Category mapping
 
-Toolkits are mapped to categories based on `@arcadeai/design-system`:
+Toolkits are mapped to categories based on `@arcadeai/design-system` and
+`INTEGRATION_CATEGORIES` in `toolkit-docs-generator/src/shared/toolkit-primitives.ts`:
 
 | Category | Display name |
 | --- | --- |
@@ -50,18 +51,18 @@ Toolkits are mapped to categories based on `@arcadeai/design-system`:
 | sales | Sales |
 | entertainment | Entertainment |
 | payments | Payments & Finance |
-| others | Others |
 
-Toolkits not found in the design system are placed in the "Others" category.
+Toolkits with an unrecognized category fail loudly instead of being routed to a
+catch-all bucket.
 
 ## Testing
 
 ```bash
 # Run tests
-npx vitest run .github/scripts/__tests__/sync-toolkit-sidebar.test.ts
+pnpm vitest run toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts
 
 # Watch mode
-npx vitest watch .github/scripts/__tests__/sync-toolkit-sidebar.test.ts
+pnpm vitest watch toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts
 ```
 
 ## Output
@@ -74,16 +75,16 @@ The script prints a summary of changes:
 Total toolkits: 96
 
 Categories created (1):
-  + others
+  + sales
 
 Categories updated (7):
   ~ productivity
   ~ development
   ~ customer-support
   ~ search
-  ~ sales
   ~ social
   ~ payments
+  ~ entertainment
 
 ====================================
 ```

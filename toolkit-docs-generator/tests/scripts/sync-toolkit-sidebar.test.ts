@@ -222,10 +222,21 @@ describe("buildToolkitInfoList", () => {
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
 
-    expect(result).toHaveLength(3);
+    expect(result).toHaveLength(2);
     expect(result[0].label).toBe("Gmail");
     expect(result[1].label).toBe("Slack");
-    expect(result[2].label).toBe("Unknown Toolkit");
+    expect(result.some((item) => item.label === "Unknown Toolkit")).toBe(false);
+  });
+
+  it("rejects an unrecognized category instead of routing it to others", () => {
+    createToolkitJson("unknowncategory", {
+      label: "Unknown Category",
+      metadata: { category: "weird" },
+    });
+
+    expect(() => buildToolkitInfoList(TEST_DATA_DIR)).toThrow(
+      'Unrecognized integration category "weird"'
+    );
   });
 
   it("should skip hidden toolkits", () => {
@@ -296,13 +307,27 @@ describe("buildToolkitInfoList", () => {
   });
 
   it("keeps sidebar href categories consistent with static params", async () => {
+    // This fixture also flows through getToolkitStaticParamsForCategory
+    // below, which validates it against the full merged toolkit schema —
+    // unlike the other fixtures in this file, it needs every required field,
+    // not just the ones buildToolkitInfoList itself reads.
     createToolkitJson("weaviateapi", {
       id: "WeaviateApi",
       label: "Weaviate API",
+      version: "1.0.0",
+      description: null,
+      auth: null,
+      tools: [],
       metadata: {
         category: "databases",
         docsLink:
           "https://docs.arcade.dev/en/mcp-servers/databases/weaviate-api",
+        iconUrl: "https://design-system.arcade.dev/icons/placeholder.svg",
+        isBYOC: false,
+        isPro: false,
+        type: "arcade",
+        isComingSoon: false,
+        isHidden: false,
       },
     });
 
@@ -393,14 +418,14 @@ describe("groupByCategory", () => {
     expect(result.size).toBe(0);
   });
 
-  it("should handle 'others' category", () => {
+  it("should group toolkits by category", () => {
     const toolkits: ToolkitInfo[] = [
-      { id: "custom", slug: "custom", label: "Custom", category: "others" },
+      { id: "custom", slug: "custom", label: "Custom", category: "payments" },
     ];
 
     const result = groupByCategory(toolkits);
-    expect(result.has("others")).toBe(true);
-    expect(result.get("others")).toHaveLength(1);
+    expect(result.has("payments")).toBe(true);
+    expect(result.get("payments")).toHaveLength(1);
   });
 });
 
@@ -496,11 +521,11 @@ describe("generateCategoryMeta", () => {
         id: "test",
         slug: "test",
         label: 'Test "Quoted" Label',
-        category: "others",
+        category: "productivity",
       },
     ];
 
-    const result = generateCategoryMeta(toolkits, "others", "/preview");
+    const result = generateCategoryMeta(toolkits, "productivity", "/preview");
 
     expect(result).toContain('title: "Test \\"Quoted\\" Label"');
   });
@@ -660,20 +685,14 @@ describe("generateMainMeta", () => {
     expect(developmentIndex).toBeLessThan(salesIndex);
   });
 
-  it("should include 'others' category when present", () => {
+  it("should omit the removed 'others' category", () => {
     const result = generateMainMeta(["productivity", "others"]);
-
-    expect(result).toContain("others: {");
-    expect(result).toContain('title: "Others"');
-  });
-
-  it("should place 'others' at the end", () => {
-    const result = generateMainMeta(["others", "productivity"]);
 
     const productivityIndex = result.indexOf("productivity:");
     const othersIndex = result.indexOf("others:");
 
-    expect(productivityIndex).toBeLessThan(othersIndex);
+    expect(productivityIndex).toBeGreaterThan(-1);
+    expect(othersIndex).toBe(-1);
   });
 
   it("should handle empty categories", () => {

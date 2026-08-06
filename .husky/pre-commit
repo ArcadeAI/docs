@@ -61,18 +61,18 @@ if [ -n "$DELETED_PAGES" ] || [ -n "$RENAMED_PAGES" ]; then
   echo "🔗 Detected deleted/renamed page(s), checking for redirects..."
 
   # Run the TypeScript redirect checker with auto-fix (only checks staged changes)
-  # This will add redirect entries to next.config.ts if missing
+  # This will add redirect entries to redirects.ts if missing
   if ! pnpm check-redirects --auto-fix --staged-only 2>&1; then
-    # Stage next.config.ts if it was modified
-    if git diff --name-only next.config.ts 2>/dev/null | grep -q "next.config.ts"; then
-      git add next.config.ts
+    # Stage redirects.ts if it was modified
+    if git diff --name-only redirects.ts 2>/dev/null | grep -q "redirects.ts"; then
+      git add redirects.ts
       echo ""
-      echo "📝 Redirect entries added to next.config.ts and staged."
+      echo "📝 Redirect entries added to redirects.ts and staged."
     fi
     echo ""
     # Check if there are placeholders vs other errors
-    if grep -q "REPLACE_WITH_NEW_PATH" next.config.ts 2>/dev/null; then
-      echo "❌ Commit blocked: Please update the placeholder destinations in next.config.ts"
+    if grep -q "REPLACE_WITH_NEW_PATH" redirects.ts 2>/dev/null; then
+      echo "❌ Commit blocked: Please update the placeholder destinations in redirects.ts"
       echo "   Search for 'REPLACE_WITH_NEW_PATH' and provide actual redirect paths."
     else
       echo "❌ Commit blocked: Please fix the redirect issues shown above."
@@ -82,8 +82,8 @@ if [ -n "$DELETED_PAGES" ] || [ -n "$RENAMED_PAGES" ]; then
 fi
 
 # --- Update Internal Links (when redirects are added) ---
-# If next.config.ts is staged, update any internal links pointing to redirected paths
-if git diff --cached --name-only | grep -q "next.config.ts"; then
+# If redirects.ts is staged, update any internal links pointing to redirected paths
+if git diff --cached --name-only | grep -q "redirects.ts"; then
   echo "🔗 Updating internal links for new redirects..."
 
   # Capture files already modified in working directory BEFORE running update-links

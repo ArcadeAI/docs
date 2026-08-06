@@ -11,22 +11,23 @@
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.ts";
+import type { MergedToolkit } from "../src/shared/toolkit-schemas.ts";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const DATA_DIR = resolveToolkitDataDir();
 
-const WORKSPACE_ROOT = join(__dirname, "..");
-const DATA_DIR = join(WORKSPACE_ROOT, "data", "toolkits");
-
-type ToolkitJson = {
-  id: string;
-  label: string;
-  documentationChunks?: Record<string, unknown>[];
-  customImports?: string[];
-  subPages?: Record<string, unknown>[];
-};
+/**
+ * This script only reads a handful of fields off each toolkit JSON file (it
+ * doesn't validate the whole document), so it declares the subset it needs
+ * as a `Pick` off the real generator schema type rather than re-describing
+ * the shape by hand.
+ */
+type ToolkitJson = Pick<
+  MergedToolkit,
+  "id" | "label" | "documentationChunks" | "customImports" | "subPages"
+>;
 
 export type ToolkitValidationDetail = {
   file: string;
