@@ -51,7 +51,6 @@ The docs site consumes the generated JSON directly:
 - `app/_lib/toolkit-data.ts` reads `toolkit-docs-generator/data/toolkits/<toolkit>.json`.
 - `app/_lib/toolkit-static-params.ts` builds routes from `index.json` and the design system catalog.
 - `app/_components/toolkit-docs` renders the toolkit page using `metadata.iconUrl`, `metadata.type`, and auth fields.
-- `app/en/resources/integrations/preview` uses the design system catalog for preview pages.
 - `app/en/resources/integrations/*/_meta.tsx` controls sidebar navigation for each category.
 
 ## Sidebar sync step (required for navigation)
@@ -62,7 +61,7 @@ The docs site consumes the generated JSON directly:
 - Uses the design system for category and label, with JSON label fallback.
 - Groups toolkits by category and writes `_meta.tsx` files per category.
 - Uses a fixed category order and alphabetical label order within each nav group.
-- Splits `optimized` vs `starter` using `metadata.type` (or an `*Api` fallback).
+- Splits `optimized` vs `starter` with a negative test: a toolkit is `starter` only when `metadata.type` is exactly `arcade_starter`, or its id ends in `Api`. Every other type falls through to `optimized`.
 - Does not prune categories unless you pass `--prune` (not used in the workflow).
 
 This step does not change JSON output. It only updates navigation files.
