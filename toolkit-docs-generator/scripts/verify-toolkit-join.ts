@@ -40,7 +40,7 @@ import {
   mergeToolkit,
 } from "../src/merger/data-merger.js";
 import { createDesignSystemMetadataSource } from "../src/sources/design-system-metadata.js";
-import type { IMetadataSource } from "../src/sources/interfaces.js";
+import type { IMetadataSource } from "../src/sources/internal.js";
 import { createMockMetadataSource } from "../src/sources/mock-metadata.js";
 import {
   createDesignSystemProviderIdResolver,
@@ -238,7 +238,7 @@ export type JoinParams = {
   enrichment: MergedToolkit;
   curation: CustomSections | null;
   metadata: ToolkitMetadata | null;
-  resolveProviderId?: ProviderIdResolver;
+  resolveProviderId?: ProviderIdResolver | undefined;
 };
 
 /**
@@ -321,7 +321,7 @@ export const verifyOneToolkit = async (params: {
   enrichment: MergedToolkit;
   curation: CustomSections | null;
   metadata: ToolkitMetadata | null;
-  resolveProviderId?: ProviderIdResolver;
+  resolveProviderId?: ProviderIdResolver | undefined;
 }): Promise<ToolkitVerification> => {
   const toolkitId = params.reference.id;
   const missing = missingCatalogTools(params.reference, params.catalogTools);
@@ -354,15 +354,16 @@ type CliOptions = {
   reference: string;
   enrichment: string;
   curation: string;
-  metadata?: string;
+  metadata?: string | undefined;
 };
 
 const parseArgs = (argv: string[]): CliOptions => {
   const values: Record<string, string> = {};
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i];
-    if (flag.startsWith("--") && argv[i + 1]) {
-      values[flag.slice(2)] = argv[i + 1];
+    const value = argv[i + 1];
+    if (flag?.startsWith("--") && value) {
+      values[flag.slice(2)] = value;
       i++;
     }
   }

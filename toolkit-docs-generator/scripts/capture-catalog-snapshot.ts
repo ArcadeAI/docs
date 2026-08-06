@@ -44,8 +44,9 @@ type CatalogSnapshot = {
 const parseArgs = (argv: string[]): CliOptions => {
   let out = DEFAULT_OUT;
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === "--out" && argv[i + 1]) {
-      out = argv[i + 1];
+    const value = argv[i + 1];
+    if (argv[i] === "--out" && value) {
+      out = value;
       i++;
     }
   }
