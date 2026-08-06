@@ -114,7 +114,7 @@ export interface ToolkitSummaryGenerator {
 }
 
 interface MergeToolkitOptions {
-  previousToolkit?: MergedToolkit;
+  previousToolkit?: MergedToolkit | undefined;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */

@@ -42,7 +42,7 @@ type CurationFile = {
   toolChunks?: Record<string, DocumentationChunk[]>;
 };
 
-const isNonEmptyArray = (value: unknown[] | undefined): boolean =>
+const isNonEmptyArray = <T>(value: T[] | undefined): value is T[] =>
   Array.isArray(value) && value.length > 0;
 
 /**
@@ -57,7 +57,7 @@ const extractToolChunks = (
   const toolChunks: Record<string, DocumentationChunk[]> = {};
   for (const tool of toolkit.tools ?? []) {
     if (isNonEmptyArray(tool.documentationChunks)) {
-      toolChunks[tool.name] = tool.documentationChunks as DocumentationChunk[];
+      toolChunks[tool.name] = tool.documentationChunks;
     }
   }
   return toolChunks;
