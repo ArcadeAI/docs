@@ -1,0 +1,827 @@
+{
+  "id": "Snowflake",
+  "label": "Snowflake",
+  "version": "0.1.0",
+  "description": "Tools to query and explore Snowflake with per-user, per-role access",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/snowflake.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/development/snowflake",
+    "isComingSoon": true,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "refresh_token"
+    ]
+  },
+  "tools": [
+    {
+      "name": "DiscoverDatabases",
+      "qualifiedName": "Snowflake.DiscoverDatabases",
+      "fullyQualifiedName": "Snowflake.DiscoverDatabases@0.1.0",
+      "description": "List the databases your role can access, newest-created first.\n\nSnowflake returns only databases your current role is granted, so this is\nalready a per-user answer. Take a `name` and use it to list that database's\nschemas. Use `name_pattern` to filter server-side rather than paging the\nwhole list.",
+      "parameters": [
+        {
+          "name": "name_pattern",
+          "type": "string",
+          "required": false,
+          "description": "Case-insensitive SQL LIKE pattern to filter database names, for example SALES% or %_RAW. Defaults to empty, which returns all of them.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum databases to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SNOWFLAKE_ACCOUNT_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Databases the caller's role can access"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Snowflake.DiscoverDatabases",
+        "parameters": {
+          "name_pattern": {
+            "value": "SALES%",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverSchemas",
+      "qualifiedName": "Snowflake.DiscoverSchemas",
+      "fullyQualifiedName": "Snowflake.DiscoverSchemas@0.1.0",
+      "description": "List the schemas in a database that your role can access.\n\nList the databases first to get a valid `database`. Then take a schema\n`name` and list that schema's tables.",
+      "parameters": [
+        {
+          "name": "database",
+          "type": "string",
+          "required": true,
+          "description": "The database to list schemas in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name_pattern",
+          "type": "string",
+          "required": false,
+          "description": "Case-insensitive SQL LIKE pattern to filter schema names, for example PUBLIC or %_STAGING. Defaults to empty, which returns all of them.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum schemas to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SNOWFLAKE_ACCOUNT_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Schemas in the database the caller's role can access"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Snowflake.DiscoverSchemas",
+        "parameters": {
+          "database": {
+            "value": "ANALYTICS_DB",
+            "type": "string",
+            "required": true
+          },
+          "name_pattern": {
+            "value": "%_STAGING",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverTables",
+      "qualifiedName": "Snowflake.DiscoverTables",
+      "fullyQualifiedName": "Snowflake.DiscoverTables@0.1.0",
+      "description": "List the tables and views in a schema that your role can query.\n\nList the schemas first to get a valid `database` and `schema_name`, then\nload a table's columns before querying it.\n\nEach row's `kind` is TABLE, VIEW, MATERIALIZED VIEW, or SEMANTIC VIEW. A\nSEMANTIC VIEW cannot be read with an ordinary SELECT: it needs Snowflake's\nSEMANTIC_VIEW(...) syntax, which this toolkit does not support, so skip\nthose when choosing something to query.",
+      "parameters": [
+        {
+          "name": "database",
+          "type": "string",
+          "required": true,
+          "description": "The database the schema lives in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": true,
+          "description": "The schema to list tables and views in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name_pattern",
+          "type": "string",
+          "required": false,
+          "description": "Case-insensitive SQL LIKE pattern to filter object names, for example ORDER% or %_FACT. Defaults to empty, which returns all of them.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum objects to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SNOWFLAKE_ACCOUNT_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Tables and views in the schema the caller's role can access"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Snowflake.DiscoverTables",
+        "parameters": {
+          "database": {
+            "value": "ANALYTICS_DB",
+            "type": "string",
+            "required": true
+          },
+          "schema_name": {
+            "value": "SALES",
+            "type": "string",
+            "required": true
+          },
+          "name_pattern": {
+            "value": "ORDER%",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverWarehouses",
+      "qualifiedName": "Snowflake.DiscoverWarehouses",
+      "fullyQualifiedName": "Snowflake.DiscoverWarehouses@0.1.0",
+      "description": "List the warehouses your role can run queries on.\n\nAn account usually has several, and Snowflake returns only the ones your\ncurrent role is granted, so this is already a per-user answer.\n\nYou only need this when a query has no warehouse to run on, either because\nyou have no default or because you want a different one. `size` is the cost\nsignal: prefer the smallest warehouse that fits the query. A SUSPENDED\nwarehouse is still usable, since Snowflake resumes it on use by default.",
+      "parameters": [
+        {
+          "name": "name_pattern",
+          "type": "string",
+          "required": false,
+          "description": "Case-insensitive SQL LIKE pattern to filter warehouse names, for example ANALYTICS% or %_WH. Defaults to empty, which returns all of them.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum warehouses to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SNOWFLAKE_ACCOUNT_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Warehouses the caller's role can use"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Snowflake.DiscoverWarehouses",
+        "parameters": {
+          "name_pattern": {
+            "value": "ANALYTICS%",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ExecuteSelectQuery",
+      "qualifiedName": "Snowflake.ExecuteSelectQuery",
+      "fullyQualifiedName": "Snowflake.ExecuteSelectQuery@0.1.0",
+      "description": "Run a read-only SELECT query and return the rows.\n\nOnly SELECT is allowed. Writes, DDL, role changes, and data movement are\nrejected before the query reaches Snowflake, so this tool cannot modify\nanything even if your Snowflake role would permit it.\n\nThe query runs under your own Snowflake identity, so your role and\nSnowflake's row-access and masking policies decide what you can read. Two\nusers running identical SQL can legitimately get different results.\n\nLoad the table's columns before calling this, and name the columns you want\nrather than selecting everything. `rows` is positional and\naligned to `columns`. `truncated` is true when more rows were available than\nwere returned.\n\nDo not put LIMIT, OFFSET, or SQL comments in any clause; use the `limit` and\n`offset` parameters, which are applied for you.",
+      "parameters": [
+        {
+          "name": "select_clause",
+          "type": "string",
+          "required": true,
+          "description": "The comma-separated columns to return, without the SELECT keyword.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_clause",
+          "type": "string",
+          "required": true,
+          "description": "The table to read, without the FROM keyword. Fully qualify it as database.schema.table, or quote it as \"DB\".\"SCHEMA\".\"TABLE\".",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum rows to return (1-1000). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting row. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "join_clause",
+          "type": "string",
+          "required": false,
+          "description": "A join. Omit the JOIN keyword for an inner join, for example orders o ON o.id = c.order_id. Include it for any other type, for example LEFT JOIN orders o ON o.id = c.order_id. Chain additional joins inside this one value. Defaults to empty, meaning no join.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "where_clause",
+          "type": "string",
+          "required": false,
+          "description": "A filter, without the WHERE keyword. Defaults to empty, meaning no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by_clause",
+          "type": "string",
+          "required": false,
+          "description": "Grouping columns, without the GROUP BY keyword. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "having_clause",
+          "type": "string",
+          "required": false,
+          "description": "A post-aggregation filter, without the HAVING keyword. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "qualify_clause",
+          "type": "string",
+          "required": false,
+          "description": "A filter over window-function results, without the QUALIFY keyword, for example ROW_NUMBER() OVER (PARTITION BY id ORDER BY ts DESC) = 1. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by_clause",
+          "type": "string",
+          "required": false,
+          "description": "Sort columns, without the ORDER BY keyword. Defaults to empty. Always sort when paging, otherwise row order is not stable between calls.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "with_clause",
+          "type": "string",
+          "required": false,
+          "description": "One or more CTEs, without the WITH keyword, for example recent AS (SELECT ...). Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "database",
+          "type": "string",
+          "required": false,
+          "description": "Session database so unqualified names resolve. Defaults to empty, meaning your own default database.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": false,
+          "description": "Session schema so unqualified names resolve. Defaults to empty, meaning your own default schema.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "warehouse",
+          "type": "string",
+          "required": false,
+          "description": "Warehouse to run on. Defaults to empty, meaning your own default warehouse.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SNOWFLAKE_ACCOUNT_SUBDOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The result columns and rows"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Snowflake.ExecuteSelectQuery",
+        "parameters": {
+          "select_clause": {
+            "value": "o.order_id, o.order_date, o.total_amount, c.customer_name, c.region",
+            "type": "string",
+            "required": true
+          },
+          "from_clause": {
+            "value": "SALES_DB.PUBLIC.ORDERS o",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "join_clause": {
+            "value": "LEFT JOIN SALES_DB.PUBLIC.CUSTOMERS c ON c.customer_id = o.customer_id",
+            "type": "string",
+            "required": false
+          },
+          "where_clause": {
+            "value": "o.order_date >= '2024-01-01' AND o.total_amount > 100",
+            "type": "string",
+            "required": false
+          },
+          "group_by_clause": {
+            "value": "o.order_id, o.order_date, o.total_amount, c.customer_name, c.region",
+            "type": "string",
+            "required": false
+          },
+          "having_clause": {
+            "value": "SUM(o.total_amount) > 500",
+            "type": "string",
+            "required": false
+          },
+          "qualify_clause": {
+            "value": "ROW_NUMBER() OVER (PARTITION BY c.customer_name ORDER BY o.order_date DESC) = 1",
+            "type": "string",
+            "required": false
+          },
+          "order_by_clause": {
+            "value": "o.order_date DESC, o.total_amount DESC",
+            "type": "string",
+            "required": false
+          },
+          "with_clause": {
+            "value": "recent_orders AS (SELECT order_id, customer_id, order_date, total_amount FROM SALES_DB.PUBLIC.ORDERS WHERE order_date >= '2024-01-01')",
+            "type": "string",
+            "required": false
+          },
+          "database": {
+            "value": "SALES_DB",
+            "type": "string",
+            "required": false
+          },
+          "schema_name": {
+            "value": "PUBLIC",
+            "type": "string",
+            "required": false
+          },
+          "warehouse": {
+            "value": "COMPUTE_WH",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTableSchema",
+      "qualifiedName": "Snowflake.GetTableSchema",
+      "fullyQualifiedName": "Snowflake.GetTableSchema@0.1.0",
+      "description": "Get a table or view's columns, so you can select exact fields.\n\nLoad this before running a query, and select named columns rather than\neverything. Works on views as well as tables. A not-found error usually\nmeans the object is not granted to your role; re-check the table listing.",
+      "parameters": [
+        {
+          "name": "database",
+          "type": "string",
+          "required": true,
+          "description": "The database the table lives in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": true,
+          "description": "The schema the table lives in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": true,
+          "description": "The table or view to describe.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum columns to return (1-500). Defaults to 200.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SNOWFLAKE_ACCOUNT_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The table's columns: name, type, nullability, comment"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Snowflake.GetTableSchema",
+        "parameters": {
+          "database": {
+            "value": "SALES_DB",
+            "type": "string",
+            "required": true
+          },
+          "schema_name": {
+            "value": "PUBLIC",
+            "type": "string",
+            "required": true
+          },
+          "table": {
+            "value": "ORDERS",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Snowflake.WhoAmI",
+      "fullyQualifiedName": "Snowflake.WhoAmI@0.1.0",
+      "description": "Return the Snowflake identity every other tool uses, and the warehouse.\n\nThe role is the important field. It is what decides which objects the other\ntools can see and which rows and cells come back, so two people calling the\nsame tool with the same arguments can legitimately get different data.\n\nPass `current_warehouse` straight through as the warehouse argument when\nrunning a query. If it comes back empty this user has no default warehouse,\nand a query must name one. The warehouse discovery tool lists the ones this\nrole may use, cheapest first by `size`.\n\nThis is the only place identity is reported. It runs no caller-supplied SQL,\nso what it returns is always the identity the other tools will run under.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "refresh_token"
+        ]
+      },
+      "secrets": [
+        "SNOWFLAKE_ACCOUNT_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SNOWFLAKE_ACCOUNT_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The Snowflake identity in effect, and the current warehouse"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Snowflake.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-08-06T11:47:14.761Z",
+  "summary": "## Snowflake Toolkit\n\nArcade's Snowflake toolkit provides read-only, per-user access to Snowflake — enabling agents and apps to explore schema structure and execute SELECT queries under each caller's own Snowflake identity and role.\n\n## Capabilities\n\n- **Identity & access inspection:** Retrieve the active Snowflake user, role, and default warehouse; all other tools operate under this identity, so two users issuing identical calls can legitimately receive different results.\n- **Schema discovery (databases → schemas → tables → columns):** Progressively explore the object hierarchy — list accessible databases, then schemas within a database, then tables/views within a schema, then column definitions for a specific table or view — filtered server-side to only what the caller's role is granted.\n- **Warehouse discovery:** List warehouses the caller's role can use (smallest = cheapest); needed when no default warehouse is configured or a different size is preferred.\n- **Safe SELECT execution:** Run arbitrary read-only SQL; writes, DDL, role changes, and data movement are rejected before reaching Snowflake. Supports `limit`/`offset` pagination parameters; returns column names, rows, and a `truncated` flag.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 to authenticate each user with Snowflake. Arcade manages the OAuth flow; refer to the Arcade auth-provider documentation for setup details. *(Provider-specific docs link unavailable — provider ID not supplied.)*\n\n## Secrets\n\n- **`SNOWFLAKE_ACCOUNT_SUBDOMAIN`** — The account identifier subdomain for your Snowflake account (e.g., `xy12345.us-east-1` or an organization-format identifier like `myorg-myaccount`). This is the hostname prefix used to construct your Snowflake account URL (`<subdomain>.snowflakecomputing.com`). You can find it in the Snowflake UI under **Admin → Accounts**, or by inspecting the URL you use to log in. See [Snowflake account identifier docs](https://docs.snowflake.com/en/user-guide/admin-account-identifier) for format details.\n\nConfigure secrets in the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets). For guidance on referencing secrets in tools, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+}
