@@ -1,0 +1,276 @@
+---
+title: Snowflake
+description: Authorize tools and agents to query Snowflake as the signed-in user, under that user's own role
+---
+
+import { Tabs, Callout, Steps } from "nextra/components";
+
+# Snowflake
+
+The Snowflake auth provider lets tools and agents query Snowflake on behalf of a user. Each end user signs in to Snowflake themselves, and every query runs as that user, with their own Snowflake role. There is no shared login, no stored password, and no role set in configuration.
+
+<Callout>
+  **Snowflake still decides who sees what.** Arcade does not change or work
+  around anything you have set up there. Whatever a person can query in
+  Snowflake is what the agent can query for them, and nothing more. Two people
+  asking the same question can get different answers. Take a grant away in
+  Snowflake and the next call reflects it.
+</Callout>
+
+<Callout>
+  Snowflake is configured as a custom OAuth 2.0 provider. Snowflake's OAuth
+  endpoints are unique to your account, so you bring your own security
+  integration credentials and endpoints. The generic [OAuth 2.0
+  provider](/references/auth-providers/oauth2) page is the underlying
+  configuration reference.
+</Callout>
+
+## What's documented here
+
+This is the setup guide for Snowflake auth. It covers creating the OAuth security integration in Snowflake, registering it in Arcade, and giving each person a role. Work through it in order.
+
+The [Arcade Snowflake toolkit](/resources/integrations/development/snowflake) is already published, so there is nothing to build or deploy. It needs this provider and one secret. What its tools do, and what they return, is documented on that page.
+
+Once the provider exists, you can also use it from:
+
+- An [agentic client](#use-snowflake-from-an-agentic-client) (Claude Code, Claude Desktop, Cursor, or your own agent) connected to an Arcade MCP gateway
+- Your [custom tools](#create-your-own-snowflake-authorized-tools) that query Snowflake
+
+<Callout type="warning">
+  Give the provider the ID `snowflake`. That is the name the published toolkit
+  asks for. Under any other name, authorization fails.
+</Callout>
+
+## Create a Snowflake security integration
+
+<Callout type="info">
+  When using your own app credentials, make sure you configure your project to
+  use a [custom user
+  verifier](/guides/user-facing-agents/secure-auth-production#build-a-custom-user-verifier).
+  Without this, your end-users will not be able to use your app or agent in
+  production.
+</Callout>
+
+These are account-level changes. Run them as `ACCOUNTADMIN`, or as a role granted `CREATE INTEGRATION ON ACCOUNT`. Owning a database is not enough, and neither is `SYSADMIN`, so get whoever holds that role involved before you start.
+
+Snowflake requires a redirect URI when the integration is created, but you need this integration's client ID and secret before you can configure the provider in Arcade. Create the integration with a placeholder, then replace it with the redirect URI Arcade shows you in a later step.
+
+```sql
+USE ROLE ACCOUNTADMIN;
+
+CREATE SECURITY INTEGRATION arcade_snowflake_oauth
+  TYPE = OAUTH
+  ENABLED = TRUE
+  OAUTH_CLIENT = CUSTOM
+  OAUTH_CLIENT_TYPE = 'CONFIDENTIAL'
+  OAUTH_REDIRECT_URI = 'https://example.com/placeholder'
+  OAUTH_ISSUE_REFRESH_TOKENS = TRUE
+  OAUTH_REFRESH_TOKEN_VALIDITY = 7776000
+  BLOCKED_ROLES_LIST = ('ACCOUNTADMIN', 'SECURITYADMIN')
+  COMMENT = 'Per-user OAuth for the Arcade Snowflake toolkit';
+```
+
+Three of these settings matter:
+
+- `OAUTH_ISSUE_REFRESH_TOKENS = TRUE` is required. Without it, access tokens expire after roughly ten minutes and every tool call afterwards fails until the user authorizes again.
+- No `session:role:` scope is asked for anywhere in this setup. That is what makes Snowflake fall back to each user's own `DEFAULT_ROLE`, which is what gives every person their own access.
+- `BLOCKED_ROLES_LIST` stops a sign-in from landing on the roles you name, whatever a user's default role is set to. Snowflake already blocks `ACCOUNTADMIN`, `ORGADMIN`, `GLOBALORGADMIN`, and `SECURITYADMIN` by default. Add any other privileged role you do not want an agent session running as, such as `SYSADMIN` and `USERADMIN`.
+
+Then read the client credentials:
+
+```sql
+SELECT SYSTEM$SHOW_OAUTH_CLIENT_SECRETS('ARCADE_SNOWFLAKE_OAUTH');
+```
+
+Type the integration name in uppercase. Snowflake stores it that way, and the function matches the stored name, not what you typed when you created it. The result is JSON holding `OAUTH_CLIENT_ID` and `OAUTH_CLIENT_SECRET`.
+
+## Get your account subdomain
+
+Both OAuth endpoints and the toolkit's one secret come from your account subdomain, the part of your Snowflake account URL before `.snowflakecomputing.com`:
+
+```text
+https://<account-subdomain>.snowflakecomputing.com
+```
+
+It looks like either `myorg-myaccount` or the older style `xy12345.us-east-1`.
+
+<Callout type="warning">
+  The same Snowflake account answers to more than one host name: the
+  organization one, the older locator one, and privatelink ones. A token only
+  works against the host name it came from, so use the same one in the secret
+  and in both endpoint URLs. Mix them and tokens come back rejected. Signing in
+  again gets you another token that fails the same way, so fix the names rather
+  than retrying.
+</Callout>
+
+## Configuring Snowflake auth
+
+<Tabs items={["Dashboard GUI"]}>
+<Tabs.Tab>
+
+### Configure Snowflake auth using the Arcade Dashboard
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard) and log in with your Arcade account credentials.
+
+#### Navigate to the OAuth providers page
+
+- Under the **Connections** section of the Arcade Dashboard left-side menu, click **Connected Apps**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **Custom Provider** tab at the top.
+
+#### Enter the provider details
+
+- Enter `snowflake` as the **ID** for your provider. The published Snowflake toolkit requires this exact ID.
+- Optionally enter a **Description**.
+- Enter the **Client ID** and **Client Secret** returned by `SYSTEM$SHOW_OAUTH_CLIENT_SECRETS`.
+- Note the **Redirect URI** generated by Arcade. Copy it exactly as shown, including any path segments. You'll add it to Snowflake in a later step.
+
+#### Configure the auth endpoints
+
+<Callout type="info">
+  Replace `<account-subdomain>` with your [account
+  subdomain](#get-your-account-subdomain), for example `myorg-myaccount`.
+</Callout>
+
+- **Authorization Endpoint**: `https://<account-subdomain>.snowflakecomputing.com/oauth/authorize`
+- **Token Endpoint**: `https://<account-subdomain>.snowflakecomputing.com/oauth/token-request`
+- Under **Authorization Settings**, leave the `scope` parameter at its default, `{{scopes}} {{existing_scopes}}`. The toolkit's tools request `refresh_token`, so that is what Snowflake receives.
+
+<Callout type="warning">
+  The token endpoint is `/oauth/token-request`, not `/oauth/token`. Snowflake is
+  unusual here, and the resulting failure does not say so.
+
+  `refresh_token` is the only scope this setup requests. Snowflake also supports
+  a `session:role:<ROLE_NAME>` scope, but do not request it here: it pins every
+  session to a single role, which takes away the per-user access this whole
+  setup is for. Leaving it out is what makes Snowflake fall back to that
+  user's own default role.
+</Callout>
+
+#### Add the redirect URI to Snowflake
+
+Copy the **Redirect URI** that Arcade generated and set it on the security integration, replacing the placeholder:
+
+```sql
+USE ROLE ACCOUNTADMIN;
+
+ALTER SECURITY INTEGRATION arcade_snowflake_oauth
+  SET OAUTH_REDIRECT_URI = '<the redirect URI Arcade generated>';
+```
+
+Use `ALTER` rather than `CREATE OR REPLACE`. Replacing an existing integration issues a new client ID and secret, which silently breaks the provider until you enter the new values in Arcade.
+
+#### Create the provider
+
+Click the **Create** button. Snowflake is now ready to be used in the Arcade Engine.
+
+</Steps>
+</Tabs.Tab>
+</Tabs>
+
+## Set the account subdomain secret
+
+The toolkit needs to know which account to connect to. Set the `SNOWFLAKE_ACCOUNT_SUBDOMAIN` secret in the Arcade Dashboard:
+
+- Click the **Secrets** section in the Arcade Dashboard left-side menu.
+- Click the **Add Secret** button.
+- Enter `SNOWFLAKE_ACCOUNT_SUBDOMAIN` as the secret ID.
+- Enter your [account subdomain](#get-your-account-subdomain) as the secret value.
+- Click the **Create** button.
+
+This is an address, not a password. Pasting the whole account URL works too: the toolkit trims off `https://`, anything after the host, and the `.snowflakecomputing.com` ending before it connects.
+
+## Give each user a role
+
+Each user's `DEFAULT_ROLE` is the role their sessions start in. Grant the role and set it as the default:
+
+```sql
+USE ROLE SECURITYADMIN;
+GRANT ROLE analytics_read_only TO USER analyst_jane;
+
+USE ROLE USERADMIN;
+ALTER USER analyst_jane SET
+  DEFAULT_ROLE      = analytics_read_only
+  DEFAULT_WAREHOUSE = analytics_wh;
+```
+
+`DEFAULT_WAREHOUSE` is optional. Setting it saves a step. Without it, the agent lists the warehouses the role can use and names one itself.
+
+### Check what a person can reach
+
+To confirm what a given user will get before they authorize:
+
+```sql
+-- The default role and warehouse their sessions will use
+DESC USER analyst_jane;
+
+-- Every role granted to them
+SHOW GRANTS TO USER analyst_jane;
+
+-- What one of those roles can read
+SHOW GRANTS TO ROLE analytics_read_only;
+```
+
+After they authorize, `Snowflake.WhoAmI` reports the user, role, account, and warehouse the agent is actually running as, which is the fastest way to confirm the session matches what you configured.
+
+Secondary roles stay on, at Snowflake's account default. A session can read anything any of that user's granted roles can read, not just the default one. Check the full list with `SHOW GRANTS TO USER`.
+
+<Callout type="info">
+  Grant `SELECT` on `FUTURE` tables and views, not just the ones that exist
+  today. Skip this and any table made next month is missing from what the
+  agent can see.
+</Callout>
+
+## Use Snowflake from an agentic client
+
+<Steps>
+
+### Add the Snowflake toolkit
+
+The [Snowflake toolkit](/resources/integrations/development/snowflake) is published, so add it to your Arcade project. It appears in the Arcade Dashboard under **Servers**, and each tool shows the Snowflake provider it requires.
+
+### Connect your agentic client to an MCP gateway
+
+Create an [MCP gateway](/guides/mcp-gateways) that exposes the toolkit's tools, then connect your client to the gateway URL (`https://api.arcade.dev/mcp/<your-gateway>`).
+
+### Call a tool
+
+Ask the agent a question about your data. The first time, Arcade hands back a Snowflake sign-in link. The person signs in, and the tool runs as them, with their role. After that it just works.
+
+</Steps>
+
+<Callout type="info">
+  Signing in happens in a browser. If multi-factor authentication gets in the
+  way, a short bypass that expires on its own is enough to get through it:
+  `ALTER USER <user> SET MINS_TO_BYPASS_MFA = 15;`. A pending password change
+  also stops the sign-in part way, so clear `MUST_CHANGE_PASSWORD` first.
+  Arcade keeps the session alive afterwards, so this comes up again only when
+  the refresh token expires or is revoked.
+</Callout>
+
+## Create your own Snowflake-authorized tools
+
+Tools that query Snowflake are built like any other Arcade tool, so follow the [Add user authorization to your tools](/guides/create-tools/tool-basics/create-tool-auth) and [Build an MCP server](/guides/create-tools/tool-basics/build-mcp-server) guides.
+
+The only Snowflake-specific part is the auth requirement on each tool, plus reading the account subdomain from context:
+
+```python
+from arcade_mcp_server import Context, tool
+from arcade_mcp_server.auth import OAuth2
+
+@tool(
+    requires_auth=OAuth2(id="snowflake", scopes=["refresh_token"]),
+    requires_secrets=["SNOWFLAKE_ACCOUNT_SUBDOMAIN"],
+)
+async def count_rows(context: Context, table: str) -> int:
+    """Count the rows in a table, as the calling user."""
+    account = context.get_secret("SNOWFLAKE_ACCOUNT_SUBDOMAIN")
+    token = context.get_auth_token_or_empty()
+    ...
+```
+
+Pass the token to `snowflake.connector.connect()` with `authenticator="oauth"`, and do not pass a `role`. Leaving the role out is what lets Snowflake fall back to each person's own default role.

@@ -66,7 +66,15 @@ export function resolveIndexToolkits(
       }
       seen.add(link);
     }
-    resolved.push({ ...toolkit, hasPage });
+
+    // "Coming soon" means there is nothing to read yet, so derive it from
+    // whether a page exists rather than trusting the design-system flag. That
+    // flag is a hand-maintained constant in a published package, so it goes
+    // stale the moment a toolkit ships and keeps a live toolkit looking
+    // unavailable. Deriving it here also keeps the badge and the sort order
+    // (`use-toolkit-filters`) reading the same value, which they previously
+    // did not.
+    resolved.push({ ...toolkit, hasPage, isComingSoon: !hasPage });
   }
 
   return resolved;
