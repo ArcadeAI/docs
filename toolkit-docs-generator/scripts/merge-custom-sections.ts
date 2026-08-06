@@ -8,7 +8,15 @@
  */
 
 import { readdir, readFile, writeFile } from "fs/promises";
-import { join } from "path";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
+/**
+ * Anchored on this file rather than the working directory, so the defaults
+ * below mean the same thing from the repo root and from
+ * toolkit-docs-generator/. Both are still overridable by flag.
+ */
+const GENERATOR_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const JSON_PRETTY_PRINT_INDENT = 2;
 const ERROR_PREVIEW_LIMIT = 10;
@@ -54,8 +62,13 @@ type MergeOutcome = {
 };
 
 const parseArgs = (args: string[]): MergeOptions => {
-  let customSectionsPath = "../data/custom_sections_for_merge.json";
-  let toolkitsDir = "data/toolkits";
+  let customSectionsPath = join(
+    GENERATOR_ROOT,
+    "..",
+    "data",
+    "custom_sections_for_merge.json"
+  );
+  let toolkitsDir = join(GENERATOR_ROOT, "data", "toolkits");
   let verbose = false;
 
   for (let i = 0; i < args.length; i++) {
