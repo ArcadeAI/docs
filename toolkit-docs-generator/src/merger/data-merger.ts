@@ -82,6 +82,8 @@ export interface DataMergerConfig {
   skipToolkitIds?: ReadonlySet<string> | undefined;
   /** When true, only process toolkits with metadata and tools */
   requireCompleteData?: boolean;
+  /** Preserve previous output for a broken toolkit instead of failing the run. */
+  preserveLastKnownGood?: boolean;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
   resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
 }
@@ -98,6 +100,8 @@ export interface MergeResult {
   warnings: string[];
   failedTools: FailedTool[];
   error?: string;
+  /** A recoverable failure retained prior output or omitted a new toolkit. */
+  recovery?: "preserved" | "omitted";
   /**
    * True when the design system had no metadata for this toolkit and
    * `getDefaultMetadata`'s placeholder (category, icon, docsLink, and
@@ -1015,6 +1019,7 @@ export class DataMerger {
     | undefined;
   private readonly skipToolkitIds: ReadonlySet<string>;
   private readonly requireCompleteData: boolean;
+  private readonly preserveLastKnownGood: boolean;
   private readonly resolveProviderId:
     | ((toolkitId: string) => string | null)
     | undefined;
@@ -1033,6 +1038,7 @@ export class DataMerger {
     this.onToolkitComplete = config.onToolkitComplete;
     this.skipToolkitIds = config.skipToolkitIds ?? new Set();
     this.requireCompleteData = config.requireCompleteData ?? false;
+    this.preserveLastKnownGood = config.preserveLastKnownGood ?? false;
     this.resolveProviderId = config.resolveProviderId;
   }
 
@@ -1058,6 +1064,7 @@ export class DataMerger {
         warnings: [`Error processing toolkit: ${message}`],
         failedTools: [],
         error: message,
+        recovery: "preserved",
         usedDefaultMetadata: false,
       };
     }
@@ -1093,8 +1100,29 @@ export class DataMerger {
       warnings: [`Error processing toolkit: ${message}`],
       failedTools: [],
       error: message,
+      recovery: "omitted",
       usedDefaultMetadata: true,
     };
+  }
+
+  private async recoverMissingMetadata(
+    toolkitId: string,
+    toolkitData: ToolkitData
+  ): Promise<MergeResult | undefined> {
+    if (!this.preserveLastKnownGood || toolkitData.metadata !== null) {
+      return;
+    }
+
+    const previousToolkit = this.getPreviousToolkit(toolkitId);
+    const result = this.buildMergeErrorResult(
+      toolkitId,
+      "missing design-system metadata",
+      previousToolkit
+    );
+    if (this.onToolkitComplete && previousToolkit) {
+      await this.onToolkitComplete(result);
+    }
+    return result;
   }
 
   private async mergeToolkitEntry(
@@ -1102,9 +1130,16 @@ export class DataMerger {
     toolkitData: ToolkitData
   ): Promise<MergeResult> {
     try {
+      const recovered = await this.recoverMissingMetadata(
+        toolkitId,
+        toolkitData
+      );
+      if (recovered) {
+        return recovered;
+      }
+
       const customSections =
         await this.customSectionsSource.getCustomSections(toolkitId);
-
       const previousToolkit = this.getPreviousToolkit(toolkitId);
       const result = await mergeToolkit(
         toolkitId,

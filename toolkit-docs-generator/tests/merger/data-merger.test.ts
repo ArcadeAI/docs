@@ -2076,6 +2076,51 @@ describe("DataMerger", () => {
       expect(results[0]?.toolkit.id).toBe("Github");
     });
 
+    it("preserves prior output when metadata is missing in resilient publishing mode", async () => {
+      const previous = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections(),
+        createStubGenerator()
+      );
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
+      });
+
+      const [result] = await merger.mergeAllToolkits();
+
+      expect(result?.recovery).toBe("preserved");
+      expect(result?.toolkit).toEqual(previous.toolkit);
+      expect(result?.error).toContain("missing design-system metadata");
+    });
+
+    it("omits a new toolkit when metadata is missing in resilient publishing mode", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        preserveLastKnownGood: true,
+      });
+
+      const [result] = await merger.mergeAllToolkits();
+
+      expect(result?.recovery).toBe("omitted");
+      expect(result?.error).toContain("missing design-system metadata");
+    });
+
     it("fails the run and names every toolkit missing design-system metadata when requireCompleteData is true", async () => {
       // Silently dropping (the old behavior) or silently fabricating
       // metadata for these toolkits are both worse than failing loudly:

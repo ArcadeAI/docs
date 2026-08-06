@@ -903,6 +903,11 @@ program
     false
   )
   .option(
+    "--preserve-last-known-good",
+    "Publish healthy toolkits while preserving prior docs for recoverable toolkit failures",
+    false
+  )
+  .option(
     "--exclude-file <file>",
     "Path to a .txt file with toolkit IDs to skip and delete existing output for (one per line, e.g. remove-toolkits.txt)"
   )
@@ -982,6 +987,7 @@ program
       incremental: boolean;
       skipUnchanged: boolean;
       requireComplete: boolean;
+      preserveLastKnownGood: boolean;
       excludeFile?: string;
       ignoreFile?: string;
       verbose: boolean;
@@ -998,6 +1004,7 @@ program
       const spinner = ora("Parsing input...").start();
       const logPaths = buildLogPaths(resolve(options.logDir));
       const requireComplete = options.requireComplete;
+      const preserveLastKnownGood = options.preserveLastKnownGood;
 
       let excludedToolkitIds = new Set<string>();
       if (options.excludeFile) {
@@ -1463,6 +1470,7 @@ program
           ...(runAll ? { onToolkitProgress } : {}),
           ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
           requireCompleteData: requireComplete,
+          preserveLastKnownGood,
           ...(onToolkitComplete ? { onToolkitComplete } : {}),
           ...(resolveProviderId ? { resolveProviderId } : {}),
         });
@@ -1587,6 +1595,7 @@ program
               onToolkitProgress,
               ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
               requireCompleteData: requireComplete,
+              preserveLastKnownGood,
               ...(onToolkitComplete ? { onToolkitComplete } : {}),
               ...(resolveProviderId ? { resolveProviderId } : {}),
             });
@@ -1637,7 +1646,9 @@ program
         // Error results can still carry a last-known-good toolkit fallback from
         // the merger. Keep them in the batch output so one failed merge cannot
         // silently remove that toolkit from index.json.
-        const writableResults = allResults;
+        const writableResults = allResults.filter(
+          (result) => result.recovery !== "omitted"
+        );
 
         // Generate output files (batch mode if not incremental)
         if (!useIncremental && writableResults.length > 0) {
@@ -1786,6 +1797,12 @@ program
           0
         );
         const failedToolkits = mergeFailures.map((result) => result.toolkit.id);
+        const preservedToolkits = mergeFailures
+          .filter((result) => result.recovery === "preserved")
+          .map((result) => result.toolkit.id);
+        const omittedToolkits = mergeFailures
+          .filter((result) => result.recovery === "omitted")
+          .map((result) => result.toolkit.id);
         const failedTools = allResults.flatMap((result) => result.failedTools);
         const failedToolkitsFromTools = Array.from(
           new Set(failedTools.map((tool) => tool.toolkitId))
@@ -1808,6 +1825,7 @@ program
           `mode=${runAll ? "all" : "providers"}`,
           `skipUnchanged=${options.skipUnchanged}`,
           `requireComplete=${requireComplete}`,
+          `preserveLastKnownGood=${preserveLastKnownGood}`,
           `filesWritten=${filesWritten.length}`,
           `warnings=${warningCount}`,
           `writeErrors=${writeErrors.length}`,
@@ -1832,6 +1850,12 @@ program
         if (failedToolkits.length > 0) {
           runDetails.push(`failedToolkits=${failedToolkits.join(", ")}`);
         }
+        if (preservedToolkits.length > 0) {
+          runDetails.push(`preservedToolkits=${preservedToolkits.join(", ")}`);
+        }
+        if (omittedToolkits.length > 0) {
+          runDetails.push(`omittedToolkits=${omittedToolkits.join(", ")}`);
+        }
         if (failedTools.length > 0) {
           runDetails.push(`failedTools=${failedTools.length}`);
         }
@@ -1848,6 +1872,8 @@ program
           generatedAt: new Date().toISOString(),
           toolkits: failedToolkitsFromTools,
           failedToolkits,
+          preservedToolkits,
+          omittedToolkits,
           tools: failedTools,
         });
 
@@ -1855,7 +1881,10 @@ program
           title: "generate",
           details: runDetails,
         });
-        if (mergeFailures.length > 0 || writeErrors.length > 0) {
+        if (
+          writeErrors.length > 0 ||
+          (mergeFailures.length > 0 && !preserveLastKnownGood)
+        ) {
           process.exitCode = 1;
         }
       } catch (error) {
