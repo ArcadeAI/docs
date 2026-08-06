@@ -18,10 +18,17 @@
  * so diffs stay small; the schema fills them back in with defaults on read.
  */
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
-import { join } from "path";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 
-const TOOLKITS_DIR = "data/toolkits";
-const CURATION_DIR = "curation";
+/**
+ * Anchored on this file rather than the working directory: the sibling
+ * generator scripts resolve their paths from the repo root, so bare relative
+ * paths here would only work when invoked from toolkit-docs-generator/.
+ */
+const GENERATOR_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const TOOLKITS_DIR = join(GENERATOR_ROOT, "data", "toolkits");
+const CURATION_DIR = join(GENERATOR_ROOT, "curation");
 const JSON_INDENT = 2;
 
 type DocumentationChunk = Record<string, unknown>;
