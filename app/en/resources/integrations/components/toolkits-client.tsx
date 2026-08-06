@@ -182,12 +182,10 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                       icon={IconComponent}
                       iconUrl={iconUrl}
                       isByoc={toolkit.isBYOC}
-                      // Doc-less toolkits have no page; render them as
-                      // non-clickable (coming-soon) cards instead of links to
-                      // a 404.
-                      isComingSoon={
-                        toolkit.isComingSoon || toolkit.hasPage === false
-                      }
+                      // Resolved in `resolveIndexToolkits` from whether a page
+                      // exists, so doc-less toolkits still render as
+                      // non-clickable cards instead of links to a 404.
+                      isComingSoon={toolkit.isComingSoon}
                       isPartner={toolkit.isPartner}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
