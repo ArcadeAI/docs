@@ -1407,6 +1407,11 @@ export class DataMerger {
       version
     );
 
+    const recovered = await this.recoverMissingMetadata(toolkitId, toolkitData);
+    if (recovered) {
+      return recovered;
+    }
+
     // Fetch custom sections
     const customSections =
       await this.customSectionsSource.getCustomSections(toolkitId);

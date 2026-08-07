@@ -2103,6 +2103,33 @@ describe("DataMerger", () => {
       expect(result?.error).toContain("missing design-system metadata");
     });
 
+    it("preserves prior output for provider-mode generation when metadata is missing", async () => {
+      const previous = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections(),
+        createStubGenerator()
+      );
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.recovery).toBe("preserved");
+      expect(result.toolkit).toEqual(previous.toolkit);
+      expect(result.error).toContain("missing design-system metadata");
+    });
+
     it("omits a new toolkit when metadata is missing in resilient publishing mode", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),
