@@ -1,4 +1,4 @@
-import { mkdtemp, rm, writeFile } from "fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -104,6 +104,63 @@ describe("CustomSectionsFileSource", () => {
 
     await expect(source.getAllCustomSections()).rejects.toThrow(
       `Custom sections file has invalid schema (${filePath})`
+    );
+  });
+
+  it("loads a directory of per-toolkit files keyed by file name", async () => {
+    tempDir = await createTempDir();
+    const dirPath = join(tempDir, "curation");
+    await mkdir(dirPath);
+    await writeFile(
+      join(dirPath, "github.json"),
+      JSON.stringify(
+        {
+          documentationChunks: [
+            {
+              type: "warning",
+              location: "description",
+              position: "after",
+              content: "Prose",
+            },
+          ],
+        },
+        null,
+        2
+      )
+    );
+    await writeFile(
+      join(dirPath, "slack.json"),
+      JSON.stringify({ customImports: ["import X from 'x';"] }, null, 2)
+    );
+
+    const source = createCustomSectionsFileSource(dirPath);
+
+    const github = await source.getCustomSections("Github");
+    expect(github?.documentationChunks).toHaveLength(1);
+    // File stem "github" matches toolkit id "Github" via normalization.
+    expect(github?.customImports).toEqual([]);
+
+    const slack = await source.getCustomSections("Slack");
+    expect(slack?.customImports).toEqual(["import X from 'x';"]);
+
+    const all = await source.getAllCustomSections();
+    expect(Object.keys(all).sort()).toEqual(["github", "slack"]);
+  });
+
+  it("throws a helpful error when a directory file has an invalid schema", async () => {
+    tempDir = await createTempDir();
+    const dirPath = join(tempDir, "curation");
+    await mkdir(dirPath);
+    const badPath = join(dirPath, "github.json");
+    await writeFile(
+      badPath,
+      JSON.stringify({ documentationChunks: "not-an-array" }, null, 2)
+    );
+
+    const source = createCustomSectionsFileSource(dirPath);
+
+    await expect(source.getAllCustomSections()).rejects.toThrow(
+      `Custom sections file has invalid schema (${badPath})`
     );
   });
 
