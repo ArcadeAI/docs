@@ -20,9 +20,14 @@ test("porter workflow includes required triggers", () => {
 });
 
 test("porter workflow generates docs and opens a PR", () => {
-  expect(workflowContents).toContain("pnpm dlx tsx src/cli/index.ts generate");
+  expect(workflowContents).toContain(
+    "../node_modules/.bin/tsx src/cli/index.ts generate"
+  );
+  // pnpm dlx resolves an unpinned tsx from the registry on every run, so the
+  // nightly's TypeScript runtime would drift outside the lockfile.
+  expect(workflowContents).not.toContain("pnpm dlx");
   expect(workflowContents).toContain("--skip-unchanged");
-  expect(workflowContents).toContain("--require-complete");
+  expect(workflowContents).toContain("--preserve-last-known-good");
   expect(workflowContents).toContain("--verbose");
   expect(workflowContents).toContain("--api-source tool-metadata");
   expect(workflowContents).toContain("--tool-metadata-url");
@@ -72,6 +77,13 @@ test("porter workflow alerts Slack when generation fails", () => {
   // escaped backslash followed by "n" and Slack would print a literal "\n".
   expect(workflowContents).toContain("generation failed\\n\\n*Workflow run:*");
   expect(workflowContents).not.toContain("\\\\n");
+});
+
+test("porter workflow warns when it preserves or omits a broken toolkit", () => {
+  expect(workflowContents).toContain("preservedToolkits");
+  expect(workflowContents).toContain("omittedToolkits");
+  expect(workflowContents).toContain("Continuing to serve previous docs");
+  expect(workflowContents).toContain("No docs are being served");
 });
 
 test("workflow dispatch keeps default full-run behavior", () => {

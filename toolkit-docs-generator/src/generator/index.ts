@@ -1,5 +1,5 @@
 /**
  * Generator module exports
  */
-export * from "./json-generator.js";
-export * from "./output-verifier.js";
+export * from "./json-generator";
+export * from "./output-verifier";

@@ -1,11 +1,11 @@
-import type { ToolDefinition } from "../types/index.js";
-import type { FetchOptions, IToolDataSource } from "./internal.js";
+import type { ToolDefinition } from "../types/index";
+import type { FetchOptions, IToolDataSource } from "./internal";
 import {
   parseToolMetadataError,
   parseToolMetadataResponse,
   parseToolMetadataSummaryResponse,
   type ToolMetadataSummary,
-} from "./tool-metadata-schema.js";
+} from "./tool-metadata-schema";
 
 export interface EngineApiSourceConfig {
   /** Base URL for Engine (e.g., https://api.arcade.dev) */

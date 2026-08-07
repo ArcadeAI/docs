@@ -48,11 +48,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate toolkit docs
+        # Invoked by path rather than through `pnpm exec`, which would reset the
+        # working directory to the repo root and break the relative paths below.
         run: |
-          pnpm dlx tsx src/cli/index.ts generate \
+          ../node_modules/.bin/tsx src/cli/index.ts generate \
             --all \
             --skip-unchanged \
-            --require-complete \
+            --preserve-last-known-good \
             --verbose \
             --api-source tool-metadata \
             --tool-metadata-url "$ENGINE_API_URL" \
@@ -81,7 +83,7 @@ jobs:
           ANTHROPIC_EDITOR_MODEL: ${{ secrets.ANTHROPIC_EDITOR_MODEL || 'claude-sonnet-4-6' }}
 
       - name: Sync toolkit sidebar navigation
-        run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
+        run: pnpm exec tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
       - name: Create pull request
         id: cpr
@@ -111,6 +113,32 @@ jobs:
         run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
         env:
           GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+
+      - name: Warn #proj-docs about preserved or omitted toolkit docs
+        continue-on-error: true
+        run: |
+          report=toolkit-docs-generator-verification/logs/failed-tools.json
+          if [ ! -f "$report" ]; then
+            exit 0
+          fi
+
+          preserved=$(jq -r '(.preservedToolkits // []) | join(", ")' "$report")
+          omitted=$(jq -r '(.omittedToolkits // []) | join(", ")' "$report")
+          if [ -z "$preserved" ] && [ -z "$omitted" ]; then
+            exit 0
+          fi
+
+          payload=$(jq -n \
+            --arg run_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            --arg preserved "$preserved" \
+            --arg omitted "$omitted" \
+            '{text: (":warning: Toolkit docs generation completed with recoverable failures\n\n*Workflow run:* <" + $run_url + "|Open run>" + (if $preserved != "" then "\n*Continuing to serve previous docs:* " + $preserved else "" end) + (if $omitted != "" then "\n*No docs are being served (no prior output):* " + $omitted else "" end))}')
+
+          curl --fail-with-body --silent --show-error \
+            -X POST \
+            -H "Content-Type: application/json" \
+            --data "$payload" \
+            "${{ secrets.SLACK_PROJ_DOCS_WEBHOOK_URL }}"
 
   alert:
     name: Alert on generation failure

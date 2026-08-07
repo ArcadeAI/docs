@@ -6,12 +6,12 @@ import {
   detectStaleSecretReferences,
   groupStaleRefsByTarget,
   hasCoherenceIssues,
-} from "../../src/merger/secret-coherence.js";
+} from "../../src/merger/secret-coherence";
 import type {
   DocumentationChunk,
   MergedTool,
   MergedToolkit,
-} from "../../src/types/index.js";
+} from "../../src/types/index";
 
 const chunk = (
   overrides: Partial<DocumentationChunk> = {}

@@ -6,8 +6,8 @@ import {
   getChangedToolkitIdsFromSummary,
   hasSummaryChanges,
   type SummaryToolkit,
-} from "../../src/diff/index.js";
-import type { MergedToolkit } from "../../src/types/index.js";
+} from "../../src/diff/index";
+import type { MergedToolkit } from "../../src/types/index";
 
 const createMergedToolkit = (id: string, version: string): MergedToolkit => ({
   id,

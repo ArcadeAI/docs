@@ -7,10 +7,10 @@
  */
 import { access, readFile } from "fs/promises";
 import { z } from "zod";
-import type { ToolkitMetadata } from "../types/index.js";
-import { ToolkitMetadataSchema } from "../types/index.js";
-import { normalizeId } from "../utils/fp.js";
-import type { IMetadataSource } from "./internal.js";
+import type { ToolkitMetadata } from "../types/index";
+import { ToolkitMetadataSchema } from "../types/index";
+import { normalizeId } from "../utils/fp";
+import type { IMetadataSource } from "./internal";
 
 // ============================================================================
 // File Schema

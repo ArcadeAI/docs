@@ -6,13 +6,10 @@
  */
 import { access, readFile } from "fs/promises";
 import { z } from "zod";
-import type { CustomSections } from "../types/index.js";
-import {
-  DocumentationChunkSchema,
-  ToolkitSubPageSchema,
-} from "../types/index.js";
-import { normalizeId } from "../utils/fp.js";
-import type { ICustomSectionsSource } from "./interfaces.js";
+import type { CustomSections } from "../types/index";
+import { DocumentationChunkSchema, ToolkitSubPageSchema } from "../types/index";
+import { normalizeId } from "../utils/fp";
+import type { ICustomSectionsSource } from "./interfaces";
 
 // ============================================================================
 // File Schema

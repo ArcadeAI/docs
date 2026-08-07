@@ -12,8 +12,8 @@
 import {
   ARCADE_SECRETS_DASHBOARD_URL,
   ARCADE_SECRETS_DOC_URL,
-} from "../merger/secret-coherence.js";
-import type { LlmClient } from "./client.js";
+} from "../merger/secret-coherence";
+import type { LlmClient } from "./client";
 
 export interface SecretEditGeneratorConfig {
   readonly client: LlmClient;

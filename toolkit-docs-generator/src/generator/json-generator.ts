@@ -6,17 +6,14 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
 import { dirname, join } from "path";
-import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output";
 import type {
   MergedToolkit,
   ToolkitIndex,
   ToolkitIndexEntry,
-} from "../types/index.js";
-import { MergedToolkitSchema } from "../types/index.js";
-import {
-  readToolkitsFromDir,
-  type ToolkitReadResult,
-} from "./output-verifier.js";
+} from "../types/index";
+import { MergedToolkitSchema } from "../types/index";
+import { readToolkitsFromDir, type ToolkitReadResult } from "./output-verifier";
 
 const SAFE_TOOLKIT_ID = /^[a-z0-9][a-z0-9_-]*$/i;
 const RESERVED_TOOLKIT_ID = "index";

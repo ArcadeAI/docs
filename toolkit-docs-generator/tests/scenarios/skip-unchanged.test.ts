@@ -9,8 +9,9 @@ import {
   detectChanges,
   getChangedToolkitIds,
   hasChanges,
-} from "../../src/diff/index.js";
-import type { MergedToolkit, ToolDefinition } from "../../src/types/index.js";
+} from "../../src/diff/index";
+import type { CurrentToolkitDiffInput } from "../../src/diff/toolkit-diff";
+import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
 
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
@@ -197,7 +198,7 @@ describe("Scenario: Skip unchanged toolkits", () => {
   });
 
   it("includes metadata-only changes in changed IDs", () => {
-    const currentToolkitData = new Map([
+    const currentToolkitData = new Map<string, CurrentToolkitDiffInput>([
       [
         "Github",
         {

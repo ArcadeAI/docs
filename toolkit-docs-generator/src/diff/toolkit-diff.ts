@@ -8,14 +8,14 @@
 import {
   buildComparableToolSignature,
   stableStringify,
-} from "../merger/data-merger.js";
+} from "../merger/data-merger";
 import type {
   MergedTool,
   MergedToolkit,
   ToolDefinition,
   ToolkitMetadata,
-} from "../types/index.js";
-import { extractVersion } from "../utils/index.js";
+} from "../types/index";
+import { extractVersion } from "../utils/index";
 
 // ============================================================================
 // Types

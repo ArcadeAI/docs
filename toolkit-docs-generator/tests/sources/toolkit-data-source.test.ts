@@ -5,18 +5,18 @@
  * abstraction returns tools + metadata together.
  */
 import { describe, expect, it } from "vitest";
-import { createDesignSystemMetadataSourceFromToolkits } from "../../src/sources/design-system-metadata.js";
+import { createDesignSystemMetadataSourceFromToolkits } from "../../src/sources/design-system-metadata";
 import {
   InMemoryMetadataSource,
   InMemoryToolDataSource,
-} from "../../src/sources/in-memory.js";
-import type { IMetadataSource } from "../../src/sources/internal.js";
+} from "../../src/sources/in-memory";
+import type { IMetadataSource } from "../../src/sources/internal";
 import {
   createCachedToolkitDataSource,
   createCombinedToolkitDataSource,
   type IToolkitDataSource,
-} from "../../src/sources/toolkit-data-source.js";
-import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index.js";
+} from "../../src/sources/toolkit-data-source";
+import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index";
 
 const createTool = (
   overrides: Partial<ToolDefinition> = {}

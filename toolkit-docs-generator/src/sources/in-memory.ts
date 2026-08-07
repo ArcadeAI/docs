@@ -9,14 +9,14 @@ import type {
   CustomSections,
   ToolDefinition,
   ToolkitMetadata,
-} from "../types/index.js";
-import { normalizeId } from "../utils/fp.js";
-import type { ICustomSectionsSource } from "./interfaces.js";
+} from "../types/index";
+import { normalizeId } from "../utils/fp";
+import type { ICustomSectionsSource } from "./interfaces";
 import type {
   FetchOptions,
   IMetadataSource,
   IToolDataSource,
-} from "./internal.js";
+} from "./internal";
 
 // ============================================================================
 // In-Memory Tool Data Source

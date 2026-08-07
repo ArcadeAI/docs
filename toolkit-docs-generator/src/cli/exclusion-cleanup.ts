@@ -1,6 +1,6 @@
 import { resolve } from "path";
-import type { RebuildIndexResult } from "../generator/json-generator.js";
-import { removeExcludedToolkitFiles } from "../utils/excluded-output-cleanup.js";
+import type { RebuildIndexResult } from "../generator/json-generator";
+import { removeExcludedToolkitFiles } from "../utils/excluded-output-cleanup";
 
 type RebuildIndexGenerator = {
   rebuildIndexFromOutput: () => Promise<RebuildIndexResult>;

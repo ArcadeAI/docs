@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   readFailedToolsReport,
   writeFailedToolsReport,
-} from "../../src/utils/run-logs.js";
+} from "../../src/utils/run-logs";
 
 const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   const dir = await mkdtemp(join(tmpdir(), "toolkit-logs-"));
