@@ -21,6 +21,7 @@ import {
   formatChangeSummary,
   formatDetailedChanges,
   getChangedToolkitIds,
+  getChangedToolkitIdsFromCustomSections,
   hasChanges,
 } from "../diff/index.js";
 import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
@@ -1339,6 +1340,14 @@ program
             currentToolkitDataForDiff,
             previousToolkits ?? new Map()
           );
+          const changedCustomSectionIds = new Set(
+            options.customSections
+              ? getChangedToolkitIdsFromCustomSections(
+                  await customSectionsSource.getAllCustomSections(),
+                  previousToolkits ?? new Map()
+                ).map((id) => id.toLowerCase())
+              : []
+          );
           const compareDurationMs = Date.now() - compareStartedAt;
           if (options.verbose) {
             console.log(
@@ -1365,7 +1374,10 @@ program
             }
           }
 
-          if (!hasChanges(detectedChanges)) {
+          if (
+            !hasChanges(detectedChanges) &&
+            changedCustomSectionIds.size === 0
+          ) {
             spinner.succeed(
               "No changes detected. All toolkits are up to date."
             );
@@ -1405,7 +1417,12 @@ program
           }
 
           // Get IDs of changed toolkits
-          const changedIds = getChangedToolkitIds(detectedChanges);
+          const changedIds = [
+            ...new Set([
+              ...getChangedToolkitIds(detectedChanges),
+              ...changedCustomSectionIds,
+            ]),
+          ];
           changedToolkitIds = new Set(changedIds.map((id) => id.toLowerCase()));
           changeResult = detectedChanges;
           const changedPreview =
