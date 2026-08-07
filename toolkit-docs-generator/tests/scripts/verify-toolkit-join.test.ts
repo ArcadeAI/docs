@@ -10,11 +10,13 @@
  * catches injected drift and missing catalog items.
  */
 import { readdirSync, readFileSync } from "fs";
-import { join } from "path";
+import { join, resolve } from "path";
+import { pathToFileURL } from "url";
 import { describe, expect, it } from "vitest";
 import {
   curationFromToolkit,
   firstDifference,
+  isInvokedDirectly,
   joinToolkit,
   missingCatalogTools,
   verifyOneToolkit,
@@ -123,6 +125,7 @@ describe("curationFromToolkit", () => {
     const sections = curationFromToolkit({
       tools: [
         {
+          name: "CreateIssue",
           qualifiedName: "Github.CreateIssue",
           documentationChunks: [
             {
@@ -137,7 +140,7 @@ describe("curationFromToolkit", () => {
     } as MergedToolkit);
 
     expect(sections.toolChunks).toEqual({
-      "Github.CreateIssue": [
+      CreateIssue: [
         {
           type: "warning",
           location: "description",
@@ -146,6 +149,19 @@ describe("curationFromToolkit", () => {
         },
       ],
     });
+  });
+});
+
+describe("isInvokedDirectly", () => {
+  it("recognizes a relative script path", () => {
+    expect(
+      isInvokedDirectly(
+        pathToFileURL(
+          resolve("toolkit-docs-generator/scripts/verify-toolkit-join.ts")
+        ).href,
+        "toolkit-docs-generator/scripts/verify-toolkit-join.ts"
+      )
+    ).toBe(true);
   });
 });
 

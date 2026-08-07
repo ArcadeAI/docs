@@ -33,7 +33,7 @@
  * matching catalog item.
  */
 import { readdir, readFile } from "fs/promises";
-import { join } from "path";
+import { join, resolve } from "path";
 import { fileURLToPath } from "url";
 import {
   groupToolsByToolkit,
@@ -229,7 +229,7 @@ export const curationFromToolkit = (toolkit: MergedToolkit): CustomSections => {
   > = {};
   for (const tool of toolkit.tools ?? []) {
     if (tool.documentationChunks && tool.documentationChunks.length > 0) {
-      toolChunks[tool.qualifiedName] = tool.documentationChunks;
+      toolChunks[tool.name] = tool.documentationChunks;
     }
   }
 
@@ -486,9 +486,13 @@ async function main(): Promise<void> {
   console.log("Parity verified: 0 differences.");
 }
 
-const invokedDirectly =
-  process.argv[1] !== undefined &&
-  fileURLToPath(import.meta.url) === process.argv[1];
+export const isInvokedDirectly = (
+  moduleUrl: string,
+  argv1: string | undefined
+): boolean =>
+  argv1 !== undefined && fileURLToPath(moduleUrl) === resolve(argv1);
+
+const invokedDirectly = isInvokedDirectly(import.meta.url, process.argv[1]);
 
 if (invokedDirectly) {
   main().catch((error) => {
