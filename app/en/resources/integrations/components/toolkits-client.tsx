@@ -109,7 +109,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                   <Button
                     className="mt-3"
                     render={
-                      <Link href="/guides/create-tools/tool-basics/build-mcp-server" />
+                      <Link href="/build/create-tools/tool-basics/build-mcp-server" />
                     }
                     size="sm"
                   >

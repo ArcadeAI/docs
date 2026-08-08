@@ -12,7 +12,7 @@ These are the guidelines for writing documentation for Arcade, to help keep the 
 
 - **Active voice**: Write in an active voice to make the instructions direct and easy to follow. Example: “Install Arcade” rather than “Arcade should be installed.”
 - **Friendly and supportive**: Assume the reader is unfamiliar with Arcade but is eager to learn. Keep the tone positive, friendly, and approachable.
-- **Developer-focused**: Tailor your language to a developer audience, using code-centric explanations but ensuring clarity for beginners. Assume the reader knows Python but might be unfamiliar with Arcade’s specifics.
+- **Persona-aware**: Arcade docs serve **agent developers** (Get Started, Build) and **platform operators** (Operate). Open each page by naming who it is for. For agent developers, use code-centric explanations and assume basic Python knowledge. For platform operators, emphasize deployment, identity, and governance; link out to Build when code samples belong there.
 - **Encouraging exploration**: Use phrases that invite readers to try things out and explore the capabilities of Arcade. Example: “Let’s try…” or “You can explore…”
 
 ## Examples and code
