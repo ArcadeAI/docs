@@ -327,39 +327,10 @@ export function LandingPage() {
             </h3>
             <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-2">
               <QuickStartCard
-                description="Browse 7,500+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
-                href={INTEGRATIONS_PAGE_HREF}
-                icon={Puzzle}
-                logos={[
-                  { src: "/images/icons/gmail.png", alt: "Gmail" },
-                  { src: "/images/icons/slack.png", alt: "Slack" },
-                  {
-                    src: "/images/icons/github.png",
-                    alt: "GitHub",
-                    invertInLight: true,
-                  },
-                  {
-                    src: "/images/icons/google_sheets.svg",
-                    alt: "Google Sheets",
-                  },
-                  { src: "/images/icons/jira.svg", alt: "Jira" },
-                  { src: "/images/icons/notion.png", alt: "Notion" },
-                  { src: "/images/icons/linear.svg", alt: "Linear" },
-                  { src: "/images/icons/hubspot.png", alt: "HubSpot" },
-                  { src: "/images/icons/stripe.svg", alt: "Stripe" },
-                  {
-                    src: "/images/icons/google_drive.png",
-                    alt: "Google Drive",
-                  },
-                  { src: "/images/icons/dropbox.png", alt: "Dropbox" },
-                  {
-                    src: "/images/icons/confluence.svg",
-                    alt: "Confluence",
-                    invertInDark: true,
-                  },
-                  { src: "/images/icons/reddit.png", alt: "Reddit" },
-                ]}
-                title="Pre-built integrations"
+                description="Call Arcade tools from your agent framework in minutes."
+                href="/get-started/quickstarts/call-tool-agent"
+                icon={Rocket}
+                title="Agent quickstart"
               />
             </div>
             <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-3">
@@ -371,14 +342,6 @@ export function LandingPage() {
               />
             </div>
             <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-4">
-              <QuickStartCard
-                description="Call Arcade tools from your agent framework in minutes."
-                href="/get-started/quickstarts/call-tool-agent"
-                icon={Rocket}
-                title="Agent quickstart"
-              />
-            </div>
-            <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-5">
               <QuickStartCard
                 description="Connect Cursor, VS Code, Claude, or any MCP client — or use AG2, LangChain, and more."
                 href="/get-started/agent-frameworks"
@@ -427,6 +390,43 @@ export function LandingPage() {
                 title="Identity & governance"
               />
             </div>
+          </div>
+          <div className="mx-auto mt-8 max-w-4xl">
+            <QuickStartCard
+              description="Browse 7,500+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
+              href={INTEGRATIONS_PAGE_HREF}
+              icon={Puzzle}
+              logos={[
+                { src: "/images/icons/gmail.png", alt: "Gmail" },
+                { src: "/images/icons/slack.png", alt: "Slack" },
+                {
+                  src: "/images/icons/github.png",
+                  alt: "GitHub",
+                  invertInLight: true,
+                },
+                {
+                  src: "/images/icons/google_sheets.svg",
+                  alt: "Google Sheets",
+                },
+                { src: "/images/icons/jira.svg", alt: "Jira" },
+                { src: "/images/icons/notion.png", alt: "Notion" },
+                { src: "/images/icons/linear.svg", alt: "Linear" },
+                { src: "/images/icons/hubspot.png", alt: "HubSpot" },
+                { src: "/images/icons/stripe.svg", alt: "Stripe" },
+                {
+                  src: "/images/icons/google_drive.png",
+                  alt: "Google Drive",
+                },
+                { src: "/images/icons/dropbox.png", alt: "Dropbox" },
+                {
+                  src: "/images/icons/confluence.svg",
+                  alt: "Confluence",
+                  invertInDark: true,
+                },
+                { src: "/images/icons/reddit.png", alt: "Reddit" },
+              ]}
+              title="Pre-built integrations"
+            />
           </div>
         </div>
       </section>
