@@ -42,14 +42,14 @@ export const meta: MetaRecord = {
   "get-started": {
     title: <TitleWithIcon icon={BookOpen}>Get Started</TitleWithIcon>,
   },
-  resources: {
-    title: <TitleWithIcon icon={Pencil}>Resources</TitleWithIcon>,
-  },
   build: {
     title: <TitleWithIcon icon={Ruler}>Build</TitleWithIcon>,
   },
   operate: {
     title: <TitleWithIcon icon={ServerCog}>Operate</TitleWithIcon>,
+  },
+  resources: {
+    title: <TitleWithIcon icon={Pencil}>Resources</TitleWithIcon>,
   },
   learn: {
     title: <TitleWithIcon icon={Book}>Learn</TitleWithIcon>,
