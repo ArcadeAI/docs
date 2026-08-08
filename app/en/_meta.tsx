@@ -45,11 +45,11 @@ export const meta: MetaRecord = {
   resources: {
     title: <TitleWithIcon icon={Pencil}>Resources</TitleWithIcon>,
   },
-  operate: {
-    title: <TitleWithIcon icon={ServerCog}>Operate</TitleWithIcon>,
-  },
   build: {
     title: <TitleWithIcon icon={Ruler}>Build</TitleWithIcon>,
+  },
+  operate: {
+    title: <TitleWithIcon icon={ServerCog}>Operate</TitleWithIcon>,
   },
   learn: {
     title: <TitleWithIcon icon={Book}>Learn</TitleWithIcon>,
