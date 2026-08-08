@@ -163,7 +163,7 @@ export default async function RootLayout({
               <SignupLink linkLocation="docs:navbar" utmMedium="navbar">
                 <NavBarButton
                   hideOnPath={[
-                    "/guides/create-tools/add-tools-to-arcade-catalog",
+                    "/build/create-tools/add-tools-to-arcade-catalog",
                   ]}
                   text="Sign Up"
                 />
