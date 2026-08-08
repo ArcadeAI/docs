@@ -40,8 +40,8 @@ export function remarkGlossary(options: RemarkGlossaryOptions) {
     // readers. The User Sources overview itself stays opted-in.
     const filePath = file.history?.[0];
     if (
-      filePath?.includes("/operate/user-sources/") &&
-      !filePath.endsWith("/operate/user-sources/page.mdx")
+      filePath?.includes("/operate/identity/user-sources/") &&
+      !filePath.endsWith("/operate/identity/user-sources/page.mdx")
     ) {
       return;
     }

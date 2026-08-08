@@ -80,22 +80,22 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/logic-extensions",
-    destination: "/:locale/operate/contextual-access",
+    destination: "/:locale/operate/governance/contextual-access",
     permanent: true,
   },
   {
     source: "/:locale/guides/logic-extensions/build-your-own",
-    destination: "/:locale/operate/contextual-access/build-your-own",
+    destination: "/:locale/operate/governance/contextual-access/build-your-own",
     permanent: true,
   },
   {
     source: "/:locale/guides/logic-extensions/examples",
-    destination: "/:locale/operate/contextual-access/examples",
+    destination: "/:locale/operate/governance/contextual-access/examples",
     permanent: true,
   },
   {
     source: "/:locale/guides/logic-extensions/how-hooks-work",
-    destination: "/:locale/operate/contextual-access/how-hooks-work",
+    destination: "/:locale/operate/governance/contextual-access/how-hooks-work",
     permanent: true,
   },
   {
@@ -273,7 +273,7 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/create-tools/mcp-gateways",
-    destination: "/:locale/operate/mcp-gateways",
+    destination: "/:locale/operate/governance/mcp-gateways",
     permanent: true,
   },
   {
@@ -521,12 +521,12 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/deployment/arcade-cloud-infra",
-    destination: "/:locale/operate/deployment/arcade-cloud",
+    destination: "/:locale/operate/deploy/arcade-cloud",
     permanent: true,
   },
   {
     source: "/:locale/home/deployment/engine-configuration",
-    destination: "/:locale/operate/deployment/helm",
+    destination: "/:locale/operate/deploy/helm",
     permanent: true,
   },
   {
@@ -568,7 +568,7 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/hosting-overview",
-    destination: "/:locale/operate/deployment",
+    destination: "/:locale/operate/deploy",
     permanent: true,
   },
   {
@@ -609,7 +609,7 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/mcp-gateways",
-    destination: "/:locale/operate/mcp-gateways",
+    destination: "/:locale/operate/governance/mcp-gateways",
     permanent: true,
   },
   {
@@ -634,7 +634,7 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/serve-tools/hybrid-worker",
-    destination: "/:locale/operate/deployment/on-prem",
+    destination: "/:locale/operate/deploy/on-prem",
     permanent: true,
   },
   {
@@ -729,12 +729,12 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/deployment-hosting/engine-configuration",
-    destination: "/:locale/operate/deployment/helm",
+    destination: "/:locale/operate/deploy/helm",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/configure-engine",
-    destination: "/:locale/operate/deployment/helm",
+    destination: "/:locale/operate/deploy/helm",
     permanent: true,
   },
   {
@@ -1003,122 +1003,239 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/audit-logs",
-    destination: "/:locale/operate/audit-logs",
+    destination: "/:locale/operate/governance/audit-logs",
     permanent: true,
   },
   {
     source: "/:locale/guides/contextual-access/build-your-own",
-    destination: "/:locale/operate/contextual-access/build-your-own",
+    destination: "/:locale/operate/governance/contextual-access/build-your-own",
     permanent: true,
   },
   {
     source: "/:locale/guides/contextual-access/examples",
-    destination: "/:locale/operate/contextual-access/examples",
+    destination: "/:locale/operate/governance/contextual-access/examples",
     permanent: true,
   },
   {
     source: "/:locale/guides/contextual-access/how-hooks-work",
-    destination: "/:locale/operate/contextual-access/how-hooks-work",
+    destination: "/:locale/operate/governance/contextual-access/how-hooks-work",
     permanent: true,
   },
   {
     source: "/:locale/guides/contextual-access",
-    destination: "/:locale/operate/contextual-access",
+    destination: "/:locale/operate/governance/contextual-access",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/arcade-cloud",
-    destination: "/:locale/operate/deployment/arcade-cloud",
+    destination: "/:locale/operate/deploy/arcade-cloud",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/aws",
-    destination: "/:locale/operate/deployment/aws",
+    destination: "/:locale/operate/deploy/aws",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/azure",
-    destination: "/:locale/operate/deployment/azure",
+    destination: "/:locale/operate/deploy/azure",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/gcp",
-    destination: "/:locale/operate/deployment/gcp",
+    destination: "/:locale/operate/deploy/gcp",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/helm",
-    destination: "/:locale/operate/deployment/helm",
+    destination: "/:locale/operate/deploy/helm",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/on-prem",
-    destination: "/:locale/operate/deployment/on-prem",
+    destination: "/:locale/operate/deploy/on-prem",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting",
-    destination: "/:locale/operate/deployment",
+    destination: "/:locale/operate/deploy",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/warp-pipes",
-    destination: "/:locale/operate/deployment/warp-pipes",
+    destination: "/:locale/operate/deploy/warp-pipes",
     permanent: true,
   },
   {
     source: "/:locale/guides/mcp-gateways/add-remote-servers",
-    destination: "/:locale/operate/mcp-gateways/add-remote-servers",
+    destination: "/:locale/operate/governance/mcp-gateways/add-remote-servers",
     permanent: true,
   },
   {
     source: "/:locale/guides/mcp-gateways/create-via-ai",
-    destination: "/:locale/operate/mcp-gateways/create-via-ai",
+    destination: "/:locale/operate/governance/mcp-gateways/create-via-ai",
     permanent: true,
   },
   {
     source: "/:locale/guides/mcp-gateways/create-via-dashboard",
-    destination: "/:locale/operate/mcp-gateways/create-via-dashboard",
+    destination:
+      "/:locale/operate/governance/mcp-gateways/create-via-dashboard",
     permanent: true,
   },
   {
     source: "/:locale/guides/mcp-gateways",
-    destination: "/:locale/operate/mcp-gateways",
+    destination: "/:locale/operate/governance/mcp-gateways",
     permanent: true,
   },
   {
     source: "/:locale/guides/user-sources/auth0",
-    destination: "/:locale/operate/user-sources/auth0",
+    destination: "/:locale/operate/identity/user-sources/auth0",
     permanent: true,
   },
   {
     source: "/:locale/guides/user-sources/clerk",
-    destination: "/:locale/operate/user-sources/clerk",
+    destination: "/:locale/operate/identity/user-sources/clerk",
     permanent: true,
   },
   {
     source: "/:locale/guides/user-sources/microsoft-entra-id",
-    destination: "/:locale/operate/user-sources/microsoft-entra-id",
+    destination: "/:locale/operate/identity/user-sources/microsoft-entra-id",
     permanent: true,
   },
   {
     source: "/:locale/guides/user-sources/okta",
-    destination: "/:locale/operate/user-sources/okta",
+    destination: "/:locale/operate/identity/user-sources/okta",
     permanent: true,
   },
   {
     source: "/:locale/guides/user-sources",
-    destination: "/:locale/operate/user-sources",
+    destination: "/:locale/operate/identity/user-sources",
     permanent: true,
   },
   {
     source: "/:locale/guides/user-sources/stytch",
-    destination: "/:locale/operate/user-sources/stytch",
+    destination: "/:locale/operate/identity/user-sources/stytch",
     permanent: true,
   },
   {
     source: "/:locale/guides",
     destination: "/:locale/build",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/deployment",
+    destination: "/:locale/operate/deploy",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/deployment/arcade-cloud",
+    destination: "/:locale/operate/deploy/arcade-cloud",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/deployment/aws",
+    destination: "/:locale/operate/deploy/aws",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/deployment/azure",
+    destination: "/:locale/operate/deploy/azure",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/deployment/gcp",
+    destination: "/:locale/operate/deploy/gcp",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/deployment/helm",
+    destination: "/:locale/operate/deploy/helm",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/deployment/on-prem",
+    destination: "/:locale/operate/deploy/on-prem",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/deployment/warp-pipes",
+    destination: "/:locale/operate/deploy/warp-pipes",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/user-sources",
+    destination: "/:locale/operate/identity/user-sources",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/user-sources/auth0",
+    destination: "/:locale/operate/identity/user-sources/auth0",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/user-sources/clerk",
+    destination: "/:locale/operate/identity/user-sources/clerk",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/user-sources/microsoft-entra-id",
+    destination: "/:locale/operate/identity/user-sources/microsoft-entra-id",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/user-sources/okta",
+    destination: "/:locale/operate/identity/user-sources/okta",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/user-sources/stytch",
+    destination: "/:locale/operate/identity/user-sources/stytch",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/mcp-gateways",
+    destination: "/:locale/operate/governance/mcp-gateways",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/mcp-gateways/add-remote-servers",
+    destination: "/:locale/operate/governance/mcp-gateways/add-remote-servers",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/mcp-gateways/create-via-ai",
+    destination: "/:locale/operate/governance/mcp-gateways/create-via-ai",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/mcp-gateways/create-via-dashboard",
+    destination:
+      "/:locale/operate/governance/mcp-gateways/create-via-dashboard",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/contextual-access",
+    destination: "/:locale/operate/governance/contextual-access",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/contextual-access/build-your-own",
+    destination: "/:locale/operate/governance/contextual-access/build-your-own",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/contextual-access/examples",
+    destination: "/:locale/operate/governance/contextual-access/examples",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/contextual-access/how-hooks-work",
+    destination: "/:locale/operate/governance/contextual-access/how-hooks-work",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/audit-logs",
+    destination: "/:locale/operate/governance/audit-logs",
     permanent: true,
   },
 ];

@@ -377,7 +377,7 @@ export function LandingPage() {
             <div className="min-[1062px]:col-start-2 min-[1062px]:row-start-3">
               <QuickStartCard
                 description="Arcade Cloud, cloud marketplaces, or self-host with Helm."
-                href="/operate/deployment"
+                href="/operate/deploy"
                 icon={Cog}
                 title="Deployment & hosting"
               />

@@ -7,20 +7,14 @@ export const meta: MetaRecord = {
   quickstart: {
     title: "Quickstart",
   },
-  deployment: {
-    title: "Deployment & hosting",
+  deploy: {
+    title: "Deploy",
   },
-  "user-sources": {
-    title: "User Sources",
+  identity: {
+    title: "Identity",
   },
-  "mcp-gateways": {
-    title: "MCP Gateways",
-  },
-  "contextual-access": {
-    title: "Contextual Access",
-  },
-  "audit-logs": {
-    title: "Audit Logs",
+  governance: {
+    title: "Governance",
   },
 };
 
