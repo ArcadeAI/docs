@@ -6,10 +6,10 @@
  * when the API endpoint is ready.
  */
 import { readFile } from "fs/promises";
-import type { ToolDefinition } from "../types/index.js";
-import { normalizeId } from "../utils/fp.js";
-import type { FetchOptions, IToolDataSource } from "./internal.js";
-import { parseToolMetadataResponse } from "./tool-metadata-schema.js";
+import type { ToolDefinition } from "../types/index";
+import { normalizeId } from "../utils/fp";
+import type { FetchOptions, IToolDataSource } from "./internal";
+import { parseToolMetadataResponse } from "./tool-metadata-schema";
 
 export interface MockEngineApiConfig {
   /** Path to the JSON fixture file */

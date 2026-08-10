@@ -14,7 +14,7 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir.ts";
+import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir";
 
 const TOOLKITS_DIR = resolveToolkitDataDir();
 
@@ -39,18 +39,29 @@ const listToolkitFiles = (): string[] => {
   }
 };
 
-const main = (): number => {
+const readToolkitShape = (
+  file: string
+): { toolkit: ToolkitShape } | { error: string } => {
+  try {
+    const raw = readFileSync(join(TOOLKITS_DIR, file), "utf8");
+    return { toolkit: JSON.parse(raw) as ToolkitShape };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return { error: message };
+  }
+};
+
+const collectStaleSummaries = (
+  files: string[]
+): Array<{ file: string; id: string; reason: string }> => {
   const stale: Array<{ file: string; id: string; reason: string }> = [];
-  for (const file of listToolkitFiles()) {
-    let toolkit: ToolkitShape;
-    try {
-      const raw = readFileSync(join(TOOLKITS_DIR, file), "utf8");
-      toolkit = JSON.parse(raw) as ToolkitShape;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error(`✗ Cannot parse ${file}: ${message}`);
-      return 1;
+  for (const file of files) {
+    const result = readToolkitShape(file);
+    if ("error" in result) {
+      console.error(`✗ Cannot parse ${file}: ${result.error}`);
+      throw new Error(`Cannot parse ${file}`);
     }
+    const toolkit = result.toolkit;
     if (toolkit.summaryStale === true) {
       stale.push({
         file,
@@ -61,6 +72,16 @@ const main = (): number => {
             : "unknown",
       });
     }
+  }
+  return stale;
+};
+
+const main = (): number => {
+  let stale: Array<{ file: string; id: string; reason: string }>;
+  try {
+    stale = collectStaleSummaries(listToolkitFiles());
+  } catch {
+    return 1;
   }
 
   if (stale.length === 0) {

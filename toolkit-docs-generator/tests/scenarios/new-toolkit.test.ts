@@ -11,15 +11,15 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 
-import { createJsonGenerator } from "../../src/generator/index.js";
-import { createDataMerger } from "../../src/merger/data-merger.js";
+import { createJsonGenerator } from "../../src/generator/index";
+import { createDataMerger } from "../../src/merger/data-merger";
 import {
   EmptyCustomSectionsSource,
   InMemoryMetadataSource,
   InMemoryToolDataSource,
-} from "../../src/sources/in-memory.js";
-import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
-import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index.js";
+} from "../../src/sources/in-memory";
+import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source";
+import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index";
 
 const createTool = (
   overrides: Partial<ToolDefinition> = {}

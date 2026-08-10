@@ -13,7 +13,7 @@
  * These scanners return structured issues. Remediation (LLM-driven edits or
  * warnings) is performed by callers in the merger pipeline.
  */
-import type { DocumentationChunk, MergedToolkit } from "../types/index.js";
+import type { DocumentationChunk, MergedToolkit } from "../types/index";
 
 export const ARCADE_SECRETS_DOC_URL =
   "https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets";

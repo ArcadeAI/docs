@@ -2,16 +2,16 @@
  * Data sources exports
  */
 
-export * from "./arcade-api.js";
-export * from "./arcade-api-types.js";
-export * from "./custom-sections-file.js";
-export * from "./design-system-metadata.js";
-export * from "./engine-api.js";
-export * from "./in-memory.js";
-export * from "./interfaces.js";
-export * from "./mock-engine-api.js";
-export * from "./mock-metadata.js";
-export * from "./oauth-provider-resolver.js";
-export * from "./toolkit-data-source.js";
+export * from "./arcade-api";
+export * from "./arcade-api-types";
+export * from "./custom-sections-file";
+export * from "./design-system-metadata";
+export * from "./engine-api";
+export * from "./in-memory";
+export * from "./interfaces";
+export * from "./mock-engine-api";
+export * from "./mock-metadata";
+export * from "./oauth-provider-resolver";
+export * from "./toolkit-data-source";
 
 // Note: Design System source requires @arcadeai/design-system to be installed.

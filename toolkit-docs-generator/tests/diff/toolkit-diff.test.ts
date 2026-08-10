@@ -10,13 +10,13 @@ import {
   formatDetailedChanges,
   getChangedToolkitIds,
   hasChanges,
-} from "../../src/diff/toolkit-diff.js";
+} from "../../src/diff/toolkit-diff";
 import type {
   MergedTool,
   MergedToolkit,
   ToolDefinition,
   ToolkitMetadata,
-} from "../../src/types/index.js";
+} from "../../src/types/index";
 
 // ============================================================================
 // Test Fixtures

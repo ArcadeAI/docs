@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, describe, expect, it } from "vitest";
-import { readIgnoreList } from "../../src/utils/ignore-list.js";
+import { readIgnoreList } from "../../src/utils/ignore-list";
 
 let tmpDir: string;
 

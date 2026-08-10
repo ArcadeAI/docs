@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { LlmClient } from "../../src/llm/client.js";
-import { LlmSecretEditGenerator } from "../../src/llm/secret-edit-generator.js";
+import type { LlmClient } from "../../src/llm/client";
+import { LlmSecretEditGenerator } from "../../src/llm/secret-edit-generator";
 
 const fakeClient = (response: string): LlmClient => ({
   provider: "anthropic",

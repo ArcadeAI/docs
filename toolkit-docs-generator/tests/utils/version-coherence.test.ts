@@ -2,11 +2,11 @@
  * Tests for highest-version coherence filter
  */
 import { describe, expect, it } from "vitest";
-import type { ToolDefinition } from "../../src/types/index.js";
+import type { ToolDefinition } from "../../src/types/index";
 import {
   filterToolsByHighestVersion,
   getHighestVersion,
-} from "../../src/utils/version-coherence.js";
+} from "../../src/utils/version-coherence";
 
 const createTool = (
   fullyQualifiedName: string,

@@ -1,8 +1,8 @@
 import { readdir, readFile } from "fs/promises";
 import { basename, join } from "path";
-import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
-import type { MergedToolkit, ToolkitIndex } from "../types/index.js";
-import { MergedToolkitSchema, ToolkitIndexSchema } from "../types/index.js";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output";
+import type { MergedToolkit, ToolkitIndex } from "../types/index";
+import { MergedToolkitSchema, ToolkitIndexSchema } from "../types/index";
 
 export interface OutputVerificationResult {
   valid: boolean;

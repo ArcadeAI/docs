@@ -5,7 +5,7 @@
  * the merge logic works correctly.
  */
 import { describe, expect, it, vi } from "vitest";
-import type { ISecretEditGenerator } from "../../src/llm/secret-edit-generator.js";
+import type { ISecretEditGenerator } from "../../src/llm/secret-edit-generator";
 import {
   computeAllScopes,
   DataMerger,
@@ -15,24 +15,25 @@ import {
   mergeToolkit,
   type ToolExampleGenerator,
   type ToolkitSummaryGenerator,
-} from "../../src/merger/data-merger.js";
+} from "../../src/merger/data-merger";
 import {
   EmptyCustomSectionsSource,
   InMemoryCustomSectionsSource,
   InMemoryMetadataSource,
   InMemoryToolDataSource,
-} from "../../src/sources/in-memory.js";
+} from "../../src/sources/in-memory";
+import type { ICustomSectionsSource } from "../../src/sources/interfaces";
 import {
   createCombinedToolkitDataSource,
   type IToolkitDataSource,
   type ToolkitData,
-} from "../../src/sources/toolkit-data-source.js";
+} from "../../src/sources/toolkit-data-source";
 import type {
   CustomSections,
   ToolDefinition,
   ToolkitMetadata,
-} from "../../src/types/index.js";
-import { extractVersion } from "../../src/utils/index.js";
+} from "../../src/types/index";
+import { extractVersion } from "../../src/utils/index";
 
 // ============================================================================
 // Test Fixtures - Realistic data matching production schema
@@ -440,9 +441,33 @@ describe("mergeToolkit", () => {
 
     expect(result.toolkit.label).toBe("Unknown");
     expect(result.toolkit.metadata.category).toBe("development");
+    // The fabricated category can't be trusted enough to route or display —
+    // isHidden neutralizes it until real design-system metadata arrives.
+    expect(result.toolkit.metadata.isHidden).toBe(true);
+    // Must match the real integration route shape (see
+    // app/_lib/toolkit-static-params.ts getToolkitCanonicalPath), never the
+    // retired /en/mcp-servers/ prefix.
+    expect(result.toolkit.metadata.docsLink).toBe(
+      "https://docs.arcade.dev/en/resources/integrations/development/unknown"
+    );
     expect(result.warnings).toContain(
       "No metadata found for toolkit: Unknown - using defaults"
     );
+    expect(result.usedDefaultMetadata).toBe(true);
+  });
+
+  it("does not flag usedDefaultMetadata when design-system metadata is present", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
+
+    const result = await mergeToolkit(
+      "TestKit",
+      tools,
+      createMetadata(),
+      null,
+      createStubGenerator()
+    );
+
+    expect(result.usedDefaultMetadata).toBe(false);
   });
 
   it("infers a readable label from toolkit description without metadata", async () => {
@@ -1442,7 +1467,7 @@ describe("DataMerger", () => {
         },
       ];
 
-      const cleanupSpy = vi.fn(
+      const cleanupSpy = vi.fn<ISecretEditGenerator["cleanupStaleReferences"]>(
         async () =>
           "| Secret | Required For |\n| `GITHUB_SERVER_URL` | All tools |"
       );
@@ -1467,14 +1492,11 @@ describe("DataMerger", () => {
       const result = await merger.mergeToolkit("Github");
 
       expect(cleanupSpy).toHaveBeenCalledTimes(1);
-      const cleanupCall = cleanupSpy.mock.calls[0]?.[0] as {
-        removedSecrets: string[];
-        kind: string;
-      };
-      expect(cleanupCall.removedSecrets).toEqual([
+      const cleanupCall = cleanupSpy.mock.calls[0]?.[0];
+      expect(cleanupCall?.removedSecrets).toEqual([
         "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN",
       ]);
-      expect(cleanupCall.kind).toBe("documentation_chunk");
+      expect(cleanupCall?.kind).toBe("documentation_chunk");
       // The chunk content in the result reflects the editor output.
       expect(
         result.toolkit.documentationChunks[0]?.content.includes(
@@ -1887,8 +1909,11 @@ describe("DataMerger", () => {
     // buildMergeErrorResult is invoked by mergeToolkitEntry (called from
     // mergeAllToolkits). We trigger it by making the customSectionsSource throw,
     // which is caught by mergeToolkitEntry's try/catch.
-    const makeFailingCustomSectionsSource = () => ({
+    const makeFailingCustomSectionsSource = (): ICustomSectionsSource => ({
       getCustomSections: async () => {
+        throw new Error("Custom sections source unavailable");
+      },
+      getAllCustomSections: async () => {
         throw new Error("Custom sections source unavailable");
       },
     });
@@ -2006,20 +2031,10 @@ describe("DataMerger", () => {
       expect(slackResult?.toolkit.tools).toHaveLength(1);
     });
 
-    it("skips toolkits missing metadata or tools when requireCompleteData is true", async () => {
+    it("skips toolkits with no tools (but present metadata) when requireCompleteData is true", async () => {
       const completeToolkitData: ToolkitData = {
         tools: [githubTool1],
         metadata: githubMetadata,
-      };
-      const missingMetadataToolkitData: ToolkitData = {
-        tools: [
-          createTool({
-            name: "Lookup",
-            qualifiedName: "Unknown.Lookup",
-            fullyQualifiedName: "Unknown.Lookup@1.0.0",
-          }),
-        ],
-        metadata: null,
       };
       const missingToolsToolkitData: ToolkitData = {
         tools: [],
@@ -2031,9 +2046,6 @@ describe("DataMerger", () => {
           if (toolkitId === "Github") {
             return completeToolkitData;
           }
-          if (toolkitId === "Unknown") {
-            return missingMetadataToolkitData;
-          }
           if (toolkitId === "Slack") {
             return missingToolsToolkitData;
           }
@@ -2042,7 +2054,6 @@ describe("DataMerger", () => {
         fetchAllToolkitsData: async () =>
           new Map([
             ["Github", completeToolkitData],
-            ["Unknown", missingMetadataToolkitData],
             ["Slack", missingToolsToolkitData],
           ]),
         isAvailable: async () => true,
@@ -2058,11 +2069,215 @@ describe("DataMerger", () => {
       const count = await merger.getToolkitCount();
       const results = await merger.mergeAllToolkits();
 
-      expect(count.total).toBe(3);
+      expect(count.total).toBe(2);
       expect(count.toProcess).toBe(1);
-      expect(count.skipped).toBe(2);
+      expect(count.skipped).toBe(1);
       expect(results).toHaveLength(1);
       expect(results[0]?.toolkit.id).toBe("Github");
+    });
+
+    it("preserves prior output when metadata is missing in resilient publishing mode", async () => {
+      const previous = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections(),
+        createStubGenerator()
+      );
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
+      });
+
+      const [result] = await merger.mergeAllToolkits();
+
+      expect(result?.recovery).toBe("preserved");
+      expect(result?.toolkit).toEqual(previous.toolkit);
+      expect(result?.error).toContain("missing design-system metadata");
+    });
+
+    it("preserves prior output for provider-mode generation when metadata is missing", async () => {
+      const previous = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections(),
+        createStubGenerator()
+      );
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.recovery).toBe("preserved");
+      expect(result.toolkit).toEqual(previous.toolkit);
+      expect(result.error).toContain("missing design-system metadata");
+    });
+
+    it("omits a new toolkit when metadata is missing in resilient publishing mode", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        preserveLastKnownGood: true,
+      });
+
+      const [result] = await merger.mergeAllToolkits();
+
+      expect(result?.recovery).toBe("omitted");
+      expect(result?.error).toContain("missing design-system metadata");
+    });
+
+    it("fails the run and names every toolkit missing design-system metadata when requireCompleteData is true", async () => {
+      // Silently dropping (the old behavior) or silently fabricating
+      // metadata for these toolkits are both worse than failing loudly:
+      // --require-complete exists so CI can't ship a wrong-but-valid
+      // category or a docsLink nobody chose. The error must name every
+      // affected toolkit, not just the first one found, so a single CI
+      // failure is enough to fix the whole batch.
+      const completeToolkitData: ToolkitData = {
+        tools: [githubTool1],
+        metadata: githubMetadata,
+      };
+      const missingMetadataToolkitData: ToolkitData = {
+        tools: [
+          createTool({
+            name: "Lookup",
+            qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
+          }),
+        ],
+        metadata: null,
+      };
+      const anotherMissingMetadataToolkitData: ToolkitData = {
+        tools: [
+          createTool({
+            name: "Ping",
+            qualifiedName: "AlsoUnknown.Ping",
+            fullyQualifiedName: "AlsoUnknown.Ping@1.0.0",
+          }),
+        ],
+        metadata: null,
+      };
+
+      const toolkitDataSource: IToolkitDataSource = {
+        fetchToolkitData: async () => {
+          throw new Error("not used by mergeAllToolkits");
+        },
+        fetchAllToolkitsData: async () =>
+          new Map([
+            ["Github", completeToolkitData],
+            ["Unknown", missingMetadataToolkitData],
+            ["AlsoUnknown", anotherMissingMetadataToolkitData],
+          ]),
+        isAvailable: async () => true,
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
+      });
+
+      await expect(merger.mergeAllToolkits()).rejects.toThrow(
+        /missing design-system metadata.*Unknown.*AlsoUnknown/s
+      );
+      await expect(merger.getToolkitCount()).rejects.toThrow(
+        /missing design-system metadata.*Unknown.*AlsoUnknown/s
+      );
+    });
+
+    it("fails strict runs for toolkits in skipToolkitIds when metadata is missing", async () => {
+      const missingMetadataToolkitData: ToolkitData = {
+        tools: [
+          createTool({
+            name: "Lookup",
+            qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
+          }),
+        ],
+        metadata: null,
+      };
+
+      const toolkitDataSource: IToolkitDataSource = {
+        fetchToolkitData: async () => missingMetadataToolkitData,
+        fetchAllToolkitsData: async () =>
+          new Map([["Unknown", missingMetadataToolkitData]]),
+        isAvailable: async () => true,
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
+        skipToolkitIds: new Set(["unknown"]),
+      });
+
+      await expect(merger.mergeAllToolkits()).rejects.toThrow(
+        /missing design-system metadata.*Unknown/s
+      );
+      await expect(merger.getToolkitCount()).rejects.toThrow(
+        /missing design-system metadata.*Unknown/s
+      );
+    });
+
+    it("does not skip or fail toolkits missing metadata when requireCompleteData is false", async () => {
+      // Without --require-complete, generation must still complete — the
+      // toolkit falls back to getDefaultMetadata (hidden placeholder
+      // metadata) and usedDefaultMetadata reports the fact rather than the
+      // omission disappearing entirely.
+      const missingMetadataToolkitData: ToolkitData = {
+        tools: [
+          createTool({
+            name: "Lookup",
+            qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
+          }),
+        ],
+        metadata: null,
+      };
+
+      const toolkitDataSource: IToolkitDataSource = {
+        fetchToolkitData: async () => missingMetadataToolkitData,
+        fetchAllToolkitsData: async () =>
+          new Map([["Unknown", missingMetadataToolkitData]]),
+        isAvailable: async () => true,
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+      });
+
+      const results = await merger.mergeAllToolkits();
+
+      expect(results).toHaveLength(1);
+      expect(results[0]?.toolkit.id).toBe("Unknown");
+      expect(results[0]?.usedDefaultMetadata).toBe(true);
+      expect(results[0]?.toolkit.metadata.isHidden).toBe(true);
     });
 
     it("fails strict runs when a complete toolkit cannot be merged", async () => {
@@ -2074,6 +2289,9 @@ describe("DataMerger", () => {
         toolkitDataSource,
         customSectionsSource: {
           getCustomSections: async () => {
+            throw new Error("Custom sections source unavailable");
+          },
+          getAllCustomSections: async () => {
             throw new Error("Custom sections source unavailable");
           },
         },
