@@ -1,0 +1,717 @@
+{
+  "id": "Notion",
+  "label": "Notion",
+  "version": "3.0.0",
+  "description": "Arcade.dev LLM tools for Notion",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/notion.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/notion",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "notion",
+    "allScopes": []
+  },
+  "tools": [
+    {
+      "name": "AppendContentToEndOfPage",
+      "qualifiedName": "Notion.AppendContentToEndOfPage",
+      "fullyQualifiedName": "Notion.AppendContentToEndOfPage@3.0.0",
+      "description": "Append markdown content to the end of a Notion page by its ID or title",
+      "parameters": [
+        {
+          "name": "page_id_or_title",
+          "type": "string",
+          "required": true,
+          "description": "ID or title of the page to append content to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "The markdown content to append to the end of the page",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a success message and the URL to the page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.AppendContentToEndOfPage",
+        "parameters": {
+          "page_id_or_title": {
+            "value": "Meeting Notes Q1 2024",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "## Action Items\n\n- [ ] Follow up with the design team by Friday\n- [ ] Review the updated project timeline\n- [x] Send meeting recap to stakeholders\n\n**Next meeting:** March 15, 2024 at 10:00 AM",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreatePage",
+      "qualifiedName": "Notion.CreatePage",
+      "fullyQualifiedName": "Notion.CreatePage@3.0.0",
+      "description": "Create a new Notion page by the title of the new page's parent.",
+      "parameters": [
+        {
+          "name": "parent_title",
+          "type": "string",
+          "required": true,
+          "description": "Title of an existing page/database within which the new page will be created. ",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Title of the new page",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "The content of the new page",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "The ID of the new page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.CreatePage",
+        "parameters": {
+          "parent_title": {
+            "value": "Project Planning",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Q3 Roadmap Overview",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "This page outlines the key milestones and deliverables for Q3, including feature launches, team goals, and sprint timelines.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetObjectLocation",
+      "qualifiedName": "Notion.GetObjectLocation",
+      "fullyQualifiedName": "Notion.GetObjectLocation@3.0.0",
+      "description": "Find the breadcrumb path for one page or database.\n\nA `complete` path starts at a workspace root. An incomplete path is still the real prefix\nof the object's location: `stop_reason` says what ended the walk, and for a rate limit\n`retry_after_seconds` carries Notion's own backoff.",
+      "parameters": [
+        {
+          "name": "object_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID or Notion URL of the page or database to locate. Titles are not accepted.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A root-first path to the requested object, whether it reaches the workspace root, and why the walk stopped when it does not."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.GetObjectLocation",
+        "parameters": {
+          "object_id": {
+            "value": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetObjectMetadata",
+      "qualifiedName": "Notion.GetObjectMetadata",
+      "fullyQualifiedName": "Notion.GetObjectMetadata@3.0.0",
+      "description": "Get the metadata of a Notion object (page or database) from its title or ID.\n\nOne of `object_title` or `object_id` MUST be provided, but both cannot be provided.\nPrefer `object_id` for exact lookup; use `object_title` (with optional `object_type`)\nwhen only a name is known. The title is case-insensitive and outer whitespace is ignored.\n\nReturns all exact title matches in a bounded search window, or a one-item list by ID.\nObject metadata includes its ID, timestamps, properties, URL, and more.",
+      "parameters": [
+        {
+          "name": "object_title",
+          "type": "string",
+          "required": false,
+          "description": "Title of the page or database whose metadata to get",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "object_id",
+          "type": "string",
+          "required": false,
+          "description": "ID of either a page or a database. Object type is detected automatically. Prefer this over object_title when the exact ID is known (unambiguous, no search).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "object_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of object to match title to. Only used if `object_title` is provided (ignored when `object_id` is provided). Defaults to both.",
+          "enum": [
+            "page",
+            "database"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "array",
+        "description": "Metadata for the matching objects"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.GetObjectMetadata",
+        "parameters": {
+          "object_title": {
+            "value": "Project Roadmap",
+            "type": "string",
+            "required": false
+          },
+          "object_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "object_type": {
+            "value": "database",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetPageContentById",
+      "qualifiedName": "Notion.GetPageContentById",
+      "fullyQualifiedName": "Notion.GetPageContentById@3.0.0",
+      "description": "Get the content of a Notion page as markdown with the page's ID",
+      "parameters": [
+        {
+          "name": "page_id",
+          "type": "string",
+          "required": true,
+          "description": "ID of the page to get content from",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "The markdown content of the page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.GetPageContentById",
+        "parameters": {
+          "page_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetPageContentByTitle",
+      "qualifiedName": "Notion.GetPageContentByTitle",
+      "fullyQualifiedName": "Notion.GetPageContentByTitle@3.0.0",
+      "description": "Get the content of a Notion page as markdown with the page's title",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Title of the page to get content from",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "The markdown content of the page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.GetPageContentByTitle",
+        "parameters": {
+          "title": {
+            "value": "Project Roadmap Q3 2024",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetWorkspaceStructure",
+      "qualifiedName": "Notion.GetWorkspaceStructure",
+      "fullyQualifiedName": "Notion.GetWorkspaceStructure@3.0.0",
+      "description": "Get up to 100 recently edited pages and databases as a tree.\n\nThe 100 counts pages and databases only: database rows are skipped (they are not sidebar\nstructure) and reported as omitted_database_rows. This is a recency-limited sample, not a\ncomplete listing: a specific object you are looking for may not appear here at all — search\nfor it by name and get its location instead. A truncated response means more workspace\nobjects exist. When sampled_objects is 0 while omitted_database_rows is high, the workspace\nis busy with database row edits rather than empty — search by title instead of concluding\nthe workspace has no content. Unplaced objects are not transitively reachable from a\nworkspace root in this sample — for example block-nested objects, objects whose parent was\nomitted from the sample, or descendants of those. They are not attached under a possibly\nincorrect workspace root. Navigate an unplaced object by passing its own `id` (not\n`parent_id` or `containing_block_id`) to GetObjectLocation or ListChildObjects.",
+      "parameters": [],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The workspace tree for objects transitively reachable from a workspace root in this recent sample, a list of unplaced objects that are not (block-nested, missing-parent, or descendants of those), a truncated flag that is true when the workspace has more objects than were returned, a stop_reason (with Notion's retry_after_seconds when it is a rate limit) when the scan ended early, and the counts describing what the bounded scan sampled, skipped, and spent."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.GetWorkspaceStructure",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListChildObjects",
+      "qualifiedName": "Notion.ListChildObjects",
+      "fullyQualifiedName": "Notion.ListChildObjects@3.0.0",
+      "description": "List direct child pages and databases without counting an entire subtree.\n\nPage children of the requested object come first, then children nested inside its\ncontainers (toggles, columns, callouts). Continue by passing `next_cursor` back; when\n`next_cursor` is null there is nothing further to fetch.\n\n`truncated` means the walk stopped before enumerating everything, with `stop_reason` saying\nwhy. If `next_cursor` is also set, continue from it. If `next_cursor` is null, more windows\ncannot recover what was missed — every call re-walks the same bounded budget — so do not\nkeep paging: call this tool again on a narrower parent (a specific child page), or use\nGetObjectLocation for one object you already know about. For a rate limit, wait\n`retry_after_seconds` before retrying.",
+      "parameters": [
+        {
+          "name": "parent_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID or Notion URL of the page or database whose direct children to list. Titles are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum children to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The `next_cursor` from a previous call for this same parent. Omit to start at the first child. Cursors are not interchangeable between parents.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A window of direct child pages and databases, a cursor for the next window when one exists, and whether children were left unenumerated; counting all children is not supported."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.ListChildObjects",
+        "parameters": {
+          "parent_id": {
+            "value": "https://www.notion.so/My-Project-Hub-1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsYXN0X2lkIjoiYWJjZGVmMTIzNDU2IiwiZGlyZWN0aW9uIjoibmV4dCJ9",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchByTitle",
+      "qualifiedName": "Notion.SearchByTitle",
+      "fullyQualifiedName": "Notion.SearchByTitle@3.0.0",
+      "description": "Search for similar titles of pages, databases, or both within the user's workspace.\nDoes not include content.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "A substring to search for within page and database titles. If not provided (default), all pages and/or databases are returned.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "select",
+          "type": "string",
+          "required": false,
+          "description": "Limit the results to either only pages or only databases. Defaults to both.",
+          "enum": [
+            "page",
+            "database"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "The direction to sort search results by last edited time. Defaults to 'descending'.",
+          "enum": [
+            "ascending",
+            "descending"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of results to return. Defaults to 100. Set to -1 for no limit.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing minimal information about the pages and/or databases that have titles that are the best match for the query. Does not include content or location."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.SearchByTitle",
+        "parameters": {
+          "query": {
+            "value": "Project Roadmap",
+            "type": "string",
+            "required": false
+          },
+          "select": {
+            "value": "page",
+            "type": "string",
+            "required": false
+          },
+          "order_by": {
+            "value": "descending",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Notion.WhoAmI",
+      "fullyQualifiedName": "Notion.WhoAmI@3.0.0",
+      "description": "Get information about the current user and their Notion workspace.\n\nThis tool provides detailed information about the authenticated user's\nNotion workspace including workspace statistics, user context, and\nintegration details.",
+      "parameters": [],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Notion workspace information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Notion.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-08-10T11:25:45.366Z",
+  "summary": "The Notion toolkit integrates Arcade with the Notion API, enabling LLMs to read, write, navigate, and search a user's Notion workspace.\n\n## Capabilities\n\n- **Content access & editing**: Retrieve page content by ID or title as Markdown, append Markdown content to the end of existing pages, and create new pages under a named parent.\n- **Metadata & identity lookup**: Fetch full object metadata (ID, timestamps, properties, URL) for any page or database by title or ID; resolve the authenticated user's identity and workspace context.\n- **Workspace navigation**: Retrieve a recency-sampled tree of up to 100 pages and databases, list direct child pages and databases of any object (with cursor-based pagination), and resolve the full breadcrumb path for any single page or database.\n- **Search**: Search pages, databases, or both by title across the workspace (content is not searched).\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the [Notion provider](https://docs.arcade.dev/en/references/auth-providers/notion). Arcade handles the authorization flow and token management automatically. Users authorize the integration through Notion's standard OAuth consent screen, which grants the integration access scoped to their workspace."
+}

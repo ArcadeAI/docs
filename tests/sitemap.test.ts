@@ -44,9 +44,7 @@ test("sitemap lists expected URLs", async () => {
     expect(urls).toContain(
       "https://example.test/en/resources/integrations/search/exa-api"
     );
-
-    // Hidden catalog entries must not become indexable sitemap URLs.
-    expect(urls).not.toContain(
+    expect(urls).toContain(
       "https://example.test/en/resources/integrations/productivity/notion"
     );
 
