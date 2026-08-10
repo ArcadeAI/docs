@@ -531,6 +531,22 @@ function generateLlmsTxt(
   );
   lines.push("");
 
+  // Persona guidance: route readers to the right path before the link
+  // sections. Arcade docs serve two audiences, so start with "to X, go to Y".
+  lines.push("## Who this is for");
+  lines.push("");
+  lines.push(
+    "Arcade docs serve two audiences. Start with the path that matches your goal:"
+  );
+  lines.push("");
+  lines.push(
+    "- To build agents and tools (call tools, create MCP servers, ship user-facing agents), go to Build: https://docs.arcade.dev/en/build. New to Arcade? Start with the agent quickstart: https://docs.arcade.dev/en/get-started/quickstarts/call-tool-agent."
+  );
+  lines.push(
+    "- To deploy, secure, and govern Arcade for an organization (hosting, identity, gateways, audit logs), go to Operate: https://docs.arcade.dev/en/operate. New to operating Arcade? Start with the operator quickstart: https://docs.arcade.dev/en/operate/quickstart."
+  );
+  lines.push("");
+
   // Main sections
   const mainSections = sections.filter((s) => !s.name.startsWith("Optional"));
   for (const section of mainSections) {
