@@ -86,7 +86,7 @@ export interface CurrentToolkitData {
   /** Tool definitions fetched from the API */
   readonly tools: readonly ToolDefinition[];
   /** Toolkit metadata fetched from Design System */
-  readonly metadata: ToolkitMetadata | null;
+  readonly metadata: ToolkitMetadata | null | undefined;
 }
 
 export type CurrentToolkitDiffInput =
@@ -229,17 +229,25 @@ const buildPreviousMetadataSnapshot = (
 };
 
 const hasRelevantMetadataChanges = (
-  currentMetadata: ToolkitMetadata | null,
+  currentMetadata: ToolkitMetadata | null | undefined,
   previousToolkit: MergedToolkit | undefined
 ): boolean => {
+  // Callers that do not have a metadata source (including compareToolkit's
+  // backwards-compatible default) should not imply metadata loss.
+  if (currentMetadata === undefined) {
+    return false;
+  }
   const current = buildCurrentMetadataSnapshot(currentMetadata);
   const previous = buildPreviousMetadataSnapshot(previousToolkit);
-  // When either side lacks metadata (new toolkit or metadata not yet available),
-  // treat as "no metadata change" — the toolkit is already flagged as added/removed
-  // by the tool-level diff, so a missing metadata snapshot should not independently
-  // trigger regeneration.
-  if (!(current && previous)) {
+  // A transition to missing metadata must be processed so the merger can
+  // preserve the previous output (or report the recoverable failure). Only
+  // two absent snapshots are genuinely unchanged; new toolkits are already
+  // selected by their tool-level additions.
+  if (!current && !previous) {
     return false;
+  }
+  if (!current || !previous) {
+    return true;
   }
 
   return (
@@ -329,7 +337,7 @@ export const compareToolkit = (
   toolkitId: string,
   currentTools: readonly ToolDefinition[],
   previousToolkit: MergedToolkit | undefined,
-  currentMetadata: ToolkitMetadata | null = null
+  currentMetadata: ToolkitMetadata | null | undefined = undefined
 ): ToolkitChange => {
   const toolChanges = compareTools(currentTools, previousToolkit);
   const currentVersion = getToolkitVersion(currentTools);
@@ -373,7 +381,9 @@ const normalizeCurrentToolkitData = (
   if (isCurrentToolkitData(value)) {
     return { tools: value.tools, metadata: value.metadata };
   }
-  return { tools: value, metadata: null };
+  // A bare tools map is the legacy API and has no metadata source. Preserve
+  // that distinction from an explicit null returned by the metadata source.
+  return { tools: value, metadata: undefined };
 };
 
 /**
