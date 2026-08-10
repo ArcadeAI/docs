@@ -8,6 +8,7 @@ import {
   Cog,
   FileText,
   HelpCircle,
+  Monitor,
   Puzzle,
   Rocket,
   ServerCog,
@@ -343,9 +344,39 @@ export function LandingPage() {
             </div>
             <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-4">
               <QuickStartCard
-                description="Connect Cursor, VS Code, Claude, or any MCP client — or use AG2, LangChain, and more."
+                description="Integrate with AG2, LangChain, OpenAI Agents, CrewAI, Vercel AI, and more."
                 href="/get-started/agent-frameworks"
                 icon={Code}
+                logos={[
+                  {
+                    src: "/images/icons/ag2.svg",
+                    alt: "AG2",
+                    invertInDark: true,
+                  },
+                  {
+                    src: "/images/icons/langchain.svg",
+                    alt: "LangChain",
+                    invertInDark: true,
+                  },
+                  { src: "/images/icons/openai.png", alt: "OpenAI" },
+                  {
+                    src: "https://avatars.githubusercontent.com/u/170677839?s=200&v=4",
+                    alt: "CrewAI",
+                  },
+                  {
+                    src: "/images/icons/vercel.svg",
+                    alt: "Vercel AI",
+                    invertInDark: true,
+                  },
+                ]}
+                title="Agent frameworks"
+              />
+            </div>
+            <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-5">
+              <QuickStartCard
+                description="Add tools to Cursor, VS Code, Claude Desktop, or any MCP client."
+                href="/get-started/mcp-clients"
+                icon={Monitor}
                 logos={[
                   {
                     src: "/images/icons/cursor.png",
@@ -354,13 +385,12 @@ export function LandingPage() {
                   },
                   { src: "/images/icons/vscode.svg", alt: "VS Code" },
                   {
-                    src: "/images/icons/langchain.svg",
-                    alt: "LangChain",
-                    invertInDark: true,
+                    src: "/images/icons/claude.png",
+                    alt: "Claude Desktop",
+                    invertInLight: true,
                   },
-                  { src: "/images/icons/openai.png", alt: "OpenAI" },
                 ]}
-                title="Frameworks & MCP clients"
+                title="MCP clients"
               />
             </div>
             <h3 className="mb-2 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl dark:text-white min-[1062px]:col-start-2 min-[1062px]:row-start-1">
