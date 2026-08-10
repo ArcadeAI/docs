@@ -2395,7 +2395,9 @@ program
           // Error results can still carry a last-known-good toolkit fallback.
           // Preserve it in batch output rather than letting --clear-output
           // remove the prior JSON artifact.
-          const writableResults = results;
+          const writableResults = results.filter(
+            (result) => result.recovery !== "omitted"
+          );
           const summary = progressTracker.getSummary();
           spinner.succeed(
             `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
