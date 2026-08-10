@@ -109,6 +109,10 @@ const meta: MetaRecord = {
     title: "Microsoft Word",
     href: "/en/resources/integrations/productivity/microsoft-word",
   },
+  notion: {
+    title: "Notion",
+    href: "/en/resources/integrations/productivity/notion",
+  },
   resend: {
     title: "Resend",
     href: "/en/resources/integrations/productivity/resend",
