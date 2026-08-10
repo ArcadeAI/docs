@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
-import { type RetryOptions, withRetry } from "../utils/retry.js";
+import { type RetryOptions, withRetry } from "../utils/retry";
 
 export type LlmProvider = "openai" | "anthropic";
 
@@ -145,4 +145,4 @@ export const createLlmClient = (config: LlmClientConfig): LlmClient => {
   return new AnthropicClient(config.config);
 };
 
-export type { RetryOptions } from "../utils/retry.js";
+export type { RetryOptions } from "../utils/retry";

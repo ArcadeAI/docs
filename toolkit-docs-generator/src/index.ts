@@ -6,14 +6,14 @@
  */
 
 // Generator
-export * from "./generator/index.js";
+export * from "./generator/index";
 // LLM
-export * from "./llm/index.js";
+export * from "./llm/index";
 // Merger
-export * from "./merger/index.js";
+export * from "./merger/index";
 // Sources
-export * from "./sources/index.js";
+export * from "./sources/index";
 // Types
-export * from "./types/index.js";
+export * from "./types/index";
 // Utils
-export * from "./utils/index.js";
+export * from "./utils/index";

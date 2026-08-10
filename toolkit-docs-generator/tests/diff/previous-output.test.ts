@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { parsePreviousToolkitForDiff } from "../../src/diff/previous-output.js";
-import type { MergedToolkit } from "../../src/types/index.js";
+import { parsePreviousToolkitForDiff } from "../../src/diff/previous-output";
+import type { MergedToolkit } from "../../src/types/index";
 
 const createValidToolkit = (): MergedToolkit => ({
   id: "Github",
@@ -25,7 +25,6 @@ const createValidToolkit = (): MergedToolkit => ({
       qualifiedName: "Github.CreateIssue",
       fullyQualifiedName: "Github.CreateIssue@1.0.0",
       description: null,
-      toolkitDescription: null,
       parameters: [
         {
           name: "title",

@@ -20,9 +20,9 @@ import {
   ToolMetadataSchema,
   ToolOutputSchema,
   ToolParameterSchema,
-} from "../shared/toolkit-schemas.js";
+} from "../shared/toolkit-schemas";
 
-export * from "../shared/toolkit-schemas.js";
+export * from "../shared/toolkit-schemas";
 
 // ============================================================================
 // CLI Input Types

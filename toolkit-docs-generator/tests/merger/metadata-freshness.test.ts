@@ -9,11 +9,11 @@ import {
   detectMetadataChanges,
   formatFreshnessWarnings,
   type MetadataFreshnessResult,
-} from "../../src/merger/metadata-freshness.js";
+} from "../../src/merger/metadata-freshness";
 import type {
   MergedToolkit,
   MergedToolkitMetadata,
-} from "../../src/types/index.js";
+} from "../../src/types/index";
 
 // ============================================================================
 // Fixtures
@@ -34,7 +34,7 @@ const createMetadata = (
 });
 
 const createPreviousToolkit = (
-  overrides: Partial<MergedToolkit> & {
+  overrides: Omit<Partial<MergedToolkit>, "metadata"> & {
     metadata?: Partial<MergedToolkitMetadata>;
     label?: string;
   } = {}
@@ -349,7 +349,7 @@ describe("mergeToolkit metadata freshness integration", () => {
   // covers the happy path extensively.
 
   it("emits warnings when previous toolkit metadata differs", async () => {
-    const { mergeToolkit } = await import("../../src/merger/data-merger.js");
+    const { mergeToolkit } = await import("../../src/merger/data-merger");
 
     const tool = {
       name: "TestTool",
@@ -424,7 +424,7 @@ describe("mergeToolkit metadata freshness integration", () => {
   });
 
   it("emits no freshness warnings when metadata is unchanged", async () => {
-    const { mergeToolkit } = await import("../../src/merger/data-merger.js");
+    const { mergeToolkit } = await import("../../src/merger/data-merger");
 
     const tool = {
       name: "TestTool",
