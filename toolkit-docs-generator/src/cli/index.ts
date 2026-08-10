@@ -13,7 +13,7 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
-import { readdir, readFile } from "fs/promises";
+import { access, readdir, readFile } from "fs/promises";
 import ora from "ora";
 import { join, resolve } from "path";
 import {
@@ -220,7 +220,8 @@ const filterProvidersByMetadataPresence = async (
 };
 
 const buildChangeLogDetails = (
-  result: ReturnType<typeof detectChanges>
+  result: ReturnType<typeof detectChanges>,
+  curationChangedToolkitIds: readonly string[] = []
 ): string[] => {
   const changed = getChangedToolkitIds(result);
   const removed = result.toolkitChanges
@@ -246,7 +247,37 @@ const buildChangeLogDetails = (
     details.push(`versionOnly=${versionOnly.join(", ")}`);
   }
 
+  if (curationChangedToolkitIds.length > 0) {
+    details.push(`curationChanged=${curationChangedToolkitIds.join(", ")}`);
+  }
+
   return details;
+};
+
+const resolveCustomSectionsPath = async (
+  explicitPath: string | undefined
+): Promise<string | undefined> => {
+  if (explicitPath) {
+    return explicitPath;
+  }
+
+  const defaultPath = join(process.cwd(), "curation");
+  try {
+    await access(defaultPath);
+    return defaultPath;
+  } catch {
+    return;
+  }
+};
+
+const getCombinedChangedToolkitIds = (
+  changeResult: ReturnType<typeof detectChanges>,
+  curationChangedToolkitIds: readonly string[]
+): string[] => {
+  const apiChangedIds = getChangedToolkitIds(changeResult).map((id) =>
+    id.toLowerCase()
+  );
+  return [...new Set([...apiChangedIds, ...curationChangedToolkitIds])].sort();
 };
 
 const clearOutputDir = async (
@@ -2696,6 +2727,10 @@ program
     "--tool-metadata-key <key>",
     "Tool metadata API key (or ENGINE_API_KEY env)"
   )
+  .option(
+    "--custom-sections <path>",
+    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file (defaults to ./curation when present)"
+  )
   .option("--verbose", "Show detailed tool-level changes", false)
   .option("--json", "Output as JSON", false)
   .action(
@@ -2710,6 +2745,7 @@ program
       listToolsPageSize?: number;
       toolMetadataUrl?: string;
       toolMetadataKey?: string;
+      customSections?: string;
       verbose: boolean;
       json: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
@@ -2775,7 +2811,25 @@ program
           currentToolkitDataForDiff,
           previousToolkits
         );
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createCustomSectionsFileSource(customSectionsPath)
+          : createEmptyCustomSectionsSource();
+        const curationChangedToolkitIds = customSectionsPath
+          ? getChangedToolkitIdsFromCustomSections(
+              await customSectionsSource.getAllCustomSections(),
+              previousToolkits
+            )
+          : [];
         const compareDurationMs = Date.now() - compareStartedAt;
+        const allChangedToolkitIds = getCombinedChangedToolkitIds(
+          changeResult,
+          curationChangedToolkitIds
+        );
+        const hasAnyChanges =
+          hasChanges(changeResult) || curationChangedToolkitIds.length > 0;
 
         spinner.stop();
 
@@ -2794,6 +2848,13 @@ program
           console.log(
             chalk.dim(`  Compared signatures in ${compareDurationMs}ms`)
           );
+          if (customSectionsPath) {
+            console.log(
+              chalk.dim(
+                `  Compared curation from ${resolve(customSectionsPath)} (${curationChangedToolkitIds.length} prose change(s))`
+              )
+            );
+          }
           if (previousToolkitLoad.stats.failedFiles.length > 0) {
             console.log(
               chalk.yellow(
@@ -2822,12 +2883,18 @@ program
             `loadPreviousDurationMs=${loadPreviousDurationMs}`,
             `compareDurationMs=${compareDurationMs}`,
             `previousLoadStats=${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)}`,
-            ...buildChangeLogDetails(changeResult),
+            ...(customSectionsPath
+              ? [`customSections=${resolve(customSectionsPath)}`]
+              : []),
+            ...buildChangeLogDetails(changeResult, curationChangedToolkitIds),
           ],
         });
         await appendLogEntry(logPaths.changeLogPath, {
           title: "changes",
-          details: buildChangeLogDetails(changeResult),
+          details: buildChangeLogDetails(
+            changeResult,
+            curationChangedToolkitIds
+          ),
         });
 
         // Output results
@@ -2836,10 +2903,15 @@ program
             JSON.stringify(
               {
                 ...changeResult,
+                curationChangedToolkitIds,
+                changedToolkitIds: allChangedToolkitIds,
                 diagnostics: {
                   currentToolkitCount: currentToolkitDataForDiff.size,
                   previousToolkitCount: previousToolkits.size,
                   previousLoad: previousToolkitLoad.stats,
+                  customSectionsPath: customSectionsPath
+                    ? resolve(customSectionsPath)
+                    : null,
                   timingMs: {
                     fetch: fetchDurationMs,
                     loadPrevious: loadPreviousDurationMs,
@@ -2857,15 +2929,26 @@ program
           // Summary
           console.log(chalk.cyan("Summary:"));
           console.log(`  ${formatChangeSummary(changeResult)}`);
+          if (curationChangedToolkitIds.length > 0) {
+            console.log(
+              chalk.cyan("Curation:"),
+              `${curationChangedToolkitIds.length} toolkit(s) with prose changes`
+            );
+          }
           console.log();
 
           // Check if there are any changes
-          if (hasChanges(changeResult)) {
-            // Show changed toolkits
-            const changedIds = getChangedToolkitIds(changeResult);
+          if (hasAnyChanges) {
+            const apiChangedIds = new Set(
+              getChangedToolkitIds(changeResult).map((id) => id.toLowerCase())
+            );
+            const curationOnlyIds = curationChangedToolkitIds.filter(
+              (id) => !apiChangedIds.has(id)
+            );
+
             console.log(
               chalk.yellow(
-                `⚠ ${changedIds.length} toolkit(s) need regeneration:\n`
+                `⚠ ${allChangedToolkitIds.length} toolkit(s) need regeneration:\n`
               )
             );
 
@@ -2889,6 +2972,10 @@ program
                   console.log(line);
                 }
               }
+
+              for (const toolkitId of curationOnlyIds) {
+                console.log(chalk.yellow(`[CURATION] ${toolkitId}`));
+              }
             } else {
               // Compact view
               for (const change of changeResult.toolkitChanges) {
@@ -2908,6 +2995,12 @@ program
 
                 console.log(
                   `  ${icon}${change.toolkitId} [${change.currentToolCount} tools]${toolChangeSummary}`
+                );
+              }
+
+              for (const toolkitId of curationOnlyIds) {
+                console.log(
+                  `  ${chalk.yellow("~ ")}${toolkitId} [curation prose]`
                 );
               }
             }

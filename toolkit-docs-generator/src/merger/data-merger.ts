@@ -473,15 +473,22 @@ const transformMetadata = (
 const getToolDocumentationChunks = (
   toolName: string,
   toolChunks: { [key: string]: DocumentationChunk[] },
-  previousTool?: MergedTool
+  previousTool: MergedTool | undefined,
+  customSectionsAuthoritative: boolean
 ): DocumentationChunk[] => {
-  const fromSource = toolChunks[toolName] ?? [];
+  const fromSource = toolChunks[toolName];
+
+  if (customSectionsAuthoritative) {
+    return fromSource ?? [];
+  }
+
   const fromPrevious = previousTool?.documentationChunks ?? [];
+  const sourceItems = fromSource ?? [];
 
   // If source has chunks, use source (it's authoritative)
   // If source is empty but previous has chunks, preserve previous
-  if (fromSource.length > 0) {
-    return fromSource;
+  if (sourceItems.length > 0) {
+    return sourceItems;
   }
   return fromPrevious;
 };
@@ -582,8 +589,13 @@ const hasToolkitOverviewChunk = (toolkit: MergedToolkit): boolean =>
 
 const mergeCustomSectionsArrays = <T>(
   fromSource: readonly T[] | undefined,
-  fromPrevious: readonly T[] | undefined
+  fromPrevious: readonly T[] | undefined,
+  authoritative: boolean
 ): T[] => {
+  if (authoritative) {
+    return [...(fromSource ?? [])];
+  }
+
   const sourceItems = fromSource ?? [];
   const previousItems = fromPrevious ?? [];
 
@@ -661,6 +673,7 @@ const buildMergedTools = async (options: {
   failedTools: FailedTool[];
   previousToolByQualifiedName: ReadonlyMap<string, MergedTool>;
   llmConcurrency: number;
+  customSectionsAuthoritative: boolean;
 }): Promise<MergedTool[]> =>
   mapWithConcurrency(
     options.tools,
@@ -671,7 +684,8 @@ const buildMergedTools = async (options: {
         options.toolExampleGenerator,
         options.warnings,
         options.failedTools,
-        options.previousToolByQualifiedName.get(tool.qualifiedName)
+        options.previousToolByQualifiedName.get(tool.qualifiedName),
+        options.customSectionsAuthoritative
       ),
     options.llmConcurrency
   );
@@ -686,6 +700,7 @@ const buildMergedToolkit = (options: {
   customSections: CustomSections | null;
   previousToolkit: MergedToolkit | undefined;
 }): MergedToolkit => {
+  const customSectionsAuthoritative = options.customSections !== null;
   const mergedMetadata = applyToolkitTypeOverrides(
     options.toolkitId,
     options.metadata
@@ -707,15 +722,18 @@ const buildMergedToolkit = (options: {
     tools: options.tools,
     documentationChunks: mergeCustomSectionsArrays(
       options.customSections?.documentationChunks,
-      options.previousToolkit?.documentationChunks
+      options.previousToolkit?.documentationChunks,
+      customSectionsAuthoritative
     ),
     customImports: mergeCustomSectionsArrays(
       options.customSections?.customImports,
-      options.previousToolkit?.customImports
+      options.previousToolkit?.customImports,
+      customSectionsAuthoritative
     ),
     subPages: mergeCustomSectionsArrays(
       options.customSections?.subPages,
-      options.previousToolkit?.subPages
+      options.previousToolkit?.subPages,
+      customSectionsAuthoritative
     ),
     generatedAt: new Date().toISOString(),
   };
@@ -730,12 +748,14 @@ const transformTool = async (
   toolExampleGenerator: ToolExampleGenerator | undefined,
   warnings: string[],
   failedTools: FailedTool[],
-  previousTool?: MergedTool
+  previousTool: MergedTool | undefined,
+  customSectionsAuthoritative: boolean
 ): Promise<MergedTool> => {
   const documentationChunks = getToolDocumentationChunks(
     tool.name,
     toolChunks,
-    previousTool
+    previousTool,
+    customSectionsAuthoritative
   );
 
   if (previousTool && shouldReuseExample(tool, previousTool)) {
@@ -875,6 +895,7 @@ export const mergeToolkit = async (
     auth = { ...auth, providerId: resolvedProviderId };
   }
 
+  const customSectionsAuthoritative = customSections !== null;
   const toolChunks = (customSections?.toolChunks ?? {}) as {
     [key: string]: DocumentationChunk[];
   };
@@ -890,6 +911,7 @@ export const mergeToolkit = async (
     failedTools,
     previousToolByQualifiedName,
     llmConcurrency,
+    customSectionsAuthoritative,
   });
 
   const toolkit = buildMergedToolkit({

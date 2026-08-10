@@ -9,7 +9,8 @@
  *   toolkit named `<toolkitId>.json`, each holding a single
  *   `CustomSections` object. This is the layout the generator reads today;
  *   one file per toolkit keeps prose edits to reviewable, single-toolkit
- *   diffs.
+ *   diffs. An empty file (`{}`) means the toolkit has no hand-authored
+ *   prose — the merger clears any carry-forward from a previous artifact.
  * - A single JSON file that maps toolkit id to `CustomSections`. This is the
  *   legacy shape produced by the one-time MDX extraction.
  */

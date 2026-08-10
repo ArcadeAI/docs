@@ -63,4 +63,20 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
       )
     ).toEqual([]);
   });
+
+  it("treats cleared curation as a prose change", () => {
+    expect(
+      getChangedToolkitIdsFromCustomSections(
+        {
+          github: {
+            documentationChunks: [],
+            customImports: [],
+            subPages: [],
+            toolChunks: {},
+          },
+        },
+        new Map([["Github", previousToolkit()]])
+      )
+    ).toEqual(["github"]);
+  });
 });

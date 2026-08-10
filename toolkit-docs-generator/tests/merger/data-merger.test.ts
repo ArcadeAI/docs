@@ -668,7 +668,7 @@ describe("mergeToolkit", () => {
       createStubGenerator()
     );
 
-    // Run again with empty custom sections - should preserve previous
+    // No curation file for this toolkit (null source) — carry forward.
     const result = await mergeToolkit("TestKit", tools, null, null, undefined, {
       previousToolkit: previousResult.toolkit,
     });
@@ -679,6 +679,42 @@ describe("mergeToolkit", () => {
     );
     expect(result.toolkit.customImports).toHaveLength(1);
     expect(result.toolkit.subPages).toHaveLength(1);
+  });
+
+  it("should clear toolkit-level custom sections when curation is authoritative but empty", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
+
+    const previousResult = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      createCustomSections({
+        documentationChunks: [
+          {
+            type: "warning",
+            location: "header",
+            position: "after",
+            content: "Important warning!",
+          },
+        ],
+        customImports: ['import CustomComponent from "@/components/custom";'],
+        subPages: ["environment-variables"],
+      }),
+      createStubGenerator()
+    );
+
+    const result = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      createCustomSections(),
+      undefined,
+      { previousToolkit: previousResult.toolkit }
+    );
+
+    expect(result.toolkit.documentationChunks).toHaveLength(0);
+    expect(result.toolkit.customImports).toHaveLength(0);
+    expect(result.toolkit.subPages).toHaveLength(0);
   });
 
   it("should use source custom sections over previous when source has content", async () => {

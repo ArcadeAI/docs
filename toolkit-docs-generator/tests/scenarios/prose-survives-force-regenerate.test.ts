@@ -118,4 +118,46 @@ describe("prose survives --force-regenerate", () => {
     expect(result.toolkit.customImports).toHaveLength(0);
     expect(result.toolkit.subPages).toHaveLength(0);
   });
+
+  it("clears prose when curation exists but is explicitly empty", async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "curation-"));
+    await writeFile(
+      join(tempDir, "testkit.json"),
+      JSON.stringify(curationEntry, null, 2)
+    );
+
+    const withProse =
+      await createCustomSectionsFileSource(tempDir).getCustomSections(
+        "TestKit"
+      );
+
+    const previousResult = await mergeToolkit(
+      "TestKit",
+      [createTool()],
+      null,
+      withProse,
+      undefined,
+      { previousToolkit: undefined }
+    );
+    expect(previousResult.toolkit.documentationChunks).toHaveLength(1);
+
+    await writeFile(join(tempDir, "testkit.json"), "{}");
+    const clearedCuration =
+      await createCustomSectionsFileSource(tempDir).getCustomSections(
+        "TestKit"
+      );
+
+    const result = await mergeToolkit(
+      "TestKit",
+      [createTool()],
+      null,
+      clearedCuration,
+      undefined,
+      { previousToolkit: previousResult.toolkit }
+    );
+
+    expect(result.toolkit.documentationChunks).toHaveLength(0);
+    expect(result.toolkit.customImports).toHaveLength(0);
+    expect(result.toolkit.subPages).toHaveLength(0);
+  });
 });
