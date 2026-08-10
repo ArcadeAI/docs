@@ -18,6 +18,37 @@ export interface CleanupExcludedToolkitOutputResult {
   warnings: string[];
 }
 
+const collectRebuildWarnings = (
+  rebuildResult: RebuildIndexResult,
+  verbose: boolean
+): string[] => {
+  const warnings: string[] = [];
+
+  if (rebuildResult.readErrors.length > 0) {
+    warnings.push(
+      `Index rebuild skipped ${rebuildResult.readErrors.length} unreadable toolkit file(s).`
+    );
+    if (verbose) {
+      for (const error of rebuildResult.readErrors) {
+        warnings.push(`Index rebuild read error: ${error}`);
+      }
+    }
+  }
+
+  if (rebuildResult.readWarnings.length > 0) {
+    warnings.push(
+      `Index rebuild reported ${rebuildResult.readWarnings.length} warning(s).`
+    );
+    if (verbose) {
+      for (const warning of rebuildResult.readWarnings) {
+        warnings.push(`Index rebuild warning: ${warning}`);
+      }
+    }
+  }
+
+  return warnings;
+};
+
 export const cleanupExcludedToolkitOutput = async (
   options: CleanupExcludedToolkitOutputOptions
 ): Promise<CleanupExcludedToolkitOutputResult> => {
@@ -33,37 +64,18 @@ export const cleanupExcludedToolkitOutput = async (
     return { deleted, warnings: [] };
   }
 
-  const warnings: string[] = [];
-
   try {
     const rebuildResult = await options.generator.rebuildIndexFromOutput();
-
-    if (rebuildResult.readErrors.length > 0) {
-      warnings.push(
-        `Index rebuild skipped ${rebuildResult.readErrors.length} unreadable toolkit file(s).`
-      );
-      if (options.verbose) {
-        for (const error of rebuildResult.readErrors) {
-          warnings.push(`Index rebuild read error: ${error}`);
-        }
-      }
-    }
-
-    if (rebuildResult.readWarnings.length > 0) {
-      warnings.push(
-        `Index rebuild reported ${rebuildResult.readWarnings.length} warning(s).`
-      );
-      if (options.verbose) {
-        for (const warning of rebuildResult.readWarnings) {
-          warnings.push(`Index rebuild warning: ${warning}`);
-        }
-      }
-    }
+    return {
+      deleted,
+      warnings: collectRebuildWarnings(rebuildResult, options.verbose),
+    };
   } catch (error) {
-    warnings.push(
-      `Excluded toolkit files were deleted, but index rebuild failed: ${error instanceof Error ? error.message : String(error)}`
-    );
+    return {
+      deleted,
+      warnings: [
+        `Excluded toolkit files were deleted, but index rebuild failed: ${error instanceof Error ? error.message : String(error)}`,
+      ],
+    };
   }
-
-  return { deleted, warnings };
 };

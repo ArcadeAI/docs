@@ -243,10 +243,10 @@ const hasRelevantMetadataChanges = (
   // preserve the previous output (or report the recoverable failure). Only
   // two absent snapshots are genuinely unchanged; new toolkits are already
   // selected by their tool-level additions.
-  if (!current && !previous) {
+  if (!(current || previous)) {
     return false;
   }
-  if (!current || !previous) {
+  if (!(current && previous)) {
     return true;
   }
 
@@ -337,7 +337,7 @@ export const compareToolkit = (
   toolkitId: string,
   currentTools: readonly ToolDefinition[],
   previousToolkit: MergedToolkit | undefined,
-  currentMetadata: ToolkitMetadata | null | undefined = undefined
+  currentMetadata?: ToolkitMetadata | null
 ): ToolkitChange => {
   const toolChanges = compareTools(currentTools, previousToolkit);
   const currentVersion = getToolkitVersion(currentTools);
