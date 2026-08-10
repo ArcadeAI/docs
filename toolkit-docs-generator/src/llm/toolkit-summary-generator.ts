@@ -1,11 +1,11 @@
-import type { ToolkitSummaryGenerator } from "../merger/data-merger.js";
+import type { ToolkitSummaryGenerator } from "../merger/data-merger";
 import {
   ARCADE_AUTH_PROVIDERS_BASE_URL,
   ARCADE_SECRETS_DASHBOARD_URL,
   ARCADE_SECRETS_DOC_URL,
-} from "../merger/secret-coherence.js";
-import type { MergedTool, MergedToolkit, SecretType } from "../types/index.js";
-import type { LlmClient } from "./client.js";
+} from "../merger/secret-coherence";
+import type { MergedTool, MergedToolkit, SecretType } from "../types/index";
+import type { LlmClient } from "./client";
 
 export interface LlmToolkitSummaryGeneratorConfig {
   readonly client: LlmClient;

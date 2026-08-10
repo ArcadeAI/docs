@@ -26,6 +26,8 @@ export interface FailedToolsReport {
   readonly generatedAt: string;
   readonly toolkits: readonly string[];
   readonly failedToolkits: readonly string[];
+  readonly preservedToolkits?: readonly string[];
+  readonly omittedToolkits?: readonly string[];
   readonly tools: readonly FailedToolEntry[];
 }
 

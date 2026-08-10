@@ -10,13 +10,13 @@ import type {
   ToolDefinition,
   ToolOutput,
   ToolParameter,
-} from "../types/index.js";
+} from "../types/index";
 import {
   type ArcadeTool,
   parseArcadeErrorResponse,
   parseArcadeToolsResponse,
-} from "./arcade-api-types.js";
-import type { FetchOptions, IToolDataSource } from "./internal.js";
+} from "./arcade-api-types";
+import type { FetchOptions, IToolDataSource } from "./internal";
 
 // ============================================================================
 // Configuration

@@ -19,7 +19,7 @@
  * that shape, only the merged output defined here.
  */
 import { z } from "zod";
-import { INTEGRATION_CATEGORIES } from "./toolkit-primitives.js";
+import { INTEGRATION_CATEGORIES } from "./toolkit-primitives";
 
 // ============================================================================
 // Tool Parameter Schema

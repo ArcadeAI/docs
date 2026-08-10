@@ -1,4 +1,4 @@
-import type { ChangeDetectionResult } from "../diff/index.js";
+import type { ChangeDetectionResult } from "../diff/index";
 
 /**
  * Extract the lowercase toolkit IDs that were removed (present in previous

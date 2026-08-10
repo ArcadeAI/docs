@@ -10,8 +10,8 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { detectChanges } from "../../src/diff/index.js";
-import type { MergedToolkit, ToolDefinition } from "../../src/types/index.js";
+import { detectChanges } from "../../src/diff/index";
+import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
 
 const createMergedToolkit = (id: string): MergedToolkit => ({
   id,

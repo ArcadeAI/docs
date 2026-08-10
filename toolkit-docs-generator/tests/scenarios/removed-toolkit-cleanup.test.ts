@@ -14,11 +14,11 @@ import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { cleanupExcludedToolkitOutput } from "../../src/cli/exclusion-cleanup.js";
-import { collectRemovedToolkitIds } from "../../src/cli/generate-flow.js";
-import { detectChanges } from "../../src/diff/index.js";
-import { createJsonGenerator } from "../../src/generator/index.js";
-import type { MergedToolkit, ToolDefinition } from "../../src/types/index.js";
+import { cleanupExcludedToolkitOutput } from "../../src/cli/exclusion-cleanup";
+import { collectRemovedToolkitIds } from "../../src/cli/generate-flow";
+import { detectChanges } from "../../src/diff/index";
+import { createJsonGenerator } from "../../src/generator/index";
+import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
 
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 

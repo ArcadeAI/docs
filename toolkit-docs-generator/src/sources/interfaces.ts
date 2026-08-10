@@ -3,7 +3,7 @@
  *
  */
 
-import type { CustomSections } from "../types/index.js";
+import type { CustomSections } from "../types/index";
 
 // ============================================================================
 // Custom Sections Source Interface

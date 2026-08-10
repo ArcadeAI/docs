@@ -7,7 +7,7 @@
  * This is a modular, pure step that can run as part of the merge pipeline
  * or independently (e.g. in a CI check).
  */
-import type { MergedToolkit, MergedToolkitMetadata } from "../types/index.js";
+import type { MergedToolkit, MergedToolkitMetadata } from "../types/index";
 
 // ============================================================================
 // Types
