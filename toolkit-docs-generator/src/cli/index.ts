@@ -13,7 +13,7 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
-import { access, readdir, readFile } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
 import ora from "ora";
 import { join, resolve } from "path";
 import {
@@ -84,6 +84,8 @@ import {
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
+  getCombinedChangedToolkitIds,
+  resolveCustomSectionsPath,
 } from "./generate-flow";
 
 const program = new Command();
@@ -248,32 +250,6 @@ const buildChangeLogDetails = (
   }
 
   return details;
-};
-
-const resolveCustomSectionsPath = async (
-  explicitPath: string | undefined
-): Promise<string | undefined> => {
-  if (explicitPath) {
-    return explicitPath;
-  }
-
-  const defaultPath = join(process.cwd(), "curation");
-  try {
-    await access(defaultPath);
-    return defaultPath;
-  } catch {
-    return;
-  }
-};
-
-const getCombinedChangedToolkitIds = (
-  changeResult: ReturnType<typeof detectChanges>,
-  curationChangedToolkitIds: readonly string[]
-): string[] => {
-  const apiChangedIds = getChangedToolkitIds(changeResult).map((id) =>
-    id.toLowerCase()
-  );
-  return [...new Set([...apiChangedIds, ...curationChangedToolkitIds])].sort();
 };
 
 const clearOutputDir = async (
@@ -915,7 +891,7 @@ program
   .option("--no-verify-output", "Skip output verification")
   .option(
     "--custom-sections <path>",
-    "Path to the authoritative Markdown/MDX curation directory"
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
   )
   .option(
     "--resume",
@@ -1279,8 +1255,11 @@ program
         }
 
         // Custom sections source
-        const customSectionsSource = options.customSections
-          ? createMarkdownCurationSource(options.customSections)
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
@@ -1363,7 +1342,7 @@ program
             previousToolkits ?? new Map()
           );
           const changedCustomSectionIds = new Set(
-            options.customSections
+            customSectionsPath
               ? getChangedToolkitIdsFromCustomSections(
                   await customSectionsSource.getAllCustomSections(),
                   previousToolkits ?? new Map()
@@ -1440,8 +1419,7 @@ program
 
           // Get IDs of changed toolkits
           const changedIds = [
-            ...new Set([
-              ...getChangedToolkitIds(detectedChanges),
+            ...getCombinedChangedToolkitIds(detectedChanges, [
               ...changedCustomSectionIds,
             ]),
           ];
@@ -2028,7 +2006,7 @@ program
   .option("--no-verify-output", "Skip output verification")
   .option(
     "--custom-sections <path>",
-    "Path to the authoritative Markdown/MDX curation directory"
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
   )
   .option(
     "--resume",
@@ -2268,8 +2246,11 @@ program
           }
         }
 
-        const customSectionsSource = options.customSections
-          ? createMarkdownCurationSource(options.customSections)
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
