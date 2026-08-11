@@ -875,6 +875,11 @@ export const redirects: Redirect[] = [
     permanent: true,
   },
   {
+    source: "/:locale/operate/deploy/arcade-deploy",
+    destination: "/:locale/build/arcade-deploy",
+    permanent: true,
+  },
+  {
     source: "/:locale/guides/create-tools/error-handling",
     destination: "/:locale/build/create-tools/error-handling",
     permanent: true,
