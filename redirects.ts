@@ -16,16 +16,21 @@ export type Redirect = {
 };
 
 export const redirects: Redirect[] = [
+  // The toolkit-page breadcrumb links "Resources" -> /resources, which has
+  // no index page. Send it to the integrations registry instead of 404ing.
   {
     source: "/:locale/resources",
     destination: "/:locale/resources/integrations",
     permanent: true,
   },
+  // The auth provider is "square"; an external/stale link points at the
+  // old "squareup" slug, which 404s. Send it to the real page.
   {
     source: "/:locale/references/auth-providers/squareup",
     destination: "/:locale/references/auth-providers/square",
     permanent: true,
   },
+  // Dissolved guides/security section
   {
     source: "/:locale/guides/security/security-research-program",
     destination: "/:locale/resources/security-research-program",
@@ -57,17 +62,20 @@ export const redirects: Redirect[] = [
     destination: "/:locale/references/mcp/python",
     permanent: true,
   },
+  // CrewAI custom auth flow redirect to use-arcade-tools
   {
     source: "/:locale/get-started/agent-frameworks/crewai/custom-auth-flow",
     destination:
       "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
     permanent: true,
   },
+  // "others" category removed — toolkits moved to proper categories
   {
     source: "/:locale/resources/integrations/others/:path*",
     destination: "/:locale/resources/integrations",
     permanent: false,
   },
+  // Google ADK tutorial consolidation - redirect old URL to new
   {
     source: "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
     destination: "/:locale/get-started/agent-frameworks/google-adk/overview",
@@ -271,11 +279,13 @@ export const redirects: Redirect[] = [
     destination: "/:locale/resources/registry-early-access",
     permanent: true,
   },
+  // Moved MCP Gateway UI guide to guides
   {
     source: "/:locale/guides/create-tools/mcp-gateways",
     destination: "/:locale/operate/governance/mcp-gateways",
     permanent: true,
   },
+  // Removed LangChain old stuff
   {
     source: "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
     destination:
@@ -289,6 +299,7 @@ export const redirects: Redirect[] = [
       "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
     permanent: true,
   },
+  // Mastra tutorial consolidation
   {
     source: "/:locale/get-started/agent-frameworks/mastra/overview",
     destination: "/:locale/get-started/agent-frameworks/mastra",
@@ -304,6 +315,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/get-started/agent-frameworks/mastra",
     permanent: true,
   },
+  // OpenAI Agents tutorial consolidation
   {
     source:
       "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents",
@@ -322,6 +334,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/get-started/agent-frameworks/openai-agents/overview",
     permanent: true,
   },
+  // Moved from guides to get-started
   {
     source:
       "/:locale/guides/agent-frameworks/setup-arcade-with-your-llm-python",
@@ -329,6 +342,7 @@ export const redirects: Redirect[] = [
       "/:locale/get-started/agent-frameworks/setup-arcade-with-your-llm-python",
     permanent: true,
   },
+  // Old /home/* paths to new structure
   {
     source: "/:locale/home/langchain/use-arcade-tools",
     destination:
@@ -662,6 +676,11 @@ export const redirects: Redirect[] = [
     destination: "/:locale/get-started/agent-frameworks/vercelai",
     permanent: true,
   },
+  // Legacy /integrations path
+  // NOTE: :locale is constrained to actual locale values to prevent
+  // collisions with locale-less paths like /resources/integrations,
+  // which would otherwise match with :locale="resources" and redirect
+  // to /resources/resources/integrations (a 404).
   {
     source: "/:locale(en|es|pt-BR)/integrations",
     destination: "/:locale/resources/integrations",
@@ -672,6 +691,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/resources/integrations/:path*",
     permanent: true,
   },
+  // MCP servers to integrations
   {
     source: "/:locale(en|es|pt-BR)/mcp-servers",
     destination: "/:locale/resources/integrations",
@@ -682,6 +702,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/resources/integrations/:path*",
     permanent: true,
   },
+  // References fixes
   {
     source: "/:locale/references/mcp",
     destination: "/:locale/references/mcp/python",
@@ -697,6 +718,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/references/arcade-cli",
     permanent: true,
   },
+  // Path corrections (typos, renames)
   {
     source: "/:locale/get-started/setup/api-key",
     destination: "/:locale/get-started/setup/api-keys",
@@ -747,6 +769,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/resources/registry-early-access",
     permanent: true,
   },
+  // Framework path aliases (old naming conventions)
   {
     source: "/:locale/guides/agent-frameworks/crewai/python",
     destination:
@@ -786,6 +809,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/get-started/agent-frameworks/vercelai",
     permanent: true,
   },
+  // Old resource paths
   {
     source: "/:locale/resources/mastra/user-auth-interrupts",
     destination: "/:locale/get-started/agent-frameworks/mastra",
@@ -801,6 +825,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/build/create-tools/:path*",
     permanent: true,
   },
+  // Agent frameworks moved from guides to get-started
   {
     source: "/:locale/guides/agent-frameworks",
     destination: "/:locale/get-started/agent-frameworks",
@@ -811,6 +836,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/get-started/agent-frameworks/:path*",
     permanent: true,
   },
+  // MCP clients moved from guides/tool-calling to get-started
   {
     source: "/:locale/guides/tool-calling/mcp-clients",
     destination: "/:locale/get-started/mcp-clients",
@@ -821,6 +847,7 @@ export const redirects: Redirect[] = [
     destination: "/:locale/get-started/mcp-clients/:path*",
     permanent: true,
   },
+  // Deprecated toolkit renames (microsoft_* prefix, ArcadeAI/monorepo#601)
   {
     source: "/:locale/resources/integrations/productivity/sharepoint",
     destination:
@@ -839,6 +866,9 @@ export const redirects: Redirect[] = [
       "/:locale/resources/integrations/productivity/microsoft-outlook-calendar",
     permanent: true,
   },
+
+  // Auto-added redirects for deleted pages.
+  // `pnpm check-redirects --auto-fix` appends new entries here.
   {
     source: "/:locale/guides/deployment-hosting/arcade-deploy",
     destination: "/:locale/build/arcade-deploy",
@@ -1120,122 +1150,6 @@ export const redirects: Redirect[] = [
   {
     source: "/:locale/guides",
     destination: "/:locale/build",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/deployment",
-    destination: "/:locale/operate/deploy",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/deployment/arcade-cloud",
-    destination: "/:locale/operate/deploy/arcade-cloud",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/deployment/aws",
-    destination: "/:locale/operate/deploy/aws",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/deployment/azure",
-    destination: "/:locale/operate/deploy/azure",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/deployment/gcp",
-    destination: "/:locale/operate/deploy/gcp",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/deployment/helm",
-    destination: "/:locale/operate/deploy/helm",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/deployment/on-prem",
-    destination: "/:locale/operate/deploy/on-prem",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/deployment/warp-pipes",
-    destination: "/:locale/operate/deploy/warp-pipes",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/user-sources",
-    destination: "/:locale/operate/identity/user-sources",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/user-sources/auth0",
-    destination: "/:locale/operate/identity/user-sources/auth0",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/user-sources/clerk",
-    destination: "/:locale/operate/identity/user-sources/clerk",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/user-sources/microsoft-entra-id",
-    destination: "/:locale/operate/identity/user-sources/microsoft-entra-id",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/user-sources/okta",
-    destination: "/:locale/operate/identity/user-sources/okta",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/user-sources/stytch",
-    destination: "/:locale/operate/identity/user-sources/stytch",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/mcp-gateways",
-    destination: "/:locale/operate/governance/mcp-gateways",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/mcp-gateways/add-remote-servers",
-    destination: "/:locale/operate/governance/mcp-gateways/add-remote-servers",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/mcp-gateways/create-via-ai",
-    destination: "/:locale/operate/governance/mcp-gateways/create-via-ai",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/mcp-gateways/create-via-dashboard",
-    destination:
-      "/:locale/operate/governance/mcp-gateways/create-via-dashboard",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/contextual-access",
-    destination: "/:locale/operate/governance/contextual-access",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/contextual-access/build-your-own",
-    destination: "/:locale/operate/governance/contextual-access/build-your-own",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/contextual-access/examples",
-    destination: "/:locale/operate/governance/contextual-access/examples",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/contextual-access/how-hooks-work",
-    destination: "/:locale/operate/governance/contextual-access/how-hooks-work",
-    permanent: true,
-  },
-  {
-    source: "/:locale/operate/audit-logs",
-    destination: "/:locale/operate/governance/audit-logs",
     permanent: true,
   },
 ];
