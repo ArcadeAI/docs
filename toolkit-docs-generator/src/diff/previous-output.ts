@@ -5,7 +5,7 @@ import {
   MergedToolkitSchema,
   type ToolDefinition,
   ToolDefinitionSchema,
-} from "../types/index.js";
+} from "../types/index";
 
 const DEFAULT_PREVIOUS_TOOLKIT_METADATA = {
   category: "development" as const,
@@ -259,6 +259,45 @@ type FallbackToolkitResult = {
   droppedParameterCount: number;
 };
 
+type FallbackSummaryFields = {
+  summary?: string;
+  summaryStale?: boolean;
+  summaryStaleReason?: string;
+  generatedAt?: string;
+};
+
+const readFallbackSummaryFields = (
+  record: Record<string, unknown>
+): FallbackSummaryFields => ({
+  ...(typeof record.summary === "string" ? { summary: record.summary } : {}),
+  ...(typeof record.summaryStale === "boolean"
+    ? { summaryStale: record.summaryStale }
+    : {}),
+  ...(typeof record.summaryStaleReason === "string"
+    ? { summaryStaleReason: record.summaryStaleReason }
+    : {}),
+  ...(typeof record.generatedAt === "string"
+    ? { generatedAt: record.generatedAt }
+    : {}),
+});
+
+const readFallbackCustomSections = (
+  record: Record<string, unknown>
+): Pick<
+  MergedToolkit,
+  "documentationChunks" | "customImports" | "subPages"
+> => ({
+  documentationChunks: Array.isArray(record.documentationChunks)
+    ? (record.documentationChunks as MergedToolkit["documentationChunks"])
+    : [],
+  customImports: Array.isArray(record.customImports)
+    ? (record.customImports as MergedToolkit["customImports"])
+    : [],
+  subPages: Array.isArray(record.subPages)
+    ? (record.subPages as MergedToolkit["subPages"])
+    : [],
+});
+
 const buildFallbackToolkit = (
   record: Record<string, unknown>,
   fallbackId: string
@@ -274,29 +313,8 @@ const buildFallbackToolkit = (
 
   const metadataResult = MergedToolkitMetadataSchema.safeParse(record.metadata);
   const authResult = MergedToolkitAuthSchema.safeParse(record.auth);
-  const summary =
-    typeof record.summary === "string" ? record.summary : undefined;
-  const summaryStale =
-    typeof record.summaryStale === "boolean" ? record.summaryStale : undefined;
-  const summaryStaleReason =
-    typeof record.summaryStaleReason === "string"
-      ? record.summaryStaleReason
-      : undefined;
-  const generatedAt =
-    typeof record.generatedAt === "string" ? record.generatedAt : undefined;
-
-  // Carry forward custom sections even when strict schema parse fails.
-  // These are hand-authored fields — losing them silently on any schema
-  // mismatch would permanently wipe content on the next write.
-  const documentationChunks = Array.isArray(record.documentationChunks)
-    ? (record.documentationChunks as MergedToolkit["documentationChunks"])
-    : [];
-  const customImports = Array.isArray(record.customImports)
-    ? (record.customImports as MergedToolkit["customImports"])
-    : [];
-  const subPages = Array.isArray(record.subPages)
-    ? (record.subPages as MergedToolkit["subPages"])
-    : [];
+  const summaryFields = readFallbackSummaryFields(record);
+  const customSections = readFallbackCustomSections(record);
 
   return {
     toolkit: {
@@ -304,9 +322,7 @@ const buildFallbackToolkit = (
       label,
       version,
       description,
-      ...(summary ? { summary } : {}),
-      ...(summaryStale !== undefined ? { summaryStale } : {}),
-      ...(summaryStaleReason !== undefined ? { summaryStaleReason } : {}),
+      ...summaryFields,
       metadata: metadataResult.success
         ? metadataResult.data
         : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
@@ -316,10 +332,7 @@ const buildFallbackToolkit = (
         secretsInfo: [],
         documentationChunks: [],
       })),
-      documentationChunks,
-      customImports,
-      subPages,
-      ...(generatedAt ? { generatedAt } : {}),
+      ...customSections,
     },
     droppedToolCount,
     droppedParameterCount,

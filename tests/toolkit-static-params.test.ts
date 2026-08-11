@@ -6,8 +6,10 @@ import {
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
   type ToolkitCatalogEntry,
-} from "../../../app/_lib/toolkit-static-params";
-import { normalizeToolkitId } from "../../src/shared/toolkit-primitives";
+} from "@/app/_lib/toolkit-static-params";
+import { normalizeToolkitId } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+
+const INVALID_TOOLKIT_INDEX_SCHEMA_ERROR = /Invalid toolkit index schema/;
 
 const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   const dir = await mkdtemp(join(tmpdir(), "toolkit-static-params-"));
@@ -263,7 +265,7 @@ describe("toolkit static params", () => {
 
       await expect(
         listToolkitRoutes({ dataDir: dir, toolkitsCatalog: [] })
-      ).rejects.toThrow(/Invalid toolkit index schema/);
+      ).rejects.toThrow(INVALID_TOOLKIT_INDEX_SCHEMA_ERROR);
     });
   });
 

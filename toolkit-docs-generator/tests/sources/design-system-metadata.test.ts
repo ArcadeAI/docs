@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createDesignSystemMetadataSourceFromToolkits } from "../../src/sources/design-system-metadata.js";
-import type { ToolkitMetadata } from "../../src/types/index.js";
+import { createDesignSystemMetadataSourceFromToolkits } from "../../src/sources/design-system-metadata";
+import type { ToolkitMetadata } from "../../src/types/index";
 
 const createMetadata = (
   overrides: Partial<ToolkitMetadata> = {}

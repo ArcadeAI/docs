@@ -15,9 +15,9 @@ import { mkdtemp, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, describe, expect, it } from "vitest";
-import { mergeToolkit } from "../../src/merger/data-merger.js";
-import { createCustomSectionsFileSource } from "../../src/sources/custom-sections-file.js";
-import type { ToolDefinition } from "../../src/types/index.js";
+import { mergeToolkit } from "../../src/merger/data-merger";
+import { createCustomSectionsFileSource } from "../../src/sources/custom-sections-file";
+import type { ToolDefinition } from "../../src/types/index";
 
 const createTool = (): ToolDefinition => ({
   name: "TestTool",

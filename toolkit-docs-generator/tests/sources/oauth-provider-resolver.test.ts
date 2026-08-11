@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildProviderIdResolver,
   normalizeLookup,
-} from "../../src/sources/oauth-provider-resolver.js";
+} from "../../src/sources/oauth-provider-resolver";
 
 // ============================================================================
 // Fixtures

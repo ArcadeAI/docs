@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { resolveApiSource } from "../../src/cli/api-source.js";
+import { resolveApiSource } from "../../src/cli/api-source";
 
 const ORIGINAL_ENV = { ...process.env };
 

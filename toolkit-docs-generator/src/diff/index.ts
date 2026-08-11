@@ -4,7 +4,7 @@
  * Exports change detection functionality for comparing API data with previous output.
  */
 
-export { getChangedToolkitIdsFromCustomSections } from "./custom-sections-diff.js";
+export { getChangedToolkitIdsFromCustomSections } from "./custom-sections-diff";
 export {
   detectSummaryChanges,
   formatSummaryChangeSummary,
@@ -15,7 +15,7 @@ export {
   type SummaryToolkit,
   type SummaryToolkitChange,
   type SummaryToolkitChangeType,
-} from "./summary-diff.js";
+} from "./summary-diff";
 export {
   buildToolDefinitionSignature,
   type ChangeDetectionResult,
@@ -31,4 +31,4 @@ export {
   type ToolChangeType,
   type ToolkitChange,
   type ToolkitChangeType,
-} from "./toolkit-diff.js";
+} from "./toolkit-diff";

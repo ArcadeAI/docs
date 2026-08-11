@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { LlmClient } from "../../src/llm/client.js";
-import { LlmToolkitSummaryGenerator } from "../../src/llm/toolkit-summary-generator.js";
-import type { MergedToolkit } from "../../src/types/index.js";
+import type { LlmClient } from "../../src/llm/client";
+import { LlmToolkitSummaryGenerator } from "../../src/llm/toolkit-summary-generator";
+import type { MergedToolkit } from "../../src/types/index";
 
 const createToolkit = (
   overrides: Partial<MergedToolkit> = {}
@@ -53,6 +53,7 @@ const createToolkit = (
 describe("LlmToolkitSummaryGenerator", () => {
   it("parses summary from a JSON response", async () => {
     const client: LlmClient = {
+      provider: "openai",
       generateText: async () => '```json\n{"summary":"Concise summary."}\n```',
     };
     const generator = new LlmToolkitSummaryGenerator({
@@ -68,6 +69,7 @@ describe("LlmToolkitSummaryGenerator", () => {
   it("includes tool descriptions and auth info in the prompt", async () => {
     let capturedPrompt = "";
     const client: LlmClient = {
+      provider: "openai",
       generateText: async ({ prompt }) => {
         capturedPrompt = prompt;
         return '{"summary":"OK"}';

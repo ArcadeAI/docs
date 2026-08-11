@@ -2,7 +2,7 @@ import { mkdir, mkdtemp, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createCustomSectionsFileSource } from "../../src/sources/custom-sections-file.js";
+import { createCustomSectionsFileSource } from "../../src/sources/custom-sections-file";
 
 const createTempDir = async (): Promise<string> =>
   mkdtemp(join(tmpdir(), "custom-sections-"));

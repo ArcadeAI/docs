@@ -12,14 +12,14 @@ import { describe, expect, it } from "vitest";
 import {
   createDataMerger,
   type ToolExampleGenerator,
-} from "../../src/merger/data-merger.js";
+} from "../../src/merger/data-merger";
 import {
   EmptyCustomSectionsSource,
   InMemoryMetadataSource,
   InMemoryToolDataSource,
-} from "../../src/sources/in-memory.js";
-import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
-import type { ToolDefinition } from "../../src/types/index.js";
+} from "../../src/sources/in-memory";
+import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source";
+import type { ToolDefinition } from "../../src/types/index";
 
 const createTool = (
   overrides: Partial<ToolDefinition> = {}

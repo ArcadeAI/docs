@@ -12,12 +12,12 @@ import {
   InMemoryCustomSectionsSource,
   InMemoryMetadataSource,
   InMemoryToolDataSource,
-} from "../../src/sources/in-memory.js";
+} from "../../src/sources/in-memory";
 import type {
   CustomSections,
   ToolDefinition,
   ToolkitMetadata,
-} from "../../src/types/index.js";
+} from "../../src/types/index";
 
 // ============================================================================
 // Test Fixtures - Realistic data matching production schema

@@ -4,7 +4,7 @@ import {
   formatDuration,
   formatToolkitComplete,
   formatToolkitError,
-} from "../../src/utils/progress.js";
+} from "../../src/utils/progress";
 
 describe("formatDuration", () => {
   it("formats milliseconds", () => {

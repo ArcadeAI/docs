@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ToolDefinition, ToolParameter } from "../types/index.js";
+import type { ToolDefinition, ToolParameter } from "../types/index";
 
 const ToolMetadataValueSchema = z.object({
   val_type: z.string(),
@@ -166,7 +166,7 @@ const normalizeSecrets = (
 
 type RawBehavior = z.infer<typeof ToolItemMetadataBehaviorSchema>;
 
-import type { ToolMetadataBehavior } from "../types/index.js";
+import type { ToolMetadataBehavior } from "../types/index";
 
 const transformBehavior = (
   raw: RawBehavior | null | undefined

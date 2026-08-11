@@ -4,7 +4,7 @@
  * These interfaces are used only inside the toolkit data source implementations.
  * Do not export them from the public sources index.
  */
-import type { ToolDefinition, ToolkitMetadata } from "../types/index.js";
+import type { ToolDefinition, ToolkitMetadata } from "../types/index";
 
 // ============================================================================
 // Fetch Options

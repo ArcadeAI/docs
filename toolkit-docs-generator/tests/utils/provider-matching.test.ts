@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { ProviderVersion } from "../../src/types/index.js";
-import { resolveProviderIdsFromMetadata } from "../../src/utils/provider-matching.js";
+import type { ProviderVersion } from "../../src/types/index";
+import { resolveProviderIdsFromMetadata } from "../../src/utils/provider-matching";
 
 describe("resolveProviderIdsFromMetadata", () => {
   it("matches by toolkit id (case-insensitive)", () => {

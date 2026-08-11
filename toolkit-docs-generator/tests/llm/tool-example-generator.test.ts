@@ -2,9 +2,9 @@
  * Tests for the LLM tool example generator
  */
 import { describe, expect, it } from "vitest";
-import type { LlmClient } from "../../src/llm/client.js";
-import { LlmToolExampleGenerator } from "../../src/llm/tool-example-generator.js";
-import type { ToolDefinition } from "../../src/types/index.js";
+import type { LlmClient } from "../../src/llm/client";
+import { LlmToolExampleGenerator } from "../../src/llm/tool-example-generator";
+import type { ToolDefinition } from "../../src/types/index";
 
 const createTool = (
   overrides: Partial<ToolDefinition> = {}

@@ -17,10 +17,10 @@
 import { access, readdir, readFile, stat } from "fs/promises";
 import { basename, join } from "path";
 import { z } from "zod";
-import type { CustomSections } from "../types/index.js";
-import { CustomSectionsSchema } from "../types/index.js";
-import { normalizeId } from "../utils/fp.js";
-import type { ICustomSectionsSource } from "./interfaces.js";
+import type { CustomSections } from "../types/index";
+import { CustomSectionsSchema } from "../types/index";
+import { normalizeId } from "../utils/fp";
+import type { ICustomSectionsSource } from "./interfaces";
 
 // ============================================================================
 // File Schema

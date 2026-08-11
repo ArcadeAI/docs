@@ -5,16 +5,16 @@
  * into the final MergedToolkit format.
  */
 
-import type { ISecretEditGenerator } from "../llm/secret-edit-generator.js";
+import type { ISecretEditGenerator } from "../llm/secret-edit-generator";
 import {
   isApiSuffixedToolkitId,
   normalizeToolkitId,
-} from "../shared/toolkit-primitives.js";
-import type { ICustomSectionsSource } from "../sources/interfaces.js";
+} from "../shared/toolkit-primitives";
+import type { ICustomSectionsSource } from "../sources/interfaces";
 import type {
   IToolkitDataSource,
   ToolkitData,
-} from "../sources/toolkit-data-source.js";
+} from "../sources/toolkit-data-source";
 import type {
   CustomSections,
   DocumentationChunk,
@@ -26,13 +26,13 @@ import type {
   ToolDefinition,
   ToolkitAuthType,
   ToolkitMetadata,
-} from "../types/index.js";
-import { mapWithConcurrency } from "../utils/concurrency.js";
-import { extractVersion } from "../utils/fp.js";
+} from "../types/index";
+import { mapWithConcurrency } from "../utils/concurrency";
+import { extractVersion } from "../utils/fp";
 import {
   detectMetadataChanges,
   formatFreshnessWarnings,
-} from "./metadata-freshness.js";
+} from "./metadata-freshness";
 import {
   collectToolkitSecrets,
   detectSecretCoherenceIssues,
@@ -40,7 +40,7 @@ import {
   hasCoherenceIssues,
   type SecretCoherenceIssues,
   type StaleSecretEditTarget,
-} from "./secret-coherence.js";
+} from "./secret-coherence";
 
 // ============================================================================
 // Merger Configuration
@@ -82,6 +82,8 @@ export interface DataMergerConfig {
   skipToolkitIds?: ReadonlySet<string> | undefined;
   /** When true, only process toolkits with metadata and tools */
   requireCompleteData?: boolean;
+  /** Preserve previous output for a broken toolkit instead of failing the run. */
+  preserveLastKnownGood?: boolean;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
   resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
 }
@@ -98,6 +100,17 @@ export interface MergeResult {
   warnings: string[];
   failedTools: FailedTool[];
   error?: string;
+  /** A recoverable failure retained prior output or omitted a new toolkit. */
+  recovery?: "preserved" | "omitted";
+  /**
+   * True when the design system had no metadata for this toolkit and
+   * `getDefaultMetadata`'s placeholder (category, icon, docsLink, and
+   * `isHidden: true`) was used instead. Also true for the last-known-good
+   * placeholder in `buildMergeErrorResult`, for the same reason. Callers
+   * use this to log which toolkits are running on fabricated metadata,
+   * since that's easy to miss in a warnings list read only on failure.
+   */
+  usedDefaultMetadata: boolean;
 }
 
 export interface ToolExampleResult {
@@ -112,6 +125,25 @@ export interface ToolExampleGenerator {
 export interface ToolkitSummaryGenerator {
   generate: (toolkit: MergedToolkit) => Promise<string>;
 }
+
+/**
+ * Under `--require-complete`, every toolkit must have design-system metadata.
+ * Fails the run with every affected toolkit named in one error.
+ */
+export const assertRequireCompleteMetadata = (
+  toolkitEntries: ReadonlyArray<readonly [string, ToolkitData]>
+): void => {
+  const missing = toolkitEntries
+    .filter(([, toolkitData]) => toolkitData.metadata === null)
+    .map(([toolkitId]) => toolkitId);
+
+  if (missing.length > 0) {
+    throw new Error(
+      `--require-complete: missing design-system metadata for ${missing.length} toolkit(s): ${missing.join(", ")}. ` +
+        "Add the toolkit to the design system catalog, or drop --require-complete to continue with a hidden placeholder record."
+    );
+  }
+};
 
 interface MergeToolkitOptions {
   previousToolkit?: MergedToolkit | undefined;
@@ -439,16 +471,50 @@ const applyToolkitTypeOverrides = (
   return metadata;
 };
 
+/**
+ * Category assigned to a toolkit when the design system has no metadata for
+ * it at all. `MergedToolkitMetadata.category` is a closed enum
+ * (`INTEGRATION_CATEGORIES`) with no catch-all value, so this placeholder
+ * has to be one of the real categories — there is nothing else the schema
+ * will accept. "development" is picked arbitrarily; it is almost certainly
+ * wrong for any given toolkit, which is exactly why `getDefaultMetadata`
+ * also forces `isHidden: true` below instead of trusting this value enough
+ * to publish a page under it.
+ */
+const DEFAULT_METADATA_CATEGORY: MergedToolkitMetadata["category"] =
+  "development";
+
+/**
+ * Metadata used when the design system has no entry for a toolkit at all.
+ *
+ * Every field here is a guess, not a fact: none of it came from the design
+ * system, so none of it should be trusted enough to route or display. The
+ * category in particular can't be flagged as "unknown" — the schema is a
+ * closed enum with no catch-all — so a wrong-but-valid category would
+ * otherwise file the toolkit under the wrong sidebar section with a
+ * canonical URL nobody chose. `isHidden: true` is what actually neutralizes
+ * that: `app/_lib/toolkit-static-params.ts` drops hidden toolkits from
+ * routing entirely, so this placeholder record can exist on disk (and keep
+ * CI green when metadata truly is optional) without ever rendering under
+ * the wrong category. Real metadata — pulled in the next successful design
+ * system sync — clears the flag automatically, since `metadata` will no
+ * longer be null and this function won't run for that toolkit again.
+ *
+ * `DataMerger` only takes this path when `requireCompleteData` is false;
+ * under `--require-complete` (CI's mode) a missing design-system entry
+ * fails the run instead, naming the toolkit, before this function is ever
+ * called. See `DataMerger.assertNoMissingMetadata`.
+ */
 const getDefaultMetadata = (toolkitId: string): MergedToolkitMetadata =>
   applyToolkitTypeOverrides(toolkitId, {
-    category: "development",
+    category: DEFAULT_METADATA_CATEGORY,
     iconUrl: `https://design-system.arcade.dev/icons/${getDefaultIconId(toolkitId)}.svg`,
     isBYOC: false,
     isPro: false,
     type: "arcade",
-    docsLink: `https://docs.arcade.dev/en/mcp-servers/development/${getDefaultDocsSlug(toolkitId)}`,
+    docsLink: `https://docs.arcade.dev/en/resources/integrations/${DEFAULT_METADATA_CATEGORY}/${getDefaultDocsSlug(toolkitId)}`,
     isComingSoon: false,
-    isHidden: false,
+    isHidden: true,
   });
 
 /**
@@ -936,7 +1002,12 @@ export const mergeToolkit = async (
     warnings.push(...formatFreshnessWarnings(freshnessResult));
   }
 
-  return { toolkit, warnings, failedTools };
+  return {
+    toolkit,
+    warnings,
+    failedTools,
+    usedDefaultMetadata: metadata === null,
+  };
 };
 
 // ============================================================================
@@ -970,6 +1041,7 @@ export class DataMerger {
     | undefined;
   private readonly skipToolkitIds: ReadonlySet<string>;
   private readonly requireCompleteData: boolean;
+  private readonly preserveLastKnownGood: boolean;
   private readonly resolveProviderId:
     | ((toolkitId: string) => string | null)
     | undefined;
@@ -988,6 +1060,7 @@ export class DataMerger {
     this.onToolkitComplete = config.onToolkitComplete;
     this.skipToolkitIds = config.skipToolkitIds ?? new Set();
     this.requireCompleteData = config.requireCompleteData ?? false;
+    this.preserveLastKnownGood = config.preserveLastKnownGood ?? false;
     this.resolveProviderId = config.resolveProviderId;
   }
 
@@ -1013,9 +1086,16 @@ export class DataMerger {
         warnings: [`Error processing toolkit: ${message}`],
         failedTools: [],
         error: message,
+        recovery: "preserved",
+        usedDefaultMetadata: false,
       };
     }
 
+    // No previous toolkit to fall back on: this is a first-time toolkit
+    // whose merge threw before metadata even entered the picture. The
+    // placeholder below reuses the same "unhidden" category and forced
+    // `isHidden: true` as `getDefaultMetadata` and for the same reason —
+    // it's a guess, not a fact, so it must not be routable.
     return {
       toolkit: {
         id: toolkitId,
@@ -1023,14 +1103,14 @@ export class DataMerger {
         version: "0.0.0",
         description: null,
         metadata: {
-          category: "development",
+          category: DEFAULT_METADATA_CATEGORY,
           iconUrl: "",
           isBYOC: false,
           isPro: false,
           type: isApiSuffixedToolkitId(toolkitId) ? "arcade_starter" : "arcade",
           docsLink: "",
           isComingSoon: false,
-          isHidden: false,
+          isHidden: true,
         },
         auth: null,
         tools: [],
@@ -1042,7 +1122,29 @@ export class DataMerger {
       warnings: [`Error processing toolkit: ${message}`],
       failedTools: [],
       error: message,
+      recovery: "omitted",
+      usedDefaultMetadata: true,
     };
+  }
+
+  private async recoverMissingMetadata(
+    toolkitId: string,
+    toolkitData: ToolkitData
+  ): Promise<MergeResult | undefined> {
+    if (!this.preserveLastKnownGood || toolkitData.metadata !== null) {
+      return;
+    }
+
+    const previousToolkit = this.getPreviousToolkit(toolkitId);
+    const result = this.buildMergeErrorResult(
+      toolkitId,
+      "missing design-system metadata",
+      previousToolkit
+    );
+    if (this.onToolkitComplete && previousToolkit) {
+      await this.onToolkitComplete(result);
+    }
+    return result;
   }
 
   private async mergeToolkitEntry(
@@ -1050,9 +1152,16 @@ export class DataMerger {
     toolkitData: ToolkitData
   ): Promise<MergeResult> {
     try {
+      const recovered = await this.recoverMissingMetadata(
+        toolkitId,
+        toolkitData
+      );
+      if (recovered) {
+        return recovered;
+      }
+
       const customSections =
         await this.customSectionsSource.getCustomSections(toolkitId);
-
       const previousToolkit = this.getPreviousToolkit(toolkitId);
       const result = await mergeToolkit(
         toolkitId,
@@ -1320,6 +1429,11 @@ export class DataMerger {
       version
     );
 
+    const recovered = await this.recoverMissingMetadata(toolkitId, toolkitData);
+    if (recovered) {
+      return recovered;
+    }
+
     // Fetch custom sections
     const customSections =
       await this.customSectionsSource.getCustomSections(toolkitId);
@@ -1346,19 +1460,42 @@ export class DataMerger {
   }
 
   /**
+   * Under `--require-complete`, a toolkit with no design-system metadata
+   * must fail the run instead of silently falling back to
+   * `getDefaultMetadata`'s guessed category/docsLink/icon. Silently
+   * dropping the toolkit (the old behavior) is just as bad as fabricating
+   * data for it — either way nobody finds out until a human notices a
+   * toolkit is missing or mis-filed. Naming every affected toolkit in one
+   * error, before any concurrent processing starts, keeps CI logs
+   * unambiguous about exactly what to fix upstream.
+   */
+  private assertNoMissingMetadata(
+    toolkitEntries: ReadonlyArray<readonly [string, ToolkitData]>
+  ): void {
+    if (!this.requireCompleteData) {
+      return;
+    }
+
+    assertRequireCompleteMetadata(toolkitEntries);
+  }
+
+  /**
    * Merge data for all toolkits
    */
   async mergeAllToolkits(): Promise<MergeResult[]> {
     const allToolkitsData = await this.toolkitDataSource.fetchAllToolkitsData();
-
     const toolkitEntries = Array.from(allToolkitsData.entries());
 
-    // Filter out toolkits that should be skipped (for resume support)
+    this.assertNoMissingMetadata(toolkitEntries);
+
+    // Filter out toolkits that should be skipped (for resume support) and,
+    // under --require-complete, toolkits with no tools. Missing metadata is
+    // no longer filtered here — assertNoMissingMetadata above already threw
+    // if any slipped through.
     const filteredEntries = toolkitEntries.filter(
       ([toolkitId, toolkitData]) =>
         !this.skipToolkitIds.has(toolkitId.toLowerCase()) &&
-        (!this.requireCompleteData ||
-          (toolkitData.metadata !== null && toolkitData.tools.length > 0))
+        (!this.requireCompleteData || toolkitData.tools.length > 0)
     );
 
     const results = await mapWithConcurrency(
@@ -1391,12 +1528,15 @@ export class DataMerger {
     skipped: number;
   }> {
     const allToolkitsData = await this.toolkitDataSource.fetchAllToolkitsData();
+    const toolkitEntries = Array.from(allToolkitsData.entries());
+
+    this.assertNoMissingMetadata(toolkitEntries);
+
     const total = allToolkitsData.size;
-    const skipped = Array.from(allToolkitsData.entries()).filter(
+    const skipped = toolkitEntries.filter(
       ([id, toolkitData]) =>
         this.skipToolkitIds.has(id.toLowerCase()) ||
-        (this.requireCompleteData &&
-          (toolkitData.metadata === null || toolkitData.tools.length === 0))
+        (this.requireCompleteData && toolkitData.tools.length === 0)
     ).length;
     return {
       total,

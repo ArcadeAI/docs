@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getChangedToolkitIdsFromCustomSections } from "../../src/diff/index.js";
-import type { MergedToolkit } from "../../src/types/index.js";
+import { getChangedToolkitIdsFromCustomSections } from "../../src/diff/index";
+import type { MergedToolkit } from "../../src/types/index";
 
 const previousToolkit = (documentation = "old"): MergedToolkit => ({
   id: "Github",
@@ -78,5 +78,14 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
         new Map([["Github", previousToolkit()]])
       )
     ).toEqual(["github"]);
+  });
+
+  it("ignores toolkits without a curation file", () => {
+    expect(
+      getChangedToolkitIdsFromCustomSections(
+        {},
+        new Map([["Github", previousToolkit()]])
+      )
+    ).toEqual([]);
   });
 });

@@ -23,13 +23,13 @@ import {
   getChangedToolkitIds,
   getChangedToolkitIdsFromCustomSections,
   hasChanges,
-} from "../diff/index.js";
-import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
+} from "../diff/index";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output";
 import {
   createJsonGenerator,
   type VerificationProgress,
   verifyOutputDir,
-} from "../generator/index.js";
+} from "../generator/index";
 import {
   createLlmClient,
   type LlmClient,
@@ -37,14 +37,17 @@ import {
   LlmSecretEditGenerator,
   LlmToolExampleGenerator,
   LlmToolkitSummaryGenerator,
-} from "../llm/index.js";
-import type { MergeResult } from "../merger/data-merger.js";
-import { createDataMerger } from "../merger/data-merger.js";
-import { createCustomSectionsFileSource } from "../sources/custom-sections-file.js";
-import { createDesignSystemMetadataSource } from "../sources/design-system-metadata.js";
-import { createEmptyCustomSectionsSource } from "../sources/in-memory.js";
-import { createMockMetadataSource } from "../sources/mock-metadata.js";
-import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver.js";
+} from "../llm/index";
+import type { MergeResult } from "../merger/data-merger";
+import {
+  assertRequireCompleteMetadata,
+  createDataMerger,
+} from "../merger/data-merger";
+import { createCustomSectionsFileSource } from "../sources/custom-sections-file";
+import { createDesignSystemMetadataSource } from "../sources/design-system-metadata";
+import { createEmptyCustomSectionsSource } from "../sources/in-memory";
+import { createMockMetadataSource } from "../sources/mock-metadata";
+import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
 import {
   createArcadeToolkitDataSource,
   createCachedToolkitDataSource,
@@ -52,36 +55,36 @@ import {
   createMockToolkitDataSource,
   type IToolkitDataSource,
   type ToolkitData,
-} from "../sources/toolkit-data-source.js";
+} from "../sources/toolkit-data-source";
 import {
   type MergedToolkit,
   type ProviderVersion,
   ProviderVersionSchema,
-} from "../types/index.js";
-import { readExclusionList } from "../utils/exclusion-list.js";
-import { readIgnoreList } from "../utils/ignore-list.js";
+} from "../types/index";
+import { readExclusionList } from "../utils/exclusion-list";
+import { readIgnoreList } from "../utils/ignore-list";
 import {
   clearSafeOutputDir,
   resolveDefaultOutputDir,
-} from "../utils/output-dir.js";
+} from "../utils/output-dir";
 import {
   createProgressTracker,
   formatToolkitComplete,
-} from "../utils/progress.js";
-import { resolveProviderIdsFromMetadata } from "../utils/provider-matching.js";
+} from "../utils/progress";
+import { resolveProviderIdsFromMetadata } from "../utils/provider-matching";
 import {
   appendLogEntry,
   readFailedToolsReport,
   writeFailedToolsReport,
-} from "../utils/run-logs.js";
-import { type ApiSource, resolveApiSource } from "./api-source.js";
-import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
+} from "../utils/run-logs";
+import { type ApiSource, resolveApiSource } from "./api-source";
+import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup";
 import {
   assertSafeCurrentToolkitSnapshot,
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
-} from "./generate-flow.js";
+} from "./generate-flow";
 
 const program = new Command();
 
@@ -133,13 +136,6 @@ const buildLogPaths = (logDir: string) => ({
   changeLogPath: join(logDir, "changes.log"),
   failedToolsPath: join(logDir, "failed-tools.json"),
 });
-
-const getToolkitIdsWithoutMetadata = (
-  toolkitsData: ReadonlyMap<string, ToolkitData>
-): string[] =>
-  Array.from(toolkitsData.entries())
-    .filter(([, toolkitData]) => toolkitData.metadata === null)
-    .map(([toolkitId]) => toolkitId);
 
 const createMetadataSource = async (options: {
   metadataFile: string;
@@ -942,6 +938,11 @@ program
     false
   )
   .option(
+    "--preserve-last-known-good",
+    "Publish healthy toolkits while preserving prior docs for recoverable toolkit failures",
+    false
+  )
+  .option(
     "--exclude-file <file>",
     "Path to a .txt file with toolkit IDs to skip and delete existing output for (one per line, e.g. remove-toolkits.txt)"
   )
@@ -1021,6 +1022,7 @@ program
       incremental: boolean;
       skipUnchanged: boolean;
       requireComplete: boolean;
+      preserveLastKnownGood: boolean;
       excludeFile?: string;
       ignoreFile?: string;
       verbose: boolean;
@@ -1037,6 +1039,7 @@ program
       const spinner = ora("Parsing input...").start();
       const logPaths = buildLogPaths(resolve(options.logDir));
       const requireComplete = options.requireComplete;
+      const preserveLastKnownGood = options.preserveLastKnownGood;
 
       let excludedToolkitIds = new Set<string>();
       if (options.excludeFile) {
@@ -1338,28 +1341,16 @@ program
             );
           }
 
-          const metadataExcludedToolkitIds = requireComplete
-            ? getToolkitIdsWithoutMetadata(currentToolkitsData)
-            : [];
-          const metadataExcludedToolkitIdSet = new Set(
-            metadataExcludedToolkitIds.map((id) => id.toLowerCase())
-          );
-          if (options.verbose && metadataExcludedToolkitIds.length > 0) {
-            console.log(
-              chalk.dim(
-                `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata before change detection`
-              )
+          if (requireComplete) {
+            assertRequireCompleteMetadata(
+              Array.from(currentToolkitsData.entries())
             );
           }
 
           // Build map of toolkit ID -> current toolkit data for comparison
-          const currentToolkitDataForDiff = new Map<string, ToolkitData>();
-          for (const [id, data] of currentToolkitsData) {
-            if (metadataExcludedToolkitIdSet.has(id.toLowerCase())) {
-              continue;
-            }
-            currentToolkitDataForDiff.set(id, data);
-          }
+          const currentToolkitDataForDiff = new Map<string, ToolkitData>(
+            currentToolkitsData
+          );
           assertSafeCurrentToolkitSnapshot(
             currentToolkitDataForDiff.size,
             previousToolkits?.size ?? 0
@@ -1530,6 +1521,7 @@ program
           ...(runAll ? { onToolkitProgress } : {}),
           ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
           requireCompleteData: requireComplete,
+          preserveLastKnownGood,
           ...(onToolkitComplete ? { onToolkitComplete } : {}),
           ...(resolveProviderId ? { resolveProviderId } : {}),
         });
@@ -1552,20 +1544,12 @@ program
             );
           }
 
-          if (requireComplete) {
-            const metadataExcludedToolkitIds =
-              getToolkitIdsWithoutMetadata(toolkitList);
-            for (const toolkitId of metadataExcludedToolkitIds) {
-              skipToolkitIds.add(toolkitId.toLowerCase());
-            }
-            if (options.verbose && metadataExcludedToolkitIds.length > 0) {
-              console.log(
-                chalk.dim(
-                  `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata`
-                )
-              );
-            }
-          }
+          // requireComplete no longer silently drops toolkits without
+          // design-system metadata into skipToolkitIds here. Silently
+          // excluding them was just as opaque as fabricating metadata for
+          // them — DataMerger.assertNoMissingMetadata (run from inside
+          // mergeAllToolkits below) now fails the whole run and names every
+          // affected toolkit instead.
 
           // If --skip-unchanged, only process changed toolkits
           // Add unchanged toolkits to skipToolkitIds
@@ -1662,6 +1646,7 @@ program
               onToolkitProgress,
               ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
               requireCompleteData: requireComplete,
+              preserveLastKnownGood,
               ...(onToolkitComplete ? { onToolkitComplete } : {}),
               ...(resolveProviderId ? { resolveProviderId } : {}),
             });
@@ -1712,7 +1697,9 @@ program
         // Error results can still carry a last-known-good toolkit fallback from
         // the merger. Keep them in the batch output so one failed merge cannot
         // silently remove that toolkit from index.json.
-        const writableResults = allResults;
+        const writableResults = allResults.filter(
+          (result) => result.recovery !== "omitted"
+        );
 
         // Generate output files (batch mode if not incremental)
         if (!useIncremental && writableResults.length > 0) {
@@ -1861,10 +1848,27 @@ program
           0
         );
         const failedToolkits = mergeFailures.map((result) => result.toolkit.id);
+        const preservedToolkits = mergeFailures
+          .filter((result) => result.recovery === "preserved")
+          .map((result) => result.toolkit.id);
+        const omittedToolkits = mergeFailures
+          .filter((result) => result.recovery === "omitted")
+          .map((result) => result.toolkit.id);
         const failedTools = allResults.flatMap((result) => result.failedTools);
         const failedToolkitsFromTools = Array.from(
           new Set(failedTools.map((tool) => tool.toolkitId))
         );
+        // Toolkits that fell back to getDefaultMetadata's guessed category,
+        // icon, and docsLink because the design system had no entry for
+        // them. --require-complete would have already failed the run for
+        // these (see DataMerger.assertNoMissingMetadata), so reaching here
+        // means requireComplete was off. The per-toolkit warning text
+        // already goes to stdout above; naming these explicitly in the run
+        // log means the omission survives past the CI log window instead
+        // of only ever being visible in real time.
+        const toolkitsWithDefaultMetadata = allResults
+          .filter((result) => result.usedDefaultMetadata)
+          .map((result) => result.toolkit.id);
 
         const runDetails = [
           `output=${resolve(options.output)}`,
@@ -1872,10 +1876,17 @@ program
           `mode=${runAll ? "all" : "providers"}`,
           `skipUnchanged=${options.skipUnchanged}`,
           `requireComplete=${requireComplete}`,
+          `preserveLastKnownGood=${preserveLastKnownGood}`,
           `filesWritten=${filesWritten.length}`,
           `warnings=${warningCount}`,
           `writeErrors=${writeErrors.length}`,
         ];
+
+        if (toolkitsWithDefaultMetadata.length > 0) {
+          runDetails.push(
+            `toolkitsWithDefaultMetadata=${toolkitsWithDefaultMetadata.join(", ")}`
+          );
+        }
 
         if (!runAll && providers) {
           runDetails.push(
@@ -1889,6 +1900,12 @@ program
 
         if (failedToolkits.length > 0) {
           runDetails.push(`failedToolkits=${failedToolkits.join(", ")}`);
+        }
+        if (preservedToolkits.length > 0) {
+          runDetails.push(`preservedToolkits=${preservedToolkits.join(", ")}`);
+        }
+        if (omittedToolkits.length > 0) {
+          runDetails.push(`omittedToolkits=${omittedToolkits.join(", ")}`);
         }
         if (failedTools.length > 0) {
           runDetails.push(`failedTools=${failedTools.length}`);
@@ -1906,6 +1923,8 @@ program
           generatedAt: new Date().toISOString(),
           toolkits: failedToolkitsFromTools,
           failedToolkits,
+          preservedToolkits,
+          omittedToolkits,
           tools: failedTools,
         });
 
@@ -1913,7 +1932,10 @@ program
           title: "generate",
           details: runDetails,
         });
-        if (mergeFailures.length > 0 || writeErrors.length > 0) {
+        if (
+          writeErrors.length > 0 ||
+          (mergeFailures.length > 0 && !preserveLastKnownGood)
+        ) {
           process.exitCode = 1;
         }
       } catch (error) {
@@ -2330,20 +2352,12 @@ program
           );
         }
 
-        if (requireComplete) {
-          const metadataExcludedToolkitIds =
-            getToolkitIdsWithoutMetadata(toolkitList);
-          for (const toolkitId of metadataExcludedToolkitIds) {
-            skipToolkitIds.add(toolkitId.toLowerCase());
-          }
-          if (options.verbose && metadataExcludedToolkitIds.length > 0) {
-            console.log(
-              chalk.dim(
-                `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata`
-              )
-            );
-          }
-        }
+        // requireComplete no longer silently drops toolkits without
+        // design-system metadata into skipToolkitIds here. Silently
+        // excluding them was just as opaque as fabricating metadata for
+        // them — DataMerger.assertNoMissingMetadata (run from inside
+        // mergeAllToolkits below) now fails the whole run and names every
+        // affected toolkit instead.
 
         const processingStats = computeProcessingStats(
           toolkitList,
@@ -2435,7 +2449,9 @@ program
           // Error results can still carry a last-known-good toolkit fallback.
           // Preserve it in batch output rather than letting --clear-output
           // remove the prior JSON artifact.
-          const writableResults = results;
+          const writableResults = results.filter(
+            (result) => result.recovery !== "omitted"
+          );
           const summary = progressTracker.getSummary();
           spinner.succeed(
             `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
@@ -2601,7 +2617,7 @@ program
   .description("Validate a generated JSON file against the schema")
   .action(async (file: string) => {
     const { readFile } = await import("fs/promises");
-    const { MergedToolkitSchema } = await import("../types/index.js");
+    const { MergedToolkitSchema } = await import("../types/index");
 
     try {
       const content = await readFile(file, "utf-8");

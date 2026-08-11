@@ -11,13 +11,13 @@ import {
   detectChanges,
   getChangedToolkitIds,
   hasChanges,
-} from "../../src/diff/index.js";
+} from "../../src/diff/index";
 import {
   InMemoryMetadataSource,
   InMemoryToolDataSource,
-} from "../../src/sources/in-memory.js";
-import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
-import type { MergedToolkit, ToolDefinition } from "../../src/types/index.js";
+} from "../../src/sources/in-memory";
+import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source";
+import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
 
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
