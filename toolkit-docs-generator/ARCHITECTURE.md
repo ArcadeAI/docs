@@ -63,8 +63,6 @@ The generator output is consumed by the Next.js app:
 - The app loads JSON from `toolkit-docs-generator/data/toolkits/`.
 - `generateStaticParams` enumerates the toolkit routes and disables unknown dynamic parameters.
 - Custom documentation chunks are rendered as MDX in the UI.
-- Copy-page and agent-facing Markdown is projected from the generated JSON and
-  includes those curated chunks.
 
 If you need HTML output, add a separate build step in the app. The generator intentionally avoids HTML to keep the pipeline deterministic.
 
