@@ -5,6 +5,7 @@
  * into the final MergedToolkit format.
  */
 
+import { createHash } from "node:crypto";
 import type { ISecretEditGenerator } from "../llm/secret-edit-generator";
 import {
   isApiSuffixedToolkitId,
@@ -216,6 +217,11 @@ export const stableStringify = (value: unknown): string => {
 
   return JSON.stringify(value);
 };
+
+export const getCustomSectionsSourceHash = (
+  customSections: CustomSections
+): string =>
+  createHash("sha256").update(stableStringify(customSections)).digest("hex");
 
 export type ToolSignatureInput = {
   name: string;
@@ -801,6 +807,13 @@ const buildMergedToolkit = (options: {
       options.previousToolkit?.subPages,
       customSectionsAuthoritative
     ),
+    ...(options.customSections
+      ? {
+          curationSourceHash: getCustomSectionsSourceHash(
+            options.customSections
+          ),
+        }
+      : {}),
     generatedAt: new Date().toISOString(),
   };
 };

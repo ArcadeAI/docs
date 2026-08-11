@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getChangedToolkitIdsFromCustomSections } from "../../src/diff/index";
+import { getCustomSectionsSourceHash } from "../../src/merger/data-merger";
 import type { MergedToolkit } from "../../src/types/index";
 
 const previousToolkit = (documentation = "old"): MergedToolkit => ({
@@ -68,6 +69,31 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
             toolChunks: {},
           },
         },
+        new Map([["Github", toolkit]])
+      )
+    ).toEqual([]);
+  });
+
+  it("uses the curation fingerprint after generated prose is edited", () => {
+    const curation = {
+      documentationChunks: [
+        {
+          type: "warning" as const,
+          location: "description" as const,
+          position: "after" as const,
+          content: "hand-authored source",
+        },
+      ],
+      customImports: [],
+      subPages: [],
+      toolChunks: {},
+    };
+    const toolkit = previousToolkit("secret-coherence edited output");
+    toolkit.curationSourceHash = getCustomSectionsSourceHash(curation);
+
+    expect(
+      getChangedToolkitIdsFromCustomSections(
+        { github: curation },
         new Map([["Github", toolkit]])
       )
     ).toEqual([]);

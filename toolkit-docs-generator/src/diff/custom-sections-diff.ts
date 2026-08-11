@@ -1,4 +1,7 @@
-import { stableStringify } from "../merger/data-merger";
+import {
+  getCustomSectionsSourceHash,
+  stableStringify,
+} from "../merger/data-merger";
 import type { CustomSections, MergedToolkit } from "../types/index";
 
 const customSectionsFromToolkit = (toolkit: MergedToolkit): CustomSections => ({
@@ -47,9 +50,12 @@ export const getChangedToolkitIdsFromCustomSections = (
       ? customSectionsFromToolkit(previousToolkit)
       : emptyCustomSections();
 
-    if (
-      stableStringify(currentSections) !== stableStringify(previousSections)
-    ) {
+    const currentHash = getCustomSectionsSourceHash(currentSections);
+    const hasChanged = previousToolkit?.curationSourceHash
+      ? currentHash !== previousToolkit.curationSourceHash
+      : stableStringify(currentSections) !== stableStringify(previousSections);
+
+    if (hasChanged) {
       changed.push(toolkitId.toLowerCase());
     }
   }

@@ -389,6 +389,11 @@ export const MergedToolkitSchema = z.object({
    * accepted an explicit override here, so it stays part of the contract.
    */
   pipPackageName: z.string().optional(),
+  /**
+   * SHA-256 fingerprint of hand-authored curation before generated
+   * post-processing edits. Used only for incremental generation.
+   */
+  curationSourceHash: z.string().optional(),
   /** Generation metadata */
   generatedAt: z.string().optional(),
 });

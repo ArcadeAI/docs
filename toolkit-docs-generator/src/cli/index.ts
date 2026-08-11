@@ -1278,9 +1278,14 @@ program
           }
         }
 
-        // Custom sections source
-        const customSectionsSource = options.customSections
-          ? createCustomSectionsFileSource(options.customSections)
+        // Custom sections source. When curation/ is present, use it by default
+        // so manual generation follows the same merge and diff behavior as
+        // check-changes and the nightly workflow.
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createCustomSectionsFileSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
@@ -1363,7 +1368,7 @@ program
             previousToolkits ?? new Map()
           );
           const changedCustomSectionIds = new Set(
-            options.customSections
+            customSectionsPath
               ? getChangedToolkitIdsFromCustomSections(
                   await customSectionsSource.getAllCustomSections(),
                   previousToolkits ?? new Map()
@@ -1439,12 +1444,9 @@ program
           }
 
           // Get IDs of changed toolkits
-          const changedIds = [
-            ...new Set([
-              ...getChangedToolkitIds(detectedChanges),
-              ...changedCustomSectionIds,
-            ]),
-          ];
+          const changedIds = getCombinedChangedToolkitIds(detectedChanges, [
+            ...changedCustomSectionIds,
+          ]);
           changedToolkitIds = new Set(changedIds.map((id) => id.toLowerCase()));
           changeResult = detectedChanges;
           const changedPreview =

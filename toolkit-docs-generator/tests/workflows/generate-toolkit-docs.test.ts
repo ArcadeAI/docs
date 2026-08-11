@@ -38,6 +38,7 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("--llm-max-tokens 8192");
   expect(workflowContents).toContain("--exclude-file ./remove-toolkits.txt");
   expect(workflowContents).toContain("--ignore-file ./skip-toolkits.txt");
+  expect(workflowContents).toContain("--custom-sections ./curation");
   expect(workflowContents).toContain("--remove-empty-sections=false");
   expect(workflowContents).toContain("peter-evans/create-pull-request");
   expect(workflowContents).toContain("HUSKY: 0");

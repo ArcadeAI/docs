@@ -10,6 +10,7 @@ import {
   computeAllScopes,
   DataMerger,
   determineAuthType,
+  getCustomSectionsSourceHash,
   getProviderId,
   groupToolsByToolkit,
   mergeToolkit,
@@ -425,6 +426,9 @@ describe("mergeToolkit", () => {
     expect(result.toolkit.auth?.allScopes).toContain("scope1");
     expect(result.toolkit.auth?.allScopes).toContain("scope2");
     expect(result.toolkit.documentationChunks).toHaveLength(1);
+    expect(result.toolkit.curationSourceHash).toBe(
+      getCustomSectionsSourceHash(customSections)
+    );
     expect(result.warnings).toHaveLength(0);
   });
 
