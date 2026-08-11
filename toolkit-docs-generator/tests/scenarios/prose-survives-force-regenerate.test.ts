@@ -33,6 +33,7 @@ const createTool = (): ToolDefinition => ({
 
 const writeCuration = async (root: string): Promise<void> => {
   await mkdir(join(root, "testkit/chunks"), { recursive: true });
+  await mkdir(join(root, "testkit/imports"), { recursive: true });
   await mkdir(join(root, "testkit/pages/environment-variables"), {
     recursive: true,
   });
@@ -52,6 +53,14 @@ Hand-authored guidance that has no upstream source.
 type: environment-variables
 ---
 # Environment Variables
+`
+  );
+  await writeFile(
+    join(root, "testkit/imports/starter-tool-info.mdx"),
+    `---
+type: import
+---
+import StarterToolInfo from "@/app/_components/starter-tool-info";
 `
   );
 };
@@ -88,7 +97,9 @@ describe("prose survives --force-regenerate", () => {
     expect(result.toolkit.documentationChunks[0]?.content).toBe(
       "Hand-authored guidance that has no upstream source."
     );
-    expect(result.toolkit.customImports).toEqual([]);
+    expect(result.toolkit.customImports).toEqual([
+      'import StarterToolInfo from "@/app/_components/starter-tool-info";',
+    ]);
     expect(result.toolkit.subPages).toEqual([
       {
         type: "environment-variables",

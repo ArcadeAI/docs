@@ -24,10 +24,10 @@ The generator does **not** render HTML. It produces structured JSON and optional
 - `EngineApiSource` fetches tool metadata from the Engine API.
 - `ArcadeApiSource` fetches tool metadata from the Arcade API.
 - `DesignSystemMetadataSource` loads toolkit metadata from `@arcadeai/design-system`.
-- `MarkdownCurationSource` compiles documentation chunks and subpages from the
-  configured curation directory. When configured, that directory is globally
-  authoritative: a missing toolkit directory means the toolkit has no authored
-  curation.
+- `MarkdownCurationSource` compiles documentation chunks, import declarations,
+  and subpages from the configured curation directory. When configured, that
+  directory is globally authoritative: a missing toolkit directory means the
+  toolkit has no authored curation.
 - `CombinedToolkitDataSource` merges tools and metadata into one interface.
 
 ### Merger

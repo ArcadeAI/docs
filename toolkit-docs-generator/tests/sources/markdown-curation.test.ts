@@ -108,6 +108,26 @@ type: environment-variables
     ]);
   });
 
+  it("loads custom imports from Markdown", async () => {
+    tempDir = await createTempDir();
+    await writeDocument(
+      tempDir,
+      "github/imports/01-starter-tool-info.mdx",
+      `---
+type: import
+---
+import StarterToolInfo from "@/app/_components/starter-tool-info";
+`
+    );
+
+    const sections =
+      await createMarkdownCurationSource(tempDir).getCustomSections("Github");
+
+    expect(sections.customImports).toEqual([
+      'import StarterToolInfo from "@/app/_components/starter-tool-info";',
+    ]);
+  });
+
   it("orders chunks by source path while preserving priority metadata", async () => {
     tempDir = await createTempDir();
     await writeDocument(

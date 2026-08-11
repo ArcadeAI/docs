@@ -40,6 +40,12 @@ const PageFrontmatterSchema = z
   })
   .strict();
 
+const ImportFrontmatterSchema = z
+  .object({
+    type: z.literal("import"),
+  })
+  .strict();
+
 type MarkdownDocument = {
   body: string;
   frontmatter: unknown;
@@ -182,6 +188,24 @@ const parsePage = async (
   };
 };
 
+const parseImport = async (sourcePath: string): Promise<string> => {
+  const document = parseMarkdownDocument(
+    await readFile(sourcePath, "utf-8"),
+    sourcePath
+  );
+  const parsed = ImportFrontmatterSchema.safeParse(document.frontmatter);
+  if (!parsed.success) {
+    throw new Error(
+      `Curation import frontmatter has invalid schema (${sourcePath}): ${parsed.error.message}`
+    );
+  }
+  await validateMdx(document.body, sourcePath);
+  if (!/^import(?:\s|\{|\*)/.test(document.body)) {
+    throw new Error(`Curation import must be an ESM import (${sourcePath})`);
+  }
+  return document.body;
+};
+
 const listFilesRecursively = async (dirPath: string): Promise<string[]> => {
   const entries = (await readdir(dirPath, { withFileTypes: true })).sort(
     (left, right) => left.name.localeCompare(right.name)
@@ -220,6 +244,7 @@ const loadToolkitDirectory = async (
   toolkitId: string
 ): Promise<CustomSections> => {
   const chunksPath = join(toolkitPath, "chunks");
+  const importsPath = join(toolkitPath, "imports");
   const pagesPath = join(toolkitPath, "pages");
   const allFiles = await listFilesRecursively(toolkitPath);
   rejectJsonFiles(allFiles);
@@ -229,6 +254,9 @@ const loadToolkitDirectory = async (
   );
   const pageFiles = allFiles.filter(
     (file) => file.startsWith(`${pagesPath}${sep}`) && isMarkdownFile(file)
+  );
+  const importFiles = allFiles.filter(
+    (file) => file.startsWith(`${importsPath}${sep}`) && isMarkdownFile(file)
   );
 
   const chunks = (
@@ -260,9 +288,13 @@ const loadToolkitDirectory = async (
     throw new Error(`Curation contains duplicate page paths (${toolkitPath})`);
   }
 
+  const customImports = await Promise.all(
+    importFiles.sort().map((file) => parseImport(file))
+  );
+
   return CustomSectionsSchema.parse({
     documentationChunks,
-    customImports: [],
+    customImports,
     subPages,
     toolChunks,
   });

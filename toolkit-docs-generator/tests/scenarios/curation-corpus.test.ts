@@ -9,7 +9,7 @@ const CURATION_DIR = join(GENERATOR_ROOT, "curation");
 const TOOLKITS_DIR = join(GENERATOR_ROOT, "data", "toolkits");
 
 describe("checked-in Markdown curation", () => {
-  it("reproduces every authored chunk and subpage in committed toolkit data", async () => {
+  it("reproduces every authored field in committed toolkit data", async () => {
     const source = createMarkdownCurationSource(CURATION_DIR);
     const files = (await readdir(TOOLKITS_DIR))
       .filter((file) => file.endsWith(".json") && file !== "index.json")
@@ -33,7 +33,7 @@ describe("checked-in Markdown curation", () => {
       );
       expect(current.toolChunks, file).toEqual(expectedToolChunks);
       expect(current.subPages, file).toEqual(toolkit.subPages);
-      expect(current.customImports, file).toEqual([]);
+      expect(current.customImports, file).toEqual(toolkit.customImports);
 
       chunkCount += current.documentationChunks.length;
       chunkCount += Object.values(current.toolChunks).reduce(

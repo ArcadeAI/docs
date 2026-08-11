@@ -241,9 +241,10 @@ deletes it and rebuilds `index.json`.
 ## Authored curation
 
 Store authored content below `curation/<toolkit>/`. Put injectable sections in
-`chunks/*.mdx` and rich subpages in `pages/**/*.mdx`. Each file begins with YAML
-frontmatter for structured placement metadata; its body is the Markdown or MDX
-that readers see.
+`chunks/*.mdx`, import declarations in `imports/*.mdx`, and rich subpages in
+`pages/**/*.mdx`. Each file begins with YAML frontmatter for structured placement
+metadata; its body is the Markdown or MDX that readers see. Import files use
+`type: import` and contain one ESM import declaration.
 
 When `--custom-sections` is set, the directory is authoritative for every
 toolkit. Removing the final curation file for a toolkit clears that toolkit's
