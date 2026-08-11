@@ -7,12 +7,21 @@ const previousToolkit = (documentation = "old"): MergedToolkit => ({
   label: "Github",
   version: "1.0.0",
   description: "GitHub",
-  metadata: null,
+  metadata: {
+    category: "development",
+    iconUrl: "https://example.com/icon.svg",
+    isBYOC: false,
+    isPro: false,
+    type: "arcade",
+    docsLink: "https://docs.example.com",
+    isComingSoon: false,
+    isHidden: false,
+  },
   auth: null,
   tools: [],
   documentationChunks: [
     {
-      type: "text",
+      type: "warning",
       location: "description",
       position: "after",
       content: documentation,
@@ -31,7 +40,7 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
           github: {
             documentationChunks: [
               {
-                type: "text",
+                type: "warning",
                 location: "description",
                 position: "after",
                 content: "new",
