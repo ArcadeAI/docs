@@ -13,7 +13,7 @@ import type { CustomSections } from "../types/index";
  * Interface for fetching custom documentation sections
  *
  * Implementations:
- * - CustomSectionsFileSource: Loads from extracted JSON file
+ * - MarkdownCurationSource: Compiles hand-authored Markdown and MDX
  * - EmptyCustomSectionsSource: Returns empty sections (for new toolkits)
  */
 export interface ICustomSectionsSource {

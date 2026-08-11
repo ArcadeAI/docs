@@ -13,7 +13,7 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
-import { access, readdir, readFile } from "fs/promises";
+import { readdir, readFile } from "fs/promises";
 import ora from "ora";
 import { join, resolve } from "path";
 import {
@@ -43,9 +43,9 @@ import {
   assertRequireCompleteMetadata,
   createDataMerger,
 } from "../merger/data-merger";
-import { createCustomSectionsFileSource } from "../sources/custom-sections-file";
 import { createDesignSystemMetadataSource } from "../sources/design-system-metadata";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory";
+import { createMarkdownCurationSource } from "../sources/markdown-curation";
 import { createMockMetadataSource } from "../sources/mock-metadata";
 import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
 import {
@@ -84,6 +84,8 @@ import {
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
+  getCombinedChangedToolkitIds,
+  resolveCustomSectionsPath,
 } from "./generate-flow";
 
 const program = new Command();
@@ -248,32 +250,6 @@ const buildChangeLogDetails = (
   }
 
   return details;
-};
-
-const resolveCustomSectionsPath = async (
-  explicitPath: string | undefined
-): Promise<string | undefined> => {
-  if (explicitPath) {
-    return explicitPath;
-  }
-
-  const defaultPath = join(process.cwd(), "curation");
-  try {
-    await access(defaultPath);
-    return defaultPath;
-  } catch {
-    return;
-  }
-};
-
-const getCombinedChangedToolkitIds = (
-  changeResult: ReturnType<typeof detectChanges>,
-  curationChangedToolkitIds: readonly string[]
-): string[] => {
-  const apiChangedIds = getChangedToolkitIds(changeResult).map((id) =>
-    id.toLowerCase()
-  );
-  return [...new Set([...apiChangedIds, ...curationChangedToolkitIds])].sort();
 };
 
 const clearOutputDir = async (
@@ -915,7 +891,7 @@ program
   .option("--no-verify-output", "Skip output verification")
   .option(
     "--custom-sections <path>",
-    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file"
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
   )
   .option(
     "--resume",
@@ -1285,7 +1261,7 @@ program
           options.customSections
         );
         const customSectionsSource = customSectionsPath
-          ? createCustomSectionsFileSource(customSectionsPath)
+          ? createMarkdownCurationSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
@@ -2030,7 +2006,7 @@ program
   .option("--no-verify-output", "Skip output verification")
   .option(
     "--custom-sections <path>",
-    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file"
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
   )
   .option(
     "--resume",
@@ -2270,8 +2246,11 @@ program
           }
         }
 
-        const customSectionsSource = options.customSections
-          ? createCustomSectionsFileSource(options.customSections)
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
@@ -2747,7 +2726,7 @@ program
   )
   .option(
     "--custom-sections <path>",
-    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file (defaults to ./curation when present)"
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
   )
   .option("--verbose", "Show detailed tool-level changes", false)
   .option("--json", "Output as JSON", false)
@@ -2833,7 +2812,7 @@ program
           options.customSections
         );
         const customSectionsSource = customSectionsPath
-          ? createCustomSectionsFileSource(customSectionsPath)
+          ? createMarkdownCurationSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
         const curationChangedToolkitIds = customSectionsPath
           ? getChangedToolkitIdsFromCustomSections(
