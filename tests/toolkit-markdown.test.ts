@@ -76,4 +76,64 @@ describe("toToolkitMarkdown", () => {
     expect(md).toContain("API_KEY");
     expect(md).toContain("Example input");
   });
+
+  test("includes toolkit and tool curation in deterministic order", () => {
+    const curated: ToolkitData = {
+      ...fixture,
+      documentationChunks: [
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "after",
+          content: "Later toolkit prose.",
+          priority: 20,
+        },
+        {
+          type: "markdown",
+          location: "custom_section",
+          position: "after",
+          content: "Earlier toolkit prose.",
+          priority: 10,
+        },
+      ],
+      tools: fixture.tools.map((tool) => ({
+        ...tool,
+        documentationChunks: [
+          {
+            type: "markdown",
+            location: "description",
+            position: "after",
+            content: "Curated tool prose.",
+          },
+        ],
+      })),
+    };
+
+    const result = toToolkitMarkdown(curated);
+    expect(result).toContain("Curated tool prose.");
+    expect(result.indexOf("Earlier toolkit prose.")).toBeLessThan(
+      result.indexOf("Later toolkit prose.")
+    );
+  });
+
+  test("uses replacement curation instead of a generated section", () => {
+    const curated: ToolkitData = {
+      ...fixture,
+      tools: fixture.tools.map((tool) => ({
+        ...tool,
+        documentationChunks: [
+          {
+            type: "markdown",
+            location: "output",
+            position: "replace",
+            content: "A hand-authored output contract.",
+          },
+        ],
+      })),
+    };
+
+    const result = toToolkitMarkdown(curated);
+    expect(result).toContain("A hand-authored output contract.");
+    expect(result).not.toContain("**Output:** `json` — The result");
+  });
 });

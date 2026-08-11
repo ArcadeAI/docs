@@ -232,11 +232,24 @@ deletes it and rebuilds `index.json`.
 - `--api-source` select `tool-metadata` (default with Engine creds), `list-tools`
   (only with the explicit flag), or `mock`
 - `--previous-output` compare against a previous output directory
-- `--custom-sections` load curated docs sections
+- `--custom-sections` load an authoritative Markdown/MDX curation directory
 - `--skip-examples`, `--skip-summary` disable LLM steps
 - `--skip-secret-coherence` disable the stale-reference scan + coverage fill (see the Secret coherence section)
 - `--llm-editor-provider`, `--llm-editor-model`, `--llm-editor-api-key` configure the secret-coherence editor (Sonnet 4.6 by default)
 - `--no-verify-output` skip output verification
+
+## Authored curation
+
+Store authored content below `curation/<toolkit>/`. Put injectable sections in
+`chunks/*.mdx` and rich subpages in `pages/**/*.mdx`. Each file begins with YAML
+frontmatter for structured placement metadata; its body is the Markdown or MDX
+that readers see.
+
+When `--custom-sections` is set, the directory is authoritative for every
+toolkit. Removing the final curation file for a toolkit clears that toolkit's
+authored prose on the next generation run. Invalid frontmatter, invalid MDX,
+unknown tool targets, symlinks, unsafe subpage paths, and leftover JSON curation
+fail generation instead of silently falling back to stale generated content.
 
 ## Troubleshooting
 

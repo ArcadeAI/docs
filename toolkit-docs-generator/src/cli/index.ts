@@ -43,9 +43,9 @@ import {
   assertRequireCompleteMetadata,
   createDataMerger,
 } from "../merger/data-merger";
-import { createCustomSectionsFileSource } from "../sources/custom-sections-file";
 import { createDesignSystemMetadataSource } from "../sources/design-system-metadata";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory";
+import { createMarkdownCurationSource } from "../sources/markdown-curation";
 import { createMockMetadataSource } from "../sources/mock-metadata";
 import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
 import {
@@ -915,7 +915,7 @@ program
   .option("--no-verify-output", "Skip output verification")
   .option(
     "--custom-sections <path>",
-    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file"
+    "Path to the authoritative Markdown/MDX curation directory"
   )
   .option(
     "--resume",
@@ -1280,7 +1280,7 @@ program
 
         // Custom sections source
         const customSectionsSource = options.customSections
-          ? createCustomSectionsFileSource(options.customSections)
+          ? createMarkdownCurationSource(options.customSections)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
@@ -2028,7 +2028,7 @@ program
   .option("--no-verify-output", "Skip output verification")
   .option(
     "--custom-sections <path>",
-    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file"
+    "Path to the authoritative Markdown/MDX curation directory"
   )
   .option(
     "--resume",
@@ -2269,7 +2269,7 @@ program
         }
 
         const customSectionsSource = options.customSections
-          ? createCustomSectionsFileSource(options.customSections)
+          ? createMarkdownCurationSource(options.customSections)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
@@ -2745,7 +2745,7 @@ program
   )
   .option(
     "--custom-sections <path>",
-    "Path to custom sections: a directory of per-toolkit files (curation/) or a single JSON file (defaults to ./curation when present)"
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
   )
   .option("--verbose", "Show detailed tool-level changes", false)
   .option("--json", "Output as JSON", false)
@@ -2831,7 +2831,7 @@ program
           options.customSections
         );
         const customSectionsSource = customSectionsPath
-          ? createCustomSectionsFileSource(customSectionsPath)
+          ? createMarkdownCurationSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
         const curationChangedToolkitIds = customSectionsPath
           ? getChangedToolkitIdsFromCustomSections(

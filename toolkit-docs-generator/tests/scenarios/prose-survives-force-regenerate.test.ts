@@ -11,12 +11,12 @@
  * merged output. The final test pins the old bug: with no previous toolkit and
  * no curation, the prose is gone.
  */
-import { mkdtemp, rm, writeFile } from "fs/promises";
+import { mkdir, mkdtemp, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, describe, expect, it } from "vitest";
 import { mergeToolkit } from "../../src/merger/data-merger";
-import { createCustomSectionsFileSource } from "../../src/sources/custom-sections-file";
+import { createMarkdownCurationSource } from "../../src/sources/markdown-curation";
 import type { ToolDefinition } from "../../src/types/index";
 
 const createTool = (): ToolDefinition => ({
@@ -31,23 +31,29 @@ const createTool = (): ToolDefinition => ({
   output: { type: "object", description: "Result" },
 });
 
-const curationEntry = {
-  documentationChunks: [
-    {
-      type: "warning",
-      location: "description",
-      position: "after",
-      content: "Hand-authored guidance that has no upstream source.",
-    },
-  ],
-  customImports: ['import { Callout } from "nextra/components";'],
-  subPages: [
-    {
-      type: "environment-variables",
-      content: "# Environment Variables\n",
-      relativePath: "environment-variables/page.mdx",
-    },
-  ],
+const writeCuration = async (root: string): Promise<void> => {
+  await mkdir(join(root, "testkit/chunks"), { recursive: true });
+  await mkdir(join(root, "testkit/pages/environment-variables"), {
+    recursive: true,
+  });
+  await writeFile(
+    join(root, "testkit/chunks/guidance.mdx"),
+    `---
+type: warning
+location: description
+position: after
+---
+Hand-authored guidance that has no upstream source.
+`
+  );
+  await writeFile(
+    join(root, "testkit/pages/environment-variables/page.mdx"),
+    `---
+type: environment-variables
+---
+# Environment Variables
+`
+  );
 };
 
 describe("prose survives --force-regenerate", () => {
@@ -62,13 +68,9 @@ describe("prose survives --force-regenerate", () => {
 
   it("keeps curation prose when there is no previous toolkit to carry forward", async () => {
     tempDir = await mkdtemp(join(tmpdir(), "curation-"));
-    // File name is the toolkit id; loaded from a directory like `curation/`.
-    await writeFile(
-      join(tempDir, "testkit.json"),
-      JSON.stringify(curationEntry, null, 2)
-    );
+    await writeCuration(tempDir);
 
-    const source = createCustomSectionsFileSource(tempDir);
+    const source = createMarkdownCurationSource(tempDir);
     const customSections = await source.getCustomSections("TestKit");
     expect(customSections).not.toBeNull();
 
@@ -86,18 +88,31 @@ describe("prose survives --force-regenerate", () => {
     expect(result.toolkit.documentationChunks[0]?.content).toBe(
       "Hand-authored guidance that has no upstream source."
     );
-    expect(result.toolkit.customImports).toEqual(curationEntry.customImports);
-    expect(result.toolkit.subPages).toEqual(curationEntry.subPages);
+    expect(result.toolkit.customImports).toEqual([]);
+    expect(result.toolkit.subPages).toEqual([
+      {
+        type: "environment-variables",
+        content: "# Environment Variables",
+        relativePath: "environment-variables/page.mdx",
+      },
+    ]);
   });
 
   it("normalizes the toolkit id when matching curation files", async () => {
     tempDir = await mkdtemp(join(tmpdir(), "curation-"));
+    await mkdir(join(tempDir, "notiontoolkit/chunks"), { recursive: true });
     await writeFile(
-      join(tempDir, "notiontoolkit.json"),
-      JSON.stringify(curationEntry, null, 2)
+      join(tempDir, "notiontoolkit/chunks/guidance.mdx"),
+      `---
+type: warning
+location: description
+position: after
+---
+Prose
+`
     );
 
-    const source = createCustomSectionsFileSource(tempDir);
+    const source = createMarkdownCurationSource(tempDir);
     // File stem "notiontoolkit" must match toolkit id "NotionToolkit".
     const customSections = await source.getCustomSections("NotionToolkit");
 
@@ -119,17 +134,12 @@ describe("prose survives --force-regenerate", () => {
     expect(result.toolkit.subPages).toHaveLength(0);
   });
 
-  it("clears prose when curation exists but is explicitly empty", async () => {
+  it("clears prose when the toolkit directory is deleted", async () => {
     tempDir = await mkdtemp(join(tmpdir(), "curation-"));
-    await writeFile(
-      join(tempDir, "testkit.json"),
-      JSON.stringify(curationEntry, null, 2)
-    );
+    await writeCuration(tempDir);
 
     const withProse =
-      await createCustomSectionsFileSource(tempDir).getCustomSections(
-        "TestKit"
-      );
+      await createMarkdownCurationSource(tempDir).getCustomSections("TestKit");
 
     const previousResult = await mergeToolkit(
       "TestKit",
@@ -141,11 +151,9 @@ describe("prose survives --force-regenerate", () => {
     );
     expect(previousResult.toolkit.documentationChunks).toHaveLength(1);
 
-    await writeFile(join(tempDir, "testkit.json"), "{}");
+    await rm(join(tempDir, "testkit"), { recursive: true, force: true });
     const clearedCuration =
-      await createCustomSectionsFileSource(tempDir).getCustomSections(
-        "TestKit"
-      );
+      await createMarkdownCurationSource(tempDir).getCustomSections("TestKit");
 
     const result = await mergeToolkit(
       "TestKit",

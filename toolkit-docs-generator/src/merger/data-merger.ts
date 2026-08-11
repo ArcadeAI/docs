@@ -805,6 +805,47 @@ const buildMergedToolkit = (options: {
   };
 };
 
+const assertKnownToolChunkTargets = (
+  tools: readonly Pick<MergedTool, "name">[],
+  customSections: CustomSections | null
+): void => {
+  if (customSections === null) {
+    return;
+  }
+
+  const knownToolNames = new Set(tools.map((tool) => tool.name));
+  const unknownToolNames = Object.keys(customSections.toolChunks)
+    .filter((toolName) => !knownToolNames.has(toolName))
+    .sort();
+  if (unknownToolNames.length > 0) {
+    throw new Error(
+      `Curation targets unknown tool(s): ${unknownToolNames.join(", ")}`
+    );
+  }
+};
+
+/** Overlay current authored curation without disturbing generated enrichment. */
+export const applyCustomSectionsToToolkit = (
+  toolkit: MergedToolkit,
+  customSections: CustomSections | null
+): MergedToolkit => {
+  if (customSections === null) {
+    return toolkit;
+  }
+  assertKnownToolChunkTargets(toolkit.tools, customSections);
+
+  return {
+    ...toolkit,
+    documentationChunks: customSections.documentationChunks,
+    customImports: customSections.customImports,
+    subPages: customSections.subPages,
+    tools: toolkit.tools.map((tool) => ({
+      ...tool,
+      documentationChunks: customSections.toolChunks[tool.name] ?? [],
+    })),
+  };
+};
+
 /**
  * Transform a tool definition into a merged tool
  */
@@ -919,6 +960,8 @@ export const mergeToolkit = async (
 ): Promise<MergeResult> => {
   const warnings: string[] = [];
   const failedTools: FailedTool[] = [];
+
+  assertKnownToolChunkTargets(tools, customSections);
 
   appendMergeWarnings(warnings, toolkitId, tools, metadata);
 
@@ -1078,11 +1121,12 @@ export class DataMerger {
   private buildMergeErrorResult(
     toolkitId: string,
     message: string,
-    previousToolkit?: MergedToolkit
+    previousToolkit: MergedToolkit | undefined,
+    customSections: CustomSections | null
   ): MergeResult {
     if (previousToolkit) {
       return {
-        toolkit: previousToolkit,
+        toolkit: applyCustomSectionsToToolkit(previousToolkit, customSections),
         warnings: [`Error processing toolkit: ${message}`],
         failedTools: [],
         error: message,
@@ -1129,7 +1173,8 @@ export class DataMerger {
 
   private async recoverMissingMetadata(
     toolkitId: string,
-    toolkitData: ToolkitData
+    toolkitData: ToolkitData,
+    customSections: CustomSections | null
   ): Promise<MergeResult | undefined> {
     if (!this.preserveLastKnownGood || toolkitData.metadata !== null) {
       return;
@@ -1139,7 +1184,8 @@ export class DataMerger {
     const result = this.buildMergeErrorResult(
       toolkitId,
       "missing design-system metadata",
-      previousToolkit
+      previousToolkit,
+      customSections
     );
     if (this.onToolkitComplete && previousToolkit) {
       await this.onToolkitComplete(result);
@@ -1151,17 +1197,20 @@ export class DataMerger {
     toolkitId: string,
     toolkitData: ToolkitData
   ): Promise<MergeResult> {
+    // Curation is configuration. Parse it outside the recoverable merge path
+    // so invalid source cannot silently preserve stale generated prose.
+    const customSections =
+      await this.customSectionsSource.getCustomSections(toolkitId);
     try {
       const recovered = await this.recoverMissingMetadata(
         toolkitId,
-        toolkitData
+        toolkitData,
+        customSections
       );
       if (recovered) {
         return recovered;
       }
 
-      const customSections =
-        await this.customSectionsSource.getCustomSections(toolkitId);
       const previousToolkit = this.getPreviousToolkit(toolkitId);
       const result = await mergeToolkit(
         toolkitId,
@@ -1178,7 +1227,11 @@ export class DataMerger {
         }
       );
       await this.maybeGenerateSummary(result, previousToolkit);
-      await this.enforceSecretCoherence(result, previousToolkit);
+      await this.enforceSecretCoherence(
+        result,
+        previousToolkit,
+        customSections !== null
+      );
 
       // Write immediately if callback provided (incremental mode)
       if (this.onToolkitComplete) {
@@ -1197,7 +1250,8 @@ export class DataMerger {
       const result = this.buildMergeErrorResult(
         toolkitId,
         message,
-        previousToolkit
+        previousToolkit,
+        customSections
       );
       if (this.onToolkitComplete && previousToolkit) {
         await this.onToolkitComplete(result);
@@ -1287,7 +1341,8 @@ export class DataMerger {
 
   private async enforceSecretCoherence(
     result: MergeResult,
-    previousToolkit?: MergedToolkit
+    previousToolkit: MergedToolkit | undefined,
+    customSectionsAuthoritative: boolean
   ): Promise<void> {
     if (this.skipSecretCoherence) {
       // --skip-secret-coherence disables the entire step: no scan, no
@@ -1311,7 +1366,11 @@ export class DataMerger {
     // re-detected against the edited summary. If cleanup accidentally
     // dropped a passage that incidentally mentioned a current secret,
     // the fresh scan notices and the editor restores it.
-    await this.applyStaleRefCleanup(result, issues);
+    await this.applyStaleRefCleanup(
+      result,
+      issues,
+      customSectionsAuthoritative
+    );
     const postCleanupIssues = detectSecretCoherenceIssues(
       result.toolkit,
       previousToolkit
@@ -1344,13 +1403,16 @@ export class DataMerger {
 
   private async applyStaleRefCleanup(
     result: MergeResult,
-    issues: SecretCoherenceIssues
+    issues: SecretCoherenceIssues,
+    customSectionsAuthoritative: boolean
   ): Promise<void> {
     const editor = this.secretEditGenerator;
     if (!editor) {
       return;
     }
-    const targets = groupStaleRefsByTarget(issues.staleReferences);
+    const targets = groupStaleRefsByTarget(issues.staleReferences).filter(
+      (target) => !customSectionsAuthoritative || target.kind === "summary"
+    );
     if (targets.length === 0) {
       return;
     }
@@ -1429,14 +1491,16 @@ export class DataMerger {
       version
     );
 
-    const recovered = await this.recoverMissingMetadata(toolkitId, toolkitData);
+    const customSections =
+      await this.customSectionsSource.getCustomSections(toolkitId);
+    const recovered = await this.recoverMissingMetadata(
+      toolkitId,
+      toolkitData,
+      customSections
+    );
     if (recovered) {
       return recovered;
     }
-
-    // Fetch custom sections
-    const customSections =
-      await this.customSectionsSource.getCustomSections(toolkitId);
 
     const previousToolkit = this.getPreviousToolkit(toolkitId);
     const result = await mergeToolkit(
@@ -1454,7 +1518,11 @@ export class DataMerger {
       }
     );
     await this.maybeGenerateSummary(result, previousToolkit);
-    await this.enforceSecretCoherence(result, previousToolkit);
+    await this.enforceSecretCoherence(
+      result,
+      previousToolkit,
+      customSections !== null
+    );
 
     return result;
   }

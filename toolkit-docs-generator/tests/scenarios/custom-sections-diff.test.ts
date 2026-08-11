@@ -89,12 +89,21 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
     ).toEqual(["github"]);
   });
 
-  it("ignores toolkits without a curation file", () => {
+  it("treats a missing toolkit directory as cleared curation", () => {
     expect(
       getChangedToolkitIdsFromCustomSections(
         {},
         new Map([["Github", previousToolkit()]])
       )
+    ).toEqual(["github"]);
+  });
+
+  it("ignores absent curation when the previous artifact is also empty", () => {
+    const toolkit = previousToolkit();
+    toolkit.documentationChunks = [];
+
+    expect(
+      getChangedToolkitIdsFromCustomSections({}, new Map([["Github", toolkit]]))
     ).toEqual([]);
   });
 });

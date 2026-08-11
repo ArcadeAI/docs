@@ -28,20 +28,28 @@ const emptyCustomSections = (): CustomSections => ({
 });
 
 /**
- * Return toolkit ids whose curation files differ from the prose embedded in
- * the previous artifact.
- *
- * Only toolkits with a curation file are considered. A missing file means
- * "not curated" and matches merge semantics (carry-forward), so those
- * toolkits are not flagged here.
+ * Return toolkit ids whose authoritative curation differs from the prose
+ * embedded in the previous artifact. Missing current entries compare as
+ * empty, so deleting the final source file remains observable.
  */
 export const getChangedToolkitIdsFromCustomSections = (
   current: Readonly<Record<string, CustomSections>>,
   previous: ReadonlyMap<string, MergedToolkit>
 ): string[] => {
+  const ids = new Set([
+    ...Object.keys(current).map((id) => id.toLowerCase()),
+    ...[...previous.keys()].map((id) => id.toLowerCase()),
+  ]);
+  const currentById = new Map(
+    Object.entries(current).map(([id, sections]) => [
+      id.toLowerCase(),
+      sections,
+    ])
+  );
   const changed: string[] = [];
 
-  for (const [toolkitId, currentSections] of Object.entries(current)) {
+  for (const toolkitId of ids) {
+    const currentSections = currentById.get(toolkitId) ?? emptyCustomSections();
     const previousToolkit = findPreviousToolkit(toolkitId, previous);
     const previousSections = previousToolkit
       ? customSectionsFromToolkit(previousToolkit)
@@ -54,5 +62,5 @@ export const getChangedToolkitIdsFromCustomSections = (
     }
   }
 
-  return changed;
+  return changed.sort();
 };

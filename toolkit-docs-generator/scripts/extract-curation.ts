@@ -1,134 +1,148 @@
 #!/usr/bin/env npx tsx
 /**
- * One-time extraction of hand-authored prose out of the committed toolkit
- * artifacts and into per-toolkit curation files.
+ * Extract hand-authored prose from committed toolkit artifacts into Markdown
+ * and MDX source files.
  *
- * `documentationChunks`, `customImports`, and `subPages` have no upstream
- * source — they exist only inside the generated `data/toolkits/*.json`. This
- * script gives them a real home under `curation/`, one file per toolkit, so
- * they stop depending on carry-forward from the previous artifact. The
- * generator reads them back via `--custom-sections curation`.
- *
- * Run from the generator package root:
- *   pnpm dlx tsx scripts/extract-curation.ts
- *
- * The output shape matches `CustomSectionsSchema`: each file holds a single
- * `{ documentationChunks?, customImports?, subPages?, toolChunks? }` object,
- * keyed by nothing (the file name is the toolkit id). Empty fields are omitted
- * so diffs stay small; the schema fills them back in with defaults on read.
+ * Each documentation chunk becomes one file under
+ * `curation/<toolkit>/chunks/`. Rich subpages keep their generated relative
+ * path below `curation/<toolkit>/pages/`. Structured placement metadata lives
+ * in frontmatter; the document body is the authored content.
  */
 import { mkdir, readdir, readFile, writeFile } from "fs/promises";
-import { dirname, join } from "path";
+import { basename, dirname, isAbsolute, join } from "path";
 import { fileURLToPath } from "url";
+import { stringify as stringifyYaml } from "yaml";
+import type { DocumentationChunk, ToolkitSubPage } from "../src/types/index";
 
-/**
- * Anchored on this file rather than the working directory: the sibling
- * generator scripts resolve their paths from the repo root, so bare relative
- * paths here would only work when invoked from toolkit-docs-generator/.
- */
 const GENERATOR_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const TOOLKITS_DIR = join(GENERATOR_ROOT, "data", "toolkits");
 const CURATION_DIR = join(GENERATOR_ROOT, "curation");
-const JSON_INDENT = 2;
-
-type DocumentationChunk = Record<string, unknown>;
-type SubPage = string | Record<string, unknown>;
 
 type ToolkitArtifact = {
   id: string;
   documentationChunks?: DocumentationChunk[];
-  customImports?: string[];
-  subPages?: SubPage[];
+  subPages?: ToolkitSubPage[];
   tools?: { name: string; documentationChunks?: DocumentationChunk[] }[];
 };
 
-type CurationFile = {
-  documentationChunks?: DocumentationChunk[];
-  customImports?: string[];
-  subPages?: SubPage[];
-  toolChunks?: Record<string, DocumentationChunk[]>;
+const slugify = (value: string): string =>
+  value
+    .replace(/^#+\s*/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 64);
+
+const frontmatter = (data: Record<string, unknown>): string =>
+  `---\n${stringifyYaml(data).trimEnd()}\n---\n`;
+
+const chunkFileName = (chunk: DocumentationChunk, index: number): string => {
+  const label = slugify(
+    chunk.header ?? `${chunk.location}-${chunk.position}-${chunk.type}`
+  );
+  return `${String(index + 1).padStart(3, "0")}-${label || "section"}.mdx`;
 };
 
-const isNonEmptyArray = <T>(value: T[] | undefined): value is T[] =>
-  Array.isArray(value) && value.length > 0;
+const writeChunk = async (
+  toolkitId: string,
+  chunk: DocumentationChunk,
+  index: number,
+  tool?: string
+): Promise<void> => {
+  const { content, ...metadata } = chunk;
+  const chunksDir = join(CURATION_DIR, toolkitId, "chunks");
+  await mkdir(chunksDir, { recursive: true });
+  await writeFile(
+    join(chunksDir, chunkFileName(chunk, index)),
+    `${frontmatter({ ...metadata, ...(tool ? { tool } : {}) })}${content}\n`,
+    "utf-8"
+  );
+};
 
-/**
- * Pull the per-tool documentation chunks out of the artifact, keyed by tool
- * name — that is the key the merger looks the chunks up by. Today every
- * toolkit has zero per-tool chunks, but extract them anyway so the format is
- * complete if that changes.
- */
-const extractToolChunks = (
+const assertSafeSubPagePath = (relativePath: string): void => {
+  if (
+    isAbsolute(relativePath) ||
+    relativePath.split(/[\\/]/).some((part) => part === ".." || part === "")
+  ) {
+    throw new Error(`Unsafe toolkit subpage path: ${relativePath}`);
+  }
+};
+
+const writeSubPage = async (
+  toolkitId: string,
+  subPage: ToolkitSubPage
+): Promise<void> => {
+  if (typeof subPage === "string") {
+    throw new Error(
+      `Cannot extract legacy subpage without content: ${toolkitId}/${subPage}`
+    );
+  }
+  assertSafeSubPagePath(subPage.relativePath);
+  const pagePath = join(CURATION_DIR, toolkitId, "pages", subPage.relativePath);
+  await mkdir(dirname(pagePath), { recursive: true });
+  await writeFile(
+    pagePath,
+    `${frontmatter({ type: subPage.type })}${subPage.content}\n`,
+    "utf-8"
+  );
+};
+
+const extractToolkit = async (
+  fileName: string,
   toolkit: ToolkitArtifact
-): Record<string, DocumentationChunk[]> => {
-  const toolChunks: Record<string, DocumentationChunk[]> = {};
+): Promise<{ chunks: number; subPages: number }> => {
+  const toolkitId = basename(fileName, ".json");
+  let chunkIndex = 0;
+  for (const chunk of toolkit.documentationChunks ?? []) {
+    await writeChunk(toolkitId, chunk, chunkIndex);
+    chunkIndex += 1;
+  }
   for (const tool of toolkit.tools ?? []) {
-    if (isNonEmptyArray(tool.documentationChunks)) {
-      toolChunks[tool.name] = tool.documentationChunks;
+    for (const chunk of tool.documentationChunks ?? []) {
+      await writeChunk(
+        toolkitId,
+        chunk,
+        chunkIndex,
+        `${toolkit.id}.${tool.name}`
+      );
+      chunkIndex += 1;
     }
   }
-  return toolChunks;
-};
 
-const buildCurationFile = (toolkit: ToolkitArtifact): CurationFile | null => {
-  const curation: CurationFile = {};
-  if (isNonEmptyArray(toolkit.documentationChunks)) {
-    curation.documentationChunks = toolkit.documentationChunks;
-  }
-  if (isNonEmptyArray(toolkit.customImports)) {
-    curation.customImports = toolkit.customImports;
-  }
-  if (isNonEmptyArray(toolkit.subPages)) {
-    curation.subPages = toolkit.subPages;
-  }
-  const toolChunks = extractToolChunks(toolkit);
-  if (Object.keys(toolChunks).length > 0) {
-    curation.toolChunks = toolChunks;
+  for (const subPage of toolkit.subPages ?? []) {
+    await writeSubPage(toolkitId, subPage);
   }
 
-  return Object.keys(curation).length > 0 ? curation : null;
+  return {
+    chunks: chunkIndex,
+    subPages: toolkit.subPages?.length ?? 0,
+  };
 };
 
 async function main(): Promise<void> {
   await mkdir(CURATION_DIR, { recursive: true });
-
   const files = (await readdir(TOOLKITS_DIR))
     .filter((file) => file.endsWith(".json") && file !== "index.json")
     .sort();
 
-  let written = 0;
+  let toolkitCount = 0;
   let chunkCount = 0;
   let subPageCount = 0;
-  let importCount = 0;
-
   for (const file of files) {
     const toolkit = JSON.parse(
       await readFile(join(TOOLKITS_DIR, file), "utf-8")
     ) as ToolkitArtifact;
-
-    const curation = buildCurationFile(toolkit);
-    if (!curation) {
-      continue;
+    const extracted = await extractToolkit(file, toolkit);
+    if (extracted.chunks > 0 || extracted.subPages > 0) {
+      toolkitCount += 1;
     }
-
-    await writeFile(
-      join(CURATION_DIR, file),
-      `${JSON.stringify(curation, null, JSON_INDENT)}\n`,
-      "utf-8"
-    );
-
-    written++;
-    chunkCount += curation.documentationChunks?.length ?? 0;
-    for (const chunks of Object.values(curation.toolChunks ?? {})) {
-      chunkCount += chunks.length;
-    }
-    subPageCount += curation.subPages?.length ?? 0;
-    importCount += curation.customImports?.length ?? 0;
+    chunkCount += extracted.chunks;
+    subPageCount += extracted.subPages;
   }
 
-  console.log(`Wrote ${written} curation files to ${CURATION_DIR}/`);
+  console.log(`Wrote Markdown curation for ${toolkitCount} toolkits.`);
   console.log(
-    `  documentationChunks: ${chunkCount}, subPages: ${subPageCount}, customImports: ${importCount}`
+    `  documentation chunks: ${chunkCount}, subpages: ${subPageCount}`
   );
 }
 
