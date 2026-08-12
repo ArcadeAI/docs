@@ -267,6 +267,21 @@ its `failed-tools` artifact. Build the message locally against any report with
 `pnpm dlx tsx src/cli/index.ts alert --report <file>`. It prints nothing when a
 run has nothing to report.
 
+No red run stays quiet. Three messages can arrive, and they answer different
+questions:
+
+| Message | Means | Who acts |
+| --- | --- | --- |
+| Toolkits missing or stale | Generation recovered from a per-toolkit failure | Follow the fix named in the entry |
+| Toolkit docs generation failed | The generate step itself broke | Open the run for the path and validation error |
+| Generated but never published | Generation was fine, a later step broke | Check sidebar sync and PR creation — there may be no auto-PR to merge |
+
+The first is reported from inside the generate job, gated on the generate step
+rather than on the steps after it, so a broken sidebar sync or PR creation does
+not hide missing pages. The other two come from the alert job. A run that both
+recovers from a toolkit failure and then fails to publish sends the first
+message and the third, because those are two separate things to fix.
+
 ## Troubleshooting
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.

@@ -188,11 +188,12 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PROJ_DOCS_WEBHOOK_URL }}
 
   alert:
-    name: Alert on generation failure
-    # Only when generation itself failed. A red job whose generate step
-    # succeeded means a later step broke — reporting that as "generation
-    # failed" would send people looking for a failure that isn't there.
-    if: ${{ always() && needs.generate.result == 'failure' && needs.generate.outputs.generation-succeeded != 'true' }}
+    name: Alert on failure
+    # Every red run gets a message. Which message depends on whether generation
+    # itself broke or something after it did: those need different people to do
+    # different things, and calling a failed sidebar sync a "generation failure"
+    # sends someone hunting for a validation error that doesn't exist.
+    if: ${{ !cancelled() && needs.generate.result == 'failure' }}
     needs: generate
     runs-on: ubuntu-latest
     permissions: {}
@@ -203,17 +204,28 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TRIGGER: ${{ github.event_name }}
           COMMIT: ${{ github.sha }}
+          GENERATION_SUCCEEDED: ${{ needs.generate.outputs.generation-succeeded }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "::error::SLACK_PROJ_DOCS_WEBHOOK_URL is not configured"
             exit 1
           fi
 
+          if [ "$GENERATION_SUCCEEDED" = "true" ]; then
+            headline=":warning: Toolkit docs were generated but never published"
+            detail="Generation succeeded, so the toolkit JSON is fine — a step after it failed (sidebar sync, PR creation, or the Slack report). Today's docs are not on their way to the site until this run's work lands, and there may be no auto-PR to merge."
+          else
+            headline=":rotating_light: Toolkit docs generation failed"
+            detail="The failed run contains the exact file path and validation error."
+          fi
+
           payload=$(jq -n \
+            --arg headline "$headline" \
+            --arg detail "$detail" \
             --arg run_url "$RUN_URL" \
             --arg trigger "$TRIGGER" \
             --arg commit "$COMMIT" \
-            '{text: (":rotating_light: Toolkit docs generation failed\n\n*Workflow run:* <" + $run_url + "|Open failed run>\n*Trigger:* " + $trigger + "\n*Commit:* " + $commit + "\n\nThe failed run contains the exact file path and validation error.")}')
+            '{text: ($headline + "\n\n*Workflow run:* <" + $run_url + "|Open failed run>\n*Trigger:* " + $trigger + "\n*Commit:* " + $commit + "\n\n" + $detail)}')
 
           curl --fail-with-body --silent --show-error \
             -X POST \
