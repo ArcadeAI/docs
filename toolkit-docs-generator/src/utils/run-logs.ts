@@ -22,12 +22,24 @@ export interface FailedToolEntry {
   readonly reason: string;
 }
 
+/**
+ * A toolkit whose merge failed and was recovered rather than aborting the run.
+ *
+ * `preserved` keeps serving the previous artifact; `omitted` means there was no
+ * previous artifact, so the toolkit has no page at all. The reason travels with
+ * the entry because it is the only thing that tells a reader what to fix.
+ */
+export interface RecoveredToolkitEntry {
+  readonly id: string;
+  readonly recovery: "preserved" | "omitted";
+  readonly reason: string;
+}
+
 export interface FailedToolsReport {
   readonly generatedAt: string;
   readonly toolkits: readonly string[];
   readonly failedToolkits: readonly string[];
-  readonly preservedToolkits?: readonly string[];
-  readonly omittedToolkits?: readonly string[];
+  readonly recoveredToolkits?: readonly RecoveredToolkitEntry[];
   readonly tools: readonly FailedToolEntry[];
 }
 

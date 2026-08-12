@@ -252,6 +252,21 @@ authored prose on the next generation run. Invalid frontmatter, invalid MDX,
 unknown tool targets, symlinks, unsafe subpage paths, and leftover JSON curation
 fail generation instead of silently falling back to stale generated content.
 
+## Run alerts
+
+The nightly workflow posts to Slack when a toolkit fails and the run recovers
+from it. Two outcomes, and the difference matters:
+
+- **Missing entirely**: the toolkit failed and had no previous artifact to fall
+  back on, so it has no page on the docs site at all.
+- **Still serving the previous docs**: the toolkit failed but still publishes
+  its last good output, so readers see yesterday's page.
+
+Each entry names the reason and the fix. Every run attaches the full report as
+its `failed-tools` artifact. Build the message locally against any report with
+`pnpm dlx tsx src/cli/index.ts alert --report <file>`. It prints nothing when a
+run has nothing to report.
+
 ## Troubleshooting
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.

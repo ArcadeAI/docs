@@ -80,11 +80,27 @@ test("porter workflow alerts Slack when generation fails", () => {
   expect(workflowContents).not.toContain("\\\\n");
 });
 
-test("porter workflow warns when it preserves or omits a broken toolkit", () => {
-  expect(workflowContents).toContain("preservedToolkits");
-  expect(workflowContents).toContain("omittedToolkits");
-  expect(workflowContents).toContain("Continuing to serve previous docs");
-  expect(workflowContents).toContain("No docs are being served");
+test("porter workflow builds the preserved/omitted message in tested code", () => {
+  // The message text lives in src/alerts/docs-alert.ts, not in this YAML. A jq
+  // program embedded in a workflow is untestable and drifts from what the
+  // generator actually knows about each failure.
+  expect(workflowContents).toContain("src/cli/index.ts alert");
+  expect(workflowContents).toContain("--log-url");
+});
+
+test("porter workflow lets a failed Slack post fail the job", () => {
+  // A wrong webhook secret went unnoticed because this step swallowed its own
+  // failure. The alert nobody is watching for is the one that must be loud.
+  const slackStep = workflowContents.slice(
+    workflowContents.indexOf("Report preserved or omitted toolkits to Slack")
+  );
+  expect(slackStep).not.toContain("continue-on-error");
+});
+
+test("porter workflow keeps the failure report as an artifact", () => {
+  expect(workflowContents).toContain("actions/upload-artifact");
+  expect(workflowContents).toContain("failed-tools");
+  expect(workflowContents).toContain("actions: read");
 });
 
 test("workflow dispatch keeps default full-run behavior", () => {

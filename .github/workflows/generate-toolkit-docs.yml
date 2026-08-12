@@ -16,6 +16,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # Read this run's jobs so the Slack alert can deep-link the failing job log
+  # rather than the run summary.
+  actions: read
 
 concurrency:
   group: generate-toolkit-docs
@@ -108,38 +111,59 @@ jobs:
           branch: automation/toolkit-docs
           delete-branch: true
 
+      # A token without reviewer permission is a real gap, but it must not fail
+      # the run: the generated PR is already open and useful without a reviewer
+      # attached. An annotation keeps it visible instead of silent.
       - name: Request team review
         if: steps.cpr.outputs.pull-request-number != ''
-        continue-on-error: true
-        run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
+        run: |
+          if ! gh pr edit ${{ steps.cpr.outputs.pull-request-number }} \
+            --add-reviewer ArcadeAI/engineering-tools-and-dx 2>review-error.log; then
+            echo "::warning::Could not request review on PR #${{ steps.cpr.outputs.pull-request-number }}: $(cat review-error.log)"
+          fi
         env:
           GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
 
-      - name: Warn #proj-docs about preserved or omitted toolkit docs
-        continue-on-error: true
+      - name: Upload generation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-tools
+          path: toolkit-docs-generator-verification/logs/failed-tools.json
+          if-no-files-found: ignore
+
+      # No `continue-on-error` here on purpose. A Slack step that dies quietly
+      # is how a wrong webhook secret went unnoticed: the alert it was meant to
+      # deliver is exactly what nobody was watching for.
+      - name: Report preserved or omitted toolkits to Slack
         run: |
-          report=toolkit-docs-generator-verification/logs/failed-tools.json
-          if [ ! -f "$report" ]; then
+          job_url=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+            --jq '.jobs[] | select(.name == "generate") | .html_url' | head -n 1)
+
+          payload=$(../node_modules/.bin/tsx src/cli/index.ts alert \
+            --report ../toolkit-docs-generator-verification/logs/failed-tools.json \
+            --log-url "${job_url:-$RUN_URL}")
+
+          if [ -z "$payload" ]; then
+            echo "No preserved or omitted toolkits to report."
             exit 0
           fi
 
-          preserved=$(jq -r '(.preservedToolkits // []) | join(", ")' "$report")
-          omitted=$(jq -r '(.omittedToolkits // []) | join(", ")' "$report")
-          if [ -z "$preserved" ] && [ -z "$omitted" ]; then
-            exit 0
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::error::SLACK_PROJ_DOCS_WEBHOOK_URL is not configured"
+            exit 1
           fi
-
-          payload=$(jq -n \
-            --arg run_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --arg preserved "$preserved" \
-            --arg omitted "$omitted" \
-            '{text: (":warning: Toolkit docs generation completed with recoverable failures\n\n*Workflow run:* <" + $run_url + "|Open run>" + (if $preserved != "" then "\n*Continuing to serve previous docs:* " + $preserved else "" end) + (if $omitted != "" then "\n*No docs are being served (no prior output):* " + $omitted else "" end))}')
 
           curl --fail-with-body --silent --show-error \
             -X POST \
             -H "Content-Type: application/json" \
             --data "$payload" \
-            "${{ secrets.SLACK_PROJ_DOCS_WEBHOOK_URL }}"
+            "$SLACK_WEBHOOK_URL"
+        working-directory: toolkit-docs-generator
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PROJ_DOCS_WEBHOOK_URL }}
 
   alert:
     name: Alert on generation failure
