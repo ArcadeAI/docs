@@ -1,4 +1,48 @@
-import type { ChangeDetectionResult } from "../diff/index";
+import { access } from "fs/promises";
+import { join } from "path";
+import {
+  type ChangeDetectionResult,
+  getChangedToolkitIds,
+} from "../diff/index";
+
+/**
+ * Resolve an explicit custom-sections path, or use curation/ in the working
+ * directory when it exists. This keeps regular generation and change checks
+ * on the same source of truth.
+ */
+export const resolveCustomSectionsPath = async (
+  explicitPath: string | undefined,
+  workingDir = process.cwd()
+): Promise<string | undefined> => {
+  if (explicitPath) {
+    return explicitPath;
+  }
+
+  const defaultPath = join(workingDir, "curation");
+  try {
+    await access(defaultPath);
+    return defaultPath;
+  } catch {
+    return;
+  }
+};
+
+/**
+ * Combine API and curation changes using the same case-insensitive toolkit ID
+ * semantics used by the generation skip set.
+ */
+export const getCombinedChangedToolkitIds = (
+  changeResult: ChangeDetectionResult,
+  curationChangedToolkitIds: readonly string[]
+): string[] => {
+  const apiChangedIds = getChangedToolkitIds(changeResult).map((id) =>
+    id.toLowerCase()
+  );
+  const curationChangedIds = curationChangedToolkitIds.map((id) =>
+    id.toLowerCase()
+  );
+  return [...new Set([...apiChangedIds, ...curationChangedIds])].sort();
+};
 
 /**
  * Extract the lowercase toolkit IDs that were removed (present in previous

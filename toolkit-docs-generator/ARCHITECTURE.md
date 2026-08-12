@@ -12,7 +12,7 @@ The generator does **not** render HTML. It produces structured JSON and optional
 
 1. Fetch tool definitions from the Engine API or Arcade API.
 2. Load toolkit metadata from the design system or mock metadata.
-3. Load custom sections from JSON files (optional).
+3. Compile hand-authored Markdown and MDX curation (optional).
 4. Merge all data into `MergedToolkit` objects.
 5. Write a JSON file per toolkit and an `index.json` file.
 6. Optionally verify output and compute diffs.
@@ -24,7 +24,10 @@ The generator does **not** render HTML. It produces structured JSON and optional
 - `EngineApiSource` fetches tool metadata from the Engine API.
 - `ArcadeApiSource` fetches tool metadata from the Arcade API.
 - `DesignSystemMetadataSource` loads toolkit metadata from `@arcadeai/design-system`.
-- `CustomSectionsFileSource` loads custom documentation chunks from a JSON file.
+- `MarkdownCurationSource` compiles documentation chunks, import declarations,
+  and subpages from the configured curation directory. When configured, that
+  directory is globally authoritative: a missing toolkit directory means the
+  toolkit has no authored curation.
 - `CombinedToolkitDataSource` merges tools and metadata into one interface.
 
 ### Merger
@@ -90,6 +93,7 @@ public, read-only values configured through these Vercel environment variables:
 ## Key files
 
 - `src/sources/engine-api.ts` — tool metadata from Engine API
+- `src/sources/markdown-curation.ts` — Markdown and MDX curation compiler
 - `src/sources/toolkit-data-source.ts` — unified data source
 - `src/merger/data-merger.ts` — merge pipeline
 - `src/generator/json-generator.ts` — output writer

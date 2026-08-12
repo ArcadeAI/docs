@@ -21,6 +21,7 @@ import {
   formatChangeSummary,
   formatDetailedChanges,
   getChangedToolkitIds,
+  getChangedToolkitIdsFromCustomSections,
   hasChanges,
 } from "../diff/index";
 import { parsePreviousToolkitForDiff } from "../diff/previous-output";
@@ -42,9 +43,9 @@ import {
   assertRequireCompleteMetadata,
   createDataMerger,
 } from "../merger/data-merger";
-import { createCustomSectionsFileSource } from "../sources/custom-sections-file";
 import { createDesignSystemMetadataSource } from "../sources/design-system-metadata";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory";
+import { createMarkdownCurationSource } from "../sources/markdown-curation";
 import { createMockMetadataSource } from "../sources/mock-metadata";
 import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
 import {
@@ -83,6 +84,8 @@ import {
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
+  getCombinedChangedToolkitIds,
+  resolveCustomSectionsPath,
 } from "./generate-flow";
 
 const program = new Command();
@@ -215,7 +218,8 @@ const filterProvidersByMetadataPresence = async (
 };
 
 const buildChangeLogDetails = (
-  result: ReturnType<typeof detectChanges>
+  result: ReturnType<typeof detectChanges>,
+  curationChangedToolkitIds: readonly string[] = []
 ): string[] => {
   const changed = getChangedToolkitIds(result);
   const removed = result.toolkitChanges
@@ -239,6 +243,10 @@ const buildChangeLogDetails = (
 
   if (versionOnly.length > 0) {
     details.push(`versionOnly=${versionOnly.join(", ")}`);
+  }
+
+  if (curationChangedToolkitIds.length > 0) {
+    details.push(`curationChanged=${curationChangedToolkitIds.join(", ")}`);
   }
 
   return details;
@@ -881,7 +889,10 @@ program
   .option("--skip-examples", "Skip LLM example generation", false)
   .option("--skip-summary", "Skip LLM summary generation", false)
   .option("--no-verify-output", "Skip output verification")
-  .option("--custom-sections <file>", "Path to custom sections JSON")
+  .option(
+    "--custom-sections <path>",
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
+  )
   .option(
     "--resume",
     "Resume from previous run, skipping already-generated toolkits",
@@ -1243,9 +1254,14 @@ program
           }
         }
 
-        // Custom sections source
-        const customSectionsSource = options.customSections
-          ? createCustomSectionsFileSource(options.customSections)
+        // Custom sections source. When curation/ is present, use it by default
+        // so manual generation follows the same merge and diff behavior as
+        // check-changes and the nightly workflow.
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
@@ -1327,6 +1343,14 @@ program
             currentToolkitDataForDiff,
             previousToolkits ?? new Map()
           );
+          const changedCustomSectionIds = new Set(
+            customSectionsPath
+              ? getChangedToolkitIdsFromCustomSections(
+                  await customSectionsSource.getAllCustomSections(),
+                  previousToolkits ?? new Map()
+                ).map((id) => id.toLowerCase())
+              : []
+          );
           const compareDurationMs = Date.now() - compareStartedAt;
           if (options.verbose) {
             console.log(
@@ -1353,7 +1377,10 @@ program
             }
           }
 
-          if (!hasChanges(detectedChanges)) {
+          if (
+            !hasChanges(detectedChanges) &&
+            changedCustomSectionIds.size === 0
+          ) {
             spinner.succeed(
               "No changes detected. All toolkits are up to date."
             );
@@ -1393,7 +1420,9 @@ program
           }
 
           // Get IDs of changed toolkits
-          const changedIds = getChangedToolkitIds(detectedChanges);
+          const changedIds = getCombinedChangedToolkitIds(detectedChanges, [
+            ...changedCustomSectionIds,
+          ]);
           changedToolkitIds = new Set(changedIds.map((id) => id.toLowerCase()));
           changeResult = detectedChanges;
           const changedPreview =
@@ -1975,7 +2004,10 @@ program
   .option("--skip-examples", "Skip LLM example generation", false)
   .option("--skip-summary", "Skip LLM summary generation", false)
   .option("--no-verify-output", "Skip output verification")
-  .option("--custom-sections <file>", "Path to custom sections JSON")
+  .option(
+    "--custom-sections <path>",
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
+  )
   .option(
     "--resume",
     "Resume from previous run, skipping already-generated toolkits",
@@ -2214,8 +2246,11 @@ program
           }
         }
 
-        const customSectionsSource = options.customSections
-          ? createCustomSectionsFileSource(options.customSections)
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
           : createEmptyCustomSectionsSource();
 
         // Build provider ID resolver from design system OAuth catalogue
@@ -2689,6 +2724,10 @@ program
     "--tool-metadata-key <key>",
     "Tool metadata API key (or ENGINE_API_KEY env)"
   )
+  .option(
+    "--custom-sections <path>",
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
+  )
   .option("--verbose", "Show detailed tool-level changes", false)
   .option("--json", "Output as JSON", false)
   .action(
@@ -2703,6 +2742,7 @@ program
       listToolsPageSize?: number;
       toolMetadataUrl?: string;
       toolMetadataKey?: string;
+      customSections?: string;
       verbose: boolean;
       json: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
@@ -2768,7 +2808,25 @@ program
           currentToolkitDataForDiff,
           previousToolkits
         );
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
+          : createEmptyCustomSectionsSource();
+        const curationChangedToolkitIds = customSectionsPath
+          ? getChangedToolkitIdsFromCustomSections(
+              await customSectionsSource.getAllCustomSections(),
+              previousToolkits
+            )
+          : [];
         const compareDurationMs = Date.now() - compareStartedAt;
+        const allChangedToolkitIds = getCombinedChangedToolkitIds(
+          changeResult,
+          curationChangedToolkitIds
+        );
+        const hasAnyChanges =
+          hasChanges(changeResult) || curationChangedToolkitIds.length > 0;
 
         spinner.stop();
 
@@ -2787,6 +2845,13 @@ program
           console.log(
             chalk.dim(`  Compared signatures in ${compareDurationMs}ms`)
           );
+          if (customSectionsPath) {
+            console.log(
+              chalk.dim(
+                `  Compared curation from ${resolve(customSectionsPath)} (${curationChangedToolkitIds.length} prose change(s))`
+              )
+            );
+          }
           if (previousToolkitLoad.stats.failedFiles.length > 0) {
             console.log(
               chalk.yellow(
@@ -2815,12 +2880,18 @@ program
             `loadPreviousDurationMs=${loadPreviousDurationMs}`,
             `compareDurationMs=${compareDurationMs}`,
             `previousLoadStats=${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)}`,
-            ...buildChangeLogDetails(changeResult),
+            ...(customSectionsPath
+              ? [`customSections=${resolve(customSectionsPath)}`]
+              : []),
+            ...buildChangeLogDetails(changeResult, curationChangedToolkitIds),
           ],
         });
         await appendLogEntry(logPaths.changeLogPath, {
           title: "changes",
-          details: buildChangeLogDetails(changeResult),
+          details: buildChangeLogDetails(
+            changeResult,
+            curationChangedToolkitIds
+          ),
         });
 
         // Output results
@@ -2829,10 +2900,15 @@ program
             JSON.stringify(
               {
                 ...changeResult,
+                curationChangedToolkitIds,
+                changedToolkitIds: allChangedToolkitIds,
                 diagnostics: {
                   currentToolkitCount: currentToolkitDataForDiff.size,
                   previousToolkitCount: previousToolkits.size,
                   previousLoad: previousToolkitLoad.stats,
+                  customSectionsPath: customSectionsPath
+                    ? resolve(customSectionsPath)
+                    : null,
                   timingMs: {
                     fetch: fetchDurationMs,
                     loadPrevious: loadPreviousDurationMs,
@@ -2850,15 +2926,26 @@ program
           // Summary
           console.log(chalk.cyan("Summary:"));
           console.log(`  ${formatChangeSummary(changeResult)}`);
+          if (curationChangedToolkitIds.length > 0) {
+            console.log(
+              chalk.cyan("Curation:"),
+              `${curationChangedToolkitIds.length} toolkit(s) with prose changes`
+            );
+          }
           console.log();
 
           // Check if there are any changes
-          if (hasChanges(changeResult)) {
-            // Show changed toolkits
-            const changedIds = getChangedToolkitIds(changeResult);
+          if (hasAnyChanges) {
+            const apiChangedIds = new Set(
+              getChangedToolkitIds(changeResult).map((id) => id.toLowerCase())
+            );
+            const curationOnlyIds = curationChangedToolkitIds.filter(
+              (id) => !apiChangedIds.has(id)
+            );
+
             console.log(
               chalk.yellow(
-                `⚠ ${changedIds.length} toolkit(s) need regeneration:\n`
+                `⚠ ${allChangedToolkitIds.length} toolkit(s) need regeneration:\n`
               )
             );
 
@@ -2882,6 +2969,10 @@ program
                   console.log(line);
                 }
               }
+
+              for (const toolkitId of curationOnlyIds) {
+                console.log(chalk.yellow(`[CURATION] ${toolkitId}`));
+              }
             } else {
               // Compact view
               for (const change of changeResult.toolkitChanges) {
@@ -2901,6 +2992,12 @@ program
 
                 console.log(
                   `  ${icon}${change.toolkitId} [${change.currentToolCount} tools]${toolChangeSummary}`
+                );
+              }
+
+              for (const toolkitId of curationOnlyIds) {
+                console.log(
+                  `  ${chalk.yellow("~ ")}${toolkitId} [curation prose]`
                 );
               }
             }

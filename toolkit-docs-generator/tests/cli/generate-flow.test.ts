@@ -1,9 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { mkdir, mkdtemp, rm } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
+import { afterEach, describe, expect, it } from "vitest";
 import {
   assertSafeCurrentToolkitSnapshot,
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
+  getCombinedChangedToolkitIds,
+  resolveCustomSectionsPath,
 } from "../../src/cli/generate-flow";
 import type { ChangeDetectionResult } from "../../src/diff/index";
 import { assertRequireCompleteMetadata } from "../../src/merger/data-merger";
@@ -72,6 +77,43 @@ describe("collectRemovedToolkitIds", () => {
 
   it("returns empty set for empty change list", () => {
     expect(collectRemovedToolkitIds(makeResult([])).size).toBe(0);
+  });
+});
+
+describe("getCombinedChangedToolkitIds", () => {
+  it("deduplicates API and curation changes case-insensitively", () => {
+    expect(
+      getCombinedChangedToolkitIds(
+        makeResult([{ toolkitId: "Github", changeType: "modified" }]),
+        ["github"]
+      )
+    ).toEqual(["github"]);
+  });
+});
+
+describe("resolveCustomSectionsPath", () => {
+  const tempDirs: string[] = [];
+
+  afterEach(async () => {
+    await Promise.all(
+      tempDirs.splice(0).map((dir) => rm(dir, { recursive: true }))
+    );
+  });
+
+  it("uses curation/ by default when it exists", async () => {
+    const workingDir = await mkdtemp(join(tmpdir(), "toolkit-curation-"));
+    tempDirs.push(workingDir);
+    await mkdir(join(workingDir, "curation"));
+
+    await expect(
+      resolveCustomSectionsPath(undefined, workingDir)
+    ).resolves.toBe(join(workingDir, "curation"));
+  });
+
+  it("preserves an explicit custom-sections path", async () => {
+    await expect(
+      resolveCustomSectionsPath("./custom-prose", "/unused")
+    ).resolves.toBe("./custom-prose");
   });
 });
 
