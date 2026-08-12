@@ -70,13 +70,13 @@ test("porter workflow opts JS actions into Node 24 to unblock the 2026-06-02 dep
   );
 });
 
-test("porter workflow alerts Slack when generation fails", () => {
+test("porter workflow alerts Slack on a red run", () => {
   expect(workflowContents).toContain("needs.generate.result == 'failure'");
   expect(workflowContents).toContain("SLACK_PROJ_DOCS_WEBHOOK_URL");
   // The jq program is single-quoted, so the shell passes backslashes through
   // untouched. `\n` reaches jq as a newline escape; `\\n` would reach it as an
   // escaped backslash followed by "n" and Slack would print a literal "\n".
-  expect(workflowContents).toContain("generation failed\\n\\n*Workflow run:*");
+  expect(workflowContents).toContain('$headline + "\\n\\n*Workflow run:* <"');
   expect(workflowContents).not.toContain("\\\\n");
 });
 
@@ -98,14 +98,21 @@ test("porter workflow lets a failed Slack post fail the job", () => {
 });
 
 test("porter workflow only claims generation failed when generation failed", () => {
-  // The Slack step can now fail the job. Without this guard, a broken webhook
-  // would make the alert job announce a generation failure that never happened.
+  // Steps after generation can now fail the job. Calling that a generation
+  // failure sends someone hunting for a validation error that doesn't exist,
+  // so the alert picks its headline from whether generation itself finished.
   expect(workflowContents).toContain("generation-succeeded:");
   expect(workflowContents).toContain("steps.generate-docs.outputs.succeeded");
   expect(workflowContents).toContain('echo "succeeded=true"');
+  expect(workflowContents).toContain("GENERATION_SUCCEEDED:");
   expect(workflowContents).toContain(
-    "needs.generate.outputs.generation-succeeded != 'true'"
+    "needs.generate.outputs.generation-succeeded"
   );
+  expect(workflowContents).toContain('if [ "$GENERATION_SUCCEEDED" = "true" ]');
+  expect(workflowContents).toContain(
+    "Toolkit docs were generated but never published"
+  );
+  expect(workflowContents).toContain("Toolkit docs generation failed");
 });
 
 test("porter workflow keeps the failure report as an artifact", () => {
