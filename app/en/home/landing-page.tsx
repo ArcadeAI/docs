@@ -248,7 +248,7 @@ export function LandingPage() {
             </motion.p>
             <motion.div
               animate={{ opacity: 1, y: 0 }}
-              className="mt-10 flex items-center justify-center gap-x-4"
+              className="mt-10 flex flex-wrap items-center justify-center gap-4"
               initial={{ opacity: 0, y: 20 }}
               transition={{
                 duration: ANIMATION_DURATION,
@@ -261,7 +261,7 @@ export function LandingPage() {
                   <Link
                     href="/get-started/quickstarts/call-tool-agent"
                     onClick={trackClick(
-                      "hero_get_started_clicked",
+                      "hero_build_clicked",
                       "/get-started/quickstarts/call-tool-agent"
                     )}
                   />
@@ -269,7 +269,23 @@ export function LandingPage() {
                 size="lg"
               >
                 <Rocket className="mr-2 h-5 w-5" />
-                Get Started
+                Build agents & tools
+              </Button>
+              <Button
+                className="h-12 px-6"
+                render={
+                  <Link
+                    href="/operate/quickstart"
+                    onClick={trackClick(
+                      "hero_operate_clicked",
+                      "/operate/quickstart"
+                    )}
+                  />
+                }
+                size="lg"
+              >
+                <ServerCog className="mr-2 h-5 w-5" />
+                Deploy & operate Arcade
               </Button>
               <Button
                 className="h-12 px-6"
