@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BookOpen,
   Bot,
-  Code,
   Cog,
   FileText,
   HelpCircle,
@@ -359,36 +358,6 @@ export function LandingPage() {
               />
             </div>
             <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-4">
-              <QuickStartCard
-                description="Integrate with AG2, LangChain, OpenAI Agents, CrewAI, Vercel AI, and more."
-                href="/get-started/agent-frameworks"
-                icon={Code}
-                logos={[
-                  {
-                    src: "/images/icons/ag2.svg",
-                    alt: "AG2",
-                    invertInDark: true,
-                  },
-                  {
-                    src: "/images/icons/langchain.svg",
-                    alt: "LangChain",
-                    invertInDark: true,
-                  },
-                  { src: "/images/icons/openai.png", alt: "OpenAI" },
-                  {
-                    src: "https://avatars.githubusercontent.com/u/170677839?s=200&v=4",
-                    alt: "CrewAI",
-                  },
-                  {
-                    src: "/images/icons/vercel.svg",
-                    alt: "Vercel AI",
-                    invertInDark: true,
-                  },
-                ]}
-                title="Agent frameworks"
-              />
-            </div>
-            <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-5">
               <QuickStartCard
                 description="Add tools to Cursor, VS Code, Claude Desktop, or any MCP client."
                 href="/get-started/mcp-clients"
