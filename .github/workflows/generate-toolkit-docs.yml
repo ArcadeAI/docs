@@ -145,8 +145,13 @@ jobs:
       # deliver is exactly what nobody was watching for.
       - name: Report preserved or omitted toolkits to Slack
         run: |
+          # The deep link is a nicety; the alert is the point. Actions runs this
+          # with `-e -o pipefail`, so a failed `gh api` — or a SIGPIPE from
+          # trimming its output — would abort the step before curl and lose the
+          # alert entirely. Select the first match in jq instead of piping to
+          # head, and fall back to the run URL on any failure.
           job_url=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
-            --jq '.jobs[] | select(.name == "generate") | .html_url' | head -n 1)
+            --jq '[.jobs[] | select(.name == "generate") | .html_url] | .[0] // empty') || job_url=""
 
           payload=$(../node_modules/.bin/tsx src/cli/index.ts alert \
             --report ../toolkit-docs-generator-verification/logs/failed-tools.json \
