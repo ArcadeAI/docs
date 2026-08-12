@@ -143,7 +143,16 @@ jobs:
       # No `continue-on-error` here on purpose. A Slack step that dies quietly
       # is how a wrong webhook secret went unnoticed: the alert it was meant to
       # deliver is exactly what nobody was watching for.
+      #
+      # Gated on the generate step rather than on the default "everything so far
+      # succeeded". Missing or stale pages are worth reporting even when a later
+      # step broke — under the default gate a failed sidebar sync or PR creation
+      # would skip this step, while `generation-succeeded` suppressed the alert
+      # job below, and nobody heard about the toolkits at all. `!cancelled()`
+      # rather than `always()` because `cancel-in-progress` cancels superseded
+      # runs, and those have nothing to report.
       - name: Report preserved or omitted toolkits to Slack
+        if: ${{ !cancelled() && steps.generate-docs.outputs.succeeded == 'true' }}
         run: |
           # The deep link is a nicety; the alert is the point. Actions runs this
           # with `-e -o pipefail`, so a failed `gh api` — or a SIGPIPE from
