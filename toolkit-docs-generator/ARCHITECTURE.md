@@ -27,7 +27,8 @@ flowchart TD
     changed -->|yes| merger
 
     design["@arcadeai/design-system<br/>TOOLKITS"] -->|"category, label, icon, docsLink, flags"| merger
-    curation["curation/toolkit/"] -->|"chunks, imports, subpages"| merger
+    author["Docs author"] -->|"writes and reviews in a PR"| curation
+    curation["curation/toolkit/<br/>chunks/*.mdx<br/>imports/*.mdx<br/>pages/**/*.mdx"] -->|"documentationChunks, customImports, subPages"| merger
     anthropic["Anthropic"] -->|"code examples, summaries, secret edits"| merger
     previous -->|"carried-forward examples and summaries"| merger
 
@@ -51,6 +52,11 @@ a toolkit's placement and identity, `curation/` owns hand-authored prose, and th
 LLM owns code examples and summaries. When a source fails, the merger falls back
 to the previous run's file rather than inventing a value, and reports what it
 recovered.
+
+`curation/` is the one input a person edits directly. Those Markdown and MDX
+files live in this repository and merge like any other change, so a prose edit
+reaches the site through the next generation run rather than through a manual
+edit of the generated JSON.
 
 Two things the diagram deliberately shows as separate. A second workflow
 regenerates `llms.txt` when the data files change, so the generator never writes
