@@ -13,7 +13,7 @@ Salesforce can host an [MCP server](https://developer.salesforce.com/docs/platfo
 <Callout type="info">
   This guide is about connecting to a Salesforce Hosted MCP Server. If you're
   looking to call Salesforce APIs from your own tools instead, see the
-  [Salesforce auth provider](/references/auth-providers/salesforce) guide.
+  [Arcade Salesforce toolkit](/resources/integrations/sales/salesforce).
 </Callout>
 
 <GuideOverview>
@@ -77,20 +77,28 @@ Copy the redirect URI Arcade generated and set it as the ECA's Callback URL. A n
 
 ### Authorize and confirm
 
-Save the server and complete the authorization prompt. On the scope selection screen, confirm `mcp_api` is checked — Arcade lists every scope your org's discovery document advertises as supported, not just the ones your ECA actually grants, so only select scopes your ECA has enabled.
-
-</Steps>
+Save the server to open the authorization prompt.
 
 <Callout type="warning">
-  Don't refresh the Arcade dashboard while an authorization prompt is open.
-  Refreshing mid-flow can leave a stale, incomplete authorization behind
-  instead of cleanly restarting it. If a connection seems stuck, close the
-  prompt, reload the page, and start a single fresh attempt.
+  The scope picker on this screen lists every scope your org's My Domain
+  discovery document advertises as supported — Salesforce orgs typically
+  support dozens (`api`, `chatbot_api`, `cdp_api`, `lightning`, and so on),
+  regardless of what your ECA actually grants. **Deselect every scope except
+  the ones your ECA's Selected Scopes includes** (per [Set up
+  Salesforce](#set-up-salesforce) above — at minimum `mcp_api`, plus whichever
+  of `api`, `offline_access`, and `refresh_token` your ECA grants). Leaving an
+  extra scope checked makes the authorization request fail, not just the
+  later tool calls.
 </Callout>
+
+Complete the authorization prompt.
+
+</Steps>
 
 ## Troubleshooting
 
 - **A 401 with `{"errors":[{"message":"Invalid token"}]}` and no error code**: your ECA isn't issuing JWT-based access tokens. See [Set up Salesforce](#set-up-salesforce).
+- **Authorization fails outright**: a scope was selected on the authorization prompt that your ECA doesn't actually grant. See [Authorize and confirm](#authorize-and-confirm).
 - **Authorization succeeds, but tool calls 401**: the `mcp_api` scope is missing from either the ECA's Selected Scopes or the scopes you approved during authorization.
 - **Tools list is empty or every call fails**: confirm the Hosted MCP Server is [activated](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/activate-mcp-servers.html).
 - **A setting change doesn't seem to take effect**: existing tokens don't retroactively pick up new ECA settings. In Salesforce Setup, go to the affected user's **OAuth Apps** list and revoke the existing grant, then re-authorize to get a fresh token.
