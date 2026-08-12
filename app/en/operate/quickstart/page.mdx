@@ -1,0 +1,94 @@
+---
+title: "Stand up Arcade for your org"
+description: "Platform operator quickstart: deploy Arcade, connect identity, create a gateway, and turn on governance"
+---
+
+import { Steps, Callout, Cards } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Stand up Arcade for your org
+
+This quickstart is for **platform operators** who set up Arcade for a team or company. You will pick a hosting model, connect identity, create an MCP Gateway, and enable governance.
+
+Agent developers who want to call tools should use the [agent quickstart](/get-started/quickstarts/call-tool-agent) instead.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+A running Arcade deployment with end-user identity, a gateway for agents and MCP clients, and audit logging available by default.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- Permission to create projects in Arcade (or to deploy infrastructure for self-hosting)
+- An OIDC identity provider for end users (optional for first experiments; required for production User Sources)
+- Familiarity with your org's networking and compliance requirements
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Choose Arcade Cloud, a marketplace deploy, or self-host with Helm
+- Create administrator credentials and a project
+- Connect a User Source for production identity
+- Create an MCP Gateway and point clients at it
+- Use Contextual Access and Audit Logs for governance
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+<Steps>
+
+### Choose how to run Arcade
+
+Pick the hosting model that matches your compliance and ops model:
+
+| Option | When to use | Guide |
+| --- | --- | --- |
+| **Arcade Cloud** | Quickest path; Arcade manages the platform | [Arcade Cloud](/operate/deploy/arcade-cloud) |
+| **Cloud marketplace** | Arcade-operated platform in your cloud account | [Azure](/operate/deploy/azure), [AWS](/operate/deploy/aws), [GCP](/operate/deploy/gcp) |
+| **Self-host with Helm** | Full control on your Kubernetes cluster | [Helm](/operate/deploy/helm) |
+
+See the [hosting options overview](/operate/deploy) for a fuller comparison.
+
+<Callout type="info">
+Hosting *your* MCP server with [`arcade deploy`](/build/arcade-deploy) is a developer workflow. It does not deploy the Arcade platform.
+</Callout>
+
+### Create administrator access
+
+1. <SignupLink linkLocation="docs:operate-quickstart" utmCampaign="docs-operate-quickstart">Sign up for Arcade</SignupLink> (Cloud) or finish your marketplace/Helm install.
+2. Create a [project API key](/get-started/setup/api-keys) for administrative use.
+3. Confirm you can open the Dashboard for your environment.
+
+### Connect end-user identity
+
+For production gateways, connect your OIDC provider as a [User Source](/operate/identity/user-sources) (Okta, Entra ID, Auth0, Clerk, Stytch, or similar).
+
+Arcade Auth is fine for internal testing. Use a User Source when end users already live in your identity system.
+
+### Create an MCP Gateway
+
+Create a gateway that federates the tools your agents and MCP clients should see:
+
+- [Create via Dashboard](/operate/governance/mcp-gateways/create-via-dashboard)
+- [Create via AI Assistant](/operate/governance/mcp-gateways/create-via-ai)
+
+Attach your User Source when you configure authentication for production.
+
+### Turn on governance
+
+- **Contextual Access**: control tool visibility and behavior with hooks. Start with [Contextual Access](/operate/governance/contextual-access).
+- **Audit Logs**: Arcade captures administrative actions by default. See [Audit Logs](/operate/governance/audit-logs) for the dashboard and SIEM API.
+
+</Steps>
+
+## Next steps
+
+<Cards num={2}>
+  <Cards.Card title="Operate overview" href="/operate" />
+  <Cards.Card title="MCP Gateways" href="/operate/governance/mcp-gateways" />
+  <Cards.Card title="User Sources" href="/operate/identity/user-sources" />
+  <Cards.Card title="Deployment & hosting" href="/operate/deploy" />
+</Cards>

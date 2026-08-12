@@ -38,18 +38,18 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/security/securing-arcade-mcp",
-    destination: "/:locale/guides/create-tools/secure-your-server",
+    destination: "/:locale/build/create-tools/secure-your-server",
     permanent: true,
   },
   {
     source: "/:locale/guides/security/secure-your-mcp-server",
     destination:
-      "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
+      "/:locale/build/create-tools/secure-your-server/secure-your-mcp-server",
     permanent: true,
   },
   {
     source: "/:locale/guides/security",
-    destination: "/:locale/guides/create-tools/secure-your-server",
+    destination: "/:locale/build/create-tools/secure-your-server",
     permanent: true,
   },
   {
@@ -88,22 +88,22 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/logic-extensions",
-    destination: "/:locale/guides/contextual-access",
+    destination: "/:locale/operate/governance/contextual-access",
     permanent: true,
   },
   {
     source: "/:locale/guides/logic-extensions/build-your-own",
-    destination: "/:locale/guides/contextual-access/build-your-own",
+    destination: "/:locale/operate/governance/contextual-access/build-your-own",
     permanent: true,
   },
   {
     source: "/:locale/guides/logic-extensions/examples",
-    destination: "/:locale/guides/contextual-access/examples",
+    destination: "/:locale/operate/governance/contextual-access/examples",
     permanent: true,
   },
   {
     source: "/:locale/guides/logic-extensions/how-hooks-work",
-    destination: "/:locale/guides/contextual-access/how-hooks-work",
+    destination: "/:locale/operate/governance/contextual-access/how-hooks-work",
     permanent: true,
   },
   {
@@ -282,7 +282,7 @@ export const redirects: Redirect[] = [
   // Moved MCP Gateway UI guide to guides
   {
     source: "/:locale/guides/create-tools/mcp-gateways",
-    destination: "/:locale/guides/mcp-gateways",
+    destination: "/:locale/operate/governance/mcp-gateways",
     permanent: true,
   },
   // Removed LangChain old stuff
@@ -392,7 +392,7 @@ export const redirects: Redirect[] = [
   {
     source: "/:locale/home/build-tools/secure-your-mcp-server",
     destination:
-      "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
+      "/:locale/build/create-tools/secure-your-server/secure-your-mcp-server",
     permanent: true,
   },
   {
@@ -432,12 +432,12 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/auth/auth-tool-calling",
-    destination: "/:locale/guides/tool-calling/custom-apps/auth-tool-calling",
+    destination: "/:locale/build/tool-calling/custom-apps/auth-tool-calling",
     permanent: true,
   },
   {
     source: "/:locale/home/auth/call-third-party-apis-directly",
-    destination: "/:locale/guides/tool-calling/call-third-party-apis",
+    destination: "/:locale/build/tool-calling/call-third-party-apis",
     permanent: true,
   },
   {
@@ -447,58 +447,58 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/auth/secure-auth-production",
-    destination: "/:locale/guides/user-facing-agents/secure-auth-production",
+    destination: "/:locale/build/user-facing-agents/secure-auth-production",
     permanent: true,
   },
   {
     source: "/:locale/home/auth/tool-auth-status",
-    destination: "/:locale/guides/tool-calling/custom-apps/check-auth-status",
+    destination: "/:locale/build/tool-calling/custom-apps/check-auth-status",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/call-tools-from-mcp-clients",
-    destination: "/:locale/guides/create-tools/tool-basics/call-tools-mcp",
+    destination: "/:locale/build/create-tools/tool-basics/call-tools-mcp",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/create-a-mcp-server",
-    destination: "/:locale/guides/create-tools/tool-basics/build-mcp-server",
+    destination: "/:locale/build/create-tools/tool-basics/build-mcp-server",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/create-a-tool-with-auth",
-    destination: "/:locale/guides/create-tools/tool-basics/create-tool-auth",
+    destination: "/:locale/build/create-tools/tool-basics/create-tool-auth",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/create-a-tool-with-secrets",
-    destination: "/:locale/guides/create-tools/tool-basics/create-tool-secrets",
+    destination: "/:locale/build/create-tools/tool-basics/create-tool-secrets",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/migrate-from-toolkits",
-    destination: "/:locale/guides/create-tools/migrate-toolkits",
+    destination: "/:locale/build/create-tools/migrate-toolkits",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/organize-mcp-server-tools",
-    destination: "/:locale/guides/create-tools/tool-basics/organize-mcp-tools",
+    destination: "/:locale/build/create-tools/tool-basics/organize-mcp-tools",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/providing-useful-tool-errors",
     destination:
-      "/:locale/guides/create-tools/error-handling/useful-tool-errors",
+      "/:locale/build/create-tools/error-handling/useful-tool-errors",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/retry-tools-with-improved-prompt",
-    destination: "/:locale/guides/create-tools/error-handling/retry-tools",
+    destination: "/:locale/build/create-tools/error-handling/retry-tools",
     permanent: true,
   },
   {
     source: "/:locale/home/build-tools/tool-context",
-    destination: "/:locale/guides/create-tools/tool-basics/runtime-data-access",
+    destination: "/:locale/build/create-tools/tool-basics/runtime-data-access",
     permanent: true,
   },
   {
@@ -508,8 +508,7 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/compare-server-types",
-    destination:
-      "/:locale/guides/create-tools/tool-basics/compare-server-types",
+    destination: "/:locale/build/create-tools/tool-basics/compare-server-types",
     permanent: true,
   },
   {
@@ -536,28 +535,28 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/deployment/arcade-cloud-infra",
-    destination: "/:locale/guides/deployment-hosting/arcade-cloud",
+    destination: "/:locale/operate/deploy/arcade-cloud",
     permanent: true,
   },
   {
     source: "/:locale/home/deployment/engine-configuration",
-    destination: "/:locale/guides/deployment-hosting/helm",
+    destination: "/:locale/operate/deploy/helm",
     permanent: true,
   },
   {
     source: "/:locale/home/evaluate-tools/create-an-evaluation-suite",
     destination:
-      "/:locale/guides/create-tools/evaluate-tools/create-evaluation-suite",
+      "/:locale/build/create-tools/evaluate-tools/create-evaluation-suite",
     permanent: true,
   },
   {
     source: "/:locale/home/evaluate-tools/run-evaluations",
-    destination: "/:locale/guides/create-tools/evaluate-tools/run-evaluations",
+    destination: "/:locale/build/create-tools/evaluate-tools/run-evaluations",
     permanent: true,
   },
   {
     source: "/:locale/home/evaluate-tools/why-evaluate-tools",
-    destination: "/:locale/guides/create-tools/evaluate-tools/why-evaluate",
+    destination: "/:locale/build/create-tools/evaluate-tools/why-evaluate",
     permanent: true,
   },
   {
@@ -583,7 +582,7 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/hosting-overview",
-    destination: "/:locale/guides/deployment-hosting",
+    destination: "/:locale/operate/deploy",
     permanent: true,
   },
   {
@@ -624,7 +623,7 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/mcp-gateways",
-    destination: "/:locale/guides/mcp-gateways",
+    destination: "/:locale/operate/governance/mcp-gateways",
     permanent: true,
   },
   {
@@ -644,33 +643,32 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/serve-tools/arcade-deploy",
-    destination: "/:locale/guides/deployment-hosting/arcade-deploy",
+    destination: "/:locale/build/arcade-deploy",
     permanent: true,
   },
   {
     source: "/:locale/home/serve-tools/hybrid-worker",
-    destination: "/:locale/guides/deployment-hosting/on-prem",
+    destination: "/:locale/operate/deploy/on-prem",
     permanent: true,
   },
   {
     source: "/:locale/home/use-tools/get-tool-definitions",
-    destination:
-      "/:locale/guides/tool-calling/custom-apps/get-tool-definitions",
+    destination: "/:locale/build/tool-calling/custom-apps/get-tool-definitions",
     permanent: true,
   },
   {
     source: "/:locale/home/use-tools/tools-overview",
-    destination: "/:locale/guides/tool-calling",
+    destination: "/:locale/build/tool-calling",
     permanent: true,
   },
   {
     source: "/:locale/home/use-tools/types-of-tools",
-    destination: "/:locale/guides/create-tools/improve/types-of-tools",
+    destination: "/:locale/build/create-tools/improve/types-of-tools",
     permanent: true,
   },
   {
     source: "/:locale/home/use-tools/error-handling",
-    destination: "/:locale/guides/tool-calling/error-handling",
+    destination: "/:locale/build/tool-calling/error-handling",
     permanent: true,
   },
   {
@@ -728,17 +726,17 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/tool-calling/custom-apps/authorized-tool-calling",
-    destination: "/:locale/guides/tool-calling/custom-apps/auth-tool-calling",
+    destination: "/:locale/build/tool-calling/custom-apps/auth-tool-calling",
     permanent: true,
   },
   {
     source: "/:locale/guides/user-facing-agents/brand-provider",
-    destination: "/:locale/guides/user-facing-agents/secure-auth-production",
+    destination: "/:locale/build/user-facing-agents/secure-auth-production",
     permanent: true,
   },
   {
     source: "/:locale/guides/user-facing-agents/configure-oauth-provider",
-    destination: "/:locale/guides/user-facing-agents/secure-auth-production",
+    destination: "/:locale/build/user-facing-agents/secure-auth-production",
     permanent: true,
   },
   {
@@ -748,23 +746,22 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/tool-calling/get-tool-definitions",
-    destination:
-      "/:locale/guides/tool-calling/custom-apps/get-tool-definitions",
+    destination: "/:locale/build/tool-calling/custom-apps/get-tool-definitions",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/engine-configuration",
-    destination: "/:locale/guides/deployment-hosting/helm",
+    destination: "/:locale/operate/deploy/helm",
     permanent: true,
   },
   {
     source: "/:locale/guides/deployment-hosting/configure-engine",
-    destination: "/:locale/guides/deployment-hosting/helm",
+    destination: "/:locale/operate/deploy/helm",
     permanent: true,
   },
   {
     source: "/:locale/guides/create-tools/performance/run-evaluations",
-    destination: "/:locale/guides/create-tools/evaluate-tools/run-evaluations",
+    destination: "/:locale/build/create-tools/evaluate-tools/run-evaluations",
     permanent: true,
   },
   {
@@ -825,7 +822,7 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/resources/creating-tools/:path*",
-    destination: "/:locale/guides/create-tools/:path*",
+    destination: "/:locale/build/create-tools/:path*",
     permanent: true,
   },
   // Agent frameworks moved from guides to get-started
@@ -872,4 +869,287 @@ export const redirects: Redirect[] = [
 
   // Auto-added redirects for deleted pages.
   // `pnpm check-redirects --auto-fix` appends new entries here.
+  {
+    source: "/:locale/guides/deployment-hosting/arcade-deploy",
+    destination: "/:locale/build/arcade-deploy",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/error-handling",
+    destination: "/:locale/build/create-tools/error-handling",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/error-handling/retry-tools",
+    destination: "/:locale/build/create-tools/error-handling/retry-tools",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/error-handling/useful-tool-errors",
+    destination:
+      "/:locale/build/create-tools/error-handling/useful-tool-errors",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/evaluate-tools/capture-mode",
+    destination: "/:locale/build/create-tools/evaluate-tools/capture-mode",
+    permanent: true,
+  },
+  {
+    source:
+      "/:locale/guides/create-tools/evaluate-tools/comparative-evaluations",
+    destination:
+      "/:locale/build/create-tools/evaluate-tools/comparative-evaluations",
+    permanent: true,
+  },
+  {
+    source:
+      "/:locale/guides/create-tools/evaluate-tools/create-evaluation-suite",
+    destination:
+      "/:locale/build/create-tools/evaluate-tools/create-evaluation-suite",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/evaluate-tools",
+    destination: "/:locale/build/create-tools/evaluate-tools",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/evaluate-tools/run-evaluations",
+    destination: "/:locale/build/create-tools/evaluate-tools/run-evaluations",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/evaluate-tools/why-evaluate",
+    destination: "/:locale/build/create-tools/evaluate-tools/why-evaluate",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/improve/types-of-tools",
+    destination: "/:locale/build/create-tools/improve/types-of-tools",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/migrate-toolkits",
+    destination: "/:locale/build/create-tools/migrate-toolkits",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/secure-your-server",
+    destination: "/:locale/build/create-tools/secure-your-server",
+    permanent: true,
+  },
+  {
+    source:
+      "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
+    destination:
+      "/:locale/build/create-tools/secure-your-server/secure-your-mcp-server",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics/add-tool-metadata",
+    destination: "/:locale/build/create-tools/tool-basics/add-tool-metadata",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics/build-mcp-server",
+    destination: "/:locale/build/create-tools/tool-basics/build-mcp-server",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics/call-tools-mcp",
+    destination: "/:locale/build/create-tools/tool-basics/call-tools-mcp",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics/compare-server-types",
+    destination: "/:locale/build/create-tools/tool-basics/compare-server-types",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics/create-tool-auth",
+    destination: "/:locale/build/create-tools/tool-basics/create-tool-auth",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics/create-tool-secrets",
+    destination: "/:locale/build/create-tools/tool-basics/create-tool-secrets",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics/organize-mcp-tools",
+    destination: "/:locale/build/create-tools/tool-basics/organize-mcp-tools",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics",
+    destination: "/:locale/build/create-tools/tool-basics",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/create-tools/tool-basics/runtime-data-access",
+    destination: "/:locale/build/create-tools/tool-basics/runtime-data-access",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/tool-calling/call-third-party-apis",
+    destination: "/:locale/build/tool-calling/call-third-party-apis",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/tool-calling/custom-apps/auth-tool-calling",
+    destination: "/:locale/build/tool-calling/custom-apps/auth-tool-calling",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/tool-calling/custom-apps/check-auth-status",
+    destination: "/:locale/build/tool-calling/custom-apps/check-auth-status",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/tool-calling/custom-apps/get-tool-definitions",
+    destination: "/:locale/build/tool-calling/custom-apps/get-tool-definitions",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/tool-calling/custom-apps",
+    destination: "/:locale/build/tool-calling/custom-apps",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/tool-calling/error-handling",
+    destination: "/:locale/build/tool-calling/error-handling",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/tool-calling",
+    destination: "/:locale/build/tool-calling",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/user-facing-agents/secure-auth-production",
+    destination: "/:locale/build/user-facing-agents/secure-auth-production",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/audit-logs",
+    destination: "/:locale/operate/governance/audit-logs",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/contextual-access/build-your-own",
+    destination: "/:locale/operate/governance/contextual-access/build-your-own",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/contextual-access/examples",
+    destination: "/:locale/operate/governance/contextual-access/examples",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/contextual-access/how-hooks-work",
+    destination: "/:locale/operate/governance/contextual-access/how-hooks-work",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/contextual-access",
+    destination: "/:locale/operate/governance/contextual-access",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/deployment-hosting/arcade-cloud",
+    destination: "/:locale/operate/deploy/arcade-cloud",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/deployment-hosting/aws",
+    destination: "/:locale/operate/deploy/aws",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/deployment-hosting/azure",
+    destination: "/:locale/operate/deploy/azure",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/deployment-hosting/gcp",
+    destination: "/:locale/operate/deploy/gcp",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/deployment-hosting/helm",
+    destination: "/:locale/operate/deploy/helm",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/deployment-hosting/on-prem",
+    destination: "/:locale/operate/deploy/on-prem",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/deployment-hosting",
+    destination: "/:locale/operate/deploy",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/deployment-hosting/warp-pipes",
+    destination: "/:locale/operate/deploy/warp-pipes",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/mcp-gateways/add-remote-servers",
+    destination: "/:locale/operate/governance/mcp-gateways/add-remote-servers",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/mcp-gateways/create-via-ai",
+    destination: "/:locale/operate/governance/mcp-gateways/create-via-ai",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/mcp-gateways/create-via-dashboard",
+    destination:
+      "/:locale/operate/governance/mcp-gateways/create-via-dashboard",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/mcp-gateways",
+    destination: "/:locale/operate/governance/mcp-gateways",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/user-sources/auth0",
+    destination: "/:locale/operate/identity/user-sources/auth0",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/user-sources/clerk",
+    destination: "/:locale/operate/identity/user-sources/clerk",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/user-sources/microsoft-entra-id",
+    destination: "/:locale/operate/identity/user-sources/microsoft-entra-id",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/user-sources/okta",
+    destination: "/:locale/operate/identity/user-sources/okta",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/user-sources",
+    destination: "/:locale/operate/identity/user-sources",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides/user-sources/stytch",
+    destination: "/:locale/operate/identity/user-sources/stytch",
+    permanent: true,
+  },
+  {
+    source: "/:locale/guides",
+    destination: "/:locale/build",
+    permanent: true,
+  },
 ];

@@ -15,6 +15,22 @@ Vale handles mechanical style checks (grammar, passive voice, etc.). This guide 
 
 Assume readers know programming fundamentals. Don't explain what a function is, but do explain Arcade-specific concepts.
 
+### Write for the right persona
+
+Arcade docs serve two primary personas. State which one a page is for in the opening paragraph.
+
+| Persona | Who they are | Primary sections |
+| --- | --- | --- |
+| **Agent developer** | Builds agents, calls tools, or ships custom MCP servers | Get Started, Build |
+| **Platform operator** | Deploys, secures, and governs Arcade for an organization | Operate |
+
+Shared sections (Learn, Resources, References) serve both. When a topic diverges by job, link to the other persona's path instead of mixing both workflows on one page.
+
+- **Do:** "These docs are for platform operators who deploy Arcade for a company."
+- **Don't:** Assume every reader is building an agent, or bury operator setup under developer quickstarts.
+
+Prefer **Operate** (or "platform operator") over vague labels like "Enterprise" when naming navigation or page audiences.
+
 ### Use "you" for the reader
 
 - **Do:** "You can configure the server with environment variables" or "Configure the server with environment variables"
