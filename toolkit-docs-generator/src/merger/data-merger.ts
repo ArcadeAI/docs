@@ -819,6 +819,7 @@ const buildMergedToolkit = (options: {
 };
 
 const assertKnownToolChunkTargets = (
+  toolkitId: string,
   tools: readonly Pick<MergedTool, "name">[],
   customSections: CustomSections | null
 ): void => {
@@ -832,7 +833,7 @@ const assertKnownToolChunkTargets = (
     .sort();
   if (unknownToolNames.length > 0) {
     throw new Error(
-      `Curation targets unknown tool(s): ${unknownToolNames.join(", ")}`
+      `Curation for ${toolkitId} targets unknown tool(s): ${unknownToolNames.join(", ")}`
     );
   }
 };
@@ -847,7 +848,7 @@ export const applyCustomSectionsToToolkit = (
     return toolkit;
   }
   if (!options.ignoreUnknownToolChunks) {
-    assertKnownToolChunkTargets(toolkit.tools, customSections);
+    assertKnownToolChunkTargets(toolkit.id, toolkit.tools, customSections);
   }
 
   return {
@@ -978,7 +979,7 @@ export const mergeToolkit = async (
   const warnings: string[] = [];
   const failedTools: FailedTool[] = [];
 
-  assertKnownToolChunkTargets(tools, customSections);
+  assertKnownToolChunkTargets(toolkitId, tools, customSections);
 
   appendMergeWarnings(warnings, toolkitId, tools, metadata);
 
@@ -1222,6 +1223,15 @@ export class DataMerger {
     // so invalid source cannot silently preserve stale generated prose.
     const customSections =
       await this.customSectionsSource.getCustomSections(toolkitId);
+    // A `tool:` target that matches no tool is an authoring mistake, so it
+    // belongs outside the recoverable path below: there it would read as an
+    // upstream failure, and the run would stay green while that toolkit
+    // silently kept stale data and dropped the mistargeted chunk. A toolkit
+    // the API returned no tools for is the outage that recovery exists for,
+    // and it says nothing about whether the curation is correct.
+    if (toolkitData.tools.length > 0) {
+      assertKnownToolChunkTargets(toolkitId, toolkitData.tools, customSections);
+    }
     try {
       const recovered = await this.recoverMissingMetadata(
         toolkitId,

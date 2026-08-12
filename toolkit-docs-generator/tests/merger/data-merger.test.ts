@@ -987,7 +987,9 @@ describe("mergeToolkit overview chunk handling", () => {
         }),
         undefined
       )
-    ).rejects.toThrow("Curation targets unknown tool(s): MissingTool");
+    ).rejects.toThrow(
+      "Curation for TestKit targets unknown tool(s): MissingTool"
+    );
   });
 
   it("keeps toolkit-level overview chunks from source custom sections", async () => {
@@ -2235,18 +2237,20 @@ describe("DataMerger", () => {
       );
       const curation = createCustomSections({
         toolChunks: {
-          NewlyAddedTool: [
+          SetStarred: [
             {
               type: "info",
               location: "parameters",
               position: "after",
-              content: "Applies after the API recovers.",
+              content: "Applies once the prior artifact catches up.",
             },
           ],
         },
       });
+      // The API exposes SetStarred, so the curation is valid; only the
+      // preserved artifact predates it.
       const toolkitDataSource = createCombinedToolkitDataSource({
-        toolSource: new InMemoryToolDataSource([githubTool1]),
+        toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
         metadataSource: new InMemoryMetadataSource([]),
       });
       const merger = new DataMerger({
@@ -2265,6 +2269,47 @@ describe("DataMerger", () => {
       expect(result?.toolkit.tools).toHaveLength(1);
       expect(result?.toolkit.curationSourceHash).toBe(
         getCustomSectionsSourceHash(curation)
+      );
+    });
+
+    it("fails the run when curation targets a tool the API does not expose, even with preserveLastKnownGood", async () => {
+      // A mistyped `tool:` target is an authoring mistake, not an upstream
+      // outage. Recovering from it would leave the nightly job green while
+      // the toolkit kept stale data and lost the chunk.
+      const previous = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections(),
+        createStubGenerator()
+      );
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new InMemoryCustomSectionsSource({
+          Github: createCustomSections({
+            toolChunks: {
+              CreateIsue: [
+                {
+                  type: "info",
+                  location: "parameters",
+                  position: "after",
+                  content: "Typo in the target tool name.",
+                },
+              ],
+            },
+          }),
+        }),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
+      });
+
+      await expect(merger.mergeAllToolkits()).rejects.toThrow(
+        "Curation for Github targets unknown tool(s): CreateIsue"
       );
     });
 
