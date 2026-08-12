@@ -31,6 +31,11 @@ jobs:
     # switch on 2026-06-02. Harmless today; unblocks the cutover.
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+    outputs:
+      # Distinguishes "generation itself failed" from "a later step failed".
+      # Without it, a broken notification would make the alert job announce a
+      # generation failure that never happened.
+      generation-succeeded: ${{ steps.generate-docs.outputs.succeeded }}
 
     steps:
       - name: Checkout repository
@@ -51,6 +56,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate toolkit docs
+        id: generate-docs
         # Invoked by path rather than through `pnpm exec`, which would reset the
         # working directory to the repo root and break the relative paths below.
         run: |
@@ -75,6 +81,8 @@ jobs:
             --ignore-file ./skip-toolkits.txt \
             --custom-sections ./curation \
             --output data/toolkits
+
+          echo "succeeded=true" >>"$GITHUB_OUTPUT"
         working-directory: toolkit-docs-generator
         env:
           ENGINE_API_URL: ${{ secrets.ENGINE_API_URL }}
@@ -167,7 +175,10 @@ jobs:
 
   alert:
     name: Alert on generation failure
-    if: ${{ always() && needs.generate.result == 'failure' }}
+    # Only when generation itself failed. A red job whose generate step
+    # succeeded means a later step broke — reporting that as "generation
+    # failed" would send people looking for a failure that isn't there.
+    if: ${{ always() && needs.generate.result == 'failure' && needs.generate.outputs.generation-succeeded != 'true' }}
     needs: generate
     runs-on: ubuntu-latest
     permissions: {}
