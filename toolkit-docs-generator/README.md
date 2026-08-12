@@ -252,6 +252,17 @@ authored prose on the next generation run. Invalid frontmatter, invalid MDX,
 unknown tool targets, symlinks, unsafe subpage paths, and leftover JSON curation
 fail generation instead of silently falling back to stale generated content.
 
+**[CURATION.md](CURATION.md) is the format reference**: every frontmatter key,
+which `location` and `position` combinations actually render, and the full list
+of failure messages. Before writing a curation file, check your work with:
+
+```bash
+pnpm dlx tsx src/cli/index.ts validate-curation --toolkit GoogleFlights
+```
+
+That compiles the directory with the same code generation uses and needs no
+credentials. Omit `--toolkit` to check everything.
+
 ## Troubleshooting
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.

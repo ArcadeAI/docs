@@ -45,7 +45,10 @@ import {
 } from "../merger/data-merger";
 import { createDesignSystemMetadataSource } from "../sources/design-system-metadata";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory";
-import { createMarkdownCurationSource } from "../sources/markdown-curation";
+import {
+  compileCurationDirectory,
+  createMarkdownCurationSource,
+} from "../sources/markdown-curation";
 import { createMockMetadataSource } from "../sources/mock-metadata";
 import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
 import {
@@ -62,6 +65,7 @@ import {
   ProviderVersionSchema,
 } from "../types/index";
 import { readExclusionList } from "../utils/exclusion-list";
+import { normalizeId } from "../utils/fp";
 import { readIgnoreList } from "../utils/ignore-list";
 import {
   clearSafeOutputDir,
@@ -2614,6 +2618,90 @@ program
       }
     } catch (error) {
       console.log(chalk.red(`✗ Failed to validate: ${error}`));
+      process.exit(1);
+    }
+  });
+
+program
+  .command("validate-curation")
+  .description(
+    "Compile the authored curation directory and report problems per toolkit"
+  )
+  .option(
+    "--custom-sections <path>",
+    "Path to the Markdown/MDX curation directory (defaults to ./curation when present)"
+  )
+  .option("--toolkit <id>", "Only validate one toolkit directory")
+  .action(async (options: { customSections?: string; toolkit?: string }) => {
+    const rootPath = await resolveCustomSectionsPath(options.customSections);
+    if (!rootPath) {
+      console.log(
+        chalk.red(
+          "No curation directory found. Pass --custom-sections <path>, or run from a directory containing curation/."
+        )
+      );
+      process.exit(1);
+    }
+
+    let results: Awaited<ReturnType<typeof compileCurationDirectory>>;
+    try {
+      results = await compileCurationDirectory(rootPath);
+    } catch (error) {
+      // A problem with the root itself, so nothing below it was compiled.
+      console.log(
+        chalk.red(`✗ ${error instanceof Error ? error.message : error}`)
+      );
+      process.exit(1);
+    }
+
+    const wanted = options.toolkit ? normalizeId(options.toolkit) : undefined;
+    const selected = wanted
+      ? results.filter((result) => normalizeId(result.toolkitId) === wanted)
+      : results;
+
+    if (selected.length === 0) {
+      console.log(
+        chalk.red(
+          options.toolkit
+            ? `No curation directory for ${options.toolkit} in ${rootPath}`
+            : `No toolkit directories found in ${rootPath}`
+        )
+      );
+      process.exit(1);
+    }
+
+    let failures = 0;
+    let toolChunkTargets = 0;
+    for (const result of selected) {
+      if ("error" in result) {
+        failures++;
+        console.log(chalk.red(`✗ ${result.toolkitId}`));
+        console.log(chalk.dim(`  ${result.error.message}`));
+        continue;
+      }
+      const { documentationChunks, customImports, subPages, toolChunks } =
+        result.sections;
+      const toolChunkCount = Object.values(toolChunks).reduce(
+        (total, chunks) => total + chunks.length,
+        0
+      );
+      toolChunkTargets += Object.keys(toolChunks).length;
+      console.log(
+        `${chalk.green("✓")} ${result.toolkitId}: ${documentationChunks.length} chunks, ${toolChunkCount} tool chunks, ${customImports.length} imports, ${subPages.length} pages`
+      );
+    }
+
+    console.log(
+      `\n${selected.length} toolkit(s) checked, ${failures} with errors`
+    );
+    if (toolChunkTargets > 0) {
+      console.log(
+        chalk.dim(
+          "Note: `tool:` targets are checked against the live tool list during generation, not here."
+        )
+      );
+    }
+    if (failures > 0) {
       process.exit(1);
     }
   });
