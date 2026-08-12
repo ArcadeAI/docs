@@ -641,13 +641,7 @@ export function LandingPage() {
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-          <div className="grid grid-cols-1 gap-8 min-[1062px]:grid-cols-3">
-            <SampleAppCard
-              blank
-              description="A chatbot that can help you with your daily tasks."
-              href="https://chat.arcade.dev/"
-              title="Arcade Chat"
-            />
+          <div className="grid grid-cols-1 gap-8 min-[1062px]:grid-cols-2">
             <SampleAppCard
               description="A bot for Slack that can act on your behalf."
               href="https://github.com/ArcadeAI/ArcadeSlackAgent"
