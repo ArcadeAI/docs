@@ -300,6 +300,112 @@ const loadToolkitDirectory = async (
   });
 };
 
+/**
+ * Outcome of compiling one toolkit directory. Compilation failures are
+ * returned rather than thrown so a caller that wants to report on every
+ * toolkit (see the `validate-curation` CLI command) is not limited to the
+ * first broken file.
+ */
+export type CurationCompileResult =
+  | { toolkitId: string; sections: CustomSections }
+  | { toolkitId: string; error: Error };
+
+const assertCurationRoot = async (rootPath: string): Promise<void> => {
+  let rootStats: Awaited<ReturnType<typeof stat>>;
+  try {
+    rootStats = await stat(rootPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error(
+        `Configured curation directory does not exist: ${rootPath}`
+      );
+    }
+    throw error;
+  }
+  if (!rootStats.isDirectory()) {
+    throw new Error(`Configured curation path is not a directory: ${rootPath}`);
+  }
+};
+
+/**
+ * Names of the toolkit directories directly below the root, in sorted order.
+ * Anything at the root that cannot be a toolkit directory either throws (a
+ * symlink, leftover JSON curation, a name colliding with another directory
+ * once normalized) or is skipped.
+ */
+const listToolkitDirectoryNames = async (
+  rootPath: string
+): Promise<string[]> => {
+  const entries = (await readdir(rootPath, { withFileTypes: true })).sort(
+    (left, right) => left.name.localeCompare(right.name)
+  );
+  const names: string[] = [];
+  const normalizedIds = new Map<string, string>();
+
+  for (const entry of entries) {
+    const entryPath = join(rootPath, entry.name);
+    if (entry.isSymbolicLink()) {
+      throw new Error(
+        `Curation directory may not contain symlinks (${entryPath})`
+      );
+    }
+    if (entry.isFile() && extensionOf(entry.name) === ".json") {
+      rejectJsonFiles([entryPath]);
+    }
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const normalizedId = normalizeId(entry.name);
+    const duplicate = normalizedIds.get(normalizedId);
+    if (duplicate) {
+      throw new Error(
+        `Curation toolkit directories normalize to the same ID: ${duplicate}, ${entry.name}`
+      );
+    }
+    normalizedIds.set(normalizedId, entry.name);
+    names.push(entry.name);
+  }
+
+  return names;
+};
+
+/**
+ * Walk a curation root and compile every toolkit directory below it, in
+ * sorted directory order.
+ *
+ * Problems with the root itself — a missing or non-directory path, a symlink,
+ * leftover JSON curation, two directories that normalize to the same toolkit
+ * ID — throw, because they make the whole directory uninterpretable rather
+ * than spoiling one toolkit.
+ */
+export const compileCurationDirectory = async (
+  rootPath: string
+): Promise<CurationCompileResult[]> => {
+  await assertCurationRoot(rootPath);
+  const toolkitIds = await listToolkitDirectoryNames(rootPath);
+  const results: CurationCompileResult[] = [];
+
+  for (const toolkitId of toolkitIds) {
+    try {
+      results.push({
+        toolkitId,
+        sections: await loadToolkitDirectory(
+          join(rootPath, toolkitId),
+          toolkitId
+        ),
+      });
+    } catch (error) {
+      results.push({
+        toolkitId,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+    }
+  }
+
+  return results;
+};
+
 export class MarkdownCurationSource implements ICustomSectionsSource {
   private readonly rootPath: string;
   private cachedData: Readonly<Record<string, CustomSections>> | null = null;
@@ -313,50 +419,13 @@ export class MarkdownCurationSource implements ICustomSectionsSource {
       return this.cachedData;
     }
 
-    let rootStats: Awaited<ReturnType<typeof stat>>;
-    try {
-      rootStats = await stat(this.rootPath);
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-        throw new Error(
-          `Configured curation directory does not exist: ${this.rootPath}`
-        );
-      }
-      throw error;
-    }
-    if (!rootStats.isDirectory()) {
-      throw new Error(
-        `Configured curation path is not a directory: ${this.rootPath}`
-      );
-    }
-
-    const entries = (
-      await readdir(this.rootPath, { withFileTypes: true })
-    ).sort((left, right) => left.name.localeCompare(right.name));
+    const results = await compileCurationDirectory(this.rootPath);
     const data: Record<string, CustomSections> = {};
-    const normalizedIds = new Map<string, string>();
-    for (const entry of entries) {
-      const entryPath = join(this.rootPath, entry.name);
-      if (entry.isSymbolicLink()) {
-        throw new Error(
-          `Curation directory may not contain symlinks (${entryPath})`
-        );
+    for (const result of results) {
+      if ("error" in result) {
+        throw result.error;
       }
-      if (entry.isFile() && extensionOf(entry.name) === ".json") {
-        rejectJsonFiles([entryPath]);
-      }
-      if (!entry.isDirectory()) {
-        continue;
-      }
-      const normalizedId = normalizeId(entry.name);
-      const duplicate = normalizedIds.get(normalizedId);
-      if (duplicate) {
-        throw new Error(
-          `Curation toolkit directories normalize to the same ID: ${duplicate}, ${entry.name}`
-        );
-      }
-      normalizedIds.set(normalizedId, entry.name);
-      data[entry.name] = await loadToolkitDirectory(entryPath, entry.name);
+      data[result.toolkitId] = result.sections;
     }
 
     this.cachedData = data;

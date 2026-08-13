@@ -2,7 +2,10 @@ import { mkdir, mkdtemp, rm, symlink, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createMarkdownCurationSource } from "../../src/sources/markdown-curation";
+import {
+  compileCurationDirectory,
+  createMarkdownCurationSource,
+} from "../../src/sources/markdown-curation";
 
 const createTempDir = async (): Promise<string> =>
   mkdtemp(join(tmpdir(), "markdown-curation-"));
@@ -230,5 +233,53 @@ import StarterToolInfo from "@/app/_components/starter-tool-info";
     await expect(
       createMarkdownCurationSource(tempDir).getAllCustomSections()
     ).rejects.toThrow("may not contain symlinks");
+  });
+});
+
+describe("compileCurationDirectory", () => {
+  let tempDir: string | null = null;
+
+  afterEach(async () => {
+    if (tempDir) {
+      await rm(tempDir, { recursive: true, force: true });
+      tempDir = null;
+    }
+  });
+
+  it("reports a failure per toolkit instead of stopping at the first one", async () => {
+    tempDir = await createTempDir();
+    await writeDocument(
+      tempDir,
+      "github/chunks/bad.mdx",
+      chunk("", "<Callout>Unclosed")
+    );
+    await writeDocument(tempDir, "slack/chunks/ok.mdx", chunk());
+    await writeDocument(
+      tempDir,
+      "zoom/chunks/bad.mdx",
+      chunk("unknown: true\n")
+    );
+
+    const results = await compileCurationDirectory(tempDir);
+
+    expect(
+      results.map((result) => [
+        result.toolkitId,
+        "error" in result ? "error" : "ok",
+      ])
+    ).toEqual([
+      ["github", "error"],
+      ["slack", "ok"],
+      ["zoom", "error"],
+    ]);
+  });
+
+  it("throws on root-level problems, which spoil the whole directory", async () => {
+    tempDir = await createTempDir();
+    await writeFile(join(tempDir, "github.json"), "{}");
+
+    await expect(compileCurationDirectory(tempDir)).rejects.toThrow(
+      "JSON curation is no longer supported"
+    );
   });
 });

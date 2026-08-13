@@ -72,7 +72,8 @@ it. The sidebar sync writes navigation only, and never touches toolkit JSON.
 - `MarkdownCurationSource` compiles documentation chunks, import declarations,
   and subpages from the configured curation directory. When configured, that
   directory is globally authoritative: a missing toolkit directory means the
-  toolkit has no authored curation.
+  toolkit has no authored curation. [CURATION.md](CURATION.md) documents the
+  file format it accepts.
 - `CombinedToolkitDataSource` merges tools and metadata into one interface.
 
 ### Merger
@@ -139,6 +140,7 @@ public, read-only values configured through these Vercel environment variables:
 
 - `src/sources/engine-api.ts` — tool metadata from Engine API
 - `src/sources/markdown-curation.ts` — Markdown and MDX curation compiler
+  ([format reference](CURATION.md))
 - `src/sources/toolkit-data-source.ts` — unified data source
 - `src/merger/data-merger.ts` — merge pipeline
 - `src/generator/json-generator.ts` — output writer
