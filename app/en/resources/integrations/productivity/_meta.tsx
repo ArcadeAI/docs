@@ -105,6 +105,10 @@ const meta: MetaRecord = {
     title: "Microsoft SharePoint",
     href: "/en/resources/integrations/productivity/microsoft-sharepoint",
   },
+  "microsoft-users": {
+    title: "Microsoft Users",
+    href: "/en/resources/integrations/productivity/microsoft-users",
+  },
   "microsoft-word": {
     title: "Microsoft Word",
     href: "/en/resources/integrations/productivity/microsoft-word",
