@@ -191,8 +191,8 @@ jobs:
     name: Alert on failure
     # Every red run gets a message. Which message depends on whether generation
     # itself broke or something after it did: those need different people to do
-    # different things, and calling a failed sidebar sync a "generation failure"
-    # sends someone hunting for a validation error that doesn't exist.
+    # different things, and calling a post-generation failure a "generation
+    # failure" sends someone hunting for a validation error that doesn't exist.
     if: ${{ !cancelled() && needs.generate.result == 'failure' }}
     needs: generate
     runs-on: ubuntu-latest
@@ -212,8 +212,8 @@ jobs:
           fi
 
           if [ "$GENERATION_SUCCEEDED" = "true" ]; then
-            headline=":warning: Toolkit docs were generated but never published"
-            detail="Generation succeeded, so the toolkit JSON is fine — a step after it failed (sidebar sync, PR creation, or the Slack report). Today's docs are not on their way to the site until this run's work lands, and there may be no auto-PR to merge."
+            headline=":warning: Toolkit docs generated, but the workflow failed afterward"
+            detail="Generation succeeded, so the toolkit JSON is fine. A later workflow step failed — inspect the run to determine whether sidebar sync, PR creation, artifact upload, or Slack notification needs attention."
           else
             headline=":rotating_light: Toolkit docs generation failed"
             detail="The failed run contains the exact file path and validation error."

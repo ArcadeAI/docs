@@ -110,7 +110,7 @@ test("porter workflow only claims generation failed when generation failed", () 
   );
   expect(workflowContents).toContain('if [ "$GENERATION_SUCCEEDED" = "true" ]');
   expect(workflowContents).toContain(
-    "Toolkit docs were generated but never published"
+    "Toolkit docs generated, but the workflow failed afterward"
   );
   expect(workflowContents).toContain("Toolkit docs generation failed");
 });

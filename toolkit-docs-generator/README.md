@@ -287,7 +287,7 @@ questions:
 | --- | --- | --- |
 | Toolkits missing or stale | Generation recovered from a per-toolkit failure | Follow the fix named in the entry |
 | Toolkit docs generation failed | The generate step itself broke | Open the run for the path and validation error |
-| Generated but never published | Generation was fine, a later step broke | Check sidebar sync and PR creation — there may be no auto-PR to merge |
+| Generated, but workflow failed afterward | Generation was fine, a later step broke | Open the run to determine whether sidebar sync, PR creation, artifact upload, or Slack notification needs attention |
 
 The first is reported from inside the generate job, gated on the generate step
 rather than on the steps after it, so a broken sidebar sync or PR creation does
