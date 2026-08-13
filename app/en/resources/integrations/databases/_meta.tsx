@@ -17,6 +17,10 @@ const meta: MetaRecord = {
     title: "Postgres",
     href: "/en/resources/integrations/databases/postgres",
   },
+  snowflake: {
+    title: "Snowflake",
+    href: "/en/resources/integrations/databases/snowflake",
+  },
   "-- Starter": {
     type: "separator",
     title: "Starter",
