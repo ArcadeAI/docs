@@ -129,7 +129,9 @@ pnpm dlx tsx src/cli/index.ts generate \
 
 ## Local usage
 
-Run these commands from the `toolkit-docs-generator` directory.
+Run these commands from the `toolkit-docs-generator` directory. Invoke `tsx` by
+path because this directory has no package for `pnpm exec`; the sidebar sync
+command below runs from the repo root instead.
 
 Generate a single toolkit:
 

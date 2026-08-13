@@ -241,9 +241,8 @@ toolkit with its message, and exits non-zero on failure. It runs the same
 compiler generation uses, so a pass means kinds, frontmatter, and MDX are all
 valid. It cannot check `tool:` targets.
 
-Invoke `tsx` by path, not through `pnpm exec`, which resets the working
-directory to the repo root and breaks the relative path. `pnpm dlx tsx` also
-works.
+Invoke `tsx` by path because `toolkit-docs-generator` has no package for
+`pnpm exec`.
 
 Seeing a chunk on a page needs generated JSON. Either wait for the automated
 generation PR, or generate that one toolkit with Engine credentials and run
