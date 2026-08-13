@@ -105,7 +105,7 @@ The summary generator is configured to **never list OAuth scopes** in the genera
 ### Local example (editor on)
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate \
+../node_modules/.bin/tsx src/cli/index.ts generate \
   --providers "Github" \
   --tool-metadata-url "$ENGINE_API_URL" \
   --tool-metadata-key "$ENGINE_API_KEY" \
@@ -129,12 +129,14 @@ pnpm dlx tsx src/cli/index.ts generate \
 
 ## Local usage
 
-Run these commands from the `toolkit-docs-generator` directory.
+Run these commands from the `toolkit-docs-generator` directory. Invoke `tsx` by
+path so the relative arguments resolve; `pnpm exec` resets the working directory
+to the repo root, which is why the sidebar sync below uses it instead.
 
 Generate a single toolkit:
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate \
+../node_modules/.bin/tsx src/cli/index.ts generate \
   --providers "Github:1.0.0" \
   --tool-metadata-url "$ENGINE_API_URL" \
   --tool-metadata-key "$ENGINE_API_KEY" \
@@ -147,7 +149,7 @@ pnpm dlx tsx src/cli/index.ts generate \
 Generate all toolkits:
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate \
+../node_modules/.bin/tsx src/cli/index.ts generate \
   --all \
   --skip-unchanged \
   --tool-metadata-url "$ENGINE_API_URL" \
@@ -161,7 +163,7 @@ pnpm dlx tsx src/cli/index.ts generate \
 Generate without LLM output:
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate \
+../node_modules/.bin/tsx src/cli/index.ts generate \
   --providers "Asana:0.1.3" \
   --tool-metadata-url "$ENGINE_API_URL" \
   --tool-metadata-key "$ENGINE_API_KEY" \
@@ -173,7 +175,7 @@ pnpm dlx tsx src/cli/index.ts generate \
 Sync sidebar navigation locally:
 
 ```bash
-pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
+pnpm exec tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
 ```
 
 ## Ignoring toolkits
@@ -190,7 +192,7 @@ SomeInternalTool
 ```
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate --all \
+../node_modules/.bin/tsx src/cli/index.ts generate --all \
   --ignore-file ./skip-toolkits.txt
 ```
 
@@ -217,7 +219,7 @@ SomeInternalTool
 The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate --all \
+../node_modules/.bin/tsx src/cli/index.ts generate --all \
   --exclude-file ./remove-toolkits.txt
 ```
 
@@ -257,7 +259,7 @@ which `location` and `position` combinations actually render, and the full list
 of failure messages. Before writing a curation file, check your work with:
 
 ```bash
-pnpm dlx tsx src/cli/index.ts validate-curation --toolkit GoogleFlights
+../node_modules/.bin/tsx src/cli/index.ts validate-curation --toolkit GoogleFlights
 ```
 
 That compiles the directory with the same code generation uses and needs no
@@ -267,4 +269,4 @@ credentials. Omit `--toolkit` to check everything.
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
 - **Missing metadata**: the generator falls back to the metadata JSON file when design system metadata is unavailable.
-- **Verify output fails**: run `pnpm dlx tsx src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.
+- **Verify output fails**: run `../node_modules/.bin/tsx src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.
