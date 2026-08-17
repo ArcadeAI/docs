@@ -4,6 +4,7 @@
  * Exports change detection functionality for comparing API data with previous output.
  */
 
+export { getChangedToolkitIdsFromCustomSections } from "./custom-sections-diff";
 export {
   detectSummaryChanges,
   formatSummaryChangeSummary,

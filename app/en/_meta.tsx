@@ -5,6 +5,7 @@ import {
   Home,
   Pencil,
   Ruler,
+  ServerCog,
 } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
@@ -41,11 +42,14 @@ export const meta: MetaRecord = {
   "get-started": {
     title: <TitleWithIcon icon={BookOpen}>Get Started</TitleWithIcon>,
   },
+  build: {
+    title: <TitleWithIcon icon={Ruler}>Build</TitleWithIcon>,
+  },
+  operate: {
+    title: <TitleWithIcon icon={ServerCog}>Operate</TitleWithIcon>,
+  },
   resources: {
     title: <TitleWithIcon icon={Pencil}>Resources</TitleWithIcon>,
-  },
-  guides: {
-    title: <TitleWithIcon icon={Ruler}>Guides</TitleWithIcon>,
   },
   learn: {
     title: <TitleWithIcon icon={Book}>Learn</TitleWithIcon>,

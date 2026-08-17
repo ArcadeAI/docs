@@ -1,7 +1,7 @@
 {
   "id": "GoogleSlides",
   "label": "Google Slides",
-  "version": "3.0.2",
+  "version": "3.1.0",
   "description": "Arcade.dev LLM tools for Google Slides",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "CommentOnPresentation",
       "qualifiedName": "GoogleSlides.CommentOnPresentation",
-      "fullyQualifiedName": "GoogleSlides.CommentOnPresentation@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.CommentOnPresentation@3.1.0",
       "description": "Add a comment to a presentation, or reply within an existing comment thread.\n\nComments are file-level, not anchored to a slide; to reference a slide, name it in\nthe text. Pass reply_to_comment_id to post within that thread instead of starting a\nnew comment.",
       "parameters": [
         {
@@ -119,7 +119,7 @@
     {
       "name": "CreateOrEditPresentation",
       "qualifiedName": "GoogleSlides.CreateOrEditPresentation",
-      "fullyQualifiedName": "GoogleSlides.CreateOrEditPresentation@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.CreateOrEditPresentation@3.1.0",
       "description": "Create a deck or apply a batch of edits to one, returning created object ids,\nreplace counts, and a fresh addressable snapshot.\n\nUse this single tool for all deck construction and editing: add, delete, or restyle\nslides and elements, insert and replace text, and brand a deck in one batch. Reorder\nslides with an updateSlidesPosition request; duplicate a slide or element with a\nduplicateObject request. To set speaker notes, insertText into a slide's\nnotes_object_id (surfaced per slide in the snapshot).\n\nTo add a slide into a specific branded layout, first read the deck and consult the\nsnapshot's layout inventory: each layout reports its placeholders (type, index, and\nobject id), so you can pick a layout that already carries the title/body/other\nplaceholders you intend to fill rather than guessing which layout holds what, and\naddress a specific placeholder in placeholderIdMappings (by {type, index} or by\nlayoutPlaceholderObjectId) even when a layout repeats a type. Read the snapshot to\ndiscover the object ids later edits target.\n\nThe batch is atomic: one invalid request rejects the whole batch, so target object\nids that exist in the snapshot. Object ids you assign to new objects are validated\nbefore the batch is sent.",
       "parameters": [
         {
@@ -320,7 +320,7 @@
     {
       "name": "CreatePresentationFromTemplate",
       "qualifiedName": "GoogleSlides.CreatePresentationFromTemplate",
-      "fullyQualifiedName": "GoogleSlides.CreatePresentationFromTemplate@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.CreatePresentationFromTemplate@3.1.0",
       "description": "Derive a new on-brand deck from an existing branded deck, preserving its\nmasters, layouts, and theme, then optionally filling tokens.\n\nUse this instead of building from scratch when the user wants a deck in their\ncompany template; the new deck inherits the source's branding.",
       "parameters": [
         {
@@ -441,8 +441,8 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleSlides.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleSlides.GenerateGoogleFilePickerUrl@3.0.2",
-      "description": "Generate a URL where the user grants this app access to specific Drive files.\n\nUse this when a prior tool reported a file was not found or access was denied and\nthe user expects the file to exist; after the user completes the picker, retry the\nprior tool. Opens Google's first-party Drive picker, not a sign-in prompt.\n\nReturns a soft envelope: an \"unavailable\" status (not an error) means the picker is\nnot configured in this environment and will not work here, so do not retry it.",
+      "fullyQualifiedName": "GoogleSlides.GenerateGoogleFilePickerUrl@3.1.0",
+      "description": "Generate a URL where the user grants this app access to specific Drive files.\n\nCheck `status` first. \"unavailable\" is not an error: either this app already reaches\nevery presentation the connected account can open, so there is no per-file grant to\nrequest, or the picker is not configured here. Either way `reason` explains it, no URL\nexists, and a presentation that could not be read is one the account itself cannot\nopen. Do not retry it.\n\nOn \"available\", use this when a prior tool reported a file was not found or access was\ndenied and the user expects the file to exist; after the user completes the picker,\nretry the prior tool. Opens Google's first-party Drive picker, not a sign-in prompt.",
       "parameters": [],
       "auth": {
         "providerId": "google",
@@ -484,7 +484,7 @@
     {
       "name": "GetPresentation",
       "qualifiedName": "GoogleSlides.GetPresentation",
-      "fullyQualifiedName": "GoogleSlides.GetPresentation@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.GetPresentation@3.1.0",
       "description": "Return an addressable snapshot of a deck: slide and element object ids,\nplaceholder types, text, speaker notes, and the layout and master inventory.\n\nThis is the read side of the read-edit loop: the object ids it returns are the\naddresses create_or_edit_presentation targets. Each layout in the inventory\nreports its placeholders with type, index, and object id, the identity a\ncreateSlide placeholderIdMappings entry needs (by {type, index} or by\nlayoutPlaceholderObjectId), even when a layout repeats a placeholder type.",
       "parameters": [
         {
@@ -619,7 +619,7 @@
     {
       "name": "GetSlideThumbnail",
       "qualifiedName": "GoogleSlides.GetSlideThumbnail",
-      "fullyQualifiedName": "GoogleSlides.GetSlideThumbnail@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.GetSlideThumbnail@3.1.0",
       "description": "Render one slide to an image and return its content URL, for visually\nconfirming a deck looks right before sharing.",
       "parameters": [
         {
@@ -716,7 +716,7 @@
     {
       "name": "ListPresentationComments",
       "qualifiedName": "GoogleSlides.ListPresentationComments",
-      "fullyQualifiedName": "GoogleSlides.ListPresentationComments@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.ListPresentationComments@3.1.0",
       "description": "List a page of comments and their replies on a presentation, newest first.",
       "parameters": [
         {
@@ -822,7 +822,7 @@
     {
       "name": "ResolveComment",
       "qualifiedName": "GoogleSlides.ResolveComment",
-      "fullyQualifiedName": "GoogleSlides.ResolveComment@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.ResolveComment@3.1.0",
       "description": "Close (resolve) or reopen a comment thread on a presentation.\n\nPosts an action reply on the thread, so the lifecycle change is attributed to the\nconnected account; the thread's existing comments and replies are preserved.",
       "parameters": [
         {
@@ -918,7 +918,7 @@
     {
       "name": "SearchPresentations",
       "qualifiedName": "GoogleSlides.SearchPresentations",
-      "fullyQualifiedName": "GoogleSlides.SearchPresentations@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.SearchPresentations@3.1.0",
       "description": "Search the user's Drive for presentations, newest first by default.\n\nKeyword matching is full-text: a keyword matches a deck's body content as well\nas its title, so a deck can match on words that never appear in its title. A\nkeyword search that matches nothing returns an empty list (not an error).",
       "parameters": [
         {
@@ -1107,7 +1107,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleSlides.WhoAmI",
-      "fullyQualifiedName": "GoogleSlides.WhoAmI@3.0.2",
+      "fullyQualifiedName": "GoogleSlides.WhoAmI@3.1.0",
       "description": "Return the connected Google account's profile (name, email, picture).",
       "parameters": [],
       "auth": {
@@ -1165,6 +1165,7 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-08-06T11:47:09.089Z",
-  "summary": "Google Slides toolkit for Arcade provides LLM-callable tools that create, read, edit, and manage Google Slides presentations via the Google Slides and Drive APIs.\n\n## Capabilities\n\n- **Presentation creation & editing:** Create new decks from scratch or from branded templates, apply atomic batches of edits (add/delete/restyle slides and elements, insert/replace text, reorder slides, duplicate objects, set speaker notes), and inspect addressable snapshots to discover object IDs and layout inventories before targeting them.\n- **Reading & visual inspection:** Retrieve full addressable snapshots (slide/element IDs, placeholder types, text, speaker notes, layout/master inventory) and render individual slides to thumbnail images for visual confirmation.\n- **Search & discovery:** Full-text search across a user's Drive presentations (matches body content and title); returns results newest-first.\n- **Comments & collaboration:** Add top-level comments or reply within threads, list comments/replies with pagination, and resolve or reopen comment threads — all attributed to the connected account.\n- **File access & identity:** Generate a Google Drive inline file picker URL to grant access to specific files when a file is not found or access is denied; look up the connected Google account's profile (name, email, picture).\n\n## OAuth\n\nThis toolkit authenticates via **OAuth 2.0** with Google as the provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details, required scopes, and configuration steps.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — An API key that enables the `GoogleSlides.GenerateGoogleFilePickerUrl` tool to open Google's first-party Drive file picker. This is a **Google Maps/Picker API key** with the [Google Picker API](https://developers.google.com/drive/picker/guides/overview) enabled. To obtain it:\n  1. Open the [Google Cloud Console → APIs & Services → Credentials](https://console.cloud.google.com/apis/credentials) for the same project used for your OAuth client.\n  2. Click **Create Credentials → API key**.\n  3. Enable the **Google Picker API** on the project under [APIs & Services → Library](https://console.cloud.google.com/apis/library).\n  4. Restrict the key to the Picker API (and optionally to your app's domain) to limit exposure.\n  5. Copy the key value and register it as this secret.\n  If this secret is absent or invalid, `GenerateGoogleFilePickerUrl` returns an `\"unavailable\"` status rather than an error — do not retry the picker in that case.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to register secrets, or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "curationSourceHash": "b3d8f14f84f11cfab50aa2251f31e3213b2612eb819c1bac2b8979c2fb898f20",
+  "generatedAt": "2026-08-13T11:19:44.487Z",
+  "summary": "## Google Slides Toolkit\n\nThe Google Slides toolkit connects Arcade to Google Slides (and Google Drive) via the Google APIs, enabling LLMs to create, edit, read, search, and comment on presentations programmatically.\n\n## Capabilities\n\n- **Deck creation and editing:** Build presentations from scratch or apply atomic batches of edits — add/delete/restyle slides and elements, insert/replace text, reorder slides, duplicate objects, and set speaker notes — all in a single call.\n- **Template and branding workflows:** Derive new decks from existing branded templates, preserving masters, layouts, and themes; inspect layout inventories (placeholder types, indices, object IDs) before constructing slides to target the right placeholders.\n- **Reading and visual inspection:** Retrieve full addressable snapshots (object IDs, placeholder types, text, speaker notes, layout/master inventory) and render individual slide thumbnails for visual confirmation before sharing.\n- **Search and discovery:** Full-text search across a user's Drive presentations, matching body content and titles; returns results newest-first.\n- **Comments and thread management:** Add top-level comments or replies to existing threads, list paginated comments and replies, and resolve or reopen comment threads — all attributed to the connected account.\n- **Account and file access:** Retrieve the connected Google account's profile, and generate a Google Drive file picker URL to grant per-file access when a presentation is inaccessible.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — Controls whether the `GenerateGoogleFilePickerUrl` tool is available in this environment. This is not a credential from Google; it is an Arcade-side configuration secret that enables or disables the inline Drive picker feature. Set it to enable the picker flow that lets users grant per-file Drive access without a full re-authorization. Configure this secret in your Arcade environment via the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets). For full details on how Arcade tool secrets work, see the [Arcade tool secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
 }

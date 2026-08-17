@@ -30,7 +30,7 @@ The only supported OAuth 2.0 flow is the authorization code grant flow (with or 
 
 ## Configuring OAuth 2.0
 
-How you configure the OAuth 2.0 provider depends on whether you use the Arcade Cloud Engine or a [self-hosted Engine](/guides/deployment-hosting/helm). If you use the Cloud Engine, you must configure your provider in the Dashboard.
+How you configure the OAuth 2.0 provider depends on whether you use the Arcade Cloud Engine or a [self-hosted Engine](/operate/deploy/helm). If you use the Cloud Engine, you must configure your provider in the Dashboard.
 
 <Callout type="info">
   When configuring your app in the OAuth 2.0 enabled service, you must use the
@@ -43,7 +43,7 @@ How you configure the OAuth 2.0 provider depends on whether you use the Arcade C
 <Callout type="info">
   When using the Arcade Cloud Platform, the Dashboard is available at
   [`https://api.arcade.dev/dashboard`](https://api.arcade.dev/dashboard). If you
-  are [self-hosting Arcade](/guides/deployment-hosting/helm), by default
+  are [self-hosting Arcade](/operate/deploy/helm), by default
   the Dashboard is available at
   [`http://localhost:9099/dashboard`](http://localhost:9099/dashboard). Adjust
   the host and port, if necessary, to match your environment.
@@ -62,7 +62,7 @@ When you use tools that require OAuth 2.0 authorization using your Arcade accoun
 
 <Callout type="info">
   This method is only available when you are [self-hosting the
-  engine](/guides/deployment-hosting/helm
+  engine](/operate/deploy/helm
 </Callout>
 
 <Steps>
@@ -84,7 +84,7 @@ HOOLI_CLIENT_SECRET="<your client secret>"
 ```
 
 <Callout>
-  See [configuration](/guides/deployment-hosting/helm#configuration) for more
+  See [configuration](/operate/deploy/helm#configuration) for more
   information on how to set environment variables and configure the Arcade
   Engine.
 </Callout>
@@ -94,7 +94,7 @@ HOOLI_CLIENT_SECRET="<your client secret>"
 <Callout>
   To locate the `engine.yaml` file in your OS after installing the Arcade
   Engine, check the [Engine configuration
-  file](/guides/deployment-hosting/helm#configuration)
+  file](/operate/deploy/helm#configuration)
   documentation.
 </Callout>
 
@@ -200,6 +200,18 @@ This section configures the code/token exchange request, after the user has appr
 - `auth_method` _(optional, default none)_: The authentication method to use. Supported values are none (omitted) and `client_secret_basic`.
 - `params`: A map of parameter keys and values to include in the token request.
 
+<Callout type="warning">
+  Use exactly one client authentication method per request. If you set
+  `auth_method: client_secret_basic`, omit `client_id` and `client_secret` from
+  `params`. Sending client credentials in both the `Authorization` header and
+  the request body violates [RFC 6749, Section
+  2.3.1](https://datatracker.ietf.org/doc/html/rfc6749#section-2.3.1), and
+  strict authorization servers such as Okta reject the token exchange (Okta's
+  System Log shows `multiple_client_credentials`). In Arcade this surfaces as a
+  successful login page while the authorization stays `pending` and never
+  receives a token.
+</Callout>
+
 These placeholders are available in `params`:
 
 - `{{client_id}}`: The configured client ID.
@@ -221,7 +233,7 @@ token_request:
     grant_type: authorization_code
     redirect_uri: "{{redirect_uri}}"
     client_id: "{{client_id}}"
-    client_secret: "{{client_secret}}" # Omit if using PKCE
+    client_secret: "{{client_secret}}" # Omit if using PKCE or client_secret_basic
 ```
 
 - `response_content_type` _(optional, default `application/json`)_: The expected content type of the response. Supported values are `application/json` and `application/x-www-form-urlencoded`.
@@ -241,6 +253,13 @@ These placeholders are available in `params`:
 - `{{client_id}}`: The configured client ID.
 - `{{client_secret}}`: The configured client secret.
 
+<Callout type="warning">
+  The single-authentication-method rule applies here too: if you set
+  `auth_method: client_secret_basic`, omit `client_id` and `client_secret` from
+  `params`. A misconfigured refresh request fails later than the token request,
+  when the first access token expires, so it is easy to miss in testing.
+</Callout>
+
 For most providers, `oauth2.refresh_request.params` will look like:
 
 ```yaml
@@ -249,7 +268,7 @@ refresh_request:
   params:
     grant_type: refresh_token
     client_id: "{{client_id}}"
-    client_secret: "{{client_secret}}"
+    client_secret: "{{client_secret}}" # Omit if using client_secret_basic
 ```
 
 - `response_content_type` _(optional, default `application/json`)_: The expected content type of the response. Supported values are `application/json` and `application/x-www-form-urlencoded`.
@@ -589,7 +608,7 @@ const token = authResponse.context.token;
 
 ## Using OAuth 2.0 in custom tools
 
-You can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server) that interact with any OAuth 2.0-compatible APIs.
+You can author your own [custom tools](/build/create-tools/tool-basics/build-mcp-server) that interact with any OAuth 2.0-compatible APIs.
 
 Use the `OAuth2()` auth class to specify that a tool requires OAuth 2.0 authorization. In your tool function, `context.authorization` will be automatically populated with the following properties:
 

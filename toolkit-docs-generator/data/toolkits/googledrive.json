@@ -1,7 +1,7 @@
 {
   "id": "GoogleDrive",
   "label": "Google Drive",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "description": "Arcade.dev LLM tools for Google Drive",
   "metadata": {
     "category": "productivity",
@@ -27,8 +27,8 @@
     {
       "name": "CheckFileAccess",
       "qualifiedName": "GoogleDrive.CheckFileAccess",
-      "fullyQualifiedName": "GoogleDrive.CheckFileAccess@7.0.0",
-      "description": "Check whether this app can already read each of several Drive files, in one batched\npre-flight call, before attempting to read them.\n\nUse this when the user references multiple files so any that are not yet accessible can\nbe granted together in a single picker step, instead of hitting a separate access error\nand grant prompt for each one. Each input may be a bare file id or a full Google\nDrive/Workspace URL (documents, spreadsheets, slides, PDFs, images, folders — any type).\n\nReturns ``files`` (a per-id list with ``accessible``, the ``title`` and ``mime_type``\nwhen the file was read, and a ``reason`` when not usable), ``all_accessible`` (true only\nwhen every id is already accessible), ``connected_account_email`` (the connected Google\naccount, empty when unknown), and a ``grant`` block. ``grant`` is empty when nothing needs\ngranting; otherwise it lists the ungranted ids (``ungranted_ids``) plus, when the inline\npicker is enabled, a single picker URL covering them all.\n\nA ``reason`` of ``not_accessible_or_not_found`` is either a file not granted to this app\nyet or one that does not exist (indistinguishable here) — the picker resolves the former.\n``invalid_reference`` is an input that is not a Drive id or link at all; ask the user to\nre-check it. ``error`` is a transient server-side failure (a timeout or 5xx) that the\npicker cannot fix; the same inputs may be retried later.",
+      "fullyQualifiedName": "GoogleDrive.CheckFileAccess@7.1.0",
+      "description": "Check whether this app can already read each of several Drive files, in one batched\npre-flight call, before attempting to read them.\n\nUse this when the user references multiple files, to learn which are readable up front\ninstead of hitting a separate access error for each one. Where this app reaches files\none grant at a time, the ungranted ones can then be granted together in a single picker\nstep. Each input may be a bare file id or a full Google Drive/Workspace URL (documents,\nspreadsheets, slides, PDFs, images, folders — any type).\n\nReturns ``files`` (a per-id list with ``accessible``, the ``title`` and ``mime_type``\nwhen the file was read, and a ``reason`` when not usable), ``all_accessible`` (true only\nwhen every id is already accessible), ``connected_account_email`` (the connected Google\naccount, empty when unknown), and a ``grant`` block. ``grant`` lists the ungranted\nids (``ungranted_ids``) plus, when the inline picker is enabled, a single picker URL\ncovering them all. Where this app already reaches every file the account can open there\nis no per-file grant to make, so ``ungranted_ids`` stays empty and only ``access_hint``\ncomes back.\n\nA ``reason`` of ``not_accessible_or_not_found`` is a file this app cannot read: one not\ngranted to it yet, one that does not exist, or one the connected account itself cannot\nopen — indistinguishable here. Empty ``ungranted_ids`` means no grant\nstep exists, so treat those ids as not found rather than asking the user to grant them.\n``invalid_reference`` is an input that is not a Drive id or link at all; ask the user to\nre-check it. ``error`` is a transient server-side failure (a timeout or 5xx) that no\ngrant can fix; the same inputs may be retried later.",
       "parameters": [
         {
           "name": "files",
@@ -58,7 +58,7 @@
       ],
       "output": {
         "type": "json",
-        "description": "Per-id accessibility (`files`), an `all_accessible` flag, the `connected_account_email` (the Google account this app is connected through), and a `grant` block — empty when nothing needs granting, otherwise listing the ungranted ids with one consolidated picker URL covering them all."
+        "description": "Per-id accessibility (`files`), an `all_accessible` flag, the `connected_account_email` (the Google account this app is connected through), and a `grant` block. `grant` lists the ungranted ids with one consolidated picker URL when a per-file grant can help; where this app already reaches every file the account can open there is none to make, so `ungranted_ids` stays empty and only an `access_hint` comes back."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -101,7 +101,7 @@
     {
       "name": "CreateFolder",
       "qualifiedName": "GoogleDrive.CreateFolder",
-      "fullyQualifiedName": "GoogleDrive.CreateFolder@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.CreateFolder@7.1.0",
       "description": "Create a new folder in Google Drive.\n\nBy default, parent folder paths are resolved in My Drive. For shared drives, use folder IDs\nor provide shared_drive_id.",
       "parameters": [
         {
@@ -194,7 +194,7 @@
     {
       "name": "DownloadFile",
       "qualifiedName": "GoogleDrive.DownloadFile",
-      "fullyQualifiedName": "GoogleDrive.DownloadFile@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.DownloadFile@7.1.0",
       "description": "Download a blob file (non-workspace file) from Google Drive as base64 encoded content.\n\nFor small files (under ~5MB raw), returns the file content directly in the response as base64.\nFor large files, returns metadata with requires_chunked_download=True - use download_file_chunk\nto retrieve the file in parts.\n\nBy default, paths are resolved in My Drive. For shared drives, use file IDs or provide\nshared_drive_id.",
       "parameters": [
         {
@@ -274,7 +274,7 @@
     {
       "name": "DownloadFileChunk",
       "qualifiedName": "GoogleDrive.DownloadFileChunk",
-      "fullyQualifiedName": "GoogleDrive.DownloadFileChunk@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.DownloadFileChunk@7.1.0",
       "description": "Download a specific byte range of a file from Google Drive.\n\nUse this for large files that require chunked download (when download_file returns\nrequires_chunked_download=True). Call repeatedly with increasing start_byte values\nto retrieve the complete file.\n\nReturns the chunk content as base64, along with progress information including\nwhether this is the final chunk.",
       "parameters": [
         {
@@ -380,8 +380,8 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleDrive.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleDrive.GenerateGoogleFilePickerUrl@7.0.0",
-      "description": "Generate a URL where the user can grant this app access to specific Drive files.\n\nOpens Google's first-party Drive picker. The user selects which files to share\nwith this application — it is not a sign-in or credential prompt. By default the picker\nshows files of all types; pass ``file_types`` to restrict it to specific types.\n\nUse this when a prior tool reported that a file was not found or access was denied,\nand the user expects the file to exist. After the user completes the picker flow,\nretry the prior tool.",
+      "fullyQualifiedName": "GoogleDrive.GenerateGoogleFilePickerUrl@7.1.0",
+      "description": "Generate a URL where the user can grant this app access to specific Drive files.\n\nCheck `url` first. An empty `url` means this app already reaches every file the\nconnected account can open, so there is no per-file grant to request: this tool cannot\nchange any outcome, and a file that could not be read is one the account itself cannot\nopen. Do not retry it.\n\nOtherwise the URL opens Google's first-party Drive picker, where the user selects which\nfiles to share with this application — it is not a sign-in or credential prompt. By\ndefault the picker shows files of all types; pass ``file_types`` to restrict it to\nspecific types. Use this when a prior tool reported that a file was not found or access\nwas denied, and the user expects the file to exist. After the user completes the picker\nflow, retry the prior tool.",
       "parameters": [
         {
           "name": "file_types",
@@ -456,7 +456,7 @@
     {
       "name": "GetFileTreeStructure",
       "qualifiedName": "GoogleDrive.GetFileTreeStructure",
-      "fullyQualifiedName": "GoogleDrive.GetFileTreeStructure@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.GetFileTreeStructure@7.1.0",
       "description": "Get the file/folder tree structure of the user's entire Google Drive.\nVery inefficient for large drives. Use with caution.",
       "parameters": [
         {
@@ -602,7 +602,7 @@
     {
       "name": "ListFilePermissions",
       "qualifiedName": "GoogleDrive.ListFilePermissions",
-      "fullyQualifiedName": "GoogleDrive.ListFilePermissions@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.ListFilePermissions@7.1.0",
       "description": "List permissions on a Google Drive file or folder.\n\nReturns the individual people (and groups) with access and the current General access\n(link sharing) state. `general_access` is computed across the ENTIRE file regardless of\nfiltering -- so \"is this doc public?\" is always answered authoritatively.\n\nWhen `roles` is provided, `people` and `total_people` reflect only collaborators whose\nrole matches the filter. Truncated collaborators beyond `limit` are not returned;\n`has_more` indicates whether truncation occurred.",
       "parameters": [
         {
@@ -717,7 +717,7 @@
     {
       "name": "MoveFile",
       "qualifiedName": "GoogleDrive.MoveFile",
-      "fullyQualifiedName": "GoogleDrive.MoveFile@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.MoveFile@7.1.0",
       "description": "Move a file or folder to a different folder within the same Google Drive.\n\nCan move to a folder (keeping name), or move and rename in one operation. By default, paths\nare resolved in My Drive. For shared drives, use file IDs or provide shared_drive_id.",
       "parameters": [
         {
@@ -823,7 +823,7 @@
     {
       "name": "RemoveAllCollaborators",
       "qualifiedName": "GoogleDrive.RemoveAllCollaborators",
-      "fullyQualifiedName": "GoogleDrive.RemoveAllCollaborators@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.RemoveAllCollaborators@7.1.0",
       "description": "Remove all user collaborators (and optionally groups) from a Google Drive file.\n\nThe file owner and the calling user are always preserved. Groups are preserved by default\nbecause the Drive API cannot verify group membership -- pass include_groups=True to opt in.\nInherited shared-drive permissions are never removable from the file level and are skipped.\n\nUse except_people to preserve additional people or groups by email or name. Ambiguous or\nunmatched except_people entries raise an error to avoid accidentally removing someone the\ncaller meant to keep.",
       "parameters": [
         {
@@ -933,7 +933,7 @@
     {
       "name": "RenameFile",
       "qualifiedName": "GoogleDrive.RenameFile",
-      "fullyQualifiedName": "GoogleDrive.RenameFile@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.RenameFile@7.1.0",
       "description": "Rename a file or folder in Google Drive.\n\nBy default, paths are resolved in My Drive. For files in shared drives, either use the file ID\ndirectly or provide the shared_drive_id parameter.",
       "parameters": [
         {
@@ -1026,7 +1026,7 @@
     {
       "name": "RevokeFileAccess",
       "qualifiedName": "GoogleDrive.RevokeFileAccess",
-      "fullyQualifiedName": "GoogleDrive.RevokeFileAccess@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.RevokeFileAccess@7.1.0",
       "description": "Revoke access for specific people or groups on a Google Drive file.\n\nIdentifies matches by email (exact, case-insensitive) or display name. When an input\nmatches multiple people, the clear matches are still revoked and the ambiguous input is\nsurfaced in the `ambiguous` response field with candidate details so the agent can\nre-prompt the user for just the uncertain ones. Inputs that don't match any collaborator\nare returned in `not_found`. Pending-owner matches (mid-ownership-transfer) are skipped\nand surfaced in `skipped_pending_owner` so the clean revokes in the batch still land.\nOwner permissions cannot be revoked -- transfer ownership first.\n\nWhen a grantee has both a direct and an inherited permission (e.g., shared-drive member\nalso granted directly on the file), revoking the direct row leaves the inherited access\nintact. The inherited row is surfaced in `skipped_inherited` so callers don't assume the\ngrantee is fully removed -- inherited access must be adjusted at the shared drive level.",
       "parameters": [
         {
@@ -1124,7 +1124,7 @@
     {
       "name": "SearchDrive",
       "qualifiedName": "GoogleDrive.SearchDrive",
-      "fullyQualifiedName": "GoogleDrive.SearchDrive@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.SearchDrive@7.1.0",
       "description": "Search the user's entire Google Drive, including files they created or\nreceived directly in Drive — not only files created through this app.\n\nReads across the user's whole Drive, so it requires broad read access to\ntheir files. The provided 'query' should contain only the search terms; the\ntool builds the full Drive query for you, matching file names and contents.",
       "parameters": [
         {
@@ -1307,7 +1307,7 @@
     {
       "name": "SearchFiles",
       "qualifiedName": "GoogleDrive.SearchFiles",
-      "fullyQualifiedName": "GoogleDrive.SearchFiles@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.SearchFiles@7.1.0",
       "description": "Search for files in Google Drive.\n\nThe provided 'query' should only contain the search terms.\nThe tool will construct the full search query for you.",
       "parameters": [
         {
@@ -1510,7 +1510,7 @@
     {
       "name": "SetGeneralAccess",
       "qualifiedName": "GoogleDrive.SetGeneralAccess",
-      "fullyQualifiedName": "GoogleDrive.SetGeneralAccess@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.SetGeneralAccess@7.1.0",
       "description": "Change the 'General access' (link sharing) setting on a Google Drive file.\n\nIdempotent: calling with the same state as the current configuration is a no-op. When access\nis 'domain', the link is scoped to the caller's email domain -- NOT the file owner's domain.\nFor cross-org collaboration (e.g., editing a file owned by another organization), confirm\nwith the user which domain they intend before calling. Google will reject domain sharing\nfor personal accounts (gmail.com, outlook.com, etc.) -- the tool translates that rejection\ninto a friendly error.\n\nThe response's `access` and `role` fields report the EFFECTIVE state after the transition,\nnot the requested state. For files on shared drives, inherited link permissions cannot be\nchanged from the file level -- if the request would have required removing an inherited\npermission, the effective state will reflect the inherited permission that remained. When\n`skipped_inherited` is non-empty, inspect it to understand why effective state may differ\nfrom what was requested.",
       "parameters": [
         {
@@ -1637,7 +1637,7 @@
     {
       "name": "ShareFile",
       "qualifiedName": "GoogleDrive.ShareFile",
-      "fullyQualifiedName": "GoogleDrive.ShareFile@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.ShareFile@7.1.0",
       "description": "Share a file or folder in Google Drive with specific people by granting them permissions.\n\nIf a user already has permission on the file, their role will be updated to the new role.\nBy default, paths are resolved in My Drive. For shared drives, use file IDs or provide\nshared_drive_id.",
       "parameters": [
         {
@@ -1778,7 +1778,7 @@
     {
       "name": "UploadFile",
       "qualifiedName": "GoogleDrive.UploadFile",
-      "fullyQualifiedName": "GoogleDrive.UploadFile@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.UploadFile@7.1.0",
       "description": "Upload a file to Google Drive from a URL.\n\nFetches the file content from the provided URL and uploads it to Google Drive.\nSupports files of any size - uses resumable upload internally for large files.\n\nCANNOT upload Google Workspace files (Google Docs, Sheets, Slides)\nCANNOT upload files larger than 25MB",
       "parameters": [
         {
@@ -1909,7 +1909,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleDrive.WhoAmI",
-      "fullyQualifiedName": "GoogleDrive.WhoAmI@7.0.0",
+      "fullyQualifiedName": "GoogleDrive.WhoAmI@7.1.0",
       "description": "Get comprehensive user profile and Google Drive environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Drive storage information, the shared\ndrives (and their IDs) the user has access to, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -1959,6 +1959,7 @@
     "import ScopePicker from \"@/app/_components/scope-picker\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-08-06T11:47:09.072Z",
-  "summary": "The Google Drive toolkit lets agents read, organize, share, and manage files in a user's Google Drive (including Shared Drives) via Arcade. It covers the full file lifecycle — discovery, access control, upload/download, and folder management.\n\n## Capabilities\n\n- **File discovery & search** — search across all of Drive (names + content), retrieve folder/file trees, resolve bare IDs or full Google Drive/Workspace URLs, and batch-check accessibility before attempting reads.\n- **File & folder management** — create folders, move/rename files, upload files from URLs (up to 25 MB), and download blob files directly or in byte-range chunks for large files.\n- **Access control & sharing** — share files with specific people, revoke individual or all collaborators, set general/link-sharing access (restricted, domain, anyone), list all permissions with role filtering, and generate a first-party Google Drive picker URL when files aren't yet granted to the app.\n- **Account & environment info** — retrieve the authenticated user's profile, email, storage quota, and the IDs of all Shared Drives they can access.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 using the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup instructions, required scopes, and configuration details.\n\n## Secrets\n\n`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL` — A flag/URL secret that enables the inline Google Drive file picker feature. When set, tools such as `CheckFileAccess` and `GenerateGoogleFilePickerUrl` can return a picker URL directly in their responses, allowing users to grant file access without a separate redirect flow. To obtain or configure this value, you set it in your Arcade environment as a secret — it is not issued by Google but rather configured in your Arcade deployment to point to (or enable) the inline picker endpoint your app exposes. Refer to the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-secrets/create-tool-secrets) for instructions on creating and managing tool secrets, and use the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets) to store the value."
+  "curationSourceHash": "dd8b363d0c5b211c25a2d7aca421340a81cbdc1eebee6d6743d73838563477a4",
+  "generatedAt": "2026-08-13T11:19:44.497Z",
+  "summary": "The Google Drive toolkit lets Arcade-powered agents read, write, organize, and share files across a user's entire Google Drive (including Shared Drives) via Google's APIs.\n\n## Capabilities\n\n- **File access & discovery:** Batch pre-flight access checks, full-drive and targeted search (by name and content), file-tree enumeration, and user/environment profile lookup.\n- **File I/O:** Download blob files directly or in byte-range chunks for large files; upload files from a URL (up to 25 MB, non-Workspace types).\n- **Organization:** Create folders, move, rename, and resolve paths in My Drive or Shared Drives.\n- **Permissions & sharing:** Share with individuals, revoke access for specific or all collaborators, set general/link-sharing access (public, domain, restricted), and list current permissions with role filtering.\n- **Picker integration:** Generate a Google-native file picker URL so users can grant per-file access to the app; batch pre-flight checks surface ungranted file IDs to minimize picker round-trips.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details, required scopes, and configuration steps.\n\n## Secrets\n\n`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL` — A token or API key that enables the inline Google Drive file picker feature. When present and valid, `CheckFileAccess` and `GenerateGoogleFilePickerUrl` will include a ready-to-use picker URL in their responses, allowing users to grant per-file access without a separate redirect flow. When absent, picker URL generation is disabled and only `ungranted_ids` are returned.\n\nThis secret is provisioned through Arcade's own configuration rather than a third-party provider dashboard. To create or retrieve it, visit the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets) and add the secret under your Arcade account.\n\nFor general guidance on adding secrets to tools, see the [Arcade tool secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
 }

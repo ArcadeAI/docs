@@ -24,7 +24,7 @@ const ToolFooter: React.FC<ToolFooterProps> = ({ pipPackageName }) => (
         description={
           "Arcade tools can be self-hosted on your own infrastructure.  Learn more about self-hosting."
         }
-        href="/guides/deployment-hosting"
+        href="/operate/deploy"
         icon={Puzzle}
         title="Self Host Arcade tools"
       />

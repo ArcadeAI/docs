@@ -10,6 +10,7 @@ import {
   computeAllScopes,
   DataMerger,
   determineAuthType,
+  getCustomSectionsSourceHash,
   getProviderId,
   groupToolsByToolkit,
   mergeToolkit,
@@ -425,6 +426,9 @@ describe("mergeToolkit", () => {
     expect(result.toolkit.auth?.allScopes).toContain("scope1");
     expect(result.toolkit.auth?.allScopes).toContain("scope2");
     expect(result.toolkit.documentationChunks).toHaveLength(1);
+    expect(result.toolkit.curationSourceHash).toBe(
+      getCustomSectionsSourceHash(customSections)
+    );
     expect(result.warnings).toHaveLength(0);
   });
 
@@ -693,7 +697,7 @@ describe("mergeToolkit", () => {
       createStubGenerator()
     );
 
-    // Run again with empty custom sections - should preserve previous
+    // No curation file for this toolkit (null source) — carry forward.
     const result = await mergeToolkit("TestKit", tools, null, null, undefined, {
       previousToolkit: previousResult.toolkit,
     });
@@ -704,6 +708,42 @@ describe("mergeToolkit", () => {
     );
     expect(result.toolkit.customImports).toHaveLength(1);
     expect(result.toolkit.subPages).toHaveLength(1);
+  });
+
+  it("should clear toolkit-level custom sections when curation is authoritative but empty", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
+
+    const previousResult = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      createCustomSections({
+        documentationChunks: [
+          {
+            type: "warning",
+            location: "header",
+            position: "after",
+            content: "Important warning!",
+          },
+        ],
+        customImports: ['import CustomComponent from "@/components/custom";'],
+        subPages: ["environment-variables"],
+      }),
+      createStubGenerator()
+    );
+
+    const result = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      createCustomSections(),
+      undefined,
+      { previousToolkit: previousResult.toolkit }
+    );
+
+    expect(result.toolkit.documentationChunks).toHaveLength(0);
+    expect(result.toolkit.customImports).toHaveLength(0);
+    expect(result.toolkit.subPages).toHaveLength(0);
   });
 
   it("should use source custom sections over previous when source has content", async () => {
@@ -927,6 +967,31 @@ describe("mergeToolkit resolveProviderId fallback", () => {
 });
 
 describe("mergeToolkit overview chunk handling", () => {
+  it("rejects curation that targets a tool outside the toolkit", async () => {
+    await expect(
+      mergeToolkit(
+        "TestKit",
+        [createTool()],
+        createMetadata(),
+        createCustomSections({
+          toolChunks: {
+            MissingTool: [
+              {
+                type: "markdown",
+                location: "description",
+                position: "after",
+                content: "This target is stale.",
+              },
+            ],
+          },
+        }),
+        undefined
+      )
+    ).rejects.toThrow(
+      "Curation for TestKit targets unknown tool(s): MissingTool"
+    );
+  });
+
   it("keeps toolkit-level overview chunks from source custom sections", async () => {
     const result = await mergeToolkit(
       "TestKit",
@@ -1513,6 +1578,59 @@ describe("DataMerger", () => {
       ).toBe(true);
     });
 
+    it("warns without rewriting an authoritative curation chunk", async () => {
+      const currentTool = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        secrets: [],
+      });
+      const previous = await mergeToolkit(
+        "Github",
+        [createTool({ ...currentTool, secrets: ["OLD_SECRET"] })],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      const cleanupSpy = vi.fn(async () => "Rewritten content");
+      const merger = new DataMerger({
+        toolkitDataSource: createCombinedToolkitDataSource({
+          toolSource: new InMemoryToolDataSource([currentTool]),
+          metadataSource: new InMemoryMetadataSource([githubMetadata]),
+        }),
+        customSectionsSource: new InMemoryCustomSectionsSource({
+          Github: createCustomSections({
+            documentationChunks: [
+              {
+                type: "warning",
+                location: "description",
+                position: "after",
+                content: "Source still mentions OLD_SECRET.",
+              },
+            ],
+          }),
+        }),
+        toolExampleGenerator: createStubGenerator(),
+        secretEditGenerator: {
+          cleanupStaleReferences: cleanupSpy,
+          fillCoverageGaps: vi.fn(async ({ content }) => content),
+        },
+        previousToolkits: new Map([["github", previous.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(cleanupSpy).not.toHaveBeenCalled();
+      expect(result.toolkit.documentationChunks[0]?.content).toBe(
+        "Source still mentions OLD_SECRET."
+      );
+      expect(
+        result.warnings.some((warning) =>
+          warning.includes("Stale secret reference")
+        )
+      ).toBe(true);
+    });
+
     it("passes the post-cleanup summary to the coverage editor, not the original", async () => {
       // Ordering guarantee: applyStaleRefCleanup runs before the coverage
       // scan is re-computed. We prove this by making cleanup mutate a
@@ -1905,10 +2023,7 @@ describe("DataMerger", () => {
     });
   });
 
-  describe("error handling preserves previous custom sections", () => {
-    // buildMergeErrorResult is invoked by mergeToolkitEntry (called from
-    // mergeAllToolkits). We trigger it by making the customSectionsSource throw,
-    // which is caught by mergeToolkitEntry's try/catch.
+  describe("curation configuration errors", () => {
     const makeFailingCustomSectionsSource = (): ICustomSectionsSource => ({
       getCustomSections: async () => {
         throw new Error("Custom sections source unavailable");
@@ -1918,7 +2033,7 @@ describe("DataMerger", () => {
       },
     });
 
-    it("preserves documentationChunks and customImports from previous toolkit when merge throws", async () => {
+    it("fails before recovery instead of preserving stale prose", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),
         metadataSource: new InMemoryMetadataSource([githubMetadata]),
@@ -1942,62 +2057,16 @@ describe("DataMerger", () => {
         }),
         createStubGenerator()
       );
-      const completedToolkitIds: string[] = [];
-
       const merger = new DataMerger({
         toolkitDataSource,
         customSectionsSource: makeFailingCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
         previousToolkits: new Map([["github", previousResult.toolkit]]),
-        onToolkitComplete: async (result) => {
-          completedToolkitIds.push(result.toolkit.id);
-        },
       });
 
-      const results = await merger.mergeAllToolkits();
-      const result = results[0];
-
-      expect(result?.error).toBe("Custom sections source unavailable");
-      expect(result?.toolkit).toEqual(previousResult.toolkit);
-      expect(result?.toolkit.documentationChunks).toHaveLength(1);
-      expect(result?.toolkit.documentationChunks[0]?.content).toBe(
-        "Critical: GitHub Apps only."
-      );
-      expect(result?.toolkit.customImports).toHaveLength(1);
-      expect(result?.toolkit.subPages).toEqual(["setup-guide"]);
-      expect(result?.warnings[0]).toContain(
+      await expect(merger.mergeAllToolkits()).rejects.toThrow(
         "Custom sections source unavailable"
       );
-      expect(completedToolkitIds).toEqual(["Github"]);
-    });
-
-    it("returns empty custom sections in error result when no previous toolkit exists", async () => {
-      const toolkitDataSource = createCombinedToolkitDataSource({
-        toolSource: new InMemoryToolDataSource([githubTool1]),
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
-      });
-      const completedToolkitIds: string[] = [];
-
-      const merger = new DataMerger({
-        toolkitDataSource,
-        customSectionsSource: makeFailingCustomSectionsSource(),
-        toolExampleGenerator: createStubGenerator(),
-        onToolkitComplete: async (result) => {
-          completedToolkitIds.push(result.toolkit.id);
-        },
-      });
-
-      const results = await merger.mergeAllToolkits();
-      const result = results[0];
-
-      expect(result?.error).toBe("Custom sections source unavailable");
-      expect(result?.toolkit.documentationChunks).toHaveLength(0);
-      expect(result?.toolkit.customImports).toHaveLength(0);
-      expect(result?.toolkit.subPages).toHaveLength(0);
-      expect(result?.warnings[0]).toContain(
-        "Custom sections source unavailable"
-      );
-      expect(completedToolkitIds).toEqual([]);
     });
   });
 
@@ -2101,6 +2170,147 @@ describe("DataMerger", () => {
       expect(result?.recovery).toBe("preserved");
       expect(result?.toolkit).toEqual(previous.toolkit);
       expect(result?.error).toContain("missing design-system metadata");
+    });
+
+    it("overlays authoritative empty curation on preserved prior output", async () => {
+      const previous = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections({
+          documentationChunks: [
+            {
+              type: "warning",
+              location: "description",
+              position: "after",
+              content: "Delete me",
+            },
+          ],
+          customImports: ["import Old from 'old';"],
+          subPages: ["old-page"],
+          toolChunks: {
+            CreateIssue: [
+              {
+                type: "info",
+                location: "parameters",
+                position: "after",
+                content: "Delete this too",
+              },
+            ],
+          },
+        }),
+        createStubGenerator()
+      );
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new InMemoryCustomSectionsSource({
+          Github: createCustomSections(),
+        }),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
+      });
+
+      const [result] = await merger.mergeAllToolkits();
+
+      expect(result?.recovery).toBe("preserved");
+      expect(result?.toolkit.documentationChunks).toEqual([]);
+      expect(result?.toolkit.customImports).toEqual([]);
+      expect(result?.toolkit.subPages).toEqual([]);
+      expect(result?.toolkit.tools[0]?.documentationChunks).toEqual([]);
+      expect(result?.toolkit.tools[0]?.codeExample).toEqual(
+        previous.toolkit.tools[0]?.codeExample
+      );
+    });
+
+    it("preserves prior output when curation targets a tool absent from it", async () => {
+      const previous = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections(),
+        createStubGenerator()
+      );
+      const curation = createCustomSections({
+        toolChunks: {
+          SetStarred: [
+            {
+              type: "info",
+              location: "parameters",
+              position: "after",
+              content: "Applies once the prior artifact catches up.",
+            },
+          ],
+        },
+      });
+      // The API exposes SetStarred, so the curation is valid; only the
+      // preserved artifact predates it.
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new InMemoryCustomSectionsSource({
+          Github: curation,
+        }),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
+      });
+
+      const [result] = await merger.mergeAllToolkits();
+
+      expect(result?.recovery).toBe("preserved");
+      expect(result?.toolkit.tools).toHaveLength(1);
+      expect(result?.toolkit.curationSourceHash).toBe(
+        getCustomSectionsSourceHash(curation)
+      );
+    });
+
+    it("fails the run when curation targets a tool the API does not expose, even with preserveLastKnownGood", async () => {
+      // A mistyped `tool:` target is an authoring mistake, not an upstream
+      // outage. Recovering from it would leave the nightly job green while
+      // the toolkit kept stale data and lost the chunk.
+      const previous = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections(),
+        createStubGenerator()
+      );
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new InMemoryCustomSectionsSource({
+          Github: createCustomSections({
+            toolChunks: {
+              CreateIsue: [
+                {
+                  type: "info",
+                  location: "parameters",
+                  position: "after",
+                  content: "Typo in the target tool name.",
+                },
+              ],
+            },
+          }),
+        }),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
+      });
+
+      await expect(merger.mergeAllToolkits()).rejects.toThrow(
+        "Curation for Github targets unknown tool(s): CreateIsue"
+      );
     });
 
     it("preserves prior output for provider-mode generation when metadata is missing", async () => {
@@ -2300,7 +2510,7 @@ describe("DataMerger", () => {
       });
 
       await expect(merger.mergeAllToolkits()).rejects.toThrow(
-        "Failed to process Github: Custom sections source unavailable"
+        "Custom sections source unavailable"
       );
     });
 

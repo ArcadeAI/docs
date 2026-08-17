@@ -5,6 +5,7 @@
  * into the final MergedToolkit format.
  */
 
+import { createHash } from "node:crypto";
 import type { ISecretEditGenerator } from "../llm/secret-edit-generator";
 import {
   isApiSuffixedToolkitId,
@@ -146,7 +147,7 @@ export const assertRequireCompleteMetadata = (
 };
 
 interface MergeToolkitOptions {
-  previousToolkit?: MergedToolkit;
+  previousToolkit?: MergedToolkit | undefined;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
@@ -216,6 +217,11 @@ export const stableStringify = (value: unknown): string => {
 
   return JSON.stringify(value);
 };
+
+export const getCustomSectionsSourceHash = (
+  customSections: CustomSections
+): string =>
+  createHash("sha256").update(stableStringify(customSections)).digest("hex");
 
 export type ToolSignatureInput = {
   name: string;
@@ -539,15 +545,22 @@ const transformMetadata = (
 const getToolDocumentationChunks = (
   toolName: string,
   toolChunks: { [key: string]: DocumentationChunk[] },
-  previousTool?: MergedTool
+  previousTool: MergedTool | undefined,
+  customSectionsAuthoritative: boolean
 ): DocumentationChunk[] => {
-  const fromSource = toolChunks[toolName] ?? [];
+  const fromSource = toolChunks[toolName];
+
+  if (customSectionsAuthoritative) {
+    return fromSource ?? [];
+  }
+
   const fromPrevious = previousTool?.documentationChunks ?? [];
+  const sourceItems = fromSource ?? [];
 
   // If source has chunks, use source (it's authoritative)
   // If source is empty but previous has chunks, preserve previous
-  if (fromSource.length > 0) {
-    return fromSource;
+  if (sourceItems.length > 0) {
+    return sourceItems;
   }
   return fromPrevious;
 };
@@ -648,8 +661,13 @@ const hasToolkitOverviewChunk = (toolkit: MergedToolkit): boolean =>
 
 const mergeCustomSectionsArrays = <T>(
   fromSource: readonly T[] | undefined,
-  fromPrevious: readonly T[] | undefined
+  fromPrevious: readonly T[] | undefined,
+  authoritative: boolean
 ): T[] => {
+  if (authoritative) {
+    return [...(fromSource ?? [])];
+  }
+
   const sourceItems = fromSource ?? [];
   const previousItems = fromPrevious ?? [];
 
@@ -727,6 +745,7 @@ const buildMergedTools = async (options: {
   failedTools: FailedTool[];
   previousToolByQualifiedName: ReadonlyMap<string, MergedTool>;
   llmConcurrency: number;
+  customSectionsAuthoritative: boolean;
 }): Promise<MergedTool[]> =>
   mapWithConcurrency(
     options.tools,
@@ -737,7 +756,8 @@ const buildMergedTools = async (options: {
         options.toolExampleGenerator,
         options.warnings,
         options.failedTools,
-        options.previousToolByQualifiedName.get(tool.qualifiedName)
+        options.previousToolByQualifiedName.get(tool.qualifiedName),
+        options.customSectionsAuthoritative
       ),
     options.llmConcurrency
   );
@@ -752,6 +772,7 @@ const buildMergedToolkit = (options: {
   customSections: CustomSections | null;
   previousToolkit: MergedToolkit | undefined;
 }): MergedToolkit => {
+  const customSectionsAuthoritative = options.customSections !== null;
   const mergedMetadata = applyToolkitTypeOverrides(
     options.toolkitId,
     options.metadata
@@ -773,17 +794,73 @@ const buildMergedToolkit = (options: {
     tools: options.tools,
     documentationChunks: mergeCustomSectionsArrays(
       options.customSections?.documentationChunks,
-      options.previousToolkit?.documentationChunks
+      options.previousToolkit?.documentationChunks,
+      customSectionsAuthoritative
     ),
     customImports: mergeCustomSectionsArrays(
       options.customSections?.customImports,
-      options.previousToolkit?.customImports
+      options.previousToolkit?.customImports,
+      customSectionsAuthoritative
     ),
     subPages: mergeCustomSectionsArrays(
       options.customSections?.subPages,
-      options.previousToolkit?.subPages
+      options.previousToolkit?.subPages,
+      customSectionsAuthoritative
     ),
+    ...(options.customSections
+      ? {
+          curationSourceHash: getCustomSectionsSourceHash(
+            options.customSections
+          ),
+        }
+      : {}),
     generatedAt: new Date().toISOString(),
+  };
+};
+
+const assertKnownToolChunkTargets = (
+  toolkitId: string,
+  tools: readonly Pick<MergedTool, "name">[],
+  customSections: CustomSections | null
+): void => {
+  if (customSections === null) {
+    return;
+  }
+
+  const knownToolNames = new Set(tools.map((tool) => tool.name));
+  const unknownToolNames = Object.keys(customSections.toolChunks)
+    .filter((toolName) => !knownToolNames.has(toolName))
+    .sort();
+  if (unknownToolNames.length > 0) {
+    throw new Error(
+      `Curation for ${toolkitId} targets unknown tool(s): ${unknownToolNames.join(", ")}`
+    );
+  }
+};
+
+/** Overlay current authored curation without disturbing generated enrichment. */
+export const applyCustomSectionsToToolkit = (
+  toolkit: MergedToolkit,
+  customSections: CustomSections | null,
+  options: { ignoreUnknownToolChunks?: boolean } = {}
+): MergedToolkit => {
+  if (customSections === null) {
+    return toolkit;
+  }
+  if (!options.ignoreUnknownToolChunks) {
+    assertKnownToolChunkTargets(toolkit.id, toolkit.tools, customSections);
+  }
+
+  return {
+    ...toolkit,
+    documentationChunks: customSections.documentationChunks,
+    customImports: customSections.customImports,
+    subPages: customSections.subPages,
+    curationSourceHash: getCustomSectionsSourceHash(customSections),
+    tools: toolkit.tools.map((tool) => ({
+      ...tool,
+      documentationChunks: customSections.toolChunks[tool.name] ?? [],
+    })),
   };
 };
 
@@ -796,12 +873,14 @@ const transformTool = async (
   toolExampleGenerator: ToolExampleGenerator | undefined,
   warnings: string[],
   failedTools: FailedTool[],
-  previousTool?: MergedTool
+  previousTool: MergedTool | undefined,
+  customSectionsAuthoritative: boolean
 ): Promise<MergedTool> => {
   const documentationChunks = getToolDocumentationChunks(
     tool.name,
     toolChunks,
-    previousTool
+    previousTool,
+    customSectionsAuthoritative
   );
 
   if (previousTool && shouldReuseExample(tool, previousTool)) {
@@ -900,6 +979,8 @@ export const mergeToolkit = async (
   const warnings: string[] = [];
   const failedTools: FailedTool[] = [];
 
+  assertKnownToolChunkTargets(toolkitId, tools, customSections);
+
   appendMergeWarnings(warnings, toolkitId, tools, metadata);
 
   const version = getToolkitVersion(tools);
@@ -941,6 +1022,7 @@ export const mergeToolkit = async (
     auth = { ...auth, providerId: resolvedProviderId };
   }
 
+  const customSectionsAuthoritative = customSections !== null;
   const toolChunks = (customSections?.toolChunks ?? {}) as {
     [key: string]: DocumentationChunk[];
   };
@@ -956,6 +1038,7 @@ export const mergeToolkit = async (
     failedTools,
     previousToolByQualifiedName,
     llmConcurrency,
+    customSectionsAuthoritative,
   });
 
   const toolkit = buildMergedToolkit({
@@ -1056,11 +1139,16 @@ export class DataMerger {
   private buildMergeErrorResult(
     toolkitId: string,
     message: string,
-    previousToolkit?: MergedToolkit
+    previousToolkit: MergedToolkit | undefined,
+    customSections: CustomSections | null
   ): MergeResult {
     if (previousToolkit) {
       return {
-        toolkit: previousToolkit,
+        toolkit: applyCustomSectionsToToolkit(previousToolkit, customSections, {
+          // A previous artifact can legitimately predate a newly curated tool.
+          // Preserve it while applying the curation that still has a target.
+          ignoreUnknownToolChunks: true,
+        }),
         warnings: [`Error processing toolkit: ${message}`],
         failedTools: [],
         error: message,
@@ -1107,7 +1195,8 @@ export class DataMerger {
 
   private async recoverMissingMetadata(
     toolkitId: string,
-    toolkitData: ToolkitData
+    toolkitData: ToolkitData,
+    customSections: CustomSections | null
   ): Promise<MergeResult | undefined> {
     if (!this.preserveLastKnownGood || toolkitData.metadata !== null) {
       return;
@@ -1117,7 +1206,8 @@ export class DataMerger {
     const result = this.buildMergeErrorResult(
       toolkitId,
       "missing design-system metadata",
-      previousToolkit
+      previousToolkit,
+      customSections
     );
     if (this.onToolkitComplete && previousToolkit) {
       await this.onToolkitComplete(result);
@@ -1129,17 +1219,29 @@ export class DataMerger {
     toolkitId: string,
     toolkitData: ToolkitData
   ): Promise<MergeResult> {
+    // Curation is configuration. Parse it outside the recoverable merge path
+    // so invalid source cannot silently preserve stale generated prose.
+    const customSections =
+      await this.customSectionsSource.getCustomSections(toolkitId);
+    // A `tool:` target that matches no tool is an authoring mistake, so it
+    // belongs outside the recoverable path below: there it would read as an
+    // upstream failure, and the run would stay green while that toolkit
+    // silently kept stale data and dropped the mistargeted chunk. A toolkit
+    // the API returned no tools for is the outage that recovery exists for,
+    // and it says nothing about whether the curation is correct.
+    if (toolkitData.tools.length > 0) {
+      assertKnownToolChunkTargets(toolkitId, toolkitData.tools, customSections);
+    }
     try {
       const recovered = await this.recoverMissingMetadata(
         toolkitId,
-        toolkitData
+        toolkitData,
+        customSections
       );
       if (recovered) {
         return recovered;
       }
 
-      const customSections =
-        await this.customSectionsSource.getCustomSections(toolkitId);
       const previousToolkit = this.getPreviousToolkit(toolkitId);
       const result = await mergeToolkit(
         toolkitId,
@@ -1156,7 +1258,11 @@ export class DataMerger {
         }
       );
       await this.maybeGenerateSummary(result, previousToolkit);
-      await this.enforceSecretCoherence(result, previousToolkit);
+      await this.enforceSecretCoherence(
+        result,
+        previousToolkit,
+        customSections !== null
+      );
 
       // Write immediately if callback provided (incremental mode)
       if (this.onToolkitComplete) {
@@ -1175,7 +1281,8 @@ export class DataMerger {
       const result = this.buildMergeErrorResult(
         toolkitId,
         message,
-        previousToolkit
+        previousToolkit,
+        customSections
       );
       if (this.onToolkitComplete && previousToolkit) {
         await this.onToolkitComplete(result);
@@ -1265,7 +1372,8 @@ export class DataMerger {
 
   private async enforceSecretCoherence(
     result: MergeResult,
-    previousToolkit?: MergedToolkit
+    previousToolkit: MergedToolkit | undefined,
+    customSectionsAuthoritative: boolean
   ): Promise<void> {
     if (this.skipSecretCoherence) {
       // --skip-secret-coherence disables the entire step: no scan, no
@@ -1289,7 +1397,11 @@ export class DataMerger {
     // re-detected against the edited summary. If cleanup accidentally
     // dropped a passage that incidentally mentioned a current secret,
     // the fresh scan notices and the editor restores it.
-    await this.applyStaleRefCleanup(result, issues);
+    await this.applyStaleRefCleanup(
+      result,
+      issues,
+      customSectionsAuthoritative
+    );
     const postCleanupIssues = detectSecretCoherenceIssues(
       result.toolkit,
       previousToolkit
@@ -1322,13 +1434,16 @@ export class DataMerger {
 
   private async applyStaleRefCleanup(
     result: MergeResult,
-    issues: SecretCoherenceIssues
+    issues: SecretCoherenceIssues,
+    customSectionsAuthoritative: boolean
   ): Promise<void> {
     const editor = this.secretEditGenerator;
     if (!editor) {
       return;
     }
-    const targets = groupStaleRefsByTarget(issues.staleReferences);
+    const targets = groupStaleRefsByTarget(issues.staleReferences).filter(
+      (target) => !customSectionsAuthoritative || target.kind === "summary"
+    );
     if (targets.length === 0) {
       return;
     }
@@ -1407,14 +1522,16 @@ export class DataMerger {
       version
     );
 
-    const recovered = await this.recoverMissingMetadata(toolkitId, toolkitData);
+    const customSections =
+      await this.customSectionsSource.getCustomSections(toolkitId);
+    const recovered = await this.recoverMissingMetadata(
+      toolkitId,
+      toolkitData,
+      customSections
+    );
     if (recovered) {
       return recovered;
     }
-
-    // Fetch custom sections
-    const customSections =
-      await this.customSectionsSource.getCustomSections(toolkitId);
 
     const previousToolkit = this.getPreviousToolkit(toolkitId);
     const result = await mergeToolkit(
@@ -1432,7 +1549,11 @@ export class DataMerger {
       }
     );
     await this.maybeGenerateSummary(result, previousToolkit);
-    await this.enforceSecretCoherence(result, previousToolkit);
+    await this.enforceSecretCoherence(
+      result,
+      previousToolkit,
+      customSections !== null
+    );
 
     return result;
   }

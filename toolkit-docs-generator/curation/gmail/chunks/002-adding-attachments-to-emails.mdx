@@ -1,0 +1,25 @@
+---
+type: markdown
+location: after_available_tools
+position: after
+header: "## Adding attachments to emails"
+priority: 10
+---
+## Adding attachments to emails
+
+The Gmail send, draft, and reply tools take an `attachments` parameter for local files. The agent emits only the file path; a client-side `preToolUse` hook swaps in the bytes before the request leaves your machine, so file contents never enter the model's context window.
+
+The first time you attach a file, your agent installs the one-time hook for you after you approve. Gmail caps total message size at 25 MB.
+
+Attachments work on hosts that support a client-side pre-tool hook. On any other host the tool returns a clear error and sends nothing.
+
+| Host | Status | Notes |
+| --- | --- | --- |
+| Cursor | Supported | App, plus Cursor cloud and background agents. |
+| Claude Code | Supported | v2.0.10+. |
+| Codex CLI | Supported | v0.131+. |
+| VS Code chat (GitHub Copilot) | Supported | 1.112+, agent mode. |
+| Claude Cowork | Documented limitation | Sandboxed to one folder; the hook cannot be installed from inside it. |
+| Claude Desktop | Documented limitation | No client-side hook layer. |
+| ChatGPT desktop | Documented limitation | No client-side hook surface. |
+| Microsoft 365 Copilot | Documented limitation | No host-side rewrite hook. |

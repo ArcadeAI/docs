@@ -1,0 +1,280 @@
+{
+  "id": "MicrosoftUsers",
+  "label": "Microsoft Users",
+  "version": "0.1.2",
+  "description": "Arcade.dev LLM tools for Microsoft Graph user profiles and organizational hierarchy",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/microsoft.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/microsoft-users",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "User.Read",
+      "User.Read.All"
+    ]
+  },
+  "tools": [
+    {
+      "name": "GetDirectReports",
+      "qualifiedName": "MicrosoftUsers.GetDirectReports",
+      "fullyQualifiedName": "MicrosoftUsers.GetDirectReports@0.1.2",
+      "description": "Get a user's direct reports from the organizational hierarchy.\n\nReturns a paginated list of users and organizational contacts who report\ndirectly to the specified user.\n\nRequires a Microsoft 365 work or school account. Not available for\npersonal Microsoft accounts (outlook.com, hotmail.com, live.com).",
+      "parameters": [
+        {
+          "name": "user_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The user's email address, UPN, or Microsoft user ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of direct reports to return per page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "Token from a previous response to get the next page of results.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of the user's direct reports with their profiles"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftUsers.GetDirectReports",
+        "parameters": {
+          "user_identifier": {
+            "value": "jane.doe@contoso.com",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJza2lwVG9rZW4iOiIrUkVJQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQT0ifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetUserManager",
+      "qualifiedName": "MicrosoftUsers.GetUserManager",
+      "fullyQualifiedName": "MicrosoftUsers.GetUserManager@0.1.2",
+      "description": "Get a user's direct manager from the organizational hierarchy.\n\nReturns the manager's profile data. If the user has no manager (e.g.,\ntop-level executives), returns a response indicating no manager was found.\n\nRequires a Microsoft 365 work or school account. Not available for\npersonal Microsoft accounts (outlook.com, hotmail.com, live.com).",
+      "parameters": [
+        {
+          "name": "user_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The user's email address, UPN, or Microsoft user ID. Use the email address from a calendar attendee or email participant.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The manager's profile including name, job title, department, and contact info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftUsers.GetUserManager",
+        "parameters": {
+          "user_identifier": {
+            "value": "jane.doe@contoso.com",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetUserProfile",
+      "qualifiedName": "MicrosoftUsers.GetUserProfile",
+      "fullyQualifiedName": "MicrosoftUsers.GetUserProfile@0.1.2",
+      "description": "Look up one or more users by email address, UPN, or user ID.\n\nAccepts a list of identifiers and automatically optimizes between single\nand batch Graph API calls. Use this to enrich calendar attendees or email\nparticipants with job titles, departments, and org data.\n\nRequires a Microsoft 365 work or school account. Not available for\npersonal Microsoft accounts (outlook.com, hotmail.com, live.com).",
+      "parameters": [
+        {
+          "name": "user_identifiers",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "One or more email addresses, user principal names (UPNs), or Microsoft user IDs to look up. Email address is the most common identifier — use it when enriching calendar attendees or email participants. Max 20 per call.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Profiles for each resolved user, plus any identifiers that could not be found"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftUsers.GetUserProfile",
+        "parameters": {
+          "user_identifiers": {
+            "value": [
+              "jane.doe@contoso.com",
+              "john.smith@fabrikam.org",
+              "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "MicrosoftUsers.WhoAmI",
+      "fullyQualifiedName": "MicrosoftUsers.WhoAmI@0.1.2",
+      "description": "Get information about the current user including name, email, job title,\ndepartment, office location, and tenant domain.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile information for the signed-in user."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftUsers.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-08-13T11:19:52.988Z",
+  "summary": "## Microsoft Users Toolkit\n\nProvides LLM tools for querying Microsoft Graph user profiles and organizational hierarchy. Enables agents to look up user details, resolve org relationships, and enrich workplace data within a Microsoft 365 tenant.\n\n## Capabilities\n\n- **Profile lookup**: Retrieve full profile data (name, email, job title, department, office location, tenant domain) for the authenticated user or one/more other users identified by email, UPN, or user ID — with automatic single vs. batch Graph API optimization.\n- **Organizational hierarchy**: Traverse reporting structures by fetching a user's direct reports (paginated) or their direct manager; gracefully handles top-level executives with no manager.\n- **Self-identification**: Dedicated tool for agents to determine who the currently authenticated user is, useful for scoping downstream actions.\n- **Microsoft 365 accounts only**: All tools require a work or school account; personal Microsoft accounts (outlook.com, hotmail.com, live.com) are not supported.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 using the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details."
+}

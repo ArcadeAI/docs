@@ -1,0 +1,109 @@
+---
+title: "Connect a Salesforce Hosted MCP Server"
+description: "Configure a Salesforce External Client App and Arcade's OAuth 2.0 settings to connect a Salesforce Hosted MCP Server"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a Salesforce Hosted MCP Server
+
+Salesforce can host an [MCP server](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/hosted-mcp-servers-overview.html) for an org, exposing tools such as SOQL queries directly from Salesforce data. This guide covers the Arcade-side setup for connecting a Salesforce Hosted MCP Server as a [remote MCP server](/operate/governance/mcp-gateways/add-remote-servers), plus the handful of Salesforce settings that most commonly trip people up.
+
+<Callout type="info">
+  This guide is about connecting to a Salesforce Hosted MCP Server. If you're
+  looking to call Salesforce APIs from your own tools instead, see the
+  [Arcade Salesforce toolkit](/resources/integrations/sales/salesforce).
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect a Salesforce Hosted MCP Server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-salesforce">Arcade account</SignupLink>
+- A Salesforce [Hosted MCP Server](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html), [activated](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/activate-mcp-servers.html)
+- A Salesforce [External Client App](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/create-external-client-app.html) for the integration
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Which Salesforce External Client App settings matter for Arcade specifically, and why
+- Configure the remote server's OAuth 2.0 settings in Arcade
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up Salesforce
+
+Follow Salesforce's own guides to [create your Hosted MCP Server](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html), [activate it](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/activate-mcp-servers.html), and [create an External Client App](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/create-external-client-app.html) (ECA) for it. A few settings on the ECA matter specifically for connecting to Arcade:
+
+- **OAuth Scopes**: include `mcp_api`. Salesforce's guide lists this scope without explaining why it's required; without it, authorization succeeds, but every tool call fails with a 401.
+- **Issue JSON Web Token (JWT)-based access tokens for named users** (under **Security**). Salesforce's guide instructs you to enable this without saying why. Without it, Salesforce issues an opaque session token instead of a JWT, and the Hosted MCP Server's endpoint only validates JWTs: every tool call fails with a bare `{"errors":[{"message":"Invalid token"}]}` 401, even though authorization otherwise looks successful.
+- **Require PKCE**: Salesforce's ECA guide doesn't mention PKCE at all, but Arcade always uses it (RFC 7636, S256) when authorizing against a remote server. Leave PKCE enabled on the ECA (it's on by default).
+- **Callback URL**: set this once you have the redirect URI Arcade generates (see [Add the redirect URI to your ECA](#add-the-redirect-uri-to-your-eca) below). You can use a placeholder now and come back to it.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://api.arcade.dev/dashboard/servers), click **Add server**, and enter a server ID and the Hosted MCP Server's URL (it looks like `https://api.salesforce.com/platform/mcp/v1/custom/YourServerName`).
+
+### Configure OAuth2 authorization
+
+Open **Advanced settings → OAuth2 authorization** and enter:
+
+- **Client ID** / **Client Secret**: your ECA's Consumer Key and Consumer Secret.
+- **Authorization URL**: the full OpenID Connect discovery URL for your org, not just the bare domain: take your org's My Domain URL (find it under Salesforce Setup → **My Domain**) and append `/.well-known/openid-configuration`. For example, `https://acme-inc.my.salesforce.com/.well-known/openid-configuration`. Arcade fetches this URL to discover the real authorization and token endpoints. Don't use the ECA's `/authorize` path or `api.salesforce.com`: neither serves that discovery document.
+
+<Callout type="info">
+  Salesforce Hosted MCP Servers don't support Dynamic Client Registration, so
+  you must supply the Client ID and Secret manually. If you leave these
+  blank, Arcade attempts Dynamic Client Registration and Salesforce rejects
+  it.
+</Callout>
+
+### Add the redirect URI to your ECA
+
+Copy the redirect URI Arcade generated and set it as the ECA's Callback URL. A new server registration gets its own unique redirect URI, so update the Callback URL again if you ever re-register the server under a new ID.
+
+### Authorize and confirm
+
+Save the server to open the authorization prompt.
+
+<Callout type="warning">
+  The scope picker on this screen lists every scope your org's My Domain
+  discovery document advertises as supported — Salesforce orgs typically
+  support dozens (`api`, `chatbot_api`, `cdp_api`, `lightning`, and so on),
+  regardless of what your ECA actually grants. **Deselect every scope except
+  the ones your ECA's Selected Scopes includes** (per [Set up
+  Salesforce](#set-up-salesforce) above — at minimum `mcp_api`, plus whichever
+  of `api`, `offline_access`, and `refresh_token` your ECA grants). Leaving an
+  extra scope checked makes the authorization request fail, not just the
+  later tool calls.
+</Callout>
+
+Complete the authorization prompt.
+
+</Steps>
+
+## Troubleshooting
+
+- **A 401 with `{"errors":[{"message":"Invalid token"}]}` and no error code**: your ECA isn't issuing JWT-based access tokens. See [Set up Salesforce](#set-up-salesforce).
+- **Authorization fails outright**: a scope was selected on the authorization prompt that your ECA doesn't actually grant. See [Authorize and confirm](#authorize-and-confirm).
+- **Authorization succeeds, but tool calls 401**: the `mcp_api` scope is missing from either the ECA's Selected Scopes or the scopes you approved during authorization.
+- **Tools list is empty or every call fails**: confirm the Hosted MCP Server is [activated](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/activate-mcp-servers.html).
+- **A setting change doesn't seem to take effect**: existing tokens don't retroactively pick up new ECA settings. In Salesforce Setup, go to the affected user's **OAuth Apps** list and revoke the existing grant, then re-authorize to get a fresh token.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).
