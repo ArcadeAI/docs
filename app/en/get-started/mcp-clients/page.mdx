@@ -1,12 +1,40 @@
 ---
 title: "Connect to MCP Clients"
-description: "Learn how to connect your MCP servers to various MCP-compatible clients and development environments"
+description: "Connect any MCP client — including a custom or unlisted client — to an Arcade MCP Gateway, and configure user authorization for your end users."
 ---
 
 import { MCPClientGrid } from "./mcp-client-grid";
 
 # Connect to MCP Clients
 
-You can connect [Arcade MCP servers](/resources/integrations) to MCP-compatible clients and development environments to unlock powerful flows for your agents.
+You can connect [Arcade MCP servers](/en/resources/integrations) to any MCP-compatible client through an [Arcade MCP Gateway](/en/operate/governance/mcp-gateways). The gateway exposes the tools you have selected at a single HTTP endpoint, and the client points at that endpoint's URL.
+
+## What you need
+
+1. An Arcade account and an [Arcade API key](/en/get-started/setup/api-keys).
+2. An [Arcade MCP Gateway](/en/operate/governance/mcp-gateways) with the tools you want to expose to the client.
+3. An MCP-compatible client. Step-by-step guides for common clients are linked below; any other client that supports remote HTTP MCP servers works against the same gateway URL.
+
+## Connect a custom or unlisted MCP client
+
+If your MCP client is not one of the clients listed below — for example, a custom in-house client, an SDK you are building against, or a third-party client Arcade has not documented individually — connect it the same way you would add any remote HTTP MCP server:
+
+- **Transport**: remote HTTP (sometimes called `http` or `streamable-http`, depending on the client).
+- **Server URL**: your Arcade MCP Gateway URL, copied from the gateway's page in the Arcade dashboard.
+- **Authentication**: pick the authentication mode when you create the gateway (see [User authorization](#user-authorization) below).
+
+There is no client-side Arcade SDK involved. Any MCP client that speaks the remote HTTP transport can talk to an Arcade gateway.
+
+## User authorization
+
+An Arcade MCP Gateway authenticates every end user before it lets the client call a tool. Pick one of these authentication modes on the gateway:
+
+- **Arcade Auth** — every end user is a member of your Arcade project. On first connect, the client redirects the user through Arcade's OAuth flow. Good for development, testing, and internal use.
+- **User Source** *(recommended for production)* — the gateway delegates sign-in to your own OIDC identity provider (Entra ID, Okta, Auth0, Clerk, Stytch, or similar). Each end user signs in with the identity they already have. See [User Sources](/en/operate/identity/user-sources).
+- **Arcade Headers** — the client passes an end-user identifier and an Arcade API key in HTTP headers. Use this when the client cannot run a browser-based OAuth flow.
+
+Once the end user is signed in, Arcade handles per-user authorization for each downstream tool (GitHub, Slack, Google Workspace, and so on). The first time a tool needs access, the user is prompted to authorize the underlying service, and Arcade stores and refreshes those tokens per user from then on. See [MCP Gateways](/en/operate/governance/mcp-gateways) for the full comparison of authentication modes and how to pick one when you create a gateway.
+
+## Client-specific guides
 
 <MCPClientGrid />
