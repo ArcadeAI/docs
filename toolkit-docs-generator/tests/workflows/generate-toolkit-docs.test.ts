@@ -70,21 +70,55 @@ test("porter workflow opts JS actions into Node 24 to unblock the 2026-06-02 dep
   );
 });
 
-test("porter workflow alerts Slack when generation fails", () => {
+test("porter workflow alerts Slack on a red run", () => {
   expect(workflowContents).toContain("needs.generate.result == 'failure'");
   expect(workflowContents).toContain("SLACK_PROJ_DOCS_WEBHOOK_URL");
   // The jq program is single-quoted, so the shell passes backslashes through
   // untouched. `\n` reaches jq as a newline escape; `\\n` would reach it as an
   // escaped backslash followed by "n" and Slack would print a literal "\n".
-  expect(workflowContents).toContain("generation failed\\n\\n*Workflow run:*");
+  expect(workflowContents).toContain('$headline + "\\n\\n*Workflow run:* <"');
   expect(workflowContents).not.toContain("\\\\n");
 });
 
-test("porter workflow warns when it preserves or omits a broken toolkit", () => {
-  expect(workflowContents).toContain("preservedToolkits");
-  expect(workflowContents).toContain("omittedToolkits");
-  expect(workflowContents).toContain("Continuing to serve previous docs");
-  expect(workflowContents).toContain("No docs are being served");
+test("porter workflow builds the preserved/omitted message in tested code", () => {
+  // The message text lives in src/alerts/docs-alert.ts, not in this YAML. A jq
+  // program embedded in a workflow is untestable and drifts from what the
+  // generator actually knows about each failure.
+  expect(workflowContents).toContain("src/cli/index.ts alert");
+  expect(workflowContents).toContain("--log-url");
+});
+
+test("porter workflow lets a failed Slack post fail the job", () => {
+  // A wrong webhook secret went unnoticed because this step swallowed its own
+  // failure. The alert nobody is watching for is the one that must be loud.
+  const slackStep = workflowContents.slice(
+    workflowContents.indexOf("Report preserved or omitted toolkits to Slack")
+  );
+  expect(slackStep).not.toContain("continue-on-error");
+});
+
+test("porter workflow only claims generation failed when generation failed", () => {
+  // Steps after generation can now fail the job. Calling that a generation
+  // failure sends someone hunting for a validation error that doesn't exist,
+  // so the alert picks its headline from whether generation itself finished.
+  expect(workflowContents).toContain("generation-succeeded:");
+  expect(workflowContents).toContain("steps.generate-docs.outputs.succeeded");
+  expect(workflowContents).toContain('echo "succeeded=true"');
+  expect(workflowContents).toContain("GENERATION_SUCCEEDED:");
+  expect(workflowContents).toContain(
+    "needs.generate.outputs.generation-succeeded"
+  );
+  expect(workflowContents).toContain('if [ "$GENERATION_SUCCEEDED" = "true" ]');
+  expect(workflowContents).toContain(
+    "Toolkit docs generated, but the workflow failed afterward"
+  );
+  expect(workflowContents).toContain("Toolkit docs generation failed");
+});
+
+test("porter workflow keeps the failure report as an artifact", () => {
+  expect(workflowContents).toContain("actions/upload-artifact");
+  expect(workflowContents).toContain("failed-tools");
+  expect(workflowContents).toContain("actions: read");
 });
 
 test("workflow dispatch keeps default full-run behavior", () => {

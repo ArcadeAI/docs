@@ -13,9 +13,11 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
+import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import ora from "ora";
 import { join, resolve } from "path";
+import { buildDocsAlert } from "../alerts/docs-alert";
 import {
   detectChanges,
   formatChangeSummary,
@@ -1830,12 +1832,21 @@ program
           0
         );
         const failedToolkits = mergeFailures.map((result) => result.toolkit.id);
-        const preservedToolkits = mergeFailures
-          .filter((result) => result.recovery === "preserved")
-          .map((result) => result.toolkit.id);
-        const omittedToolkits = mergeFailures
-          .filter((result) => result.recovery === "omitted")
-          .map((result) => result.toolkit.id);
+        // The reason travels with the toolkit id: it is what turns "MicrosoftUsers
+        // has no page" into something a reader can act on without opening the log.
+        const recoveredToolkits = mergeFailures
+          .filter((result) => result.recovery !== undefined)
+          .map((result) => ({
+            id: result.toolkit.id,
+            recovery: result.recovery as "preserved" | "omitted",
+            reason: result.error ?? "unknown error",
+          }));
+        const preservedToolkits = recoveredToolkits
+          .filter((entry) => entry.recovery === "preserved")
+          .map((entry) => entry.id);
+        const omittedToolkits = recoveredToolkits
+          .filter((entry) => entry.recovery === "omitted")
+          .map((entry) => entry.id);
         const failedTools = allResults.flatMap((result) => result.failedTools);
         const failedToolkitsFromTools = Array.from(
           new Set(failedTools.map((tool) => tool.toolkitId))
@@ -1905,8 +1916,7 @@ program
           generatedAt: new Date().toISOString(),
           toolkits: failedToolkitsFromTools,
           failedToolkits,
-          preservedToolkits,
-          omittedToolkits,
+          recoveredToolkits,
           tools: failedTools,
         });
 
@@ -3119,6 +3129,37 @@ program
       }
     }
   );
+
+program
+  .command("alert")
+  .description(
+    "Print the Slack payload for a finished run, or nothing when the run had no recoverable failures"
+  )
+  .option(
+    "--report <file>",
+    "Failed tools report to summarize",
+    buildLogPaths(getDefaultLogDir()).failedToolsPath
+  )
+  .option(
+    "--log-url <url>",
+    "Link the message should point at, ideally the job log rather than the run summary"
+  )
+  .action(async (options: { report: string; logUrl?: string }) => {
+    // Silence rather than failure when there is no report: a clean run never
+    // writes one, and CI should not need to know the difference.
+    if (!existsSync(options.report)) {
+      return;
+    }
+
+    const report = await readFailedToolsReport(options.report);
+    const message = buildDocsAlert(
+      report,
+      options.logUrl ? { logUrl: options.logUrl } : {}
+    );
+    if (message) {
+      console.log(JSON.stringify(message));
+    }
+  });
 
 // Parse command line arguments
 program.parse();
