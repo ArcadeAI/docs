@@ -129,7 +129,9 @@ pnpm dlx tsx src/cli/index.ts generate \
 
 ## Local usage
 
-Run these commands from the `toolkit-docs-generator` directory.
+Run these commands from the `toolkit-docs-generator` directory. Invoke `tsx` by
+path because this directory has no package for `pnpm exec`; the sidebar sync
+command below runs from the repo root instead.
 
 Generate a single toolkit:
 
@@ -262,6 +264,36 @@ pnpm dlx tsx src/cli/index.ts validate-curation --toolkit GoogleFlights
 
 That compiles the directory with the same code generation uses and needs no
 credentials. Omit `--toolkit` to check everything.
+
+## Run alerts
+
+The nightly workflow posts to Slack when a toolkit fails and the run recovers
+from it. Two outcomes, and the difference matters:
+
+- **Missing entirely**: the toolkit failed and had no previous artifact to fall
+  back on, so it has no page on the docs site at all.
+- **Still serving the previous docs**: the toolkit failed but still publishes
+  its last good output, so readers see yesterday's page.
+
+Each entry names the reason and the fix. Every run attaches the full report as
+its `failed-tools` artifact. Build the message locally against any report with
+`pnpm dlx tsx src/cli/index.ts alert --report <file>`. It prints nothing when a
+run has nothing to report.
+
+No red run stays quiet. Three messages can arrive, and they answer different
+questions:
+
+| Message | Means | Who acts |
+| --- | --- | --- |
+| Toolkits missing or stale | Generation recovered from a per-toolkit failure | Follow the fix named in the entry |
+| Toolkit docs generation failed | The generate step itself broke | Open the run for the path and validation error |
+| Generated, but workflow failed afterward | Generation was fine, a later step broke | Open the run to determine whether sidebar sync, PR creation, artifact upload, or Slack notification needs attention |
+
+The first is reported from inside the generate job, gated on the generate step
+rather than on the steps after it, so a broken sidebar sync or PR creation does
+not hide missing pages. The other two come from the alert job. A run that both
+recovers from a toolkit failure and then fails to publish sends the first
+message and the third, because those are two separate things to fix.
 
 ## Troubleshooting
 

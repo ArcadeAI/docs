@@ -16,6 +16,9 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  # Read this run's jobs so the Slack alert can deep-link the failing job log
+  # rather than the run summary.
+  actions: read
 
 concurrency:
   group: generate-toolkit-docs
@@ -28,6 +31,11 @@ jobs:
     # switch on 2026-06-02. Harmless today; unblocks the cutover.
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+    outputs:
+      # Distinguishes "generation itself failed" from "a later step failed".
+      # Without it, a broken notification would make the alert job announce a
+      # generation failure that never happened.
+      generation-succeeded: ${{ steps.generate-docs.outputs.succeeded }}
 
     steps:
       - name: Checkout repository
@@ -48,6 +56,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Generate toolkit docs
+        id: generate-docs
         # Invoked by path rather than through `pnpm exec`, which would reset the
         # working directory to the repo root and break the relative paths below.
         run: |
@@ -72,6 +81,8 @@ jobs:
             --ignore-file ./skip-toolkits.txt \
             --custom-sections ./curation \
             --output data/toolkits
+
+          echo "succeeded=true" >>"$GITHUB_OUTPUT"
         working-directory: toolkit-docs-generator
         env:
           ENGINE_API_URL: ${{ secrets.ENGINE_API_URL }}
@@ -108,42 +119,81 @@ jobs:
           branch: automation/toolkit-docs
           delete-branch: true
 
+      # A token without reviewer permission is a real gap, but it must not fail
+      # the run: the generated PR is already open and useful without a reviewer
+      # attached. An annotation keeps it visible instead of silent.
       - name: Request team review
         if: steps.cpr.outputs.pull-request-number != ''
-        continue-on-error: true
-        run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
+        run: |
+          if ! gh pr edit ${{ steps.cpr.outputs.pull-request-number }} \
+            --add-reviewer ArcadeAI/engineering-tools-and-dx 2>review-error.log; then
+            echo "::warning::Could not request review on PR #${{ steps.cpr.outputs.pull-request-number }}: $(cat review-error.log)"
+          fi
         env:
           GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
 
-      - name: Warn #proj-docs about preserved or omitted toolkit docs
-        continue-on-error: true
+      - name: Upload generation report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failed-tools
+          path: toolkit-docs-generator-verification/logs/failed-tools.json
+          if-no-files-found: ignore
+
+      # No `continue-on-error` here on purpose. A Slack step that dies quietly
+      # is how a wrong webhook secret went unnoticed: the alert it was meant to
+      # deliver is exactly what nobody was watching for.
+      #
+      # Gated on the generate step rather than on the default "everything so far
+      # succeeded". Missing or stale pages are worth reporting even when a later
+      # step broke — under the default gate a failed sidebar sync or PR creation
+      # would skip this step, while `generation-succeeded` suppressed the alert
+      # job below, and nobody heard about the toolkits at all. `!cancelled()`
+      # rather than `always()` because `cancel-in-progress` cancels superseded
+      # runs, and those have nothing to report.
+      - name: Report preserved or omitted toolkits to Slack
+        if: ${{ !cancelled() && steps.generate-docs.outputs.succeeded == 'true' }}
         run: |
-          report=toolkit-docs-generator-verification/logs/failed-tools.json
-          if [ ! -f "$report" ]; then
+          # The deep link is a nicety; the alert is the point. Actions runs this
+          # with `-e -o pipefail`, so a failed `gh api` — or a SIGPIPE from
+          # trimming its output — would abort the step before curl and lose the
+          # alert entirely. Select the first match in jq instead of piping to
+          # head, and fall back to the run URL on any failure.
+          job_url=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
+            --jq '[.jobs[] | select(.name == "generate") | .html_url] | .[0] // empty') || job_url=""
+
+          payload=$(../node_modules/.bin/tsx src/cli/index.ts alert \
+            --report ../toolkit-docs-generator-verification/logs/failed-tools.json \
+            --log-url "${job_url:-$RUN_URL}")
+
+          if [ -z "$payload" ]; then
+            echo "No preserved or omitted toolkits to report."
             exit 0
           fi
 
-          preserved=$(jq -r '(.preservedToolkits // []) | join(", ")' "$report")
-          omitted=$(jq -r '(.omittedToolkits // []) | join(", ")' "$report")
-          if [ -z "$preserved" ] && [ -z "$omitted" ]; then
-            exit 0
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "::error::SLACK_PROJ_DOCS_WEBHOOK_URL is not configured"
+            exit 1
           fi
-
-          payload=$(jq -n \
-            --arg run_url "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            --arg preserved "$preserved" \
-            --arg omitted "$omitted" \
-            '{text: (":warning: Toolkit docs generation completed with recoverable failures\n\n*Workflow run:* <" + $run_url + "|Open run>" + (if $preserved != "" then "\n*Continuing to serve previous docs:* " + $preserved else "" end) + (if $omitted != "" then "\n*No docs are being served (no prior output):* " + $omitted else "" end))}')
 
           curl --fail-with-body --silent --show-error \
             -X POST \
             -H "Content-Type: application/json" \
             --data "$payload" \
-            "${{ secrets.SLACK_PROJ_DOCS_WEBHOOK_URL }}"
+            "$SLACK_WEBHOOK_URL"
+        working-directory: toolkit-docs-generator
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PROJ_DOCS_WEBHOOK_URL }}
 
   alert:
-    name: Alert on generation failure
-    if: ${{ always() && needs.generate.result == 'failure' }}
+    name: Alert on failure
+    # Every red run gets a message. Which message depends on whether generation
+    # itself broke or something after it did: those need different people to do
+    # different things, and calling a post-generation failure a "generation
+    # failure" sends someone hunting for a validation error that doesn't exist.
+    if: ${{ !cancelled() && needs.generate.result == 'failure' }}
     needs: generate
     runs-on: ubuntu-latest
     permissions: {}
@@ -154,17 +204,28 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           TRIGGER: ${{ github.event_name }}
           COMMIT: ${{ github.sha }}
+          GENERATION_SUCCEEDED: ${{ needs.generate.outputs.generation-succeeded }}
         run: |
           if [ -z "$SLACK_WEBHOOK_URL" ]; then
             echo "::error::SLACK_PROJ_DOCS_WEBHOOK_URL is not configured"
             exit 1
           fi
 
+          if [ "$GENERATION_SUCCEEDED" = "true" ]; then
+            headline=":warning: Toolkit docs generated, but the workflow failed afterward"
+            detail="Generation succeeded, so the toolkit JSON is fine. A later workflow step failed — inspect the run to determine whether sidebar sync, PR creation, artifact upload, or Slack notification needs attention."
+          else
+            headline=":rotating_light: Toolkit docs generation failed"
+            detail="The failed run contains the exact file path and validation error."
+          fi
+
           payload=$(jq -n \
+            --arg headline "$headline" \
+            --arg detail "$detail" \
             --arg run_url "$RUN_URL" \
             --arg trigger "$TRIGGER" \
             --arg commit "$COMMIT" \
-            '{text: (":rotating_light: Toolkit docs generation failed\n\n*Workflow run:* <" + $run_url + "|Open failed run>\n*Trigger:* " + $trigger + "\n*Commit:* " + $commit + "\n\nThe failed run contains the exact file path and validation error.")}')
+            '{text: ($headline + "\n\n*Workflow run:* <" + $run_url + "|Open failed run>\n*Trigger:* " + $trigger + "\n*Commit:* " + $commit + "\n\n" + $detail)}')
 
           curl --fail-with-body --silent --show-error \
             -X POST \
