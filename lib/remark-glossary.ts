@@ -78,6 +78,17 @@ export function remarkGlossary(options: RemarkGlossaryOptions) {
             return SKIP;
           }
 
+          // Skip text already inside a GlossaryTerm we inserted. After a term
+          // is wrapped mid-sentence the visitor descends into the new node;
+          // re-wrapping a shorter term here nests a <button> inside a
+          // <button> (invalid HTML that triggers a React hydration error).
+          if (
+            parent.type === "mdxJsxTextElement" &&
+            parent.name === "GlossaryTerm"
+          ) {
+            return SKIP;
+          }
+
           const markedTerms =
             markedTermsPerParagraph.get(paragraphNode) || new Set();
           let text = textNode.value;
