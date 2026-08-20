@@ -44,10 +44,20 @@ Connect a Salesforce Hosted MCP Server to Arcade and use its tools in gateways a
 
 Follow Salesforce's own guides to [create your Hosted MCP Server](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/custom-servers.html), [activate it](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/activate-mcp-servers.html), and [create an External Client App](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/create-external-client-app.html) (ECA) for it. A few settings on the ECA matter specifically for connecting to Arcade:
 
-- **OAuth Scopes**: include `mcp_api`. Salesforce's guide lists this scope without explaining why it's required; without it, authorization succeeds, but every tool call fails with a 401.
-- **Issue JSON Web Token (JWT)-based access tokens for named users** (under **Security**). Salesforce's guide instructs you to enable this without saying why. Without it, Salesforce issues an opaque session token instead of a JWT, and the Hosted MCP Server's endpoint only validates JWTs: every tool call fails with a bare `{"errors":[{"message":"Invalid token"}]}` 401, even though authorization otherwise looks successful.
-- **Require PKCE**: Salesforce's ECA guide doesn't mention PKCE at all, but Arcade always uses it (RFC 7636, S256) when authorizing against a remote server. Leave PKCE enabled on the ECA (it's on by default).
-- **Callback URL**: set this once you have the redirect URI Arcade generates (see [Add the redirect URI to your ECA](#add-the-redirect-uri-to-your-eca) below). You can use a placeholder now and come back to it.
+- **OAuth Scopes**: select exactly two scopes.
+
+  - `mcp_api` ("Access Salesforce hosted MCP servers"). Salesforce's guide lists this without explaining why it's required. Without it, authorization succeeds, but every tool call fails with a 401.
+  - `refresh_token`/`offline_access` ("Perform requests at any time"). Salesforce combines these into one scope, so there's no way to grant just one.
+
+  Don't also select `api`. It can trigger the same opaque-token failure as skipping the JWT setting below, even though authorization still looks successful.
+
+- **Issue JSON Web Token (JWT)-based access tokens for named users** (under **Security**). Salesforce's guide doesn't explain why this is needed.
+
+  Without it, Salesforce issues an opaque session token instead of a JWT, and the Hosted MCP Server's endpoint only validates JWTs. Every tool call fails with a bare `{"errors":[{"message":"Invalid token"}]}` 401, even though authorization otherwise looks successful.
+
+- **Require PKCE**: leave this enabled (it's on by default). Salesforce's ECA guide doesn't mention PKCE, but Arcade always uses it (RFC 7636, S256) when authorizing against a remote server.
+
+- **Callback URL**: set this once you have the redirect URI Arcade generates (see [Add the redirect URI to your ECA](#add-the-redirect-uri-to-your-eca) below). A placeholder works for now.
 
 ## Configure the remote server in Arcade
 
@@ -62,7 +72,13 @@ Go to the [MCP servers dashboard](https://api.arcade.dev/dashboard/servers), cli
 Open **Advanced settings → OAuth2 authorization** and enter:
 
 - **Client ID** / **Client Secret**: your ECA's Consumer Key and Consumer Secret.
-- **Authorization URL**: the full OpenID Connect discovery URL for your org, not just the bare domain: take your org's My Domain URL (find it under Salesforce Setup → **My Domain**) and append `/.well-known/openid-configuration`. For example, `https://acme-inc.my.salesforce.com/.well-known/openid-configuration`. Arcade fetches this URL to discover the real authorization and token endpoints. Don't use the ECA's `/authorize` path or `api.salesforce.com`: neither serves that discovery document.
+- **Authorization URL**: leave this empty. Arcade discovers your org's real authorization server automatically from the Hosted MCP Server's own metadata, and only requests the scopes that server actually needs (`mcp_api`, `refresh_token`) — no manual scope deselection required later.
+
+  Only set this manually if authorization still fails after ruling out the propagation delay in [Add the redirect URI to your ECA](#add-the-redirect-uri-to-your-eca) below. If you do:
+
+  - Use the full OpenID Connect discovery URL for your org, not just the bare domain — your My Domain URL (Salesforce Setup → **My Domain**) with `/.well-known/openid-configuration` appended. For example: `https://acme-inc.my.salesforce.com/.well-known/openid-configuration`.
+  - Don't use the ECA's `/authorize` path or `api.salesforce.com`. Neither serves that discovery document.
+  - Expect the authorization prompt's scope picker to list every scope your org supports, not just what this server needs. You'll need to manually deselect everything except what your ECA grants.
 
 <Callout type="info">
   Salesforce Hosted MCP Servers don't support Dynamic Client Registration, so
@@ -75,31 +91,24 @@ Open **Advanced settings → OAuth2 authorization** and enter:
 
 Copy the redirect URI Arcade generated and set it as the ECA's Callback URL. A new server registration gets its own unique redirect URI, so update the Callback URL again if you ever re-register the server under a new ID.
 
-### Authorize and confirm
-
-Save the server to open the authorization prompt.
-
 <Callout type="warning">
-  The scope picker on this screen lists every scope your org's My Domain
-  discovery document advertises as supported — Salesforce orgs typically
-  support dozens (`api`, `chatbot_api`, `cdp_api`, `lightning`, and so on),
-  regardless of what your ECA actually grants. **Deselect every scope except
-  the ones your ECA's Selected Scopes includes** (per [Set up
-  Salesforce](#set-up-salesforce) above — at minimum `mcp_api`, plus whichever
-  of `api`, `offline_access`, and `refresh_token` your ECA grants). Leaving an
-  extra scope checked makes the authorization request fail, not just the
-  later tool calls.
+  Salesforce takes a few minutes to propagate a Callback URL change. If
+  authorization fails with `redirect_uri_mismatch` right after saving it,
+  wait about 10 minutes and try again before troubleshooting further.
 </Callout>
 
-Complete the authorization prompt.
+### Authorize and confirm
+
+Save the server to open the authorization prompt. Confirm `mcp_api` and `refresh_token` are checked, then complete the prompt.
 
 </Steps>
 
 ## Troubleshooting
 
 - **A 401 with `{"errors":[{"message":"Invalid token"}]}` and no error code**: your ECA isn't issuing JWT-based access tokens. See [Set up Salesforce](#set-up-salesforce).
-- **Authorization fails outright**: a scope was selected on the authorization prompt that your ECA doesn't actually grant. See [Authorize and confirm](#authorize-and-confirm).
-- **Authorization succeeds, but tool calls 401**: the `mcp_api` scope is missing from either the ECA's Selected Scopes or the scopes you approved during authorization.
+- **`redirect_uri_mismatch` right after updating the Callback URL**: Salesforce hasn't propagated the change yet. Wait about 10 minutes and retry before assuming a misconfiguration.
+- **Authorization fails outright, and Authorization URL is set manually**: a scope was selected on the authorization prompt that your ECA doesn't actually grant. See [Configure OAuth2 authorization](#configure-oauth2-authorization).
+- **Authorization succeeds, but tool calls 401**: the `mcp_api` scope is missing from either the ECA's Selected Scopes or the scopes you approved during authorization, or `api` is also selected on the ECA (see [Set up Salesforce](#set-up-salesforce)).
 - **Tools list is empty or every call fails**: confirm the Hosted MCP Server is [activated](https://developer.salesforce.com/docs/platform/hosted-mcp-servers/guide/activate-mcp-servers.html).
 - **A setting change doesn't seem to take effect**: existing tokens don't retroactively pick up new ECA settings. In Salesforce Setup, go to the affected user's **OAuth Apps** list and revoke the existing grant, then re-authorize to get a fresh token.
 
