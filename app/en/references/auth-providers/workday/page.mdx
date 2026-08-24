@@ -1,0 +1,173 @@
+import { Tabs, Callout, Steps } from "nextra/components";
+
+# Workday
+
+<Callout type="info">
+  Arcade does not offer a default Workday auth provider. Each customer registers
+  an API client in their own Workday tenant.
+</Callout>
+
+The Workday auth provider lets tools and agents call Workday APIs as the signed-in employee.
+
+This page is used by Arcade's Workday tools, [app code](#using-workday-auth-in-app-code) that calls Workday APIs, and [custom tools](#using-workday-auth-in-custom-tools).
+
+## Create a Workday API client
+
+<Callout type="info">
+  When using your own app credentials, configure your project to use a [custom
+  user
+  verifier](/build/user-facing-agents/secure-auth-production#build-a-custom-user-verifier).
+  Without this, end-users cannot use your app or agent in production.
+</Callout>
+
+In Workday, search for **Register API Client** (not **Register API Client for Integrations**).
+
+- Grant type: **Authorization Code**
+- Redirect URI: the redirect URL Arcade shows when you add the provider (see below)
+- Scopes: the [functional areas](#scopes) your tools need
+
+Copy the **Client ID**, **Client Secret**, **Authorization Endpoint**, and **Token Endpoint** from the client page after you save.
+
+Do not use a Workday Extend / Developer Site client unless your tenant already uses that path.
+
+<Callout>
+  The exact Register API Client fields will be listed here after we review
+  Workday's admin guide (Community login required). Until then, use the values
+  Workday shows on the client you just created.
+</Callout>
+
+## Set Workday secrets
+
+Add these secrets in the [Arcade Dashboard](https://api.arcade.dev/dashboard/auth/secrets):
+
+| Secret | Example |
+| --- | --- |
+| `WORKDAY_BASE_URL` | `https://wd2-impl-services1.workday.com/ccx/api` |
+| `WORKDAY_TENANT_NAME` | your tenant name |
+
+These are the REST API host and tenant. They are not the OAuth login URLs.
+
+## Scopes
+
+Pick only the areas your tools need. Arcade's Workday tools use:
+
+- `Time Off and Leave` — time-off balance, history, and requests
+- `Contact Information` — home and mailing address
+- `Staffing` — the signed-in worker (`workers/me`)
+- `Tenant Non-Configurable` — business process actions on those writes
+
+## Configuring Workday auth
+
+<Tabs items={["Dashboard GUI"]}>
+<Tabs.Tab>
+
+### Configure Workday auth in the Arcade Dashboard
+
+<Steps>
+
+#### Open Connected Apps
+
+Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard). Under **Connections**, click **Connected Apps**.
+
+#### Add a custom provider
+
+- Click **Add OAuth Provider**
+- Open the **Custom Provider** tab
+
+#### Enter the provider details
+
+- **ID:** `workday` (required for Arcade's Workday tools)
+- **Client ID** and **Client Secret** from the Workday API client
+- **Authorization Endpoint** and **Token Endpoint** from the Workday API client
+- **Refresh Token Endpoint:** the same Token Endpoint
+- Leave token introspection **disabled** unless Workday documents an introspect URL for your client
+- Note the **Redirect URL** Arcade generates and set it as the Workday client's redirect URI
+
+#### Create the provider
+
+Click **Create**.
+
+</Steps>
+</Tabs.Tab>
+</Tabs>
+
+## Using Workday auth in app code
+
+See [authorizing agents with Arcade](/get-started/about-arcade).
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python {6-10}
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+auth_response = client.auth.start(
+    user_id="{arcade_user_id}",
+    provider="workday",
+    scopes=["Time Off and Leave"],
+)
+
+if auth_response.status != "completed":
+    print("Please complete the authorization challenge in your browser:")
+    print(auth_response.url)
+
+auth_response = client.auth.wait_for_completion(auth_response)
+token = auth_response.context.token
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```javascript {8-11}
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+const userId = "{arcade_user_id}";
+
+let authResponse = await client.auth.start(userId, {
+  provider: "workday",
+  scopes: ["Time Off and Leave"],
+});
+
+if (authResponse.status !== "completed") {
+  console.log("Please complete the authorization challenge in your browser:");
+  console.log(authResponse.url);
+}
+
+authResponse = await client.auth.waitForCompletion(authResponse);
+const token = authResponse.context.token;
+```
+
+</Tabs.Tab>
+</Tabs>
+
+## Using Workday auth in custom tools
+
+```python
+from typing import Annotated, Any
+
+import httpx
+from arcade_tdk import ToolContext, tool
+from arcade_tdk.auth import OAuth2
+
+
+@tool(
+    requires_auth=OAuth2(id="workday", scopes=["Staffing"]),
+    requires_secrets=["WORKDAY_BASE_URL", "WORKDAY_TENANT_NAME"],
+)
+async def get_my_worker(
+    context: ToolContext,
+) -> Annotated[dict[str, Any], "The signed-in worker"]:
+    """Get the signed-in employee's Workday worker record."""
+    token = context.get_auth_token_or_empty()
+    base_url = context.get_secret("WORKDAY_BASE_URL").rstrip("/")
+    tenant = context.get_secret("WORKDAY_TENANT_NAME")
+    url = f"{base_url}/staffing/v7/{tenant}/workers/me"
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url, headers={"Authorization": f"Bearer {token}"})
+        resp.raise_for_status()
+        return resp.json()
+```
