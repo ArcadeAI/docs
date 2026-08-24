@@ -1,6 +1,6 @@
 ---
-title: "Add remote MCP servers"
-description: "Register a remote MCP server in Arcade and use its tools in gateways and SDKs"
+title: "Remote MCP servers"
+description: "Register an MCP server that Arcade does not host, then govern its tools alongside Arcade's own"
 ---
 
 import Image from "next/image";
@@ -9,10 +9,20 @@ import { SignupLink } from "@/app/_components/analytics";
 
 export const REMOTE_SETUP_WIDTH = 557 / 1.5;
 export const REMOTE_SETUP_HEIGHT = 773 / 1.5;
+export const ADVANCED_SETTINGS_WIDTH = 890 / 2;
+export const ADVANCED_SETTINGS_HEIGHT = 1958 / 2;
 
-# Add remote MCP servers
+# Remote MCP servers
 
-Use this guide if you want to connect an existing MCP server that Arcade does not host. You will add the server to your Arcade project, expose its tools in MCP Gateways, and call those tools from Arcade SDKs.
+A remote MCP server is an MCP server that Arcade does not host: one your team already runs, one a vendor hosts for you, or one from an Arcade partner. Register it once with a URL, and its tools join your project alongside Arcade's own — same auth handling, same tool filtering, same logs, same audit trail.
+
+This guide covers registering the server, configuring its connection and auth, and calling its tools from MCP Gateways and the Arcade SDKs.
+
+<Callout type="info">
+  Looking to *write* new tools rather than connect an existing server? See [Build
+  an MCP server](/build/create-tools/tool-basics/build-mcp-server) instead. This
+  page is for servers that already exist and are reachable over HTTP.
+</Callout>
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -38,7 +48,29 @@ Register a remote MCP server and use its tools in gateways and SDKs.
 </GuideOverview.YouWillLearn>
 </GuideOverview>
 
-## Why use MCP Gateways for Remote MCP Servers
+## Types of MCP servers in Arcade
+
+Every MCP server in your project appears in the same [Servers dashboard](https://api.arcade.dev/dashboard/servers), sorted along two axes.
+
+**Who runs it**, shown as the `Type` badge and the `URI` column:
+
+| | `URI` | `Type` |
+|---|---|---|
+| **Arcade Native** — a server Arcade hosts for you, either pre-built by Arcade or deployed with `arcade deploy` | `Arcade Hosted` | `HTTP` |
+| **Remote** — a server you or a vendor hosts, reached at a URL you supply | the server URL | `MCP` |
+
+**Where it's visible**, shown as the scope badge:
+
+| | Visible to |
+|---|---|
+| `Project` | This project only |
+| `Global` | All organizations, projects, and accounts |
+
+Arcade's pre-built catalog arrives as `Global` servers. Servers you register yourself — Arcade Native or remote — are scoped to your project.
+
+Whichever combination a server is, it gets the same treatment: connection timeout and retry settings, an `Active` / `Healthy` / `Pending Auth` status, an enable toggle, a **Tools** picker, **Logs**, and the same audit trail. A remote MCP server is a peer of an Arcade-hosted one, not an attachment to it.
+
+## Why use MCP Gateways for remote MCP servers
 
 MCP Gateways let you manage and filter tools in one place, so your agent or team uses a curated set of tools across clients. This is especially useful for remote MCP servers, where you may not have control over the tools available. By using MCP Gateways, you can select the tools you want to use and hide the ones you don't want to use.
 
@@ -48,14 +80,16 @@ MCP Gateways let you manage and filter tools in one place, so your agent or team
 
 ### Open the MCP servers page
 
-Go to the [MCP servers dashboard](https://api.arcade.dev/dashboard/servers) for your project and click **Add server**.
+Go to the [MCP servers dashboard](https://api.arcade.dev/dashboard/servers) for your project and click **Add Server**.
 
 ### Enter the required fields
 
-Arcade requires two fields for remote MCP servers:
+Choose **Remote MCP** as the server type, then fill in the two required fields:
 
 - **ID**: A unique, human-readable identifier (for example, `render-mcp-server`)
 - **URI**: The public URL for your MCP server (for example, `https://mcp.render.com/mcp`)
+
+Select **Arcade** instead of **Remote MCP** if you are registering a server that Arcade or your own infrastructure hosts. See [Hybrid MCP servers](/operate/deploy/on-prem) for that flow.
 
 <Callout type="info">
   Use the [MCP Debugger](https://mcpdebugger.dev) to verify the remote server's
@@ -96,13 +130,21 @@ Common settings include:
 - **Custom headers**: Add headers such as `Authorization` or `X-API-Key` and reference secrets with `${secret:NAME}`.
 - **Header secrets**: Store API tokens or passwords and reference them in headers.
 
-Some remote servers need provider-specific setup beyond these generic settings. See [Connect a Salesforce Remote MCP Server](/operate/governance/mcp-gateways/add-remote-servers/salesforce) for a fully worked example.
+<Image
+  alt={"Advanced settings for a remote MCP server"}
+  className="max-w-full mt-4"
+  src={"/images/mcp-gateway/remote-mcp-server-advanced-settings.png"}
+  width={ADVANCED_SETTINGS_WIDTH}
+  height={ADVANCED_SETTINGS_HEIGHT}
+/>
+
+Some remote servers need provider-specific setup beyond these generic settings. See [Connect a Salesforce Hosted MCP Server](/operate/governance/remote-mcp-servers/salesforce) for a fully worked example.
 
 ## Use remote tools in MCP Gateways
 
 Once the server is registered, its tools show up in the Playground for this project, as well as in the MCP Gateway tool picker.
 
-1. Create or edit an MCP Gateway in the [MCP Gateways dashboard](https://app.arcade.dev/mcp-gateways).
+1. Create or edit an MCP Gateway in the [MCP Gateways dashboard](https://api.arcade.dev/dashboard/mcp-gateways).
 2. Open **Select tools** and filter by your remote server name.
 3. Choose the tools you want to expose through the gateway.
 
