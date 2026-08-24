@@ -57,6 +57,18 @@ const meta: MetaRecord = {
     title: "Exa API",
     href: "/en/resources/integrations/search/exa-api",
   },
+  "-- Partners": {
+    type: "separator",
+    title: "Partners",
+  },
+  nimble: {
+    title: "Nimble",
+    href: "/en/resources/integrations/search/nimble",
+  },
+  tavily: {
+    title: "Tavily",
+    href: "/en/resources/integrations/search/tavily",
+  },
 };
 
 export default meta;

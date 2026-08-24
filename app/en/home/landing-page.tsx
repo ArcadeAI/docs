@@ -8,6 +8,7 @@ import {
   FileText,
   HelpCircle,
   Monitor,
+  Plug,
   Puzzle,
   Rocket,
   ServerCog,
@@ -406,7 +407,7 @@ export function LandingPage() {
               />
             </div>
           </div>
-          <div className="mx-auto mt-8 max-w-4xl">
+          <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-4 min-[1062px]:grid-cols-2 min-[1062px]:gap-x-8">
             <QuickStartCard
               description="Browse 7,500+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
               href={INTEGRATIONS_PAGE_HREF}
@@ -441,6 +442,12 @@ export function LandingPage() {
                 { src: "/images/icons/reddit.png", alt: "Reddit" },
               ]}
               title="Pre-built integrations"
+            />
+            <QuickStartCard
+              description="Already run an MCP server, or use a vendor's? Register it with Arcade and govern its tools alongside Arcade's own."
+              href="/operate/governance/remote-mcp-servers"
+              icon={Plug}
+              title="Bring your own MCP server"
             />
           </div>
         </div>
