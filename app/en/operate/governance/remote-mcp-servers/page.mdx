@@ -11,6 +11,8 @@ export const REMOTE_SETUP_WIDTH = 557 / 1.5;
 export const REMOTE_SETUP_HEIGHT = 773 / 1.5;
 export const ADVANCED_SETTINGS_WIDTH = 890 / 2;
 export const ADVANCED_SETTINGS_HEIGHT = 1958 / 2;
+export const SERVERS_LIST_WIDTH = 2808 / 2;
+export const SERVERS_LIST_HEIGHT = 2014 / 2;
 
 # Remote MCP servers
 
@@ -72,6 +74,16 @@ Arcade's pre-built catalog arrives as `Global` servers. Servers you register you
 
 Whichever combination a server is, it gets the same treatment: connection timeout and retry settings, an `Active` / `Healthy` / `Pending Auth` status, an enable toggle, a **Tools** picker, **Logs**, and the same audit trail. A remote MCP server is a peer of an Arcade-hosted one, not an attachment to it.
 
+The Servers dashboard below mixes all of them in one list. `GoogleForms` and `envcheck` are Arcade-hosted project servers; `exa` and `granola-1p` are remote servers reached at their own URLs, with `granola-1p` still waiting on its first authorization; and the `Global` group at the bottom is Arcade's own catalog.
+
+<Image
+  alt={"The Arcade Servers dashboard, showing Arcade-hosted and remote MCP servers as project servers, plus Arcade's global servers"}
+  className="max-w-full mt-4"
+  src={"/images/mcp-gateway/servers-project-and-global.png"}
+  width={SERVERS_LIST_WIDTH}
+  height={SERVERS_LIST_HEIGHT}
+/>
+
 ## Add the remote server to your project
 
 <Steps>
@@ -124,15 +136,11 @@ Create the server and confirm that Arcade lists the server tools in your project
 
 ## Who authenticates, and when
 
-Authentication to a remote MCP server happens twice, with different credentials each time. This is the behavior that most often surprises people, so it's worth being precise about.
+Authentication to a remote MCP server happens twice, with different credentials each time.
 
-**At setup, the admin authenticates.** When you register the server, Arcade uses *your* credentials to fetch the server's tool list. That list is what you see in the Playground and what you pick from in a gateway's tool picker. Authorize as a user with the broadest access on the remote server, or tools your team needs will simply never appear as options.
+**At setup, the admin authenticates.** When you register the server, Arcade uses *your* credentials to fetch the server's tool list. That list is what you see in the Playground and what you pick from in a gateway's tool picker. Authorize as a user with the broadest access on the remote server, so the full set is available to add to your MCP Gateways.
 
 **At runtime, each end user authenticates.** When an end user's agent first calls a tool on that server, Arcade runs the OAuth flow against the remote server for *that user* and stores their tokens separately. Arcade then re-resolves the tool list for them individually.
-
-The consequence: the admin's tool list is the *superset you curate from*, not the set anyone actually gets. A tool the end user's own account can't access is not available to them at runtime, even if you selected it in the gateway and even though you could see it at setup. Curation narrows the admin's list; each user's own permissions narrow it again.
-
-This is what you want — the remote server's own access controls keep applying per user, and an admin registering a server does not silently lend their access to everyone. But it means a tool appearing in your gateway is not a guarantee that a given end user can call it.
 
 ## Configure advanced settings
 
