@@ -18,7 +18,7 @@ export const SERVERS_LIST_HEIGHT = 1837 / 2;
 
 A remote MCP server is an MCP server that Arcade does not host: one your team already runs, one that a vendor hosts for you, or one from an Arcade partner.
 
-You register it **once, to a project or organization** — not to a gateway. From that point its tools are part of the project's tool catalog alongside Arcade's own, and every gateway in the project can select from them, the Playground can call them, and the SDKs can execute them. Register a server globally instead and every project in the organization can use it the same way.
+You register it **once, and to a scope** — a single project, or your whole organization — not to a gateway. From that point its tools are part of that scope's tool catalog alongside Arcade's own: every gateway in scope can select from them, the Playground can call them, and the SDKs can execute them. Registering to a second gateway, or re-running setup per gateway, is never something you do.
 
 This guide covers registering the server, configuring its connection and auth, and using its tools.
 
@@ -63,14 +63,14 @@ Every MCP server in your project appears in the same [Servers dashboard](https:/
 | **Arcade Native** — a server Arcade hosts for you, either pre-built by Arcade or deployed with `arcade deploy` | `Arcade Hosted` | `HTTP` |
 | **Remote** — a server you or a vendor hosts, reached at a URL you supply | the server URL | `MCP` |
 
-**Where it's visible**, shown as the scope badge:
+**How far it reaches**, chosen when you register it and shown as the scope badge:
 
 | | Available to |
 |---|---|
-| `Project` | Every gateway, Playground session, and SDK call in the project it was added to |
-| `Global` | All organizations, projects, and accounts |
+| `Project` | Every gateway, Playground session, and SDK call in the one project it was registered to |
+| `Global` | Every project across the organization, per the dashboard's "all organizations, projects, and accounts" |
 
-Arcade's pre-built catalog arrives as `Global` servers. Servers you register yourself — Arcade Native or remote — are scoped to a project by default. Scope is set on the server, not on the gateway, which is why one registration serves every gateway in that scope.
+Arcade's pre-built catalog arrives as `Global` servers. A server you register yourself — Arcade Native or remote — is scoped to a single project unless you widen it. Either way the scope belongs to the *server*, not to any gateway, which is why one registration serves every gateway inside it.
 
 Whichever combination a server is, it gets the same treatment: connection timeout and retry settings, an `Active` / `Healthy` / `Pending Auth` status, an enable toggle, a **Tools** picker, **Logs**, and the same audit trail. A remote MCP server is a peer of an Arcade-hosted one, not an attachment to it.
 
@@ -172,13 +172,13 @@ Some remote servers need provider-specific setup beyond these generic settings. 
 
 ## Where the server's tools become available
 
-Registration is a one-time, project-level act. Once the server is registered, its tools are available everywhere in its scope:
+Registration happens once, and the scope you picked decides the reach. Within that scope — one project, or every project in the organization — the server's tools are available to all three consumers:
 
-- **Every MCP Gateway in the project** can select them in its tool picker. A project can have many gateways, each exposing a different subset of the same server.
-- **The Playground** for the project can call them, which is the fastest way to learn a tool's arguments.
+- **Every MCP Gateway in scope** can select them in its tool picker. A project can have many gateways, each exposing a different subset of the same server.
+- **The Playground** can call them, which is the fastest way to learn a tool's arguments.
 - **The Arcade SDKs** can execute them by name, with no gateway involved.
 
-If the server is registered globally rather than to a single project, that scope widens to every project in the organization.
+Widening or narrowing that reach is a change to the server's scope, not something you configure per gateway.
 
 ### Select the tools in a gateway
 
