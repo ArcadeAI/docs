@@ -1098,7 +1098,18 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/guides/mcp-gateways/add-remote-servers",
-    destination: "/:locale/operate/governance/mcp-gateways/add-remote-servers",
+    destination: "/:locale/operate/governance/remote-mcp-servers",
+    permanent: true,
+  },
+  {
+    source:
+      "/:locale/operate/governance/mcp-gateways/add-remote-servers/salesforce",
+    destination: "/:locale/operate/governance/remote-mcp-servers/salesforce",
+    permanent: true,
+  },
+  {
+    source: "/:locale/operate/governance/mcp-gateways/add-remote-servers",
+    destination: "/:locale/operate/governance/remote-mcp-servers",
     permanent: true,
   },
   {
