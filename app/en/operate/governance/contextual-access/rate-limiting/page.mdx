@@ -1,0 +1,130 @@
+---
+title: "Rate Limiting"
+description: "Cap how often tools can be called with built-in rate limits enforced by the Arcade Engine, no webhook server required"
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Rate Limiting
+
+As a platform operator, you can cap how often tools are called. Rate limits are built into the Arcade Engine: you define rules in the Dashboard or through the API, and the Engine enforces them before each tool execution. Unlike webhook extensions, rate limits run natively inside Arcade, so there is no server to build or host.
+
+Use rate limits to protect upstream services from runaway agents, keep automated workloads inside vendor quotas, and contain the blast radius of a misbehaving loop.
+
+## How enforcement works
+
+A rate limit is a set of **rules**. Each rule combines three things:
+
+- A **tool matcher** that selects which tools the rule applies to
+- A **limit**, the maximum number of calls
+- A **time window** the limit applies within
+
+Enforcement runs at the pre-execution hook point, so every matched call is counted before the tool executes. Calls are counted in fixed windows aligned to the clock: a per-minute window spans one calendar minute, and the count resets when the next window starts. Window boundaries are computed in UTC, which is worth keeping in mind for day and month windows.
+
+Counters are scoped in three ways:
+
+- **Per tool** - a toolkit or global matcher caps each matched tool independently, not the combined total across tools. A rule of 100 per hour on `Slack.*` allows 100 calls to `Slack.SendMessage` and 100 calls to `Slack.ListChannels` in the same hour.
+- **Per scope** - counters are isolated by organization and project, so a project-scoped rule never counts calls from another project.
+- **Not per user** - every user and agent calling through the bound scope shares one counter, so the limit caps their combined traffic rather than each caller's.
+
+### Tool matchers
+
+| Matcher | Example | Applies to |
+| --- | --- | --- |
+| Exact | `Slack.SendMessage` | One fully qualified tool |
+| Toolkit | `Slack.*` | Every tool in the toolkit |
+| Global | `*` | Every tool |
+
+When several rules match the same call, only the most specific rule applies: an exact match beats a toolkit match, and a toolkit match beats the global match. The call is counted against that one rule only.
+
+### Time windows
+
+| Unit | Window |
+| --- | --- |
+| `s` | Second |
+| `m` | Minute |
+| `h` | Hour |
+| `d` | Day |
+| `mo` | Month |
+
+## What a rate-limited call sees
+
+When a call exceeds its matched rule's limit, the Engine denies the execution with rate-limit semantics and a message that names the tool, the configured limit, and roughly how long until the window resets:
+
+```text
+Rate limit exceeded for Slack.SendMessage (5/m). Try again in ~42s.
+```
+
+The agent receives this as a tool-call error and can retry after the window resets.
+
+## Configure in the Dashboard
+
+<Steps>
+
+### Create a rate limit
+
+Navigate to **Contextual Access** in the Arcade Dashboard, click **Add Extension**, and choose the rate limit type.
+
+### Pick a scope
+
+Bind the rate limit to the organization to apply it across all projects, or to a single project.
+
+### Add rules
+
+Each rule row takes a tool matcher, a limit, and a time window. You can add up to 100 rules, and each matcher can appear only once.
+
+### Activate
+
+The **Active** toggle controls enforcement. Inactive rate limits are kept but not enforced, so you can stage rules before turning them on.
+
+</Steps>
+
+## Configure via the API
+
+Create a rate limit with the plugins API. The example below caps `Slack.SendMessage` at 5 calls per minute, every other Slack tool at 100 calls per hour each, and everything else at 1000 calls per day each:
+
+```bash
+curl -s -X POST "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/plugins" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "plugin_type": "rate_limit",
+    "name": "Production tool limits",
+    "rate_limit_config": {
+      "rules": [
+        { "match": "Slack.SendMessage", "limit": 5, "time_unit": "m" },
+        { "match": "Slack.*", "limit": 100, "time_unit": "h" },
+        { "match": "*", "limit": 1000, "time_unit": "d" }
+      ]
+    }
+  }'
+```
+
+To bind a rate limit to the organization instead of a project, post to `/v1/orgs/{org_id}/plugins`. The [API reference](/references/api) documents the full plugins API, including listing, updating, and deleting.
+
+## When the platform cannot verify a limit
+
+If the Engine cannot reach its counting backend, a matched call's limit cannot be verified. By default the call is **rejected**: a degraded platform must not silently stop enforcing the caps you rely on.
+
+For rules that protect availability rather than enforce a hard cap, you can opt individual rules into allowing unverified calls by setting `allow_on_unavailable` on the rule:
+
+```json
+{ "match": "Slack.*", "limit": 100, "time_unit": "h", "allow_on_unavailable": true }
+```
+
+A rejected unverified call sees its own denial message:
+
+```text
+The rate limit for Slack.SendMessage could not be verified; the call was rejected.
+```
+
+<Callout type="info">
+  The unverified denial intentionally carries no detail about what failed, so
+  callers cannot tell which part of the platform is degraded.
+</Callout>
+
+## Next steps
+
+- [How hooks work](/operate/governance/contextual-access/how-hooks-work) - Where rate limits fit in the hook pipeline
+- [Build your own](/operate/governance/contextual-access/build-your-own) - Enforce custom policies, including rate-limit responses, from your own webhook server
+- [API reference](/references/api) - Full plugins API documentation
