@@ -5,7 +5,7 @@ description: "Review every tool run in a project: what ran, for whom, and why it
 
 # Tool executions
 
-Arcade records every tool run in a project, including which tool ran, for which end user, when, and how it went, and exposes that history in the dashboard and over the API.
+Arcade records every tool run in a project, including which tool ran, for which end user, when, and how it went, and exposes that history in the dashboard and over the API. Recording is on by default and is an organization-wide setting — see [Recording and retention](#recording-and-retention).
 
 This page serves two jobs:
 
@@ -166,11 +166,36 @@ Two behaviors trip up API callers:
 
 Find your organization and project IDs in the dashboard URL: `/orgs/{org_id}/projects/{project_id}`. For the full request and response schemas, see the [API reference](/references/api).
 
-## Retention
+## Recording and retention
 
-Execution logging runs by default, and each project keeps its history for a bounded retention window: 7 days unless your organization sets a different default or a project overrides it. Past the window, Arcade deletes the records and they stop appearing in the history and the API.
+Two organization-wide settings govern the history, and are configured by an organization admin. They apply to every project in the organization.
 
-To change the retention window, or to turn off execution logging and delete the history for your organization, contact Arcade support.
+| Setting | What it decides |
+| -- | -- |
+| Recording (boolean) | Whether new tool runs are written down at all |
+| Retention window (number) | How long a recorded run is kept |
+
+On Arcade Cloud, recording is enabled by default and the retention window is 7 days. Past the window, Arcade deletes the records and they stop appearing in the history and the API. A self-hosted deployment sets its own defaults, and records nothing until execution logging is turned on in the Engine configuration.
+
+### Change them yourself
+
+Open your organization in the dashboard and select **Execution Logging**, or call the API:
+
+```bash
+curl -s -X PUT "https://api.arcade.dev/v1/orgs/{org_id}/logging-config" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"logging_data_retention": "ALLOWED", "default_log_retention_days": 30}'
+```
+
+Send either field on its own; an omitted field is left alone, so changing the window cannot switch recording off by accident.
+
+A window must be at least 1 day and no longer than the platform maximum, which is 90 days on Arcade Cloud and is reported as `max_log_retention_days` on the organization read. Anything outside that is refused with a `422` rather than quietly adjusted. Zero is not "keep nothing" — it is refused, because turning recording off is the way to stop recording.
+
+### What each setting does to history you already have
+
+- **Turning recording off** stops new runs being written down. It leaves what is already stored in place, and those records go on expiring under the window as before. It is not an erasure control.
+- **Shortening the window** applies to records you already have. Going from 90 days to 7 deletes everything older than 7 days across every project in the organization, shortly after you save, and it cannot be undone.
 
 ## Related content
 
