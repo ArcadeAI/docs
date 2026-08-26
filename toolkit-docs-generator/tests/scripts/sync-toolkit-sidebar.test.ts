@@ -8,8 +8,10 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import type { PartnerToolkit } from "../../../app/_data/partner-toolkits";
 import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params";
 import {
+  buildPartnerToolkitInfoList,
   buildToolkitInfoList,
   generateCategoryMeta,
   generateMainMeta,
@@ -24,6 +26,7 @@ import {
   syncToolkitSidebar,
   type ToolkitInfo,
 } from "../../scripts/sync-toolkit-sidebar";
+import { INTEGRATION_CATEGORIES } from "../../src/shared/toolkit-primitives";
 
 setToolkitsForTesting([
   { id: "Gmail", label: "Gmail", category: "productivity" },
@@ -790,6 +793,7 @@ describe("syncToolkitSidebar", () => {
       categoriesCreated: expect.any(Array),
       categoriesRemoved: expect.any(Array),
       toolkitCount: expect.any(Number),
+      partnerCount: expect.any(Number),
       errors: expect.any(Array),
     });
   });
@@ -920,5 +924,131 @@ describe("category move cleanup logic", () => {
     expect(mainMeta).toContain("development:");
     expect(mainMeta).toContain("productivity:");
     expect(mainMeta).not.toContain("others:");
+  });
+});
+
+// ============================================================================
+// Unit Tests: partner integrations
+// ============================================================================
+
+/**
+ * `buildPartnerToolkitInfoList` reads four fields off a partner, so the cases
+ * below supply those and nothing else. The cast is confined here rather than
+ * spelled out at every call site.
+ */
+const asPartner = (fields: Record<string, unknown>): PartnerToolkit =>
+  fields as unknown as PartnerToolkit;
+
+describe("buildPartnerToolkitInfoList", () => {
+  const partner = asPartner({
+    id: "Tavily",
+    label: "Tavily",
+    category: "search",
+    relativeDocsLink: "/en/resources/integrations/search/tavily",
+  });
+
+  it("derives a partner sidebar entry from the partner catalog", () => {
+    const result = buildPartnerToolkitInfoList([partner]);
+
+    expect(result).toEqual([
+      {
+        id: "Tavily",
+        slug: "tavily",
+        label: "Tavily",
+        category: "search",
+        navGroup: "partner",
+      },
+    ]);
+  });
+
+  it("falls back to the kebab-cased id when there is no docs link", () => {
+    const result = buildPartnerToolkitInfoList([
+      asPartner({ id: "NimbleWay", label: "Nimble", category: "search" }),
+    ]);
+
+    expect(result[0]?.slug).toBe("nimble-way");
+  });
+
+  it("throws on a category with no integrations route", () => {
+    expect(() =>
+      buildPartnerToolkitInfoList([
+        asPartner({ ...partner, category: "nonsense" }),
+      ])
+    ).toThrow(/Unrecognized integration category "nonsense"/);
+  });
+
+  it("keeps the real partner catalog routable", () => {
+    const result = buildPartnerToolkitInfoList();
+
+    expect(result.length).toBeGreaterThan(0);
+    for (const entry of result) {
+      expect(INTEGRATION_CATEGORIES).toContain(entry.category);
+      expect(entry.navGroup).toBe("partner");
+    }
+  });
+});
+
+describe("generateCategoryMeta partner section", () => {
+  const toolkits: ToolkitInfo[] = [
+    {
+      id: "GoogleSearch",
+      slug: "google-search",
+      label: "Google Search",
+      category: "search",
+      navGroup: "optimized",
+    },
+    {
+      id: "ExaApi",
+      slug: "exa-api",
+      label: "Exa API",
+      category: "search",
+      navGroup: "starter",
+    },
+    {
+      id: "Tavily",
+      slug: "tavily",
+      label: "Tavily",
+      category: "search",
+      navGroup: "partner",
+    },
+  ];
+
+  it("renders partners in their own section after the generated toolkits", () => {
+    const result = generateCategoryMeta(
+      toolkits,
+      "search",
+      "/en/resources/integrations"
+    );
+
+    expect(result).toContain('"-- Partners"');
+    expect(result).toContain("tavily: {");
+    expect(result).toContain(
+      'href: "/en/resources/integrations/search/tavily"'
+    );
+    expect(result.indexOf('"-- Partners"')).toBeGreaterThan(
+      result.indexOf('"-- Starter"')
+    );
+  });
+
+  it("omits the Partners separator when the category has no partners", () => {
+    const result = generateCategoryMeta(
+      toolkits.filter((t) => t.navGroup !== "partner"),
+      "search",
+      "/en/resources/integrations"
+    );
+
+    expect(result).not.toContain('"-- Partners"');
+    expect(result).not.toContain("tavily: {");
+  });
+
+  it("renders a partner-only category without duplicating entries", () => {
+    const result = generateCategoryMeta(
+      toolkits.filter((t) => t.navGroup === "partner"),
+      "search",
+      "/en/resources/integrations"
+    );
+
+    expect(result).toContain('"-- Partners"');
+    expect(result.match(/tavily: \{/g)).toHaveLength(1);
   });
 });
