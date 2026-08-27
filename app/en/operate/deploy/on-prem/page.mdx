@@ -1,6 +1,6 @@
 ---
 title: "Hybrid MCP servers"
-description: "Run MCP servers in your own environment and connect them to Arcade Cloud"
+description: "Run a self-hosted MCP server worker in your own private network or VPC and connect it to Arcade Cloud. Hybrid worker deployment for on-premises and private cloud environments."
 ---
 
 import { Steps, Tabs, Callout } from "nextra/components";
@@ -10,7 +10,7 @@ import { Steps, Tabs, Callout } from "nextra/components";
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-An on-premises MCP server deployment allows you to execute tools in your own environment while still leveraging Arcade's cloud Engine infrastructure. This gives you the flexibility to access private resources, maintain data security, and customize your environment while leveraging Arcade's MCP server management and federation capabilities.
+A hybrid MCP server deployment — also called a self-hosted worker or hybrid worker — runs the MCP server on infrastructure you control (on-premises, private cloud, VPC, or any private network) while Arcade's cloud Engine keeps handling identity, routing, and governance. This gives you the flexibility to access private resources behind a firewall, keep sensitive data inside your network, and customize your environment while leveraging Arcade's MCP server management and federation capabilities.
 
 </GuideOverview.Outcomes>
 
@@ -34,21 +34,23 @@ An on-premises MCP server deployment allows you to execute tools in your own env
 
 ## How on-premises MCP servers work
 
-You can make your MCP server accessible to others by exposing it through a secure tunnel and registering it with Arcade. This allows remote users and services to interact with your tools without deploying to a cloud platform.
+You can make your self-hosted MCP server accessible to Arcade Cloud by exposing it through a secure tunnel and registering it as a worker. This allows remote users and services to interact with your tools without deploying to a cloud platform.
 
-The on-premises MCP server model uses a bidirectional connection between your local environment and Arcade's cloud engine:
+The on-premises MCP server model (a hybrid worker deployment) uses a bidirectional connection between your local environment and Arcade's cloud engine:
 
-1. You run the Arcade MCP server in your environment (on-premises, private cloud, etc.)
+1. You run the Arcade MCP server in your environment (on-premises, private cloud, VPC, or any private network)
 2. Your MCP server is exposed to Arcade's cloud engine using a public URL
 3. The Arcade cloud engine routes tool calls to your MCP server
 4. Your MCP server processes the requests and returns responses to the engine
 
 ## Benefits of on-premises MCP servers
 
-- **Resource access**: Access private databases, APIs, and other resources not accessible from Arcade's cloud
+- **Resource access**: Reach private databases, internal APIs, and other resources sitting behind your firewall that aren't accessible from Arcade's cloud
 - **Data control**: Keep sensitive data within your environment while still using Arcade's capabilities
 - **Custom environments**: Use specific dependencies or configurations required by your tools
 - **Compliance**: Meet regulatory requirements by keeping data processing within your infrastructure
+
+If you need to connect external AI clients to a self-hosted Arcade runtime without any tunnel — using outbound-only network egress from your VPC — see [Warp Pipes](/operate/deploy/warp-pipes) instead.
 
 ## Setting up an on-premises MCP server
 
@@ -254,14 +256,7 @@ Open a **separate terminal** and create a tunnel using one of these options:
 
 Once you have a public URL, register your MCP server in the Arcade dashboard to make it accessible through the Arcade API.
 
-<Callout type="info">
-  This flow uses the **Arcade** server type, for a server built with the Arcade
-  SDK that Arcade authenticates with a shared secret. To register a server that
-  speaks plain MCP over HTTP — a vendor's or a partner's — pick **Remote MCP**
-  instead and follow [Remote MCP servers](/operate/governance/remote-mcp-servers).
-</Callout>
-
-1. **Navigate to the MCP Servers page** in your [Arcade dashboard](https://app.arcade.dev/servers)
+1. **Navigate to the MCP Servers page** in your [Arcade dashboard](https://api.arcade.dev/dashboard/servers)
 
 2. **Click "Add Server"**
 
@@ -294,7 +289,7 @@ You can now test your MCP Server by making requests using the Playground, or an 
 <Tabs items={["Playground", "MCP Client"]}>
 <Tabs.Tab>
 
-1. **Go to the [Arcade Playground](https://app.arcade.dev/playground/chat)**
+1. **Go to the [Arcade Playground](https://api.arcade.dev/dashboard/playground/chat)**
 
 2. **Select your MCP server** from the dropdown
 
