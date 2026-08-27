@@ -83,9 +83,9 @@ For Claude, through the Messages API or managed agents, use **Arcade Auth** or *
 
 ## Connect to internal MCP servers
 
-Your internal MCP servers live at private hostnames or IP addresses. Configure the runtime's SSRF allowlist through your Helm values to tell the runtime which internal addresses it's permitted to call, then register each MCP server URI as a worker.
+Your internal MCP servers live at private hostnames or IP addresses. Configure the runtime's SSRF allowlist (an IP allowlist for outbound egress) through your Helm values to tell the runtime which internal addresses it's permitted to call, then register each MCP server URI as a worker.
 
-The runtime calls these servers directly over your private network, by their internal addresses. No inbound ports, and no tunnel, are required.
+The runtime calls these servers directly over your private network, by their internal addresses. Your firewall stays closed to inbound traffic — the runtime only makes outbound egress calls — so no inbound ports, and no tunnel, are required.
 
 <Image
   alt="A single Arcade runtime and its internal MCP servers share one private network. AI clients connect to scoped /mcp gateways, the ssrf_allowlist gates which internal addresses the runtime reaches, and the runtime makes outbound-only calls to Arcade for identity and access."
