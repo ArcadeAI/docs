@@ -1,0 +1,316 @@
+---
+title: Freshservice
+description: Authorize tools and agents with Freshservice on behalf of a user
+---
+
+import { Tabs, Callout, Steps } from "nextra/components";
+
+# Freshservice
+
+<Callout type="info">
+  Arcade does not offer a default Freshservice auth provider, and cannot offer
+  one. Freshworks OAuth endpoints embed your organization domain, so there is no
+  global Freshworks authorization server for Arcade to register a shared
+  application against. Every Freshservice deployment brings its own OAuth
+  application and configures a [custom provider](/references/auth-providers/oauth2),
+  as described below.
+</Callout>
+
+The Freshservice auth provider enables tools and agents to call Freshservice APIs on behalf of a user. Each user authorizes once, and every tool call runs under that user's own token and their own Freshservice permissions.
+
+## Freshservice is not Freshdesk
+
+Freshworks ships both products, and they are separate services with separate APIs, separate scopes, and separate Arcade toolkits:
+
+- **Freshservice** is IT service management: tickets, changes, problems, requesters, the service catalog, and the solutions knowledge base. This page covers Freshservice.
+- **Freshdesk** is a customer support desk. It has its own auth provider and toolkit.
+
+Neither supersedes the other. Configure the one that matches the product your team runs.
+
+## What's documented here
+
+This page is for platform operators who configure Freshservice auth for an organization. It describes how to register a Freshworks OAuth app, how to configure the matching custom provider in Arcade, and which scopes to request.
+
+This auth provider is used by:
+
+- The Arcade Freshservice toolkit, which provides read-only tools for tickets, requesters, changes, problems, solutions, and the service catalog
+- Your [app code](#use-freshservice-auth-in-app-code) that needs to call Freshservice APIs
+- Your [custom tools](#use-freshservice-auth-in-custom-tools) that need to call Freshservice APIs
+
+## Prerequisites
+
+- A Freshservice account, and an administrator on the Freshworks organization that owns it
+- An Arcade account with access to the [Arcade Dashboard](https://api.arcade.dev/dashboard)
+
+## Create a Freshworks OAuth app
+
+<Callout type="info">
+  When using your own app credentials, make sure you configure your project to
+  use a [custom user
+  verifier](/build/user-facing-agents/secure-auth-production#build-a-custom-user-verifier).
+  Without this, your end-users will not be able to use your app or agent in
+  production.
+</Callout>
+
+You create OAuth apps in the Freshworks **developer portal**, not in the Freshworks administrator console. That console carries only users, security, organization, and audit log settings, and creates no OAuth credentials.
+
+<Steps>
+
+#### Open the developer portal
+
+Go to the Freshworks developer portal and enter your organization URL, for example `https://acme-1012508551095650304.myfreshworks.com`.
+
+#### Create an OAuth credential
+
+Open **Connectivity and tools** in your developer profile, select the **OAuth Credentials** tab, and create a credential.
+
+#### Fill in the application details
+
+Supply an application name of three words or fewer, a description, and your redirect URL. Arcade generates the redirect URL when you create the provider, so you can return and fill this in after the next section.
+
+#### Select scopes
+
+Select the scopes your integration requests, per product. See [scopes](#scopes) below for the set the Arcade Freshservice toolkit uses.
+
+#### Copy the credentials
+
+Copy the **Client ID** and **Client Secret**. You need both in the next steps.
+
+</Steps>
+
+## Get your Freshworks organization domain
+
+Your OAuth endpoints are unique to your Freshworks organization. The domain looks like:
+
+```text
+acme-1012508551095650304.myfreshworks.com
+```
+
+Freshworks appends a numeric organization id, so the domain is not your company name alone. Read the value off the URL you are redirected to when you sign in to your organization, rather than constructing it.
+
+Your authorization and token endpoints are:
+
+```text
+https://<your-freshworks-org-domain>/org/oauth/v2/authorize
+https://<your-freshworks-org-domain>/org/oauth/v2/token
+```
+
+<Callout type="warning">
+  Both endpoints require the `/org/` path segment, and leaving it out fails in a
+  way that looks like success. Without `/org/`, both URLs return `200` because
+  they fall through to the admin interface's catch-all route, so the provider
+  looks correctly configured and fails only at consent time. With `/org/`, the
+  authorize URL redirects to your login page and the token URL returns `401`,
+  which is the correct behavior for these endpoints. Freshworks' own
+  documentation shows `/org/` on the authorize URL but omits it from the token
+  URL.
+</Callout>
+
+## Get your Freshservice subdomain
+
+Your Freshservice subdomain is the value before the `.freshservice.com` part of your Freshservice URL. If your Freshservice domain is `https://acme.freshservice.com`, your subdomain is `acme`.
+
+Your Freshworks organization domain and your Freshservice subdomain are separate values and are not guaranteed to match. Arcade needs both: the organization domain routes the authorization, and the subdomain routes the API call to `https://<subdomain>.freshservice.com/api/v2`.
+
+## Set the Freshservice subdomain secret
+
+Set the `FRESHSERVICE_SUBDOMAIN` secret in the [Arcade Dashboard](https://api.arcade.dev/dashboard/auth/secrets).
+
+This secret is a routing address, not a credential. It names the Freshservice tenant to call. Authorization stays entirely with the user's OAuth token, so Arcade stores no static API key.
+
+## Configure Freshservice auth
+
+<Tabs items={["Dashboard GUI"]}>
+<Tabs.Tab>
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+Navigate to the [Arcade Dashboard](https://api.arcade.dev/dashboard/auth/oauth) OAuth Providers page.
+
+#### Navigate to the Add Custom Provider page
+
+- Click **Add OAuth Provider** in the top right corner.
+- Click the **Custom Provider** tab at the top.
+
+#### Enter the provider details
+
+- ID: `freshservice`
+- Description: `<your description>`
+- Client ID: `<your client id>`
+- Client Secret: `<your client secret>`
+- Authorization Endpoint: `https://<your-freshworks-org-domain>/org/oauth/v2/authorize`
+- Token Endpoint: `https://<your-freshworks-org-domain>/org/oauth/v2/token`
+- Refresh Token Endpoint: `https://<your-freshworks-org-domain>/org/oauth/v2/token`
+
+Leave the remaining settings as they are. The [OAuth 2.0 provider reference](/references/auth-providers/oauth2) describes each one.
+
+#### Register the redirect URL
+
+Note the **Redirect URL** that Arcade generates, and add it to your Freshworks OAuth credential.
+
+#### Create the provider
+
+Click to create the provider.
+
+</Steps>
+
+</Tabs.Tab>
+</Tabs>
+
+Access tokens issued by Freshworks are valid for 30 minutes and refresh tokens for 365 days. Arcade refreshes the access token for you.
+
+## Scopes
+
+The Arcade Freshservice toolkit is read-only and requests nine scopes:
+
+```text
+freshservice.tickets.view
+freshservice.tickets.conversations.view
+freshservice.tickets.tasks.view
+freshservice.requesters.view
+freshservice.solutions.view
+freshservice.service_catalog.view
+freshservice.changes.view
+freshservice.problems.view
+freshservice.departments.view
+```
+
+### Scopes are granular per sub-resource
+
+A parent scope does not imply its children. `freshservice.tickets.view` does not cover ticket conversations or ticket tasks, which need `freshservice.tickets.conversations.view` and `freshservice.tickets.tasks.view`. The same split applies to `changes.notes.view`, `changes.tasks.view`, `problems.notes.view`, and others.
+
+An integration that requests only parent scopes reaches the consent screen and then fails at runtime on the sub-resource call, presenting as a permissions error rather than a missing declaration.
+
+### The scope registry is irregular
+
+Freshworks publishes no scope reference, and the catalog does not follow a consistent `view` and `manage` pair per resource. Read the authoritative list from your credential's **Scopes and permissions** panel in the developer portal.
+
+Three gaps are worth knowing before you scope a read-only integration:
+
+- **Agents cannot be read.** `freshservice.agents.manage` exists, but `freshservice.agents.view` does not. `agents.fields.view` and `agents.roles.view` return field and role definitions rather than agent records. A read-only grant cannot resolve an agent's name, so a ticket's assignee is not resolvable without granting a write scope.
+- **Groups have no read scope.** Groups are spelled `agentgroups` with no underscore, and only `freshservice.agentgroups.manage` exists.
+- **The service catalog's list endpoints need a write scope.** `freshservice.service_catalog.view` does not grant `/service_catalog/items`, `/service_catalog/items/{id}`, or `/service_catalog/categories`, which return `403` under the read scope and `200` under `freshservice.service_catalog.edit`. The search endpoint, `/service_catalog/items/search`, does work under the read scope, which is what the Arcade toolkit uses.
+
+Each of these forces the same choice: accept reduced capability, or grant a write scope to perform a read. The Arcade Freshservice toolkit takes the first option and stays read-only.
+
+<Callout type="warning">
+  Authorization errors are reported as `invalid_request`, never `invalid_scope`,
+  and the error page carries only an opaque error id. A wrong scope, a wrong
+  redirect URI, and a wrong client id are indistinguishable by error code.
+  Change one variable at a time when debugging.
+</Callout>
+
+### Trim your credential
+
+The consent screen validates each requested scope string against a global Freshworks registry rather than against the scopes selected on your credential. Reaching consent therefore proves the scope name exists, not that your credential declares it.
+
+Select only the scopes your integration requests. A token carries only what the authorization request asks for, so a broadly selected credential does not widen a narrow token. The credential itself still stands as an app authorized to do everything selected on it, which is what a security review reads.
+
+## Use Freshservice auth in app code
+
+Use the Freshservice auth provider you created to get a user token for Freshservice APIs. See [authorizing agents with Arcade](/get-started/about-arcade) to understand how this works.
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python {6-10}
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+# Start the authorization process
+auth_response = client.auth.start(
+    user_id="{arcade_user_id}",
+    provider="freshservice",
+    scopes=["freshservice.tickets.view"],
+)
+
+if auth_response.status != "completed":
+    print("Please complete the authorization challenge in your browser:")
+    print(auth_response.url)
+
+# Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
+
+token = auth_response.context.token
+
+# Do something interesting with the token...
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```javascript {8-11}
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+const userId = "{arcade_user_id}";
+
+// Start the authorization process
+let authResponse = await client.auth.start(userId, {
+  provider: "freshservice",
+  scopes: ["freshservice.tickets.view"],
+});
+
+if (authResponse.status !== "completed") {
+  console.log("Please complete the authorization challenge in your browser:");
+  console.log(authResponse.url);
+}
+
+// Wait for the authorization to complete
+authResponse = await client.auth.waitForCompletion(authResponse);
+
+const token = authResponse.context.token;
+
+// Do something interesting with the token...
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+<Callout type="info">
+  Arcade adds the scopes already held by a connection to every new authorization
+  request. A follow-up authorization for one extra scope re-requests everything
+  the user already granted, so there is no narrow incremental consent.
+</Callout>
+
+## Use Freshservice auth in custom tools
+
+If the Arcade Freshservice toolkit does not meet your needs, you can author your own [custom tools](/build/create-tools/tool-basics/build-mcp-server) that call Freshservice APIs.
+
+Use the `OAuth2()` auth class to declare that a tool requires authorization with Freshservice, and `requires_secrets` to declare the subdomain. Arcade populates the token for you:
+
+```python
+from typing import Annotated, Any
+
+import httpx
+from arcade_mcp_server import Context, tool
+from arcade_mcp_server.auth import OAuth2
+
+
+@tool(
+    requires_auth=OAuth2(id="freshservice", scopes=["freshservice.tickets.view"]),
+    requires_secrets=["FRESHSERVICE_SUBDOMAIN"],
+)
+async def list_open_tickets(
+    context: Context,
+) -> Annotated[dict[str, Any], "Open tickets from Freshservice"]:
+    """List open tickets from Freshservice."""
+    token = context.get_auth_token_or_empty()
+    subdomain = context.get_secret("FRESHSERVICE_SUBDOMAIN")
+    url = f"https://{subdomain}.freshservice.com/api/v2/tickets"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers)
+        response.raise_for_status()
+        return {"tickets": response.json()}
+```
