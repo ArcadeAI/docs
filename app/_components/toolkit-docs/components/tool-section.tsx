@@ -552,7 +552,7 @@ export function ToolSection({
 
   return (
     <section
-      className="mt-10 scroll-mt-20 rounded-xl border-neutral-dark-high/20 border-b bg-neutral-dark/20 p-6 last:border-b-0"
+      className="mt-10 rounded-xl border-neutral-dark-high/20 border-b bg-neutral-dark/20 p-6 last:border-b-0"
       id={anchorId}
       ref={sectionRef}
     >
