@@ -19,6 +19,9 @@ const meta: MetaRecord = {
   snowflake: {
     title: "Snowflake",
   },
+  atlassian: {
+    title: "Atlassian",
+  },
 };
 
 export default meta;
