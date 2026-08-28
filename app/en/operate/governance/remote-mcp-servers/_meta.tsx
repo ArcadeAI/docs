@@ -10,6 +10,9 @@ const meta: MetaRecord = {
   servicenow: {
     title: "ServiceNow",
   },
+  atlassian: {
+    title: "Atlassian",
+  },
 };
 
 export default meta;

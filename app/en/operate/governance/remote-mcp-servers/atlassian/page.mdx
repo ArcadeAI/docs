@@ -1,0 +1,113 @@
+---
+title: "Connect an Atlassian Remote MCP Server"
+description: "Connect Arcade to Atlassian's Rovo MCP server and configure the site-level domain, permission, and IP controls that govern access"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect an Atlassian Remote MCP Server
+
+Atlassian hosts a remote MCP server at `mcp.atlassian.com`, exposing Jira, Confluence, Jira Service Management, Bitbucket, and Compass tools from an Atlassian Cloud site. This guide covers the Arcade-side setup for connecting it as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the Atlassian administrator controls that most commonly trip people up.
+
+<Callout type="info">
+  Arcade already ships Optimized [Jira](/resources/integrations/productivity/jira)
+  and [Confluence](/resources/integrations/productivity/confluence) toolkits
+  for curated, agent-optimized access with none of the setup below. Reach for
+  this remote-server path instead when you specifically need Compass or Jira
+  Service Management coverage (neither has an Arcade toolkit today), or when
+  you want access enforced entirely through Atlassian's own domain,
+  permission-group, and IP controls rather than Arcade-maintained tool code.
+</Callout>
+
+<Callout type="warning">
+  This guide is sourced from [Atlassian's own support
+  documentation](https://support.atlassian.com/security-and-access-policies/docs/understand-atlassian-rovo-mcp-server/)
+  and the [official
+  atlassian-mcp-server repo](https://github.com/atlassian/atlassian-mcp-server).
+  The Arcade-side field mapping hasn't been walked through end-to-end against
+  a live site. Confirm before treating this as authoritative.
+</Callout>
+
+Atlassian's setup is structurally different from the other guides in this section. Salesforce, ServiceNow, Dynamics 365, and Snowflake all require an administrator to manually create an OAuth app or security integration and hand Arcade a Client ID and Secret. Atlassian's Rovo MCP server instead supports **OAuth 2.1 with Dynamic Client Registration (DCR)**: Arcade registers itself as a client automatically on first connection. There's no app-creation step on Atlassian's side at all. The administrative work here is entirely about *who's allowed to connect and what they can touch*, not about provisioning credentials.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect an Atlassian Remote MCP server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-atlassian">Arcade account</SignupLink>
+- An Atlassian Cloud site (Jira and/or Confluence)
+- Organization administrator access to Atlassian Administration, to configure Rovo MCP server settings
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Which Atlassian domain, permission, and IP controls matter for Arcade specifically, and why
+- Register the remote server in Arcade without manually configuring OAuth credentials
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up Atlassian
+
+- **Allow Arcade's domain to connect.** In Atlassian Administration, go to **Rovo → Rovo MCP server**, and check the domain settings. Atlassian's default **Allow Atlassian supported domains** setting covers Atlassian's own launch partners; it's unlikely to include Arcade automatically. Add Arcade explicitly under allowed domains, or connections will be blocked at the domain-allowlist stage before OAuth is even attempted, regardless of how permissions are otherwise configured.
+
+- **Set permission groups to Allowed for the products you need.** Under the same **Rovo MCP server** area, open **Permissions**. Atlassian groups tools by intent (for example `read_jira`, `write_confluence`, `search_atlassian`), and each tool inherits its group's setting. A connection can complete OAuth successfully and still fail every tool call with an access-denied error if the relevant group isn't set to **Allowed**.
+
+- **Check your org's IP allowlist separately.** If your organization has IP allowlisting configured, it applies independently of the preceding domain allowlist. Arcade's outbound IP addresses need to be added there too, or calls get blocked with an IP-specific error even when the domain and permission settings are both correct.
+
+- **Complete the first-time install with a broadly permissioned account.** The first user to complete the OAuth consent flow for your site needs access to every Atlassian app you want to expose. If that first consent happens with a Jira-only account, Confluence tools never get registered for the site, even for other users who do have Confluence access. Use an account with both Jira and Confluence access (whichever products you're exposing) for that first authorization.
+
+- **API token auth is available as an alternative, but changes the model.** For headless or service-style connections, an organization administrator can enable API token authentication instead of per-user OAuth 2.1 consent (**Rovo MCP server → Authentication**). This is also the *only* supported auth method for Jira Service Management and Bitbucket Cloud tools; those two product surfaces aren't reachable through the OAuth 2.1 flow at all. If you need JSM or Bitbucket tools, plan for a scoped API token rather than expecting OAuth to cover them.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, and enter a server ID and the server URL:
+
+```
+https://mcp.atlassian.com/v1/mcp
+```
+
+<Callout type="info">
+  Atlassian has changed this endpoint before. The legacy `/v1/sse`
+  Server-Sent Events path is still supported but deprecated, and some
+  documentation references `/v1/mcp/authv2`. Confirm the current recommended
+  path in Atlassian's docs if the connection behaves unexpectedly.
+</Callout>
+
+### Configure OAuth2 authorization
+
+Open **Advanced settings → OAuth2 authorization** and **leave Client ID, Client Secret, Authorization URL, and Token URL all empty.** This is the opposite guidance from the other guides in this section: Atlassian's server supports Dynamic Client Registration, so populating these fields isn't necessary and there's nothing to create on the Atlassian side to get them from. Arcade registers a client and discovers the authorization server automatically on first connection.
+
+There's no redirect URI to manually configure anywhere in Atlassian Administration, either. DCR handles that as part of client registration.
+
+### Authorize and confirm
+
+Save the server to open the authorization prompt. If this is the first time anyone has connected an MCP client to this site, sign in with the broadly permissioned account described in [Set up Atlassian](#set-up-atlassian) above, so the site-level app registration picks up access to every product you intend to expose.
+
+</Steps>
+
+## Troubleshooting
+
+- **"Access denied: Your organization admin has not authorized..."**: the relevant permission group (read, write, or search, per product) isn't set to **Allowed** under **Rovo MCP server → Permissions**, even though OAuth itself succeeded.
+- **"You don't have permission to connect from this IP"**: Arcade's outbound IP addresses aren't on the organization's IP allowlist. This is a separate control from the domain allowlist and needs its own configuration.
+- **Authorization fails outright, before any consent screen appears**: Arcade's domain isn't in the allowed domains list under **Rovo MCP server** settings. "Allow Atlassian supported domains" being enabled doesn't guarantee Arcade is covered by it.
+- **Confluence (or Jira) tools never show up, even for a user with access to that product**: the first user to complete the site's initial OAuth consent didn't have access to that product. Have an administrator with access to all needed products redo the initial authorization.
+- **The connection stops responding, or behaves inconsistently**: confirm you're pointed at the current MCP endpoint rather than the deprecated `/v1/sse` path.
+- **Jira Service Management or Bitbucket Cloud tools are missing**: those tool families require API token authentication, not OAuth 2.1. They won't appear through a pure OAuth-based connection regardless of permission group settings.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).
