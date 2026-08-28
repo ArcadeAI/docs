@@ -91,6 +91,7 @@ describe("unified eventing guide", () => {
       "PATCH /schedules/{schedule_id}",
       "DELETE /schedules/{schedule_id}",
       "GET /events/{event_id}",
+      "POST /webhooks/{webhook_id}/rotate_secret",
       "POST /webhooks/{webhook_id}/recover_deliveries",
       "POST /webhooks/{webhook_id}/replay_missing",
       "POST /webhooks/{webhook_id}/deliveries/{delivery_id}/retry",

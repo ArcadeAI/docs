@@ -78,9 +78,10 @@ import hmac
 import json
 import sqlite3
 import time
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping
 
 TOLERANCE_SECONDS = 300
+WebhookSecrets = list[str] | tuple[str, ...]
 
 
 class VerificationError(Exception):
@@ -94,9 +95,12 @@ class ConfigurationError(Exception):
 def verify_request(
     body: bytes,
     headers: Mapping[str, str],
-    secrets: Sequence[str],
+    secrets: WebhookSecrets,
     now: int | None = None,
 ) -> tuple[dict, str]:
+    if isinstance(secrets, str):
+        raise ConfigurationError("webhook secrets must be a list or tuple")
+
     normalized = {key.lower(): value for key, value in headers.items()}
     try:
         delivery_id = normalized["webhook-id"]
@@ -208,7 +212,7 @@ class SQLiteInbox:
 def receive(
     body: bytes,
     headers: Mapping[str, str],
-    active_secrets: Sequence[str],
+    active_secrets: WebhookSecrets,
     inbox: SQLiteInbox,
     handler: Callable[[sqlite3.Connection, dict], None],
     now: int | None = None,
@@ -229,11 +233,13 @@ def receive(
 
 The inbox claim and your business writes must share one transaction. If the handler fails, both roll back and the non-2xx response lets Arcade retry. A valid duplicate returns `204` without rerunning the handler. During secret rotation, pass both active secrets; remove the retired secret after the grace period.
 
+Before calling your business handler, allow-list the subscribed event types and compare tenant identifiers with your server-side subscription configuration. Keep secrets mapped to their subscription; the generic verifier accepts the active secrets you supply and does not treat payload identifiers as authority.
+
 <Callout type="warning">
 Use a persistent store in production, and expire recorded `webhook-id` values only after they can no longer be retried. The configured retry span is 27 hours, 35 minutes, and 5 seconds; retain identifiers longer than that span with operational margin.
 </Callout>
 
-The sample records `received_at` for that cleanup policy but does not schedule the cleanup job for you.
+The sample records `received_at` for that cleanup policy but does not schedule the cleanup job for you. SQLite serializes these write transactions, so keep the handler's transactional work short and local; use a concurrent durable inbox for production receivers with parallel or network-bound work.
 
 ## Try a scheduled event
 
@@ -317,11 +323,11 @@ curl --fail-with-body --silent --show-error \
 Delete the resources, then repeat `GET /events/{event_id}` to confirm the retained event remains:
 
 ```bash
-curl --fail-with-body --request DELETE \
+curl --fail-with-body --silent --show-error --request DELETE \
   --header "Authorization: Bearer $ARCADE_API_KEY" \
   "$SCOPE/schedules/$SCHEDULE_ID"
 
-curl --fail-with-body --request DELETE \
+curl --fail-with-body --silent --show-error --request DELETE \
   --header "Authorization: Bearer $ARCADE_API_KEY" \
   "$SCOPE/webhooks/$WEBHOOK_ID"
 
@@ -424,10 +430,26 @@ Every route below is relative to the project-scoped `$SCOPE`. The Dashboard uses
 | Trigger instance | Inspect, enable, disable, delete | `GET /triggers/{trigger_id}`, `PATCH /triggers/{trigger_id}`, `DELETE /triggers/{trigger_id}` |
 | Schedule | Inspect, enable, disable, delete | `GET /schedules/{schedule_id}`, `PATCH /schedules/{schedule_id}`, `DELETE /schedules/{schedule_id}` |
 | Arcade event | Inspect its delivery trace | `GET /events/{event_id}` |
-| Webhook subscription | Inspect, enable, disable, delete, recover, replay | `GET /webhooks/{webhook_id}`, `PATCH /webhooks/{webhook_id}`, `DELETE /webhooks/{webhook_id}`, `POST /webhooks/{webhook_id}/recover_deliveries`, `POST /webhooks/{webhook_id}/replay_missing` |
+| Webhook subscription | Inspect, enable, disable, rotate signing secret, delete, recover, replay | `GET /webhooks/{webhook_id}`, `PATCH /webhooks/{webhook_id}`, `POST /webhooks/{webhook_id}/rotate_secret`, `DELETE /webhooks/{webhook_id}`, `POST /webhooks/{webhook_id}/recover_deliveries`, `POST /webhooks/{webhook_id}/replay_missing` |
 | Webhook delivery | Inspect and retry a dead delivery | `GET /webhooks/{webhook_id}/deliveries/{delivery_id}`, `POST /webhooks/{webhook_id}/deliveries/{delivery_id}/retry` |
 
 Deleting a trigger, schedule, or webhook subscription does not delete events already retained in project history.
+
+Recovery and replay take an RFC 3339 `since` timestamp in the JSON body:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/webhooks/$WEBHOOK_ID/recover_deliveries" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{"since":"2026-08-28T00:00:00Z"}'
+
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/webhooks/$WEBHOOK_ID/replay_missing" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{"since":"2026-08-28T00:00:00Z"}'
+```
 
 ## Reliability boundaries
 
@@ -435,7 +457,7 @@ Deleting a trigger, schedule, or webhook subscription does not delete events alr
 - **Schedule timing:** A due schedule is published no later than 60 seconds after its due time. The local 90-second delivery observation in this guide is a readiness check, not a production delivery-latency guarantee.
 - **Delivery:** Outgoing webhook delivery is at-least-once. Arcade makes 8 attempts: immediately, then after 5 seconds, 5 minutes, 30 minutes, 2 hours, 5 hours, 10 hours, and 10 hours. The configured delay from attempt 1 through attempt 8 totals 27 hours, 35 minutes, and 5 seconds.
 - **Identity:** One delivery keeps the same `webhook-id` across retries. Different events, and one event delivered through different subscriptions, receive different IDs.
-- **Signatures:** Verify the raw body, `webhook-id`, and `webhook-timestamp` before deduplication. Timestamps through 300 seconds in either direction are accepted; timestamps 301 seconds away are rejected.
+- **Signatures:** Verify the raw body, `webhook-id`, and `webhook-timestamp` before deduplication. The sample receiver chooses a 300-second clock-skew tolerance: it accepts timestamps through 300 seconds in either direction and rejects timestamps 301 seconds away.
 - **Retention:** Project events are retained for 90 days by default. An event exactly at the retention cutoff remains replayable; an older event is unavailable for replay.
 - **Recovery and replay:** `since` is inclusive. Recovery selects existing failed deliveries at or after the boundary. Replay selects retained matching events at or after the boundary that were never delivered to that subscription.
 
