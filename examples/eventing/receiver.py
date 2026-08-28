@@ -26,7 +26,7 @@ def verify_request(
     secrets: WebhookSecrets,
     now: int | None = None,
 ) -> tuple[dict, str]:
-    if isinstance(secrets, str) or any(
+    if not isinstance(secrets, (list, tuple)) or any(
         not isinstance(secret, str) for secret in secrets
     ):
         raise ConfigurationError("webhook secrets must be a list or tuple of strings")

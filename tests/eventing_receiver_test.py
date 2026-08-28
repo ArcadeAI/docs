@@ -71,6 +71,8 @@ class ReceiverTest(unittest.TestCase):
             verify_request(BODY, headers(key), secret(key), NOW)  # type: ignore[arg-type]
         with self.assertRaisesRegex(ConfigurationError, "list or tuple of strings"):
             verify_request(BODY, headers(key), [None], NOW)  # type: ignore[list-item]
+        with self.assertRaisesRegex(ConfigurationError, "list or tuple of strings"):
+            verify_request(BODY, headers(key), {secret(key)}, NOW)  # type: ignore[arg-type]
 
     def test_receive_maps_failures_and_keeps_duplicate_and_retry_contracts(self) -> None:
         key = b"current-secret"
@@ -78,6 +80,10 @@ class ReceiverTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             inbox = SQLiteInbox(str(Path(directory) / "inbox.sqlite"))
             handled: list[str] = []
+            connection = sqlite3.connect(inbox.path)
+            connection.execute("CREATE TABLE business_events (event_type TEXT NOT NULL)")
+            connection.commit()
+            connection.close()
 
             def succeed(_: sqlite3.Connection, event: dict) -> None:
                 handled.append(event["type"])
@@ -91,16 +97,41 @@ class ReceiverTest(unittest.TestCase):
 
             attempts = 0
 
-            def fail_once(_: sqlite3.Connection, __: dict) -> None:
+            def fail_once(connection: sqlite3.Connection, event: dict) -> None:
                 nonlocal attempts
                 attempts += 1
+                connection.execute(
+                    "INSERT INTO business_events(event_type) VALUES (?)",
+                    (event["type"],),
+                )
                 if attempts == 1:
                     raise RuntimeError("retry me")
 
             retry_headers = headers(key, delivery_id="msg_retry")
             self.assertEqual(500, receive(BODY, retry_headers, active, inbox, fail_once, NOW))
+            connection = sqlite3.connect(inbox.path)
+            self.assertEqual([], connection.execute("SELECT * FROM business_events").fetchall())
+            self.assertEqual(
+                [],
+                connection.execute(
+                    "SELECT * FROM webhook_inbox WHERE webhook_id = 'msg_retry'"
+                ).fetchall(),
+            )
+            connection.close()
             self.assertEqual(204, receive(BODY, retry_headers, active, inbox, fail_once, NOW))
             self.assertEqual(2, attempts)
+            connection = sqlite3.connect(inbox.path)
+            self.assertEqual(
+                [("demo.follow_up",)],
+                connection.execute("SELECT event_type FROM business_events").fetchall(),
+            )
+            self.assertEqual(
+                [("msg_retry",)],
+                connection.execute(
+                    "SELECT webhook_id FROM webhook_inbox WHERE webhook_id = 'msg_retry'"
+                ).fetchall(),
+            )
+            connection.close()
 
 
 if __name__ == "__main__":

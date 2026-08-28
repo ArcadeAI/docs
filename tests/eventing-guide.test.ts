@@ -110,6 +110,7 @@ describe("unified eventing guide", () => {
       "27 hours, 35 minutes, and 5 seconds",
       "90 days",
       "webhook-id",
+      "fresh `webhook-timestamp`",
       "300 seconds",
       "301 seconds",
       "one Arcade event per scheduled fire",

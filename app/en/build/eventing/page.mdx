@@ -100,7 +100,7 @@ def verify_request(
     secrets: WebhookSecrets,
     now: int | None = None,
 ) -> tuple[dict, str]:
-    if isinstance(secrets, str) or any(
+    if not isinstance(secrets, (list, tuple)) or any(
         not isinstance(secret, str) for secret in secrets
     ):
         raise ConfigurationError("webhook secrets must be a list or tuple of strings")
@@ -462,7 +462,7 @@ curl --fail-with-body --silent --show-error \
 - **Schedule timing:** A due schedule is published no later than 60 seconds after its due time. The local 90-second delivery observation in this guide is a readiness check, not a production delivery-latency guarantee.
 - **Delivery:** Outgoing webhook delivery is at-least-once. Arcade makes 8 attempts: immediately, then after 5 seconds, 5 minutes, 30 minutes, 2 hours, 5 hours, 10 hours, and 10 hours. The configured delay from attempt 1 through attempt 8 totals 27 hours, 35 minutes, and 5 seconds.
 - **Identity:** One delivery keeps the same `webhook-id` across retries. Different events, and one event delivered through different subscriptions, receive different IDs.
-- **Signatures:** Verify the raw body, `webhook-id`, and `webhook-timestamp` before deduplication. The sample receiver chooses a 300-second clock-skew tolerance: it accepts timestamps through 300 seconds in either direction and rejects timestamps 301 seconds away.
+- **Signatures:** Arcade signs every retry with a fresh `webhook-timestamp`, so a short receiver tolerance remains compatible with the full retry schedule. Verify the raw body, `webhook-id`, and `webhook-timestamp` before deduplication. The sample receiver chooses a 300-second clock-skew tolerance: it accepts timestamps through 300 seconds in either direction and rejects timestamps 301 seconds away.
 - **Retention:** Project events are retained for 90 days by default. An event exactly at the retention cutoff remains replayable; an older event is unavailable for replay.
 - **Recovery and replay:** `since` is inclusive. Recovery selects existing failed deliveries at or after the boundary. Replay selects retained matching events at or after the boundary that were never delivered to that subscription.
 
