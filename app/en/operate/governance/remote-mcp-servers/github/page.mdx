@@ -1,0 +1,144 @@
+---
+title: "Connect a GitHub Remote MCP Server"
+description: "Connect Arcade to GitHub's hosted MCP server using a fine-grained PAT or a registered OAuth App / GitHub App"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a GitHub Remote MCP Server
+
+GitHub hosts a remote MCP server at `api.githubcopilot.com/mcp/`, exposing repositories, issues, pull requests, Actions, code security alerts, Projects, and more through roughly 80 tools. This guide covers the Arcade-side setup for connecting it as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the GitHub settings that most commonly trip people up.
+
+<Callout type="info">
+  This guide is about connecting to GitHub's own remote MCP server, not the
+  Arcade GitHub toolkits. Arcade already covers most of this surface with
+  two toolkits: the [Optimized GitHub
+  toolkit](/resources/integrations/development/github), and the `githubapi`
+  starter toolkit (818 tools, including Actions logs, Dependabot alerts,
+  and code scanning alerts). The one confirmed gap is Copilot Spaces, which
+  neither toolkit covers.
+
+  Reach for this remote server instead when you want:
+
+  - One connection instead of combining two toolkits
+  - Access governed by GitHub's own PAT and OAuth App policies, mirroring your organization's existing controls
+</Callout>
+
+<Callout type="warning">
+  This guide is sourced from [GitHub's own MCP server
+  documentation](https://github.com/github/github-mcp-server) and [policies
+  and governance
+  guide](https://github.com/github/github-mcp-server/blob/main/docs/policies-and-governance.md).
+  The Arcade-side field mapping hasn't been walked through end-to-end
+  against a live GitHub organization. Confirm before treating this as
+  authoritative.
+</Callout>
+
+GitHub supports two distinct auth paths for a remote MCP client, and which one fits depends on your governance requirements more than technical difficulty.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect a GitHub Remote MCP server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-github">Arcade account</SignupLink>
+- A GitHub account or organization with access to the repositories you want to expose
+- For the OAuth path: ability to register an OAuth App or GitHub App (any GitHub user or org owner can do this; no approval from GitHub is required)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Whether to authenticate with a fine-grained PAT or a registered OAuth App / GitHub App, and why
+- Which GitHub organization and enterprise settings matter for Arcade specifically
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up GitHub
+
+### Option A: Fine-grained Personal Access Token (no app registration)
+
+A fine-grained PAT requires no app registration at all. Create one under **Settings → Developer settings → Personal access tokens → Fine-grained tokens**, scoped to exactly the repositories and permissions Arcade needs. This is GitHub's recommended token type over classic PATs, since access is explicitly scoped rather than applying to every repository the user can reach.
+
+This path doesn't use Arcade's OAuth2 configuration at all. It's a static credential passed as a header (see [Configure the remote server in Arcade](#configure-the-remote-server-in-arcade) below).
+
+Two things limit this path:
+- **PATs don't respect OAuth App or GitHub App installation policies.** If your organization governs third-party access through those mechanisms, a PAT bypasses that governance entirely, which is exactly why GitHub itself doesn't recommend PATs for production automation.
+- **Enterprise Managed Users (EMU) have PATs turned off by default.** If your organization uses EMU, this path may not be available until an enterprise administrator explicitly enables it.
+
+### Option B: Register an OAuth App or GitHub App (recommended for governed rollouts)
+
+Unlike AWS's managed MCP server, GitHub doesn't gate this behind an approval process. Any user or organization owner can register an OAuth App or GitHub App themselves, under **Settings → Developer settings**. This is the path that gives you per-user authorization and lets your existing GitHub access policies apply to Arcade's connection the same way they'd apply to any other third-party integration.
+
+A few organization-level settings affect whether this works smoothly:
+
+- **OAuth App access restrictions.** If your organization has this enabled, an organization administrator must explicitly approve Arcade's specific OAuth App before members can authorize through it, similar in spirit to Atlassian's domain allowlist. Notably, GitHub exempts Visual Studio Code and Visual Studio from this restriction by default; Arcade won't be exempt, so this step is required if the restriction is on.
+- **GitHub Enterprise Server (GHES) or `ghe.com`**: these self-hosted or data-residency variants require registering the OAuth App or GitHub App directly against that instance's own domain, not `github.com`. The server URL you register in Arcade will point at your enterprise's own domain instead of `api.githubcopilot.com`.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, and enter a server ID and the server URL:
+
+```
+https://api.githubcopilot.com/mcp/
+```
+
+For GitHub Enterprise Server or `ghe.com`, use your instance's own domain instead. Check with your GitHub administrator for the exact remote MCP endpoint on your instance.
+
+### If using a fine-grained PAT
+
+Under **Advanced settings → Custom headers**, add:
+
+```
+Authorization: Bearer ${secret:GITHUB_PAT}
+```
+
+storing the PAT itself as a header secret. There's no OAuth2 configuration to fill in for this path.
+
+### If using an OAuth App or GitHub App
+
+Open **Advanced settings → OAuth2 authorization** and enter:
+
+- **Client ID** / **Client Secret**: from the OAuth App or GitHub App you registered.
+- **Authorization URL**: `https://github.com/login/oauth/authorize`
+- **Token URL**: `https://github.com/login/oauth/access_token`
+
+<Callout type="info">
+  GitHub doesn't offer Dynamic Client Registration for this. As with most of
+  the providers in this section, these fields need to be filled in manually
+  rather than left blank.
+</Callout>
+
+### Add the redirect URI to your OAuth App
+
+Only needed for the OAuth App / GitHub App path. Copy the redirect URI Arcade generates and add it to your OAuth App's or GitHub App's callback URL settings in GitHub.
+
+### Authorize and confirm
+
+Save the server to open the authorization prompt. Sign in with a GitHub account that has access to the repositories and organizations you intend to expose. Arcade discovers the available tool surface based on this identity's access at setup time.
+
+</Steps>
+
+## Troubleshooting
+
+- **Authorization fails, or GitHub shows an error about the app not being approved**: your organization has OAuth App access restrictions enabled, and an organization administrator needs to explicitly approve Arcade's OAuth App before members can use it.
+- **PAT-based connection returns fewer results than expected, or write actions fail silently**: the fine-grained PAT's scopes don't cover the repositories or permissions the tool call needs. Fine-grained PATs are not filtered the way classic PAT scopes are, so some tools may appear available even when the token can't actually use them. A visible tool isn't a guarantee of access.
+- **A PAT that should work returns an authentication error entirely**: your organization may be an Enterprise Managed User (EMU) tenant, where PATs are turned off by default. Confirm with an enterprise administrator whether PAT access has been explicitly enabled, or switch to the OAuth App path instead.
+- **Connection works for `github.com` repositories but not an internal GitHub Enterprise Server instance**: the server URL and the OAuth App/GitHub App registration both need to point at your enterprise instance's own domain, not `api.githubcopilot.com` or `github.com`.
+- **Calls start failing under moderate load, with rate-limit errors**: rate limits differ by auth method. A PAT or OAuth App is capped at 5,000 requests/hour, while a GitHub App installation scales with repos and users (up to 12,500, or 15,000 on GitHub Enterprise Cloud). A GitHub App may be worth the extra registration step for higher-volume usage.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).

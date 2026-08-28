@@ -22,6 +22,9 @@ const meta: MetaRecord = {
   atlassian: {
     title: "Atlassian",
   },
+  github: {
+    title: "GitHub",
+  },
 };
 
 export default meta;
