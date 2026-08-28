@@ -58,7 +58,7 @@ def headers(key: bytes, *, delivery_id: str = "msg_1", timestamp: int = NOW, bod
 
 
 class ReceiverTest(unittest.TestCase):
-    def test_accepts_the_engine_standard_webhooks_vector(self) -> None:
+    def test_accepts_the_canonical_standard_webhooks_vector(self) -> None:
         body = b'{"event_type":"ping","data":{"success":true}}'
         event, delivery_id = verify_request(
             body,

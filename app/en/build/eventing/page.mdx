@@ -252,7 +252,7 @@ Resolve one subscription from your HTTP route before calling `receive`, and pass
 }
 ```
 
-An authorization rejection returns `403`, so Arcade retries and eventually records a dead delivery; use that behavior to surface a mis-scoped subscription rather than silently dropping it. Any malformed current or previous secret makes the receiver return `500`, including during rotation. Configure a request-body size limit in the HTTP framework before reading the raw body.
+An authorization rejection returns `403`, so Arcade retries and eventually records a dead delivery; use that behavior to surface a mis-scoped subscription rather than silently dropping it. On an otherwise-valid request, any malformed current or previous secret makes the receiver return `500`, including during rotation. Configure a request-body size limit in the HTTP framework before reading the raw body.
 
 <Callout type="warning">
 Use a persistent store in production. Keep each recorded `webhook-id` for at least Arcade's configured event-retention period (90 days by default), plus operational margin. Manual retry and recovery reuse the original delivery ID after automatic attempts end, so sizing the inbox only to the 27-hour automatic retry span can repeat business side effects.
@@ -391,7 +391,7 @@ Delete the trigger and its demo webhook subscription. The emitted event remains 
   </Tabs.Tab>
   <Tabs.Tab>
 
-Set the connected user's stable ID. When exactly one active Gmail connection exists for that user, `connection_id` may be omitted.
+Set the connected user's stable ID and the connection to observe.
 
 ```bash
 export ARCADE_USER_ID="connected-user@example.com"
