@@ -1,0 +1,178 @@
+---
+title: "Connect a Snowflake-Managed MCP Server"
+description: "Configure a Snowflake OAuth security integration and Arcade's OAuth 2.0 settings to connect a Snowflake-managed MCP server"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a Snowflake-Managed MCP Server
+
+Snowflake can host an MCP server object inside a database and schema, exposing Cortex Analyst, Cortex Search, Cortex Agents, SQL execution, and custom UDF/stored procedure tools without any separate infrastructure to deploy. This guide covers the Arcade-side setup for connecting a Snowflake-managed MCP server as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the Snowflake settings that most commonly trip people up.
+
+<Callout type="info">
+  Arcade already ships an [Optimized Snowflake
+  toolkit](/resources/integrations/databases/snowflake) for curated,
+  agent-optimized query and write access with none of the setup below. Reach
+  for this remote-server path instead when you specifically need Cortex
+  Analyst, Cortex Search, or Cortex Agents as tools, or when you want to
+  expose custom UDFs and stored procedures that a Snowflake administrator
+  defines and governs directly. Those are capabilities outside what a
+  general-purpose SQL toolkit covers.
+</Callout>
+
+<Callout type="warning">
+  This guide draws directly from [Snowflake's own MCP server
+  documentation](https://docs.snowflake.com/en/user-guide/snowflake-cortex/cortex-agents-mcp),
+  which is unusually precise about exact SQL, error strings, and failure
+  modes, more so than the vendor docs behind some of the other guides in this
+  section. Even so, the Arcade-side field mapping hasn't been walked through
+  end-to-end against a live account. Confirm before treating this as
+  authoritative.
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect a Snowflake-managed MCP server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-snowflake">Arcade account</SignupLink>
+- A Snowflake account with an MCP server object already created (`CREATE MCP SERVER`), exposing the tools you want Arcade to reach
+- `ACCOUNTADMIN`, or a role with the privileges to create a security integration and grant MCP access
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Which Snowflake security integration and role settings matter for Arcade specifically, and why
+- Configure the remote server's OAuth 2.0 settings in Arcade
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up Snowflake
+
+**Use hyphens, not underscores, in any hostname involved in this setup.** Snowflake calls this out repeatedly in its own docs: MCP servers have connection issues with hostnames containing underscores, and this affects both your account URL and any schema name that ends up in the MCP server's URL path.
+
+- **Create a least-privileged access role for MCP, and grant it only what it needs.** Access to the MCP server object itself does not grant access to the tools behind it. Each tool's underlying object (a Cortex Agent, Search Service, Semantic View, function, or procedure) needs its own grant:
+
+  ```sql
+  CREATE ROLE mcp_access_role;
+
+  GRANT USAGE ON WAREHOUSE <warehouse_name> TO ROLE mcp_access_role;
+  GRANT USAGE ON DATABASE <database_name> TO ROLE mcp_access_role;
+  GRANT USAGE ON SCHEMA <database_name>.<schema_name> TO ROLE mcp_access_role;
+  GRANT USAGE ON MCP SERVER <database_name>.<schema_name>.<server_name> TO ROLE mcp_access_role;
+
+  -- Then grant access to whatever the server's tools actually use, for example:
+  GRANT USAGE ON CORTEX SEARCH SERVICE <database_name>.<schema_name>.<search_service_name> TO ROLE mcp_access_role;
+  GRANT SELECT ON SEMANTIC VIEW <database_name>.<schema_name>.<semantic_view_name> TO ROLE mcp_access_role;
+  ```
+
+  Don't grant this role to `PUBLIC` or give it broad future-table access just to make an MCP connection work. Scope it to exactly what the server's tools require.
+
+- **Create a Snowflake OAuth security integration for Arcade.** The Snowflake-managed MCP server **doesn't support Dynamic Client Registration**. As with the other providers in this section, you create this manually and supply the resulting Client ID and Secret to Arcade yourself.
+
+  ```sql
+  CREATE OR REPLACE SECURITY INTEGRATION arcade_mcp_integration
+    TYPE = OAUTH
+    OAUTH_CLIENT = CUSTOM
+    ENABLED = TRUE
+    OAUTH_CLIENT_TYPE = 'CONFIDENTIAL'
+    OAUTH_REDIRECT_URI = '<redirect_URI>'
+    OAUTH_USE_SECONDARY_ROLES = NONE
+    ALLOWED_ROLES_LIST = ('mcp_access_role');
+  ```
+
+  Leave `OAUTH_REDIRECT_URI` as a placeholder for now; you'll set it to the value Arcade generates once you register the server (see [Add the redirect URI to your security integration](#add-the-redirect-uri-to-your-security-integration) below). `OAUTH_USE_SECONDARY_ROLES = NONE` plus a tightly scoped `ALLOWED_ROLES_LIST` is Snowflake's own recommended least-privilege pattern for MCP. Leaving secondary roles implicit is technically supported, but it broadens the session's effective access beyond what's usually intended.
+
+  Retrieve the Client ID and Secret with:
+
+  ```sql
+  SELECT SYSTEM$SHOW_OAUTH_CLIENT_SECRETS('ARCADE_MCP_INTEGRATION');
+  ```
+
+  The integration name is case-sensitive in this call and must be uppercase, regardless of the case you used when creating it.
+
+- **Set each authorizing user's default role and warehouse.** By default, an MCP OAuth session uses the connecting user's `DEFAULT_ROLE` as its primary role. The scope Claude and some other MCP clients request (`session:role:all`) doesn't let you pick a different role at connect time. If a user's `DEFAULT_ROLE` isn't the MCP access role, or they have no `DEFAULT_WAREHOUSE` set, the session either uses the wrong privileges or fails to initialize:
+
+  ```sql
+  ALTER USER <username> SET DEFAULT_ROLE = 'mcp_access_role' DEFAULT_WAREHOUSE = '<warehouse_name>';
+  ```
+
+- **Check your account's network policy.** If the Snowflake account has network policies enabled, requests from Arcade's infrastructure, not the end user's browser, need to be explicitly allowed, since the token request originates from Arcade's servers:
+
+  ```sql
+  CREATE NETWORK RULE mcp_client_ingress_rule
+    MODE = INGRESS
+    TYPE = IPV4
+    VALUE_LIST = ('<arcade_outbound_ip_1>', '<arcade_outbound_ip_2>', ...);
+
+  ALTER NETWORK POLICY <your_policy_name> ADD ALLOWED_NETWORK_RULE_LIST = ('mcp_client_ingress_rule');
+  ```
+
+  If this is blocked, Snowflake's error is `error: invalid_client` from the token endpoint, identical to what you'd see for wrong credentials. That overlap can lead to a misdiagnosis as a Client ID/Secret problem instead of a network policy one.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, and enter a server ID and the server URL:
+
+```
+https://<account_url>/api/v2/databases/<database>/schemas/<schema>/mcp-servers/<name>
+```
+
+Use the fully qualified database, schema, and server name. An incomplete path is a common cause of "authentication succeeds, but the server doesn't connect."
+
+### Configure OAuth2 authorization
+
+Open **Advanced settings → OAuth2 authorization** and enter:
+
+- **Client ID** / **Client Secret**: from `SYSTEM$SHOW_OAUTH_CLIENT_SECRETS` above.
+- **Authorization URL** / **Token URL**: leave these empty. Snowflake advertises its OAuth metadata via Protected Resource Metadata (RFC 9728) when a client connects, and Arcade should discover the correct endpoints automatically. Only set these manually if discovery fails.
+
+### Add the redirect URI to your security integration
+
+Copy the redirect URI Arcade generates and set it as `OAUTH_REDIRECT_URI` on the security integration:
+
+```sql
+ALTER SECURITY INTEGRATION arcade_mcp_integration
+  SET OAUTH_REDIRECT_URI = '<arcade_redirect_uri>';
+```
+
+<Callout type="info">
+  If Arcade ever needs more than one redirect URI, add the others with
+  `OAUTH_ALTERNATE_REDIRECT_URIS` rather than replacing the primary one.
+</Callout>
+
+### Authorize and confirm
+
+Save the server to open the authorization prompt. Sign in as a Snowflake user whose `DEFAULT_ROLE` is the MCP access role you configured, with a `DEFAULT_WAREHOUSE` set. Both are required for the session to initialize with the access you expect.
+
+</Steps>
+
+## Troubleshooting
+
+This list mirrors Snowflake's own troubleshooting guidance, applied to an Arcade connection:
+
+- **OAuth consent or connection fails**: the redirect URI doesn't match. Set `OAUTH_REDIRECT_URI` to the exact value Arcade generated.
+- **`error: invalid_client` from the token endpoint, even though the Client ID and Secret look correct**: a network policy is blocking Arcade's outbound IP addresses. See [Set up Snowflake](#set-up-snowflake). This error is identical to a credentials error, so don't assume the Client ID/Secret is wrong before checking the network policy.
+- **Authentication succeeds, but the MCP server doesn't connect**: the server URL is missing part of the fully qualified database/schema/server path.
+- **A hostname-related connection failure**: the account hostname (or a schema name in the URL) contains an underscore. Replace it with a hyphen.
+- **The session fails to initialize**: the authorizing user has no `DEFAULT_WAREHOUSE` set.
+- **The session uses the wrong role, or tools aren't visible at all**: the user's `DEFAULT_ROLE` isn't the MCP access role, or that role doesn't have `USAGE` on the MCP server object.
+- **A tool is visible but can't be invoked**: the MCP access role is missing the underlying grant for that specific tool's object. Access to the MCP server doesn't imply access to what it exposes.
+- **The consent screen shows "secondary roles = ALL" even though the integration sets `OAUTH_USE_SECONDARY_ROLES = NONE`**: this label is cosmetic. Snowflake enforces the security integration's actual setting regardless of what the client's consent screen displays.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).

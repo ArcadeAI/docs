@@ -10,6 +10,9 @@ const meta: MetaRecord = {
   servicenow: {
     title: "ServiceNow",
   },
+  snowflake: {
+    title: "Snowflake",
+  },
 };
 
 export default meta;
