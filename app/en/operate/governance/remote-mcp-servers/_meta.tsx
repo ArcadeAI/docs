@@ -10,6 +10,9 @@ const meta: MetaRecord = {
   servicenow: {
     title: "ServiceNow",
   },
+  hubspot: {
+    title: "HubSpot",
+  },
 };
 
 export default meta;
