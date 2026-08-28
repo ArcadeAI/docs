@@ -13,6 +13,9 @@ const meta: MetaRecord = {
   "dynamics-365-customer-service": {
     title: "Dynamics 365 Customer Service",
   },
+  hubspot: {
+    title: "HubSpot",
+  },
 };
 
 export default meta;
