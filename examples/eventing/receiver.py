@@ -59,12 +59,15 @@ def verify_request(
     valid_secret_found = False
     for secret in secrets:
         if not secret.startswith("whsec_"):
+            logger.warning("ignoring webhook secret without whsec_ prefix")
             continue
         try:
             key = base64.b64decode(secret.removeprefix("whsec_"), validate=True)
         except ValueError:
+            logger.warning("ignoring webhook secret with invalid base64")
             continue
         if not key:
+            logger.warning("ignoring webhook secret with an empty key")
             continue
         valid_secret_found = True
         digest = hmac.new(key, signed, hashlib.sha256).digest()
@@ -155,6 +158,8 @@ def receive(
         return 500
 
     try:
+        # Before side effects, the handler must allow-list event types and
+        # compare payload tenant IDs with server-side subscription configuration.
         inbox.handle(delivery_id, event, handler)
     except Exception:
         logger.exception("webhook handler failed")

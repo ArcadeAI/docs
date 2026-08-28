@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -20,12 +20,12 @@ describe("eventing receiver example", () => {
   });
 
   test("executes signature, rotation, boundary, duplicate, and rollback proofs", () => {
-    expect(() =>
-      execFileSync("python3", ["tests/eventing_receiver_test.py"], {
-        cwd: process.cwd(),
-        env: { ...process.env, PYTHONPATH: process.cwd() },
-        stdio: "pipe",
-      })
-    ).not.toThrow();
+    const result = spawnSync("python3", ["tests/eventing_receiver_test.py"], {
+      cwd: process.cwd(),
+      encoding: "utf8",
+      env: { ...process.env, PYTHONPATH: process.cwd() },
+    });
+    expect(result.error?.message ?? "", result.stderr).toBe("");
+    expect(result.status, result.stderr || result.stdout).toBe(0);
   });
 });

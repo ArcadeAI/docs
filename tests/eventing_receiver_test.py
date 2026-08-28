@@ -4,6 +4,7 @@ import hmac
 import json
 import sqlite3
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 
@@ -65,6 +66,10 @@ class ReceiverTest(unittest.TestCase):
         verify_request(BODY, headers(old_key), active, NOW)
         verify_request(BODY, headers(new_key), active, NOW)
 
+        combined = headers(old_key)
+        combined["webhook-signature"] += " " + headers(new_key)["webhook-signature"]
+        verify_request(BODY, combined, active, NOW)
+
     def test_rejects_malformed_secret_collections_as_configuration(self) -> None:
         key = b"current-secret"
         with self.assertRaisesRegex(ConfigurationError, "list or tuple of strings"):
@@ -73,6 +78,37 @@ class ReceiverTest(unittest.TestCase):
             verify_request(BODY, headers(key), [None], NOW)  # type: ignore[list-item]
         with self.assertRaisesRegex(ConfigurationError, "list or tuple of strings"):
             verify_request(BODY, headers(key), {secret(key)}, NOW)  # type: ignore[arg-type]
+
+    def test_rejects_malformed_headers_and_non_object_json(self) -> None:
+        key = b"current-secret"
+        valid = headers(key)
+        for required in ("webhook-id", "webhook-timestamp", "webhook-signature"):
+            candidate = dict(valid)
+            candidate.pop(required)
+            with self.assertRaises(VerificationError):
+                verify_request(BODY, candidate, [secret(key)], NOW)
+        with self.assertRaises(VerificationError):
+            verify_request(BODY, {**valid, "webhook-timestamp": "nope"}, [secret(key)], NOW)
+        with self.assertRaises(VerificationError):
+            verify_request(BODY, {**valid, "webhook-signature": "v1,é"}, [secret(key)], NOW)
+
+        scalar = b'"signed but not an event"'
+        with self.assertRaises(VerificationError):
+            verify_request(scalar, headers(key, body=scalar), [secret(key)], NOW)
+
+    def test_header_names_are_case_insensitive(self) -> None:
+        key = b"current-secret"
+        mixed_case = {
+            name.title(): value for name, value in headers(key).items()
+        }
+        event, delivery_id = verify_request(BODY, mixed_case, [secret(key)], NOW)
+        self.assertEqual("demo.follow_up", event["type"])
+        self.assertEqual("msg_1", delivery_id)
+
+    def test_malformed_rotation_secret_is_logged_while_valid_secret_works(self) -> None:
+        key = b"current-secret"
+        with self.assertLogs("examples.eventing.receiver", level="WARNING"):
+            verify_request(BODY, headers(key), ["not-base64!", secret(key)], NOW)
 
     def test_receive_maps_failures_and_keeps_duplicate_and_retry_contracts(self) -> None:
         key = b"current-secret"
@@ -132,6 +168,51 @@ class ReceiverTest(unittest.TestCase):
                 ).fetchall(),
             )
             connection.close()
+
+    def test_distinct_ids_fan_out_and_concurrent_duplicates_run_once(self) -> None:
+        key = b"current-secret"
+        active = [secret(key)]
+        with tempfile.TemporaryDirectory() as directory:
+            inbox = SQLiteInbox(str(Path(directory) / "inbox.sqlite"))
+            handled: list[str] = []
+            lock = threading.Lock()
+
+            def succeed(_: sqlite3.Connection, event: dict) -> None:
+                with lock:
+                    handled.append(event["type"])
+
+            for delivery_id in ("msg_a", "msg_b"):
+                self.assertEqual(
+                    204,
+                    receive(BODY, headers(key, delivery_id=delivery_id), active, inbox, succeed, NOW),
+                )
+            self.assertEqual(2, len(handled))
+
+            barrier = threading.Barrier(3)
+            statuses: list[int] = []
+
+            def send_duplicate() -> None:
+                barrier.wait()
+                status = receive(
+                    BODY,
+                    headers(key, delivery_id="msg_race"),
+                    active,
+                    inbox,
+                    succeed,
+                    NOW,
+                )
+                with lock:
+                    statuses.append(status)
+
+            threads = [threading.Thread(target=send_duplicate) for _ in range(2)]
+            for thread in threads:
+                thread.start()
+            barrier.wait()
+            for thread in threads:
+                thread.join()
+
+            self.assertEqual([204, 204], sorted(statuses))
+            self.assertEqual(3, len(handled))
 
 
 if __name__ == "__main__":

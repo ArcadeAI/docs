@@ -133,12 +133,15 @@ def verify_request(
     valid_secret_found = False
     for secret in secrets:
         if not secret.startswith("whsec_"):
+            logger.warning("ignoring webhook secret without whsec_ prefix")
             continue
         try:
             key = base64.b64decode(secret.removeprefix("whsec_"), validate=True)
         except ValueError:
+            logger.warning("ignoring webhook secret with invalid base64")
             continue
         if not key:
+            logger.warning("ignoring webhook secret with an empty key")
             continue
         valid_secret_found = True
         digest = hmac.new(key, signed, hashlib.sha256).digest()
@@ -229,6 +232,8 @@ def receive(
         return 500
 
     try:
+        # Before side effects, the handler must allow-list event types and
+        # compare payload tenant IDs with server-side subscription configuration.
         inbox.handle(delivery_id, event, handler)
     except Exception:
         logger.exception("webhook handler failed")
@@ -238,7 +243,7 @@ def receive(
 
 The inbox claim and your business writes must share one transaction. If the handler fails, both roll back and the non-2xx response lets Arcade retry. A valid duplicate returns `204` without rerunning the handler. During secret rotation, pass both active secrets; remove the retired secret after the grace period.
 
-Before calling your business handler, allow-list the subscribed event types and compare tenant identifiers with your server-side subscription configuration. Keep secrets mapped to their subscription; the generic verifier accepts the active secrets you supply and does not treat payload identifiers as authority.
+Before calling your business handler, allow-list the subscribed event types and compare tenant identifiers with your server-side subscription configuration. Keep secrets mapped to their subscription; the generic verifier accepts the active secrets you supply and does not treat payload identifiers as authority. Configure a request-body size limit in the HTTP framework before reading the raw body.
 
 <Callout type="warning">
 Use a persistent store in production, and expire recorded `webhook-id` values only after they can no longer be retried. The configured retry span is 27 hours, 35 minutes, and 5 seconds; retain identifiers longer than that span with operational margin.
@@ -271,7 +276,7 @@ Record the schedule ID and **Next fire** time.
 
 ### Inspect the event and delivery
 
-After the due time, poll **Events** for up to 90 seconds and select the row whose source is that schedule. The event detail shows the subscription, delivery ID, status, and attempts. Confirm the delivery succeeds and your receiver records a signature-valid request with the same `webhook-id`.
+After the due time, poll **Events** for up to 120 seconds and select the row whose source is that schedule. The event detail shows the subscription, delivery ID, status, and attempts. Confirm the delivery succeeds and your receiver records a signature-valid request with the same `webhook-id`.
 
 ### Clean up
 
@@ -311,7 +316,7 @@ curl --fail-with-body --silent --show-error \
 export SCHEDULE_ID="<id from the response>"
 ```
 
-After `next_fire_at`, poll for up to 90 seconds and list only that schedule's events. Save the returned event ID, then inspect that event and its delivery attempts:
+After `next_fire_at`, poll for up to 120 seconds and list only that schedule's events. Save the returned event ID, then inspect that event and its delivery attempts:
 
 ```bash
 curl --fail-with-body --silent --show-error \
@@ -378,6 +383,7 @@ Set the connected user's stable ID. When exactly one active Gmail connection exi
 
 ```bash
 export ARCADE_USER_ID="connected-user@example.com"
+export CONNECTION_ID="<connection_id from Connected users>"
 export SUBJECT_TOKEN="CUSTOMER-20260827-1048"
 ```
 
@@ -388,7 +394,7 @@ curl --fail-with-body --silent --show-error \
   --request POST "$SCOPE/triggers" \
   --header "Authorization: Bearer $ARCADE_API_KEY" \
   --header "Content-Type: application/json" \
-  --data "{\"type_slug\":\"gmail.message.received\",\"user_id\":\"$ARCADE_USER_ID\",\"config\":{\"subject_contains\":\"$SUBJECT_TOKEN\"}}"
+  --data "{\"type_slug\":\"gmail.message.received\",\"user_id\":\"$ARCADE_USER_ID\",\"connection_id\":\"$CONNECTION_ID\",\"config\":{\"subject_contains\":\"$SUBJECT_TOKEN\"}}"
 
 export TRIGGER_ID="<id from the response>"
 ```
@@ -410,11 +416,11 @@ curl --fail-with-body --silent --show-error \
 Delete the trigger and webhook subscription, then confirm the event remains:
 
 ```bash
-curl --fail-with-body --request DELETE \
+curl --fail-with-body --silent --show-error --request DELETE \
   --header "Authorization: Bearer $ARCADE_API_KEY" \
   "$SCOPE/triggers/$TRIGGER_ID"
 
-curl --fail-with-body --request DELETE \
+curl --fail-with-body --silent --show-error --request DELETE \
   --header "Authorization: Bearer $ARCADE_API_KEY" \
   "$SCOPE/webhooks/$WEBHOOK_ID"
 
@@ -461,7 +467,7 @@ curl --fail-with-body --silent --show-error \
 - **Schedule identity:** Arcade publishes one Arcade event per scheduled fire, keyed by schedule ID and scheduled fire time. A schedule and the events it publishes have separate lifecycles.
 - **Schedule timing:** A due schedule is published no later than 60 seconds after its due time. The local 90-second delivery observation in this guide is a readiness check, not a production delivery-latency guarantee.
 - **Delivery:** Outgoing webhook delivery is at-least-once. Arcade makes 8 attempts: immediately, then after 5 seconds, 5 minutes, 30 minutes, 2 hours, 5 hours, 10 hours, and 10 hours. The configured delay from attempt 1 through attempt 8 totals 27 hours, 35 minutes, and 5 seconds.
-- **Identity:** One delivery keeps the same `webhook-id` across retries. Different events, and one event delivered through different subscriptions, receive different IDs.
+- **Identity:** One delivery keeps the same `webhook-id` across retries. That value is also the `{delivery_id}` used by the delivery detail and retry APIs. Different events, and one event delivered through different subscriptions, receive different IDs.
 - **Signatures:** Arcade signs every retry with a fresh `webhook-timestamp`, so a short receiver tolerance remains compatible with the full retry schedule. Verify the raw body, `webhook-id`, and `webhook-timestamp` before deduplication. The sample receiver chooses a 300-second clock-skew tolerance: it accepts timestamps through 300 seconds in either direction and rejects timestamps 301 seconds away.
 - **Retention:** Project events are retained for 90 days by default. An event exactly at the retention cutoff remains replayable; an older event is unavailable for replay.
 - **Recovery and replay:** `since` is inclusive. Recovery selects existing failed deliveries at or after the boundary. Replay selects retained matching events at or after the boundary that were never delivered to that subscription.

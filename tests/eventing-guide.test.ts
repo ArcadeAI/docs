@@ -63,7 +63,7 @@ describe("unified eventing guide", () => {
     ]) {
       expect(page).toContain(`export ${variable}=`);
     }
-    expect(page).toContain("poll for up to 90 seconds");
+    expect(page).toContain("poll for up to 120 seconds");
   });
 
   test("pins origins, tenant isolation, and the reference boundary", () => {
@@ -76,9 +76,6 @@ describe("unified eventing guide", () => {
     ]) {
       expect(page).toContain(value);
     }
-    expect(page).toContain(
-      "Credentials for one organization and project cannot access another scope's resources."
-    );
     expect(page).toContain("[Arcade API reference](/references/api)");
   });
 
@@ -98,9 +95,6 @@ describe("unified eventing guide", () => {
     ]) {
       expect(page).toContain(route);
     }
-    expect(page).toContain(
-      "Deleting a trigger, schedule, or webhook subscription does not delete events already retained in project history."
-    );
   });
 
   test("states only reviewed delivery guarantees and resource boundaries", () => {
