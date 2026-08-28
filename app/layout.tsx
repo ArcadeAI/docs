@@ -112,7 +112,12 @@ export default async function RootLayout({
   const pageMap = addRoutesToHrefItems(rawPageMap) as typeof rawPageMap;
 
   return (
-    <html dir="ltr" lang={lang} suppressHydrationWarning>
+    <html
+      data-scroll-behavior="smooth"
+      dir="ltr"
+      lang={lang}
+      suppressHydrationWarning
+    >
       <Head
         backgroundColor={{
           dark: "#0a0a0a",
