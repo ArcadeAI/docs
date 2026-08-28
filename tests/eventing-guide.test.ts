@@ -115,7 +115,9 @@ describe("unified eventing guide", () => {
       "connected_account.created",
       "connected_account.expired",
       "connected_account.reconnected",
-      '"event_types":["connected_account.expired"]',
+      '--request POST "$SCOPE/webhooks"',
+      "event_types",
+      "url",
       '"type": "connected_account.expired"',
       '"timestamp":',
       '"data":',
@@ -135,8 +137,8 @@ describe("unified eventing guide", () => {
     }
     expect(section).toContain("**Reconnect**");
     expect(section).toContain("public subscription API is project-scoped");
-    expect(section).toContain("organization-bound lifecycle events omit");
-    expect(section).toContain("verify the Standard Webhooks signature");
+    expect(section).toContain("Organization-bound lifecycle events omit");
+    expect(section).toContain("Verify the Standard Webhooks signature");
     expect(section).toContain("reduced grant");
   });
 
