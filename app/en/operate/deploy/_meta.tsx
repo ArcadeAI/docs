@@ -22,10 +22,6 @@ const meta: MetaRecord = {
   "on-prem": {
     title: "Hybrid MCP servers",
   },
-  "warp-pipes": {
-    title: "Warp Pipes",
-    display: "hidden",
-  },
 };
 
 export default meta;
