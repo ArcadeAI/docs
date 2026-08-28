@@ -1,0 +1,128 @@
+---
+title: "Connect a Dynamics 365 Customer Service MCP Server"
+description: "Configure a Microsoft Entra app registration and Arcade's OAuth 2.0 settings to connect the Dynamics 365 CX MCP Server - Service through Agent 365 Tooling Gateway"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a Dynamics 365 Customer Service MCP Server
+
+Microsoft fronts the **Dynamics 365 CX MCP Server - Service** with **Agent 365 Tooling Gateway (ATG)**, a Microsoft-hosted gateway that handles authentication to Dataverse and exposes Customer Service tools (case management, knowledge search, activity timelines, and email drafting) over MCP. This guide covers the Arcade-side setup for connecting it as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the Microsoft Entra settings that most commonly trip people up.
+
+<Callout type="warning">
+  The Microsoft-side steps below are sourced directly from [Microsoft's own
+  documentation](https://learn.microsoft.com/en-us/dynamics365/customer-service/develop/connect-agent-model-context-protocol)
+  for this server. The Arcade-side field mapping (which Arcade dashboard field
+  takes which value) has not yet been walked through end-to-end against a live
+  tenant. Confirm before treating this as authoritative.
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect a Dynamics 365 Customer Service MCP server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-dynamics365-customer-service">Arcade account</SignupLink>
+- A Dynamics 365 Customer Service environment with the CX MCP Server - Service enabled
+- Tenant administrator (or delegated admin-consent) permissions in Microsoft Entra
+- The target environment's Dataverse environment ID
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Which Microsoft Entra and Agent 365 Tooling Gateway settings matter for Arcade specifically, and why
+- Configure the remote server's OAuth 2.0 settings in Arcade
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up Dynamics 365 and Microsoft Entra
+
+Agent 365 Tooling Gateway is a shared, Microsoft-hosted OAuth 2.0-protected resource that fronts several Dynamics 365 MCP servers, not just Customer Service. Before Arcade (or any client app) can request a token for it, two separate things need to exist in your tenant: the gateway's own service principal, and a client app registration you create for Arcade.
+
+- **Provision the Agent 365 Tooling Gateway service principal and grant admin consent.** This is a one-time, tenant-wide step, independent of any specific client. As a tenant administrator, visit:
+
+  ```
+  https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/adminconsent?client_id=ea9ffc3e-8a23-4a7d-836d-234d7c7565c1
+  ```
+
+  Replace `00000000-0000-0000-0000-000000000000` with your tenant ID (Microsoft Entra admin center → **Overview** → **Tenant ID**). The `client_id` value, `ea9ffc3e-8a23-4a7d-836d-234d7c7565c1`, is Microsoft's fixed Entra app ID for Agent 365 Tooling Gateway. It's the same for every tenant. Approving this creates the gateway's resource service principal under **Enterprise applications**. Skipping this step is the most common cause of authorization failing outright: no client app registration can get a token for a resource that doesn't yet exist as a service principal in your tenant.
+
+- **Create a dedicated Entra app registration for Arcade.** This is *not* the Dynamics 365 first-party app. It's your own confidential client, single-tenant. Create a client secret and copy the value; you'll paste it into Arcade's OAuth settings. Leave the **Web** redirect URI empty for now.
+
+- **Add the delegated permission.** Under **API permissions → Add a permission → APIs my organization uses**, search for the Agent 365 Tooling Gateway app (by the preceding app ID) and add its delegated permission, `McpServers.D365Service.All`. Then select **Grant admin consent**.
+
+  This permission uses the `/.default` scope pattern, which doesn't support incremental or per-user consent. The preceding admin consent step has to happen up front, not on first sign-in. If a user hits a consent screen that seems to be missing permissions, or authorization fails silently, this is the first thing to check.
+
+- **Note that this is environment-specific.** The scope and server URL both encode the Dataverse environment ID. A tenant with multiple Customer Service environments needs a separate Arcade server registration and separate OAuth scope per environment.
+
+- **Roles**: configuring the MCP server itself requires **System Administrator** or **Omnichannel Administrator**. The account that authorizes Arcade's connection to actually use the tools needs **Customer Service Representative** or **CSR Manager**.
+
+<Callout type="warning">
+  FedRAMP High tenants get a specific warning here: enabling this MCP server
+  lets Customer Service data egress the FedRAMP High boundary, since Agent 365
+  Tooling Gateway is a Microsoft cloud service outside that boundary. Confirm
+  with your tenant administrator that this meets your compliance requirements
+  before connecting it in a regulated environment.
+</Callout>
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, and enter a server ID and the server URL:
+
+```
+https://agent365.svc.cloud.microsoft/mcp/environments/11111111-1111-1111-1111-111111111111/servers/mcp_D365CX_Service
+```
+
+Replace `11111111-1111-1111-1111-111111111111` with your Dataverse environment ID. The `/mcp/environments/.../servers/` path segment is required; omitting or mistyping it returns a `404 RouteNotFound` from the gateway itself, before authentication is even attempted.
+
+### Configure OAuth2 authorization
+
+Open **Advanced settings → OAuth2 authorization** and enter:
+
+- **Client ID** / **Client Secret**: from the Entra app registration you created above.
+- **Authorization URL**: `https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/oauth2/v2.0/authorize`, with your tenant ID in place of the example GUID.
+- **Token URL**: `https://login.microsoftonline.com/00000000-0000-0000-0000-000000000000/oauth2/v2.0/token`, with your tenant ID in place of the example GUID.
+- **Scope**: `ea9ffc3e-8a23-4a7d-836d-234d7c7565c1/.default`, the Agent 365 Tooling Gateway app ID with `/.default` appended, not a Dynamics-specific scope string.
+
+<Callout type="info">
+  Microsoft Entra doesn't support Dynamic Client Registration, so, as with
+  Salesforce and ServiceNow, you must supply the Client ID and Secret
+  manually. If you leave these blank, Arcade attempts Dynamic Client
+  Registration and Entra rejects it.
+</Callout>
+
+### Add the redirect URI to your Entra app
+
+Copy the redirect URI Arcade generates and add it as a **Web** redirect URI on the Entra app registration you created for Arcade. Microsoft's own guidance for this same app in Copilot Studio is to leave the redirect URI blank until this point, specifically because the value isn't known ahead of time. The same applies here.
+
+### Authorize and confirm
+
+Save the server to open the authorization prompt. Sign in with an account that has access to the target Customer Service environment and the **Customer Service Representative** or **CSR Manager** role. The token audience is the tooling gateway, and Agent 365 Tooling Gateway performs an on-behalf-of exchange to reach Dataverse using that identity's permissions.
+
+</Steps>
+
+## Troubleshooting
+
+- **`404 RouteNotFound` when registering the server**: the server URL is missing the `/mcp/environments/.../servers/mcp_D365CX_Service` path segment, or the environment ID is wrong.
+- **Authorization fails outright, with no clear consent screen**: the Agent 365 Tooling Gateway service principal hasn't been provisioned and admin-consented in this tenant yet. See [Set up Dynamics 365 and Microsoft Entra](#set-up-dynamics-365-and-microsoft-entra); this is a separate, tenant-wide step from your Arcade app's own permissions.
+- **Consent looks incomplete, or a permission seems to silently not apply**: the `/.default` scope requires admin consent granted in advance. It doesn't support incremental consent during the OAuth flow itself.
+- **Tool list is empty, or every call returns a 404 despite a valid token**: the environment ID in the server URL doesn't match the scope's environment, or doesn't match the environment where the Customer Service MCP Server is actually enabled. Both the URL and the scope are environment-specific.
+- **Authorization succeeds, but tool calls return 403**: the signing-in user doesn't have the Customer Service Representative or CSR Manager role, even though their Entra sign-in itself succeeded.
+- **Connection blocked or flagged in a regulated tenant**: check with the tenant administrator about the FedRAMP High data-egress notice. Some tenants turn off this class of connection by policy.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).

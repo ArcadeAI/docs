@@ -10,6 +10,9 @@ const meta: MetaRecord = {
   servicenow: {
     title: "ServiceNow",
   },
+  "dynamics-365-customer-service": {
+    title: "Dynamics 365 Customer Service",
+  },
 };
 
 export default meta;
