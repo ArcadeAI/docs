@@ -338,6 +338,16 @@ export function buildToolkitInfoList(dataDir: string): ToolkitInfo[] {
 }
 
 /**
+ * The fields a partner needs to become a sidebar entry. Narrower than
+ * `PartnerToolkit` so tests can hand in plain objects instead of casting a
+ * full catalog entry into existence.
+ */
+export type PartnerNavSource = Pick<
+  PartnerToolkit,
+  "id" | "label" | "category" | "relativeDocsLink"
+>;
+
+/**
  * Sidebar entries for the partner integrations (remote MCP Servers offered by
  * Arcade partners).
  *
@@ -350,7 +360,7 @@ export function buildToolkitInfoList(dataDir: string): ToolkitInfo[] {
  * file. tests/partner-integration-nav.test.ts holds the two together.
  */
 export function buildPartnerToolkitInfoList(
-  partners: readonly PartnerToolkit[] = PARTNER_TOOLKITS
+  partners: readonly PartnerNavSource[] = PARTNER_TOOLKITS
 ): ToolkitInfo[] {
   return partners.map((partner) => {
     const category = partner.category;
@@ -364,13 +374,44 @@ export function buildPartnerToolkitInfoList(
       id: partner.id,
       slug: getToolkitSlug({
         id: partner.id,
-        docsLink: partner.relativeDocsLink ?? partner.docsLink ?? null,
+        docsLink: partner.relativeDocsLink,
       }),
       label: partner.label,
       category,
       navGroup: "partner" as const,
     };
   });
+}
+
+/**
+ * A partner and a JSON-backed toolkit that resolve to the same slug in the same
+ * category would render two `_meta.tsx` entries under one key. Fail here, naming
+ * both, rather than write a file that tsc rejects with a line number and no
+ * explanation of where the second entry came from.
+ */
+export function mergeToolkitAndPartnerInfo(
+  toolkits: ToolkitInfo[],
+  partners: ToolkitInfo[]
+): ToolkitInfo[] {
+  const toolkitKeys = new Map(
+    toolkits.map((toolkit) => [
+      `${toolkit.category}/${toolkit.slug}`,
+      toolkit.id,
+    ])
+  );
+
+  for (const partner of partners) {
+    const key = `${partner.category}/${partner.slug}`;
+    const toolkitId = toolkitKeys.get(key);
+    if (toolkitId) {
+      throw new Error(
+        `Partner "${partner.id}" and toolkit "${toolkitId}" both resolve to ${key}. ` +
+          "Give one of them a different slug, or drop the partner from app/_data/partner-toolkits.ts."
+      );
+    }
+  }
+
+  return [...toolkits, ...partners];
 }
 
 /**
@@ -564,7 +605,9 @@ export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
     log(`Found ${partners.length} partner integrations`);
 
     // Group by category
-    const grouped = groupByCategory([...toolkits, ...partners]);
+    const grouped = groupByCategory(
+      mergeToolkitAndPartnerInfo(toolkits, partners)
+    );
     const activeCategories = Array.from(grouped.keys());
     log(`Active categories: ${activeCategories.join(", ")}`);
 

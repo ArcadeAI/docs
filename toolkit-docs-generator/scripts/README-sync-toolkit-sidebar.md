@@ -49,7 +49,9 @@ This script rewrites every category `_meta.tsx` from scratch, so the next run
 drops a partner entry that someone typed into one of those files by hand. Add
 the partner to `app/_data/partner-toolkits.ts` and re-run the script instead.
 `tests/partner-integration-nav.test.ts` fails when a partner has no page or no
-sidebar entry.
+sidebar entry. The script also refuses to run when a partner and a toolkit
+resolve to the same slug in the same category, since the sidebar can hold only
+one entry per key.
 
 ## Category mapping
 

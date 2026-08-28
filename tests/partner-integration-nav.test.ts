@@ -3,10 +3,7 @@ import { join } from "node:path";
 import type { MetaRecord } from "nextra";
 import { describe, expect, test } from "vitest";
 import { PARTNER_TOOLKITS } from "@/app/_data/partner-toolkits";
-import {
-  getToolkitSlug,
-  INTEGRATION_CATEGORIES,
-} from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import { getToolkitSlug } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 
 /**
  * Partner integrations are hand-authored pages that no toolkit JSON file backs,
@@ -30,7 +27,7 @@ const partnerCases = PARTNER_TOOLKITS.map((partner) => ({
   partner,
   slug: getToolkitSlug({
     id: partner.id,
-    docsLink: partner.relativeDocsLink ?? partner.docsLink ?? null,
+    docsLink: partner.relativeDocsLink,
   }),
 }));
 
@@ -43,13 +40,6 @@ describe("partner integrations", () => {
   test("there is at least one partner to check", () => {
     expect(partnerCases.length).toBeGreaterThan(0);
   });
-
-  test.each(partnerCases)(
-    "$partner.id has a routable category",
-    ({ partner }) => {
-      expect(INTEGRATION_CATEGORIES).toContain(partner.category);
-    }
-  );
 
   test.each(partnerCases)(
     "$partner.id has a page on disk",
@@ -81,14 +71,6 @@ describe("partner integrations", () => {
         title: partner.label,
         href: `${INTEGRATIONS_BASE_PATH}/${partner.category}/${slug}`,
       });
-    }
-  );
-
-  test.each(partnerCases)(
-    "$partner.id has a sidebar Partners section",
-    async ({ partner }) => {
-      const meta = await loadCategoryMeta(partner.category);
-
       expect(meta["-- Partners"]).toMatchObject({
         type: "separator",
         title: "Partners",

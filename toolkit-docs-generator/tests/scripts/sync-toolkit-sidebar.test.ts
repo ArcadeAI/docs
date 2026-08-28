@@ -8,7 +8,6 @@
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { PartnerToolkit } from "../../../app/_data/partner-toolkits";
 import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params";
 import {
   buildPartnerToolkitInfoList,
@@ -20,6 +19,8 @@ import {
   getToolkitLabel,
   getToolkitLabelFromJson,
   groupByCategory,
+  mergeToolkitAndPartnerInfo,
+  type PartnerNavSource,
   parseBooleanCliFlag,
   resolveRemoveEmptySections,
   setToolkitsForTesting,
@@ -931,24 +932,16 @@ describe("category move cleanup logic", () => {
 // Unit Tests: partner integrations
 // ============================================================================
 
-/**
- * `buildPartnerToolkitInfoList` reads four fields off a partner, so the cases
- * below supply those and nothing else. The cast is confined here rather than
- * spelled out at every call site.
- */
-const asPartner = (fields: Record<string, unknown>): PartnerToolkit =>
-  fields as unknown as PartnerToolkit;
+const tavilyPartner: PartnerNavSource = {
+  id: "Tavily",
+  label: "Tavily",
+  category: "search",
+  relativeDocsLink: "/en/resources/integrations/search/tavily",
+};
 
 describe("buildPartnerToolkitInfoList", () => {
-  const partner = asPartner({
-    id: "Tavily",
-    label: "Tavily",
-    category: "search",
-    relativeDocsLink: "/en/resources/integrations/search/tavily",
-  });
-
   it("derives a partner sidebar entry from the partner catalog", () => {
-    const result = buildPartnerToolkitInfoList([partner]);
+    const result = buildPartnerToolkitInfoList([tavilyPartner]);
 
     expect(result).toEqual([
       {
@@ -961,20 +954,12 @@ describe("buildPartnerToolkitInfoList", () => {
     ]);
   });
 
-  it("falls back to the kebab-cased id when there is no docs link", () => {
-    const result = buildPartnerToolkitInfoList([
-      asPartner({ id: "NimbleWay", label: "Nimble", category: "search" }),
-    ]);
-
-    expect(result[0]?.slug).toBe("nimble-way");
-  });
-
+  // "all" is the design system's filter meta-value: a legal ToolkitCategory
+  // with no integrations route behind it.
   it("throws on a category with no integrations route", () => {
     expect(() =>
-      buildPartnerToolkitInfoList([
-        asPartner({ ...partner, category: "nonsense" }),
-      ])
-    ).toThrow(/Unrecognized integration category "nonsense"/);
+      buildPartnerToolkitInfoList([{ ...tavilyPartner, category: "all" }])
+    ).toThrow(/Unrecognized integration category "all"/);
   });
 
   it("keeps the real partner catalog routable", () => {
@@ -985,6 +970,49 @@ describe("buildPartnerToolkitInfoList", () => {
       expect(INTEGRATION_CATEGORIES).toContain(entry.category);
       expect(entry.navGroup).toBe("partner");
     }
+  });
+});
+
+describe("mergeToolkitAndPartnerInfo", () => {
+  const searchToolkit: ToolkitInfo = {
+    id: "GoogleSearch",
+    slug: "google-search",
+    label: "Google Search",
+    category: "search",
+    navGroup: "optimized",
+  };
+  const searchPartner: ToolkitInfo = {
+    id: "Tavily",
+    slug: "tavily",
+    label: "Tavily",
+    category: "search",
+    navGroup: "partner",
+  };
+
+  it("appends the partners to the toolkits", () => {
+    expect(
+      mergeToolkitAndPartnerInfo([searchToolkit], [searchPartner])
+    ).toEqual([searchToolkit, searchPartner]);
+  });
+
+  it("throws when a partner and a toolkit share a slug in one category", () => {
+    expect(() =>
+      mergeToolkitAndPartnerInfo(
+        [{ ...searchToolkit, slug: "tavily" }],
+        [searchPartner]
+      )
+    ).toThrow(
+      /Partner "Tavily" and toolkit "GoogleSearch" both resolve to search\/tavily/
+    );
+  });
+
+  it("allows the same slug in different categories", () => {
+    expect(() =>
+      mergeToolkitAndPartnerInfo(
+        [{ ...searchToolkit, slug: "tavily", category: "development" }],
+        [searchPartner]
+      )
+    ).not.toThrow();
   });
 });
 
