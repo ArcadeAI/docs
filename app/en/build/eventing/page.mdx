@@ -301,7 +301,7 @@ All three events identify the `organization_id`, `user_id`, `provider_id`, `conn
 - `no_refresh_token` means the access token expired and no refresh token was available.
 - `refresh_failed` means the provider permanently rejected the refresh grant.
 
-The public subscription API is project-scoped. Organization-bound lifecycle events omit `project_id` and are not delivered to a project subscription.
+Each lifecycle event can originate from a project-bound or organization-bound connection. The public subscription API is project-scoped, so it delivers the project-bound events in the preceding example. Organization-bound lifecycle events omit `project_id` and are not delivered to a project subscription.
 
 In the Dashboard, open the expired connected user, and choose **Reconnect**. The same action is available through `POST /v1/orgs/{org_id}/projects/{project_id}/auth/authorize`:
 
@@ -320,7 +320,7 @@ curl --fail-with-body --silent --show-error \
   }'
 ```
 
-Open the returned authorization URL. A successful flow restores the same connection and emits `connected_account.reconnected`. Triggers pinned to it become healthy again. Ask for the connection's recorded scopes. Arcade also applies scopes configured on the provider. A reconnected event reports the OAuth state change, but normal scope checks still apply if the provider returns a reduced grant.
+Open the returned authorization URL. A successful flow restores the same connection and emits `connected_account.reconnected`. Triggers pinned to it become healthy again. Use the scopes on the connected-account record; Dashboard does this for you. Arcade also applies scopes configured on the provider. A reconnected event reports the OAuth state change, but normal scope checks still apply if the provider returns a reduced grant.
 
 Engine does not observe MCP-managed OAuth refresh outcomes, so MCP-managed OAuth connections do not emit this lifecycle or use the standard OAuth Reconnect action.
 
