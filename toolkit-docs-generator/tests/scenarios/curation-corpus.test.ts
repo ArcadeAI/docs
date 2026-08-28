@@ -43,7 +43,7 @@ describe("checked-in Markdown curation", () => {
       subPageCount += current.subPages.length;
     }
 
-    expect(chunkCount).toBe(82);
+    expect(chunkCount).toBe(90);
     expect(subPageCount).toBe(2);
   });
 });
