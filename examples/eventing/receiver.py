@@ -8,6 +8,9 @@ import time
 from collections.abc import Callable, Mapping
 
 TOLERANCE_SECONDS = 300
+SECRET_FORMAT_ERROR = (
+    "webhook secrets must use whsec_ followed by padded standard base64"
+)
 WebhookSecrets = list[str] | tuple[str, ...]
 logger = logging.getLogger(__name__)
 
@@ -55,21 +58,22 @@ def verify_request(
         + b"."
         + body
     )
-    matched = False
-    valid_secret_found = False
+    keys: list[bytes] = []
     for secret in secrets:
         if not secret.startswith("whsec_"):
-            logger.warning("ignoring webhook secret without whsec_ prefix")
-            continue
+            raise ConfigurationError(SECRET_FORMAT_ERROR)
         try:
             key = base64.b64decode(secret.removeprefix("whsec_"), validate=True)
-        except ValueError:
-            logger.warning("ignoring webhook secret with invalid base64")
-            continue
+        except ValueError as error:
+            raise ConfigurationError(SECRET_FORMAT_ERROR) from error
         if not key:
-            logger.warning("ignoring webhook secret with an empty key")
-            continue
-        valid_secret_found = True
+            raise ConfigurationError(SECRET_FORMAT_ERROR)
+        keys.append(key)
+    if not keys:
+        raise ConfigurationError("no webhook secrets configured")
+
+    matched = False
+    for key in keys:
         digest = hmac.new(key, signed, hashlib.sha256).digest()
         expected = b"v1," + base64.b64encode(digest)
         for candidate in supplied:
@@ -78,12 +82,6 @@ def verify_request(
             except UnicodeEncodeError:
                 continue
             matched |= hmac.compare_digest(expected, encoded)
-    if not valid_secret_found:
-        if not secrets:
-            raise ConfigurationError("no webhook secrets configured")
-        raise ConfigurationError(
-            "webhook secrets must use whsec_ followed by padded standard base64"
-        )
     if not matched:
         raise VerificationError("invalid webhook-signature")
 
@@ -145,6 +143,7 @@ def receive(
     headers: Mapping[str, str],
     subscription_secrets: WebhookSecrets,
     inbox: SQLiteInbox,
+    authorize: Callable[[dict], bool],
     handler: Callable[[sqlite3.Connection, dict], None],
     now: int | None = None,
 ) -> int:
@@ -156,8 +155,10 @@ def receive(
         return 500
 
     try:
-        # Before side effects, the handler must allow-list event types and
-        # compare payload tenant IDs with server-side subscription configuration.
+        # Build this callback from server-side subscription configuration. Do not
+        # accept event types or tenant IDs merely because they appear in the payload.
+        if not authorize(event):
+            return 403
         inbox.handle(delivery_id, event, handler)
     except Exception:
         logger.exception("webhook handler failed")

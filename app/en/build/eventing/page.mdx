@@ -69,7 +69,7 @@ The [Arcade API reference](/references/api) owns the complete request and respon
 
 Arcade returns a webhook signing secret only when the subscription is created or its secret is rotated. It uses the `whsec_` prefix followed by padded standard base64. Store it as a secret and verify the exact raw request body before parsing JSON or checking for duplicates.
 
-The following Python 3.10+ example has no framework dependency. Call `receive` from your HTTP handler with the raw bytes and lowercase or mixed-case request headers. Return its status code without changing the body first.
+The following Python 3.10+ example has no framework dependency. Call `receive` from your HTTP handler with the unchanged raw request bytes and lowercase or mixed-case headers, then use its return value as the HTTP response status.
 
 ```python filename="receiver.py"
 import base64
@@ -82,6 +82,9 @@ import time
 from collections.abc import Callable, Mapping
 
 TOLERANCE_SECONDS = 300
+SECRET_FORMAT_ERROR = (
+    "webhook secrets must use whsec_ followed by padded standard base64"
+)
 WebhookSecrets = list[str] | tuple[str, ...]
 logger = logging.getLogger(__name__)
 
@@ -129,21 +132,22 @@ def verify_request(
         + b"."
         + body
     )
-    matched = False
-    valid_secret_found = False
+    keys: list[bytes] = []
     for secret in secrets:
         if not secret.startswith("whsec_"):
-            logger.warning("ignoring webhook secret without whsec_ prefix")
-            continue
+            raise ConfigurationError(SECRET_FORMAT_ERROR)
         try:
             key = base64.b64decode(secret.removeprefix("whsec_"), validate=True)
-        except ValueError:
-            logger.warning("ignoring webhook secret with invalid base64")
-            continue
+        except ValueError as error:
+            raise ConfigurationError(SECRET_FORMAT_ERROR) from error
         if not key:
-            logger.warning("ignoring webhook secret with an empty key")
-            continue
-        valid_secret_found = True
+            raise ConfigurationError(SECRET_FORMAT_ERROR)
+        keys.append(key)
+    if not keys:
+        raise ConfigurationError("no webhook secrets configured")
+
+    matched = False
+    for key in keys:
         digest = hmac.new(key, signed, hashlib.sha256).digest()
         expected = b"v1," + base64.b64encode(digest)
         for candidate in supplied:
@@ -152,12 +156,6 @@ def verify_request(
             except UnicodeEncodeError:
                 continue
             matched |= hmac.compare_digest(expected, encoded)
-    if not valid_secret_found:
-        if not secrets:
-            raise ConfigurationError("no webhook secrets configured")
-        raise ConfigurationError(
-            "webhook secrets must use whsec_ followed by padded standard base64"
-        )
     if not matched:
         raise VerificationError("invalid webhook-signature")
 
@@ -219,6 +217,7 @@ def receive(
     headers: Mapping[str, str],
     subscription_secrets: WebhookSecrets,
     inbox: SQLiteInbox,
+    authorize: Callable[[dict], bool],
     handler: Callable[[sqlite3.Connection, dict], None],
     now: int | None = None,
 ) -> int:
@@ -230,8 +229,10 @@ def receive(
         return 500
 
     try:
-        # Before side effects, the handler must allow-list event types and
-        # compare payload tenant IDs with server-side subscription configuration.
+        # Build this callback from server-side subscription configuration. Do not
+        # accept event types or tenant IDs merely because they appear in the payload.
+        if not authorize(event):
+            return 403
         inbox.handle(delivery_id, event, handler)
     except Exception:
         logger.exception("webhook handler failed")
@@ -241,7 +242,17 @@ def receive(
 
 The inbox claim and your business writes must share one transaction. If the handler fails, both roll back and the non-2xx response lets Arcade retry. A valid duplicate returns `204` without rerunning the handler. During secret rotation, pass both active secrets; remove the retired secret after the grace period.
 
-Resolve one subscription from your HTTP route before calling `receive`, and pass only that subscription's current and previous secrets as `subscription_secrets`. Before side effects, have the handler allow-list that subscription's event types and compare tenant identifiers with its server-side configuration. The generic verifier does not treat payload identifiers as authority. Configure a request-body size limit in the HTTP framework before reading the raw body.
+Resolve one subscription from your HTTP route before calling `receive`, and pass only that subscription's current and previous secrets as `subscription_secrets`. Build `authorize` from that server-side subscription: allow its configured event types and, when the event schema carries tenant identifiers, compare them with the route's organization and project. The payload itself is not authority. Arcade event envelopes use `type`, `timestamp`, and `data`:
+
+```json
+{
+  "type": "demo.follow_up",
+  "timestamp": "2026-08-28T21:00:00Z",
+  "data": {"organization_id":"org_123","project_id":"proj_123"}
+}
+```
+
+An authorization rejection returns `403`, so Arcade retries and eventually records a dead delivery; use that behavior to surface a mis-scoped subscription rather than silently dropping it. Any malformed current or previous secret makes the receiver return `500`, including during rotation. Configure a request-body size limit in the HTTP framework before reading the raw body.
 
 <Callout type="warning">
 Use a persistent store in production. Keep each recorded `webhook-id` for at least Arcade's configured event-retention period (90 days by default), plus operational margin. Manual retry and recovery reuse the original delivery ID after automatic attempts end, so sizing the inbox only to the 27-hour automatic retry span can repeat business side effects.
@@ -439,9 +450,9 @@ Every route below is relative to the project-scoped `$SCOPE`. The Dashboard uses
 
 | Resource | Dashboard | REST API |
 | --- | --- | --- |
-| Trigger instance | Inspect, enable, disable, delete | `GET /triggers/{trigger_id}`, `PATCH /triggers/{trigger_id}`, `DELETE /triggers/{trigger_id}` |
+| Trigger instance | Inspect, enable, disable, delete | `GET /triggers/{trigger_id}`, `PATCH /triggers/{trigger_id}`, `DELETE /triggers/{trigger_id}`, `GET /triggers/{trigger_id}/events`, `GET /triggers/{trigger_id}/events/{event_id}` |
 | Schedule | Inspect, enable, disable, delete | `GET /schedules/{schedule_id}`, `PATCH /schedules/{schedule_id}`, `DELETE /schedules/{schedule_id}` |
-| Arcade event | Inspect its delivery trace | `GET /events/{event_id}` |
+| Arcade event | List and inspect delivery traces | `GET /events`, `GET /events/{event_id}` |
 | Webhook subscription | Inspect, enable, disable, rotate signing secret, delete, recover, replay | `GET /webhooks/{webhook_id}`, `PATCH /webhooks/{webhook_id}`, `POST /webhooks/{webhook_id}/rotate_secret`, `DELETE /webhooks/{webhook_id}`, `POST /webhooks/{webhook_id}/recover_deliveries`, `POST /webhooks/{webhook_id}/replay_missing` |
 | Webhook delivery | Inspect and retry a dead delivery | `GET /webhooks/{webhook_id}/deliveries/{delivery_id}`, `POST /webhooks/{webhook_id}/deliveries/{delivery_id}/retry` |
 

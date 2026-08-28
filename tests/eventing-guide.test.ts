@@ -7,8 +7,7 @@ const PAGE = "app/en/build/eventing/page.mdx";
 const TITLE_RE = /title:\s*"Build event-driven integrations"/;
 const MODEL_SECTION_RE =
   /## The eventing model([\s\S]*?)## Choose your deployment origin/;
-const MODEL_ROW_RE =
-  /^\| (Arcade event|Trigger type|Trigger instance|Schedule|Provider ingress|Webhook subscription|Webhook delivery) \|/gm;
+const TABLE_DATA_ROW_RE = /^\| (?!Term \|)(?!-)[^|]+\|/gm;
 const TIMESTAMP_TOLERANCE_RE = /through (\d+) seconds/;
 const TIMESTAMP_REJECTION_RE = /timestamps (\d+) seconds away/;
 const TOLERANCE_CONSTANT_RE = /TOLERANCE_SECONDS = (\d+)/;
@@ -49,7 +48,7 @@ describe("unified eventing guide", () => {
     for (const row of rows) {
       expect(model).toContain(row);
     }
-    expect(model.match(MODEL_ROW_RE)).toHaveLength(7);
+    expect(model.match(TABLE_DATA_ROW_RE)).toHaveLength(7);
   });
 
   test("keeps examples on Dashboard and scoped REST surfaces", () => {
@@ -105,6 +104,9 @@ describe("unified eventing guide", () => {
     const tolerance = Number(page.match(TIMESTAMP_TOLERANCE_RE)?.[1]);
     const rejection = Number(page.match(TIMESTAMP_REJECTION_RE)?.[1]);
     const receiverTolerance = Number(page.match(TOLERANCE_CONSTANT_RE)?.[1]);
+    expect(Number.isInteger(tolerance)).toBe(true);
+    expect(Number.isInteger(rejection)).toBe(true);
+    expect(Number.isInteger(receiverTolerance)).toBe(true);
     expect(receiverTolerance).toBe(tolerance);
     expect(rejection).toBe(tolerance + 1);
 
@@ -116,6 +118,7 @@ describe("unified eventing guide", () => {
         const [, amount, unit] = delay.match(RETRY_DELAY_RE) ?? [];
         return Number(amount) * unitSeconds[unit as keyof typeof unitSeconds];
       });
+    expect(delays).toHaveLength(7);
     const [, hours, minutes, seconds] = page.match(RETRY_TOTAL_RE) ?? [];
     const statedTotal =
       Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
