@@ -583,7 +583,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
   return (
     <div className="w-full">
       {/* Overview section */}
-      <section className="scroll-mt-20" id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
+      <section id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
         <BreadcrumbBar category={data.metadata?.category} label={data.label} />
         <PageActionsBar toolkitId={data.id} />
         <h1 className="mb-6 font-bold text-4xl text-foreground tracking-tight">
@@ -684,7 +684,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         position="after"
       />
 
-      <div className="mt-10 scroll-mt-20" id="available-tools">
+      <div className="mt-10" id="available-tools">
         <h2 className="flex items-center gap-3 font-semibold text-2xl">
           <span className="rounded-lg bg-brand-accent/10 p-2">
             <svg
@@ -745,7 +745,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         tools={tools}
       />
 
-      <section className="mt-10 scroll-mt-20" id="get-building">
+      <section className="mt-10" id="get-building">
         <DocumentationChunkRenderer
           chunks={documentationChunks}
           location="footer"

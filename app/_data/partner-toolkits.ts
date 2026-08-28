@@ -8,6 +8,13 @@ import type { Toolkit } from "@arcadeai/design-system";
  * a standard ToolkitType (typically "verified") plus an `isPartner: true`
  * flag that renders a Partner badge next to BYOC/Pro on catalog cards.
  *
+ * This list is also what the category sidebars are built from, so an entry
+ * here needs a matching page at the path its `relativeDocsLink` points to.
+ * See buildPartnerToolkitInfoList in
+ * toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts, and
+ * tests/partner-integration-nav.test.ts for the assertions that keep the
+ * two in step.
+ *
  * Once DS adds an explicit `isPartner` field to its Toolkit shape, migrate
  * these entries into the DS TOOLKITS array and delete this file.
  */

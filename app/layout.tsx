@@ -112,7 +112,12 @@ export default async function RootLayout({
   const pageMap = addRoutesToHrefItems(rawPageMap) as typeof rawPageMap;
 
   return (
-    <html dir="ltr" lang={lang} suppressHydrationWarning>
+    <html
+      data-scroll-behavior="smooth"
+      dir="ltr"
+      lang={lang}
+      suppressHydrationWarning
+    >
       <Head
         backgroundColor={{
           dark: "#0a0a0a",
@@ -130,6 +135,20 @@ export default async function RootLayout({
         <link href="https://www.googletagmanager.com" rel="dns-prefetch" />
       </Head>
       <body>
+        {/*
+          swagger-ui-react bundles zenscroll, which installs a document-wide
+          click handler as soon as its module is evaluated. That handler
+          intercepts every in-page anchor click, computes the destination as
+          "element top minus a 10px edge offset", and animates there with
+          window.scrollTo. CSS scroll-padding-top never enters the
+          calculation, so headings land under the sticky navbar. Standing
+          zenscroll's automatic anchor handling down hands anchor scrolling
+          back to the browser, which does honor scroll-padding-top. The
+          zenscroll methods swagger-ui calls itself keep working.
+        */}
+        <Script id="disable-zenscroll-anchors" strategy="beforeInteractive">
+          {"window.noZensmooth = true;"}
+        </Script>
         {lang !== "en" && (
           <TranslationBanner dictionary={dictionary} locale={lang} />
         )}
