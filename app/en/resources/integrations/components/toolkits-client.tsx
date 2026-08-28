@@ -141,7 +141,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
             </div>
           </div>
         </div>
-        <div className="mx-auto max-w-7xl scroll-mt-20 px-4" id="list">
+        <div className="mx-auto max-w-7xl px-4" id="list">
           <Separator className="mt-4" />
           <FiltersBar resultsCount={resultsCount} />
           <main className="mx-auto max-w-7xl px-4 pt-2 pb-8 sm:pb-12">

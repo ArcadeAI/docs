@@ -214,7 +214,7 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
   // Render complex MDX content directly
   if (type === "markdown" || hasJSXContent(content)) {
     return (
-      <section className="my-3 scroll-mt-20" id={anchorId}>
+      <section className="my-3" id={anchorId}>
         <MdxContent content={content} />
       </section>
     );
@@ -231,7 +231,7 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
   }
 
   return (
-    <section className="scroll-mt-20" id={anchorId}>
+    <section id={anchorId}>
       <Callout title={title} type={calloutType}>
         <MdxContent content={content} />
       </Callout>

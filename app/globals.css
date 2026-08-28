@@ -265,3 +265,18 @@ nav > div:has(.algolia-search-button) {
   --x-color-primary-700: color-mix(in oklch, var(--primary) 85%, white);
   --x-color-primary-800: color-mix(in oklch, var(--primary) 70%, white);
 }
+
+/*
+ * Anchor scroll offset. Nextra sets `scroll-padding-top` to exactly the navbar
+ * height, so a heading lands flush against the navbar's bottom edge with no
+ * gap, and it scopes that to `html:not(:has(*:focus))` — so when a click leaves
+ * focus on the page the offset disappears entirely and the heading ends up
+ * hidden behind the navbar. Set it unconditionally, with room to breathe.
+ *
+ * `html:root` matches Nextra's specificity and wins on source order. Headings
+ * and sections should not add their own `scroll-mt-*`; it stacks on top of this
+ * and leaves a large empty band above the target.
+ */
+html:root {
+  scroll-padding-top: calc(var(--nextra-navbar-height) + 1.5rem);
+}
