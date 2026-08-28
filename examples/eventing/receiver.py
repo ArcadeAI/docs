@@ -72,14 +72,12 @@ def verify_request(
         valid_secret_found = True
         digest = hmac.new(key, signed, hashlib.sha256).digest()
         expected = b"v1," + base64.b64encode(digest)
-        candidate_matched = False
         for candidate in supplied:
             try:
                 encoded = candidate.encode("ascii")
             except UnicodeEncodeError:
                 continue
-            candidate_matched |= hmac.compare_digest(expected, encoded)
-        matched |= candidate_matched
+            matched |= hmac.compare_digest(expected, encoded)
     if not valid_secret_found:
         if not secrets:
             raise ConfigurationError("no webhook secrets configured")
@@ -145,13 +143,13 @@ class SQLiteInbox:
 def receive(
     body: bytes,
     headers: Mapping[str, str],
-    active_secrets: WebhookSecrets,
+    subscription_secrets: WebhookSecrets,
     inbox: SQLiteInbox,
     handler: Callable[[sqlite3.Connection, dict], None],
     now: int | None = None,
 ) -> int:
     try:
-        event, delivery_id = verify_request(body, headers, active_secrets, now)
+        event, delivery_id = verify_request(body, headers, subscription_secrets, now)
     except VerificationError:
         return 400
     except ConfigurationError:

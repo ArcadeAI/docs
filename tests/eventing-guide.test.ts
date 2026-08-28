@@ -12,6 +12,11 @@ const MODEL_ROW_RE =
 const TIMESTAMP_TOLERANCE_RE = /through (\d+) seconds/;
 const TIMESTAMP_REJECTION_RE = /timestamps (\d+) seconds away/;
 const TOLERANCE_CONSTANT_RE = /TOLERANCE_SECONDS = (\d+)/;
+const RETRY_DELAYS_RE =
+  /Arcade makes 8 attempts: immediately, then after ([^.]+)\. The configured delay/;
+const RETRY_TOTAL_RE = /totals (\d+) hours, (\d+) minutes, and (\d+) seconds/;
+const RETRY_DELAY_SEPARATOR_RE = /,\s*(?:and\s+)?/;
+const RETRY_DELAY_RE = /(\d+) (second|minute|hour)s?/;
 
 const page = readFileSync(join(process.cwd(), PAGE), "utf8");
 
@@ -116,5 +121,20 @@ describe("unified eventing guide", () => {
     const receiverTolerance = Number(page.match(TOLERANCE_CONSTANT_RE)?.[1]);
     expect(receiverTolerance).toBe(tolerance);
     expect(rejection).toBe(tolerance + 1);
+
+    const unitSeconds = { second: 1, minute: 60, hour: 3600 };
+    const delays = page
+      .match(RETRY_DELAYS_RE)?.[1]
+      .split(RETRY_DELAY_SEPARATOR_RE)
+      .map((delay) => {
+        const [, amount, unit] = delay.match(RETRY_DELAY_RE) ?? [];
+        return Number(amount) * unitSeconds[unit as keyof typeof unitSeconds];
+      });
+    const [, hours, minutes, seconds] = page.match(RETRY_TOTAL_RE) ?? [];
+    const statedTotal =
+      Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
+    expect(delays?.reduce((total, delay) => total + delay, 0)).toBe(
+      statedTotal
+    );
   });
 });

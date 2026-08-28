@@ -146,14 +146,12 @@ def verify_request(
         valid_secret_found = True
         digest = hmac.new(key, signed, hashlib.sha256).digest()
         expected = b"v1," + base64.b64encode(digest)
-        candidate_matched = False
         for candidate in supplied:
             try:
                 encoded = candidate.encode("ascii")
             except UnicodeEncodeError:
                 continue
-            candidate_matched |= hmac.compare_digest(expected, encoded)
-        matched |= candidate_matched
+            matched |= hmac.compare_digest(expected, encoded)
     if not valid_secret_found:
         if not secrets:
             raise ConfigurationError("no webhook secrets configured")
@@ -219,13 +217,13 @@ class SQLiteInbox:
 def receive(
     body: bytes,
     headers: Mapping[str, str],
-    active_secrets: WebhookSecrets,
+    subscription_secrets: WebhookSecrets,
     inbox: SQLiteInbox,
     handler: Callable[[sqlite3.Connection, dict], None],
     now: int | None = None,
 ) -> int:
     try:
-        event, delivery_id = verify_request(body, headers, active_secrets, now)
+        event, delivery_id = verify_request(body, headers, subscription_secrets, now)
     except VerificationError:
         return 400
     except ConfigurationError:
@@ -243,7 +241,7 @@ def receive(
 
 The inbox claim and your business writes must share one transaction. If the handler fails, both roll back and the non-2xx response lets Arcade retry. A valid duplicate returns `204` without rerunning the handler. During secret rotation, pass both active secrets; remove the retired secret after the grace period.
 
-Before calling your business handler, allow-list the subscribed event types and compare tenant identifiers with your server-side subscription configuration. Keep secrets mapped to their subscription; the generic verifier accepts the active secrets you supply and does not treat payload identifiers as authority. Configure a request-body size limit in the HTTP framework before reading the raw body.
+Resolve one subscription from your HTTP route before calling `receive`, and pass only that subscription's current and previous secrets as `subscription_secrets`. Before side effects, have the handler allow-list that subscription's event types and compare tenant identifiers with its server-side configuration. The generic verifier does not treat payload identifiers as authority. Configure a request-body size limit in the HTTP framework before reading the raw body.
 
 <Callout type="warning">
 Use a persistent store in production, and expire recorded `webhook-id` values only after they can no longer be retried. The configured retry span is 27 hours, 35 minutes, and 5 seconds; retain identifiers longer than that span with operational margin.
@@ -297,7 +295,10 @@ curl --fail-with-body --silent --show-error \
   --data "{\"url\":\"$RECEIVER_URL\",\"event_types\":[\"demo.follow_up\"]}"
 
 export WEBHOOK_ID="<id from the response>"
+export WEBHOOK_SECRET="<one-time secret from the response>"
 ```
+
+Load `WEBHOOK_SECRET` into this receiver route's secret store and pass `[WEBHOOK_SECRET]` as `subscription_secrets` to `receive`. Do not combine secrets from unrelated subscriptions.
 
 Create a schedule and save its `id` and `next_fire_at`:
 
@@ -465,7 +466,7 @@ curl --fail-with-body --silent --show-error \
 ## Reliability boundaries
 
 - **Schedule identity:** Arcade publishes one Arcade event per scheduled fire, keyed by schedule ID and scheduled fire time. A schedule and the events it publishes have separate lifecycles.
-- **Schedule timing:** A due schedule is published no later than 60 seconds after its due time. The local 90-second delivery observation in this guide is a readiness check, not a production delivery-latency guarantee.
+- **Schedule timing:** A due schedule is published no later than 60 seconds after its due time. The local 120-second delivery observation in this guide is a readiness check, not a production delivery-latency guarantee.
 - **Delivery:** Outgoing webhook delivery is at-least-once. Arcade makes 8 attempts: immediately, then after 5 seconds, 5 minutes, 30 minutes, 2 hours, 5 hours, 10 hours, and 10 hours. The configured delay from attempt 1 through attempt 8 totals 27 hours, 35 minutes, and 5 seconds.
 - **Identity:** One delivery keeps the same `webhook-id` across retries. That value is also the `{delivery_id}` used by the delivery detail and retry APIs. Different events, and one event delivered through different subscriptions, receive different IDs.
 - **Signatures:** Arcade signs every retry with a fresh `webhook-timestamp`, so a short receiver tolerance remains compatible with the full retry schedule. Verify the raw body, `webhook-id`, and `webhook-timestamp` before deduplication. The sample receiver chooses a 300-second clock-skew tolerance: it accepts timestamps through 300 seconds in either direction and rejects timestamps 301 seconds away.
