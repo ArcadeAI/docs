@@ -8,6 +8,8 @@ const TITLE_RE = /title:\s*"Build event-driven integrations"/;
 const MODEL_SECTION_RE =
   /## The eventing model([\s\S]*?)## Choose your deployment origin/;
 const TABLE_DATA_ROW_RE = /^\| (?!Term \|)(?!-)[^|]+\|/gm;
+const ACCOUNT_LIFECYCLE_SECTION_RE =
+  /## Recover expired connected accounts([\s\S]*?)## Try a scheduled event/;
 const TIMESTAMP_TOLERANCE_RE = /through (\d+) seconds/;
 const TIMESTAMP_REJECTION_RE = /timestamps (\d+) seconds away/;
 const TOLERANCE_CONSTANT_RE = /TOLERANCE_SECONDS = (\d+)/;
@@ -105,6 +107,37 @@ describe("unified eventing guide", () => {
       expect(page).toContain(value);
     }
     expect(page).toContain("[Arcade API reference](/references/api)");
+  });
+
+  test("documents the complete connected-account recovery contract", () => {
+    const section = page.match(ACCOUNT_LIFECYCLE_SECTION_RE)?.[1] ?? "";
+    for (const value of [
+      "connected_account.created",
+      "connected_account.expired",
+      "connected_account.reconnected",
+      '"event_types":["connected_account.expired"]',
+      '"type": "connected_account.expired"',
+      '"timestamp":',
+      '"data":',
+      "organization_id",
+      "project_id",
+      "user_id",
+      "provider_id",
+      "connection_id",
+      "status",
+      "reason",
+      "no_refresh_token",
+      "refresh_failed",
+      "POST /v1/orgs/{org_id}/projects/{project_id}/auth/authorize",
+      "MCP-managed OAuth",
+    ]) {
+      expect(section).toContain(value);
+    }
+    expect(section).toContain("**Reconnect**");
+    expect(section).toContain("public subscription API is project-scoped");
+    expect(section).toContain("organization-bound lifecycle events omit");
+    expect(section).toContain("verify the Standard Webhooks signature");
+    expect(section).toContain("reduced grant");
   });
 
   test("documents the supported lifecycle without hiding retained events", () => {
