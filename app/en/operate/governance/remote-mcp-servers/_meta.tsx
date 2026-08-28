@@ -16,6 +16,9 @@ const meta: MetaRecord = {
   hubspot: {
     title: "HubSpot",
   },
+  snowflake: {
+    title: "Snowflake",
+  },
 };
 
 export default meta;
