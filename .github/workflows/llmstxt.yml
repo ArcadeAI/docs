@@ -37,24 +37,14 @@ jobs:
         with:
           node-version: "22.x"
 
-      - name: Get app token
-        id: app-token
-        uses: actions/create-github-app-token@v2
-        with:
-          app-id: ${{ secrets.DOCS_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
-
-      - name: Get bot user ID
-        id: bot-user
-        run: echo "id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >>"$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref || github.ref }}
-          token: ${{ steps.app-token.outputs.token }}
+          # No credentials to persist: the app token is minted further down,
+          # once there is something to push. The commit step below supplies it
+          # to git explicitly.
+          persist-credentials: false
 
       - name: Install dependencies
         run: npm install -g pnpm
@@ -76,14 +66,27 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Get app token
+        if: steps.check-changes.outputs.has_changes == 'true'
+        id: app-token
+        uses: ./.github/actions/app-token
+        with:
+          app-id: ${{ secrets.DOCS_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
+
       - name: Commit changes to PR
         if: steps.check-changes.outputs.has_changes == 'true' && github.event_name == 'pull_request'
+        env:
+          GH_APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          USER_NAME: ${{ steps.app-token.outputs.user-name }}
+          USER_EMAIL: ${{ steps.app-token.outputs.user-email }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
-          git config user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
-          git config user.email "${{ steps.bot-user.outputs.id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
+          git config user.name "$USER_NAME"
+          git config user.email "$USER_EMAIL"
           git add public/llms.txt
           git commit -m "🤖 Regenerate LLMs.txt"
-          git push
+          git push "https://x-access-token:${GH_APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:${HEAD_REF}"
 
       - name: Create Pull Request (for scheduled/manual runs)
         if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
@@ -91,8 +94,8 @@ jobs:
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ steps.app-token.outputs.token }}
-          author: ${{ steps.app-token.outputs.app-slug }}[bot] <${{ steps.bot-user.outputs.id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>
-          committer: ${{ steps.app-token.outputs.app-slug }}[bot] <${{ steps.bot-user.outputs.id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>
+          author: ${{ steps.app-token.outputs.committer }}
+          committer: ${{ steps.app-token.outputs.committer }}
           commit-message: Regenerate LLMs.txt and related files
           branch: auto-update-llms-txt
           delete-branch: true
@@ -107,8 +110,9 @@ jobs:
         run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+
       - name: Enable Pull Request Automerge
-        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request' && steps.cpr.outputs.pull-request-number != ''
         run: gh pr merge --squash --auto ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}

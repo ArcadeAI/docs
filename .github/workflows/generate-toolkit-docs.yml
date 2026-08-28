@@ -99,16 +99,10 @@ jobs:
 
       - name: Get app token
         id: app-token
-        uses: actions/create-github-app-token@v2
+        uses: ./.github/actions/app-token
         with:
           app-id: ${{ secrets.DOCS_BOT_CLIENT_ID }}
           private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
-
-      - name: Get bot user ID
-        id: bot-user
-        run: echo "id=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)" >>"$GITHUB_OUTPUT"
-        env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Create pull request
         id: cpr
@@ -117,8 +111,8 @@ jobs:
           HUSKY: 0
         with:
           token: ${{ steps.app-token.outputs.token }}
-          author: ${{ steps.app-token.outputs.app-slug }}[bot] <${{ steps.bot-user.outputs.id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>
-          committer: ${{ steps.app-token.outputs.app-slug }}[bot] <${{ steps.bot-user.outputs.id }}+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com>
+          author: ${{ steps.app-token.outputs.committer }}
+          committer: ${{ steps.app-token.outputs.committer }}
           commit-message: "[AUTO] Adding MCP Servers docs update"
           title: "[AUTO] Adding MCP Servers docs update"
           body: |
