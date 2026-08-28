@@ -1,0 +1,254 @@
+---
+title: "Remote MCP servers"
+description: "Register an MCP server that Arcade does not host, then govern its tools alongside Arcade's own"
+---
+
+import Image from "next/image";
+import { Callout, Steps, Tabs } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+export const REMOTE_SETUP_WIDTH = 557 / 1.5;
+export const REMOTE_SETUP_HEIGHT = 773 / 1.5;
+export const ADVANCED_SETTINGS_WIDTH = 890 / 2;
+export const ADVANCED_SETTINGS_HEIGHT = 1958 / 2;
+export const SERVERS_LIST_WIDTH = 2799 / 2;
+export const SERVERS_LIST_HEIGHT = 1837 / 2;
+
+# Remote MCP servers
+
+A remote MCP server is an MCP server that Arcade does not host: one your team already runs, one that a vendor hosts for you, or one from an Arcade partner.
+
+You register it **once, and to a scope** — a single project, or your whole organization — not to a gateway. From that point its tools are part of that scope's tool catalog alongside Arcade's own: every gateway in scope can select from them, the Playground can call them, and the SDKs can execute them. Registering to a second gateway, or re-running setup per gateway, is never something you do.
+
+This guide covers registering the server, configuring its connection and auth, and using its tools.
+
+<Callout type="info">
+  Check the [MCP server catalog](/resources/integrations) first. When Arcade
+  already ships a server for a service, its tools are agent-optimized and
+  maintained for you, which beats registering that vendor's remote server
+  yourself. Reach for a remote MCP server when the catalog doesn't cover it.
+</Callout>
+
+<Callout type="info">
+  Looking to *write* new tools rather than connect an existing server? See [Build
+  an MCP server](/build/create-tools/tool-basics/build-mcp-server) instead. This
+  page is for servers that already exist and are reachable over HTTP.
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Register a remote MCP server to a project and use its tools anywhere in that project.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers">Arcade account</SignupLink>
+- A remote MCP server URL that Arcade can reach
+- Access to any auth credentials your server requires
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Register a remote MCP server to a project
+- Configure advanced connection settings
+- Use the server's tools in gateways, the Playground, and the SDKs
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Types of MCP servers in Arcade
+
+Every MCP server in your project appears in the same [Servers dashboard](https://app.arcade.dev/servers), sorted along two axes.
+
+**Who runs it**, shown as the `Type` badge and the `URI` column:
+
+| | `URI` | `Type` |
+|---|---|---|
+| **Arcade Native** — a server Arcade hosts for you, either pre-built by Arcade or deployed with `arcade deploy` | `Arcade Hosted` | `HTTP` |
+| **Remote** — a server you or a vendor hosts, reached at a URL you supply | the server URL | `MCP` |
+
+**How far it reaches**, chosen when you register it and shown as the scope badge:
+
+| | Available to |
+|---|---|
+| `Project` | Every gateway, Playground session, and SDK call in the one project it was registered to |
+| `Global` | Every project across the organization, per the dashboard's "all organizations, projects, and accounts" |
+
+Arcade's pre-built catalog arrives as `Global` servers. A server you register yourself — Arcade Native or remote — is scoped to a single project unless you widen it. Either way the scope belongs to the *server*, not to any gateway, which is why one registration serves every gateway inside it.
+
+Whichever combination a server is, it gets the same treatment: connection timeout and retry settings, an `Active` / `Healthy` / `Pending Auth` status, an enable toggle, a **Tools** picker, **Logs**, and the same audit trail. A remote MCP server is a peer of an Arcade-hosted one, not an attachment to it.
+
+The Servers dashboard below mixes all of them in one list. `GoogleForms` and `envcheck` are Arcade-hosted project servers; `exa` and `granola-1p` are remote servers reached at their own URLs, with `granola-1p` still waiting on its first authorization; and the `Global` group at the bottom is Arcade's own catalog.
+
+<Image
+  alt={"The Arcade Servers dashboard, showing Arcade-hosted and remote MCP servers as project servers, plus Arcade's global servers"}
+  className="max-w-full dark:hidden mt-4"
+  src={"/images/mcp-gateway/servers-project-and-global-light.png"}
+  width={SERVERS_LIST_WIDTH}
+  height={SERVERS_LIST_HEIGHT}
+/>
+<Image
+  alt={"The Arcade Servers dashboard, showing Arcade-hosted and remote MCP servers as project servers, plus Arcade's global servers"}
+  className="hidden max-w-full dark:block mt-4"
+  src={"/images/mcp-gateway/servers-project-and-global-dark.png"}
+  width={SERVERS_LIST_WIDTH}
+  height={SERVERS_LIST_HEIGHT}
+/>
+
+## Add the remote server to your project
+
+<Steps>
+
+### Open the MCP servers page
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers) for your project and click **Add Server**.
+
+### Enter the required fields
+
+Choose **Remote MCP** as the server type, then fill in the two required fields:
+
+- **ID**: A unique, human-readable identifier (for example, `render-mcp-server`)
+- **URI**: The public URL for your MCP server (for example, `https://mcp.render.com/mcp`)
+
+Select **Arcade** instead of **Remote MCP** if you are registering a server that Arcade or your own infrastructure hosts. See [Hybrid MCP servers](/operate/deploy/on-prem) for that flow.
+
+<Callout type="info">
+  Use the [MCP Debugger](https://mcpdebugger.dev) to verify the remote server's
+  MCP compliance before adding it to Arcade.
+</Callout>
+
+<Image
+  alt={"Remote MCP server setup"}
+  className="max-w-full mt-4"
+  src={"/images/mcp-gateway/remote-mcp-server-setup.png"}
+  width={REMOTE_SETUP_WIDTH}
+  height={REMOTE_SETUP_HEIGHT}
+/>
+
+### Save and confirm the connection
+
+Create the server and confirm that Arcade lists the server tools in your project. If the remote MCP server requires authentication, Arcade prompts you to complete the OAuth flow.
+
+<Callout type="info">
+  Authorize as an admin user with the broadest tool access on the remote server.
+  Your credentials determine the tool list Arcade discovers, and therefore what
+  you can choose from when curating gateways. See [Who authenticates,
+  and when](#who-authenticates-and-when).
+</Callout>
+
+<Callout type="warning">
+  Don't refresh the Arcade dashboard while an authorization prompt is open.
+  Refreshing mid-flow can leave a stale, incomplete authorization behind
+  instead of cleanly restarting it. If a connection seems stuck, close the
+  prompt, reload the page, and start a single fresh attempt.
+</Callout>
+
+</Steps>
+
+## Who authenticates, and when
+
+Authentication to a remote MCP server happens twice, with different credentials each time.
+
+**At setup, the admin authenticates.** When you register the server, Arcade uses *your* credentials to fetch the server's tool list. That list is what you see in the Playground and what you pick from in a gateway's tool picker. Authorize as a user with the broadest access on the remote server, so the full set is available to add to your MCP Gateways.
+
+**At runtime, each end user authenticates.** When an end user's agent first calls a tool on that server, Arcade runs the OAuth flow against the remote server for *that user* and stores their tokens separately. Arcade then re-resolves the tool list for them individually.
+
+## Configure advanced settings
+
+Remote MCP may often require more than a URL. Use **Advanced settings** to configure connection, OAuth, and header details.
+
+Common settings include:
+
+- **Connection settings**: Configure timeout and retry values for tool calls.
+- **OAuth2 authorization (optional)**: Add client ID and client secret, and set an authorization URL if it differs from the MCP server URI. Use the provided redirect URI when configuring your OAuth app.
+- **Custom headers**: Add headers such as `Authorization` or `X-API-Key` and reference secrets with `${secret:NAME}`.
+- **Header secrets**: Store API tokens or passwords and reference them in headers.
+
+<Image
+  alt={"Advanced settings for a remote MCP server"}
+  className="max-w-full mt-4"
+  src={"/images/mcp-gateway/remote-mcp-server-advanced-settings.png"}
+  width={ADVANCED_SETTINGS_WIDTH}
+  height={ADVANCED_SETTINGS_HEIGHT}
+/>
+
+Some remote servers need provider-specific setup beyond these generic settings. See [Connect a Salesforce Hosted MCP Server](/operate/governance/remote-mcp-servers/salesforce), [Connect a ServiceNow Hosted MCP Server](/operate/governance/remote-mcp-servers/servicenow), [Connect a Dynamics 365 Customer Service MCP Server](/operate/governance/remote-mcp-servers/dynamics-365-customer-service), [Connect a HubSpot Remote MCP Server](/operate/governance/remote-mcp-servers/hubspot), [Connect a Snowflake-Managed MCP Server](/operate/governance/remote-mcp-servers/snowflake), [Connect an Atlassian Remote MCP Server](/operate/governance/remote-mcp-servers/atlassian), or [Connect a GitHub Remote MCP Server](/operate/governance/remote-mcp-servers/github) for fully worked examples.
+
+## Where the server's tools become available
+
+Registration happens once, and the scope you picked decides the reach. Within that scope — one project, or every project in the organization — the server's tools are available to all three consumers:
+
+- **Every MCP Gateway in scope** can select them in its tool picker. A project can have many gateways, each exposing a different subset of the same server.
+- **The Playground** can call them, which is the fastest way to learn a tool's arguments.
+- **The Arcade SDKs** can execute them by name, with no gateway involved.
+
+Widening or narrowing that reach is a change to the server's scope, not something you configure per gateway.
+
+### Select the tools in a gateway
+
+Because you often don't control which tools a remote server exposes, gateways are where you curate them: pick the tools you want and hide the rest, per gateway.
+
+1. Create or edit an MCP Gateway in the [MCP Gateways dashboard](https://app.arcade.dev/mcp-gateways).
+2. Open **Select tools** and filter by your remote server name.
+3. Choose the tools you want to expose through the gateway.
+
+## Call remote tools from Arcade SDKs
+
+Remote tools behave like any other Arcade tool. Try it out in the Playground first to learn any nuances about the name and arguments. Copy the tool name from the tool picker or tool catalog, then call it with the SDK.
+
+<Tabs items={["Python", "TypeScript"]}>
+<Tabs.Tab>
+
+```python
+from arcade import Arcade
+
+client = Arcade(api_key="ARCADE_API_KEY")
+
+result = client.tools.execute(
+    tool_name="render-mcp-server.get_key_value",
+    input={"keyValueId": "foo-bar"},
+    user_id="user-123",
+)
+
+print(result)
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```typescript
+import { Arcade } from "@arcadeai/arcade";
+
+const client = new Arcade({ apiKey: "ARCADE_API_KEY" });
+
+const result = await client.tools.execute({
+  tool_name: "render-mcp-server.get_key_value",
+  input: { keyValueId: "foo-bar" },
+  user_id: "user-123",
+});
+
+console.log(result);
+```
+
+</Tabs.Tab>
+</Tabs>
+
+## Limitations and caveats
+
+<Callout type="warning">
+  Remote servers must be reachable from Arcade and must support the Streamable
+  HTTP(s) transport. If your server depends on non-HTTP MCP transports, Arcade
+  cannot proxy it.
+</Callout>
+
+- If the remote server is offline, gateway and SDK calls will fail until it is reachable again.
+- MCP Gateways only expose the tools you select, not every tool on the server.
+- Arcade only supports tools from remote MCP servers today. Prompts, resources, and sampling are not supported yet.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard)
+- [Connect to MCP clients](/get-started/mcp-clients)

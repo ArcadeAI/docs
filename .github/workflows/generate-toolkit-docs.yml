@@ -97,13 +97,22 @@ jobs:
       - name: Sync toolkit sidebar navigation
         run: pnpm exec tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
+      - name: Get app token
+        id: app-token
+        uses: ./.github/actions/app-token
+        with:
+          app-id: ${{ secrets.DOCS_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
+
       - name: Create pull request
         id: cpr
         uses: peter-evans/create-pull-request@v7
         env:
           HUSKY: 0
         with:
-          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
+          author: ${{ steps.app-token.outputs.committer }}
+          committer: ${{ steps.app-token.outputs.committer }}
           commit-message: "[AUTO] Adding MCP Servers docs update"
           title: "[AUTO] Adding MCP Servers docs update"
           body: |
@@ -130,7 +139,7 @@ jobs:
             echo "::warning::Could not request review on PR #${{ steps.cpr.outputs.pull-request-number }}: $(cat review-error.log)"
           fi
         env:
-          GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 
       - name: Upload generation report
         if: always()

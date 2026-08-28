@@ -7,6 +7,9 @@ export const meta: MetaRecord = {
   "mcp-gateways": {
     title: "MCP Gateways",
   },
+  "remote-mcp-servers": {
+    title: "Remote MCP servers",
+  },
   "contextual-access": {
     title: "Contextual Access",
   },
