@@ -262,11 +262,11 @@ The sample records `received_at` for that cleanup policy but does not schedule t
 
 ## Recover expired connected accounts
 
-Subscribe to connection lifecycle events when your application should tell a user that an OAuth connection needs attention:
+Subscribe to connection lifecycle events when your app should tell a user that an OAuth connection needs attention:
 
-- `connected_account.created` — the connection became active for the first time.
-- `connected_account.expired` — Arcade can no longer use the connection.
-- `connected_account.reconnected` — reauthorization restored an expired connection.
+- `connected_account.created`—the connection became active for the first time.
+- `connected_account.expired`—Arcade can no longer use the connection.
+- `connected_account.reconnected`—reauthorization restored an expired connection.
 
 Create the project-scoped subscription:
 
@@ -303,7 +303,7 @@ All three events identify the `organization_id`, `user_id`, `provider_id`, `conn
 
 The public subscription API is project-scoped. Organization-bound lifecycle events omit `project_id` and are not delivered to a project subscription.
 
-In the Dashboard, open the expired connected user and choose **Reconnect**. The same action is available through `POST /v1/orgs/{org_id}/projects/{project_id}/auth/authorize`:
+In the Dashboard, open the expired connected user, and choose **Reconnect**. The same action is available through `POST /v1/orgs/{org_id}/projects/{project_id}/auth/authorize`:
 
 ```bash
 curl --fail-with-body --silent --show-error \
@@ -320,7 +320,7 @@ curl --fail-with-body --silent --show-error \
   }'
 ```
 
-Open the returned authorization URL. A successful flow restores the same connection and emits `connected_account.reconnected`; triggers pinned to it become healthy again. Ask for the connection's recorded scopes. Arcade also applies scopes configured on the provider. A reconnected event reports the OAuth state change, but normal scope checks still apply if the provider returns a reduced grant.
+Open the returned authorization URL. A successful flow restores the same connection and emits `connected_account.reconnected`. Triggers pinned to it become healthy again. Ask for the connection's recorded scopes. Arcade also applies scopes configured on the provider. A reconnected event reports the OAuth state change, but normal scope checks still apply if the provider returns a reduced grant.
 
 Engine does not observe MCP-managed OAuth refresh outcomes, so MCP-managed OAuth connections do not emit this lifecycle or use the standard OAuth Reconnect action.
 
