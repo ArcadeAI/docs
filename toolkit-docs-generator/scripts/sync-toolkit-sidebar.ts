@@ -5,9 +5,11 @@
  * This script:
  * 1. Reads all toolkit JSON files from data/toolkits/
  * 2. Maps each toolkit to its category from the design system
- * 3. Creates/updates _meta.tsx files for each category
- * 4. Skips toolkits without a recognized category
- * 5. Updates the main integrations _meta.tsx if needed
+ * 3. Adds the partner integrations from app/_data/partner-toolkits.ts, which
+ *    have hand-authored pages and no JSON file of their own
+ * 4. Creates/updates _meta.tsx files for each category
+ * 5. Skips toolkits without a recognized category
+ * 6. Updates the main integrations _meta.tsx if needed
  *
  * Usage:
  *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
@@ -28,6 +30,10 @@ import {
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
+import {
+  PARTNER_TOOLKITS,
+  type PartnerToolkit,
+} from "../../app/_data/partner-toolkits";
 import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir";
 import {
   getToolkitSlug,
@@ -113,7 +119,7 @@ export type ToolkitInfo = {
   slug: string;
   label: string;
   category: string;
-  navGroup: "optimized" | "starter";
+  navGroup: "optimized" | "starter" | "partner";
 };
 
 export type CategoryData = {
@@ -127,6 +133,7 @@ export type SyncResult = {
   categoriesCreated: string[];
   categoriesRemoved: string[];
   toolkitCount: number;
+  partnerCount: number;
   errors: string[];
 };
 
@@ -331,6 +338,83 @@ export function buildToolkitInfoList(dataDir: string): ToolkitInfo[] {
 }
 
 /**
+ * The fields a partner needs to become a sidebar entry. Narrower than
+ * `PartnerToolkit` so tests can hand in plain objects instead of casting a
+ * full catalog entry into existence.
+ */
+export type PartnerNavSource = Pick<
+  PartnerToolkit,
+  "id" | "label" | "category" | "relativeDocsLink"
+>;
+
+/**
+ * Sidebar entries for the partner integrations (remote MCP Servers offered by
+ * Arcade partners).
+ *
+ * Partner pages are hand-authored and have no JSON file in the data directory,
+ * so `buildToolkitInfoList` can't see them. This script rewrites every
+ * category's `_meta.tsx` from scratch, so an entry typed into that file by hand
+ * disappears on the next run. Deriving the entries from `PARTNER_TOOLKITS` — the
+ * same list the integrations catalog renders its cards from — keeps the sidebar
+ * and the catalog agreeing, and makes adding a partner a one-line change in one
+ * file. tests/partner-integration-nav.test.ts holds the two together.
+ */
+export function buildPartnerToolkitInfoList(
+  partners: readonly PartnerNavSource[] = PARTNER_TOOLKITS
+): ToolkitInfo[] {
+  return partners.map((partner) => {
+    const category = partner.category;
+    if (!(INTEGRATION_CATEGORIES as readonly string[]).includes(category)) {
+      throw new Error(
+        `Unrecognized integration category "${category}" for partner "${partner.id}".`
+      );
+    }
+
+    return {
+      id: partner.id,
+      slug: getToolkitSlug({
+        id: partner.id,
+        docsLink: partner.relativeDocsLink,
+      }),
+      label: partner.label,
+      category,
+      navGroup: "partner" as const,
+    };
+  });
+}
+
+/**
+ * A partner and a JSON-backed toolkit that resolve to the same slug in the same
+ * category would render two `_meta.tsx` entries under one key. Fail here, naming
+ * both, rather than write a file that tsc rejects with a line number and no
+ * explanation of where the second entry came from.
+ */
+export function mergeToolkitAndPartnerInfo(
+  toolkits: ToolkitInfo[],
+  partners: ToolkitInfo[]
+): ToolkitInfo[] {
+  const toolkitKeys = new Map(
+    toolkits.map((toolkit) => [
+      `${toolkit.category}/${toolkit.slug}`,
+      toolkit.id,
+    ])
+  );
+
+  for (const partner of partners) {
+    const key = `${partner.category}/${partner.slug}`;
+    const toolkitId = toolkitKeys.get(key);
+    if (toolkitId) {
+      throw new Error(
+        `Partner "${partner.id}" and toolkit "${toolkitId}" both resolve to ${key}. ` +
+          "Give one of them a different slug, or drop the partner from app/_data/partner-toolkits.ts."
+      );
+    }
+  }
+
+  return [...toolkits, ...partners];
+}
+
+/**
  * Group toolkits by category
  */
 export function groupByCategory(
@@ -376,6 +460,9 @@ export function generateCategoryMeta(
   const starter = toolkits
     .filter((t) => t.navGroup === "starter")
     .sort(byLabel);
+  const partners = toolkits
+    .filter((t) => t.navGroup === "partner")
+    .sort(byLabel);
 
   const renderEntry = (t: ToolkitInfo) => {
     // Escape any quotes in the label
@@ -395,18 +482,17 @@ export function generateCategoryMeta(
   };
 
   const sections: string[] = [];
-  if (optimized.length > 0 || starter.length > 0) {
-    if (optimized.length > 0) {
-      sections.push(renderSeparator("Optimized"));
-      sections.push(...optimized.map(renderEntry));
-    }
-    if (starter.length > 0) {
-      sections.push(renderSeparator("Starter"));
-      sections.push(...starter.map(renderEntry));
-    }
-  } else {
-    const sortedToolkits = [...toolkits].sort(byLabel);
-    sections.push(...sortedToolkits.map(renderEntry));
+  if (optimized.length > 0) {
+    sections.push(renderSeparator("Optimized"));
+    sections.push(...optimized.map(renderEntry));
+  }
+  if (starter.length > 0) {
+    sections.push(renderSeparator("Starter"));
+    sections.push(...starter.map(renderEntry));
+  }
+  if (partners.length > 0) {
+    sections.push(renderSeparator("Partners"));
+    sections.push(...partners.map(renderEntry));
   }
 
   const entries = sections.join(",\n");
@@ -498,6 +584,7 @@ export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
     categoriesCreated: [],
     categoriesRemoved: [],
     toolkitCount: 0,
+    partnerCount: 0,
     errors: [],
   };
 
@@ -513,8 +600,14 @@ export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
     result.toolkitCount = toolkits.length;
     log(`Found ${toolkits.length} toolkit JSON files`);
 
+    const partners = buildPartnerToolkitInfoList();
+    result.partnerCount = partners.length;
+    log(`Found ${partners.length} partner integrations`);
+
     // Group by category
-    const grouped = groupByCategory(toolkits);
+    const grouped = groupByCategory(
+      mergeToolkitAndPartnerInfo(toolkits, partners)
+    );
     const activeCategories = Array.from(grouped.keys());
     log(`Active categories: ${activeCategories.join(", ")}`);
 
@@ -619,6 +712,7 @@ export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
 export function printResults(result: SyncResult): void {
   console.log("\n=== Toolkit Sidebar Sync Results ===\n");
   console.log(`Total toolkits: ${result.toolkitCount}`);
+  console.log(`Partner integrations: ${result.partnerCount}`);
 
   if (result.categoriesCreated.length > 0) {
     console.log(`\nCategories created (${result.categoriesCreated.length}):`);

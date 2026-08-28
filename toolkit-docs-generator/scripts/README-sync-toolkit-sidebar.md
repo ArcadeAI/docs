@@ -22,9 +22,10 @@ npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --dry-run --verbo
 
 1. Reads toolkit JSON files from `toolkit-docs-generator/data/toolkits/`.
 2. Maps toolkits to categories using the design system catalog.
-3. Creates or updates `_meta.tsx` files for each category folder.
-4. Skips toolkits without a recognized integration category.
-5. Updates the main integrations `_meta.tsx`.
+3. Adds the partner integrations from `app/_data/partner-toolkits.ts`.
+4. Creates or updates `_meta.tsx` files for each category folder.
+5. Skips toolkits without a recognized integration category.
+6. Updates the main integrations `_meta.tsx`.
 
 ## When to run
 
@@ -33,7 +34,24 @@ Run this script when:
 - Adding a new toolkit JSON file to `toolkit-docs-generator/data/toolkits/`
 - Removing a toolkit JSON file
 - Updating toolkit categories in the design system
+- Adding or removing a partner in `app/_data/partner-toolkits.ts`
 - Regenerating toolkit documentation
+
+## Partner integrations
+
+Partner integrations (remote MCP Servers offered by Arcade partners) have
+hand-authored pages and no toolkit JSON file. This script reads them from
+`app/_data/partner-toolkits.ts`, the same list the integrations catalog renders
+its cards from. Each one lands in a `Partners` section at the end of its
+category sidebar, keyed by the last segment of its `relativeDocsLink`.
+
+This script rewrites every category `_meta.tsx` from scratch, so the next run
+drops a partner entry that someone typed into one of those files by hand. Add
+the partner to `app/_data/partner-toolkits.ts` and re-run the script instead.
+`tests/partner-integration-nav.test.ts` fails when a partner has no page or no
+sidebar entry. The script also refuses to run when a partner and a toolkit
+resolve to the same slug in the same category, since the sidebar can hold only
+one entry per key.
 
 ## Category mapping
 

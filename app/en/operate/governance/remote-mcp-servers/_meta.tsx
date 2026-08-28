@@ -10,6 +10,15 @@ const meta: MetaRecord = {
   servicenow: {
     title: "ServiceNow",
   },
+  "dynamics-365-customer-service": {
+    title: "Dynamics 365 Customer Service",
+  },
+  hubspot: {
+    title: "HubSpot",
+  },
+  snowflake: {
+    title: "Snowflake",
+  },
   atlassian: {
     title: "Atlassian",
   },

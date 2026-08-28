@@ -53,7 +53,7 @@ export function ToolkitToolDetail({
   return (
     <>
       {shouldShowSelection && (
-        <section className="mt-10 scroll-mt-20" id={SELECTED_TOOLS_SECTION_ID}>
+        <section className="mt-10" id={SELECTED_TOOLS_SECTION_ID}>
           <ScopePicker
             onSelectedToolsChange={onScopeSelectionChange}
             selectedTools={Array.from(selectedTools)}
