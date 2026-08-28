@@ -1092,8 +1092,8 @@ export const redirects: Redirect[] = [
     permanent: true,
   },
   {
-    source: "/:locale/guides/deployment-hosting/warp-pipes",
-    destination: "/:locale/operate/deploy/warp-pipes",
+    source: "/:locale/operate/deploy/warp-pipes",
+    destination: "/:locale/operate/deploy",
     permanent: true,
   },
   {
