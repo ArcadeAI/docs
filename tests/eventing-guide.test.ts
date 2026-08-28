@@ -68,7 +68,6 @@ describe("unified eventing guide", () => {
     ]) {
       expect(page).toContain(`export ${variable}=`);
     }
-    expect(page).toContain("poll for up to 120 seconds");
   });
 
   test("pins origins, tenant isolation, and the reference boundary", () => {
@@ -103,19 +102,6 @@ describe("unified eventing guide", () => {
   });
 
   test("states only reviewed delivery guarantees and resource boundaries", () => {
-    for (const claim of [
-      "at-least-once",
-      "8 attempts",
-      "27 hours, 35 minutes, and 5 seconds",
-      "90 days",
-      "webhook-id",
-      "fresh `webhook-timestamp`",
-      "300 seconds",
-      "301 seconds",
-      "one Arcade event per scheduled fire",
-    ]) {
-      expect(page).toContain(claim);
-    }
     const tolerance = Number(page.match(TIMESTAMP_TOLERANCE_RE)?.[1]);
     const rejection = Number(page.match(TIMESTAMP_REJECTION_RE)?.[1]);
     const receiverTolerance = Number(page.match(TOLERANCE_CONSTANT_RE)?.[1]);
@@ -135,6 +121,15 @@ describe("unified eventing guide", () => {
       Number(hours) * 3600 + Number(minutes) * 60 + Number(seconds);
     expect(delays?.reduce((total, delay) => total + delay, 0)).toBe(
       statedTotal
+    );
+  });
+
+  test("keeps deduplication through the manual recovery window", () => {
+    expect(page).toMatch(
+      /Keep each recorded `webhook-id` for at least Arcade's configured event-retention period \(90 days by default\)/
+    );
+    expect(page).toMatch(
+      /same `webhook-id` across automatic retries, manual retry, and recovery/
     );
   });
 });

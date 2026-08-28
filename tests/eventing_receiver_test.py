@@ -108,7 +108,27 @@ class ReceiverTest(unittest.TestCase):
     def test_malformed_rotation_secret_is_logged_while_valid_secret_works(self) -> None:
         key = b"current-secret"
         with self.assertLogs("examples.eventing.receiver", level="WARNING"):
-            verify_request(BODY, headers(key), ["not-base64!", secret(key)], NOW)
+            verify_request(BODY, headers(key), ["whsec_not-base64!", secret(key)], NOW)
+
+    def test_rejects_invalid_or_empty_prefixed_secrets(self) -> None:
+        key = b"current-secret"
+        for configured in (["whsec_not-base64!"], ["whsec_"]):
+            with self.assertRaisesRegex(
+                ConfigurationError,
+                "webhook secrets must use whsec_ followed by padded standard base64",
+            ):
+                verify_request(BODY, headers(key), configured, NOW)
+
+    def test_route_rejects_a_different_subscriptions_secret(self) -> None:
+        route_key = b"route-a-secret"
+        unrelated_key = b"route-b-secret"
+        with self.assertRaises(VerificationError):
+            verify_request(
+                BODY,
+                headers(unrelated_key),
+                [secret(route_key)],
+                NOW,
+            )
 
     def test_receive_maps_failures_and_keeps_duplicate_and_retry_contracts(self) -> None:
         key = b"current-secret"
