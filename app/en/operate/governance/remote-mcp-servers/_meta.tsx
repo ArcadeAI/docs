@@ -7,6 +7,9 @@ const meta: MetaRecord = {
   salesforce: {
     title: "Salesforce",
   },
+  servicenow: {
+    title: "ServiceNow",
+  },
 };
 
 export default meta;
