@@ -11,6 +11,7 @@ from examples.eventing.receiver import (
     ConfigurationError,
     SQLiteInbox,
     VerificationError,
+    receive,
     verify_request,
 )
 
@@ -64,12 +65,16 @@ class ReceiverTest(unittest.TestCase):
         verify_request(BODY, headers(old_key), active, NOW)
         verify_request(BODY, headers(new_key), active, NOW)
 
-    def test_rejects_a_bare_secret_string_as_configuration(self) -> None:
+    def test_rejects_malformed_secret_collections_as_configuration(self) -> None:
         key = b"current-secret"
-        with self.assertRaisesRegex(ConfigurationError, "list or tuple"):
+        with self.assertRaisesRegex(ConfigurationError, "list or tuple of strings"):
             verify_request(BODY, headers(key), secret(key), NOW)  # type: ignore[arg-type]
+        with self.assertRaisesRegex(ConfigurationError, "list or tuple of strings"):
+            verify_request(BODY, headers(key), [None], NOW)  # type: ignore[list-item]
 
-    def test_duplicate_is_ignored_and_failed_handler_can_retry(self) -> None:
+    def test_receive_maps_failures_and_keeps_duplicate_and_retry_contracts(self) -> None:
+        key = b"current-secret"
+        active = [secret(key)]
         with tempfile.TemporaryDirectory() as directory:
             inbox = SQLiteInbox(str(Path(directory) / "inbox.sqlite"))
             handled: list[str] = []
@@ -77,9 +82,12 @@ class ReceiverTest(unittest.TestCase):
             def succeed(_: sqlite3.Connection, event: dict) -> None:
                 handled.append(event["type"])
 
-            self.assertTrue(inbox.handle("msg_duplicate", {"type": "first"}, succeed))
-            self.assertFalse(inbox.handle("msg_duplicate", {"type": "second"}, succeed))
-            self.assertEqual(["first"], handled)
+            duplicate_headers = headers(key, delivery_id="msg_duplicate")
+            self.assertEqual(204, receive(BODY, duplicate_headers, active, inbox, succeed, NOW))
+            self.assertEqual(204, receive(BODY, duplicate_headers, active, inbox, succeed, NOW))
+            self.assertEqual(["demo.follow_up"], handled)
+            self.assertEqual(400, receive(BODY + b" ", duplicate_headers, active, inbox, succeed, NOW))
+            self.assertEqual(500, receive(BODY, duplicate_headers, [], inbox, succeed, NOW))
 
             attempts = 0
 
@@ -89,9 +97,9 @@ class ReceiverTest(unittest.TestCase):
                 if attempts == 1:
                     raise RuntimeError("retry me")
 
-            with self.assertRaises(RuntimeError):
-                inbox.handle("msg_retry", {"type": "retry"}, fail_once)
-            self.assertTrue(inbox.handle("msg_retry", {"type": "retry"}, fail_once))
+            retry_headers = headers(key, delivery_id="msg_retry")
+            self.assertEqual(500, receive(BODY, retry_headers, active, inbox, fail_once, NOW))
+            self.assertEqual(204, receive(BODY, retry_headers, active, inbox, fail_once, NOW))
             self.assertEqual(2, attempts)
 
 

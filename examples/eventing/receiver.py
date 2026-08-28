@@ -2,12 +2,14 @@ import base64
 import hashlib
 import hmac
 import json
+import logging
 import sqlite3
 import time
 from collections.abc import Callable, Mapping
 
 TOLERANCE_SECONDS = 300
 WebhookSecrets = list[str] | tuple[str, ...]
+logger = logging.getLogger(__name__)
 
 
 class VerificationError(Exception):
@@ -24,8 +26,10 @@ def verify_request(
     secrets: WebhookSecrets,
     now: int | None = None,
 ) -> tuple[dict, str]:
-    if isinstance(secrets, str):
-        raise ConfigurationError("webhook secrets must be a list or tuple")
+    if isinstance(secrets, str) or any(
+        not isinstance(secret, str) for secret in secrets
+    ):
+        raise ConfigurationError("webhook secrets must be a list or tuple of strings")
 
     normalized = {key.lower(): value for key, value in headers.items()}
     try:
@@ -96,7 +100,7 @@ class SQLiteInbox:
 
     def __init__(self, path: str):
         self.path = path
-        connection = sqlite3.connect(path)
+        connection = sqlite3.connect(path, timeout=30, isolation_level=None)
         try:
             connection.execute(
                 """CREATE TABLE IF NOT EXISTS webhook_inbox (
@@ -114,7 +118,7 @@ class SQLiteInbox:
         event: dict,
         handler: Callable[[sqlite3.Connection, dict], None],
     ) -> bool:
-        connection = sqlite3.connect(self.path, timeout=30)
+        connection = sqlite3.connect(self.path, timeout=30, isolation_level=None)
         try:
             connection.execute("BEGIN IMMEDIATE")
             inserted = connection.execute(
@@ -153,5 +157,6 @@ def receive(
     try:
         inbox.handle(delivery_id, event, handler)
     except Exception:
+        logger.exception("webhook handler failed")
         return 500
     return 204
