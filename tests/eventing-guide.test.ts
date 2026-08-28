@@ -10,6 +10,7 @@ const MODEL_SECTION_RE =
 const TABLE_DATA_ROW_RE = /^\| (?!Term \|)(?!-)[^|]+\|/gm;
 const ACCOUNT_LIFECYCLE_SECTION_RE =
   /## Recover expired connected accounts([\s\S]*?)## Try a scheduled event/;
+const JSON_BLOCK_RE = /```json\n([\s\S]*?)\n```/;
 const TIMESTAMP_TOLERANCE_RE = /through (\d+) seconds/;
 const TIMESTAMP_REJECTION_RE = /timestamps (\d+) seconds away/;
 const TOLERANCE_CONSTANT_RE = /TOLERANCE_SECONDS = (\d+)/;
@@ -118,16 +119,6 @@ describe("unified eventing guide", () => {
       '--request POST "$SCOPE/webhooks"',
       "event_types",
       "url",
-      '"type": "connected_account.expired"',
-      '"timestamp":',
-      '"data":',
-      "organization_id",
-      "project_id",
-      "user_id",
-      "provider_id",
-      "connection_id",
-      "status",
-      "reason",
       "no_refresh_token",
       "refresh_failed",
       "POST /v1/orgs/{org_id}/projects/{project_id}/auth/authorize",
@@ -140,6 +131,19 @@ describe("unified eventing guide", () => {
     expect(section).toContain("Organization-bound lifecycle events omit");
     expect(section).toContain("Verify the Standard Webhooks signature");
     expect(section).toContain("reduced grant");
+
+    const envelope = JSON.parse(section.match(JSON_BLOCK_RE)?.[1] ?? "{}");
+    expect(Object.keys(envelope).sort()).toEqual(["data", "timestamp", "type"]);
+    expect(envelope.type).toBe("connected_account.expired");
+    expect(Object.keys(envelope.data).sort()).toEqual([
+      "connection_id",
+      "organization_id",
+      "project_id",
+      "provider_id",
+      "reason",
+      "status",
+      "user_id",
+    ]);
   });
 
   test("documents the supported lifecycle without hiding retained events", () => {
