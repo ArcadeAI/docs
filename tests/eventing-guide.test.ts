@@ -16,6 +16,10 @@ const RETRY_DELAYS_RE =
 const RETRY_TOTAL_RE = /totals (\d+) hours, (\d+) minutes, and (\d+) seconds/;
 const RETRY_DELAY_SEPARATOR_RE = /,\s*(?:and\s+)?/;
 const RETRY_DELAY_RE = /(\d+) (second|minute|hour)s?/;
+const RETENTION_WINDOW_RE =
+  /Keep each recorded `webhook-id` for at least Arcade's configured event-retention period \(90 days by default\)/;
+const STABLE_WEBHOOK_ID_RE =
+  /same `webhook-id` across automatic retries, manual retry, and recovery/;
 
 const page = readFileSync(join(process.cwd(), PAGE), "utf8");
 
@@ -128,11 +132,7 @@ describe("unified eventing guide", () => {
   });
 
   test("keeps deduplication through the manual recovery window", () => {
-    expect(page).toMatch(
-      /Keep each recorded `webhook-id` for at least Arcade's configured event-retention period \(90 days by default\)/
-    );
-    expect(page).toMatch(
-      /same `webhook-id` across automatic retries, manual retry, and recovery/
-    );
+    expect(page).toMatch(RETENTION_WINDOW_RE);
+    expect(page).toMatch(STABLE_WEBHOOK_ID_RE);
   });
 });
