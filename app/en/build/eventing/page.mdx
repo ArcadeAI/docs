@@ -444,6 +444,108 @@ curl --fail-with-body --silent --show-error \
   </Tabs.Tab>
 </Tabs>
 
+## Connect a customer-owned realtime provider
+
+Provider ingress lets agent developers route signed Slack or GitHub events into the existing trigger runtime without operating a separate receiver. Arcade supports one realtime trigger type per project-owned OAuth app for this release.
+
+Before setup, you need:
+
+- A Slack or GitHub OAuth app in the selected Arcade project
+- An active connected account for that app
+- A current realtime trigger type: `slack.message.received` or `github.push.received`
+- A provider-reachable HTTPS origin for the Arcade Engine
+
+Arcade Cloud supplies the public origin. For customer-managed or local deployments, your platform operator must expose the Arcade Engine through HTTPS and set `api.public_host` to the public hostname. Private-only deployments must use polling triggers.
+
+<Callout type="warning">
+The provider callback receives events from Slack or GitHub. It is not the OAuth redirect URI and it is not an outgoing webhook subscription. Arcade does not create the provider-side event subscription or webhook for you.
+</Callout>
+
+<Tabs items={["Dashboard", "REST API"]}>
+  <Tabs.Tab>
+
+<Steps>
+
+### Configure provider ingress
+
+Open **Auth providers**, select your Slack or GitHub app, and find **Provider ingress**. Choose the realtime trigger type and the connected account that Arcade should use for trigger runs.
+
+For Slack, enter the app's signing secret. For GitHub, choose whether the webhook belongs to a GitHub App installation, repository, or organization, then enter the webhook secret that you will use in GitHub.
+
+Select **Configure ingress**, then copy the provider callback URL. Arcade encrypts the secret and does not show it again.
+
+### Configure the provider
+
+For Slack, paste the provider callback into **Event Subscriptions > Request URL** and subscribe to message events. Slack sends a signed URL-verification challenge.
+
+For GitHub, paste the provider callback into **Payload URL**, choose `application/json`, use the same webhook secret, and subscribe to push events. The target kind in Arcade must match where you create the webhook.
+
+### Confirm the first delivery
+
+Send a matching Slack message or GitHub push. Return to **Provider ingress** and confirm that **Latest verified delivery** has a timestamp and **Current signing secret** is **Verified**.
+
+The first matching event pins the Slack workspace or selected GitHub target. A signed event from another target is acknowledged but does not enter Arcade event routing.
+
+</Steps>
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Read the provider ingress state to discover current eligible types:
+
+```bash
+export AUTH_PROVIDER_ID="<ap_... from the auth provider>"
+export CONNECTION_ID="<connection_id from Connected users>"
+
+curl --fail-with-body --silent --show-error \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/auth_providers/$AUTH_PROVIDER_ID/ingress"
+```
+
+Configure Slack ingress with the current type and version returned by that read:
+
+```bash
+export PROVIDER_SIGNING_SECRET="<Slack app signing secret>"
+
+curl --fail-with-body --silent --show-error \
+  --request PUT "$SCOPE/auth_providers/$AUTH_PROVIDER_ID/ingress" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data "{\"type\":\"slack.message.received\",\"type_version\":\"1\",\"connection_id\":\"$CONNECTION_ID\",\"signing_secret\":\"$PROVIDER_SIGNING_SECRET\"}"
+```
+
+The response contains `callback_url` but never contains the signing secret. For GitHub, use `github.push.received` and include `external_scope_kind` with `installation`, `repository`, or `organization`.
+
+Paste `callback_url` into the provider settings described in the Dashboard tab. After the provider sends a signed challenge, ping, or matching event, repeat the GET request and inspect `last_verified_at` and `current_secret_verified`.
+
+To change only the connected account, send the stored type and version with the new `connection_id` and `"preserve_signing_secret":true`. To rotate the secret, send `signing_secret` instead. Both operations keep the callback URL and pinned provider target.
+
+Remove provider ingress explicitly before deleting the auth provider or changing its Slack or GitHub classification:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request DELETE "$SCOPE/auth_providers/$AUTH_PROVIDER_ID/ingress" \
+  --header "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+Removal keeps the OAuth app, connected accounts, trigger instances, Arcade events, and outgoing webhook subscriptions.
+
+  </Tabs.Tab>
+</Tabs>
+
+### Recover provider ingress
+
+- **Rotate a secret:** pause delivery in Slack or GitHub, update the provider and Arcade with the same secret, resume delivery, then send a new event. Do not set the Arcade auth provider to Disabled for this cutover. That setting acknowledges and drops deliveries instead of buffering them.
+- **Replace a connected account:** choose another active account for the same provider and project. Matching deliveries return `503` while no usable account is selected so the provider can retry.
+- **Fix a public host:** restore the provider-reachable HTTPS origin. Existing configurations can still rotate a secret or change an account while the host check reports `public_host_required`, and a previously copied callback continues to route.
+- **Reset a pinned target:** remove and recreate provider ingress. Slack Enterprise Grid customers need one provider configuration per workspace. GitHub customers must recreate ingress to change the installation, repository, or organization target kind after the first event pins it.
+
+Provider ingress accepts request bodies up to 5 MiB and suppresses a provider redelivery for seven days within one configuration lifetime. Removing and recreating ingress starts a new configuration lifetime. Deliveries already staged before removal continue through normalization and event routing from their stored snapshot.
+
+<Callout type="warning">
+Arcade Cloud applies edge controls to the public callback. Before exposing a customer-managed or local deployment, configure request-rate and byte-rate limits at your reverse proxy or load balancer. Keep the callback route public, but do not expose private management endpoints through that exception.
+</Callout>
+
 ## Operate each resource
 
 Every route below is relative to the project-scoped `$SCOPE`. The Dashboard uses the same public project resources. Recovery and replay belong to the webhook subscription: recovery requeues existing dead deliveries; replay creates deliveries for retained matching events that subscription never received.

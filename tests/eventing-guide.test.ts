@@ -58,6 +58,7 @@ describe("unified eventing guide", () => {
   test("keeps examples on Dashboard and scoped REST surfaces", () => {
     expect(page).toContain("## Try a scheduled event");
     expect(page).toContain("## Try a filtered Gmail trigger");
+    expect(page).toContain("## Connect a customer-owned realtime provider");
     expect(page).toContain('Tabs items={["Dashboard", "REST API"]}');
     expect(page).toContain("Authorization: Bearer $ARCADE_API_KEY");
     expect(page).toContain(
@@ -68,9 +69,29 @@ describe("unified eventing guide", () => {
       "SCHEDULE_ID",
       "TRIGGER_ID",
       "EVENT_ID",
+      "AUTH_PROVIDER_ID",
     ]) {
       expect(page).toContain(`export ${variable}=`);
     }
+  });
+
+  test("documents provider ingress setup, proof, recovery, and boundaries", () => {
+    for (const value of [
+      "slack.message.received",
+      "github.push.received",
+      '"preserve_signing_secret":true',
+      "current_secret_verified",
+      "last_verified_at",
+      "public_host_required",
+      "request-rate and byte-rate limits",
+      "seven days",
+      "5 MiB",
+    ]) {
+      expect(page).toContain(value);
+    }
+    expect(page).toContain("$SCOPE/auth_providers/$AUTH_PROVIDER_ID/ingress");
+    expect(page).toContain("It is not the OAuth redirect URI");
+    expect(page).toContain("acknowledges and drops deliveries");
   });
 
   test("pins origins, tenant isolation, and the reference boundary", () => {
