@@ -4,6 +4,9 @@ const meta: MetaRecord = {
   index: {
     title: "Overview",
   },
+  architecture: {
+    title: "Platform architecture",
+  },
   "arcade-cloud": {
     title: "Arcade Cloud",
   },
