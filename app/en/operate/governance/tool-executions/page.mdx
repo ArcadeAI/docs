@@ -1,0 +1,204 @@
+---
+title: "Tool Executions"
+description: "Review every tool run in a project: what ran, for whom, and why it failed, with tool inputs and outputs held to project admins."
+---
+
+# Tool executions
+
+Arcade records every tool run in a project, including which tool ran, for which end user, when, and how it went, and exposes that history in the dashboard and over the API. Recording is on by default and is an organization-wide setting — see [Recording and retention](#recording-and-retention).
+
+This page serves two jobs:
+
+- **Agent and tool developers** debug a run that misbehaved. The exact inputs a tool received and the outputs it returned show whether your agent sent the wrong arguments or the tool or its provider failed.
+- **Platform operators** review what a project has run, for compliance and to see which tools and toolkits people actually use.
+
+Tool executions cover runtime activity. For administrative changes such as creating an API key or adding a project member, see [Audit Logs](/operate/governance/audit-logs).
+
+## What Arcade records
+
+Each execution records:
+
+- The tool and toolkit that ran, including the toolkit version
+- Whether the run was **immediate** (on demand) or **scheduled** (queued to run later)
+- The end user it ran for
+- Its status, plus the times Arcade created, scheduled, started, and finished it
+- One entry per **attempt**, with that attempt's success or failure, timing, and error
+
+Arcade also records the **inputs** a tool received and the **outputs** it returned. Both can be large and can carry credentials or end-user data, so Arcade withholds them by default and holds them to project admins. See [Who can see what](#who-can-see-what).
+
+## Find a run in the dashboard
+
+Open your project in the dashboard and select **Tool Executions**. The newest runs appear first.
+
+![The Tool Executions page in the Arcade dashboard, listing recent runs with status, tool, toolkit, type, user, duration, and start time](/images/screenshots/tool-executions-list.png)
+
+Narrow the list with these filters:
+
+| Filter | Behavior |
+| -- | -- |
+| Search tool name | Case-insensitive substring match on the tool name |
+| Toolkit | Exact toolkit name, picked from your project's catalog |
+| Outcome | All, success, or failure |
+| Time range | A preset from the last hour to the last 90 days, or a custom start and end |
+| User ID | The end user Arcade ran the tool for |
+| Error contains | Case-insensitive match against the error an attempt reported when it failed |
+
+Every filter lives in the URL, so a filtered view survives a reload and you can paste it to a teammate.
+
+Select a row to open the execution details panel. It shows the execution ID, the tool and its toolkit version, the run type, the end user, the full timeline, the duration, and each attempt with its status and error.
+
+![The execution details panel showing tool metadata and timing, with tool inputs and outputs hidden behind toggles](/images/screenshots/tool-executions-detail-hidden.png)
+
+## Debug a tool that isn't working
+
+When a tool call goes wrong, work from the record rather than from your agent's logs. The record is what Arcade actually ran.
+
+1. Set **Outcome** to failure, and narrow by tool name or by the affected user.
+2. Open the run and read the attempt list. Each attempt shows whether it succeeded, how long it took, and the error it reported. Retries that eventually succeed point at a transient provider problem. A run that fails the same way on every attempt points at the request itself.
+3. Turn on **Show inputs** to see the exact arguments the tool received.
+4. Turn on **Show outputs** to see what the tool returned, including the full error a provider sent back.
+
+![The execution details panel with both toggles on, showing a warning that sensitive data is visible over the tool input and output JSON](/images/screenshots/tool-executions-detail-revealed.png)
+
+Read the two together to place the fault:
+
+| What you see | Where to look |
+| -- | -- |
+| Inputs don't match what you meant to send | Your agent, prompt, or harness built the wrong call |
+| Inputs look right, output carries a provider error | The upstream provider, its permissions, or its rate limits |
+| Inputs look right, output is wrong or empty | The tool's own logic |
+| The run needed authorization | The end user hasn't connected the account the tool needs |
+
+Reading inputs or outputs takes project-admin authority. If the toggles won't turn on, ask a project admin, or read the attempt errors, which stay available to every reader.
+
+## Review what a project has run
+
+For compliance work, the list itself is the answer: every tool run in the project, with the end user it ran for and the outcome. Filter by **User ID** to produce the history for one person, or set a time range to cover an audit period. Because filters live in the URL, a scoped view is something you can share or store alongside your findings.
+
+To see which tools people actually use, filter by tool or toolkit and read the total off the list, or ask the API for a count without pulling a page:
+
+```bash
+# How many times the project ran a GoogleDocs tool in the last week
+curl -s "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/tool_executions/count?toolkit_name=GoogleDocs&start_time=2026-08-08T00:00:00Z" \
+  -H "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+```json
+{ "count": 412 }
+```
+
+Both surfaces stay scoped to a single project, and neither includes tool inputs or outputs.
+
+## Who can see what
+
+Anyone holding a role on the project can read the history of what that project ran. The recorded inputs and outputs take project-admin authority.
+
+| | Project member | Project admin / org admin |
+| -- | -- | -- |
+| List what the project ran | ✅ | ✅ |
+| Open a single run, with its tool, user, status, timing, and attempts | ✅ | ✅ |
+| See why a run failed | ✅ | ✅ |
+| See the inputs a tool received | ❌ | ✅ |
+| See the outputs it returned | ❌ | ✅ |
+
+Two consequences are worth knowing.
+
+**Diagnostics are not payload.** The error an attempt reported when it failed, and the system error message behind a scheduler or infrastructure failure, reach every reader. A project member can diagnose a failure without anyone revealing the payload. Free-form detail that a tool chose to attach to its error, such as a developer message, model-facing guidance, extra fields, and the stack trace, travels with the payload instead, and Arcade withholds it alongside the payload.
+
+**Revealing is deliberate.** A project member gets toggles they can't switch on, rather than a permission error. When an admin turns one on, the panel warns that sensitive data is visible, since anyone watching the screen or a recording can read it. The toggle state never lands in the URL, so a shared or bookmarked link never reveals another person's tool inputs on open.
+
+## Read executions from the API
+
+The same history is available over the Arcade API. The base URL is `https://api.arcade.dev`, and requests authenticate with a bearer token.
+
+List the runs that failed, 25 at a time:
+
+```bash
+curl -s "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/tool_executions?outcome=failure&limit=25" \
+  -H "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+```json
+{
+  "items": [
+    {
+      "id": "te_3HvzkMFaDOAfGWLtqJq0nhoD9Qd",
+      "created_at": "2026-08-14T20:11:13Z",
+      "updated_at": "2026-08-14T20:11:13Z",
+      "execution_type": "immediate",
+      "execution_status": "failed",
+      "tool_name": "GetDocumentById",
+      "toolkit_name": "GoogleDocs",
+      "toolkit_version": "8.1.0",
+      "user_id": "sterling@arcade.dev",
+      "started_at": "2026-08-14T20:02:14Z",
+      "finished_at": "2026-08-14T20:11:13Z"
+    }
+  ],
+  "limit": 25,
+  "offset": 0,
+  "page_count": 1,
+  "total_count": 137
+}
+```
+
+The newest results come first, and pages advance by offset. `limit` defaults to 100. The list accepts `tool_name`, `toolkit_name`, `user_id`, `outcome`, `failure_reason`, `start_time`, and `end_time`, the same filters the dashboard exposes. Both timestamps take RFC 3339.
+
+Open one run, and ask for the arguments and results it recorded:
+
+```bash
+curl -s "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/tool_executions/{id}?include_inputs=true&include_outputs=true" \
+  -H "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+The detail response adds `input` and an `attempts` array to the fields the list returns. Each attempt carries its ID, timing, success, any output, and a system error message.
+
+| Endpoint | Method | Description |
+| -- | -- | -- |
+| `/v1/orgs/{org_id}/projects/{project_id}/tool_executions` | GET | List the project's executions, newest first |
+| `/v1/orgs/{org_id}/projects/{project_id}/tool_executions/count` | GET | Count the executions matching the same filters |
+| `/v1/orgs/{org_id}/projects/{project_id}/tool_executions/{id}` | GET | Read one execution and its attempts |
+
+Two behaviors trip up API callers:
+
+- **The payload flags change the authority a request needs.** Omit `include_inputs` and `include_outputs` and the request needs only a role on the project. Add either one and the request needs project-admin authority, so the same caller can receive `200` without the flags and `403` with them.
+- **These endpoints serve operators and project API keys.** Arcade refuses a read-only project API key, and refuses any caller whose authority comes from a single end user, such as an MCP client.
+
+Find your organization and project IDs in the dashboard URL: `/orgs/{org_id}/projects/{project_id}`. For the full request and response schemas, see the [API reference](/references/api).
+
+## Recording and retention
+
+Two organization-wide settings govern the history, and are configured by an organization admin. They apply to every project in the organization.
+
+| Setting | What it decides |
+| -- | -- |
+| Recording (boolean) | Whether new tool runs are written down at all |
+| Retention window (number) | How long a recorded run is kept |
+
+On Arcade Cloud, recording is enabled by default and the retention window is 7 days. Past the window, Arcade deletes the records and they stop appearing in the history and the API. A self-hosted deployment sets its own defaults, and records nothing until execution logging is turned on in the Engine configuration.
+
+### Change them yourself
+
+In the dashboard, open **Organization → Logging Policy**. Or call the API. The policy belongs to the organization, so this endpoint authenticates a user the same way the [audit log API](/operate/governance/audit-logs) does — a project API key is refused with a `401`:
+
+```bash
+curl -s -X PUT "https://cloud.arcade.dev/api/v1/orgs/{org_id}/logging-config" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"logging_data_retention": "ALLOWED", "default_log_retention_days": 30}'
+```
+
+Send either field on its own; an omitted field is left alone, so changing the window cannot switch recording off by accident.
+
+A window must be at least 1 day and no longer than the platform maximum, which is 90 days on Arcade Cloud and is reported as `max_log_retention_days` on the organization read. Anything outside that is refused with a `422` rather than quietly adjusted. Zero is not "keep nothing" — it is refused, because turning recording off is the way to stop recording.
+
+### What each setting does to history you already have
+
+- **Turning recording off** stops new runs being written down. It leaves what is already stored in place, and those records go on expiring under the window as before. It is not an erasure control.
+- **Shortening the window** applies to records you already have. Going from 90 days to 7 deletes everything older than 7 days across every project in the organization, shortly after you save, and it cannot be undone.
+
+## Related content
+
+- [Audit Logs](/operate/governance/audit-logs): administrative actions across the platform
+- [Contextual Access](/operate/governance/contextual-access): policies that decide whether a tool call runs at all
+- [API reference](/references/api): full schemas for every endpoint
