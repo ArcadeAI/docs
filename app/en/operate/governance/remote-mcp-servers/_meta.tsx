@@ -25,6 +25,9 @@ const meta: MetaRecord = {
   github: {
     title: "GitHub",
   },
+  splunk: {
+    title: "Splunk",
+  },
 };
 
 export default meta;

@@ -1,0 +1,161 @@
+---
+title: "Connect a Splunk MCP Server"
+description: "Connect Arcade to the MCP Server for Splunk platform using a bearer token or OAuth 2.1"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a Splunk MCP Server
+
+Splunk hosts an MCP server through the **MCP Server for Splunk platform** app, installed on a Search Head or Search Head Cluster, exposing SPL search execution, saved searches, SPL generation/explanation/optimization, and customer-authored custom tools directly from a Splunk Cloud deployment. This guide covers the Arcade-side setup for connecting it as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the Splunk settings that most commonly trip people up.
+
+<Callout type="info">
+  This guide is about connecting to a Splunk MCP server. Arcade doesn't ship
+  a Splunk toolkit today, but even a future one wouldn't replace what the
+  Splunk MCP Server can front: tools no generic toolkit could ever
+  pre-build, since an administrator defines them for their own instance:
+
+  - Custom tools an administrator [authors
+    themselves](https://help.splunk.com/en/splunk-cloud-platform/mcp-server-for-splunk-platform/1.2/managing-custom-tools-in-splunk-mcp-server),
+    wrapping a specific saved search or SPL workflow their organization relies on
+  - SPL search execution, saved searches, and (with Splunk AI Assistant
+    installed) SPL generation, explanation, and optimization tools
+</Callout>
+
+<Callout type="warning">
+  The bearer-token path in this guide has been validated end-to-end against
+  a live Splunk Cloud stack. The OAuth 2.1 path is sourced from [Splunk's
+  own OAuth
+  documentation](https://help.splunk.com/en/splunk-cloud-platform/mcp-server-for-splunk-platform/1.2/oauth-for-mcp-server)
+  but hasn't yet been walked through end-to-end on the Arcade side. Confirm
+  that path before relying on it.
+</Callout>
+
+Splunk's MCP server supports two authentication paths, and which one fits depends on your setup more than difficulty:
+
+- **Bearer token (the field-tested path here, no OAuth client needed)**: an MCP Server token issued by Splunk, passed as an `Authorization` header. No browser sign-in. Works on any Splunk Cloud stack.
+- **OAuth 2.1 (interactive, per-user)**: a browser-based sign-in with no static credential stored. Available only on AWS-hosted Splunk Cloud stacks running recent versions.
+
+Both are covered below. The IP-allowlist and token-audience gotchas in [Set up Splunk](#set-up-splunk) apply to **both** paths.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect a Splunk MCP server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-splunk">Arcade account</SignupLink>
+- A **Splunk Cloud Platform** deployment with the MCP Server for Splunk platform app installed
+- Splunk administrator access to manage the IP allowlist and issue MCP Server tokens (and, for the OAuth path, to create OAuth clients)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Whether to authenticate with a bearer token or OAuth 2.1, and why
+- Which Splunk MCP Server app, capability, IP-allowlist, and token settings matter for Arcade specifically
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up Splunk
+
+The Splunk MCP Server has prerequisites that fail quietly if missed. Sign-in can succeed while every tool call then fails. Confirm all of these before configuring Arcade, regardless of which auth path you use:
+
+- **Install the MCP Server for Splunk platform app** from Splunkbase on your Search Head or Search Head Cluster.
+- **Enable REST API access** for the deployment.
+- **Enable token-based authentication.** The underlying MCP Server requires this for both the bearer-token and OAuth paths.
+- **Assign the `mcp_tool_execute` capability** to every Splunk role that needs MCP access (and `mcp_tool_admin` for administrators). A user can authenticate successfully and still get nothing back if their role lacks this capability.
+- **(Optional) Install Splunk AI Assistant** if you want the SPL generation, explanation, and optimization tools (`generate_spl`, `explain_spl`, `optimize_spl`, `ask_splunk_question`). They don't appear without it.
+
+### Two gotchas that apply to both auth paths
+
+These are the two failures seen in practice connecting Arcade to a live Splunk stack, in the order they surface:
+
+- **Add Arcade's outbound IPs to the Splunk Cloud IP allowlist first.** Splunk Cloud's IP allowlist (**Splunk Cloud settings → server settings → IP allowlist**, which the MCP server's search-head API access is governed by) blocks Arcade's requests until Arcade's egress IP ranges are added. The symptom is an **HTTP 405**. The request is rejected at the network layer before authentication is even evaluated, which can be misread as a broken endpoint. Get Arcade's current outbound IP ranges from your Arcade contact and add them here before anything else. Allowlist changes can take a few minutes to propagate.
+
+- **Issue the token as an MCP Server token, not a plain user/service-account token.** This is the subtle one. A token minted under a *user's* own context carries the wrong audience, and Splunk rejects it with **`invalid token audience`** (an HTTP 403) even though the IP allowlist has been cleared and the token is otherwise valid. Splunk's MCP Server has its own token-creation path that sets the correct audience. Use that. In practice, creating an "MCP token" (rather than reusing the generic service-account token used for other integrations) is what changes the audience and makes the connection succeed.
+
+### Bearer-token path
+
+Issue an **MCP Server token** from Splunk (per the preceding token-audience note), and store it somewhere secure. You'll add it to Arcade as a header secret. Nothing else is required on the Splunk side for this path beyond the shared prerequisites and the IP allowlist. This is the path validated against a live stack.
+
+### OAuth 2.1 path
+
+Two additional environment constraints are hard blocks (not misconfigurations) specific to OAuth:
+
+- **Region**: OAuth for MCP is supported only on **AWS-hosted** Splunk Cloud stacks. Azure, GCP, IL2, and IL5 are explicitly not supported. (The bearer-token path has no such restriction.)
+- **Versions**: Splunk Cloud `10.3.2512.11`+ and MCP Server app `1.2.1`+ are the floor; OAuth 2.1 ships by default on Splunk Cloud `10.5.2506.3` and later. If **Splunk OAuth Clients** doesn't appear under **Settings → Authentication methods**, OAuth isn't enabled on your stack. Contact Splunk Support to enable it.
+
+To create the OAuth client: in Splunk Web, go to **Settings → Authentication methods → Splunk OAuth Clients → New OAuth Client**. Give it a descriptive name (for example, `arcade`) and set the **Redirect URI** to Arcade's hosted `https://` callback (see [If using OAuth 2.1: add the redirect URI to your OAuth client](#if-using-oauth-21-add-the-redirect-uri-to-your-oauth-client) below). Splunk's docs default their examples to `http://localhost:8787/callback` for desktop clients like Claude Code and Cursor. That pattern is wrong for Arcade, which is a hosted service. On save, Splunk shows the **Client ID, Client Secret, Authorization URL, and Token URL** once. Capture all four then, since the secret is displayed a single time. Splunk recommends **one OAuth client per application**, so create a dedicated client for Arcade rather than reusing one.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, and enter a server ID and the MCP endpoint URL for your stack, which your Splunk admin provides. It looks like:
+
+```
+https://<your-stack>.splunkcloud.com/.../mcp
+```
+
+The endpoint uses HTTPS on port 443. No non-standard outbound port configuration is needed.
+
+### If using a bearer token
+
+Under **Advanced settings → Custom headers**, add an `Authorization` header whose value is `Bearer ` followed by a reference to the token stored as a secret:
+
+```
+Authorization: Bearer ${secret:SPLUNK_MCP_TOKEN}
+```
+
+Add the MCP Server token itself as a header secret (the **Add secret** control in the same section) rather than pasting it in plain text, and reference it by name as shown. Note the single space after `Bearer`. There's no OAuth2 configuration to fill in for this path.
+
+### If using OAuth 2.1
+
+Open **Advanced settings → OAuth2 authorization** and enter, all captured from the OAuth client Splunk created:
+
+- **Client ID** / **Client Secret**
+- **Authorization URL** / **Token URL**: Splunk displays both when the client is created; enter them exactly.
+- **Scopes**: set these explicitly to `openid offline_access` and nothing more. **Splunk's OAuth server advertises more scopes than most MCP clients support**, and requesting the full advertised set causes scope-negotiation errors. Restricting to `openid offline_access` is Splunk's own documented workaround.
+
+<Callout type="info">
+  The Splunk MCP Server uses Authorization Code + PKCE and doesn't support
+  Dynamic Client Registration, so, as with most providers in this section,
+  the Client ID and Secret must be supplied manually.
+</Callout>
+
+### If using OAuth 2.1: add the redirect URI to your OAuth client
+
+Copy the redirect URI Arcade generates and set it as the **Redirect URI** on the Splunk OAuth client. Use Arcade's exact hosted `https://` callback value. The `http://localhost:8787/callback` pattern from Splunk's desktop-client examples will not work for a hosted service like Arcade, and a mismatch here is a common failure (see troubleshooting).
+
+### Authorize and confirm
+
+Save the server. For the bearer-token path, click **Tools** to confirm Arcade can reach the server and discover its tools (roughly 15 come from a standard install). For the OAuth path, saving opens an authorization prompt. Sign in as a Splunk user whose role carries the `mcp_tool_execute` capability, since the session runs under that identity and its role determines which tools are reachable. Either way, a successful connection immediately lists the discovered tools, which you can then add to an [MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard).
+
+</Steps>
+
+## Troubleshooting
+
+The first two are the failures seen most often in practice, and they apply to **both** auth paths. The `405`-vs-`403` distinction is diagnostic: a 405 means the request never got past the network layer, a 403 means it did but the token was rejected.
+
+- **HTTP 405, or the connection behaves as if the endpoint is dead**: Arcade's outbound IPs aren't on the Splunk Cloud IP allowlist, so requests are blocked before authentication. Add Arcade's egress IP ranges under **Splunk Cloud settings → server settings → IP allowlist** and allow a few minutes to propagate. This blocks both auth paths equally.
+- **HTTP 403 `invalid token audience`, even though the IP allowlist is cleared and the token looks valid**: the bearer token was issued under a user/service-account context with the wrong audience. Re-issue it as an **MCP Server token** (Splunk's MCP token-creation path), which sets the correct audience. This is the single most common bearer-token failure.
+- **Authentication succeeds, but the tool list is empty or every call fails with a permission/API-access error**: a shared prerequisite is missing. Most often the authorizing role lacks the `mcp_tool_execute` capability, or REST API access / token authentication isn't enabled on the deployment.
+- **(OAuth path) The browser opens, but the callback fails or shows a redirect error**: the Redirect URI on the Splunk OAuth client doesn't exactly match Arcade's callback, including protocol and path. It's usually a leftover `http://localhost:8787/callback` value where Arcade's hosted `https://` callback should be.
+- **(OAuth path) Authentication succeeds, but the client reports a scope error**: the request is asking for more than `openid offline_access`. Restrict the Arcade OAuth scopes to exactly those two.
+- **(OAuth path) A TLS or "self-signed certificate in chain" error during sign-in**: the certificate presented by the Splunk stack isn't trusted in the relevant trust store. An environment/cert-chain issue on the Splunk side, not an Arcade configuration problem.
+- **(OAuth path) `Splunk OAuth Clients` doesn't appear in Settings, so there's no client to create**: OAuth isn't enabled on the stack (or it's below the required version, or not AWS-hosted). Contact Splunk Support, after confirming region and version prerequisites. The bearer-token path doesn't depend on any of this and may be the faster route.
+- **The SPL generation/explanation tools (`generate_spl`, `explain_spl`, etc.) are missing**: Splunk AI Assistant isn't installed. It's an optional dependency for those specific tools.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).
