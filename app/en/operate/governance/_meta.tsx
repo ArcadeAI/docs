@@ -16,6 +16,9 @@ export const meta: MetaRecord = {
   "audit-logs": {
     title: "Audit Logs",
   },
+  "tool-executions": {
+    title: "Tool Executions",
+  },
 };
 
 export default meta;
