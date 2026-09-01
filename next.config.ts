@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 import nextra from "nextra";
 import { withLlmsTxt } from "./lib/next-plugin-llmstxt";
 import { remarkGlossary } from "./lib/remark-glossary";
+import { stripMarkdownFromSwcPageExtensions } from "./lib/swc-page-extensions";
 import { redirects } from "./redirects";
 
 // Set up Nextra with its configuration
@@ -36,6 +37,10 @@ const nextConfig: NextConfig = withLlmsTxt({
         ...config.resolve.extensionAlias,
         ".js": [".ts", ".tsx", ".js"],
       };
+      // Keeps `page.mdx` out of Next 16.2's new SWC app-entry check, which
+      // otherwise rejects the `metadata` export Nextra generates. See
+      // lib/swc-page-extensions.ts for the full story.
+      stripMarkdownFromSwcPageExtensions(config.module.rules);
       return config;
     },
     headers: async () => [

@@ -15,13 +15,13 @@ If you'd rather not manage Kubernetes yourself, the [Azure](/operate/deploy/azur
 
 ## What it deploys
 
-The chart installs the complete platform — Engine, Coordinator, Worker, Dashboard, and Experience API — into a namespace on your cluster, along with the supporting controllers it needs.
+The chart installs the complete platform into a namespace on your cluster, along with the supporting controllers it needs. See [Platform architecture](/operate/deploy/architecture) for what each service is responsible for and how they connect.
 
 ## Prerequisites
 
 - **Kubernetes** 1.30 or later
 - **Helm** 3.8 or later (for OCI chart support)
-- **PostgreSQL** and **Redis** — bundled by the chart for proof-of-concept, or bring your own managed instances for production
+- **PostgreSQL** and **Redis** — bundled by the chart for evaluation, or bring your own managed instances for production
 - An [OIDC identity provider](/references/auth-providers)
 - An ingress controller or Gateway API implementation, TLS certificates, and a DNS hostname
 
@@ -59,7 +59,7 @@ Once the pods are running, open your configured hostname and sign in through you
 
 Configure the platform through Helm values. The chart covers:
 
-- **Components** — Engine, Coordinator, Worker, Dashboard, and Experience API
+- **Components** — the [platform services](/operate/deploy/architecture) and how many replicas of each to run
 - **Identity** — your OIDC identity provider and [OAuth providers](/references/auth-providers)
 - **Data stores** — bundled or external PostgreSQL and Redis
 - **Networking** — ingress or Gateway API, TLS, and the `engine.ssrfAllowlist` for reaching internal services
@@ -77,5 +77,4 @@ Upgrade to a new chart version with `helm upgrade`, and roll back with `helm rol
 ## Next steps
 
 - [Create an MCP Gateway](/operate/governance/mcp-gateways) to scope tools and auth for each client
-- [Connect external clients with Warp Pipes](/operate/deploy/warp-pipes)
 - [Set up a User Source](/operate/identity/user-sources) to authenticate end users with your own identity provider

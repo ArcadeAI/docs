@@ -1,0 +1,116 @@
+---
+title: "Connect a HubSpot Remote MCP Server"
+description: "Configure a HubSpot MCP Auth App and Arcade's OAuth 2.0 settings to connect the HubSpot Remote MCP Server"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a HubSpot Remote MCP Server
+
+HubSpot hosts a remote MCP server at `mcp.hubspot.com`, exposing CRM records, activities, conversations, campaigns, and marketing email tools directly from a HubSpot portal. This guide covers the Arcade-side setup for connecting it as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the HubSpot settings that most commonly trip people up.
+
+<Callout type="info">
+  This guide is about connecting to HubSpot's own remote MCP server, not
+  the Arcade HubSpot toolkits. Arcade already covers most of this surface
+  across two toolkit tiers: the [HubSpot
+  toolkit](/resources/integrations/sales/hubspot) for core CRM objects, and
+  starter toolkits like `hubspotconversationsapi` and `hubspotmarketingapi`
+  for conversations, campaigns, and marketing email.
+
+  Reach for this remote server instead when you want:
+
+  - One connection instead of wiring up the toolkit plus as many as eight starter toolkits
+  - Access scoped to whatever the authorizing HubSpot user can already do in the portal, not fixed toolkit scopes
+</Callout>
+
+<Callout type="info">
+  The HubSpot-side steps below are sourced directly from [HubSpot's own
+  documentation](https://developers.hubspot.com/docs/apps/developer-platform/build-apps/integrate-with-the-remote-hubspot-mcp-server)
+  for this server, which is unusually thorough.
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect a HubSpot Remote MCP server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-hubspot">Arcade account</SignupLink>
+- A HubSpot account with access to the Developer Platform (available on every hub and tier, no separate license required)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Which HubSpot MCP Auth App settings matter for Arcade specifically, and why
+- Configure the remote server's OAuth 2.0 settings in Arcade
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up HubSpot
+
+Follow HubSpot's guide to [create an MCP auth app](https://app.hubspot.com/l/mcp-auth-apps/): in your HubSpot account, go to **Development → MCP Auth Apps → Create MCP auth app**, and enter an app name, optional description, and a placeholder **Redirect URL** (you'll update this once Arcade generates its own; see [Add the redirect URI to your MCP auth app](#add-the-redirect-uri-to-your-mcp-auth-app) below). HubSpot supports multiple redirect URLs on one app, and the first one listed becomes the default, so adding Arcade's later won't disturb any existing entry.
+
+A few things about this integration are structurally different from Salesforce, ServiceNow, or Dynamics 365, and worth knowing before you configure Arcade:
+
+- **There's no scope picker.** Unlike the other providers in this section, you don't explicitly select OAuth scopes when creating the MCP auth app. Available scopes are determined automatically by whatever tools the MCP server currently exposes, and whatever the authorizing user grants during installation. If HubSpot adds tools to the MCP server later, previously authorized users need to reinstall the app to pick up the new scopes. If a capability that should exist suddenly seems missing, a stale authorization is worth checking before assuming a bug.
+
+- **Sensitive Data accounts lose activity and conversation access through MCP specifically.** If the HubSpot portal has [Sensitive Data](https://developers.hubspot.com/docs/api-reference/latest/crm/properties/sensitive-data) protection turned on, calls, emails, meetings, notes, tasks, and conversation data are blocked from the MCP server, even though the same data remains available through HubSpot's standard CRM API. This is MCP-specific behavior, not a permissions bug, and it can be mistaken for one if you're used to those objects being reachable via the API.
+
+- **PKCE is mandatory with no fallback.** HubSpot's MCP server requires OAuth 2.1 with PKCE (RFC 7636, S256) for every connection. There's no plain OAuth 2.0 or static-token path for production use.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, and enter a server ID and the server URL:
+
+```
+https://mcp.hubspot.com
+```
+
+### Configure OAuth2 authorization
+
+Open **Advanced settings → OAuth2 authorization** and enter:
+
+- **Client ID** / **Client Secret**: from your MCP auth app's details page in HubSpot.
+- **Authorization URL** / **Token URL**: leave these empty. Arcade discovers HubSpot's OAuth endpoints automatically from the MCP server's own metadata, per the MCP authorization specification. Only set these manually if authorization still fails after confirming the redirect URI and PKCE configuration below.
+
+<Callout type="info">
+  HubSpot's documented integration path is a manually created MCP auth app.
+  There's no Dynamic Client Registration flow described for this server, so
+  leaving Client ID and Secret blank isn't expected to work here the way it
+  does for some other remote MCP servers.
+</Callout>
+
+### Add the redirect URI to your MCP auth app
+
+Copy the redirect URI Arcade generates and add it to your MCP auth app's **Redirect URL** field in HubSpot (you can have more than one; only the first is used as the default elsewhere, so appending Arcade's is safe). The redirect URL your MCP client presents during the OAuth flow must match one of the values configured here exactly.
+
+### Authorize and confirm
+
+Save the server to open the authorization prompt. During authorization you'll select which HubSpot account to connect, then grant permissions. These are scoped to whatever the signing-in user is themselves permitted to see and do in HubSpot, since all MCP server actions respect the authorizing user's existing HubSpot permissions.
+
+</Steps>
+
+## Troubleshooting
+
+- **Authentication fails during the OAuth handshake, with no clear HubSpot-side error**: confirm PKCE parameters are being sent correctly: `code_challenge` and `code_challenge_method=S256` on the authorization request, and the matching `code_verifier` on the token exchange. HubSpot enforces PKCE with no fallback, so a client that skips it fails silently rather than falling back to a simpler flow.
+- **`redirect_uri` mismatch, or authorization fails immediately after opening the consent screen**: the redirect URI Arcade is presenting doesn't exactly match one of the Redirect URLs configured on the MCP auth app (trailing slashes and protocol mismatches count).
+- **Connection stops working after a period of inactivity**: the access token expired and the refresh token either wasn't used or has itself expired or been invalidated. If refreshing doesn't recover it, re-run the full authorization flow from scratch.
+- **Activities (calls, emails, meetings, notes, tasks) or conversation data are missing from results, but the connection otherwise works**: the HubSpot portal has Sensitive Data protection enabled. This is expected MCP-specific behavior (see [Set up HubSpot](#set-up-hubspot)), not an authorization or scope problem.
+- **A capability that used to work stops returning results after a HubSpot MCP server update**: the app's granted scopes are tied to the tool set at the time of installation. Reinstall or reauthorize the app to pick up newly available scopes.
+- **Custom objects don't appear in search or record results**: the remote MCP server currently covers standard CRM objects and engagement history only. Custom objects aren't supported through MCP yet; use HubSpot's direct API for those.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).

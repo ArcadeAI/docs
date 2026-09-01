@@ -4,6 +4,9 @@ const meta: MetaRecord = {
   index: {
     title: "Overview",
   },
+  architecture: {
+    title: "Platform architecture",
+  },
   "arcade-cloud": {
     title: "Arcade Cloud",
   },
@@ -21,10 +24,6 @@ const meta: MetaRecord = {
   },
   "on-prem": {
     title: "Hybrid MCP servers",
-  },
-  "warp-pipes": {
-    title: "Warp Pipes",
-    display: "hidden",
   },
 };
 

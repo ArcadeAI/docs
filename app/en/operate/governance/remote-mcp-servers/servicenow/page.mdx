@@ -1,0 +1,135 @@
+---
+title: "Connect a ServiceNow Hosted MCP Server"
+description: "Configure a ServiceNow inbound integration and Arcade's OAuth 2.0 settings to connect a ServiceNow MCP Server Console server"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a ServiceNow Hosted MCP Server
+
+ServiceNow can host an [MCP server](https://www.servicenow.com/docs/r/intelligent-experiences/exploring-mcp-server-console.html) for an instance through **MCP Server Console**, exposing tools built on Now Assist Skills, Knowledge Graph, Subflows, Actions, and Scripted REST APIs directly from ServiceNow data. This guide covers the Arcade-side setup for connecting a ServiceNow MCP Server Console server as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the handful of ServiceNow settings that most commonly trip people up.
+
+<Callout type="warning">
+  MCP Server Console is a newer, actively evolving feature. Field names and
+  menu paths below reflect ServiceNow's documentation and community reports at
+  time of writing. Confirm exact screen labels against your instance's
+  release before publishing this internally.
+</Callout>
+
+<Callout type="info">
+  This guide is about connecting to a ServiceNow-hosted MCP server. Arcade
+  doesn't ship a ServiceNow toolkit today, but even a future one wouldn't
+  replace what MCP Server Console can front: tools no generic toolkit
+  could ever pre-build, since a customer defines them for their own
+  instance:
+
+  - Now Assist Skills and Subflows built around one company's own workflows
+  - Actions and Scripted REST APIs scoped to that company's specific ITSM, HR, or business-unit configuration
+
+  Need something even MCP Server Console doesn't expose? Build a custom
+  tool with the [Arcade MCP SDK](/build/create-tools/tool-basics/build-mcp-server)
+  against ServiceNow's Table API.
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect a ServiceNow MCP Server Console server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-servicenow">Arcade account</SignupLink>
+- A ServiceNow instance with **MCP Server Console** activated and at least one server configured with tools
+- A ServiceNow **inbound integration** (Machine Identity Console) created for the Arcade integration
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Which ServiceNow inbound integration settings matter for Arcade specifically, and why
+- Configure the remote server's OAuth 2.0 settings in Arcade
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up ServiceNow
+
+MCP Server Console requires a **Now Assist or AI Native SKU** entitlement. It is **not available on Personal Developer Instances (PDIs)**, since the feature depends on Now Assist activation, which standard PDIs don't carry. Confirm the entitlement and a supported release (Zurich or later; some MCP Apps features require Zurich Patch 9+ / Australia Patch 2+) before continuing.
+
+Follow ServiceNow's own guides to activate MCP Server Console and configure a server with the tools you want to expose (**All > MCP Server Console > Configuration > Servers**). A few settings on the inbound integration matter specifically for connecting to Arcade:
+
+- **Create the inbound integration under Machine Identity Console**, not the classic Application Registry: **All > Machine Identity Console > Inbound integrations > New**, then choose **OAuth - Authorization code grant**. This is the only OAuth flow MCP Server Console supports, consistent with the MCP authorization spec (there's no client-credentials, or machine-to-machine, option). Configuring this requires the `oauth_admin`, `mi_admin`, or `admin` role.
+
+- **Auth scope**: clear the **Allow access only to APIs in selected scope** toggle. ServiceNow's setup guides don't always call out why this matters. Left enabled, the resulting token can't reach the `/sncapps/mcp-server` endpoint, and every tool call fails even though authorization itself looks successful.
+
+- **Advanced options → Token Format**: set this to **JWT**. Left at the default, ServiceNow issues an opaque session token instead, and the MCP Server Console endpoint only validates JWTs. Every tool call then fails with a bare 403, which reads like a permissions problem but is actually a token-format mismatch.
+
+- **Redirect URL**: set this once you have the redirect URI Arcade generates (see [Add the redirect URI to your inbound integration](#add-the-redirect-uri-to-your-inbound-integration) below). A placeholder works for now.
+
+<Callout type="warning">
+  Create one inbound integration per external client. ServiceNow's design
+  assumes a dedicated OAuth integration for each AI application connecting to
+  a server. Reusing an integration created for a different client, or having
+  multiple integrations on the instance and pointing Arcade at the wrong one,
+  is one of the more common causes of "authenticated but not authorized"
+  errors (a valid token that still gets a 403 or an empty tool list).
+</Callout>
+
+Calls through MCP Server Console are proxied via ServiceNow's central AI Control Tower, which means request and response data leaves the instance for processing. If that matters for your data-residency requirements, review Now Assist's data handling and opt-out settings before connecting this in a production environment.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, and enter a server ID and the MCP Server Console server's URL. For example, if your instance domain is `https://acme-inc.service-now.com` and your server is named `IncidentTools`, the URL is `https://acme-inc.service-now.com/sncapps/mcp-server/mcp/IncidentTools`.
+
+### Configure OAuth2 authorization
+
+Open **Advanced settings → OAuth2 authorization** and enter:
+
+- **Client ID** / **Client Secret**: from the inbound integration you created above.
+- **Authorization URL** / **Token URL**: unlike some vendors, ServiceNow doesn't publish OpenID Connect discovery metadata for inbound integrations, so set these explicitly to your instance's endpoints:
+  - Authorization URL: your instance domain with `/oauth_auth.do` appended. For example: `https://acme-inc.service-now.com/oauth_auth.do`.
+  - Token URL: your instance domain with `/oauth_token.do` appended. For example: `https://acme-inc.service-now.com/oauth_token.do`.
+
+<Callout type="info">
+  ServiceNow inbound integrations don't support Dynamic Client Registration,
+  so you must supply the Client ID and Secret manually. If you leave these
+  blank, Arcade attempts Dynamic Client Registration and ServiceNow rejects
+  it.
+</Callout>
+
+### Add the redirect URI to your inbound integration
+
+Copy the redirect URI Arcade generated and set it as the inbound integration's Redirect URL. A new server registration gets its own unique redirect URI, so update it again if you ever re-register the server under a new ID.
+
+<Callout type="warning">
+  If authorization fails with a redirect mismatch immediately after saving
+  the Redirect URL, allow a few minutes for ServiceNow to propagate the
+  change before troubleshooting further.
+</Callout>
+
+### Authorize and confirm
+
+Save the server to open the authorization prompt. Sign in as a ServiceNow user with the broadest applicable roles on the target server's tools. Authorization Code Grant runs the session under whoever completes the browser prompt, and every tool call afterward executes under that identity's roles and ACLs. Your credentials at setup time also determine the tool list Arcade discovers.
+
+</Steps>
+
+## Troubleshooting
+
+- **A bare 403 with no clear error code, even though authorization looked successful**: the inbound integration is issuing opaque tokens instead of JWTs. See [Set up ServiceNow](#set-up-servicenow).
+- **Tool list comes back empty, or every call fails, despite a valid token**: either **Allow access only to APIs in selected scope** is still enabled on the inbound integration, or Arcade is authenticating against a different inbound integration than the one you intended (check for duplicate integrations on the instance). Test the same access token directly against the MCP server endpoint with curl or Postman to isolate whether the problem is on Arcade's side or ServiceNow's.
+- **"Page not found" at the server URL you registered**: MCP Server Console isn't activated on this instance. Confirm the Now Assist / AI Native SKU entitlement. This is the most common cause, especially on non-production or trial instances, and PDIs specifically don't support it at all.
+- **403 Forbidden on individual tool calls, but the connection and tool list look fine**: the authorizing ServiceNow user doesn't have the roles needed for that tool's underlying skill or table. Re-authorize as a user with broader access, or adjust the ACLs on the underlying capability.
+- **A setting change doesn't seem to take effect**: existing tokens don't retroactively pick up changes to the inbound integration. Revoke the existing grant for the affected user (ServiceNow Setup or the user's OAuth grants list) and re-authorize to get a fresh token.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).
