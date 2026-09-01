@@ -21,6 +21,7 @@ This page describes what each service does and what it connects to. For installa
 | Dashboard | The web interface for operators and developers | Experience API | Yes |
 | MCP servers | Hosting and running tools | The third-party APIs the tools call | Yes |
 | OpenFGA | Evaluating operator access control policies | Nothing outbound | No |
+| Usage | Collecting usage events for billing and analytics | Billing and analytics sinks | No |
 | PostgreSQL and Redis | Persistent state, caching, and sessions | Nothing outbound | Yes |
 
 Agents and Arcade clients call the Engine. Operators use the dashboard in a browser, which reaches the platform through the Experience API. Each service reads and writes its own state in PostgreSQL and Redis.
@@ -92,11 +93,19 @@ OpenFGA evaluates whether an account may perform an action on an organization or
 
 It is optional and turned off by default. When turned on, the Coordinator is its only caller.
 
+### Usage
+
+The Usage service collects usage events from the Engine, Coordinator, and MCP servers and routes them to billing and analytics sinks.
+
+It is off by default. Setting `usageTracking.enabled` turns it on, after which those three services emit usage events to the endpoint at `usageTracking.url`.
+
+That value defaults to an Arcade-hosted endpoint. The Helm chart does not deploy a Usage service, so keeping usage events inside your network means running the service yourself and pointing `usageTracking.url` at it.
+
 ## Network paths
 
 Three services accept inbound traffic. The Engine takes calls from agents, Arcade clients, and MCP clients. The Dashboard and Experience API take requests from operators' browsers. Nothing outside the cluster connects to the Coordinator, an MCP server, OpenFGA, or a data store.
 
-The platform initiates the remaining connections outbound:
+The platform initiates the remaining connections outbound. The last row applies only if you turn on usage tracking:
 
 | From | To | For |
 | --- | --- | --- |
@@ -106,6 +115,7 @@ The platform initiates the remaining connections outbound:
 | Engine | Your [contextual access](/operate/governance/contextual-access) hooks | Policy checks before and after each tool call |
 | Coordinator | Your OIDC identity provider | Signing operators in |
 | MCP servers | Third-party APIs | The work each tool does |
+| Engine, Coordinator, MCP servers | Your `usageTracking.url` endpoint | Usage events |
 
 The Engine accepts no connection from the Coordinator, so it can run behind a firewall as long as it can reach the destinations in the preceding table.
 
