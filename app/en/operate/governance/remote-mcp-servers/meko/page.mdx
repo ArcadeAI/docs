@@ -35,7 +35,7 @@ Connect a Meko Remote MCP server to Arcade and use its memory tools in gateways 
 
 - An <SignupLink linkLocation="docs:remote-mcp-servers-meko">Arcade account</SignupLink>
 - A [Meko account](https://mekodata.ai), which provisions a default workspace on first sign-in
-- Owner or maintainer access to the workspace you plan to connect
+- Any grant on the workspace you plan to connect. Owner or maintainer is needed only for `memory_promote`
 
 </GuideOverview.Prerequisites>
 
@@ -50,13 +50,13 @@ Connect a Meko Remote MCP server to Arcade and use its memory tools in gateways 
 
 ## Set up Meko
 
-Meko provisions a default workspace, called a **datapack**, on first sign-in. A datapack is an isolated environment with its own memory, knowledge base, and traces, and agents target one by passing `datapack_id` in tool calls.
+Meko provisions a default workspace, called a **datapack** and named `meko_default_datapack`, on first sign-in. A datapack is an isolated environment with its own memory, knowledge base, and traces, and agents target one by passing `datapack_id` in tool calls.
 
 Four parts of Meko's model determine what your agents can reach through a gateway:
 
-- **Memory scopes to the agent that wrote it.** Meko tags each write with `agent_id` and extracts it into a vector collection plus an entity-relationship graph, so `memory_search` returns semantic matches, graph relations, and which agent learned each result.
+- **Memory is private to the user who wrote it, and attributed to the agent that wrote it.** Meko tags each write with `agent_id` and extracts it into a vector collection plus an entity-relationship graph. `memory_search` spans all of that user's agents and returns semantic matches, graph relations, and the `agent_id` behind each result.
 - **Knowledge spans the datapack.** Every member can retrieve promoted memories and uploaded documents through `knowledgebase_search`.
-- **Members cannot read each other's private memories.** This holds in both directions. A datapack owner cannot read a contributor's private memories either. Promotion is the only path a memory takes between two people.
+- **Members cannot read each other's private memories.** Isolation is per user and holds in both directions. A datapack owner cannot read a contributor's private memories either. Promotion is the only path a memory takes between two people.
 - **Promotion needs a privileged grant.** `memory_promote` publishes a memory into shared knowledge, and only owners and maintainers may call it. It moves the memory rather than copying it, so `knowledgebase_search` returns it afterward and `memory_search` does not.
 
 The server exposes 23 tools: memory (8), conversation (6), knowledge base (1), datapack management (5), artifacts (2), and observability (1). Through a gateway they appear prefixed by server name, for example `Meko_memory_search`. The [Meko MCP tool reference](https://docs.mekodata.ai/reference/mcp-server) documents each one.
@@ -64,7 +64,7 @@ The server exposes 23 tools: memory (8), conversation (6), knowledge base (1), d
 Two Meko-side settings matter for Arcade:
 
 - **Grants.** Share a datapack from **Datapacks → Share** and choose a permission level. Grants include `owner`, `maintainer`, `contributor`, and `viewer`, and Meko applies them to the authorizing user rather than to the gateway.
-- **API keys.** Generate a key under **Settings → API Keys** if you plan to use the static-credential path below. Keys start with `mko_tkn_`.
+- **API keys.** Generate a key under **Settings → API Keys**, or from a datapack's **Connect** dialog, if you plan to use the static-credential path below. Keys start with `mko_tkn_` and expire after 365 days.
 
 ## Configure the remote server in Arcade
 
@@ -108,7 +108,7 @@ Enter the returned `client_id` and `client_secret` in Arcade's OAuth2 settings.
 
 ### Authorize and confirm
 
-Save the server and complete the authorization prompt as an owner or maintainer of the datapack. Arcade pre-loads the tool list from the authorizing user, so connecting as an admin surfaces the broadest set for gateway filtering. Arcade's health check then lists all 23 Meko tools, and you can invoke any of them from the Playground's **Execute** view.
+Save the server to open the authorization prompt, and authorize as an owner or maintainer so `memory_promote` succeeds when you test from the Playground. Arcade's health check then lists all 23 Meko tools, and you can invoke any of them from the Playground's **Execute** view. Every grant sees the same 23 tools; Meko denies the privileged ones at call time rather than hiding them.
 
 ### Expose a curated set through a gateway
 
@@ -122,9 +122,11 @@ For single-user evaluation, skip OAuth and add a header under **Advanced setting
 
 <Callout type="warning">
   A static API key means every user reaching Meko through the gateway arrives as
-  the **same identity**. Meko's per-agent attribution and its owner and
-  maintainer restrictions cannot apply, because the server sees a single
-  account. Use OAuth wherever per-user attribution matters.
+  the **same identity**, so Meko cannot apply per-user grants. `agent_id`
+  attribution still works, because it is a tool argument rather than a property
+  of the connection. Two other things to know: a key is account-scoped, so the
+  gateway reaches every datapack its owner can see, and keys expire after 365
+  days. Use OAuth wherever per-user identity and grants matter.
 </Callout>
 
 ## Troubleshooting
@@ -135,6 +137,7 @@ For single-user evaluation, skip OAuth and add a header under **Advanced setting
 - **An agent treats a denied promotion as a success**: denials arrive in the tool result payload with MCP-level `isError: false`. Branch on the payload contents rather than on `isError` alone.
 - **A teammate's agent finds nothing you know is stored**: members cannot read each other's private memories in either direction. Someone must promote a memory before anyone else can retrieve it.
 - **`memory_add` rejects a call for a missing `conversation_id`**: it requires one from `conversation_create`, so it is not a single-call operation.
+- **A copied snippet passes a scope argument and the call fails**: Meko removed tool-level scope arguments in v2.1.0. Drop the argument.
 - **`redirect_uri_mismatch` during authorization**: the client registered with Meko carries a stale redirect URI. Re-register the client with the URI Arcade currently shows for this server.
 
 ## Next steps
