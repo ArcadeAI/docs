@@ -260,6 +260,70 @@ Use a persistent store in production. Keep each recorded `webhook-id` for at lea
 
 The sample records `received_at` for that cleanup policy but does not schedule the cleanup job for you. SQLite serializes these write transactions, so keep the handler's transactional work short and local; use a concurrent durable inbox for production receivers with parallel or network-bound work.
 
+## Recover expired connected accounts
+
+Subscribe to connection lifecycle events when your app should tell a user that an OAuth connection needs attention:
+
+- `connected_account.created`—the connection became active for the first time.
+- `connected_account.expired`—Arcade can no longer use the connection.
+- `connected_account.reconnected`—reauthorization restored an expired connection.
+
+Create the project-scoped subscription:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/webhooks" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data "{\"url\":\"$RECEIVER_URL\",\"event_types\":[\"connected_account.expired\"]}"
+```
+
+Arcade sends the Standard Webhooks envelope. Verify the Standard Webhooks signature against the raw body before reading it:
+
+```json
+{
+  "type": "connected_account.expired",
+  "timestamp": "2026-08-28T21:00:00Z",
+  "data": {
+    "organization_id": "org_123",
+    "project_id": "proj_123",
+    "user_id": "user@example.com",
+    "provider_id": "google",
+    "connection_id": "ac_123",
+    "status": "expired",
+    "reason": "refresh_failed"
+  }
+}
+```
+
+All three events identify the `organization_id`, `user_id`, `provider_id`, `connection_id`, and `status`. Project-bound events also include `project_id`. Only `connected_account.expired` includes `reason`:
+
+- `no_refresh_token` means the access token expired and no refresh token was available.
+- `refresh_failed` means the provider permanently rejected the refresh grant.
+
+Each lifecycle event can originate from a project-bound or organization-bound connection. The public subscription API is project-scoped, so it delivers the project-bound events in the preceding example. Organization-bound lifecycle events omit `project_id` and are not delivered to a project subscription.
+
+In the Dashboard, open the expired connected user, and choose **Reconnect**. The same action is available through `POST /v1/orgs/{org_id}/projects/{project_id}/auth/authorize`:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/auth/authorize" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "user_id":"user@example.com",
+    "auth_requirement":{
+      "provider_id":"google",
+      "provider_type":"oauth2",
+      "oauth2":{"scopes":["https://www.googleapis.com/auth/gmail.readonly"]}
+    }
+  }'
+```
+
+Open the returned authorization URL. A successful flow restores the same connection and emits `connected_account.reconnected`. Triggers pinned to it become healthy again. Use the scopes on the connected-account record; Dashboard does this for you. Arcade also applies scopes configured on the provider. A reconnected event reports the OAuth state change, but normal scope checks still apply if the provider returns a reduced grant.
+
+Engine does not observe MCP-managed OAuth refresh outcomes, so MCP-managed OAuth connections do not emit this lifecycle or use the standard OAuth Reconnect action.
+
 ## Try a scheduled event
 
 A schedule is a configurable producer; every fire creates a separate retained Arcade event with its own delivery history. Use an interval for this check.
