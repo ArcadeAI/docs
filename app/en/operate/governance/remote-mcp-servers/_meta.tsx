@@ -28,6 +28,9 @@ const meta: MetaRecord = {
   splunk: {
     title: "Splunk",
   },
+  meko: {
+    title: "Meko",
+  },
 };
 
 export default meta;
