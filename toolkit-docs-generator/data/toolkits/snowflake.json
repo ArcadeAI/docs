@@ -1,7 +1,7 @@
 {
   "id": "Snowflake",
   "label": "Snowflake",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Tools to query and explore Snowflake with per-user, per-role access",
   "metadata": {
     "category": "databases",
@@ -24,7 +24,7 @@
     {
       "name": "DiscoverDatabases",
       "qualifiedName": "Snowflake.DiscoverDatabases",
-      "fullyQualifiedName": "Snowflake.DiscoverDatabases@0.1.0",
+      "fullyQualifiedName": "Snowflake.DiscoverDatabases@0.1.2",
       "description": "List the databases your role can access, newest-created first.\n\nSnowflake returns only databases your current role is granted, so this is\nalready a per-user answer. Take a `name` and use it to list that database's\nschemas. Use `name_pattern` to filter server-side rather than paging the\nwhole list.",
       "parameters": [
         {
@@ -114,7 +114,7 @@
     {
       "name": "DiscoverSchemas",
       "qualifiedName": "Snowflake.DiscoverSchemas",
-      "fullyQualifiedName": "Snowflake.DiscoverSchemas@0.1.0",
+      "fullyQualifiedName": "Snowflake.DiscoverSchemas@0.1.2",
       "description": "List the schemas in a database that your role can access.\n\nList the databases first to get a valid `database`. Then take a schema\n`name` and list that schema's tables.",
       "parameters": [
         {
@@ -217,7 +217,7 @@
     {
       "name": "DiscoverTables",
       "qualifiedName": "Snowflake.DiscoverTables",
-      "fullyQualifiedName": "Snowflake.DiscoverTables@0.1.0",
+      "fullyQualifiedName": "Snowflake.DiscoverTables@0.1.2",
       "description": "List the tables and views in a schema that your role can query.\n\nList the schemas first to get a valid `database` and `schema_name`, then\nload a table's columns before querying it.\n\nEach row's `kind` is TABLE, VIEW, MATERIALIZED VIEW, or SEMANTIC VIEW. A\nSEMANTIC VIEW cannot be read with an ordinary SELECT: it needs Snowflake's\nSEMANTIC_VIEW(...) syntax, which this toolkit does not support, so skip\nthose when choosing something to query.",
       "parameters": [
         {
@@ -333,7 +333,7 @@
     {
       "name": "DiscoverWarehouses",
       "qualifiedName": "Snowflake.DiscoverWarehouses",
-      "fullyQualifiedName": "Snowflake.DiscoverWarehouses@0.1.0",
+      "fullyQualifiedName": "Snowflake.DiscoverWarehouses@0.1.2",
       "description": "List the warehouses your role can run queries on.\n\nAn account usually has several, and Snowflake returns only the ones your\ncurrent role is granted, so this is already a per-user answer.\n\nYou only need this when a query has no warehouse to run on, either because\nyou have no default or because you want a different one. `size` is the cost\nsignal: prefer the smallest warehouse that fits the query. A SUSPENDED\nwarehouse is still usable, since Snowflake resumes it on use by default.",
       "parameters": [
         {
@@ -423,7 +423,7 @@
     {
       "name": "ExecuteSelectQuery",
       "qualifiedName": "Snowflake.ExecuteSelectQuery",
-      "fullyQualifiedName": "Snowflake.ExecuteSelectQuery@0.1.0",
+      "fullyQualifiedName": "Snowflake.ExecuteSelectQuery@0.1.2",
       "description": "Run a read-only SELECT query and return the rows.\n\nOnly SELECT is allowed. Writes, DDL, role changes, and data movement are\nrejected before the query reaches Snowflake, so this tool cannot modify\nanything even if your Snowflake role would permit it.\n\nThe query runs under your own Snowflake identity, so your role and\nSnowflake's row-access and masking policies decide what you can read. Two\nusers running identical SQL can legitimately get different results.\n\nLoad the table's columns before calling this, and name the columns you want\nrather than selecting everything. `rows` is positional and\naligned to `columns`. `truncated` is true when more rows were available than\nwere returned.\n\nDo not put LIMIT, OFFSET, or SQL comments in any clause; use the `limit` and\n`offset` parameters, which are applied for you.",
       "parameters": [
         {
@@ -656,7 +656,7 @@
     {
       "name": "GetTableSchema",
       "qualifiedName": "Snowflake.GetTableSchema",
-      "fullyQualifiedName": "Snowflake.GetTableSchema@0.1.0",
+      "fullyQualifiedName": "Snowflake.GetTableSchema@0.1.2",
       "description": "Get a table or view's columns, so you can select exact fields.\n\nLoad this before running a query, and select named columns rather than\neverything. Works on views as well as tables. A not-found error usually\nmeans the object is not granted to your role; re-check the table listing.",
       "parameters": [
         {
@@ -772,7 +772,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Snowflake.WhoAmI",
-      "fullyQualifiedName": "Snowflake.WhoAmI@0.1.0",
+      "fullyQualifiedName": "Snowflake.WhoAmI@0.1.2",
       "description": "Return the Snowflake identity every other tool uses, and the warehouse.\n\nThe role is the important field. It is what decides which objects the other\ntools can see and which rows and cells come back, so two people calling the\nsame tool with the same arguments can legitimately get different data.\n\nPass `current_warehouse` straight through as the warehouse argument when\nrunning a query. If it comes back empty this user has no default warehouse,\nand a query must name one. The warehouse discovery tool lists the ones this\nrole may use, cheapest first by `size`.\n\nThis is the only place identity is reported. It runs no caller-supplied SQL,\nso what it returns is always the identity the other tools will run under.",
       "parameters": [],
       "auth": {
@@ -823,6 +823,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-08-12T19:27:03.868Z",
+  "generatedAt": "2026-09-02T11:19:23.873Z",
   "summary": "## Snowflake Toolkit\n\nArcade's Snowflake toolkit provides read-only, per-user access to Snowflake — enabling agents and apps to explore schema structure and execute SELECT queries under each caller's own Snowflake identity and role.\n\n## Capabilities\n\n- **Identity & access inspection:** Retrieve the active Snowflake user, role, and default warehouse; all other tools operate under this identity, so two users issuing identical calls can legitimately receive different results.\n- **Schema discovery (databases → schemas → tables → columns):** Progressively explore the object hierarchy — list accessible databases, then schemas within a database, then tables/views within a schema, then column definitions for a specific table or view — filtered server-side to only what the caller's role is granted.\n- **Warehouse discovery:** List warehouses the caller's role can use (smallest = cheapest); needed when no default warehouse is configured or a different size is preferred.\n- **Safe SELECT execution:** Run arbitrary read-only SQL; writes, DDL, role changes, and data movement are rejected before reaching Snowflake. Supports `limit`/`offset` pagination parameters; returns column names, rows, and a `truncated` flag.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 to authenticate each user with Snowflake. Arcade manages the OAuth flow; refer to the Arcade auth-provider documentation for setup details. *(Provider-specific docs link unavailable — provider ID not supplied.)*\n\n## Secrets\n\n- **`SNOWFLAKE_ACCOUNT_SUBDOMAIN`** — The account identifier subdomain for your Snowflake account (e.g., `xy12345.us-east-1` or an organization-format identifier like `myorg-myaccount`). This is the hostname prefix used to construct your Snowflake account URL (`<subdomain>.snowflakecomputing.com`). You can find it in the Snowflake UI under **Admin → Accounts**, or by inspecting the URL you use to log in. See [Snowflake account identifier docs](https://docs.snowflake.com/en/user-guide/admin-account-identifier) for format details.\n\nConfigure secrets in the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets). For guidance on referencing secrets in tools, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
 }
