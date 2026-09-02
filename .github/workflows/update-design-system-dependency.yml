@@ -1,11 +1,27 @@
 name: Update design system dependency
+# A toolkit reaches the docs site only when `@arcadeai/design-system` carries
+# metadata for it and the pin in this repo is new enough to see that metadata.
+# Nothing else in the repo moves that pin, so this runs daily and keeps it at
+# most a day behind upstream. The PR it opens is where a human decides whether
+# the bump is safe to merge.
 
 on:
   workflow_dispatch:
+  # 10:00 UTC, an hour ahead of the 11:00 UTC "Generate toolkit docs" run, so a
+  # bump merged promptly is already in place for that day's generation.
+  schedule:
+    - cron: "0 10 * * *"
 
 permissions:
   contents: write
   pull-requests: write
+
+# The scheduled run and a manual dispatch both force-push the same
+# `automation/update-design-system-dependency` branch, so let one finish before
+# the next starts. Not cancel-in-progress: a run cancelled between its test
+# gate and PR creation does the work and reports nothing.
+concurrency:
+  group: update-design-system-dependency
 
 jobs:
   update-design-system:
