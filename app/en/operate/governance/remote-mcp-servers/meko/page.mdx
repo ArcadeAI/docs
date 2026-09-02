@@ -1,0 +1,143 @@
+---
+title: "Connect a Meko Remote MCP Server"
+description: "Configure a Meko OAuth client and Arcade's OAuth 2.0 settings to connect the Meko Remote MCP Server for agent memory"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a Meko Remote MCP Server
+
+[Meko](https://mekodata.ai) hosts a remote MCP server at `mcp.mekodata.ai`, exposing durable agent memory, a shared team knowledge base, and conversation history directly from a Meko workspace. It is built on YugabyteDB. This guide covers the Arcade-side setup for connecting it as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the Meko behaviors that most commonly trip people up.
+
+<Callout type="info">
+  This guide is about connecting to Meko's own remote MCP server, not the
+  Arcade YugabyteDB toolkit. Meko runs on YugabyteDB, and Arcade covers that
+  database separately with the [YugabyteDB
+  toolkit](/resources/integrations/databases/yugabytedb) for read-only SQL
+  against your own instance.
+
+  Reach for this remote server instead when you want:
+
+  - Agent memory and a shared knowledge base rather than SQL access to a database
+  - Memory governed by the same gateway and tool selection as the agent's other tools
+  - Per-user permissions that Meko enforces against the authorizing user
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect a Meko Remote MCP server to Arcade and use its memory tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-meko">Arcade account</SignupLink>
+- A [Meko account](https://mekodata.ai), which provisions a default workspace on first sign-in
+- Owner or maintainer access to the workspace you plan to connect
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Which Meko workspace settings matter for Arcade specifically, and why
+- Configure the remote server's OAuth 2.0 settings in Arcade
+- Diagnose the most common setup mistakes from their error messages
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up Meko
+
+Meko provisions a default workspace, called a **datapack**, on first sign-in. A datapack is an isolated environment with its own memory, knowledge base, and traces, and agents target one by passing `datapack_id` in tool calls.
+
+Four parts of Meko's model determine what your agents can reach through a gateway:
+
+- **Memory scopes to the agent that wrote it.** Meko tags each write with `agent_id` and extracts it into a vector collection plus an entity-relationship graph, so `memory_search` returns semantic matches, graph relations, and which agent learned each result.
+- **Knowledge spans the datapack.** Every member can retrieve promoted memories and uploaded documents through `knowledgebase_search`.
+- **Members cannot read each other's private memories.** This holds in both directions. A datapack owner cannot read a contributor's private memories either. Promotion is the only path a memory takes between two people.
+- **Promotion needs a privileged grant.** `memory_promote` publishes a memory into shared knowledge, and only owners and maintainers may call it. It moves the memory rather than copying it, so `knowledgebase_search` returns it afterward and `memory_search` does not.
+
+The server exposes 23 tools: memory (8), conversation (6), knowledge base (1), datapack management (5), artifacts (2), and observability (1). Through a gateway they appear prefixed by server name, for example `Meko_memory_search`. The [Meko MCP tool reference](https://docs.mekodata.ai/reference/mcp-server) documents each one.
+
+Two Meko-side settings matter for Arcade:
+
+- **Grants.** Share a datapack from **Datapacks → Share** and choose a permission level. Grants include `owner`, `maintainer`, `contributor`, and `viewer`, and Meko applies them to the authorizing user rather than to the gateway.
+- **API keys.** Generate a key under **Settings → API Keys** if you plan to use the static-credential path below. Keys start with `mko_tkn_`.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://api.arcade.dev/dashboard/servers) and click **Add server**. Choose **Remote MCP**, set the **ID** to `meko`, and set the **URI** to `https://mcp.mekodata.ai/mcp`.
+
+### Configure OAuth2 authorization
+
+Meko is an OAuth 2.1 protected resource and supports dynamic client registration, so you can mint a client for Arcade without creating an app by hand.
+
+Open **Advanced settings → OAuth2 authorization**. Arcade generates a redirect URI for this server, in the form `https://cloud.arcade.dev/api/v1/oauth/<id>/callback`. Copy it before continuing.
+
+<Callout type="warning">
+  Arcade allocates the redirect URI when you save the server, and it changes if
+  you delete and recreate the server. Register the URI Arcade shows for the
+  server you intend to keep, and register a fresh one if you recreate it.
+</Callout>
+
+### Add the redirect URI to your Meko client
+
+Register a client with Meko using the redirect URI from the previous step:
+
+```bash
+curl -X POST https://mcp.mekodata.ai/register \
+  -H 'Content-Type: application/json' \
+  -H 'User-Agent: arcade/1.0' \
+  -d '{
+    "client_name": "Arcade",
+    "redirect_uris": ["<the redirect URI Arcade generated>"],
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "token_endpoint_auth_method": "client_secret_post",
+    "scope": "openid email profile"
+  }'
+```
+
+Enter the returned `client_id` and `client_secret` in Arcade's OAuth2 settings.
+
+### Authorize and confirm
+
+Save the server and complete the authorization prompt as an owner or maintainer of the datapack. Arcade pre-loads the tool list from the authorizing user, so connecting as an admin surfaces the broadest set for gateway filtering. Arcade's health check then lists all 23 Meko tools, and you can invoke any of them from the Playground's **Execute** view.
+
+### Expose a curated set through a gateway
+
+Create or edit a gateway from the [MCP Gateways dashboard](https://app.arcade.dev/mcp-gateways), open **Select tools**, and filter by `meko`. Granting the memory, search, and conversation tools while leaving datapack administration off the gateway is a reasonable default.
+
+</Steps>
+
+### Using a static API key instead
+
+For single-user evaluation, skip OAuth and add a header under **Advanced settings → Custom headers**: `Authorization` with the value `Bearer <your-meko-api-key>`, stored as a header secret and referenced as `${secret:MEKO_API_KEY}`.
+
+<Callout type="warning">
+  A static API key means every user reaching Meko through the gateway arrives as
+  the **same identity**. Meko's per-agent attribution and its owner and
+  maintainer restrictions cannot apply, because the server sees a single
+  account. Use OAuth wherever per-user attribution matters.
+</Callout>
+
+## Troubleshooting
+
+- **A `403 Forbidden` from `mcp.mekodata.ai` with an HTML body**: the request carried no `User-Agent` header, which Meko's edge rejects. Arcade sends one on the gateway path, so add one explicitly only when you call the server directly.
+- **`only datapack owners and maintainers are allowed` on `memory_promote`**: the authorizing user holds a `contributor` or `viewer` grant. Promotion is restricted by design. Change the grant in Meko, or promote as an owner.
+- **A promoted memory disappears from `memory_search` results**: expected. Promotion moves a memory out of private storage, so `knowledgebase_search` returns it afterward. An agent that searches only private memory misses everything the team has published, so search both surfaces.
+- **An agent treats a denied promotion as a success**: denials arrive in the tool result payload with MCP-level `isError: false`. Branch on the payload contents rather than on `isError` alone.
+- **A teammate's agent finds nothing you know is stored**: members cannot read each other's private memories in either direction. Someone must promote a memory before anyone else can retrieve it.
+- **`memory_add` rejects a call for a missing `conversation_id`**: it requires one from `conversation_create`, so it is not a single-call operation.
+- **`redirect_uri_mismatch` during authorization**: the client registered with Meko carries a stale redirect URI. Re-register the client with the URI Arcade currently shows for this server.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/get-started/mcp-clients).
