@@ -1163,4 +1163,9 @@ export const redirects: Redirect[] = [
     destination: "/:locale/build",
     permanent: true,
   },
+  {
+    source: "/:locale/get-started/agent-plugin/any-mcp-client",
+    destination: "/:locale/get-started/agent-plugin/tools-only",
+    permanent: true,
+  },
 ];

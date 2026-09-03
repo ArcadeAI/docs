@@ -7,8 +7,8 @@ export const meta: MetaRecord = {
   "claude-desktop": {
     title: "Claude Desktop",
   },
-  "any-mcp-client": {
-    title: "Any MCP client",
+  "tools-only": {
+    title: "Tools only",
   },
   "team-rollout": {
     title: "From personal use to team rollout",

@@ -1,0 +1,45 @@
+---
+title: "Arcade tools without the plugin"
+description: "Point any Streamable HTTP MCP client at the Arcade gateway to get tools for every app you connect, with no API key and no plugin install."
+---
+
+import { SignupLink } from "@/app/_components/analytics";
+
+# Arcade tools without the plugin
+
+The plugin bundles more than tools: two skills, three commands, and the `arcade-operator` subagent, all of which need a client that loads [agent plugins](https://agent-plugins.org). If you only want the tools, or your client does not load plugins at all, point it straight at the gateway:
+
+```text
+{{ARCADE_PLUGIN_GATEWAY_URL}}
+```
+
+Any client that speaks the Streamable HTTP MCP transport works, OpenCode included. Your agent gets every tool on the gateway and nothing else changes about how you use it.
+
+Cursor and VS Code can add the gateway this way in one click. [The install guide](/get-started/agent-plugin#tools-only) has those links.
+
+## What you give up
+
+Tools alone still do the work. What you lose is the part that helps your agent use them well:
+
+- **The skills** teach your agent to turn "reply to that thread" into the right sequence of tool calls, and to walk you through a team rollout when you ask about one.
+- **The commands** give you `/arcade-status`, `/arcade-connect`, and `/arcade-apps` for checking and managing connections without leaving your agent.
+- **The subagent** keeps tool search out of your main conversation, so it does not crowd out your actual work.
+
+If your client supports plugins, [install the full plugin](/get-started/agent-plugin) instead.
+
+## Sign in
+
+No API keys. You authorize twice: your client signs you in to Arcade with your <SignupLink linkLocation="docs:agent-plugin-tools-only">Arcade account</SignupLink> when it first connects to the gateway, and then each app gets authorized on its own the first time a task needs it. Approve that once per app and Arcade holds the token.
+
+Your tool calls, tokens, and secrets route through your own Arcade project, isolated from every other user of the same gateway. [Server-level and tool-level authorization](/learn/server-level-vs-tool-level-auth) covers the split in depth.
+
+## Try it
+
+- "What's on my calendar tomorrow?"
+- "What apps can Arcade use?"
+
+## Next steps
+
+- [Install the agent plugin](/get-started/agent-plugin): one command for Cursor, Claude Code, VS Code, Copilot CLI, and Codex
+- [Connect to MCP clients](/get-started/mcp-clients): point a client at a gateway you control, with your own tool list
+- [From personal use to team rollout](/get-started/agent-plugin/team-rollout): what changes when a team depends on the workflow

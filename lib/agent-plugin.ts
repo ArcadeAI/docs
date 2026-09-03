@@ -15,6 +15,13 @@ export const AGENT_PLUGIN_REPO = "ArcadeAI/arcade-plugin";
 export const AGENT_PLUGIN_INSTALL_COMMAND = `npx plugins add ${AGENT_PLUGIN_REPO}`;
 
 /**
+ * The Claude Desktop bundle, served off the latest GitHub release so the link
+ * does not need updating per version. Confirm the asset filename matches what
+ * the release actually publishes.
+ */
+export const AGENT_PLUGIN_MCPB_URL = `https://github.com/${AGENT_PLUGIN_REPO}/releases/latest/download/arcade.mcpb`;
+
+/**
  * Cursor takes its MCP config as base64-encoded JSON in a query parameter.
  */
 export const AGENT_PLUGIN_CURSOR_INSTALL_LINK = (() => {
