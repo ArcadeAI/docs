@@ -11,7 +11,7 @@ export const meta: MetaRecord = {
     title: "Any MCP client",
   },
   "team-rollout": {
-    title: "From trial to team rollout",
+    title: "From personal use to team rollout",
   },
 };
 

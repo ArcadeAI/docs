@@ -1,15 +1,23 @@
 ---
-title: "From trial to team rollout"
+title: "From personal use to team rollout"
 description: "What changes when an Arcade workflow you proved with the agent plugin becomes something a team depends on: your own MCP Gateway, a curated tool list, and your own identity provider."
 ---
 
 import { Callout } from "nextra/components";
 
-# From trial to team rollout
+# From personal use to team rollout
 
-The [agent plugin](/get-started/agent-plugin) serves one person evaluating Arcade. It points every install at a shared Arcade gateway, offers a broad tool selection, and identifies you by the apps you signed in to yourself. That is exactly what you want while you are finding out whether a workflow is worth having.
+The [agent plugin](/get-started/agent-plugin) serves one person working on their own. Every install points at the same global gateway URL, and that is where the sharing ends. Your tool calls, tokens, and secrets route through your own Arcade project, isolated from every other user of that gateway. No one else's agent can reach your Gmail, and yours cannot reach theirs.
 
-Once a team depends on that workflow, three things change. This page names them and points at the setup for each.
+What the plugin gives you is a broad tool selection and an identity that is yours alone, which is what you want for your own work.
+
+Once a team depends on that workflow, three questions you never had to answer start to matter:
+
+1. Where does your team connect?
+2. Which tools can they call?
+3. Who is each end user?
+
+Each one has a section below, in that order.
 
 <Callout type="info">
   If your agent loaded the plugin's skills, ask it to run `/scale-arcade`. The
@@ -17,13 +25,13 @@ Once a team depends on that workflow, three things change. This page names them 
   workspace.
 </Callout>
 
-## You want your own gateway
+## Where does your team connect?
 
 An [MCP Gateway](/operate/governance/mcp-gateways) is the endpoint your team's clients connect to, and it is where you decide what those clients can do. Create one per project in the [Arcade dashboard](https://app.arcade.dev) so each project gets a URL you control, its own tool list, and its own audit trail.
 
 Clients connect to it exactly the way they connected to the plugin's gateway. See the [MCP client guides](/get-started/mcp-clients) for Cursor, Claude Code, Claude Desktop, VS Code, and Copilot.
 
-## You want a curated tool list
+## Which tools can they call?
 
 The gateway is the filter that decides which tools reach your agent. Open the **Allowed Tools** picker on your gateway and select across everything in scope: Arcade-hosted toolkits from the [integrations catalog](/resources/integrations), [remote MCP servers](/operate/governance/remote-mcp-servers) you register, and your own [custom MCP servers](/build/create-tools/tool-basics/build-mcp-server) deployed with [Arcade Deploy](/build/arcade-deploy).
 
@@ -31,13 +39,13 @@ A smaller, deliberate tool list makes agents more accurate, not less capable. Sa
 
 Beyond the allowlist, [contextual access](/operate/governance/contextual-access) lets you allow or deny each individual tool call as it arrives, and [audit logs](/operate/governance/audit-logs) and [tool executions](/operate/governance/tool-executions) show you what actually ran.
 
-## You want your own user identities
+## Who is each end user?
 
-During a trial, you are the only user, and browser sign-in is enough. In production, each of your end users needs their own authorization, so an agent acting for one person can never reach another person's data.
+When you are the only user, signing in to each app yourself is enough. In production, each of your end users needs their own authorization, so an agent acting for one person can never reach another person's data.
 
 Configure a [User Source](/operate/identity/user-sources) on your gateway and Arcade redirects each end user to your existing identity provider, whether that is Entra ID, Okta, Auth0, Clerk, or another OIDC provider, then identifies them by an OIDC subject claim.
 
-## Going beyond MCP
+## Building your own product?
 
 Connecting a client to a gateway takes the least work, and for many teams it is the whole rollout. When you are building your own product rather than configuring an agent, call Arcade directly instead:
 
