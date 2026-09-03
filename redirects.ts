@@ -1165,7 +1165,12 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/get-started/agent-plugin/any-mcp-client",
-    destination: "/:locale/get-started/agent-plugin/tools-only",
+    destination: "/:locale/get-started/agent-plugin/tools-only/any-mcp-client",
+    permanent: true,
+  },
+  {
+    source: "/:locale/get-started/agent-plugin/claude-desktop",
+    destination: "/:locale/get-started/agent-plugin/tools-only/claude-desktop",
     permanent: true,
   },
 ];
