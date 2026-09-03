@@ -8,12 +8,12 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Install the Arcade agent plugin
 
-The Arcade agent plugin puts Arcade inside your coding agent with one command. Your agent gains tools for email, calendar, chat, issues, docs, and dozens of other apps, and you authorize each app in the browser the first time it comes up. No API keys to create, no gateway to configure.
+The Arcade agent plugin puts Arcade inside your agent with one command. Your agent gains access to thousands of tools for email, calendar, chat, issues, docs, and dozens of other apps. You authorize each app in the browser the first time it comes up. No API keys to create, no gateway to configure.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-Install the Arcade agent plugin in your coding agent and run your first task against a connected app.
+Install the Arcade agent plugin in your agent and run your first task against a connected app.
 
 </GuideOverview.Outcomes>
 
@@ -28,8 +28,8 @@ Install the Arcade agent plugin in your coding agent and run your first task aga
 </GuideOverview>
 
 <Callout type="info">
-  The plugin is built for personal use. When you are ready to put
-  a workflow in front of a team, read [from personal use to team
+  The plugin is built for personal use. When you are ready to put a workflow in
+  front of a team, read [from personal use to team
   rollout](/get-started/agent-plugin/team-rollout). You will want your own [MCP
   Gateway](/operate/governance/mcp-gateways) with a curated tool list and your
   own identity provider.
@@ -61,27 +61,20 @@ Reload your agent afterwards if it does not pick up the plugin on its own. A cou
 
 Two things worth knowing if you use more than one agent. Codex and ChatGPT share a plugin directory, so one install covers both. And VS Code can discover a copy installed through GitHub Copilot CLI, so install in one place rather than both.
 
-Using Claude Desktop, or a client that does not load plugins? Those connect to the same gateway as a [tools-only MCP server](/get-started/agent-plugin/tools-only).
+// todo: claude mcpb instructions
 
-## Tools only
-
-If you want Arcade tools without the skills, commands, and subagent, Cursor and VS Code can add the gateway on its own:
-
-- **Cursor:** use [this link]({{ARCADE_PLUGIN_CURSOR_INSTALL_LINK}}) for a one-click MCP install.
-- **VS Code:** use [this link]({{ARCADE_PLUGIN_VSCODE_INSTALL_LINK}}) for a one-click MCP install.
-
-For any other client, add the gateway URL by hand. See [Tools-only MCP server](/get-started/agent-plugin/tools-only).
+Using a client that does not load plugins? Those connect to the same gateway as a [tools-only MCP server](/get-started/agent-plugin/tools-only).
 
 ## Sign in
 
-You authorize twice, and the two are doing different jobs.
+Authentication happens in two layers:
 
-1. **Into the gateway.** Your client asks you to authenticate when it first connects. You sign in to Arcade in the browser, and the client can reach the gateway from then on.
-2. **Into each app.** When a task needs Gmail, Slack, Linear, or anything else, your agent hands you a link that grants the scopes that task requires. Approve it once and Arcade holds the token for that app.
+1. **Into the gateway.** Your client will ask you to authenticate when it first connects. You sign in to Arcade in the browser, and the client can reach the gateway from then on.
+2. **Into each app.** When a task needs Gmail, Slack, Linear, or anything else, your agent hands you a link that grants the scopes that task requires. Approve it once and Arcade holds the token for that app. You won't need to authenticate that service again unless a later task requires greater scopes.
 
-You never give your agent an API key or a password for either layer. Ask your agent to run `/arcade-status` to see where you stand, or `/arcade-connect google` to authorize an app before you need it.
+You never give your agent an API key or a password for either layer. Ask your agent to run `/arcade-status` to see what applications are currently enabled , or `/arcade-connect google` to authorize an app with the widest possible scope before you need it.
 
-Every install points at the same gateway URL, but your tool calls, tokens, and secrets route through your own Arcade project, isolated from every other user of that gateway. No one else's agent can reach your apps.
+All of your tool calls, tokens, and secrets route through your own Arcade project, isolated from every other user of that gateway. No one else's agent can ever reach your apps, tools, or tokens.
 
 Every Arcade gateway works this way, not just the one in the plugin. [Server-level and tool-level authorization](/learn/server-level-vs-tool-level-auth) goes deeper on the split.
 
@@ -89,22 +82,22 @@ Every Arcade gateway works this way, not just the one in the plugin. [Server-lev
 
 Every install connects to the same Arcade gateway and gets the same tools. What differs is how much of the rest of the plugin each agent can load.
 
-| Agent | Tools | Skills | Subagent | Commands | Rule | Hooks |
-| --- | :--: | :--: | :--: | :--: | :--: | :--: |
-| Cursor | ✅ | 2 | ✅ | 3 | ✅ | ✅ |
-| Claude Code | ✅ | 2 | ✅ | 3 | — | ✅ |
-| Claude Cowork | ✅ | 2 | ✅ | 3 | — | ✅ |
-| GitHub Copilot CLI | ✅ | 2 | ✅ | — | — | — |
-| VS Code | ✅ | 2 | — | — | — | — |
-| Codex and ChatGPT | ✅ | 2 | — | — | — | — |
-| Claude Desktop | ✅ | — | — | — | — | — |
-| Any other MCP client | ✅ | — | — | — | — | — |
+| Agent                |     Tools      | Skills | Subagent | Commands | Rule | Hooks |
+| -------------------- | :------------: | :----: | :------: | :------: | :--: | :---: | --- | -------------- |
+| Cursor               |       ✅       |   2    |    ✅    |    3     |  ✅  |  ✅   |
+| Claude Code          |       ✅       |   2    |    ✅    |    3     |  —   |  ✅   |
+| Claude Cowork        |       ✅       |   2    |    ✅    |    3     |  —   |  ✅   |
+| GitHub Copilot CLI   |       ✅       |   2    |    ✅    |    —     |  —   |   —   |
+| VS Code              |       ✅       |   2    |    —     |    —     |  —   |   —   |
+| Codex and ChatGPT    |       ✅       |   2    |    —     |    —     |  —   |   —   |
+| Any other MCP client |       ✅       |   —    |    —     |    —     |  —   |   —   |
+| //                   | Claude Desktop |   ✅   |    —     |    —     |  —   |   —   | —   | TODO: not true |
 
 Here is what each of those is for.
 
 **Commands** are the part you type. `/arcade-status` reports whether the gateway is reachable, whether you have signed in, and which apps you have authorized. `/arcade-connect <app>` authorizes an app on demand, so you are not interrupted mid-task. `/arcade-apps` lists what you have connected and lets you disconnect one.
 
-**Skills** are instructions your agent reads on its own, so you never have to invoke them. `try-arcade` teaches it to turn a request like "reply to that thread" into the right sequence of tool calls across your apps. `scale-arcade` handles the other kind of question, the one about moving a workflow onto a team gateway, and it walks you through the decisions on [this page](/get-started/agent-plugin/team-rollout) against your own workspace.
+**Skills** are instructions your agent reads on its own, so you never have to invoke them. `try-arcade` teaches it to turn a request like "reply to that thread" into the right sequence of tool calls across your apps. `scale-arcade` handles the other kind of question, the one about moving a workflow onto a team gateway, and it walks you through the decisions on [this page](/get-started/agent-plugin/team-rollout) against your own project.
 
 **The subagent**, `arcade-operator`, runs an app task in its own context and reports back just the result. Arcade exposes a lot of tools, and searching them fills a conversation with noise that pushes out your actual work. The operator absorbs that.
 
@@ -114,14 +107,17 @@ The columns thin out because the [Agent Plugins](https://agent-plugins.org) 1.0 
 
 ## Try it
 
-Ask your agent for an outcome rather than naming a tool:
+The Arcade Agent Plugin exposes hundreds of tools from our catalog that need zero additional configuration. Try asking your agent:
 
-- "What's on my calendar tomorrow?"
-- "Summarize the unread email from this week."
-- "Draft a reply to that thread, then wait for me before sending it."
-- "What can Arcade do?"
+- "Send a summary of tomorrow's calendar events to me on Slack."
+- "Read my Granola notes from last week, check them against Linear, and file anything I promised that is not a ticket yet. Wait for me before creating anything."
+- "Find unread mail that needs a reply. Look the sender up in HubSpot if you can, draft a response, and Slack me the draft before sending."
+- "Pull my open GitHub pull requests, my Linear issues, and tomorrow's calendar. Write a standup update and send it to me on Slack."
+- "Search my Drive and Notion for the latest product spec, then drop a one-paragraph summary in Slack."
 
-Your agent asks you to confirm before it sends, creates, or deletes anything.
+Or ask "What can Arcade do?" and pick a workflow from the answer.
+
+\
 
 ## Next steps
 
