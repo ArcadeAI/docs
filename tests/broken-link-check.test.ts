@@ -3,6 +3,7 @@ import { join } from "node:path";
 import fg from "fast-glob";
 import { scanURLs, validateFiles } from "next-validate-link";
 import { expect, test } from "vitest";
+import { applySubstitutions } from "@/lib/remark-substitute";
 import {
   INTEGRATION_CATEGORIES,
   normalizeToolkitId,
@@ -256,7 +257,15 @@ test(
       return false;
     };
 
-    const found = await validateFiles(await fg("app/**/*.{md,mdx}"), {
+    // Pages write `{{TOKEN}}` placeholders for values that live in one place in
+    // the codebase, so resolve them before validating or the checker sees the
+    // literal token as a relative path.
+    const files = (await fg("app/**/*.{md,mdx}")).map((path) => ({
+      path,
+      content: applySubstitutions(readFileSync(path, "utf-8")),
+    }));
+
+    const found = await validateFiles(files, {
       scanned,
       whitelist,
     });
