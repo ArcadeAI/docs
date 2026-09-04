@@ -2,6 +2,9 @@
  * Arcade architecture overview, drawn as one SVG so it follows the active
  * theme, stays crisp at any zoom, and keeps every label as real selectable text.
  *
+ * ArchitectureDiagramSummary below the figure provides the same topology as
+ * structured prose for agents, screen readers, and markdown export.
+ *
  * Every box is placed by hand. The left-to-right Local -> Platform reading
  * order, the shared tools row, and the boundary crossings are the content here,
  * so none of it is auto-laid-out. The coordinate space is sized so labels stay
@@ -227,6 +230,109 @@ function Zone({ x, w, label }: { x: number; w: number; label: string }) {
         y={ZONE.y + ZONE_RULE_Y}
       />
     </g>
+  );
+}
+
+/** Text-only topology for agents, screen readers, and markdown export. */
+function ArchitectureDiagramSummary() {
+  return (
+    <figcaption className="mt-4 text-muted-foreground text-sm">
+      <details className="rounded-lg border border-border bg-muted/30 px-4 py-3">
+        <summary className="cursor-pointer font-medium text-foreground">
+          Architecture summary
+        </summary>
+        <div className="mt-3 space-y-4 text-foreground">
+          <p>
+            Arcade runs in two zones side by side. <strong>Local</strong> is for
+            single-user agents on a developer machine. <strong>Platform</strong>{" "}
+            is the hosted control plane and runtime for multi-user production
+            agents.
+          </p>
+
+          <div>
+            <p className="font-medium">Local zone</p>
+            <ul className="mt-1 list-disc space-y-1 ps-5">
+              <li>
+                <strong>Custom local tools</strong> connect bidirectionally to
+                the <strong>local MCP server</strong>.
+              </li>
+              <li>
+                The <strong>local MCP server</strong> serves{" "}
+                <strong>local single-user agents and applications</strong> over
+                MCP.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium">Platform zone</p>
+            <ul className="mt-1 list-disc space-y-1 ps-5">
+              <li>
+                <strong>Project and user management</strong> and{" "}
+                <strong>auditing and compliance</strong> handle governance.
+              </li>
+              <li>
+                <strong>Tool registry</strong>,{" "}
+                <strong>tool authentication, authorization, and secrets</strong>
+                , and <strong>distributed tool runtime and management</strong>{" "}
+                register, authorize, and run hosted tools.
+              </li>
+              <li>
+                <strong>Custom hosted tools</strong> and{" "}
+                <strong>pre-built Arcade tools</strong> connect bidirectionally
+                to the <strong>MCP and agentic tool engine</strong>.
+              </li>
+              <li>
+                The <strong>MCP and agentic tool engine</strong> serves{" "}
+                <strong>multi-user agents and applications</strong> over MCP and
+                OXP/native LLM tool calls.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium">External systems</p>
+            <ul className="mt-1 list-disc space-y-1 ps-5">
+              <li>
+                <strong>IdPs and entitlement servers</strong> connect to project
+                and user management and to tool authentication, authorization,
+                and secrets.
+              </li>
+              <li>
+                <strong>External MCP servers</strong> connect bidirectionally to
+                the MCP and agentic tool engine over MCP.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <p className="font-medium">Cross-zone links</p>
+            <ul className="mt-1 list-disc space-y-1 ps-5">
+              <li>
+                <strong>Tool development kit and evals</strong> builds tools for
+                both local and hosted deployment.
+              </li>
+              <li>
+                <strong>Custom local tools</strong> and{" "}
+                <strong>custom hosted tools</strong> share the same tool code —
+                the dashed link between them is bidirectional.
+              </li>
+            </ul>
+          </div>
+
+          <p>
+            Platform operators: for Kubernetes service topology, see{" "}
+            <a
+              className="text-brand-accent underline underline-offset-2"
+              href="/operate/deploy/architecture"
+            >
+              Platform architecture
+            </a>
+            .
+          </p>
+        </div>
+      </details>
+    </figcaption>
   );
 }
 
@@ -485,6 +591,7 @@ export function ArchitectureDiagram() {
           <Chip cx={850} cy={526} label="OXP / native LLM tools" w={170} />
         </svg>
       </div>
+      <ArchitectureDiagramSummary />
     </figure>
   );
 }
