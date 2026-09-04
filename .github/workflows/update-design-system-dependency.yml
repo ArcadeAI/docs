@@ -44,10 +44,7 @@ jobs:
         env:
           VERSION: ${{ inputs.version || 'latest' }}
         run: |
-          # --save-exact because every dependency here is pinned exactly and
-          # no save-prefix is configured, so the default would write a caret
-          # range and quietly loosen the pin.
-          pnpm install --save-exact "@arcadeai/design-system@${VERSION}"
+          pnpm install "@arcadeai/design-system@${VERSION}"
           # Report the version actually written to package.json, so the PR
           # names a release rather than the `latest` alias.
           installed=$(jq -r '.dependencies["@arcadeai/design-system"]' package.json)
