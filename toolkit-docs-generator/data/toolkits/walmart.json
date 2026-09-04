@@ -1,7 +1,7 @@
 {
   "id": "Walmart",
   "label": "Walmart",
-  "version": "3.1.2",
+  "version": "4.0.0",
   "description": "Arcade.dev LLM tools for searching for products sold by Walmart",
   "metadata": {
     "category": "search",
@@ -18,7 +18,7 @@
     {
       "name": "GetProductDetails",
       "qualifiedName": "Walmart.GetProductDetails",
-      "fullyQualifiedName": "Walmart.GetProductDetails@3.1.2",
+      "fullyQualifiedName": "Walmart.GetProductDetails@4.0.0",
       "description": "Get product details from Walmart.",
       "parameters": [
         {
@@ -78,8 +78,8 @@
     {
       "name": "SearchProducts",
       "qualifiedName": "Walmart.SearchProducts",
-      "fullyQualifiedName": "Walmart.SearchProducts@3.1.2",
-      "description": "Search Walmart products using SerpAPI.",
+      "fullyQualifiedName": "Walmart.SearchProducts@4.0.0",
+      "description": "Search Walmart products using SerpAPI.\n\nSerpAPI does not expose a total result count, so responses omit total_count;\nrely on has_more / next_offset to continue paging.",
       "parameters": [
         {
           "name": "keywords",
@@ -129,10 +129,18 @@
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Page number to fetch. Defaults to 1 (first page of results). The maximum page value is 100.",
+          "description": "Maximum results to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of results to skip before the first returned item. Defaults to 0.",
           "enum": null,
           "inferrable": true
         }
@@ -156,7 +164,7 @@
         "toolName": "Walmart.SearchProducts",
         "parameters": {
           "keywords": {
-            "value": "samsung galaxy",
+            "value": "wireless noise cancelling headphones",
             "type": "string",
             "required": true
           },
@@ -166,12 +174,12 @@
             "required": false
           },
           "min_price": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "max_price": {
-            "value": 500,
+            "value": 250,
             "type": "integer",
             "required": false
           },
@@ -180,8 +188,13 @@
             "type": "boolean",
             "required": false
           },
-          "page": {
-            "value": 2,
+          "limit": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           }
@@ -211,6 +224,7 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.437Z",
-  "summary": "Walmart's Arcade toolkit empowers developers to seamlessly integrate product search functionalities and detailed product information retrieval from Walmart. This toolkit streamlines access to Walmart's extensive product catalog, enabling enhanced user experiences and effective e-commerce solutions.\n\n**Capabilities**  \n- Retrieve comprehensive product details from Walmart's catalog  \n- Efficiently search for products with relevant filters  \n- Enhance e-commerce applications with real-time data  \n- Facilitate user-friendly product discovery  \n\n**OAuth**  \n- No OAuth required; integrates easily with an API key.  \n\n**Secrets**  \n- Requires an API key for authentication.  \n  - Example: SERP_API_KEY for product search functionality."
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-04T15:27:38.988Z",
+  "summary": "## Walmart Toolkit\n\nThe Walmart toolkit provides Arcade tools for searching and retrieving product data from Walmart's catalog via SerpAPI, enabling LLM agents to query products and fetch detailed listings programmatically.\n\n## Capabilities\n\n- **Product search**: Query Walmart's product catalog with keyword-based search, returning paginated results with `has_more` and `next_offset` for continuation (note: `total_count` is not available due to SerpAPI limitations).\n- **Product details**: Retrieve structured product information for a specific Walmart item by ID or URL.\n\n## Secrets\n\nThis toolkit requires one secret:\n\n- **`SERP_API_KEY`**: An API key issued by [SerpAPI](https://serpapi.com/), the service used to query Walmart search results. To obtain it: create an account at [serpapi.com](https://serpapi.com/users/sign_up), then find your private API key on the [API Key page in your SerpAPI dashboard](https://serpapi.com/manage-api-key). Free-tier accounts have a limited monthly search quota; paid plans are required for higher volume. The key must be kept secret and is used to authenticate all outbound requests from the toolkit to SerpAPI.\n\nStore this secret in Arcade using the [Secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly via the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
 }

@@ -41,6 +41,10 @@ const meta: MetaRecord = {
     title: "Math",
     href: "/en/resources/integrations/development/math",
   },
+  mixpanel: {
+    title: "Mixpanel",
+    href: "/en/resources/integrations/development/mixpanel",
+  },
   pagerduty: {
     title: "PagerDuty",
     href: "/en/resources/integrations/development/pagerduty",
