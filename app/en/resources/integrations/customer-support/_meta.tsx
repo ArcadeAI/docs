@@ -17,6 +17,10 @@ const meta: MetaRecord = {
     title: "Pylon",
     href: "/en/resources/integrations/customer-support/pylon",
   },
+  servicenow: {
+    title: "ServiceNow",
+    href: "/en/resources/integrations/customer-support/servicenow",
+  },
   zendesk: {
     title: "Zendesk",
     href: "/en/resources/integrations/customer-support/zendesk",

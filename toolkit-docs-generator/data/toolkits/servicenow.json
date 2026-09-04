@@ -1,0 +1,1916 @@
+{
+  "id": "Servicenow",
+  "label": "ServiceNow",
+  "version": "0.1.0",
+  "description": "Arcade.dev LLM tools for ServiceNow ITSM",
+  "metadata": {
+    "category": "customer-support",
+    "iconUrl": "https://design-system.arcade.dev/icons/servicenow.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/customer-support/servicenow",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "useraccount"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddComment",
+      "qualifiedName": "Servicenow.AddComment",
+      "fullyQualifiedName": "Servicenow.AddComment@0.1.0",
+      "description": "Add a comment or internal work note to a work record.\n\nThe note is normally attributed to the authenticated ServiceNow user. Some\ninstances have a business rule that attributes every journal entry to a\nfixed integration/service persona regardless of which OAuth identity made\nthe write — a structural property of that instance's configuration, not a\nper-call fluke. When that happens here, ``warnings`` names the mismatched\nauthor so the discrepancy is visible on every affected write, not just\nguessed at afterward. Work notes are internal and visible only to\nfulfillers; customer-visible comments are seen by the requestor who opened\nthe record.",
+      "parameters": [
+        {
+          "name": "identifier",
+          "type": "string",
+          "required": true,
+          "description": "The record's human-facing number or sys_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": true,
+          "description": "The text of the note to add. Cannot be empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "audience",
+          "type": "string",
+          "required": false,
+          "description": "Whether this note is internal-only (visible only to fulfillers) or visible to the requestor. Defaults to internal.",
+          "enum": [
+            "internal",
+            "customer_visible"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "record_type",
+          "type": "string",
+          "required": false,
+          "description": "The record's type. Required when identifier is a sys_id; inferred automatically from the number prefix when identifier is a number.",
+          "enum": [
+            "incident",
+            "problem",
+            "change_request",
+            "sc_request",
+            "sc_req_item",
+            "task"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The record's full details, including the new note in its history."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.AddComment",
+        "parameters": {
+          "identifier": {
+            "value": "INC0012345",
+            "type": "string",
+            "required": true
+          },
+          "comment": {
+            "value": "Investigated the issue and found that the root cause is a misconfigured network policy. Updating the firewall rules to resolve the connectivity problem.",
+            "type": "string",
+            "required": true
+          },
+          "audience": {
+            "value": "internal",
+            "type": "string",
+            "required": false
+          },
+          "record_type": {
+            "value": "incident",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateIncident",
+      "qualifiedName": "Servicenow.CreateIncident",
+      "fullyQualifiedName": "Servicenow.CreateIncident@0.1.0",
+      "description": "Open a new incident. Returns the incident number the caller can quote.\n\nThe authenticated ServiceNow user is recorded as the caller unless overridden\nwith ``caller``. A short description is required; every other field is optional.",
+      "parameters": [
+        {
+          "name": "short_description",
+          "type": "string",
+          "required": true,
+          "description": "One-line summary of the incident. Cannot be empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Detailed description of the incident. Leave empty to omit.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "urgency",
+          "type": "string",
+          "required": false,
+          "description": "How quickly this needs to be resolved: 'high', 'medium', or 'low'. Leave empty to use the instance's default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "impact",
+          "type": "string",
+          "required": false,
+          "description": "Business impact: 'high', 'medium', or 'low'. Leave empty to use the instance's default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "description": "Incident category, e.g. 'network', 'hardware', 'software', 'database'. Leave empty to use the instance's default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "caller",
+          "type": "string",
+          "required": false,
+          "description": "Person this incident is being reported for, by email or name. Resolved to a ServiceNow user before creation; an unresolvable or ambiguous match is left unresolved (the incident is still created, attributed to the authenticated caller, and the failure is explained in warnings) rather than blocking creation. Omitting this or leaving it blank attributes the incident to the authenticated caller.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The newly created incident, including its number."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.CreateIncident",
+        "parameters": {
+          "short_description": {
+            "value": "VPN connection dropping intermittently for remote users",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "Multiple remote employees have reported that their VPN connections are dropping every 15-30 minutes since approximately 09:00 AM today. This is affecting productivity across the sales and engineering departments. Users have tried reconnecting but the issue persists.",
+            "type": "string",
+            "required": false
+          },
+          "urgency": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "impact": {
+            "value": "medium",
+            "type": "string",
+            "required": false
+          },
+          "category": {
+            "value": "network",
+            "type": "string",
+            "required": false
+          },
+          "caller": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCatalogItem",
+      "qualifiedName": "Servicenow.GetCatalogItem",
+      "fullyQualifiedName": "Servicenow.GetCatalogItem@0.1.0",
+      "description": "Read a catalog item's details and the options required to order it.\n\nCheck each variable's ``mandatory`` flag before submitting an order — an\norder missing a required variable is rejected before anything is submitted.",
+      "parameters": [
+        {
+          "name": "sys_id",
+          "type": "string",
+          "required": true,
+          "description": "The catalog item's unique identifier.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The item's details and its variables (the options required to order it), or a not-found envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.GetCatalogItem",
+        "parameters": {
+          "sys_id": {
+            "value": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetConfigurationItem",
+      "qualifiedName": "Servicenow.GetConfigurationItem",
+      "fullyQualifiedName": "Servicenow.GetConfigurationItem@0.1.0",
+      "description": "Read a configuration item together with what it depends on and what depends on it.\n\nA missing or unreadable item returns a not-found envelope (``found`` false)\nrather than raising. When ``ci_class`` doesn't match this sys_id's real,\nmore-specific class, the base ``cmdb_ci`` class is tried automatically\nbefore concluding not-found, since every CI is reachable through it\nregardless of its specific subtype.",
+      "parameters": [
+        {
+          "name": "sys_id",
+          "type": "string",
+          "required": true,
+          "description": "The configuration item's sys_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ci_class",
+          "type": "string",
+          "required": false,
+          "description": "The item's CMDB class. Defaults to 'cmdb_ci', the base class.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The item's attributes and its upstream/downstream relations, or a not-found envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.GetConfigurationItem",
+        "parameters": {
+          "sys_id": {
+            "value": "a1b2c3d4e5f6789012345678901234ab",
+            "type": "string",
+            "required": true
+          },
+          "ci_class": {
+            "value": "cmdb_ci_server",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetKnowledgeArticle",
+      "qualifiedName": "Servicenow.GetKnowledgeArticle",
+      "fullyQualifiedName": "Servicenow.GetKnowledgeArticle@0.1.0",
+      "description": "Read a knowledge article's full body.\n\nA missing article, or one the caller is not entitled to read, returns a\nnot-found envelope (``found`` false) rather than raising.",
+      "parameters": [
+        {
+          "name": "sys_id",
+          "type": "string",
+          "required": true,
+          "description": "The knowledge article's unique identifier.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The article's full body, or a not-found envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.GetKnowledgeArticle",
+        "parameters": {
+          "sys_id": {
+            "value": "kb0010042a3b1200abc123def053af12",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetRecord",
+      "qualifiedName": "Servicenow.GetRecord",
+      "fullyQualifiedName": "Servicenow.GetRecord@0.1.0",
+      "description": "Read a work record together with its full comment and work-note history.\n\nA missing or unreadable identifier returns a not-found envelope (``found``\nfalse) rather than raising, so a stale or guessed identifier can be recovered\nwithin the same turn. When the most recent activity entry's author doesn't\nmatch the authenticated caller, that's reported in ``warnings`` too — some\ninstances attribute every journal entry to a fixed persona regardless of who\nwrote it, so ``author`` in the activity history may not name the true writer.",
+      "parameters": [
+        {
+          "name": "identifier",
+          "type": "string",
+          "required": true,
+          "description": "The record's human-facing number (e.g. 'INC0010023') or sys_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_type",
+          "type": "string",
+          "required": false,
+          "description": "The record's type. Required when identifier is a sys_id; inferred automatically from the number prefix (INC, PRB, CHG, REQ, RITM, TASK) when identifier is a number.",
+          "enum": [
+            "incident",
+            "problem",
+            "change_request",
+            "sc_request",
+            "sc_req_item",
+            "task"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The record's full details and activity history, or a not-found envelope."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.GetRecord",
+        "parameters": {
+          "identifier": {
+            "value": "INC0010023",
+            "type": "string",
+            "required": true
+          },
+          "record_type": {
+            "value": "incident",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetRecordCounts",
+      "qualifiedName": "Servicenow.GetRecordCounts",
+      "fullyQualifiedName": "Servicenow.GetRecordCounts@0.1.0",
+      "description": "Count work records matching a filter, optionally broken down by a field.\n\nThe count reflects only work records the authenticated caller can see —\nthe same visibility every other tool in this toolkit applies. For\nsc_request/sc_req_item, text also matches the ordered catalog item's name,\nsince a request's own short description is otherwise structurally blank.",
+      "parameters": [
+        {
+          "name": "record_type",
+          "type": "string",
+          "required": true,
+          "description": "The work-record type to count.",
+          "enum": [
+            "incident",
+            "problem",
+            "change_request",
+            "sc_request",
+            "sc_req_item",
+            "task"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": false,
+          "description": "Only count records whose short description contains this text. For sc_request/sc_req_item, also matches the ordered catalog item's name. Leave empty for no text filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assigned_to_me",
+          "type": "boolean",
+          "required": false,
+          "description": "Only count records assigned to the authenticated caller. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Only count records in this state: 'new', 'in_progress', 'on_hold', 'resolved', 'closed', or 'cancelled'. Leave empty for no state filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Only count records at this priority: 'critical', 'high', 'moderate', 'low', or 'planning'. Leave empty for no priority filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "active_only",
+          "type": "boolean",
+          "required": false,
+          "description": "Exclude resolved, closed, and cancelled records. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opened_after",
+          "type": "string",
+          "required": false,
+          "description": "Only count records opened on or after this date (YYYY-MM-DD). Leave empty for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by",
+          "type": "string",
+          "required": false,
+          "description": "A field to break the count down by, e.g. 'priority' or 'assignment_group'. Leave empty for a single total with no breakdown.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The total count for the filtered set, and a breakdown by group_by if given."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.GetRecordCounts",
+        "parameters": {
+          "record_type": {
+            "value": "incident",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "network outage",
+            "type": "string",
+            "required": false
+          },
+          "assigned_to_me": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "state": {
+            "value": "in_progress",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "active_only": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "opened_after": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "group_by": {
+            "value": "priority",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetRecordFieldChoices",
+      "qualifiedName": "Servicenow.GetRecordFieldChoices",
+      "fullyQualifiedName": "Servicenow.GetRecordFieldChoices@0.1.0",
+      "description": "Discover the valid choice values for a work-record field on this instance.\n\nChoice lists are instance-customized, so a state or priority filter that\nanother tool rejected can be corrected by reading the values this returns.",
+      "parameters": [
+        {
+          "name": "record_type",
+          "type": "string",
+          "required": true,
+          "description": "The work-record type the field belongs to.",
+          "enum": [
+            "incident",
+            "problem",
+            "change_request",
+            "sc_request",
+            "sc_req_item",
+            "task"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "field",
+          "type": "string",
+          "required": true,
+          "description": "The field name to discover valid choices for, e.g. 'state' or 'priority'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The instance's valid label/value pairs for that field. When the instance's configured choice list itself isn't readable, this falls back to the values currently in use on existing records, which may omit a configured value no record currently holds. ``available`` is false only when neither source can produce any values, in which case ``choices`` is empty rather than incomplete."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.GetRecordFieldChoices",
+        "parameters": {
+          "record_type": {
+            "value": "incident",
+            "type": "string",
+            "required": true
+          },
+          "field": {
+            "value": "priority",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "OrderCatalogItem",
+      "qualifiedName": "Servicenow.OrderCatalogItem",
+      "fullyQualifiedName": "Servicenow.OrderCatalogItem@0.1.0",
+      "description": "Order an item from the service catalog. Returns the request number.\n\nEvery variable marked mandatory on the item must be present in ``variables``,\nor the order is rejected before anything is submitted. A variable with a\nnon-empty set of configured options is also rejected here before submission\nif the supplied value doesn't match one of those options (by value or by\nlabel).",
+      "parameters": [
+        {
+          "name": "item_sys_id",
+          "type": "string",
+          "required": true,
+          "description": "The catalog item's unique identifier.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "quantity",
+          "type": "integer",
+          "required": false,
+          "description": "How many to order (1 or greater). Defaults to 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "variables",
+          "type": "json",
+          "required": false,
+          "description": "The item's required and optional options, keyed by variable name to the chosen value. Omit if the item has no variables.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "requested_for",
+          "type": "string",
+          "required": false,
+          "description": "Person to place this order for, by email or name. Resolved to a ServiceNow user before ordering; an unresolvable or ambiguous match is left unresolved (the order still proceeds for the authenticated caller, and the failure is explained in warnings) rather than blocking the order. Omitting this requests the item for the authenticated caller.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The completed order's request number."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.OrderCatalogItem",
+        "parameters": {
+          "item_sys_id": {
+            "value": "a1b2c3d4e5f6789012345678abcdef01",
+            "type": "string",
+            "required": true
+          },
+          "quantity": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "variables": {
+            "value": {
+              "color": "black",
+              "storage": "512GB",
+              "operating_system": "Windows 11 Pro",
+              "justification": "Required for new hire onboarding in the engineering department."
+            },
+            "type": "string",
+            "required": false
+          },
+          "requested_for": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchAssignmentGroups",
+      "qualifiedName": "Servicenow.SearchAssignmentGroups",
+      "fullyQualifiedName": "Servicenow.SearchAssignmentGroups@0.1.0",
+      "description": "Find ServiceNow assignment groups by full or partial name, to route work to them.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "A full or partial team name to search for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_inactive",
+          "type": "boolean",
+          "required": false,
+          "description": "Include inactive/deactivated groups. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum groups to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0. Must be 0 or greater — if a previous call's next_offset was -1, that means stop, not restart from 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching assignment groups. Every match is returned, not just one, so an ambiguous name can be disambiguated by the caller."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.SearchAssignmentGroups",
+        "parameters": {
+          "query": {
+            "value": "network operations",
+            "type": "string",
+            "required": true
+          },
+          "include_inactive": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchCatalogItems",
+      "qualifiedName": "Servicenow.SearchCatalogItems",
+      "fullyQualifiedName": "Servicenow.SearchCatalogItems@0.1.0",
+      "description": "Find service catalog items matching a described need.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Text describing the hardware, software, or access being requested.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "description": "Limit the search to a named catalog category's sys_id. Leave empty to search every category.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum items to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0. Must be 0 or greater — if a previous call's next_offset was -1, that means stop, not restart from 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching service catalog items."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.SearchCatalogItems",
+        "parameters": {
+          "query": {
+            "value": "laptop with 16GB RAM and SSD for software development",
+            "type": "string",
+            "required": true
+          },
+          "category": {
+            "value": "d36b0c6a0a0a3c9e0012b3f5d9a4e1b7",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchConfigurationItems",
+      "qualifiedName": "Servicenow.SearchConfigurationItems",
+      "fullyQualifiedName": "Servicenow.SearchConfigurationItems@0.1.0",
+      "description": "Find configuration items (systems) by name, optionally narrowed to a CMDB class.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Text to match against a configuration item's name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ci_class",
+          "type": "string",
+          "required": false,
+          "description": "Narrow the search to a CMDB class, e.g. 'cmdb_ci_server' or 'cmdb_ci_computer'. Defaults to 'cmdb_ci', the base class covering every type.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum items to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0. Must be 0 or greater — if a previous call's next_offset was -1, that means stop, not restart from 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching configuration items."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.SearchConfigurationItems",
+        "parameters": {
+          "query": {
+            "value": "web-server-prod",
+            "type": "string",
+            "required": false
+          },
+          "ci_class": {
+            "value": "cmdb_ci_server",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchKnowledgeArticles",
+      "qualifiedName": "Servicenow.SearchKnowledgeArticles",
+      "fullyQualifiedName": "Servicenow.SearchKnowledgeArticles@0.1.0",
+      "description": "Search the knowledge base for articles matching a described problem or topic.\n\nOnly articles the caller is entitled to read are returned; a search matching\nnothing (including everything the caller cannot read) returns an empty list,\nnot an error.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Text describing the problem or topic to search for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "knowledge_base",
+          "type": "string",
+          "required": false,
+          "description": "Limit the search to a named knowledge base's sys_id. Leave empty to search all knowledge bases the caller can read.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum articles to return (1-50). Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0. Must be 0 or greater — if a previous call's next_offset was -1, that means stop, not restart from 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching articles with a short snippet of each."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.SearchKnowledgeArticles",
+        "parameters": {
+          "query": {
+            "value": "How to reset a forgotten password in Active Directory",
+            "type": "string",
+            "required": true
+          },
+          "knowledge_base": {
+            "value": "a7e8b1c2d3f4e5a6b7c8d9e0f1a2b3c4",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchRecords",
+      "qualifiedName": "Servicenow.SearchRecords",
+      "fullyQualifiedName": "Servicenow.SearchRecords@0.1.0",
+      "description": "Find work records of one type by text, assignment, state, priority, or recency.\n\nWith no filters, returns the caller's most recently updated active records of\nthat type. A search matching nothing returns an empty list, not an error.\nFor sc_request/sc_req_item, text also matches the ordered catalog item's name,\nsince a request's own short description is otherwise structurally blank.",
+      "parameters": [
+        {
+          "name": "record_type",
+          "type": "string",
+          "required": true,
+          "description": "The work-record type to search: incident, problem, change_request, sc_request (service catalog request), sc_req_item (a line item within a service catalog request), or task (a generic task not covered by the other types).",
+          "enum": [
+            "incident",
+            "problem",
+            "change_request",
+            "sc_request",
+            "sc_req_item",
+            "task"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": false,
+          "description": "Only include records whose short description contains this text. For sc_request/sc_req_item, also matches the ordered catalog item's name. Leave empty for no text filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assigned_to_me",
+          "type": "boolean",
+          "required": false,
+          "description": "Only include records assigned to the authenticated caller. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Only include records in this state: 'new', 'in_progress', 'on_hold', 'resolved', 'closed', or 'cancelled'. An instance-specific value also works. Leave empty for no state filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Only include records at this priority: 'critical', 'high', 'moderate', 'low', or 'planning'. Leave empty for no priority filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "active_only",
+          "type": "boolean",
+          "required": false,
+          "description": "Exclude resolved, closed, and cancelled records. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opened_after",
+          "type": "string",
+          "required": false,
+          "description": "Only include records opened on or after this date (YYYY-MM-DD). Leave empty for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum records to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0. Must be 0 or greater — if a previous call's next_offset was -1, that means stop, not restart from 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching records, most recently updated first, with pagination metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.SearchRecords",
+        "parameters": {
+          "record_type": {
+            "value": "incident",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "VPN connection issue",
+            "type": "string",
+            "required": false
+          },
+          "assigned_to_me": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "state": {
+            "value": "in_progress",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "active_only": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "opened_after": {
+            "value": "2024-01-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchUsers",
+      "qualifiedName": "Servicenow.SearchUsers",
+      "fullyQualifiedName": "Servicenow.SearchUsers@0.1.0",
+      "description": "Find ServiceNow users by name or email, to assign or contact them.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "A name or email to search for. An '@' in the query matches against email; otherwise it matches against name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_inactive",
+          "type": "boolean",
+          "required": false,
+          "description": "Include inactive/deactivated users. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum people to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0. Must be 0 or greater — if a previous call's next_offset was -1, that means stop, not restart from 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching people. Every match is returned, not just one, so an ambiguous name can be disambiguated by the caller."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.SearchUsers",
+        "parameters": {
+          "query": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "include_inactive": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateRecord",
+      "qualifiedName": "Servicenow.UpdateRecord",
+      "fullyQualifiedName": "Servicenow.UpdateRecord@0.1.0",
+      "description": "Change one or more fields on a work record. Fields not specified are left untouched.\n\nA person or team named by ``assigned_to``/``assignment_group``/``caller`` is resolved\nto a real ServiceNow record before anything is written; if the name can't be\nresolved (no match, or more than one candidate), that field alone is left\nunchanged and explained in ``warnings`` rather than raising, while every other\nfield given in the same call is still written — so it can be retried with just\nthe corrected name. A field the instance's own business rules recalculate\nor reject after the write (e.g.\n``priority`` recomputed from ``impact``/``urgency``, or an invalid ``state``)\nis also reported in ``warnings`` when the written value didn't stick. A write\nthe instance's ACLs reject outright (e.g. a 403 tied to the record's current\nassignment) is reported in ``warnings`` the same way, instead of raising.\nChanging ``state`` away from a resolved/closed state (reopening a record)\nwithout also setting ``close_code``/``close_notes`` in the same call can\nclear those fields as a platform side effect; when that happens it is\nreported in ``warnings`` too, not left for a separate read to discover.\nWhen more than one field is given and the instance rejects the combined\nwrite atomically (some business rules abort on a specific field\ncombination), each field is retried on its own so the ones that apply\ncleanly still get written instead of the whole call failing silently.",
+      "parameters": [
+        {
+          "name": "identifier",
+          "type": "string",
+          "required": true,
+          "description": "The record's human-facing number or sys_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_type",
+          "type": "string",
+          "required": false,
+          "description": "The record's type. Required when identifier is a sys_id; inferred automatically from the number prefix when identifier is a number.",
+          "enum": [
+            "incident",
+            "problem",
+            "change_request",
+            "sc_request",
+            "sc_req_item",
+            "task"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "New state: 'new', 'in_progress', 'on_hold', 'resolved', 'closed', or 'cancelled', or an instance-specific value. Omitting this leaves the existing state unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assigned_to",
+          "type": "string",
+          "required": false,
+          "description": "Person to assign this record to, by email or name. Resolved to a ServiceNow user before the write; an unresolvable or ambiguous name is reported and nothing is written. Omitting this leaves the existing assignee unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignment_group",
+          "type": "string",
+          "required": false,
+          "description": "Team to assign this record to, by name. Resolved to a ServiceNow group before the write, with the same unresolvable/ambiguous handling as assigned_to. Omitting this leaves the existing group unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "caller",
+          "type": "string",
+          "required": false,
+          "description": "Person this record is reported for, by email or name. Resolved to a ServiceNow user before the write, with the same unresolvable/ambiguous handling as assigned_to. Some instances require this to be set before a record can transition to a resolved or closed state. Omitting this leaves the existing caller unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "New priority: 'critical', 'high', 'moderate', 'low', or 'planning'. Omitting this leaves the existing priority unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "urgency",
+          "type": "string",
+          "required": false,
+          "description": "New urgency: 'high', 'medium', or 'low'. Omitting this leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "impact",
+          "type": "string",
+          "required": false,
+          "description": "New impact: 'high', 'medium', or 'low'. Omitting this leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "description": "New category, e.g. 'network', 'hardware', 'software', 'database'. Instance-specific value — an invalid value is flagged in warnings with the live list of valid options for this field. Omitting this leaves the existing category unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Replacement text for the record's detailed description. Omitting this leaves the existing description unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "close_code",
+          "type": "string",
+          "required": false,
+          "description": "Resolution code. Some instances require this when resolving or closing a record. Omitting this leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "close_notes",
+          "type": "string",
+          "required": false,
+          "description": "Resolution notes describing how the record was resolved. Some instances require this when resolving or closing a record. Omitting this leaves it unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The updated record's full details."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.UpdateRecord",
+        "parameters": {
+          "identifier": {
+            "value": "INC0045231",
+            "type": "string",
+            "required": true
+          },
+          "record_type": {
+            "value": "incident",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "in_progress",
+            "type": "string",
+            "required": false
+          },
+          "assigned_to": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "assignment_group": {
+            "value": "Network Operations",
+            "type": "string",
+            "required": false
+          },
+          "caller": {
+            "value": "john.smith@example.com",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "urgency": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "impact": {
+            "value": "medium",
+            "type": "string",
+            "required": false
+          },
+          "category": {
+            "value": "network",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "User is unable to connect to the VPN. Issue started after the latest system update was applied on Monday morning.",
+            "type": "string",
+            "required": false
+          },
+          "close_code": {
+            "value": "Solved (Permanently)",
+            "type": "string",
+            "required": false
+          },
+          "close_notes": {
+            "value": "Rolled back the latest network driver update and restored VPN connectivity. Issue confirmed resolved by the end user.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Servicenow.WhoAmI",
+      "fullyQualifiedName": "Servicenow.WhoAmI@0.1.0",
+      "description": "Return the authenticated ServiceNow user's profile.\n\nUse this to verify the configured instance and OAuth authorization, and to get\nthe caller's own sys_id for \"my queue\"-style filters; it is not a required\npreamble to the other tools.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "useraccount"
+        ]
+      },
+      "secrets": [
+        "SERVICENOW_INSTANCE_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERVICENOW_INSTANCE_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The authenticated ServiceNow user's identity and the connected instance."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Servicenow.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-04T18:05:34.663Z",
+  "summary": "ServiceNow toolkit for Arcade enables LLM agents to interact with a ServiceNow ITSM instance — reading, searching, creating, and updating work records, catalog items, knowledge articles, configuration items, and user/group data.\n\n## Capabilities\n\n- **Incident & work record lifecycle**: Open incidents, read full records with activity history, update arbitrary fields (with per-field retry and warnings on ACL rejections or business-rule overrides), add comments or internal work notes, count and search records by text, state, priority, assignment, or recency.\n- **Service catalog**: Search catalog items, read item details and mandatory variables, and place orders with pre-submission validation of required and constrained variables.\n- **Knowledge base**: Search articles and read full article bodies; access is scoped to what the authenticated caller is entitled to read.\n- **CMDB & configuration items**: Search configuration items by name or CMDB class, and read individual CI details including dependency relationships.\n- **User, group & field discovery**: Look up users by name or email, find assignment groups by name, and retrieve instance-specific valid choice values for any work-record field.\n- **Auth verification**: Confirm the authenticated identity and retrieve the caller's `sys_id` via `WhoAmI` for self-referential filters.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 to authenticate with ServiceNow. Refer to the Arcade auth provider docs for configuration details: [https://docs.arcade.dev/en/references/auth-providers/unknown](https://docs.arcade.dev/en/references/auth-providers/unknown).\n\n## Secrets\n\n- **`SERVICENOW_INSTANCE_URL`**: The base URL of your ServiceNow instance (e.g., `https://yourcompany.service-now.com`). This is not a generated API key — it is simply the root URL of the specific ServiceNow tenant the toolkit should target. You can find it in your browser's address bar when logged into your ServiceNow instance, or by asking your ServiceNow administrator. Every API call is routed to this URL, so it must point to the correct instance (dev, staging, or production). Set this value via the Arcade secrets system.\n\nSee the Arcade secrets documentation for how to store and reference secrets: [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}
