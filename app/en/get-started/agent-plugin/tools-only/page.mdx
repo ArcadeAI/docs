@@ -1,0 +1,43 @@
+---
+title: "Tools-only MCP server"
+description: "Connect any MCP client to the Arcade gateway to get tools for every app you connect, without the agent plugin's skills, commands, or subagent."
+---
+
+import { SignupLink } from "@/app/_components/analytics";
+
+# Tools-only MCP server
+
+The [agent plugin](/get-started/agent-plugin) ships more than tools: two skills, three commands, and the `arcade-operator` subagent, all of which need a client that loads [agent plugins](https://agent-plugins.org). Clients that do not, Claude Desktop among them, can still connect to the same gateway and get every tool on it.
+
+That is what this section covers. The gateway URL is:
+
+```text
+{{ARCADE_PLUGIN_GATEWAY_URL}}
+```
+
+## Install it
+
+- **[Claude Desktop](/get-started/agent-plugin/tools-only/claude-desktop)** installs from a downloadable bundle, so you never paste a URL.
+- **[Any other MCP client](/get-started/agent-plugin/tools-only/any-mcp-client)** takes the gateway URL directly. Cursor and VS Code also have one-click links.
+
+## What you give up
+
+Tools alone still do the work. What you lose is the part that helps your agent use them well:
+
+- **The skills** teach your agent to turn "reply to that thread" into the right sequence of tool calls, and to walk you through a team rollout when you ask about one.
+- **The commands** give you `/arcade-status`, `/arcade-connect`, and `/arcade-apps` for checking and managing connections without leaving your agent.
+- **The subagent** keeps tool search out of your main conversation, so it does not crowd out your actual work.
+
+If your client supports [plugins](https://agent-plugins.org), you should [install the full plugin](/get-started/agent-plugin) instead.
+
+## Sign in
+
+No API keys. You authorize twice: your client signs you in to Arcade with your <SignupLink linkLocation="docs:agent-plugin-tools-only">Arcade account</SignupLink> when it first connects to the gateway, and then each app gets authorized on its own the first time a task needs it. Approve that once per app and Arcade holds the token.
+
+Your tool calls, tokens, and secrets route through your own Arcade project, isolated from every other user of the same gateway. [Server-level and tool-level authorization](/learn/server-level-vs-tool-level-auth) covers the split in depth.
+
+## Next steps
+
+- [Install the agent plugin](/get-started/agent-plugin): one command for Cursor, Claude Code, VS Code, Copilot CLI, and Codex
+- [Connect to MCP clients](/get-started/mcp-clients): point a client at a gateway you control, with your own tool list
+- [From personal use to team rollout](/get-started/agent-plugin/team-rollout): what changes when a team depends on the workflow
