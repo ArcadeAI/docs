@@ -2,6 +2,16 @@ name: Update design system dependency
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: >-
+          Exact version to install, e.g. 7.9.2. Defaults to whatever the
+          registry currently tags as latest. The design-system publish
+          workflow passes the version it just published, so the bump lands on
+          that release rather than on whichever one `latest` resolves to when
+          this run happens to read the registry.
+        required: false
+        default: latest
 
 permissions:
   contents: write
@@ -29,8 +39,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Update @arcadeai/design-system to latest
-        run: pnpm install @arcadeai/design-system@latest
+      - name: Update @arcadeai/design-system
+        id: update
+        env:
+          VERSION: ${{ inputs.version || 'latest' }}
+        run: |
+          # --save-exact because every dependency here is pinned exactly and
+          # no save-prefix is configured, so the default would write a caret
+          # range and quietly loosen the pin.
+          pnpm install --save-exact "@arcadeai/design-system@${VERSION}"
+          # Report the version actually written to package.json, so the PR
+          # names a release rather than the `latest` alias.
+          installed=$(jq -r '.dependencies["@arcadeai/design-system"]' package.json)
+          echo "installed=${installed}" >> "$GITHUB_OUTPUT"
 
       - name: Check for changes
         id: check-changes
@@ -66,15 +87,16 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
           author: ${{ steps.app-token.outputs.committer }}
           committer: ${{ steps.app-token.outputs.committer }}
-          commit-message: "chore: update @arcadeai/design-system to latest"
-          title: "chore: update @arcadeai/design-system to latest"
+          commit-message: "chore: update @arcadeai/design-system to ${{ steps.update.outputs.installed }}"
+          title: "chore: update @arcadeai/design-system to ${{ steps.update.outputs.installed }}"
           body: |
-            This PR updates `@arcadeai/design-system` to the latest published version.
+            This PR updates `@arcadeai/design-system` to `${{ steps.update.outputs.installed }}`.
 
             It runs a design-system compatibility test gate before opening this PR.
             If that gate fails, the workflow stops and no PR is created.
 
             - Trigger: `${{ github.event_name }}`
+            - Requested version: `${{ inputs.version || 'latest' }}`
             - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           add-paths: |
             package.json
