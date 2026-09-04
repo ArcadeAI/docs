@@ -3,16 +3,16 @@ settings:
   minimumReleaseAge: 10080
 
 overrides:
-  # Force next's transitive postcss to the same safe version as the direct dep
-  postcss: ">=8.5.15"
-  # rule-engine pulls a vulnerable @xmldom/xmldom (XML injection / uncontrolled recursion)
-  "@xmldom/xmldom": ">=0.9.10"
+  # Force next's transitive postcss to the same safe version as the direct dep. 8.5.23 fixes the sourceMappingURL arbitrary .map file read (GHSA-6g55-p6wh-862q follow-up). Capped below 8.5.27 because later releases are still inside the 7-day minimumReleaseAge window above; raise the cap once they age out.
+  postcss: ">=8.5.26 <8.5.27"
+  # rule-engine pulls a vulnerable @xmldom/xmldom (XML injection / uncontrolled recursion). 0.9.12 fixes the EntityReference.nodeName fragment injection.
+  "@xmldom/xmldom": ">=0.9.12"
   # Force vite's transitive esbuild off the vulnerable dev-server file-read advisory (GHSA-g7r4-m6w7-qqqr)
   esbuild: "0.28.1"
   # Force form-data to a patched version across all transitive dependents (CVE-2026-12143, CRLF header injection)
   form-data: "4.0.6"
   # Force dompurify (via mermaid, posthog-js, swagger-ui-react) past mXSS advisories (CVE-2026-49459, CVE-2026-49458 fixed in 3.4.6; GHSA-76mc-f452-cxcm fixed in 3.4.7). Cap below 4 to stay within consumers' ^3 range.
-  dompurify: ">=3.4.7 <4"
+  dompurify: ">=3.4.13 <4"
   # Force protobufjs (via @opentelemetry/otlp-transformer) past prototype-pollution advisory (CVE-2026-54269, fixed in 7.6.3). Cap below 8 to stay within otlp-transformer's ^7 range.
   protobufjs: ">=7.6.3 <8"
   # Force axios (via @ory/client, @swagger-api/apidom-reference) past the absolute-URL redirect advisory (GHSA-gcfj-64vw-6mp9, fixed in 1.18.0). Cap below 2 to stay within consumers' ^1 range.
@@ -23,3 +23,9 @@ overrides:
   js-yaml: ">=4.3.1 <5"
   # Force @opentelemetry/core (via posthog-js) past the unbounded W3C Baggage allocation advisory (CVE-2026-54285, fixed in 2.8.0). Capped below 2.11.0 because that release is still inside the 7-day minimumReleaseAge window above; raise the cap once it ages out.
   "@opentelemetry/core": ">=2.8.0 <2.11.0"
+  # Force mermaid (via @theguild/remark-mermaid, streamdown) past the XY-chart and radar DoS loops, architecture/config prototype pollution, and sibling CSS injection (all fixed in 11.16.1). Cap below 12 to stay within consumers' ^11 range.
+  mermaid: ">=11.16.1 <12"
+  # Force nanoid (via postcss) past the infinite loops on zero and negative size (fixed in 3.3.18). Cap below 4 to stay within postcss's ^3 range.
+  nanoid: ">=3.3.18 <4"
+  # Force fflate (via posthog-js) past the unzipSync infinite loop on malformed ZIP64 archives (fixed in 0.4.9). Cap below 0.5 to stay within posthog-js's ^0.4.8 range.
+  fflate: ">=0.4.9 <0.5"
