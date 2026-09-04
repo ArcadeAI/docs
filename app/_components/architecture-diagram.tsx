@@ -213,7 +213,7 @@ function Zone({ x, w, label }: { x: number; w: number; label: string }) {
         y={ZONE.y}
       />
       <text
-        className="fill-brand-accent font-semibold"
+        className="fill-foreground font-semibold tracking-wide"
         fontSize={ZONE_LABEL_SIZE}
         x={x + ZONE_LABEL_INSET_X}
         y={ZONE.y + ZONE_LABEL_BASELINE_Y}
