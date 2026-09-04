@@ -44,10 +44,9 @@ const LINE_HEIGHT_RATIO = 1.3;
 /** Nudge that puts a line's optical center, not its baseline, on cy. */
 const BASELINE_OFFSET_RATIO = 0.34;
 
-/** Where a zone's label and its accent rule sit below the zone's top edge. */
+/** Where a zone's label sits below the zone's top edge. */
 const ZONE_LABEL_INSET_X = 18;
 const ZONE_LABEL_BASELINE_Y = 28;
-const ZONE_RULE_Y = 38;
 const ARROW = "url(#arcade-arrow)";
 const ARROW_ACCENT = "url(#arcade-arrow-accent)";
 
@@ -214,21 +213,13 @@ function Zone({ x, w, label }: { x: number; w: number; label: string }) {
         y={ZONE.y}
       />
       <text
-        className="fill-foreground font-semibold"
+        className="fill-brand-accent font-semibold"
         fontSize={ZONE_LABEL_SIZE}
         x={x + ZONE_LABEL_INSET_X}
         y={ZONE.y + ZONE_LABEL_BASELINE_Y}
       >
         {label}
       </text>
-      <rect
-        className="fill-brand-accent"
-        height={2}
-        rx={1}
-        width={24}
-        x={x + ZONE_LABEL_INSET_X}
-        y={ZONE.y + ZONE_RULE_Y}
-      />
     </g>
   );
 }
