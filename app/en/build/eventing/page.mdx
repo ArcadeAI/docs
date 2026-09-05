@@ -1,0 +1,589 @@
+---
+title: "Build event-driven integrations"
+description: "Produce, inspect, and deliver Arcade events with triggers, schedules, and signed webhooks"
+---
+
+import { Callout, Steps, Tabs } from "nextra/components";
+
+# Build event-driven integrations
+
+Use Arcade eventing when your application or agent should react after something happens. This guide follows one fact from its producer, through project event history, to a signed request at your receiver.
+
+## The eventing model
+
+The producer side is separate from the delivery side:
+
+```text
+trigger instance ─┐
+schedule ─────────┼─> Arcade event ─> webhook subscription ─> webhook delivery ─> receiver
+provider ingress ─┘
+```
+
+| Term | Responsibility | Source | Destination |
+| --- | --- | --- | --- |
+| Arcade event | Store | Trigger instance, schedule, or provider ingress | Project history |
+| Trigger type | Configure | Toolkit declaration | Trigger instance |
+| Trigger instance | Produce | Connected-account observation | Arcade event |
+| Schedule | Produce | Time rule | Arcade event |
+| Provider ingress | Produce | Verified provider callback | Arcade event |
+| Webhook subscription | Route | Matching Arcade event | Webhook delivery |
+| Webhook delivery | Deliver | Webhook subscription | Configured receiver |
+
+A trigger type is a reusable toolkit declaration. A trigger instance binds that type to one user, connection, and filter configuration. Poll trigger instances, such as Gmail, ask the provider for changes on a declared cadence. Provider ingress instead begins realtime processing when Arcade receives a verified provider callback; it does not run an Arcade polling loop.
+
+Provider ingress setup is specific to a realtime provider. Find supported providers in [Integrations](/resources/integrations); do not configure provider ingress as an outgoing webhook.
+
+A webhook subscription is outgoing: it selects Arcade events and routes them to your URL. A webhook delivery is one event-subscription pairing and owns its attempt history. Neither is an OAuth callback URL.
+
+## Choose your deployment origin
+
+The origin changes by deployment mode. The scoped REST path does not.
+
+| Mode | API origin | Dashboard origin |
+| --- | --- | --- |
+| Arcade Cloud | `https://api.arcade.dev` | `https://app.arcade.dev` |
+| Customer-managed | `$ARCADE_ENGINE_URL` | `$ARCADE_ENGINE_URL/dashboard` |
+| Local | `http://localhost:9099` | `http://localhost:9099/dashboard` |
+
+The examples default to Arcade Cloud. For customer-managed or local Arcade,
+replace the API origin with the value in the table.
+
+```bash
+export ARCADE_API_ORIGIN="https://api.arcade.dev"
+export ARCADE_ORG_ID="your-org-id"
+export ARCADE_PROJECT_ID="your-project-id"
+export ARCADE_API_KEY="your-api-key"
+export RECEIVER_URL="https://receiver.example.com/events"
+export SCOPE="$ARCADE_API_ORIGIN/v1/orgs/$ARCADE_ORG_ID/projects/$ARCADE_PROJECT_ID"
+```
+
+Every REST request below sends `Authorization: Bearer $ARCADE_API_KEY` and stays under `/v1/orgs/$ARCADE_ORG_ID/projects/$ARCADE_PROJECT_ID`.
+
+<Callout type="warning">
+Credentials for one organization and project cannot access another scope's resources. Keep the organization, project, and API key from the same selected project. Do not accept organization or project authority from an event payload.
+</Callout>
+
+The [Arcade API reference](/references/api) owns the complete request and response schemas. This guide keeps only the fields needed for the two journeys.
+
+## Verify the receiver before processing
+
+Arcade returns a webhook signing secret only when the subscription is created or its secret is rotated. It uses the `whsec_` prefix followed by padded standard base64. Store it as a secret and verify the exact raw request body before parsing JSON or checking for duplicates.
+
+The following Python 3.10+ example has no framework dependency. Call `receive` from your HTTP handler with the unchanged raw request bytes and lowercase or mixed-case headers, then use its return value as the HTTP response status.
+
+```python filename="receiver.py"
+import base64
+import hashlib
+import hmac
+import json
+import logging
+import sqlite3
+import time
+from collections.abc import Callable, Mapping
+
+TOLERANCE_SECONDS = 300
+SECRET_FORMAT_ERROR = (
+    "webhook secrets must use whsec_ followed by padded standard base64"
+)
+WebhookSecrets = list[str] | tuple[str, ...]
+logger = logging.getLogger(__name__)
+
+
+class VerificationError(Exception):
+    pass
+
+
+class ConfigurationError(Exception):
+    pass
+
+
+def verify_request(
+    body: bytes,
+    headers: Mapping[str, str],
+    secrets: WebhookSecrets,
+    now: int | None = None,
+) -> tuple[dict, str]:
+    if not isinstance(secrets, (list, tuple)) or any(
+        not isinstance(secret, str) for secret in secrets
+    ):
+        raise ConfigurationError("webhook secrets must be a list or tuple of strings")
+
+    normalized = {key.lower(): value for key, value in headers.items()}
+    try:
+        delivery_id = normalized["webhook-id"]
+        timestamp_text = normalized["webhook-timestamp"]
+        supplied = normalized["webhook-signature"].split()
+    except KeyError as error:
+        raise VerificationError(f"missing {error.args[0]}") from error
+
+    try:
+        timestamp = int(timestamp_text)
+    except ValueError as error:
+        raise VerificationError("invalid webhook-timestamp") from error
+
+    verification_time = int(time.time()) if now is None else now
+    if abs(verification_time - timestamp) > TOLERANCE_SECONDS:
+        raise VerificationError("webhook-timestamp outside tolerance")
+
+    signed = (
+        delivery_id.encode()
+        + b"."
+        + timestamp_text.encode()
+        + b"."
+        + body
+    )
+    keys: list[bytes] = []
+    for secret in secrets:
+        if not secret.startswith("whsec_"):
+            raise ConfigurationError(SECRET_FORMAT_ERROR)
+        try:
+            key = base64.b64decode(secret.removeprefix("whsec_"), validate=True)
+        except ValueError as error:
+            raise ConfigurationError(SECRET_FORMAT_ERROR) from error
+        if not key:
+            raise ConfigurationError(SECRET_FORMAT_ERROR)
+        keys.append(key)
+    if not keys:
+        raise ConfigurationError("no webhook secrets configured")
+
+    matched = False
+    for key in keys:
+        digest = hmac.new(key, signed, hashlib.sha256).digest()
+        expected = b"v1," + base64.b64encode(digest)
+        for candidate in supplied:
+            try:
+                encoded = candidate.encode("ascii")
+            except UnicodeEncodeError:
+                continue
+            matched |= hmac.compare_digest(expected, encoded)
+    if not matched:
+        raise VerificationError("invalid webhook-signature")
+
+    try:
+        event = json.loads(body)
+    except json.JSONDecodeError as error:
+        raise VerificationError("invalid JSON") from error
+    if not isinstance(event, dict):
+        raise VerificationError("event must be a JSON object")
+    return event, delivery_id
+
+
+class SQLiteInbox:
+    """A durable idempotency inbox for one receiver process."""
+
+    def __init__(self, path: str):
+        self.path = path
+        connection = sqlite3.connect(path, timeout=30, isolation_level=None)
+        try:
+            connection.execute(
+                """CREATE TABLE IF NOT EXISTS webhook_inbox (
+                       webhook_id TEXT PRIMARY KEY,
+                       received_at INTEGER NOT NULL
+                   )"""
+            )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def handle(
+        self,
+        delivery_id: str,
+        event: dict,
+        handler: Callable[[sqlite3.Connection, dict], None],
+    ) -> bool:
+        connection = sqlite3.connect(self.path, timeout=30, isolation_level=None)
+        try:
+            connection.execute("BEGIN IMMEDIATE")
+            inserted = connection.execute(
+                """INSERT OR IGNORE INTO webhook_inbox(webhook_id, received_at)
+                   VALUES (?, ?)""",
+                (delivery_id, int(time.time())),
+            ).rowcount
+            if inserted == 0:
+                connection.commit()
+                return False
+            handler(connection, event)
+            connection.commit()
+            return True
+        except Exception:
+            connection.rollback()
+            raise
+        finally:
+            connection.close()
+
+
+def receive(
+    body: bytes,
+    headers: Mapping[str, str],
+    subscription_secrets: WebhookSecrets,
+    inbox: SQLiteInbox,
+    authorize: Callable[[dict], bool],
+    handler: Callable[[sqlite3.Connection, dict], None],
+    now: int | None = None,
+) -> int:
+    try:
+        event, delivery_id = verify_request(body, headers, subscription_secrets, now)
+    except VerificationError:
+        return 400
+    except ConfigurationError:
+        return 500
+
+    try:
+        # Build this callback from server-side subscription configuration. Do not
+        # accept event types or tenant IDs merely because they appear in the payload.
+        if not authorize(event):
+            return 403
+        inbox.handle(delivery_id, event, handler)
+    except Exception:
+        logger.exception("webhook handler failed")
+        return 500
+    return 204
+```
+
+The inbox claim and your business writes must share one transaction. If the handler fails, both roll back and the non-2xx response lets Arcade retry. A valid duplicate returns `204` without rerunning the handler. During secret rotation, pass both active secrets; remove the retired secret after the grace period.
+
+Resolve one subscription from your HTTP route before calling `receive`, and pass only that subscription's current and previous secrets as `subscription_secrets`. Build `authorize` from that server-side subscription: allow its configured event types and, when the event schema carries tenant identifiers, compare them with the route's organization and project. The payload itself is not authority. Arcade event envelopes use `type`, `timestamp`, and `data`:
+
+```json
+{
+  "type": "tenant.audit_recorded",
+  "timestamp": "2026-08-28T21:00:00Z",
+  "data": {"organization_id":"org_123","project_id":"proj_123"}
+}
+```
+
+An authorization rejection returns `403`, so Arcade retries and eventually records a dead delivery; use that behavior to surface a mis-scoped subscription rather than silently dropping it. On an otherwise-valid request, any malformed current or previous secret makes the receiver return `500`, including during rotation. Configure a request-body size limit in the HTTP framework before reading the raw body.
+
+<Callout type="warning">
+Use a persistent store in production. Keep each recorded `webhook-id` for at least Arcade's configured event-retention period (90 days by default), plus operational margin. Manual retry and recovery reuse the original delivery ID after automatic attempts end, so sizing the inbox only to the 27-hour automatic retry span can repeat business side effects.
+</Callout>
+
+The sample records `received_at` for that cleanup policy but does not schedule the cleanup job for you. SQLite serializes these write transactions, so keep the handler's transactional work short and local; use a concurrent durable inbox for production receivers with parallel or network-bound work.
+
+## Try a scheduled event
+
+A schedule is a configurable producer; every fire creates a separate retained Arcade event with its own delivery history. Use an interval for this check.
+
+<Tabs items={["Dashboard", "REST API"]}>
+  <Tabs.Tab>
+
+<Steps>
+
+### Create the outgoing webhook
+
+Open the selected project's **Webhooks** page, create a URL endpoint for your receiver, and set **Events to send** to `demo.follow_up`. Copy the signing secret when it appears.
+
+### Create the schedule
+
+Open **Schedules**, create `Demo follow-up`, choose an interval of 60 seconds, set the event type to `demo.follow_up`, and use this payload:
+
+```json
+{"customer_id":"demo-123","action":"follow_up"}
+```
+
+Record the schedule ID and **Next fire** time.
+
+### Inspect the event and delivery
+
+After the due time, poll **Events** for up to 120 seconds and select the row whose source is that schedule. The event detail shows the subscription, delivery ID, status, and attempts. Confirm the delivery succeeds and your receiver records a signature-valid request with the same `webhook-id`.
+
+### Clean up
+
+Delete the demo schedule and webhook subscription. Return to **Events** and confirm the event is still present.
+
+</Steps>
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Create the subscription and save the returned `id` and one-time `secret`:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/webhooks" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data "{\"url\":\"$RECEIVER_URL\",\"event_types\":[\"demo.follow_up\"]}"
+
+export WEBHOOK_ID="<id from the response>"
+export WEBHOOK_SECRET="<one-time secret from the response>"
+```
+
+Load `WEBHOOK_SECRET` into this receiver route's secret store and pass `[WEBHOOK_SECRET]` as `subscription_secrets` to `receive`. Do not combine secrets from unrelated subscriptions.
+
+Create a schedule and save its `id` and `next_fire_at`:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/schedules" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{
+    "name":"Demo follow-up",
+    "event_type":"demo.follow_up",
+    "interval_seconds":60,
+    "payload":{"customer_id":"demo-123","action":"follow_up"}
+  }'
+
+export SCHEDULE_ID="<id from the response>"
+```
+
+After `next_fire_at`, poll for up to 120 seconds and list only that schedule's events. Save the returned event ID, then inspect that event and its delivery attempts:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/events?source_type=schedule&source_id=$SCHEDULE_ID"
+
+export EVENT_ID="<id from the event list>"
+
+curl --fail-with-body --silent --show-error \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/events/$EVENT_ID"
+```
+
+Delete the resources, then repeat `GET /events/{event_id}` to confirm the retained event remains:
+
+```bash
+curl --fail-with-body --silent --show-error --request DELETE \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/schedules/$SCHEDULE_ID"
+
+curl --fail-with-body --silent --show-error --request DELETE \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/webhooks/$WEBHOOK_ID"
+
+curl --fail-with-body --silent --show-error \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/events/$EVENT_ID"
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+## Try a filtered Gmail trigger
+
+The `gmail.message.received` trigger declares a 60-second polling interval. Its optional filters are `subject_contains`, `from`, and `to`; `to` matches both To and Cc recipients. Filters inspect message metadata, not message bodies.
+
+Before starting, connect the Gmail account for the user who owns the trigger. Create a webhook subscription for `gmail.message.received` and keep the receiver serving. For REST, use the webhook request above with `gmail.message.received` as its event type, then set `WEBHOOK_ID` to the returned ID.
+
+<Tabs items={["Dashboard", "REST API"]}>
+  <Tabs.Tab>
+
+<Steps>
+
+### Create the trigger
+
+Open **Triggers**, choose **Email received**, and choose **Myself** for an initial test. Enter a run-unique value such as `CUSTOMER-20260827-1048` in **Subject contains**, then create the trigger.
+
+Wait for its first successful poll before sending the test messages. Send one message whose subject contains the token and one whose subject does not.
+
+### Inspect the result
+
+Open the trigger's **View delivery history** sheet. After a completed poll newer than both messages, the matching Gmail message ID appears in an event and the non-matching ID does not. Open the event to confirm its linked delivery succeeded, then check the same `webhook-id` at your receiver.
+
+### Clean up
+
+Delete the trigger and its demo webhook subscription. The emitted event remains in **Events** until event retention removes it.
+
+</Steps>
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Set the connected user's stable ID and the connection to observe.
+
+```bash
+export ARCADE_USER_ID="connected-user@example.com"
+export CONNECTION_ID="<connection_id from Connected users>"
+export SUBJECT_TOKEN="CUSTOMER-20260827-1048"
+```
+
+Create the trigger and save its `id`:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/triggers" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data "{\"type_slug\":\"gmail.message.received\",\"user_id\":\"$ARCADE_USER_ID\",\"connection_id\":\"$CONNECTION_ID\",\"config\":{\"subject_contains\":\"$SUBJECT_TOKEN\"}}"
+
+export TRIGGER_ID="<id from the response>"
+```
+
+After the first successful poll, send matching and non-matching messages. Inspect the trigger event list, event payload, and linked deliveries:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/triggers/$TRIGGER_ID/events"
+
+export EVENT_ID="<id from the trigger event list>"
+
+curl --fail-with-body --silent --show-error \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/triggers/$TRIGGER_ID/events/$EVENT_ID"
+```
+
+Delete the trigger and webhook subscription, then confirm the event remains:
+
+```bash
+curl --fail-with-body --silent --show-error --request DELETE \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/triggers/$TRIGGER_ID"
+
+curl --fail-with-body --silent --show-error --request DELETE \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/webhooks/$WEBHOOK_ID"
+
+curl --fail-with-body --silent --show-error \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/events/$EVENT_ID"
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+## Connect a customer-owned realtime provider
+
+Provider ingress lets agent developers route signed Slack or GitHub events into the existing trigger runtime without operating a separate receiver. Arcade supports one realtime trigger type per project-owned OAuth app for this release.
+
+Before setup, you need:
+
+- A Slack or GitHub OAuth app in the selected Arcade project
+- An active connected account for that app
+- A current realtime trigger type: `slack.message.received` or `github.push.received`
+- A provider-reachable HTTPS origin for the Arcade Engine
+
+Arcade Cloud supplies the public origin. For customer-managed or local deployments, your platform operator must expose the Arcade Engine through HTTPS and set `api.public_host` to the public hostname. Private-only deployments must use polling triggers.
+
+<Callout type="warning">
+The provider callback receives events from Slack or GitHub. It is not the OAuth redirect URI and it is not an outgoing webhook subscription. Arcade does not create the provider-side event subscription or webhook for you.
+</Callout>
+
+<Tabs items={["Dashboard", "REST API"]}>
+  <Tabs.Tab>
+
+<Steps>
+
+### Configure provider ingress
+
+Open **Auth providers**, select your Slack or GitHub app, and find **Provider ingress**. Choose the realtime trigger type and the connected account that Arcade should use for trigger runs.
+
+For Slack, enter the app's signing secret. For GitHub, choose whether the webhook belongs to a GitHub App installation, repository, or organization, then enter the webhook secret that you will use in GitHub.
+
+Select **Configure ingress**, then copy the provider callback URL. Arcade encrypts the secret and does not show it again.
+
+### Configure the provider
+
+For Slack, paste the provider callback into **Event Subscriptions > Request URL** and subscribe to message events. Slack sends a signed URL-verification challenge.
+
+For GitHub, paste the provider callback into **Payload URL**, choose `application/json`, use the same webhook secret, and subscribe to push events. The target kind in Arcade must match where you create the webhook.
+
+### Confirm the first delivery
+
+Send a matching Slack message or GitHub push. Return to **Provider ingress** and confirm that **Latest verified delivery** has a timestamp and **Current signing secret** is **Verified**.
+
+The first matching event pins the Slack workspace or selected GitHub target. A signed event from another target is acknowledged but does not enter Arcade event routing.
+
+</Steps>
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Read the provider ingress state to discover current eligible types:
+
+```bash
+export AUTH_PROVIDER_ID="<ap_... from the auth provider>"
+export CONNECTION_ID="<connection_id from Connected users>"
+
+curl --fail-with-body --silent --show-error \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  "$SCOPE/auth_providers/$AUTH_PROVIDER_ID/ingress"
+```
+
+Configure Slack ingress with the current type and version returned by that read:
+
+```bash
+export PROVIDER_SIGNING_SECRET="<Slack app signing secret>"
+
+curl --fail-with-body --silent --show-error \
+  --request PUT "$SCOPE/auth_providers/$AUTH_PROVIDER_ID/ingress" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data "{\"type\":\"slack.message.received\",\"type_version\":\"1\",\"connection_id\":\"$CONNECTION_ID\",\"signing_secret\":\"$PROVIDER_SIGNING_SECRET\"}"
+```
+
+The response contains `callback_url` but never contains the signing secret. For GitHub, use `github.push.received` and include `external_scope_kind` with `installation`, `repository`, or `organization`.
+
+Paste `callback_url` into the provider settings described in the Dashboard tab. After the provider sends a signed challenge, ping, or matching event, repeat the GET request and inspect `last_verified_at` and `current_secret_verified`.
+
+To change only the connected account, send the stored type and version with the new `connection_id` and `"preserve_signing_secret":true`. To rotate the secret, send `signing_secret` instead. Both operations keep the callback URL and pinned provider target.
+
+Remove provider ingress explicitly before deleting the auth provider or changing its Slack or GitHub classification:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request DELETE "$SCOPE/auth_providers/$AUTH_PROVIDER_ID/ingress" \
+  --header "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+Removal keeps the OAuth app, connected accounts, trigger instances, Arcade events, and outgoing webhook subscriptions.
+
+  </Tabs.Tab>
+</Tabs>
+
+### Recover provider ingress
+
+- **Rotate a secret:** pause delivery in Slack or GitHub, update the provider and Arcade with the same secret, resume delivery, then send a new event. Do not set the Arcade auth provider to Disabled for this cutover. That setting acknowledges and drops deliveries instead of buffering them.
+- **Replace a connected account:** choose another active account for the same provider and project. Matching deliveries return `503` while no usable account is selected so the provider can retry.
+- **Fix a public host:** restore the provider-reachable HTTPS origin. Existing configurations can still rotate a secret or change an account while the host check reports `public_host_required`, and a previously copied callback continues to route.
+- **Reset a pinned target:** remove and recreate provider ingress. Slack Enterprise Grid customers need one provider configuration per workspace. GitHub customers must recreate ingress to change the installation, repository, or organization target kind after the first event pins it.
+
+Provider ingress accepts request bodies up to 5 MiB and suppresses a provider redelivery for seven days within one configuration lifetime. Removing and recreating ingress starts a new configuration lifetime. Deliveries already staged before removal continue through normalization and event routing from their stored snapshot.
+
+<Callout type="warning">
+Arcade Cloud applies edge controls to the public callback. Before exposing a customer-managed or local deployment, configure request-rate and byte-rate limits at your reverse proxy or load balancer. Keep the callback route public, but do not expose private management endpoints through that exception.
+</Callout>
+
+## Operate each resource
+
+Every route below is relative to the project-scoped `$SCOPE`. The Dashboard uses the same public project resources. Recovery and replay belong to the webhook subscription: recovery requeues existing dead deliveries; replay creates deliveries for retained matching events that subscription never received.
+
+| Resource | Dashboard | REST API |
+| --- | --- | --- |
+| Trigger instance | Inspect, enable, disable, delete | `GET /triggers/{trigger_id}`, `PATCH /triggers/{trigger_id}`, `DELETE /triggers/{trigger_id}`, `GET /triggers/{trigger_id}/events`, `GET /triggers/{trigger_id}/events/{event_id}` |
+| Schedule | Inspect, enable, disable, delete | `GET /schedules/{schedule_id}`, `PATCH /schedules/{schedule_id}`, `DELETE /schedules/{schedule_id}` |
+| Arcade event | List and inspect delivery traces | `GET /events`, `GET /events/{event_id}` |
+| Webhook subscription | Inspect, enable, disable, rotate signing secret, delete, recover, replay | `GET /webhooks/{webhook_id}`, `PATCH /webhooks/{webhook_id}`, `POST /webhooks/{webhook_id}/rotate_secret`, `DELETE /webhooks/{webhook_id}`, `POST /webhooks/{webhook_id}/recover_deliveries`, `POST /webhooks/{webhook_id}/replay_missing` |
+| Webhook delivery | Inspect and retry a dead delivery | `GET /webhooks/{webhook_id}/deliveries/{delivery_id}`, `POST /webhooks/{webhook_id}/deliveries/{delivery_id}/retry` |
+
+Deleting a trigger, schedule, or webhook subscription does not delete events already retained in project history.
+
+Recovery and replay take an RFC 3339 `since` timestamp in the JSON body:
+
+```bash
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/webhooks/$WEBHOOK_ID/recover_deliveries" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{"since":"2026-08-28T00:00:00Z"}'
+
+curl --fail-with-body --silent --show-error \
+  --request POST "$SCOPE/webhooks/$WEBHOOK_ID/replay_missing" \
+  --header "Authorization: Bearer $ARCADE_API_KEY" \
+  --header "Content-Type: application/json" \
+  --data '{"since":"2026-08-28T00:00:00Z"}'
+```
+
+## Reliability boundaries
+
+- **Schedule identity:** Arcade publishes one Arcade event per scheduled fire, keyed by schedule ID and scheduled fire time. A schedule and the events it publishes have separate lifecycles.
+- **Schedule timing:** A due schedule is published no later than 60 seconds after its due time. The local 120-second delivery observation in this guide is a readiness check, not a production delivery-latency guarantee.
+- **Delivery:** Outgoing webhook delivery is at-least-once. Arcade makes 8 attempts: immediately, then after 5 seconds, 5 minutes, 30 minutes, 2 hours, 5 hours, 10 hours, and 10 hours. The configured delay from attempt 1 through attempt 8 totals 27 hours, 35 minutes, and 5 seconds.
+- **Identity:** One delivery keeps the same `webhook-id` across automatic retries, manual retry, and recovery. That value is also the `{delivery_id}` used by the delivery detail and retry APIs. Different events, and one event delivered through different subscriptions, receive different IDs; if two subscriptions share a receiver, deduplicate each delivery independently.
+- **Signatures:** Arcade signs every retry with a fresh `webhook-timestamp`, so a short receiver tolerance remains compatible with the full retry schedule. Verify the raw body, `webhook-id`, and `webhook-timestamp` before deduplication. The sample receiver chooses a 300-second clock-skew tolerance: it accepts timestamps through 300 seconds in either direction and rejects timestamps 301 seconds away.
+- **Retention:** Project events are retained for 90 days by default. An event exactly at the retention cutoff remains replayable; an older event is unavailable for replay.
+- **Recovery and replay:** `since` is inclusive. Recovery selects existing failed deliveries at or after the boundary. Replay selects retained matching events at or after the boundary that were never delivered to that subscription.
+
+When a delivery is dead, retry that delivery. When several existing deliveries failed, recover them from a chosen time. When a subscription was absent or disabled, replay retained missing events from a chosen time.
