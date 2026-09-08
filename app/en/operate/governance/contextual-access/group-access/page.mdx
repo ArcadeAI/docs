@@ -52,7 +52,7 @@ One configuration uses one backend. All three are read-only integrations that ne
 | Microsoft Entra ID | Directory (tenant) ID, application (client) ID, client secret | The `GroupMember.Read.All` application permission, with administrator consent granted |
 | SailPoint Identity Security Cloud | Tenant URL, client ID, client secret | See the SailPoint section below, because the rights that sound correct are not the ones that work |
 
-With Okta, a rule's required groups are group names. With Entra ID they are group names or group object IDs, which is a distinction worth reading below. With SailPoint, they are access profile or role names.
+With Okta, a rule's required groups are group names. With Entra ID they are group names or group object IDs, which is a distinction worth reading below. With SailPoint, they are role names or access profile IDs, which is also covered below.
 
 ### Naming an Entra group: name or object ID
 
@@ -85,7 +85,17 @@ SailPoint support has constraints the other two backends do not.
 
 **Identity Security Cloud only.** IdentityIQ is a separate product with a different API surface and is not supported.
 
-**Rules match access profile and role names.** Not group names, and not raw entitlements or identity attributes. A rule requiring `Finance-Analyst` is satisfied when the caller holds an access profile or a role by that name.
+**Rules match roles and access profiles, not groups.** Raw entitlements and identity attributes do not count either. How you name each one differs:
+
+| Rule value | Matched against |
+| --- | --- |
+| `Finance-Approver` | a role's name |
+| a role's ID | that role |
+| an access profile's ID | that access profile |
+
+**An access profile has to be named by its ID.** SailPoint's access-items response documents `displayName` as the *role* display name on a role, but as *the identity's* display name on an access profile, and it carries no access profile name at all, so a profile-name rule has nothing to match against. Copy the ID from the access profile's page in Identity Security Cloud.
+
+Resolving profile names to IDs for you would mean reading `/v3/access-profiles`, which needs `idn:access-profiles:read`. The section below deliberately excludes that right, so the rule carries the ID instead.
 
 **Only provisioned access counts.** Access that has been requested or approved but not yet provisioned does not satisfy a rule. This is deliberate: a rule should reflect what someone actually has.
 
