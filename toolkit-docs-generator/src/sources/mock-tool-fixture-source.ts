@@ -1,9 +1,7 @@
 /**
- * Mock Engine API Source
+ * Mock tool fixture source
  *
- * This source loads tool definitions from JSON fixtures, simulating
- * what the real Engine API will return. Replace with EngineApiSource
- * when the API endpoint is ready.
+ * Loads tool definitions from JSON fixtures for local development and tests.
  */
 import { readFile } from "fs/promises";
 import type { ToolDefinition } from "../types/index";
@@ -11,22 +9,16 @@ import { normalizeId } from "../utils/fp";
 import type { FetchOptions, ToolDataSource } from "./internal";
 import { parseToolMetadataResponse } from "./tool-metadata-schema";
 
-export interface MockEngineApiConfig {
+export interface MockToolFixtureSourceConfig {
   /** Path to the JSON fixture file */
   fixtureFilePath: string;
 }
 
-/**
- * Mock implementation of IToolDataSource that loads from JSON fixtures
- *
- * Use this until the real Engine API endpoint is available.
- * The fixture format matches the expected API response schema.
- */
-export class MockEngineApiSource implements ToolDataSource {
+export class MockToolFixtureSource implements ToolDataSource {
   private readonly fixtureFilePath: string;
   private cachedData: ToolDefinition[] | null = null;
 
-  constructor(config: MockEngineApiConfig) {
+  constructor(config: MockToolFixtureSourceConfig) {
     this.fixtureFilePath = config.fixtureFilePath;
   }
 
@@ -93,10 +85,6 @@ export class MockEngineApiSource implements ToolDataSource {
   }
 }
 
-// ============================================================================
-// Factory
-// ============================================================================
-
-export const createMockEngineApiSource = (
+export const createMockToolFixtureSource = (
   fixtureFilePath: string
-): ToolDataSource => new MockEngineApiSource({ fixtureFilePath });
+): ToolDataSource => new MockToolFixtureSource({ fixtureFilePath });

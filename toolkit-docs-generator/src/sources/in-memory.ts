@@ -19,7 +19,7 @@ import type { FetchOptions, MetadataSource, ToolDataSource } from "./internal";
 // ============================================================================
 
 /**
- * In-memory implementation of IToolDataSource for testing
+ * In-memory implementation of ToolDataSource for testing
  *
  * Use this instead of mocking the interface. Simply provide
  * realistic test data in the constructor.
@@ -89,7 +89,7 @@ export class InMemoryToolDataSource implements ToolDataSource {
 // ============================================================================
 
 /**
- * In-memory implementation of IMetadataSource for testing
+ * In-memory implementation of MetadataSource for testing
  *
  * @example
  * ```typescript

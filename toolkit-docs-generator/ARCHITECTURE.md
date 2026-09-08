@@ -67,8 +67,6 @@ it. The sidebar sync writes navigation only, and never touches toolkit JSON.
 ### Data sources
 
 - `PublicCatalogApiSource` fetches tool metadata from the Engine public catalog API.
-- `EngineApiSource` fetches tool metadata from the authenticated Engine API (deprecated).
-- `ArcadeApiSource` fetches tool metadata from the Arcade API (deprecated).
 - `DesignSystemMetadataSource` loads toolkit metadata from `@arcadeai/design-system`.
 - `MarkdownCurationSource` compiles documentation chunks, import declarations,
   and subpages from the configured curation directory. When configured, that
@@ -140,7 +138,6 @@ public, read-only values configured through these Vercel environment variables:
 ## Key files
 
 - `src/sources/public-catalog-api.ts` — tool metadata from Engine public catalog
-- `src/sources/engine-api.ts` — tool metadata from authenticated Engine API (deprecated)
 - `src/sources/markdown-curation.ts` — Markdown and MDX curation compiler
   ([format reference](CURATION.md))
 - `src/sources/toolkit-data-source.ts` — unified data source

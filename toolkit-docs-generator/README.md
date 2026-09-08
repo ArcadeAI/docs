@@ -36,7 +36,7 @@ It runs these steps:
 
 Required secrets:
 
-- `ENGINE_API_URL`
+- `ENGINE_API_URL` (API host for the public catalog; rename to `ARCADE_API_URL` in a follow-up)
 - `ANTHROPIC_API_KEY` for examples, summaries, and secret-coherence edits
 
 Optional secrets:
@@ -107,8 +107,7 @@ The summary generator is configured to **never list OAuth scopes** in the genera
 ```bash
 pnpm dlx tsx src/cli/index.ts generate \
   --providers "Github" \
-  --tool-metadata-url "$ENGINE_API_URL" \
-  --tool-metadata-key "$ENGINE_API_KEY" \
+  --api-url "$ARCADE_API_URL" \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -138,8 +137,7 @@ Generate a single toolkit:
 ```bash
 pnpm dlx tsx src/cli/index.ts generate \
   --providers "Github:1.0.0" \
-  --tool-metadata-url "$ENGINE_API_URL" \
-  --tool-metadata-key "$ENGINE_API_KEY" \
+  --api-url "$ARCADE_API_URL" \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -152,8 +150,7 @@ Generate all toolkits:
 pnpm dlx tsx src/cli/index.ts generate \
   --all \
   --skip-unchanged \
-  --tool-metadata-url "$ENGINE_API_URL" \
-  --tool-metadata-key "$ENGINE_API_KEY" \
+  --api-url "$ARCADE_API_URL" \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -165,8 +162,7 @@ Generate without LLM output:
 ```bash
 pnpm dlx tsx src/cli/index.ts generate \
   --providers "Asana:0.1.3" \
-  --tool-metadata-url "$ENGINE_API_URL" \
-  --tool-metadata-key "$ENGINE_API_KEY" \
+  --api-url "$ARCADE_API_URL" \
   --skip-examples \
   --skip-summary \
   --output data/toolkits
@@ -231,8 +227,7 @@ deletes it and rebuilds `index.json`.
 - `--all` generate all toolkits
 - `--providers` generate a subset of toolkits
 - `--skip-unchanged` only write changed toolkits
-- `--api-source` select `public-catalog` (default with `ENGINE_API_URL`), `tool-metadata`
-  (deprecated; requires `ENGINE_API_KEY`), `list-tools` (deprecated), or `mock`
+- `--api-source` select `public-catalog` (default with `ARCADE_API_URL` or `ENGINE_API_URL`) or `mock`
 - `--previous-output` compare against a previous output directory
 - `--custom-sections` load an authoritative Markdown/MDX curation directory
 - `--skip-examples`, `--skip-summary` disable LLM steps

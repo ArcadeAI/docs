@@ -30,8 +30,9 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("--preserve-last-known-good");
   expect(workflowContents).toContain("--verbose");
   expect(workflowContents).toContain("--api-source public-catalog");
-  expect(workflowContents).toContain("--tool-metadata-url");
+  expect(workflowContents).toContain("--api-url");
   expect(workflowContents).not.toContain("--tool-metadata-key");
+  expect(workflowContents).not.toContain("--tool-metadata-url");
   expect(workflowContents).toContain("--llm-provider anthropic");
   expect(workflowContents).toContain("--llm-model");
   expect(workflowContents).toContain("--llm-api-key");

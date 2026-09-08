@@ -56,9 +56,6 @@ export interface SecretEditGenerator {
   fillCoverageGaps: (input: SecretCoverageEditInput) => Promise<string>;
 }
 
-/** @deprecated Use {@link SecretEditGenerator} */
-export type ISecretEditGenerator = SecretEditGenerator;
-
 const DEFAULT_SYSTEM_PROMPT =
   "You are a careful documentation editor for the Arcade MCP toolkit docs. " +
   "You make the smallest possible change that satisfies the request. " +

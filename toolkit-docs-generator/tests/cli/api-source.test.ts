@@ -1,5 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { resolveApiSource } from "../../src/cli/api-source";
+import {
+  resolveApiBaseUrlFromEnv,
+  resolveApiSource,
+} from "../../src/cli/api-source";
 
 const ORIGINAL_ENV = { ...process.env };
 
@@ -18,8 +21,6 @@ describe("resolveApiSource", () => {
     // biome-ignore lint/performance/noDelete: Required to actually remove env vars
     delete process.env.ENGINE_API_URL;
     // biome-ignore lint/performance/noDelete: Required to actually remove env vars
-    delete process.env.ARCADE_API_KEY;
-    // biome-ignore lint/performance/noDelete: Required to actually remove env vars
     delete process.env.ARCADE_API_URL;
   });
 
@@ -34,37 +35,33 @@ describe("resolveApiSource", () => {
     expect(resolveApiSource({ apiSource: "public" })).toBe("public-catalog");
   });
 
-  it("returns list-tools only when explicitly requested", () => {
-    expect(resolveApiSource({ apiSource: "list-tools" })).toBe("list-tools");
+  it("returns mock when explicitly requested", () => {
+    expect(resolveApiSource({ apiSource: "mock" })).toBe("mock");
   });
 
-  it("accepts engine as an alias for tool-metadata", () => {
-    expect(resolveApiSource({ apiSource: "engine" })).toBe("tool-metadata");
-  });
-
-  it("rejects unsupported aliases", () => {
-    expect(() => resolveApiSource({ apiSource: "arcade" })).toThrow(
-      'Invalid --api-source "arcade"'
+  it("rejects removed legacy sources", () => {
+    expect(() => resolveApiSource({ apiSource: "tool-metadata" })).toThrow(
+      'Invalid --api-source "tool-metadata"'
+    );
+    expect(() => resolveApiSource({ apiSource: "list-tools" })).toThrow(
+      'Invalid --api-source "list-tools"'
     );
   });
 
-  it("auto-selects public-catalog when only the Engine URL is set", () => {
-    process.env.ENGINE_API_URL = "https://api.arcade.dev";
+  it("auto-selects public-catalog when an API URL is set", () => {
+    process.env.ARCADE_API_URL = "https://api.arcade.dev";
 
     expect(resolveApiSource({})).toBe("public-catalog");
   });
 
-  it("auto-selects tool-metadata when Engine credentials exist", () => {
-    process.env.ENGINE_API_KEY = "test-key";
+  it("falls back to ENGINE_API_URL for the API host", () => {
     process.env.ENGINE_API_URL = "https://api.arcade.dev";
 
-    expect(resolveApiSource({})).toBe("tool-metadata");
+    expect(resolveApiBaseUrlFromEnv()).toBe("https://api.arcade.dev");
+    expect(resolveApiSource({})).toBe("public-catalog");
   });
 
-  it("does not auto-select list-tools from Arcade credentials", () => {
-    process.env.ARCADE_API_KEY = "test-key";
-    process.env.ARCADE_API_URL = "https://api.arcade.dev";
-
+  it("defaults to mock when no API URL is configured", () => {
     expect(resolveApiSource({})).toBe("mock");
   });
 });
