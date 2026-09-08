@@ -50,6 +50,20 @@ dashboard and in CI secrets. The workflows need:
 | `ALGOLIA_CRAWLER_ID` | Variable | Crawler dashboard URL |
 | `ALGOLIA_CRAWLER_USER_ID` | Secret | Crawler → API credentials |
 | `ALGOLIA_CRAWLER_API_KEY` | Secret | Crawler → API credentials |
+| `ALGOLIA_ADMIN_API_KEY` | Secret | Algolia dashboard → API Keys → Admin API Key |
+
+### Why `ALGOLIA_ADMIN_API_KEY` is needed
+
+The crawler's `initialIndexSettings` block is only applied when the crawler
+*creates* an index. Once the production index exists, later edits to that
+block (for example, tuning `removeWordsIfNoResults` to relax matching for
+long agent-style queries) never reach the live index through the crawler
+API alone, and the no-result rate stays elevated for those queries.
+
+`scripts/sync-crawler-config.ts` therefore also pushes `initialIndexSettings`
+to each live index via the Search API's `PUT /1/indexes/{name}/settings`
+using this key. Without the key the config still syncs and a reindex still
+runs, but the index-settings step is skipped with a warning.
 
 The public search credentials used by the frontend widget
 (`app/_components/algolia-search.tsx`) are separate `NEXT_PUBLIC_ALGOLIA_*`

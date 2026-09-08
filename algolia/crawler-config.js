@@ -63,6 +63,10 @@ export const crawlerConfig = {
       },
     },
   ],
+  // The crawler applies `initialIndexSettings` only when it *creates* an
+  // index, so edits below never reach an existing production index by
+  // themselves. `scripts/sync-crawler-config.ts` also pushes these via the
+  // Search API when ALGOLIA_ADMIN_API_KEY is set; see algolia/README.md.
   initialIndexSettings: {
     docs_arcade_dev_bjb8pbsq9t_docsearch: {
       distinct: true,
