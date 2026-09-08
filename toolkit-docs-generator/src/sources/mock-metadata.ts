@@ -30,7 +30,7 @@ export interface MockMetadataConfig {
 }
 
 /**
- * Mock implementation of IMetadataSource that loads from JSON fixtures
+ * Mock implementation of MetadataSource that loads from JSON fixtures
  */
 export class MockMetadataSource implements MetadataSource {
   private readonly fixtureFilePath: string;

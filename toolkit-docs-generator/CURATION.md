@@ -251,8 +251,7 @@ generation PR, or generate that one toolkit with Engine credentials and run
 ```bash
 ../node_modules/.bin/tsx src/cli/index.ts generate \
   --providers "GoogleFlights" \
-  --tool-metadata-url "$ENGINE_API_URL" \
-  --tool-metadata-key "$ENGINE_API_KEY" \
+  --api-url "$ARCADE_API_URL" \
   --custom-sections ./curation \
   --skip-examples --skip-summary --skip-secret-coherence \
   --output data/toolkits

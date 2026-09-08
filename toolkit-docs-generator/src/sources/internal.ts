@@ -36,9 +36,6 @@ export interface ToolDataSource {
   readonly isAvailable: () => Promise<boolean>;
 }
 
-/** @deprecated Use {@link ToolDataSource} */
-export type IToolDataSource = ToolDataSource;
-
 // ============================================================================
 // Metadata Source Interface (internal)
 // ============================================================================
@@ -53,6 +50,3 @@ export interface MetadataSource {
   /** List all available toolkit IDs */
   readonly listToolkitIds: () => Promise<readonly string[]>;
 }
-
-/** @deprecated Use {@link MetadataSource} */
-export type IMetadataSource = MetadataSource;

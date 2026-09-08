@@ -13,7 +13,7 @@ This workflow regenerates toolkit JSON and opens a PR with the changes. It can b
 
 Required secrets:
 
-- `ENGINE_API_URL`
+- `ENGINE_API_URL` (public catalog API host)
 - `ANTHROPIC_API_KEY`
 
 Optional secrets:
