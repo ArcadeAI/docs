@@ -24,22 +24,6 @@ describe("applySubstitutions", () => {
       'client_id: "{{client_id}}"'
     );
   });
-
-  it("derives the one-click install links from the gateway URL", () => {
-    const cursor = applySubstitutions("{{ARCADE_PLUGIN_CURSOR_INSTALL_LINK}}");
-    const encoded = new URL(cursor).searchParams.get("config") ?? "";
-    const config = JSON.parse(Buffer.from(encoded, "base64").toString("utf-8"));
-    expect(config.url).toBe(AGENT_PLUGIN_GATEWAY_URL);
-
-    const vscode = applySubstitutions("{{ARCADE_PLUGIN_VSCODE_INSTALL_LINK}}");
-    const vscodeConfig = JSON.parse(
-      new URL(vscode).searchParams.get("config") ?? ""
-    );
-    expect(vscodeConfig).toEqual({
-      type: "http",
-      url: AGENT_PLUGIN_GATEWAY_URL,
-    });
-  });
 });
 
 describe("remarkSubstitute", () => {

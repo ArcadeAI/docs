@@ -8,7 +8,7 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Install the Arcade agent plugin
 
-The Arcade agent plugin puts Arcade inside your agent with one command. Your agent gains access to thousands of tools for email, calendar, chat, issues, docs, and dozens of other apps. You authorize each app in the browser the first time it comes up. No API keys to create, no gateway to configure.
+The Arcade agent plugin bundles a connection to Arcade's hosted MCP gateway with two skills, three commands, and the `arcade-operator` subagent. The gateway gives your agent thousands of tools for email, calendar, chat, issues, docs, and dozens of other apps. The rest of the plugin helps your agent choose and use those tools. You authorize each app in the browser the first time it comes up, with no API keys to create and no gateway to configure.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -59,11 +59,7 @@ npx plugins discover {{ARCADE_PLUGIN_REPO}}
 
 Reload your agent afterwards if it does not pick up the plugin on its own. A couple of agents gate plugins behind a setting. Claude Code may ask you to enable it with `claude plugin`, and VS Code needs `chat.plugins.enabled` set to `true`.
 
-Two things worth knowing if you use more than one agent. Codex and ChatGPT share a plugin directory, so one install covers both. And VS Code can discover a copy installed through GitHub Copilot CLI, so install in one place rather than both.
-
-// todo: claude mcpb instructions
-
-Using a client that does not load plugins? Those connect to the same gateway as a [tools-only MCP server](/get-started/agent-plugin/tools-only).
+Using a client that does not load plugins? Those connect to the same gateway with the [tools-only Arcade bundle](/get-started/agent-plugin/tools-only).
 
 ## Sign in
 
@@ -82,26 +78,44 @@ Every Arcade gateway works this way, not just the one in the plugin. [Server-lev
 
 Every install connects to the same Arcade gateway and gets the same tools. What differs is how much of the rest of the plugin each agent can load.
 
-| Agent                |     Tools      | Skills | Subagent | Commands | Rule | Hooks |
-| -------------------- | :------------: | :----: | :------: | :------: | :--: | :---: | --- | -------------- |
-| Cursor               |       ✅       |   2    |    ✅    |    3     |  ✅  |  ✅   |
-| Claude Code          |       ✅       |   2    |    ✅    |    3     |  —   |  ✅   |
-| Claude Cowork        |       ✅       |   2    |    ✅    |    3     |  —   |  ✅   |
-| GitHub Copilot CLI   |       ✅       |   2    |    ✅    |    —     |  —   |   —   |
-| VS Code              |       ✅       |   2    |    —     |    —     |  —   |   —   |
-| Codex and ChatGPT    |       ✅       |   2    |    —     |    —     |  —   |   —   |
-| Any other MCP client |       ✅       |   —    |    —     |    —     |  —   |   —   |
-| //                   | Claude Desktop |   ✅   |    —     |    —     |  —   |   —   | —   | TODO: not true |
+| Agent                | Tools | Skills | Subagent | Commands | Rule | Hooks |
+| -------------------- | :---: | :----: | :------: | :------: | :--: | :---: |
+| Cursor               |  ✅   |   2    |    ✅    |    3     |  ✅  |  ✅   |
+| Claude Code          |  ✅   |   2    |    ✅    |    3     |  —   |  ✅   |
+| Claude Cowork        |  ✅   |   2    |    ✅    |    3     |  —   |  ✅   |
+| GitHub Copilot CLI   |  ✅   |   2    |    ✅    |    —     |  —   |   —   |
+| VS Code              |  ✅   |   2    |    —     |    —     |  —   |   —   |
+| Codex and ChatGPT    |  ✅   |   2    |    —     |    —     |  —   |   —   |
+| Claude Desktop       |  ✅   |   —    |    —     |    —     |  —   |   —   |
+| Any other MCP client |  ✅   |   —    |    —     |    —     |  —   |   —   |
 
 Here is what each of those is for.
 
-**Commands** are the part you type. `/arcade-status` reports whether the gateway is reachable, whether you have signed in, and which apps you have authorized. `/arcade-connect <app>` authorizes an app on demand, so you are not interrupted mid-task. `/arcade-apps` lists what you have connected and lets you disconnect one.
+### Commands
 
-**Skills** are instructions your agent reads on its own, so you never have to invoke them. `try-arcade` teaches it to turn a request like "reply to that thread" into the right sequence of tool calls across your apps. `scale-arcade` handles the other kind of question, the one about moving a workflow onto a team gateway, and it walks you through the decisions on [this page](/get-started/agent-plugin/team-rollout) against your own project.
+#### `/arcade-status`
 
-**The subagent**, `arcade-operator`, runs an app task in its own context and reports back just the result. Arcade exposes a lot of tools, and searching them fills a conversation with noise that pushes out your actual work. The operator absorbs that.
+Reports whether the gateway is reachable, whether you have signed in, and which apps you have authorized.
 
-**The rule and hooks** are Cursor and Claude Code specific. They tell your agent that Arcade exists and when reaching for it is the right move, which is the difference between a tool that sits unused and one your agent actually picks up.
+#### `/arcade-connect <app>`
+
+Authorizes an app on demand, so you are not interrupted mid-task.
+
+#### `/arcade-apps`
+
+Lists the apps you have connected and lets you disconnect one.
+
+### Skills
+
+Skills are instructions your agent reads on its own, so you never have to invoke them. `try-arcade` teaches it to turn a request like "reply to that thread" into the right sequence of tool calls across your apps. `scale-arcade` handles the other kind of question, the one about moving a workflow onto a team gateway, and it walks you through the decisions on [this page](/get-started/agent-plugin/team-rollout) against your own project.
+
+### Subagent
+
+The `arcade-operator` subagent runs an app task in its own context and reports back just the result. Arcade exposes a lot of tools, and searching them fills a conversation with noise that pushes out your actual work. The operator absorbs that.
+
+### Rule and hooks
+
+The rule and hooks are Cursor and Claude Code specific. They tell your agent that Arcade exists and when reaching for it is the right move, which is the difference between a tool that sits unused and one your agent actually picks up.
 
 The columns thin out because the [Agent Plugins](https://agent-plugins.org) 1.0 specification only makes skills and MCP servers portable. Commands, subagents, hooks, and editor rules are specific to each agent, so the plugin ships them where the agents that support them will find them.
 
