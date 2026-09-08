@@ -58,8 +58,9 @@ import {
   createCachedToolkitDataSource,
   createEngineToolkitDataSource,
   createMockToolkitDataSource,
-  type IToolkitDataSource,
+  createPublicCatalogToolkitDataSource,
   type ToolkitData,
+  type ToolkitDataSource,
 } from "../sources/toolkit-data-source";
 import {
   type MergedToolkit,
@@ -83,7 +84,11 @@ import {
   readFailedToolsReport,
   writeFailedToolsReport,
 } from "../utils/run-logs";
-import { type ApiSource, resolveApiSource } from "./api-source";
+import {
+  type ApiSource,
+  isDeprecatedApiSource,
+  resolveApiSource,
+} from "./api-source";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup";
 import {
   assertSafeCurrentToolkitSnapshot,
@@ -507,6 +512,21 @@ const resolveListToolsConfig = (options: ToolkitDataSourceOptions) => {
   };
 };
 
+const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
+  const baseUrl = options.toolMetadataUrl ?? process.env.ENGINE_API_URL;
+
+  if (!baseUrl) {
+    return null;
+  }
+
+  return {
+    baseUrl,
+    ...(options.toolMetadataPageSize
+      ? { toolsPageSize: options.toolMetadataPageSize }
+      : {}),
+  };
+};
+
 const resolveToolMetadataConfig = (options: ToolkitDataSourceOptions) => {
   const baseUrl = options.toolMetadataUrl ?? process.env.ENGINE_API_URL;
   const apiKey = options.toolMetadataKey ?? process.env.ENGINE_API_KEY;
@@ -524,6 +544,90 @@ const resolveToolMetadataConfig = (options: ToolkitDataSourceOptions) => {
   };
 };
 
+const warnDeprecatedApiSource = (apiSource: ApiSource): void => {
+  if (!isDeprecatedApiSource(apiSource)) {
+    return;
+  }
+
+  console.warn(
+    chalk.yellow(
+      `Warning: --api-source ${apiSource} is deprecated. Use "public-catalog" instead.`
+    )
+  );
+};
+
+const createPublicCatalogToolkitSource = (
+  options: ToolkitDataSourceOptions,
+  metadataSource: ReturnType<typeof createMockMetadataSource>,
+  verbose: boolean
+): ToolkitDataSource => {
+  const config = resolvePublicCatalogConfig(options);
+  if (!config) {
+    throw new Error(
+      "Public catalog API requires --tool-metadata-url (or ENGINE_API_URL environment variable)."
+    );
+  }
+  if (verbose) {
+    console.log(
+      chalk.dim(
+        `Using /v1/public/tool_catalog + /v1/public/tools: ${config.baseUrl}`
+      )
+    );
+  }
+  return createPublicCatalogToolkitDataSource({
+    publicCatalog: config,
+    metadataSource,
+  });
+};
+
+const createListToolsToolkitSource = (
+  options: ToolkitDataSourceOptions,
+  metadataSource: ReturnType<typeof createMockMetadataSource>,
+  verbose: boolean,
+  spinner?: ReturnType<typeof ora>
+): ToolkitDataSource => {
+  const config = resolveListToolsConfig(options);
+  if (!config) {
+    throw new Error(
+      "List tools API requires --list-tools-key (or ARCADE_API_KEY environment variable)."
+    );
+  }
+  if (verbose) {
+    console.log(chalk.dim(`Using /v1/tools endpoint: ${config.baseUrl}`));
+  }
+  const onProgress = spinner
+    ? (fetched: number, total: number) => {
+        spinner.text = `Fetching tools from API... ${fetched}/${total}`;
+      }
+    : undefined;
+  return createArcadeToolkitDataSource({
+    arcade: { ...config, onProgress },
+    metadataSource,
+  });
+};
+
+const createToolMetadataToolkitSource = (
+  options: ToolkitDataSourceOptions,
+  metadataSource: ReturnType<typeof createMockMetadataSource>,
+  verbose: boolean
+): ToolkitDataSource => {
+  const config = resolveToolMetadataConfig(options);
+  if (!config) {
+    throw new Error(
+      "Tool metadata API requires --tool-metadata-url and --tool-metadata-key."
+    );
+  }
+  if (verbose) {
+    console.log(
+      chalk.dim(`Using /v1/tool_metadata endpoint: ${config.baseUrl}`)
+    );
+  }
+  return createEngineToolkitDataSource({
+    engine: config,
+    metadataSource,
+  });
+};
+
 const createToolkitDataSourceForApi = (
   apiSource: ApiSource,
   options: ToolkitDataSourceOptions,
@@ -531,53 +635,29 @@ const createToolkitDataSourceForApi = (
   mockDataDir: string,
   verbose: boolean,
   spinner?: ReturnType<typeof ora>
-): IToolkitDataSource => {
-  if (apiSource === "list-tools") {
-    const config = resolveListToolsConfig(options);
-    if (!config) {
-      throw new Error(
-        "List tools API requires --list-tools-key (or ARCADE_API_KEY environment variable)."
-      );
-    }
-    if (verbose) {
-      console.log(chalk.dim(`Using /v1/tools endpoint: ${config.baseUrl}`));
-    }
-    // Add progress callback for API pagination
-    const onProgress = spinner
-      ? (fetched: number, total: number) => {
-          spinner.text = `Fetching tools from API... ${fetched}/${total}`;
-        }
-      : undefined;
-    return createArcadeToolkitDataSource({
-      arcade: { ...config, onProgress },
-      metadataSource,
-    });
-  }
+): ToolkitDataSource => {
+  warnDeprecatedApiSource(apiSource);
 
-  if (apiSource === "tool-metadata") {
-    const config = resolveToolMetadataConfig(options);
-    if (!config) {
-      throw new Error(
-        "Tool metadata API requires --tool-metadata-url and --tool-metadata-key."
+  switch (apiSource) {
+    case "public-catalog":
+      return createPublicCatalogToolkitSource(options, metadataSource, verbose);
+    case "list-tools":
+      return createListToolsToolkitSource(
+        options,
+        metadataSource,
+        verbose,
+        spinner
       );
-    }
-    if (verbose) {
-      console.log(
-        chalk.dim(`Using /v1/tool_metadata endpoint: ${config.baseUrl}`)
-      );
-    }
-    return createEngineToolkitDataSource({
-      engine: config,
-      metadataSource,
-    });
+    case "tool-metadata":
+      return createToolMetadataToolkitSource(options, metadataSource, verbose);
+    default:
+      if (verbose) {
+        console.log(chalk.dim(`Using mock data: ${mockDataDir}`));
+      }
+      return createMockToolkitDataSource({
+        dataDir: mockDataDir,
+      });
   }
-
-  if (verbose) {
-    console.log(chalk.dim(`Using mock data: ${mockDataDir}`));
-  }
-  return createMockToolkitDataSource({
-    dataDir: mockDataDir,
-  });
 };
 
 const normalizeToolkitKey = (toolkitId: string): string =>
@@ -831,7 +911,7 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (/v1/public/*), "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata, deprecated), or "mock" (default: auto-detect)'
   )
   .option(
     "--list-tools-url <url>",
@@ -846,10 +926,13 @@ program
     "List tools API page size",
     (value) => Number.parseInt(value, 10)
   )
-  .option("--tool-metadata-url <url>", "Tool metadata API URL")
+  .option(
+    "--tool-metadata-url <url>",
+    "Engine API base URL (or ENGINE_API_URL env)"
+  )
   .option(
     "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env)"
+    "Tool metadata API key (or ENGINE_API_KEY env; deprecated, only for tool-metadata source)"
   )
   .option(
     "--tool-metadata-page-size <number>",
@@ -1954,7 +2037,7 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (/v1/public/*), "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata, deprecated), or "mock" (default: auto-detect)'
   )
   .option(
     "--list-tools-url <url>",
@@ -1969,10 +2052,13 @@ program
     "List tools API page size",
     (value) => Number.parseInt(value, 10)
   )
-  .option("--tool-metadata-url <url>", "Tool metadata API URL")
+  .option(
+    "--tool-metadata-url <url>",
+    "Engine API base URL (or ENGINE_API_URL env)"
+  )
   .option(
     "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env)"
+    "Tool metadata API key (or ENGINE_API_KEY env; deprecated, only for tool-metadata source)"
   )
   .option(
     "--tool-metadata-page-size <number>",
@@ -2802,7 +2888,7 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (/v1/public/*), "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata, deprecated), or "mock" (default: auto-detect)'
   )
   .option(
     "--list-tools-url <url>",
@@ -2817,10 +2903,13 @@ program
     "List tools API page size",
     (value) => Number.parseInt(value, 10)
   )
-  .option("--tool-metadata-url <url>", "Tool metadata API URL")
+  .option(
+    "--tool-metadata-url <url>",
+    "Engine API base URL (or ENGINE_API_URL env)"
+  )
   .option(
     "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env)"
+    "Tool metadata API key (or ENGINE_API_KEY env; deprecated, only for tool-metadata source)"
   )
   .option(
     "--custom-sections <path>",

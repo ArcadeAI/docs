@@ -19,7 +19,7 @@ flowchart TD
     manual["Manual run<br/>workflow_dispatch"] --> generate
     porter["Porter deploy succeeded<br/>repository_dispatch"] --> generate
 
-    engine["Engine API<br/>/v1/tool_metadata"] -->|"tools, parameters, auth, secrets"| generate
+    engine["Engine public catalog<br/>/v1/public/tool_catalog + /v1/public/tools"] -->|"tools, parameters, auth, secrets"| generate
     previous["data/toolkits/*.json<br/>previous run"] -->|"signatures and curation hashes"| generate
 
     generate["generate --all --skip-unchanged"] --> changed{"Changed since<br/>last run?"}
@@ -66,8 +66,9 @@ it. The sidebar sync writes navigation only, and never touches toolkit JSON.
 
 ### Data sources
 
-- `EngineApiSource` fetches tool metadata from the Engine API.
-- `ArcadeApiSource` fetches tool metadata from the Arcade API.
+- `PublicCatalogApiSource` fetches tool metadata from the Engine public catalog API.
+- `EngineApiSource` fetches tool metadata from the authenticated Engine API (deprecated).
+- `ArcadeApiSource` fetches tool metadata from the Arcade API (deprecated).
 - `DesignSystemMetadataSource` loads toolkit metadata from `@arcadeai/design-system`.
 - `MarkdownCurationSource` compiles documentation chunks, import declarations,
   and subpages from the configured curation directory. When configured, that
@@ -138,7 +139,8 @@ public, read-only values configured through these Vercel environment variables:
 
 ## Key files
 
-- `src/sources/engine-api.ts` — tool metadata from Engine API
+- `src/sources/public-catalog-api.ts` — tool metadata from Engine public catalog
+- `src/sources/engine-api.ts` — tool metadata from authenticated Engine API (deprecated)
 - `src/sources/markdown-curation.ts` — Markdown and MDX curation compiler
   ([format reference](CURATION.md))
 - `src/sources/toolkit-data-source.ts` — unified data source

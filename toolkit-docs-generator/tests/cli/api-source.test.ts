@@ -27,6 +27,13 @@ describe("resolveApiSource", () => {
     resetEnv();
   });
 
+  it("returns public-catalog when explicitly requested", () => {
+    expect(resolveApiSource({ apiSource: "public-catalog" })).toBe(
+      "public-catalog"
+    );
+    expect(resolveApiSource({ apiSource: "public" })).toBe("public-catalog");
+  });
+
   it("returns list-tools only when explicitly requested", () => {
     expect(resolveApiSource({ apiSource: "list-tools" })).toBe("list-tools");
   });
@@ -39,6 +46,12 @@ describe("resolveApiSource", () => {
     expect(() => resolveApiSource({ apiSource: "arcade" })).toThrow(
       'Invalid --api-source "arcade"'
     );
+  });
+
+  it("auto-selects public-catalog when only the Engine URL is set", () => {
+    process.env.ENGINE_API_URL = "https://api.arcade.dev";
+
+    expect(resolveApiSource({})).toBe("public-catalog");
   });
 
   it("auto-selects tool-metadata when Engine credentials exist", () => {

@@ -10,7 +10,7 @@ import { z } from "zod";
 import type { ToolkitMetadata } from "../types/index";
 import { ToolkitMetadataSchema } from "../types/index";
 import { normalizeId } from "../utils/fp";
-import type { IMetadataSource } from "./internal";
+import type { MetadataSource } from "./internal";
 
 // ============================================================================
 // File Schema
@@ -32,7 +32,7 @@ export interface MockMetadataConfig {
 /**
  * Mock implementation of IMetadataSource that loads from JSON fixtures
  */
-export class MockMetadataSource implements IMetadataSource {
+export class MockMetadataSource implements MetadataSource {
   private readonly fixtureFilePath: string;
   private cachedData: MetadataFile | null = null;
   private normalizedIndex: Map<string, ToolkitMetadata> | null = null;
@@ -111,4 +111,4 @@ export class MockMetadataSource implements IMetadataSource {
 
 export const createMockMetadataSource = (
   fixtureFilePath: string
-): IMetadataSource => new MockMetadataSource({ fixtureFilePath });
+): MetadataSource => new MockMetadataSource({ fixtureFilePath });

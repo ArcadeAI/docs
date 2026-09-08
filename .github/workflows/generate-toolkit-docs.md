@@ -5,7 +5,7 @@ This workflow regenerates toolkit JSON and opens a PR with the changes. It can b
 ## What it does
 
 1. Builds the toolkit docs generator.
-2. Generates toolkit JSON in `toolkit-docs-generator/data/toolkits` using the Engine tool metadata and summary endpoints.
+2. Generates toolkit JSON in `toolkit-docs-generator/data/toolkits` using the Engine public catalog endpoints.
 3. Syncs integrations sidebar navigation from the generated JSON.
 4. Creates or updates a PR on the stable `automation/toolkit-docs` branch if any files changed. Later runs overwrite that open PR with the latest generated docs.
 
@@ -14,7 +14,6 @@ This workflow regenerates toolkit JSON and opens a PR with the changes. It can b
 Required secrets:
 
 - `ENGINE_API_URL`
-- `ENGINE_API_KEY`
 - `ANTHROPIC_API_KEY`
 
 Optional secrets:

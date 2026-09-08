@@ -79,7 +79,7 @@ const ToolItemMetadataSchema = z
   .optional()
   .nullable();
 
-const ToolMetadataItemSchema = z.object({
+export const ToolMetadataItemSchema = z.object({
   fully_qualified_name: z.string(),
   qualified_name: z.string(),
   name: z.string(),

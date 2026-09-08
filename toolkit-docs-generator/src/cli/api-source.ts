@@ -1,4 +1,8 @@
-export type ApiSource = "list-tools" | "tool-metadata" | "mock";
+export type ApiSource =
+  | "public-catalog"
+  | "list-tools"
+  | "tool-metadata"
+  | "mock";
 
 type ApiSourceOptions = {
   apiSource?: string;
@@ -6,29 +10,27 @@ type ApiSourceOptions = {
   toolMetadataKey?: string;
 };
 
-export const resolveApiSource = (options: ApiSourceOptions): ApiSource => {
-  // Explicit source takes precedence
-  if (options.apiSource) {
-    const source = options.apiSource.toLowerCase();
-    if (source === "list-tools") {
-      return "list-tools";
-    }
-    if (source === "engine") {
-      return "tool-metadata";
-    }
-    if (source === "tool-metadata") {
-      return "tool-metadata";
-    }
-    if (source === "mock") {
-      return "mock";
-    }
-    throw new Error(
-      `Invalid --api-source "${options.apiSource}". Use "list-tools", "tool-metadata", or "mock".`
-    );
+const EXPLICIT_API_SOURCES: Record<string, ApiSource> = {
+  "public-catalog": "public-catalog",
+  public: "public-catalog",
+  "list-tools": "list-tools",
+  engine: "tool-metadata",
+  "tool-metadata": "tool-metadata",
+  mock: "mock",
+};
+
+const resolveExplicitApiSource = (apiSource: string): ApiSource => {
+  const resolved = EXPLICIT_API_SOURCES[apiSource.toLowerCase()];
+  if (resolved) {
+    return resolved;
   }
 
-  // Auto-detect based on provided Engine credentials only.
-  // List-tools endpoint must be explicitly selected via --api-source list-tools.
+  throw new Error(
+    `Invalid --api-source "${apiSource}". Use "public-catalog", "list-tools", "tool-metadata", or "mock".`
+  );
+};
+
+const resolveAutoDetectedApiSource = (options: ApiSourceOptions): ApiSource => {
   const hasToolMetadataKey = !!(
     options.toolMetadataKey ?? process.env.ENGINE_API_KEY
   );
@@ -39,5 +41,21 @@ export const resolveApiSource = (options: ApiSourceOptions): ApiSource => {
   if (hasToolMetadataKey && hasToolMetadataUrl) {
     return "tool-metadata";
   }
+
+  if (hasToolMetadataUrl) {
+    return "public-catalog";
+  }
+
   return "mock";
 };
+
+export const resolveApiSource = (options: ApiSourceOptions): ApiSource => {
+  if (options.apiSource) {
+    return resolveExplicitApiSource(options.apiSource);
+  }
+
+  return resolveAutoDetectedApiSource(options);
+};
+
+export const isDeprecatedApiSource = (apiSource: ApiSource): boolean =>
+  apiSource === "tool-metadata" || apiSource === "list-tools";

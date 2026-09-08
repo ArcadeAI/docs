@@ -23,7 +23,7 @@ export interface FetchOptions {
 // Tool Data Source Interface (internal)
 // ============================================================================
 
-export interface IToolDataSource {
+export interface ToolDataSource {
   /** Fetch tools for a specific toolkit */
   readonly fetchToolsByToolkit: (
     toolkitId: string
@@ -36,11 +36,14 @@ export interface IToolDataSource {
   readonly isAvailable: () => Promise<boolean>;
 }
 
+/** @deprecated Use {@link ToolDataSource} */
+export type IToolDataSource = ToolDataSource;
+
 // ============================================================================
 // Metadata Source Interface (internal)
 // ============================================================================
 
-export interface IMetadataSource {
+export interface MetadataSource {
   /** Get metadata for a specific toolkit */
   readonly getToolkitMetadata: (
     toolkitId: string
@@ -50,3 +53,6 @@ export interface IMetadataSource {
   /** List all available toolkit IDs */
   readonly listToolkitIds: () => Promise<readonly string[]>;
 }
+
+/** @deprecated Use {@link MetadataSource} */
+export type IMetadataSource = MetadataSource;
