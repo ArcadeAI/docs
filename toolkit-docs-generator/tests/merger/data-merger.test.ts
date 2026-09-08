@@ -5,7 +5,7 @@
  * the merge logic works correctly.
  */
 import { describe, expect, it, vi } from "vitest";
-import type { ISecretEditGenerator } from "../../src/llm/secret-edit-generator";
+import type { SecretEditGenerator } from "../../src/llm/secret-edit-generator";
 import {
   computeAllScopes,
   DataMerger,
@@ -26,8 +26,8 @@ import {
 import type { ICustomSectionsSource } from "../../src/sources/interfaces";
 import {
   createCombinedToolkitDataSource,
-  type IToolkitDataSource,
   type ToolkitData,
+  type ToolkitDataSource,
 } from "../../src/sources/toolkit-data-source";
 import type {
   CustomSections,
@@ -1532,7 +1532,7 @@ describe("DataMerger", () => {
         },
       ];
 
-      const cleanupSpy = vi.fn<ISecretEditGenerator["cleanupStaleReferences"]>(
+      const cleanupSpy = vi.fn<SecretEditGenerator["cleanupStaleReferences"]>(
         async () =>
           "| Secret | Required For |\n| `GITHUB_SERVER_URL` | All tools |"
       );
@@ -1540,7 +1540,7 @@ describe("DataMerger", () => {
         async (input: { content: string }) =>
           `${input.content}\n\n[config link]`
       );
-      const secretEditGenerator: ISecretEditGenerator = {
+      const secretEditGenerator: SecretEditGenerator = {
         cleanupStaleReferences: cleanupSpy,
         fillCoverageGaps: coverageSpy,
       };
@@ -1674,7 +1674,7 @@ describe("DataMerger", () => {
       const coverageSpy = vi.fn(
         async (input: { content: string }) => `${input.content} [link]`
       );
-      const secretEditGenerator: ISecretEditGenerator = {
+      const secretEditGenerator: SecretEditGenerator = {
         cleanupStaleReferences: cleanupSpy,
         fillCoverageGaps: coverageSpy,
       };
@@ -2110,7 +2110,7 @@ describe("DataMerger", () => {
         metadata: slackMetadata,
       };
 
-      const toolkitDataSource: IToolkitDataSource = {
+      const toolkitDataSource: ToolkitDataSource = {
         fetchToolkitData: async (toolkitId: string) => {
           if (toolkitId === "Github") {
             return completeToolkitData;
@@ -2390,7 +2390,7 @@ describe("DataMerger", () => {
         metadata: null,
       };
 
-      const toolkitDataSource: IToolkitDataSource = {
+      const toolkitDataSource: ToolkitDataSource = {
         fetchToolkitData: async () => {
           throw new Error("not used by mergeAllToolkits");
         },
@@ -2430,7 +2430,7 @@ describe("DataMerger", () => {
         metadata: null,
       };
 
-      const toolkitDataSource: IToolkitDataSource = {
+      const toolkitDataSource: ToolkitDataSource = {
         fetchToolkitData: async () => missingMetadataToolkitData,
         fetchAllToolkitsData: async () =>
           new Map([["Unknown", missingMetadataToolkitData]]),
@@ -2469,7 +2469,7 @@ describe("DataMerger", () => {
         metadata: null,
       };
 
-      const toolkitDataSource: IToolkitDataSource = {
+      const toolkitDataSource: ToolkitDataSource = {
         fetchToolkitData: async () => missingMetadataToolkitData,
         fetchAllToolkitsData: async () =>
           new Map([["Unknown", missingMetadataToolkitData]]),

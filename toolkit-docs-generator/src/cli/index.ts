@@ -54,9 +54,7 @@ import {
 import { createMockMetadataSource } from "../sources/mock-metadata";
 import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
 import {
-  createArcadeToolkitDataSource,
   createCachedToolkitDataSource,
-  createEngineToolkitDataSource,
   createMockToolkitDataSource,
   createPublicCatalogToolkitDataSource,
   type ToolkitData,
@@ -86,7 +84,7 @@ import {
 } from "../utils/run-logs";
 import {
   type ApiSource,
-  isDeprecatedApiSource,
+  resolveApiBaseUrlFromEnv,
   resolveApiSource,
 } from "./api-source";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup";
@@ -484,36 +482,12 @@ const resolveSecretEditGenerator = (
 
 interface ToolkitDataSourceOptions {
   apiSource?: string;
-  listToolsUrl?: string;
-  listToolsKey?: string;
-  listToolsPageSize?: number;
-  toolMetadataUrl?: string;
-  toolMetadataKey?: string;
-  toolMetadataPageSize?: number;
+  apiUrl?: string;
+  apiPageSize?: number;
 }
 
-const resolveListToolsConfig = (options: ToolkitDataSourceOptions) => {
-  const baseUrl =
-    options.listToolsUrl ??
-    process.env.ARCADE_API_URL ??
-    "https://api.arcade.dev";
-  const apiKey = options.listToolsKey ?? process.env.ARCADE_API_KEY;
-
-  if (!apiKey) {
-    return null;
-  }
-
-  return {
-    baseUrl,
-    apiKey,
-    ...(options.listToolsPageSize
-      ? { pageSize: options.listToolsPageSize }
-      : {}),
-  };
-};
-
 const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
-  const baseUrl = options.toolMetadataUrl ?? process.env.ENGINE_API_URL;
+  const baseUrl = options.apiUrl ?? resolveApiBaseUrlFromEnv();
 
   if (!baseUrl) {
     return null;
@@ -521,39 +495,8 @@ const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
 
   return {
     baseUrl,
-    ...(options.toolMetadataPageSize
-      ? { toolsPageSize: options.toolMetadataPageSize }
-      : {}),
+    ...(options.apiPageSize ? { toolsPageSize: options.apiPageSize } : {}),
   };
-};
-
-const resolveToolMetadataConfig = (options: ToolkitDataSourceOptions) => {
-  const baseUrl = options.toolMetadataUrl ?? process.env.ENGINE_API_URL;
-  const apiKey = options.toolMetadataKey ?? process.env.ENGINE_API_KEY;
-
-  if (!(baseUrl && apiKey)) {
-    return null;
-  }
-
-  return {
-    baseUrl,
-    apiKey,
-    ...(options.toolMetadataPageSize
-      ? { pageSize: options.toolMetadataPageSize }
-      : {}),
-  };
-};
-
-const warnDeprecatedApiSource = (apiSource: ApiSource): void => {
-  if (!isDeprecatedApiSource(apiSource)) {
-    return;
-  }
-
-  console.warn(
-    chalk.yellow(
-      `Warning: --api-source ${apiSource} is deprecated. Use "public-catalog" instead.`
-    )
-  );
 };
 
 const createPublicCatalogToolkitSource = (
@@ -564,7 +507,7 @@ const createPublicCatalogToolkitSource = (
   const config = resolvePublicCatalogConfig(options);
   if (!config) {
     throw new Error(
-      "Public catalog API requires --tool-metadata-url (or ENGINE_API_URL environment variable)."
+      "Public catalog API requires --api-url (or ARCADE_API_URL / ENGINE_API_URL environment variable)."
     );
   }
   if (verbose) {
@@ -580,84 +523,23 @@ const createPublicCatalogToolkitSource = (
   });
 };
 
-const createListToolsToolkitSource = (
-  options: ToolkitDataSourceOptions,
-  metadataSource: ReturnType<typeof createMockMetadataSource>,
-  verbose: boolean,
-  spinner?: ReturnType<typeof ora>
-): ToolkitDataSource => {
-  const config = resolveListToolsConfig(options);
-  if (!config) {
-    throw new Error(
-      "List tools API requires --list-tools-key (or ARCADE_API_KEY environment variable)."
-    );
-  }
-  if (verbose) {
-    console.log(chalk.dim(`Using /v1/tools endpoint: ${config.baseUrl}`));
-  }
-  const onProgress = spinner
-    ? (fetched: number, total: number) => {
-        spinner.text = `Fetching tools from API... ${fetched}/${total}`;
-      }
-    : undefined;
-  return createArcadeToolkitDataSource({
-    arcade: { ...config, onProgress },
-    metadataSource,
-  });
-};
-
-const createToolMetadataToolkitSource = (
-  options: ToolkitDataSourceOptions,
-  metadataSource: ReturnType<typeof createMockMetadataSource>,
-  verbose: boolean
-): ToolkitDataSource => {
-  const config = resolveToolMetadataConfig(options);
-  if (!config) {
-    throw new Error(
-      "Tool metadata API requires --tool-metadata-url and --tool-metadata-key."
-    );
-  }
-  if (verbose) {
-    console.log(
-      chalk.dim(`Using /v1/tool_metadata endpoint: ${config.baseUrl}`)
-    );
-  }
-  return createEngineToolkitDataSource({
-    engine: config,
-    metadataSource,
-  });
-};
-
 const createToolkitDataSourceForApi = (
   apiSource: ApiSource,
   options: ToolkitDataSourceOptions,
   metadataSource: ReturnType<typeof createMockMetadataSource>,
   mockDataDir: string,
-  verbose: boolean,
-  spinner?: ReturnType<typeof ora>
+  verbose: boolean
 ): ToolkitDataSource => {
-  warnDeprecatedApiSource(apiSource);
-
-  switch (apiSource) {
-    case "public-catalog":
-      return createPublicCatalogToolkitSource(options, metadataSource, verbose);
-    case "list-tools":
-      return createListToolsToolkitSource(
-        options,
-        metadataSource,
-        verbose,
-        spinner
-      );
-    case "tool-metadata":
-      return createToolMetadataToolkitSource(options, metadataSource, verbose);
-    default:
-      if (verbose) {
-        console.log(chalk.dim(`Using mock data: ${mockDataDir}`));
-      }
-      return createMockToolkitDataSource({
-        dataDir: mockDataDir,
-      });
+  if (apiSource === "public-catalog") {
+    return createPublicCatalogToolkitSource(options, metadataSource, verbose);
   }
+
+  if (verbose) {
+    console.log(chalk.dim(`Using mock data: ${mockDataDir}`));
+  }
+  return createMockToolkitDataSource({
+    dataDir: mockDataDir,
+  });
 };
 
 const normalizeToolkitKey = (toolkitId: string): string =>
@@ -911,32 +793,15 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "public-catalog" (/v1/public/*), "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata, deprecated), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (/v1/public/*) or "mock" (default: auto-detect)'
   )
   .option(
-    "--list-tools-url <url>",
-    "List tools API URL (default: https://api.arcade.dev)"
+    "--api-url <url>",
+    "Arcade API base URL (or ARCADE_API_URL / ENGINE_API_URL env)"
   )
   .option(
-    "--list-tools-key <key>",
-    "List tools API key (or ARCADE_API_KEY env)"
-  )
-  .option(
-    "--list-tools-page-size <number>",
-    "List tools API page size",
-    (value) => Number.parseInt(value, 10)
-  )
-  .option(
-    "--tool-metadata-url <url>",
-    "Engine API base URL (or ENGINE_API_URL env)"
-  )
-  .option(
-    "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env; deprecated, only for tool-metadata source)"
-  )
-  .option(
-    "--tool-metadata-page-size <number>",
-    "Tool metadata API page size",
+    "--api-page-size <number>",
+    "Public catalog tools page size",
     (value) => Number.parseInt(value, 10)
   )
   .option("--previous-output <dir>", "Path to previous output directory")
@@ -1059,12 +924,8 @@ program
       mockDataDir?: string;
       metadataFile?: string;
       apiSource?: string;
-      listToolsUrl?: string;
-      listToolsKey?: string;
-      listToolsPageSize?: number;
-      toolMetadataUrl?: string;
-      toolMetadataKey?: string;
-      toolMetadataPageSize?: number;
+      apiUrl?: string;
+      apiPageSize?: number;
       previousOutput?: string;
       forceRegenerate: boolean;
       overwriteOutput?: boolean;
@@ -1255,8 +1116,7 @@ program
             options,
             metadataSource,
             mockDataDir,
-            options.verbose,
-            spinner
+            options.verbose
           )
         );
 
@@ -2037,32 +1897,15 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "public-catalog" (/v1/public/*), "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata, deprecated), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (/v1/public/*) or "mock" (default: auto-detect)'
   )
   .option(
-    "--list-tools-url <url>",
-    "List tools API URL (default: https://api.arcade.dev)"
+    "--api-url <url>",
+    "Arcade API base URL (or ARCADE_API_URL / ENGINE_API_URL env)"
   )
   .option(
-    "--list-tools-key <key>",
-    "List tools API key (or ARCADE_API_KEY env)"
-  )
-  .option(
-    "--list-tools-page-size <number>",
-    "List tools API page size",
-    (value) => Number.parseInt(value, 10)
-  )
-  .option(
-    "--tool-metadata-url <url>",
-    "Engine API base URL (or ENGINE_API_URL env)"
-  )
-  .option(
-    "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env; deprecated, only for tool-metadata source)"
-  )
-  .option(
-    "--tool-metadata-page-size <number>",
-    "Tool metadata API page size",
+    "--api-page-size <number>",
+    "Public catalog tools page size",
     (value) => Number.parseInt(value, 10)
   )
   .option("--previous-output <dir>", "Path to previous output directory")
@@ -2171,12 +2014,8 @@ program
       mockDataDir?: string;
       metadataFile?: string;
       apiSource?: string;
-      listToolsUrl?: string;
-      listToolsKey?: string;
-      listToolsPageSize?: number;
-      toolMetadataUrl?: string;
-      toolMetadataKey?: string;
-      toolMetadataPageSize?: number;
+      apiUrl?: string;
+      apiPageSize?: number;
       previousOutput?: string;
       forceRegenerate: boolean;
       overwriteOutput?: boolean;
@@ -2264,8 +2103,7 @@ program
             options,
             metadataSource,
             mockDataDir,
-            options.verbose,
-            spinner
+            options.verbose
           )
         );
 
@@ -2888,28 +2726,16 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "public-catalog" (/v1/public/*), "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata, deprecated), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (/v1/public/*) or "mock" (default: auto-detect)'
   )
   .option(
-    "--list-tools-url <url>",
-    "List tools API URL (default: https://api.arcade.dev)"
+    "--api-url <url>",
+    "Arcade API base URL (or ARCADE_API_URL / ENGINE_API_URL env)"
   )
   .option(
-    "--list-tools-key <key>",
-    "List tools API key (or ARCADE_API_KEY env)"
-  )
-  .option(
-    "--list-tools-page-size <number>",
-    "List tools API page size",
+    "--api-page-size <number>",
+    "Public catalog tools page size",
     (value) => Number.parseInt(value, 10)
-  )
-  .option(
-    "--tool-metadata-url <url>",
-    "Engine API base URL (or ENGINE_API_URL env)"
-  )
-  .option(
-    "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env; deprecated, only for tool-metadata source)"
   )
   .option(
     "--custom-sections <path>",
@@ -2924,11 +2750,8 @@ program
       mockDataDir?: string;
       metadataFile?: string;
       apiSource?: string;
-      listToolsUrl?: string;
-      listToolsKey?: string;
-      listToolsPageSize?: number;
-      toolMetadataUrl?: string;
-      toolMetadataKey?: string;
+      apiUrl?: string;
+      apiPageSize?: number;
       customSections?: string;
       verbose: boolean;
       json: boolean;
@@ -2955,8 +2778,7 @@ program
             options,
             metadataSource,
             mockDataDir,
-            false, // not verbose during fetch
-            spinner
+            false // not verbose during fetch
           )
         );
 

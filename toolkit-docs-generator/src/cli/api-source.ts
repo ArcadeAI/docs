@@ -1,21 +1,13 @@
-export type ApiSource =
-  | "public-catalog"
-  | "list-tools"
-  | "tool-metadata"
-  | "mock";
+export type ApiSource = "public-catalog" | "mock";
 
 type ApiSourceOptions = {
   apiSource?: string;
-  toolMetadataUrl?: string;
-  toolMetadataKey?: string;
+  apiUrl?: string;
 };
 
 const EXPLICIT_API_SOURCES: Record<string, ApiSource> = {
   "public-catalog": "public-catalog",
   public: "public-catalog",
-  "list-tools": "list-tools",
-  engine: "tool-metadata",
-  "tool-metadata": "tool-metadata",
   mock: "mock",
 };
 
@@ -26,28 +18,22 @@ const resolveExplicitApiSource = (apiSource: string): ApiSource => {
   }
 
   throw new Error(
-    `Invalid --api-source "${apiSource}". Use "public-catalog", "list-tools", "tool-metadata", or "mock".`
+    `Invalid --api-source "${apiSource}". Use "public-catalog" or "mock".`
   );
 };
 
 const resolveAutoDetectedApiSource = (options: ApiSourceOptions): ApiSource => {
-  const hasToolMetadataKey = !!(
-    options.toolMetadataKey ?? process.env.ENGINE_API_KEY
-  );
-  const hasToolMetadataUrl = !!(
-    options.toolMetadataUrl ?? process.env.ENGINE_API_URL
-  );
+  const hasApiUrl = !!(options.apiUrl ?? resolveApiBaseUrlFromEnv());
 
-  if (hasToolMetadataKey && hasToolMetadataUrl) {
-    return "tool-metadata";
-  }
-
-  if (hasToolMetadataUrl) {
+  if (hasApiUrl) {
     return "public-catalog";
   }
 
   return "mock";
 };
+
+export const resolveApiBaseUrlFromEnv = (): string | undefined =>
+  process.env.ARCADE_API_URL ?? process.env.ENGINE_API_URL;
 
 export const resolveApiSource = (options: ApiSourceOptions): ApiSource => {
   if (options.apiSource) {
@@ -56,6 +42,3 @@ export const resolveApiSource = (options: ApiSourceOptions): ApiSource => {
 
   return resolveAutoDetectedApiSource(options);
 };
-
-export const isDeprecatedApiSource = (apiSource: ApiSource): boolean =>
-  apiSource === "tool-metadata" || apiSource === "list-tools";
