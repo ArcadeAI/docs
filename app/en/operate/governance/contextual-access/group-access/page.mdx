@@ -52,7 +52,26 @@ One configuration uses one backend. All three are read-only integrations that ne
 | Microsoft Entra ID | Directory (tenant) ID, application (client) ID, client secret | The `GroupMember.Read.All` application permission, with administrator consent granted |
 | SailPoint Identity Security Cloud | Tenant URL, client ID, client secret | See the SailPoint section below, because the rights that sound correct are not the ones that work |
 
-With Okta and Entra ID, a rule's required groups are group names. With SailPoint, they are access profile or role names.
+With Okta, a rule's required groups are group names. With Entra ID they are group names or group object IDs, which is a distinction worth reading below. With SailPoint, they are access profile or role names.
+
+### Naming an Entra group: name or object ID
+
+Entra does not require group display names to be unique. Its object ID is the only unique key, and many tenants let ordinary members create groups. A rule that requires the display name `finance-admins` could therefore be satisfied by someone who creates their own group with that name and joins it, without ever belonging to the group you meant.
+
+Two ways to name an Entra group in a rule:
+
+| Rule value | Matched against | Collision risk |
+| --- | --- | --- |
+| `finance-admins` | `displayName`, and only for a security group that is not a Microsoft 365 group | Possible, if your tenant lets members create security groups |
+| `3f2504e0-4f89-11d3-9a0c-0305e82c3301` | the group's object ID | None. It is unique, and it follows the group through a rename |
+
+Restricting a display-name match to ordinary security groups removes the surface most members can add to, but it is not a guarantee. **For anything sensitive, put the group's object ID in the rule.** You can copy it from the group's overview page in Entra.
+
+<Callout type="info">
+  This does not apply to Okta or SailPoint. Group, access profile, and role
+  creation there are administrative actions, so an ordinary caller cannot
+  introduce a colliding name.
+</Callout>
 
 ### Matching a caller to a directory user
 
