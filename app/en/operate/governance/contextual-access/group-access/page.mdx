@@ -1,0 +1,203 @@
+---
+title: "Group-Based Tool Access"
+description: "Vary which tools a caller can see and use based on their identity provider group membership, enforced natively by the Arcade Engine"
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Group-Based Tool Access
+
+As a platform operator, you can vary which tools a caller sees based on who they are. Group-based access is built into the Arcade Engine: you define rules that require membership in an identity provider group, and the Engine resolves membership and filters the tool list before the caller ever sees it. Like rate limits, this runs natively inside Arcade, so there is no server to build or host.
+
+Use it when one shared MCP gateway serves more than one team or customer and they should not all see the same tools. Without it, the alternatives are a separate gateway per access boundary or a custom webhook extension.
+
+## How enforcement works
+
+A group access configuration has two parts: an **identity backend** that holds your groups, and a set of **rules**. Each rule combines two things:
+
+- A **tool matcher** that selects which tools the rule applies to
+- One or more **required groups** the caller must belong to
+
+Enforcement runs at the tool access hook point, so it applies to both discovery and execution:
+
+- A caller who does not satisfy a matched rule has the tool **removed from the response** rather than being shown a tool that returns an error.
+- Naming that tool directly is also refused, so hiding is not the only enforcement. A caller who guesses a tool name gains nothing.
+
+Membership is resolved by querying your identity provider, then cached per user and per group for five minutes by default.
+
+<Callout type="info">
+  Multiple required groups on one rule are combined with OR: the caller needs
+  membership in any one of them, not all of them.
+</Callout>
+
+### Tool matchers
+
+| Matcher | Example | Applies to |
+| --- | --- | --- |
+| Exact | `Slack.SendMessage` | One fully qualified tool |
+| Toolkit | `Slack.*` | Every tool in the toolkit |
+| Global | `*` | Every tool |
+
+When several rules match the same call, only the most specific rule applies: an exact match beats a toolkit match, and a toolkit match beats the global match. The caller is evaluated against that one rule only.
+
+**A tool no rule matches stays visible.** This matters when you write a matcher by hand: a typo produces a rule that governs nothing, rather than a rule that hides everything. Use a global `*` rule when you want a default that covers tools you have not named.
+
+## Choosing an identity backend
+
+One configuration uses one backend. All three are read-only integrations that never write to your directory.
+
+| Backend | You provide | Access it needs |
+| --- | --- | --- |
+| Okta | Org URL and an API token | Read access to users and groups |
+| Microsoft Entra ID | Directory (tenant) ID, application (client) ID, client secret | The `GroupMember.Read.All` application permission, with administrator consent granted |
+| SailPoint Identity Security Cloud | Tenant URL, client ID, client secret | See the SailPoint section below, because the rights that sound correct are not the ones that work |
+
+With Okta and Entra ID, a rule's required groups are group names. With SailPoint, they are access profile or role names.
+
+### Matching a caller to a directory user
+
+The backend looks the caller up in your directory **by the identity the request carries**. In practice the Arcade user ID has to equal the directory login exactly.
+
+This is the most common source of surprise in a real deployment. A caller whose Arcade identity is an internal ID, or an email that differs in case or domain from the directory login, matches nothing. Because the hook fails closed, that surfaces as tools quietly missing for everyone rather than as an error someone can act on. Confirm that the identity your gateway sends is the same string your directory knows the person by before you turn a rule on.
+
+## SailPoint Identity Security Cloud
+
+SailPoint support has constraints the other two backends do not.
+
+**Identity Security Cloud only.** IdentityIQ is a separate product with a different API surface and is not supported.
+
+**Rules match access profile and role names.** Not group names, and not raw entitlements or identity attributes. A rule requiring `Finance-Analyst` is satisfied when the caller holds an access profile or a role by that name.
+
+**Only provisioned access counts.** Access that has been requested or approved but not yet provisioned does not satisfy a rule. This is deliberate: a rule should reflect what someone actually has.
+
+### Required API client rights
+
+Create a read-only API client in Identity Security Cloud using the OAuth 2.0 client credentials grant. No interactive user is needed. Grant it exactly:
+
+- `idn:identity-history:read`
+- `idn:public-identities:read`
+
+<Callout type="warning">
+  `idn:access-profiles:read` and `idn:roles:read` are **not sufficient**, even
+  though they sound like the correct ones. They authorize reading access
+  profile and role *definitions*, not which identity has been assigned them. A
+  client granted only those authenticates successfully and then fails every
+  membership lookup, which fail-closed behavior turns into every gated tool
+  disappearing for every caller.
+</Callout>
+
+### Identity matching in SailPoint
+
+SailPoint's access read is keyed on an internal identity ID rather than a login, so an email caller is resolved to that ID first. Two cases are reported as errors rather than as a clean denial, so that a mapping mistake stays diagnosable instead of looking like a working deny:
+
+- No identity matches the caller
+- More than one identity matches the caller
+
+### Consider gating on the provisioned groups instead
+
+Many organizations use SailPoint to provision access into Okta or Entra ID. If that describes you, pointing a rule at the resulting Okta or Entra group is simpler to operate and closer to real time, because you skip a layer of propagation. Reach for the SailPoint backend when the access you want to gate on lives only in SailPoint.
+
+## Configure in the Dashboard
+
+<Steps>
+
+### Create a group access extension
+
+Navigate to **Contextual Access** in the Arcade Dashboard, click **Add Extension**, and choose the group access type.
+
+### Pick a scope
+
+Bind the configuration to the organization to apply it across all projects, or to a single project.
+
+### Select a backend and enter credentials
+
+Choose Okta, Microsoft Entra ID, or SailPoint ISC, then fill in that backend's fields. Credentials are stored write-only: they are never returned, so the form cannot show you a stored secret later.
+
+### Add rules
+
+Each rule row takes a tool matcher and a comma-separated list of required groups. You can add up to 100 rules, each matcher can appear only once, and each rule accepts up to 50 groups.
+
+### Activate
+
+The **Active** toggle controls enforcement. Inactive configurations are kept but not enforced, so you can stage rules before turning them on.
+
+</Steps>
+
+Rules and credentials can both be edited after creation. Leave a credential field blank when editing to keep the stored value.
+
+<Callout type="info">
+  A project can have one group access configuration at a time. To combine
+  more than one set of rules, put them in one configuration.
+</Callout>
+
+## Configure via the API
+
+Create a configuration with the plugins API. The example below hides every Slack tool from callers outside two Okta groups, restricts one specific tool to a narrower group, and leaves every other tool visible:
+
+```bash
+curl -s -X POST "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/plugins" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "plugin_type": "group_access",
+    "name": "Team tool boundaries",
+    "group_access_config": {
+      "backend": "okta",
+      "okta": {
+        "org_url": "https://example.okta.com",
+        "api_token": "'"$OKTA_API_TOKEN"'"
+      },
+      "rules": [
+        { "match": "Slack.SendMessage", "required_groups": ["comms-team"] },
+        { "match": "Slack.*", "required_groups": ["comms-team", "support-team"] }
+      ]
+    }
+  }'
+```
+
+Swap the `okta` block for `entra` or `sailpoint` to use another backend:
+
+```json
+{ "backend": "entra", "entra": { "tenant_id": "...", "client_id": "...", "client_secret": "..." } }
+```
+
+```json
+{ "backend": "sailpoint", "sailpoint": { "tenant_url": "https://acme.identitynow.com", "client_id": "...", "client_secret": "..." } }
+```
+
+To bind the configuration to the organization instead of a project, post to `/v1/orgs/{org_id}/plugins`. The [API reference](/references/api) documents the full plugins API, including listing, updating, and deleting.
+
+When you update a configuration, rules are replaced as a set rather than merged, because a rule has no identifier of its own. Send the complete list you want. Credentials behave the opposite way: omit one and the stored value is kept.
+
+## How quickly a change takes effect
+
+Effective delay is the membership cache lifetime plus however long your identity provider takes to converge on the change. Both directions are worth understanding:
+
+- **Granting access fails safe.** A caller stays without the tool until the change propagates.
+- **Revoking access is bounded, not immediate.** A caller who is removed from a group can keep seeing a gated tool until the cached answer expires.
+
+Identity providers are themselves eventually consistent, and in testing a group removal took roughly ten seconds to appear in one provider's transitive membership data. If you need tighter propagation than the default five minutes, lower the cache lifetime on the hook.
+
+## When the platform cannot verify membership
+
+If membership cannot be determined, because the provider is unreachable or does not recognize the caller, the tool is **hidden**. A degraded provider must not silently stop enforcing the boundaries you rely on.
+
+For rules where availability matters more than the boundary, you can opt individual rules into the opposite behavior with `allow_on_unavailable`:
+
+```json
+{ "match": "Slack.*", "required_groups": ["comms-team"], "allow_on_unavailable": true }
+```
+
+<Callout type="warning">
+  Because unverifiable membership hides tools, a credential problem and a
+  revoked user look identical to the caller. If tools disappear unexpectedly
+  for everyone at once, check the backend credentials and the identity mapping
+  before looking at group membership.
+</Callout>
+
+## Next steps
+
+- [How hooks work](/operate/governance/contextual-access/how-hooks-work) - Where group access fits in the hook pipeline
+- [Rate limiting](/operate/governance/contextual-access/rate-limiting) - Cap how often tools can be called
+- [Build your own](/operate/governance/contextual-access/build-your-own) - Enforce custom policies from your own webhook server
+- [API reference](/references/api) - Full plugins API documentation
