@@ -1,0 +1,1865 @@
+{
+  "id": "Mixpanel",
+  "label": "Mixpanel",
+  "version": "1.0.0",
+  "description": "Arcade.dev LLM tools for Mixpanel product analytics",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/mixpanel.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/development/mixpanel",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AggregateProperty",
+      "qualifiedName": "Mixpanel.AggregateProperty",
+      "fullyQualifiedName": "Mixpanel.AggregateProperty@1.0.0",
+      "description": "Sum or average a numeric event property over time.\n\nUse this for value metrics -- revenue, order size, duration -- where the answer\nis a total or a mean rather than a count of events.\n\nAggregates one event at a time, so a project-wide total needs one call per\nevent carrying the property.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Exact name of the event carrying the property, matching how the event is tracked in Mixpanel. Mixpanel aggregates one event at a time.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "expression",
+          "type": "string",
+          "required": true,
+          "description": "Numeric property to aggregate. A bare property name is wrapped automatically; a full arithmetic expression over properties[\"NAME\"] terms is also accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "aggregation",
+          "type": "string",
+          "required": false,
+          "description": "How to combine the values. Defaults to 'sum'.",
+          "enum": [
+            "sum",
+            "average"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Start of the window. Accepts an absolute date (YYYY-MM-DD), an offset (-Nd, -Nw, -Nm, -Ny), or a named range (last N days/weeks/months, this or last week/month/quarter/year, month to date, year to date, today, yesterday). An offset here opens a window of that length ending at to_date, so -7d with to_date 'today' is the seven days ending today; as an end bound the same offset names that day itself. A named range sets both ends of the window and to_date is ignored. Defaults to 'last 30 days'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "End of the window, inclusive (YYYY-MM-DD, 'today', 'yesterday', or an offset back from today such as -1d or -2w, which names that day itself). Defaults to today. Ignored when the start names a whole range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "required": false,
+          "description": "Bucket size. Defaults to 'day'.",
+          "enum": [
+            "hour",
+            "day"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The aggregated value with its per-bucket points and the date window that was queried."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.AggregateProperty",
+        "parameters": {
+          "event": {
+            "value": "Purchase Completed",
+            "type": "string",
+            "required": true
+          },
+          "expression": {
+            "value": "properties[\"revenue\"]",
+            "type": "string",
+            "required": true
+          },
+          "aggregation": {
+            "value": "sum",
+            "type": "string",
+            "required": false
+          },
+          "from_date": {
+            "value": "last 30 days",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "today",
+            "type": "string",
+            "required": false
+          },
+          "unit": {
+            "value": "day",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ComparePeriods",
+      "qualifiedName": "Mixpanel.ComparePeriods",
+      "fullyQualifiedName": "Mixpanel.ComparePeriods@1.0.0",
+      "description": "Compare one event's volume between two periods, matched in length.\n\nReports the absolute change, the percentage change, and the direction, so the\n\"is this up or down\" question is answered directly rather than left as\narithmetic over two payloads. A comparison window given explicitly can end up\nshorter when it runs into today, and notes says so when it does.\n\nThis is also how to get one whole-window figure for unique_users or\naverage_events_per_user: each window is measured as a single span rather\nthan per bucket. It takes no breakdown, so it cannot answer a per-segment\nquestion, and it fails rather than answering if Mixpanel does not reduce a\nwindow to one figure.\n\nCosts two of the 60 Mixpanel queries available per hour.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Exact event name, matching how the event is tracked in Mixpanel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Start of the current window. Accepts an absolute date (YYYY-MM-DD), an offset (-Nd, -Nw, -Nm, -Ny), or a named range (last N days/weeks/months, this or last week/month/quarter/year, month to date, year to date, today, yesterday). An offset here opens a window of that length ending at to_date, so -7d with to_date 'today' is the seven days ending today; as an end bound the same offset names that day itself. A named range sets both ends of the window and to_date is ignored. Defaults to 'last 7 days'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "End of the window, inclusive (YYYY-MM-DD, 'today', 'yesterday', or an offset back from today such as -1d or -2w, which names that day itself). Defaults to today. Ignored when the start names a whole range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "compare_from_date",
+          "type": "string",
+          "required": false,
+          "description": "First day of the comparison window (YYYY-MM-DD, 'yesterday', or an offset back from today such as -60d, which names that day itself). The window runs forward from it for as long as the current one, clipped at today. Omit it to compare against the period immediately before the current window, which is almost always what is wanted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "required": false,
+          "description": "Bucket size for both series. Defaults to 'day'. Applies to total_events only; unique_users and average_events_per_user are measured over each window as a whole and ignore this.",
+          "enum": [
+            "hour",
+            "day",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "count_type",
+          "type": "string",
+          "required": false,
+          "description": "How occurrences are counted. Defaults to 'total_events'.",
+          "enum": [
+            "total_events",
+            "unique_users",
+            "average_events_per_user"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "filter_expression",
+          "type": "string",
+          "required": false,
+          "description": "Applied to both windows. Mixpanel filter expression over event properties, in the form properties[\"NAME\"] OPERATOR VALUE. Supports ==, !=, >, >=, <, <=, in, and/or/not, and defined(properties[\"NAME\"]). Omit for no filtering.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Both windows' totals with the absolute change, percentage change and direction, plus each window's series."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.ComparePeriods",
+        "parameters": {
+          "event": {
+            "value": "Purchase Completed",
+            "type": "string",
+            "required": true
+          },
+          "from_date": {
+            "value": "last 30 days",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "today",
+            "type": "string",
+            "required": false
+          },
+          "compare_from_date": {
+            "value": "-60d",
+            "type": "string",
+            "required": false
+          },
+          "unit": {
+            "value": "day",
+            "type": "string",
+            "required": false
+          },
+          "count_type": {
+            "value": "total_events",
+            "type": "string",
+            "required": false
+          },
+          "filter_expression": {
+            "value": "properties[\"plan_type\"] == \"premium\" and properties[\"amount\"] > 0",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "FindProfiles",
+      "qualifiedName": "Mixpanel.FindProfiles",
+      "fullyQualifiedName": "Mixpanel.FindProfiles@1.0.0",
+      "description": "Find Mixpanel user profiles by property filter or cohort membership.\n\nA cohort is given by name or numeric ID and a name is resolved here, so there\nis no need to list cohorts first.\n\nPages hold up to 1000 profiles; to read further ones, pass back the returned\nsession_id with an incremented page number.\n\nProfile properties are a separate namespace from event properties; a filter\nwritten against an event property will not match anything here.",
+      "parameters": [
+        {
+          "name": "match_mode",
+          "type": "string",
+          "required": false,
+          "description": "Whether to select profiles by a property filter or by membership of a saved cohort. Defaults to 'filter'.",
+          "enum": [
+            "filter",
+            "cohort"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "filter_expression",
+          "type": "string",
+          "required": false,
+          "description": "Mixpanel filter expression over *profile* properties, in the form properties[\"NAME\"] OPERATOR VALUE. Supports ==, !=, >, >=, <, <=, in, and/or/not, and defined(properties[\"NAME\"]). Omit to return all profiles. Used only when selecting by filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cohort",
+          "type": "string",
+          "required": false,
+          "description": "The saved cohort whose members to return, given as its name or numeric ID. Required when match_mode is 'cohort', ignored otherwise.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "output_properties",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Exact profile property names to return. Omitting this returns a compact identity set covering email, name, creation and last-seen dates, and location. A long explicit list makes responses substantially larger and slower.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed page number. Mixpanel pages profiles in fixed blocks of 1000 rather than by arbitrary offset. Defaults to 0 (first page).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "The session_id returned by a previous call. Required for any page after the first, and makes paging much faster by reusing Mixpanel's cached result set.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of matching profiles with the requested properties, and the session_id needed to request further pages."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.FindProfiles",
+        "parameters": {
+          "match_mode": {
+            "value": "filter",
+            "type": "string",
+            "required": false
+          },
+          "filter_expression": {
+            "value": "properties[\"plan\"] == \"premium\" and properties[\"age\"] >= 30",
+            "type": "string",
+            "required": false
+          },
+          "cohort": {
+            "value": "High Value Users",
+            "type": "string",
+            "required": false
+          },
+          "output_properties": {
+            "value": [
+              "$email",
+              "$name",
+              "$created",
+              "$last_seen",
+              "plan",
+              "country"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "page": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "session_id": {
+            "value": "abc123def456ghi789",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetEngagementFrequency",
+      "qualifiedName": "Mixpanel.GetEngagementFrequency",
+      "fullyQualifiedName": "Mixpanel.GetEngagementFrequency@1.0.0",
+      "description": "Get how habitually users perform an event.\n\nBuckets users by how many distinct periods they were active in, separating\none-time users from a habitual core. Answers how sticky a feature is, which a\nplain event count cannot. Buckets are cumulative thresholds, so they overlap\nand do not sum to the user base.\n\nMixpanel measures each unit cohort separately and cannot dedupe users across\nthem, so total_users is a distinct headcount only when the window resolves to\none cohort and is null otherwise -- which the defaults produce, since a\n30-day window holds four or five weekly cohorts. Quote peak_users_per_cohort\nfor scale, or query a window of one unit for a distinct total.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Exact event name, matching how the event is tracked in Mixpanel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Start of the window. Accepts an absolute date (YYYY-MM-DD), an offset (-Nd, -Nw, -Nm, -Ny), or a named range (last N days/weeks/months, this or last week/month/quarter/year, month to date, year to date, today, yesterday). An offset here opens a window of that length ending at to_date, so -7d with to_date 'today' is the seven days ending today; as an end bound the same offset names that day itself. A named range sets both ends of the window and to_date is ignored. Defaults to 'last 30 days'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "End of the window, inclusive (YYYY-MM-DD, 'today', 'yesterday', or an offset back from today such as -1d or -2w, which names that day itself). Defaults to today. Ignored when the start names a whole range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "required": false,
+          "description": "Length of each analysis cohort. Defaults to 'week'.",
+          "enum": [
+            "day",
+            "week",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "activity_period",
+          "type": "string",
+          "required": false,
+          "description": "The period a user is counted as active in. Defaults to 'day'.",
+          "enum": [
+            "hour",
+            "day"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "filter_expression",
+          "type": "string",
+          "required": false,
+          "description": "Mixpanel filter expression over event properties, in the form properties[\"NAME\"] OPERATOR VALUE. Supports ==, !=, >, >=, <, <=, in, and/or/not, and defined(properties[\"NAME\"]). Omit for no filtering.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Cumulative buckets of users by how many periods they were active in, each with its share of the active user base."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.GetEngagementFrequency",
+        "parameters": {
+          "event": {
+            "value": "Song Played",
+            "type": "string",
+            "required": true
+          },
+          "from_date": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "2024-01-31",
+            "type": "string",
+            "required": false
+          },
+          "unit": {
+            "value": "week",
+            "type": "string",
+            "required": false
+          },
+          "activity_period": {
+            "value": "day",
+            "type": "string",
+            "required": false
+          },
+          "filter_expression": {
+            "value": "properties[\"plan\"] == \"premium\" and properties[\"country\"] in [\"US\", \"CA\"]",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetEventTrend",
+      "qualifiedName": "Mixpanel.GetEventTrend",
+      "fullyQualifiedName": "Mixpanel.GetEventTrend@1.0.0",
+      "description": "Get a time series for one event, optionally split by a property.\n\nA window-wide total comes back for total_events. Unique users and per-user\naverages are counted within each bucket, so they report no window total\nunless the window resolves to a single bucket.\n\nSplitting by a property answers \"which segment drove this\" in one query.\nMixpanel allows only 60 queries per hour, so a single split query is\nsubstantially cheaper than one filtered query per segment.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Exact event name, matching how the event is tracked in Mixpanel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Start of the window. Accepts an absolute date (YYYY-MM-DD), an offset (-Nd, -Nw, -Nm, -Ny), or a named range (last N days/weeks/months, this or last week/month/quarter/year, month to date, year to date, today, yesterday). An offset here opens a window of that length ending at to_date, so -7d with to_date 'today' is the seven days ending today; as an end bound the same offset names that day itself. A named range sets both ends of the window and to_date is ignored. Defaults to 'last 30 days'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "End of the window, inclusive (YYYY-MM-DD, 'today', 'yesterday', or an offset back from today such as -1d or -2w, which names that day itself). Defaults to today. Ignored when the start names a whole range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "required": false,
+          "description": "Bucket size for the time series. Defaults to 'day'.",
+          "enum": [
+            "hour",
+            "day",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "count_type",
+          "type": "string",
+          "required": false,
+          "description": "How occurrences are counted. Defaults to 'total_events'. Only total_events adds up across buckets and segments, so it is the only one that reports a window-wide grand_total; for the other two grand_total is null unless the window resolves to a single bucket.",
+          "enum": [
+            "total_events",
+            "unique_users",
+            "average_events_per_user"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "segment_by_property",
+          "type": "string",
+          "required": false,
+          "description": "Property name to split the series by, giving one series per value. Omit for a single combined series.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_expression",
+          "type": "string",
+          "required": false,
+          "description": "Mixpanel filter expression over event properties, in the form properties[\"NAME\"] OPERATOR VALUE. Supports ==, !=, >, >=, <, <=, in, and/or/not, and defined(properties[\"NAME\"]). Omit for no filtering.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "segment_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum segments to request when splitting by a property (1-1000). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "One series per segment, each with its per-bucket points, total, peak and first-to-last change, plus the date window that was queried."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.GetEventTrend",
+        "parameters": {
+          "event": {
+            "value": "Purchase Completed",
+            "type": "string",
+            "required": true
+          },
+          "from_date": {
+            "value": "last 30 days",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "today",
+            "type": "string",
+            "required": false
+          },
+          "unit": {
+            "value": "day",
+            "type": "string",
+            "required": false
+          },
+          "count_type": {
+            "value": "total_events",
+            "type": "string",
+            "required": false
+          },
+          "segment_by_property": {
+            "value": "plan_type",
+            "type": "string",
+            "required": false
+          },
+          "filter_expression": {
+            "value": "properties[\"country\"] == \"US\" and properties[\"amount\"] >= 100",
+            "type": "string",
+            "required": false
+          },
+          "segment_limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetFunnel",
+      "qualifiedName": "Mixpanel.GetFunnel",
+      "fullyQualifiedName": "Mixpanel.GetFunnel@1.0.0",
+      "description": "Get step-by-step conversion for a saved Mixpanel funnel.\n\nTakes the funnel's name or its numeric ID and resolves a name against the\nproject's saved funnels, so there is no need to list them first.\n\nSteps are aggregated across the whole window rather than split into per-date\nsub-funnels.\n\nCosts two of the 60 Mixpanel queries available per hour.",
+      "parameters": [
+        {
+          "name": "funnel",
+          "type": "string",
+          "required": true,
+          "description": "The saved funnel to query, given either as its name or its numeric ID. Names are resolved against the project's saved funnels, and a unique partial name is accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Start of the window. Accepts an absolute date (YYYY-MM-DD), an offset (-Nd, -Nw, -Nm, -Ny), or a named range (last N days/weeks/months, this or last week/month/quarter/year, month to date, year to date, today, yesterday). An offset here opens a window of that length ending at to_date, so -7d with to_date 'today' is the seven days ending today; as an end bound the same offset names that day itself. A named range sets both ends of the window and to_date is ignored. Defaults to 'last 30 days'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "End of the window, inclusive (YYYY-MM-DD, 'today', 'yesterday', or an offset back from today such as -1d or -2w, which names that day itself). Defaults to today. Ignored when the start names a whole range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conversion_window_days",
+          "type": "integer",
+          "required": false,
+          "description": "Days a user has to finish the funnel after entering it (1-90). Omitting it uses the conversion window saved with the funnel in Mixpanel.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Each funnel step with its count, step and overall conversion and average timings, plus the largest drop-off."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.GetFunnel",
+        "parameters": {
+          "funnel": {
+            "value": "Signup to Purchase",
+            "type": "string",
+            "required": true
+          },
+          "from_date": {
+            "value": "last 30 days",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "today",
+            "type": "string",
+            "required": false
+          },
+          "conversion_window_days": {
+            "value": 14,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetRetention",
+      "qualifiedName": "Mixpanel.GetRetention",
+      "fullyQualifiedName": "Mixpanel.GetRetention@1.0.0",
+      "description": "Get a cohort retention table with retention percentages computed.\n\nThe size-weighted average curve across cohorts is the figure usually meant by\n\"our day-7 retention\".\n\nIntervals are indexed as Mixpanel buckets them: index 0 holds users who came\nback within the first period and runs close to 100%, and index N is retention\nN periods out. first_time retention reports a window-wide headcount in\ntotal_cohort_size; recurring re-enrols a user in every period they act in, so\nthe cohorts overlap and that field comes back null.",
+      "parameters": [
+        {
+          "name": "born_event",
+          "type": "string",
+          "required": true,
+          "description": "Exact name of the event that starts the cohort clock, such as a signup or activation event.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "return_event",
+          "type": "string",
+          "required": false,
+          "description": "Exact name of the event that counts as returning. Omitting it measures whether users repeat born_event.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Start of the cohort window. Accepts an absolute date (YYYY-MM-DD), an offset (-Nd, -Nw, -Nm, -Ny), or a named range (last N days/weeks/months, this or last week/month/quarter/year, month to date, year to date, today, yesterday). An offset here opens a window of that length ending at to_date, so -7d with to_date 'today' is the seven days ending today; as an end bound the same offset names that day itself. A named range sets both ends of the window and to_date is ignored. Defaults to 'last 8 weeks'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "End of the window, inclusive (YYYY-MM-DD, 'today', 'yesterday', or an offset back from today such as -1d or -2w, which names that day itself). Defaults to today. Ignored when the start names a whole range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "unit",
+          "type": "string",
+          "required": false,
+          "description": "Length of each retention interval. Defaults to 'day'.",
+          "enum": [
+            "day",
+            "week",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "retention_kind",
+          "type": "string",
+          "required": false,
+          "description": "Which retention question to ask. Defaults to 'first_time'.",
+          "enum": [
+            "first_time",
+            "recurring"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "intervals",
+          "type": "integer",
+          "required": false,
+          "description": "Number of retention intervals to return (1-90). Defaults to 14.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_expression",
+          "type": "string",
+          "required": false,
+          "description": "Applied to the return event. Mixpanel filter expression over event properties, in the form properties[\"NAME\"] OPERATOR VALUE. Supports ==, !=, >, >=, <, <=, in, and/or/not, and defined(properties[\"NAME\"]). Omit for no filtering.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "One row per cohort with its size, per-interval counts and retention percentages, plus the size-weighted average curve across cohorts."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.GetRetention",
+        "parameters": {
+          "born_event": {
+            "value": "Sign Up",
+            "type": "string",
+            "required": true
+          },
+          "return_event": {
+            "value": "Session Start",
+            "type": "string",
+            "required": false
+          },
+          "from_date": {
+            "value": "last 8 weeks",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "today",
+            "type": "string",
+            "required": false
+          },
+          "unit": {
+            "value": "week",
+            "type": "string",
+            "required": false
+          },
+          "retention_kind": {
+            "value": "first_time",
+            "type": "string",
+            "required": false
+          },
+          "intervals": {
+            "value": 8,
+            "type": "integer",
+            "required": false
+          },
+          "filter_expression": {
+            "value": "properties[\"plan\"] == \"premium\"",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetSavedReport",
+      "qualifiedName": "Mixpanel.GetSavedReport",
+      "fullyQualifiedName": "Mixpanel.GetSavedReport@1.0.0",
+      "description": "Read the data behind a saved Mixpanel Insights report.\n\nThis is Mixpanel's supported way to query a report whose definition already\nlives in the product, including breakdown and funnel report types that have no\ndirect API of their own.\n\nThe report's own saved date range and filters apply and cannot be overridden\nthrough the API. Nested breakdowns are flattened to one series per segment.",
+      "parameters": [
+        {
+          "name": "report_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric ID of the saved Insights report. It appears in the report's URL as the digits in the editor card reference, formatted report-<ID>.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The report's series with totals, the date range saved with the report, and when Mixpanel computed the figures."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.GetSavedReport",
+        "parameters": {
+          "report_id": {
+            "value": 7483921,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetUserActivity",
+      "qualifiedName": "Mixpanel.GetUserActivity",
+      "fullyQualifiedName": "Mixpanel.GetUserActivity@1.0.0",
+      "description": "Get one user's chronological event history, newest first.\n\nUse this to trace an individual journey -- reproducing a support report, or\nseeing what a user did before churning.",
+      "parameters": [
+        {
+          "name": "distinct_id",
+          "type": "string",
+          "required": true,
+          "description": "The user's Mixpanel distinct_id, the unique profile identifier.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Start of the window. Accepts an absolute date (YYYY-MM-DD), an offset (-Nd, -Nw, -Nm, -Ny), or a named range (last N days/weeks/months, this or last week/month/quarter/year, month to date, year to date, today, yesterday). An offset here opens a window of that length ending at to_date, so -7d with to_date 'today' is the seven days ending today; as an end bound the same offset names that day itself. A named range sets both ends of the window and to_date is ignored. Defaults to 'last 7 days'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "End of the window, inclusive (YYYY-MM-DD, 'today', 'yesterday', or an offset back from today such as -1d or -2w, which names that day itself). Defaults to today. Ignored when the start names a whole range.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum events to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (most recent event).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of the user's events, newest first, with timestamps and properties."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.GetUserActivity",
+        "parameters": {
+          "distinct_id": {
+            "value": "user_7f3a2c1d-4e89-4b0f-91d2-3c5e6f7a8b9c",
+            "type": "string",
+            "required": true
+          },
+          "from_date": {
+            "value": "last 30 days",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "today",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListCohorts",
+      "qualifiedName": "Mixpanel.ListCohorts",
+      "fullyQualifiedName": "Mixpanel.ListCohorts@1.0.0",
+      "description": "List the saved cohorts in this Mixpanel project, largest first.\n\nCohorts are created in the Mixpanel UI; they cannot be created here.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum cohorts to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of saved cohorts with their names, IDs and last computed member counts."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.ListCohorts",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEventProperties",
+      "qualifiedName": "Mixpanel.ListEventProperties",
+      "fullyQualifiedName": "Mixpanel.ListEventProperties@1.0.0",
+      "description": "List the property names recorded on an event, most frequent first.\n\nThese names are the valid inputs for segmenting or filtering this event in the\nanalytics tools.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Exact event name, matching how the event is tracked in Mixpanel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum properties to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of property names recorded on the event, with how often each one appears."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.ListEventProperties",
+        "parameters": {
+          "event": {
+            "value": "Purchase Completed",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEvents",
+      "qualifiedName": "Mixpanel.ListEvents",
+      "fullyQualifiedName": "Mixpanel.ListEvents@1.0.0",
+      "description": "List the event names tracked in this Mixpanel project, ranked by volume.\n\nEvent names must be given to analytics tools exactly as tracked -- they are\ncase- and punctuation-sensitive, so \"Sign Up\" and \"sign_up\" are different\nevents. Returns the highest-volume events first.",
+      "parameters": [
+        {
+          "name": "ranking_window",
+          "type": "string",
+          "required": false,
+          "description": "Window to rank event volume over. 'today' also reports each event's percent change against yesterday. Defaults to 'last_31_days'.",
+          "enum": [
+            "today",
+            "last_31_days"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "count_type",
+          "type": "string",
+          "required": false,
+          "description": "How occurrences are counted. Defaults to 'total_events'.",
+          "enum": [
+            "total_events",
+            "unique_users",
+            "average_events_per_user"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum events to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of tracked event names ranked by volume, with pagination fields."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.ListEvents",
+        "parameters": {
+          "ranking_window": {
+            "value": "last_31_days",
+            "type": "string",
+            "required": false
+          },
+          "count_type": {
+            "value": "total_events",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListFunnels",
+      "qualifiedName": "Mixpanel.ListFunnels",
+      "fullyQualifiedName": "Mixpanel.ListFunnels@1.0.0",
+      "description": "List the saved funnels in this Mixpanel project, with their IDs.\n\nMixpanel can only report on funnels that were saved in its UI; there is no way\nto define an ad-hoc funnel over arbitrary events through the API.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum funnels to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of saved funnels with their names and numeric IDs."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.ListFunnels",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPropertyValues",
+      "qualifiedName": "Mixpanel.ListPropertyValues",
+      "fullyQualifiedName": "Mixpanel.ListPropertyValues@1.0.0",
+      "description": "List the values observed for one property of an event.\n\nUse this to get filter values exactly right: a filter on a value that does not\nexist returns zero rows, which is indistinguishable from a genuine absence of\nactivity.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Exact event name, matching how the event is tracked in Mixpanel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "property_name",
+          "type": "string",
+          "required": true,
+          "description": "Exact property name as recorded on that event.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum values to return (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A page of values observed for the property."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.ListPropertyValues",
+        "parameters": {
+          "event": {
+            "value": "Purchase Completed",
+            "type": "string",
+            "required": true
+          },
+          "property_name": {
+            "value": "payment_method",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Mixpanel.WhoAmI",
+      "fullyQualifiedName": "Mixpanel.WhoAmI@1.0.0",
+      "description": "Verify the Mixpanel connection and list the projects it can reach.\n\nConfirms the service account authenticates, reports the configured region and\nproject, and checks that the configured project is one the service account can\nactually read -- the usual cause of empty results or permission errors.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+        "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+        "MIXPANEL_PROJECT_ID",
+        "MIXPANEL_REGION"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_USERNAME",
+          "type": "api_key"
+        },
+        {
+          "name": "MIXPANEL_SERVICE_ACCOUNT_SECRET",
+          "type": "client_secret"
+        },
+        {
+          "name": "MIXPANEL_PROJECT_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "MIXPANEL_REGION",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The authenticated service account, the region and project in use, and the organizations and projects that account can reach."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mixpanel.WhoAmI",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-04T15:27:39.244Z",
+  "summary": "Mixpanel is a product analytics platform; this toolkit lets LLM agents query Mixpanel event data, user profiles, funnels, retention, and saved reports using a service account.\n\n## Capabilities\n\n- **Event analytics**: Retrieve time-series trends for events, aggregate numeric properties (sum/average), compare volumes across periods, and inspect raw event lists and property values.\n- **Funnel & retention analysis**: Fetch step-by-step conversion from saved funnels and cohort retention tables with computed percentages and size-weighted averages.\n- **Segmentation & frequency**: Split event trends by property, measure engagement habitualness (stickiness buckets), and filter or page through user profiles by property or cohort membership.\n- **Saved content access**: Read data behind saved Insights reports and list saved funnels, cohorts, events, and event properties — resolving names to IDs where needed.\n- **User-level debugging**: Pull a single user's chronological event history and verify service account connectivity and project access.\n\n## Secrets\n\nAll authentication is handled via Mixpanel service account credentials passed as secrets. No OAuth flow is involved.\n\n- **`MIXPANEL_SERVICE_ACCOUNT_USERNAME`** — The username of a Mixpanel service account. Service accounts are created in your Mixpanel organization settings under **Organization Settings → Service Accounts**. The username is displayed at creation time. See [Mixpanel Service Accounts docs](https://developer.mixpanel.com/reference/service-accounts) for setup steps. Service accounts require at least **Analyst** role on the target project to read analytics data.\n\n- **`MIXPANEL_SERVICE_ACCOUNT_SECRET`** — The secret (password) issued when the service account is created. It is shown only once at creation; if lost, a new service account must be created. Treat this as a password — do not commit it to source control.\n\n- **`MIXPANEL_PROJECT_ID`** — The numeric ID of the Mixpanel project to query. Find it in **Project Settings → Overview** in the Mixpanel UI, or via the `Mixpanel.WhoAmI` tool, which lists all projects the service account can reach.\n\n- **`MIXPANEL_REGION`** — The data residency region for the project. Accepts `US` (default, `api.mixpanel.com`) or `EU` (`eu.mixpanel.com`). Check your project's data residency setting under **Project Settings → Data Residency**. An incorrect region causes all API calls to return empty results or auth errors.\n\nFor instructions on registering secrets with Arcade, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can manage secret values at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}
