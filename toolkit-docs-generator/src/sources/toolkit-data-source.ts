@@ -18,9 +18,13 @@ import {
   createEngineApiSource,
   type EngineApiSourceConfig,
 } from "./engine-api";
-import type { IMetadataSource, IToolDataSource } from "./internal";
+import type { MetadataSource, ToolDataSource } from "./internal";
 import { createMockEngineApiSource } from "./mock-engine-api";
 import { createMockMetadataSource } from "./mock-metadata";
+import {
+  createPublicCatalogApiSource,
+  type PublicCatalogApiSourceConfig,
+} from "./public-catalog-api";
 
 // ============================================================================
 // Unified Toolkit Data Interface
@@ -48,10 +52,10 @@ export interface ToolkitData {
  * 2. Future: Use a single unified source when Engine API includes metadata
  *
  * Implementations:
- * - CombinedToolkitDataSource: Combines IToolDataSource + IMetadataSource
+ * - CombinedToolkitDataSource: Combines ToolDataSource + MetadataSource
  * - UnifiedToolkitDataSource: Single source (future implementation)
  */
-export interface IToolkitDataSource {
+export interface ToolkitDataSource {
   /**
    * Fetch combined data for a specific toolkit
    * @param toolkitId - The toolkit identifier (e.g., "Github", "Slack")
@@ -75,6 +79,9 @@ export interface IToolkitDataSource {
   readonly isAvailable: () => Promise<boolean>;
 }
 
+/** @deprecated Use {@link ToolkitDataSource} */
+export type IToolkitDataSource = ToolkitDataSource;
+
 /**
  * Reuse one all-toolkit snapshot for the lifetime of a generation run.
  *
@@ -82,8 +89,8 @@ export interface IToolkitDataSource {
  * instead of issuing independent API reads that can disagree mid-run.
  */
 export const createCachedToolkitDataSource = (
-  source: IToolkitDataSource
-): IToolkitDataSource => {
+  source: ToolkitDataSource
+): ToolkitDataSource => {
   let allToolkitsSnapshot:
     | Promise<ReadonlyMap<string, ToolkitData>>
     | undefined;
@@ -108,24 +115,24 @@ export const createCachedToolkitDataSource = (
  */
 export interface CombinedToolkitDataSourceConfig {
   /** Source for tool definitions */
-  readonly toolSource: IToolDataSource;
+  readonly toolSource: ToolDataSource;
   /** Source for toolkit metadata */
-  readonly metadataSource: IMetadataSource;
+  readonly metadataSource: MetadataSource;
 }
 
 /**
  * Combined implementation that merges separate tool and metadata sources
  *
  * This is the current implementation that combines:
- * - Engine API (via IToolDataSource)
- * - Design System (via IMetadataSource)
+ * - Engine API (via ToolDataSource)
+ * - Design System (via MetadataSource)
  *
  * In the future, this can be replaced with UnifiedToolkitDataSource
  * when Engine API includes metadata.
  */
-export class CombinedToolkitDataSource implements IToolkitDataSource {
-  private readonly toolSource: IToolDataSource;
-  private readonly metadataSource: IMetadataSource;
+export class CombinedToolkitDataSource implements ToolkitDataSource {
+  private readonly toolSource: ToolDataSource;
+  private readonly metadataSource: MetadataSource;
 
   constructor(config: CombinedToolkitDataSourceConfig) {
     this.toolSource = config.toolSource;
@@ -259,7 +266,26 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
  */
 export const createCombinedToolkitDataSource = (
   config: CombinedToolkitDataSourceConfig
-): IToolkitDataSource => new CombinedToolkitDataSource(config);
+): ToolkitDataSource => new CombinedToolkitDataSource(config);
+
+// ============================================================================
+// Public Catalog Toolkit Data Source
+// ============================================================================
+
+export interface PublicCatalogToolkitDataSourceConfig {
+  /** Public catalog API configuration */
+  readonly publicCatalog: PublicCatalogApiSourceConfig;
+  /** Source for toolkit metadata */
+  readonly metadataSource: MetadataSource;
+}
+
+export const createPublicCatalogToolkitDataSource = (
+  config: PublicCatalogToolkitDataSourceConfig
+): ToolkitDataSource =>
+  createCombinedToolkitDataSource({
+    toolSource: createPublicCatalogApiSource(config.publicCatalog),
+    metadataSource: config.metadataSource,
+  });
 
 // ============================================================================
 // Engine Toolkit Data Source
@@ -269,12 +295,13 @@ export interface EngineToolkitDataSourceConfig {
   /** Engine API configuration */
   readonly engine: EngineApiSourceConfig;
   /** Source for toolkit metadata */
-  readonly metadataSource: IMetadataSource;
+  readonly metadataSource: MetadataSource;
 }
 
+/** @deprecated Use {@link createPublicCatalogToolkitDataSource} instead. */
 export const createEngineToolkitDataSource = (
   config: EngineToolkitDataSourceConfig
-): IToolkitDataSource =>
+): ToolkitDataSource =>
   createCombinedToolkitDataSource({
     toolSource: createEngineApiSource(config.engine),
     metadataSource: config.metadataSource,
@@ -288,15 +315,13 @@ export interface ArcadeToolkitDataSourceConfig {
   /** Arcade API configuration */
   readonly arcade: ArcadeApiSourceConfig;
   /** Source for toolkit metadata */
-  readonly metadataSource: IMetadataSource;
+  readonly metadataSource: MetadataSource;
 }
 
-/**
- * Create a toolkit data source using the Arcade Production API (/v1/tools)
- */
+/** @deprecated Use {@link createPublicCatalogToolkitDataSource} instead. */
 export const createArcadeToolkitDataSource = (
   config: ArcadeToolkitDataSourceConfig
-): IToolkitDataSource =>
+): ToolkitDataSource =>
   createCombinedToolkitDataSource({
     toolSource: createArcadeApiSource(config.arcade),
     metadataSource: config.metadataSource,
@@ -322,7 +347,7 @@ export interface MockToolkitDataSourceConfig {
  */
 export const createMockToolkitDataSource = (
   config: MockToolkitDataSourceConfig
-): IToolkitDataSource => {
+): ToolkitDataSource => {
   const toolFixturePath = join(config.dataDir, "engine-api-response.json");
   const metadataFixturePath = join(config.dataDir, "metadata.json");
 

@@ -1,5 +1,5 @@
 import type { ToolDefinition } from "../types/index";
-import type { FetchOptions, IToolDataSource } from "./internal";
+import type { FetchOptions, ToolDataSource } from "./internal";
 import {
   parseToolMetadataError,
   parseToolMetadataResponse,
@@ -60,7 +60,8 @@ const parseJsonResponse = async (
   }
 };
 
-export class EngineApiSource implements IToolDataSource {
+/** @deprecated Use the public catalog source ({@link createPublicCatalogApiSource}) instead. */
+export class EngineApiSource implements ToolDataSource {
   private readonly endpoint: string;
   private readonly summaryEndpoint: string;
   private readonly apiKey: string;
@@ -216,4 +217,4 @@ export class EngineApiSource implements IToolDataSource {
 
 export const createEngineApiSource = (
   config: EngineApiSourceConfig
-): IToolDataSource => new EngineApiSource(config);
+): ToolDataSource => new EngineApiSource(config);

@@ -16,7 +16,7 @@ import {
   parseArcadeErrorResponse,
   parseArcadeToolsResponse,
 } from "./arcade-api-types";
-import type { FetchOptions, IToolDataSource } from "./internal";
+import type { FetchOptions, ToolDataSource } from "./internal";
 
 // ============================================================================
 // Configuration
@@ -153,7 +153,8 @@ const extractToolkitId = (qualifiedName: string): string => {
 // Arcade API Source Implementation
 // ============================================================================
 
-export class ArcadeApiSource implements IToolDataSource {
+/** @deprecated Use the public catalog source ({@link createPublicCatalogApiSource}) instead. */
+export class ArcadeApiSource implements ToolDataSource {
   private readonly endpoint: string;
   private readonly apiKey: string;
   private readonly fetchFn: typeof fetch;
@@ -327,7 +328,7 @@ export class ArcadeApiSource implements IToolDataSource {
  */
 export const createArcadeApiSource = (
   config: ArcadeApiSourceConfig
-): IToolDataSource => new ArcadeApiSource(config);
+): ToolDataSource => new ArcadeApiSource(config);
 
 /**
  * Create an Arcade API source with default production URL
@@ -335,7 +336,7 @@ export const createArcadeApiSource = (
 export const createProductionArcadeApiSource = (
   apiKey: string,
   options?: Partial<Omit<ArcadeApiSourceConfig, "apiKey" | "baseUrl">>
-): IToolDataSource =>
+): ToolDataSource =>
   new ArcadeApiSource({
     baseUrl: DEFAULT_BASE_URL,
     apiKey,

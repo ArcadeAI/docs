@@ -39,7 +39,7 @@ export interface SecretCoverageEditInput {
   readonly requireConfigLink: boolean;
 }
 
-export interface ISecretEditGenerator {
+export interface SecretEditGenerator {
   /**
    * Edit the provided content to remove all references to `removedSecrets`
    * while preserving every other sentence, bullet, table row, heading, and
@@ -55,6 +55,9 @@ export interface ISecretEditGenerator {
    */
   fillCoverageGaps: (input: SecretCoverageEditInput) => Promise<string>;
 }
+
+/** @deprecated Use {@link SecretEditGenerator} */
+export type ISecretEditGenerator = SecretEditGenerator;
 
 const DEFAULT_SYSTEM_PROMPT =
   "You are a careful documentation editor for the Arcade MCP toolkit docs. " +
@@ -146,7 +149,7 @@ const buildCoveragePrompt = (input: SecretCoverageEditInput): string => {
   ].join("\n");
 };
 
-export class LlmSecretEditGenerator implements ISecretEditGenerator {
+export class LlmSecretEditGenerator implements SecretEditGenerator {
   private readonly client: LlmClient;
   private readonly model: string;
   private readonly temperature: number | undefined;

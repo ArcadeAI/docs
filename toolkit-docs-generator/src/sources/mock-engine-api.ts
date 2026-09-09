@@ -8,7 +8,7 @@
 import { readFile } from "fs/promises";
 import type { ToolDefinition } from "../types/index";
 import { normalizeId } from "../utils/fp";
-import type { FetchOptions, IToolDataSource } from "./internal";
+import type { FetchOptions, ToolDataSource } from "./internal";
 import { parseToolMetadataResponse } from "./tool-metadata-schema";
 
 export interface MockEngineApiConfig {
@@ -22,7 +22,7 @@ export interface MockEngineApiConfig {
  * Use this until the real Engine API endpoint is available.
  * The fixture format matches the expected API response schema.
  */
-export class MockEngineApiSource implements IToolDataSource {
+export class MockEngineApiSource implements ToolDataSource {
   private readonly fixtureFilePath: string;
   private cachedData: ToolDefinition[] | null = null;
 
@@ -99,4 +99,4 @@ export class MockEngineApiSource implements IToolDataSource {
 
 export const createMockEngineApiSource = (
   fixtureFilePath: string
-): IToolDataSource => new MockEngineApiSource({ fixtureFilePath });
+): ToolDataSource => new MockEngineApiSource({ fixtureFilePath });

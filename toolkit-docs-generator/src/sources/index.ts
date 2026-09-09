@@ -12,6 +12,8 @@ export * from "./markdown-curation";
 export * from "./mock-engine-api";
 export * from "./mock-metadata";
 export * from "./oauth-provider-resolver";
+export * from "./public-catalog-api";
+export * from "./public-catalog-pagination";
 export * from "./toolkit-data-source";
 
 // Note: Design System source requires @arcadeai/design-system to be installed.

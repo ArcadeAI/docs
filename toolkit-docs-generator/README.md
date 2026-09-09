@@ -19,8 +19,8 @@ The generator merges three inputs into one JSON output per toolkit:
 
 It also reads the previous output when you use `--skip-unchanged` or `--previous-output`.
 
-When `--skip-unchanged` runs against the tool metadata API, the generator fetches
-one complete snapshot from `/v1/tool_metadata`. It reuses that snapshot for
+When `--skip-unchanged` runs against the public catalog API, the generator fetches
+one complete snapshot from `/v1/public/tool_catalog` and `/v1/public/tools`. It reuses that snapshot for
 change detection, progress calculation, and generation so a run cannot compare
 different API states. Only changed toolkits are regenerated.
 
@@ -30,13 +30,13 @@ The workflow file is `/.github/workflows/generate-toolkit-docs.yml`.
 It runs these steps:
 
 1. Type-check and test the toolkit docs generator.
-2. Generate toolkit JSON using `toolkit-docs-generator` and the Engine API.
+2. Generate toolkit JSON using `toolkit-docs-generator` and the Engine public catalog API.
 3. Sync sidebar navigation from `toolkit-docs-generator/data/toolkits` to the `_meta.tsx` files.
 4. Create or update a pull request if there are changes.
 
 Required secrets:
 
-- `ENGINE_API_URL`, `ENGINE_API_KEY`
+- `ENGINE_API_URL`
 - `ANTHROPIC_API_KEY` for examples, summaries, and secret-coherence edits
 
 Optional secrets:
@@ -231,8 +231,8 @@ deletes it and rebuilds `index.json`.
 - `--all` generate all toolkits
 - `--providers` generate a subset of toolkits
 - `--skip-unchanged` only write changed toolkits
-- `--api-source` select `tool-metadata` (default with Engine creds), `list-tools`
-  (only with the explicit flag), or `mock`
+- `--api-source` select `public-catalog` (default with `ENGINE_API_URL`), `tool-metadata`
+  (deprecated; requires `ENGINE_API_KEY`), `list-tools` (deprecated), or `mock`
 - `--previous-output` compare against a previous output directory
 - `--custom-sections` load an authoritative Markdown/MDX curation directory
 - `--skip-examples`, `--skip-summary` disable LLM steps
