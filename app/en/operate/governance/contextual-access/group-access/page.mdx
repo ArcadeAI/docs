@@ -52,7 +52,7 @@ One configuration uses one backend. All three are read-only integrations that ne
 | Microsoft Entra ID | Directory (tenant) ID, application (client) ID, client secret | The `GroupMember.Read.All` application permission, with administrator consent granted |
 | SailPoint Identity Security Cloud | Tenant URL, client ID, client secret | See the SailPoint section below, because the rights that sound correct are not the ones that work |
 
-With Okta, a rule's required groups are group names. With Entra ID they are group names or group object IDs, which is a distinction worth reading below. With SailPoint, they are role names or access profile IDs, which is also covered below.
+With Okta, a rule's required groups are group names. With Entra ID they are group names or group object IDs, which is a distinction worth reading below. With SailPoint, they are role or access profile names, or their IDs, which is also covered below.
 
 ### Naming an Entra group: name or object ID
 
@@ -85,17 +85,23 @@ SailPoint support has constraints the other two backends do not.
 
 **Identity Security Cloud only.** IdentityIQ is a separate product with a different API surface and is not supported.
 
-**Rules match roles and access profiles, not groups.** Raw entitlements and identity attributes do not count either. How you name each one differs:
+**Rules match roles and access profiles, not groups.** Raw entitlements and identity attributes do not count either. Either kind can be named two ways:
 
 | Rule value | Matched against |
 | --- | --- |
-| `Finance-Approver` | a role's name |
-| a role's ID | that role |
-| an access profile's ID | that access profile |
+| `Finance-Approver` | the name of a role or an access profile |
+| an ID | the role or access profile with that ID |
 
-**An access profile has to be named by its ID.** SailPoint's access-items response documents `displayName` as the *role* display name on a role, but as *the identity's* display name on an access profile, and it carries no access profile name at all, so a profile-name rule has nothing to match against. Copy the ID from the access profile's page in Identity Security Cloud.
+Names are easier to read in a rule. An ID is exact, cannot collide, and follows the item through a rename, so it is the better choice for anything sensitive. You can copy it from the item's page in Identity Security Cloud.
 
-Resolving profile names to IDs for you would mean reading `/v3/access-profiles`, which needs `idn:access-profiles:read`. The section below deliberately excludes that right, so the rule carries the ID instead.
+<Callout type="info">
+  One rule for both kinds: a name that matches the caller's *own* identity
+  display name is never treated as a match. Some tenants report an access
+  item's `displayName` as the identity's name rather than the item's, and
+  without that rule a person whose name happened to equal a rule's value would
+  satisfy it by holding any access at all. On tenants that report item names,
+  which is what we see in practice, this costs nothing.
+</Callout>
 
 **Only provisioned access counts.** Access that has been requested or approved but not yet provisioned does not satisfy a rule. This is deliberate: a rule should reflect what someone actually has.
 
