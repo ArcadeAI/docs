@@ -127,14 +127,11 @@ statically render the toolkit routes at build time from the committed JSON.
 
 ## Search indexing
 
-Search uses an external Algolia crawler. There is no Pagefind or local search
-index build step in this repository. After deployment, the crawler indexes the
-rendered site. `app/_components/algolia-search.tsx` queries that index with the
-public, read-only values configured through these Vercel environment variables:
-
-- `NEXT_PUBLIC_ALGOLIA_APP_ID`
-- `NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY`
-- `NEXT_PUBLIC_ALGOLIA_INDEX_NAME`
+Search is an in-memory BM25 index built from authored MDX and generated
+toolkit JSON at request/build time (`app/_lib/search/build-index.ts`). The
+`/api/search-index` route serves the corpus; `app/_components/docs-search.tsx`
+ranks hits in the browser. Preview deployments search the current branch —
+there is no external crawler or search API key.
 
 ## Key files
 

@@ -1,8 +1,8 @@
 import { getDictionary } from "@/_dictionaries/get-dictionary";
-import { AlgoliaSearch } from "@/app/_components/algolia-search";
 import { SignupLink } from "@/app/_components/analytics";
 import CustomLayout from "@/app/_components/custom-layout";
 import { getDashboardUrl } from "@/app/_components/dashboard-link";
+import { DocsSearch } from "@/app/_components/docs-search";
 import { Footer } from "@/app/_components/footer";
 import { Logo } from "@/app/_components/logo";
 import NavBarButton from "@/app/_components/nav-bar-button";
@@ -194,7 +194,7 @@ export default async function RootLayout({
           }
           nextThemes={{ defaultTheme: "dark" }}
           pageMap={pageMap}
-          search={<AlgoliaSearch />}
+          search={<DocsSearch />}
           sidebar={{
             defaultMenuCollapseLevel: 2,
             autoCollapse: true,
