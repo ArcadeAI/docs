@@ -5,7 +5,7 @@ This workflow regenerates toolkit JSON and opens a PR with the changes. It can b
 ## What it does
 
 1. Builds the toolkit docs generator.
-2. Generates toolkit JSON in `toolkit-docs-generator/data/toolkits` using the Engine public catalog endpoints.
+2. Generates toolkit JSON in `toolkit-docs-generator/data/toolkits` using the experience API's public tool catalog, which serves tool definitions and toolkit branding in one anonymous read.
 3. Syncs integrations sidebar navigation from the generated JSON.
 4. Creates or updates a PR on the stable `automation/toolkit-docs` branch if any files changed. Later runs overwrite that open PR with the latest generated docs.
 
@@ -13,11 +13,11 @@ This workflow regenerates toolkit JSON and opens a PR with the changes. It can b
 
 Required secrets:
 
-- `ENGINE_API_URL` (public catalog API host)
 - `ANTHROPIC_API_KEY`
 
 Optional secrets:
 
+- `PUBLIC_CATALOG_URL` (falls back to `https://experience.arcade.dev/api`; set it to run against staging)
 - `ANTHROPIC_MODEL` (falls back to `claude-sonnet-4-6`)
 - `ANTHROPIC_EDITOR_MODEL` (falls back to `claude-sonnet-4-6`)
 

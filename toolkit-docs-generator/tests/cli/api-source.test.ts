@@ -22,6 +22,8 @@ describe("resolveApiSource", () => {
     delete process.env.ENGINE_API_URL;
     // biome-ignore lint/performance/noDelete: Required to actually remove env vars
     delete process.env.ARCADE_API_URL;
+    // biome-ignore lint/performance/noDelete: Required to actually remove env vars
+    delete process.env.PUBLIC_CATALOG_URL;
   });
 
   afterEach(() => {
@@ -48,16 +50,26 @@ describe("resolveApiSource", () => {
     );
   });
 
-  it("auto-selects public-catalog when an API URL is set", () => {
-    process.env.ARCADE_API_URL = "https://api.arcade.dev";
-
-    expect(resolveApiSource({})).toBe("public-catalog");
+  it("auto-selects public-catalog when an API URL is passed", () => {
+    expect(
+      resolveApiSource({ apiUrl: "https://experience.arcade.dev/api" })
+    ).toBe("public-catalog");
   });
 
-  it("falls back to ENGINE_API_URL for the API host", () => {
+  it("ignores engine hosts, which point at the wrong path prefix", () => {
+    process.env.ARCADE_API_URL = "https://api.arcade.dev";
     process.env.ENGINE_API_URL = "https://api.arcade.dev";
 
-    expect(resolveApiBaseUrlFromEnv()).toBe("https://api.arcade.dev");
+    expect(resolveApiBaseUrlFromEnv()).toBeUndefined();
+    expect(resolveApiSource({})).toBe("mock");
+  });
+
+  it("reads the API host from PUBLIC_CATALOG_URL", () => {
+    process.env.PUBLIC_CATALOG_URL = "https://experience.arcade.dev/api";
+
+    expect(resolveApiBaseUrlFromEnv()).toBe(
+      "https://experience.arcade.dev/api"
+    );
     expect(resolveApiSource({})).toBe("public-catalog");
   });
 

@@ -22,6 +22,14 @@ const resolveExplicitApiSource = (apiSource: string): ApiSource => {
   );
 };
 
+/**
+ * Pick a source from the environment when --api-source is omitted.
+ *
+ * An explicitly configured URL means the caller wants live data. With nothing
+ * set, stay on fixtures rather than reaching out to the network behind the
+ * caller's back, even though the public catalog needs no credentials and
+ * carries its own default URL.
+ */
 const resolveAutoDetectedApiSource = (options: ApiSourceOptions): ApiSource => {
   const hasApiUrl = !!(options.apiUrl ?? resolveApiBaseUrlFromEnv());
 
@@ -32,8 +40,13 @@ const resolveAutoDetectedApiSource = (options: ApiSourceOptions): ApiSource => {
   return "mock";
 };
 
+/**
+ * The catalog now lives on the experience API, whose paths hang off `/api`
+ * rather than the engine's `/v1`. An engine host would build a URL that 404s,
+ * so ARCADE_API_URL and ENGINE_API_URL are deliberately not consulted here.
+ */
 export const resolveApiBaseUrlFromEnv = (): string | undefined =>
-  process.env.ARCADE_API_URL ?? process.env.ENGINE_API_URL;
+  process.env.PUBLIC_CATALOG_URL;
 
 export const resolveApiSource = (options: ApiSourceOptions): ApiSource => {
   if (options.apiSource) {

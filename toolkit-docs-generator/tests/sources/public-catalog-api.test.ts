@@ -5,7 +5,23 @@ import {
   extractToolkitRequirements,
   groupToolsByToolkit,
   transformPublicToolItem,
+  transformPublicToolkitMetadata,
 } from "../../src/sources/public-catalog-schema";
+import { createPublicCatalogSources } from "../../src/sources/toolkit-data-source";
+
+const githubBranding = {
+  id: "GitHub",
+  label: "GitHub",
+  category: "development",
+  type: "arcade",
+  docsLink:
+    "https://docs.arcade.dev/en/resources/integrations/development/github",
+  publicIconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  isBYOC: false,
+  isPro: false,
+  isComingSoon: false,
+  isHidden: false,
+};
 
 const githubCatalogEntry = {
   name: "Github",
@@ -27,6 +43,7 @@ const githubCatalogEntry = {
       },
     },
   },
+  metadata: githubBranding,
 };
 
 const githubTool = {
@@ -51,6 +68,31 @@ const githubTool = {
     },
   },
 };
+
+/** Serve one page of catalog entries and one page of tools, nothing else. */
+const stubCatalogFetch = (
+  catalogItems: unknown[],
+  toolItems: unknown[],
+  onCatalogFetch?: () => void
+): typeof fetch =>
+  (async (input: string | URL | Request) => {
+    const url = new URL(input.toString());
+    const page = (items: unknown[]) =>
+      new Response(JSON.stringify({ items, total_count: items.length }), {
+        status: 200,
+      });
+
+    if (url.pathname.endsWith("/public/tool_catalog")) {
+      onCatalogFetch?.();
+      return page(catalogItems);
+    }
+
+    if (url.pathname.endsWith("/public/tools")) {
+      return page(toolItems);
+    }
+
+    return new Response("not found", { status: 404 });
+  }) as typeof fetch;
 
 describe("fetchAllPages", () => {
   it("reads every page until total_count is satisfied", async () => {
@@ -237,5 +279,118 @@ describe("PublicCatalogApiSource", () => {
     expect(first[0]?.auth?.providerId).toBe("github");
     expect(catalogCalls).toBe(1);
     expect(toolsCalls).toBe(1);
+  });
+
+  it("serves toolkit branding from the same catalog read", async () => {
+    let catalogCalls = 0;
+    const source = new PublicCatalogApiSource({
+      baseUrl: "https://experience.example/api",
+      fetchFn: stubCatalogFetch([githubCatalogEntry], [githubTool], () => {
+        catalogCalls += 1;
+      }),
+    });
+
+    const tools = await source.fetchAllTools();
+    const metadata = await source.getToolkitMetadata("Github");
+
+    expect(tools).toHaveLength(1);
+    expect(metadata).toEqual({
+      id: "Github",
+      label: "GitHub",
+      category: "development",
+      iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+      isBYOC: false,
+      isPro: false,
+      type: "arcade",
+      docsLink:
+        "https://docs.arcade.dev/en/resources/integrations/development/github",
+      isComingSoon: false,
+      isHidden: false,
+    });
+    expect(catalogCalls).toBe(1);
+  });
+
+  it("looks branding up by catalog name, branding id, or label", async () => {
+    const source = new PublicCatalogApiSource({
+      baseUrl: "https://experience.example/api",
+      fetchFn: stubCatalogFetch([githubCatalogEntry], [githubTool]),
+    });
+
+    // The catalog says "Github" where the branding block says "GitHub".
+    expect((await source.getToolkitMetadata("GitHub"))?.id).toBe("Github");
+    expect((await source.getToolkitMetadata("github"))?.id).toBe("Github");
+    expect(await source.getToolkitMetadata("Slack")).toBeNull();
+  });
+
+  it("lists each toolkit once despite the multi-key branding index", async () => {
+    const source = new PublicCatalogApiSource({
+      baseUrl: "https://experience.example/api",
+      fetchFn: stubCatalogFetch([githubCatalogEntry], [githubTool]),
+    });
+
+    expect(await source.getAllToolkitsMetadata()).toHaveLength(1);
+    expect(await source.listToolkitIds()).toEqual(["Github"]);
+  });
+
+  it("reports no branding when the experience API drops it", async () => {
+    const source = new PublicCatalogApiSource({
+      baseUrl: "https://experience.example/api",
+      fetchFn: stubCatalogFetch(
+        [{ ...githubCatalogEntry, metadata: null }],
+        [githubTool]
+      ),
+    });
+
+    expect(await source.getToolkitMetadata("Github")).toBeNull();
+    expect(await source.getAllToolkitsMetadata()).toEqual([]);
+    expect(await source.fetchAllTools()).toHaveLength(1);
+  });
+});
+
+describe("transformPublicToolkitMetadata", () => {
+  it("prefers the public icon and keys off the catalog name", () => {
+    const metadata = transformPublicToolkitMetadata({
+      ...githubCatalogEntry,
+      metadata: { ...githubBranding, iconUrl: "https://internal/github.svg" },
+    });
+
+    expect(metadata?.id).toBe("Github");
+    expect(metadata?.iconUrl).toBe(
+      "https://design-system.arcade.dev/icons/github.svg"
+    );
+  });
+
+  it("returns null for a category the generator does not publish", () => {
+    expect(
+      transformPublicToolkitMetadata({
+        ...githubCatalogEntry,
+        metadata: { ...githubBranding, category: "not-a-category" },
+      })
+    ).toBeNull();
+  });
+
+  it("returns null when no icon is available", () => {
+    const { publicIconUrl: _publicIconUrl, ...withoutIcon } = githubBranding;
+
+    expect(
+      transformPublicToolkitMetadata({
+        ...githubCatalogEntry,
+        metadata: withoutIcon,
+      })
+    ).toBeNull();
+  });
+});
+
+describe("createPublicCatalogSources", () => {
+  it("merges tools and branding without a design-system read", async () => {
+    const { toolkitDataSource } = createPublicCatalogSources({
+      baseUrl: "https://experience.example/api",
+      fetchFn: stubCatalogFetch([githubCatalogEntry], [githubTool]),
+    });
+
+    const data = await toolkitDataSource.fetchToolkitData("Github");
+
+    expect(data.tools).toHaveLength(1);
+    expect(data.metadata?.label).toBe("GitHub");
   });
 });

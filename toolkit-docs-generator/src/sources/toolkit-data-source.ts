@@ -192,18 +192,44 @@ export const createCombinedToolkitDataSource = (
   config: CombinedToolkitDataSourceConfig
 ): ToolkitDataSource => new CombinedToolkitDataSource(config);
 
-export interface PublicCatalogToolkitDataSourceConfig {
-  readonly publicCatalog: PublicCatalogApiSourceConfig;
+// ============================================================================
+// Public Catalog Toolkit Data Source
+// ============================================================================
+
+export interface PublicCatalogSources {
+  /** Tools plus branding, both from the public catalog */
+  readonly toolkitDataSource: ToolkitDataSource;
+  /**
+   * The same catalog read exposed as a metadata source, for the CLI steps
+   * that resolve toolkit names before any tools are fetched.
+   */
   readonly metadataSource: MetadataSource;
 }
 
+/**
+ * Build both sources off a single catalog read.
+ *
+ * The experience API returns branding alongside each toolkit, so tools and
+ * metadata come from one snapshot and cannot disagree with each other the way
+ * a separate design-system read could.
+ */
+export const createPublicCatalogSources = (
+  config: PublicCatalogApiSourceConfig
+): PublicCatalogSources => {
+  const source = createPublicCatalogApiSource(config);
+
+  return {
+    toolkitDataSource: createCombinedToolkitDataSource({
+      toolSource: source,
+      metadataSource: source,
+    }),
+    metadataSource: source,
+  };
+};
+
 export const createPublicCatalogToolkitDataSource = (
-  config: PublicCatalogToolkitDataSourceConfig
-): ToolkitDataSource =>
-  createCombinedToolkitDataSource({
-    toolSource: createPublicCatalogApiSource(config.publicCatalog),
-    metadataSource: config.metadataSource,
-  });
+  config: PublicCatalogApiSourceConfig
+): ToolkitDataSource => createPublicCatalogSources(config).toolkitDataSource;
 
 export interface MockToolkitDataSourceConfig {
   readonly dataDir: string;

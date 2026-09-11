@@ -11,18 +11,26 @@ This guide explains how Arcade generates toolkit JSON, how the GitHub workflow r
 
 ## Data sources
 
-The generator merges three inputs into one JSON output per toolkit:
+The generator merges two inputs into one JSON output per toolkit:
 
-- **Engine API** for tool definitions, auth requirements, and scopes
-- **Arcade design system** for metadata (category, icons, flags)
+- **Public tool catalog** on the experience API for tool definitions, auth
+  requirements, scopes, and toolkit branding (category, label, icon, docs link,
+  pro/BYOC flags) in a single anonymous read
 - **Custom sections file** (optional) for preserved or curated docs content
 
 It also reads the previous output when you use `--skip-unchanged` or `--previous-output`.
 
-When `--skip-unchanged` runs against the public catalog API, the generator fetches
-one complete snapshot from `/v1/public/tool_catalog` and `/v1/public/tools`. It reuses that snapshot for
-change detection, progress calculation, and generation so a run cannot compare
-different API states. Only changed toolkits are regenerated.
+The catalog lives at `https://experience.arcade.dev/api` by default; override it
+with `--api-url` or `PUBLIC_CATALOG_URL`. The generator fetches one
+complete snapshot from `public/tool_catalog` and `public/tools`, then reuses it
+for change detection, progress calculation, and generation so a run cannot
+compare different API states. Only changed toolkits are regenerated.
+
+The design-system package (`@arcadeai/design-system`) is only consulted by the
+deprecated engine sources. When the experience API cannot reach the design
+system it returns `metadata: null` for a toolkit, and the merger falls back to
+default branding and flags the toolkit; `--require-complete` turns that into a
+hard failure instead.
 
 ## GitHub workflow: generate and sync
 
@@ -30,17 +38,18 @@ The workflow file is `/.github/workflows/generate-toolkit-docs.yml`.
 It runs these steps:
 
 1. Type-check and test the toolkit docs generator.
-2. Generate toolkit JSON using `toolkit-docs-generator` and the Engine public catalog API.
+2. Generate toolkit JSON using `toolkit-docs-generator` and the public tool catalog.
 3. Sync sidebar navigation from `toolkit-docs-generator/data/toolkits` to the `_meta.tsx` files.
 4. Create or update a pull request if there are changes.
 
 Required secrets:
 
-- `ENGINE_API_URL` (API host for the public catalog; rename to `ARCADE_API_URL` in a follow-up)
 - `ANTHROPIC_API_KEY` for examples, summaries, and secret-coherence edits
 
 Optional secrets:
 
+- `PUBLIC_CATALOG_URL` (defaults to `https://experience.arcade.dev/api`; set it
+  to point a run at staging or a local BFF)
 - `ANTHROPIC_MODEL` (defaults to `claude-sonnet-4-6` in the workflow)
 - `ANTHROPIC_EDITOR_MODEL` (defaults to `claude-sonnet-4-6` in the workflow)
 
@@ -107,7 +116,7 @@ The summary generator is configured to **never list OAuth scopes** in the genera
 ```bash
 pnpm dlx tsx src/cli/index.ts generate \
   --providers "Github" \
-  --api-url "$ARCADE_API_URL" \
+  --api-source public-catalog \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -120,7 +129,7 @@ pnpm dlx tsx src/cli/index.ts generate \
 ## Architecture at a glance
 
 - **CLI**: `toolkit-docs-generator/src/cli/index.ts`
-- **Sources**: `src/sources` for Engine API, mock data, and design system metadata
+- **Sources**: `src/sources` for the public catalog, mock data, and the deprecated engine APIs
 - **Merger**: `src/merger/data-merger.ts` merges tools, metadata, and custom sections
 - **Generator**: `src/generator/json-generator.ts` writes JSON and `index.json`
 - **Verifier**: `src/generator/output-verifier.ts` validates output and index consistency
@@ -132,12 +141,15 @@ Run these commands from the `toolkit-docs-generator` directory. Invoke `tsx` by
 path because this directory has no package for `pnpm exec`; the sidebar sync
 command below runs from the repo root instead.
 
+`--api-source public-catalog` is spelled out below because a bare run with no
+catalog or engine environment variables falls back to the mock fixtures.
+
 Generate a single toolkit:
 
 ```bash
 pnpm dlx tsx src/cli/index.ts generate \
   --providers "Github:1.0.0" \
-  --api-url "$ARCADE_API_URL" \
+  --api-source public-catalog \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -150,7 +162,7 @@ Generate all toolkits:
 pnpm dlx tsx src/cli/index.ts generate \
   --all \
   --skip-unchanged \
-  --api-url "$ARCADE_API_URL" \
+  --api-source public-catalog \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -162,7 +174,7 @@ Generate without LLM output:
 ```bash
 pnpm dlx tsx src/cli/index.ts generate \
   --providers "Asana:0.1.3" \
-  --api-url "$ARCADE_API_URL" \
+  --api-source public-catalog \
   --skip-examples \
   --skip-summary \
   --output data/toolkits
@@ -227,7 +239,10 @@ deletes it and rebuilds `index.json`.
 - `--all` generate all toolkits
 - `--providers` generate a subset of toolkits
 - `--skip-unchanged` only write changed toolkits
-- `--api-source` select `public-catalog` (default with `ARCADE_API_URL` or `ENGINE_API_URL`) or `mock`
+- `--api-source` select `public-catalog` or `mock`. Auto-detects
+  `public-catalog` when `PUBLIC_CATALOG_URL` is set, and `mock` otherwise
+- `--api-url` public catalog base URL including path prefix
+  (default `https://experience.arcade.dev/api`, or `PUBLIC_CATALOG_URL`)
 - `--previous-output` compare against a previous output directory
 - `--custom-sections` load an authoritative Markdown/MDX curation directory
 - `--skip-examples`, `--skip-summary` disable LLM steps
@@ -293,5 +308,5 @@ message and the third, because those are two separate things to fix.
 ## Troubleshooting
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
-- **Missing metadata**: the generator falls back to the metadata JSON file when design system metadata is unavailable.
+- **Missing metadata**: when the catalog returns `metadata: null` for a toolkit the merger substitutes defaults and warns. Re-run once the experience API's design-system read recovers, or use `--require-complete` to fail instead of publishing defaults.
 - **Verify output fails**: run `pnpm dlx tsx src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.

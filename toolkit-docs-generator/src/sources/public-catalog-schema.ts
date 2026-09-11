@@ -1,5 +1,6 @@
 import { z } from "zod";
-import type { ToolAuth, ToolDefinition } from "../types/index";
+import type { ToolAuth, ToolDefinition, ToolkitMetadata } from "../types/index";
+import { ToolkitMetadataSchema } from "../types/index";
 import {
   ToolMetadataItemSchema,
   transformToolMetadataItem,
@@ -32,12 +33,38 @@ const PublicCatalogRequirementsSchema = z
   .nullable()
   .optional();
 
+/**
+ * Toolkit branding the experience API merges in from the design system.
+ *
+ * Kept loose on purpose: the design system can add fields or ship a category
+ * this generator doesn't know yet without breaking the parse of the whole
+ * catalog page. `transformPublicToolkitMetadata` validates the mapped shape
+ * and returns null when it doesn't fit, which the merger already handles.
+ */
+const PublicCatalogToolkitMetadataSchema = z
+  .object({
+    id: z.string(),
+    label: z.string(),
+    category: z.string(),
+    type: z.string(),
+    docsLink: z.string(),
+    publicIconUrl: z.string().optional(),
+    iconUrl: z.string().optional(),
+    isBYOC: z.boolean(),
+    isPro: z.boolean(),
+    isComingSoon: z.boolean(),
+    isHidden: z.boolean(),
+  })
+  .nullable()
+  .optional();
+
 export const PublicCatalogToolkitSchema = z.object({
   name: z.string(),
   description: z.string(),
   version: z.string(),
   tool_count: z.number(),
   requirements: PublicCatalogRequirementsSchema,
+  metadata: PublicCatalogToolkitMetadataSchema,
 });
 
 export const PublicCatalogToolkitResponseSchema = z.object({
@@ -60,6 +87,47 @@ export type PublicCatalogToolkit = z.infer<typeof PublicCatalogToolkitSchema>;
 export type PublicCatalogRequirements = z.infer<
   typeof PublicCatalogRequirementsSchema
 >;
+
+/**
+ * Map a catalog entry's branding block onto the generator's ToolkitMetadata.
+ *
+ * `id` comes from the catalog entry name rather than `metadata.id` because the
+ * two disagree on casing for a dozen toolkits ("Clickup" vs "ClickUp"), and
+ * everything downstream — tool namespaces, output filenames, provider
+ * resolution — keys off the catalog name.
+ *
+ * Returns null when the branding block is missing (the experience API sets it
+ * to null when its design-system read fails) or when it doesn't fit the
+ * generator's schema. The merger substitutes defaults and flags the toolkit.
+ */
+export const transformPublicToolkitMetadata = (
+  toolkit: PublicCatalogToolkit
+): ToolkitMetadata | null => {
+  const metadata = toolkit.metadata;
+  if (!metadata) {
+    return null;
+  }
+
+  const iconUrl = metadata.publicIconUrl ?? metadata.iconUrl;
+  if (!iconUrl) {
+    return null;
+  }
+
+  const parsed = ToolkitMetadataSchema.safeParse({
+    id: toolkit.name,
+    label: metadata.label,
+    category: metadata.category,
+    iconUrl,
+    isBYOC: metadata.isBYOC,
+    isPro: metadata.isPro,
+    type: metadata.type,
+    docsLink: metadata.docsLink,
+    isComingSoon: metadata.isComingSoon,
+    isHidden: metadata.isHidden,
+  });
+
+  return parsed.success ? parsed.data : null;
+};
 
 const DEFAULT_OAUTH_PROVIDER_TYPE = "oauth2";
 
@@ -157,6 +225,11 @@ export const parsePublicCatalogResponse = (
   payload: unknown
 ): PublicCatalogToolkit[] =>
   PublicCatalogToolkitResponseSchema.parse(payload).items;
+
+export const parsePublicCatalogItems = (
+  items: unknown[]
+): PublicCatalogToolkit[] =>
+  items.map((item) => PublicCatalogToolkitSchema.parse(item));
 
 export const parsePublicToolsResponse = (
   items: unknown[]

@@ -56,9 +56,9 @@ import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-
 import {
   createCachedToolkitDataSource,
   createMockToolkitDataSource,
-  createPublicCatalogToolkitDataSource,
+  createPublicCatalogSources,
+  type PublicCatalogSources,
   type ToolkitData,
-  type ToolkitDataSource,
 } from "../sources/toolkit-data-source";
 import {
   type MergedToolkit,
@@ -480,6 +480,14 @@ const resolveSecretEditGenerator = (
   });
 };
 
+/**
+ * The experience API merges the engine's public catalog with design-system
+ * branding, so one anonymous read supplies both tools and toolkit metadata.
+ * Override with --api-url / PUBLIC_CATALOG_URL to point at staging
+ * or a local BFF.
+ */
+const DEFAULT_PUBLIC_CATALOG_URL = "https://experience.arcade.dev/api";
+
 interface ToolkitDataSourceOptions {
   apiSource?: string;
   apiUrl?: string;
@@ -487,11 +495,8 @@ interface ToolkitDataSourceOptions {
 }
 
 const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
-  const baseUrl = options.apiUrl ?? resolveApiBaseUrlFromEnv();
-
-  if (!baseUrl) {
-    return null;
-  }
+  const baseUrl =
+    options.apiUrl ?? resolveApiBaseUrlFromEnv() ?? DEFAULT_PUBLIC_CATALOG_URL;
 
   return {
     baseUrl,
@@ -499,47 +504,48 @@ const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
   };
 };
 
-const createPublicCatalogToolkitSource = (
+const createPublicCatalogSourcesForCli = (
   options: ToolkitDataSourceOptions,
-  metadataSource: ReturnType<typeof createMockMetadataSource>,
   verbose: boolean
-): ToolkitDataSource => {
+): PublicCatalogSources => {
   const config = resolvePublicCatalogConfig(options);
-  if (!config) {
-    throw new Error(
-      "Public catalog API requires --api-url (or ARCADE_API_URL / ENGINE_API_URL environment variable)."
-    );
-  }
   if (verbose) {
     console.log(
       chalk.dim(
-        `Using /v1/public/tool_catalog + /v1/public/tools: ${config.baseUrl}`
+        `Using public/tool_catalog + public/tools: ${config.baseUrl} (tools and toolkit branding)`
       )
     );
   }
-  return createPublicCatalogToolkitDataSource({
-    publicCatalog: config,
-    metadataSource,
-  });
+  return createPublicCatalogSources(config);
 };
 
-const createToolkitDataSourceForApi = (
+/**
+ * Build the toolkit data source, plus the metadata source that name
+ * resolution and `--require-complete` filtering should consult.
+ *
+ * Under the public catalog those two are the same read, so a toolkit is never
+ * filtered out for missing branding that the catalog actually has. Only the
+ * mock path still needs a separate metadata source, and it is built on demand
+ * so a live run never loads the design-system package.
+ */
+const createToolkitDataSourceForApi = async (
   apiSource: ApiSource,
   options: ToolkitDataSourceOptions,
-  metadataSource: ReturnType<typeof createMockMetadataSource>,
+  getFallbackMetadataSource: () => Promise<MetadataSource>,
   mockDataDir: string,
   verbose: boolean
-): ToolkitDataSource => {
+): Promise<PublicCatalogSources> => {
   if (apiSource === "public-catalog") {
-    return createPublicCatalogToolkitSource(options, metadataSource, verbose);
+    return createPublicCatalogSourcesForCli(options, verbose);
   }
 
   if (verbose) {
     console.log(chalk.dim(`Using mock data: ${mockDataDir}`));
   }
-  return createMockToolkitDataSource({
-    dataDir: mockDataDir,
-  });
+  return {
+    toolkitDataSource: createMockToolkitDataSource({ dataDir: mockDataDir }),
+    metadataSource: await getFallbackMetadataSource(),
+  };
 };
 
 const normalizeToolkitKey = (toolkitId: string): string =>
@@ -793,11 +799,11 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "public-catalog" (/v1/public/*) or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
   )
   .option(
     "--api-url <url>",
-    "Arcade API base URL (or ARCADE_API_URL / ENGINE_API_URL env)"
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
   )
   .option(
     "--api-page-size <number>",
@@ -1067,11 +1073,23 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = await createMetadataSource({
-          metadataFile,
-          useMetadataFile: Boolean(options.metadataFile),
-          verbose: options.verbose,
-        });
+        const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: options.verbose,
+            }),
+          mockDataDir,
+          options.verbose
+        );
+        const metadataSource = sources.metadataSource;
+        const toolkitDataSource = createCachedToolkitDataSource(
+          sources.toolkitDataSource
+        );
 
         // Resolve provider names to canonical toolkit IDs (best effort).
         if (providers && providers.length > 0) {
@@ -1107,18 +1125,6 @@ program
             process.exit(0);
           }
         }
-
-        // Create toolkit data source based on API source
-        const apiSource = resolveApiSource(options);
-        const toolkitDataSource = createCachedToolkitDataSource(
-          createToolkitDataSourceForApi(
-            apiSource,
-            options,
-            metadataSource,
-            mockDataDir,
-            options.verbose
-          )
-        );
 
         const needsExamples = !options.skipExamples;
         const needsSummary = !options.skipSummary;
@@ -1897,11 +1903,11 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "public-catalog" (/v1/public/*) or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
   )
   .option(
     "--api-url <url>",
-    "Arcade API base URL (or ARCADE_API_URL / ENGINE_API_URL env)"
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
   )
   .option(
     "--api-page-size <number>",
@@ -2089,22 +2095,22 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = await createMetadataSource({
-          metadataFile,
-          useMetadataFile: Boolean(options.metadataFile),
-          verbose: options.verbose,
-        });
-
         // Create toolkit data source based on API source
         const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: options.verbose,
+            }),
+          mockDataDir,
+          options.verbose
+        );
         const toolkitDataSource = createCachedToolkitDataSource(
-          createToolkitDataSourceForApi(
-            apiSource,
-            options,
-            metadataSource,
-            mockDataDir,
-            options.verbose
-          )
+          sources.toolkitDataSource
         );
 
         const needsExamples = !options.skipExamples;
@@ -2726,11 +2732,11 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "public-catalog" (/v1/public/*) or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
   )
   .option(
     "--api-url <url>",
-    "Arcade API base URL (or ARCADE_API_URL / ENGINE_API_URL env)"
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
   )
   .option(
     "--api-page-size <number>",
@@ -2765,21 +2771,21 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = await createMetadataSource({
-          metadataFile,
-          useMetadataFile: Boolean(options.metadataFile),
-          verbose: false,
-        });
-
         const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: false,
+            }),
+          mockDataDir,
+          false // not verbose during fetch
+        );
         const toolkitDataSource = createCachedToolkitDataSource(
-          createToolkitDataSourceForApi(
-            apiSource,
-            options,
-            metadataSource,
-            mockDataDir,
-            false // not verbose during fetch
-          )
+          sources.toolkitDataSource
         );
 
         // Fetch current data from API

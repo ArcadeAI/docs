@@ -19,14 +19,13 @@ flowchart TD
     manual["Manual run<br/>workflow_dispatch"] --> generate
     porter["Porter deploy succeeded<br/>repository_dispatch"] --> generate
 
-    engine["Engine public catalog<br/>/v1/public/tool_catalog + /v1/public/tools"] -->|"tools, parameters, auth, secrets"| generate
+    catalog["Public tool catalog (experience API)<br/>public/tool_catalog + public/tools"] -->|"tools, parameters, auth, secrets,<br/>category, label, icon, docsLink, flags"| generate
     previous["data/toolkits/*.json<br/>previous run"] -->|"signatures and curation hashes"| generate
 
     generate["generate --all --skip-unchanged"] --> changed{"Changed since<br/>last run?"}
     changed -->|no| skipped["Left untouched"]
     changed -->|yes| merger
 
-    design["@arcadeai/design-system<br/>TOOLKITS"] -->|"category, label, icon, docsLink, flags"| merger
     author["Docs author"] -->|"writes and reviews in a PR"| curation
     curation["curation/toolkit/<br/>chunks/*.mdx<br/>imports/*.mdx<br/>pages/**/*.mdx"] -->|"documentationChunks, customImports, subPages"| merger
     anthropic["Anthropic"] -->|"code examples, summaries, secret edits"| merger
@@ -47,11 +46,18 @@ flowchart TD
 ```
 
 Each field in a toolkit JSON file comes from exactly one of those inputs. The
-Engine API owns everything about a tool, the design system owns everything about
-a toolkit's placement and identity, `curation/` owns hand-authored prose, and the
-LLM owns code examples and summaries. When a source fails, the merger falls back
-to the previous run's file rather than inventing a value, and reports what it
-recovered.
+public catalog owns everything about a tool and about a toolkit's placement and
+identity, `curation/` owns hand-authored prose, and the LLM owns code examples
+and summaries. When a source fails, the merger falls back to the previous run's
+file rather than inventing a value, and reports what it recovered.
+
+The catalog is one read for both halves. The experience API joins the engine's
+operational catalog to design-system branding before the generator sees it, so
+tools and branding always describe the same snapshot. The generator no longer
+reads `@arcadeai/design-system` itself except through the deprecated engine
+sources. When the experience API's branding read fails it returns
+`metadata: null` for a toolkit; the merger substitutes defaults and flags it,
+and `--require-complete` fails the run instead.
 
 `curation/` is the one input a person edits directly. Those Markdown and MDX
 files live in this repository and merge like any other change, so a prose edit
@@ -66,8 +72,8 @@ it. The sidebar sync writes navigation only, and never touches toolkit JSON.
 
 ### Data sources
 
-- `PublicCatalogApiSource` fetches tool metadata from the Engine public catalog API.
-- `DesignSystemMetadataSource` loads toolkit metadata from `@arcadeai/design-system`.
+- `PublicCatalogApiSource` fetches tools and toolkit branding from the public
+  tool catalog on the experience API, serving both from one cached snapshot.
 - `MarkdownCurationSource` compiles documentation chunks, import declarations,
   and subpages from the configured curation directory. When configured, that
   directory is globally authoritative: a missing toolkit directory means the
@@ -137,7 +143,7 @@ public, read-only values configured through these Vercel environment variables:
 
 ## Key files
 
-- `src/sources/public-catalog-api.ts` — tool metadata from Engine public catalog
+- `src/sources/public-catalog-api.ts` — tools and toolkit branding from the public catalog
 - `src/sources/markdown-curation.ts` — Markdown and MDX curation compiler
   ([format reference](CURATION.md))
 - `src/sources/toolkit-data-source.ts` — unified data source

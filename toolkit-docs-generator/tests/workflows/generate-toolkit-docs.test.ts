@@ -30,9 +30,12 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("--preserve-last-known-good");
   expect(workflowContents).toContain("--verbose");
   expect(workflowContents).toContain("--api-source public-catalog");
-  expect(workflowContents).toContain("--api-url");
-  expect(workflowContents).not.toContain("--tool-metadata-key");
+  // The public catalog is anonymous and the generator carries the production
+  // URL, so the nightly passes no API URL or key at all.
+  expect(workflowContents).not.toContain("--api-url");
   expect(workflowContents).not.toContain("--tool-metadata-url");
+  expect(workflowContents).not.toContain("--tool-metadata-key");
+  expect(workflowContents).not.toContain("ENGINE_API_URL");
   expect(workflowContents).toContain("--llm-provider anthropic");
   expect(workflowContents).toContain("--llm-model");
   expect(workflowContents).toContain("--llm-api-key");
