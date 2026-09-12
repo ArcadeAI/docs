@@ -1,0 +1,274 @@
+---
+title: "Run background tool executions"
+description: "Start, inspect, continue, and cancel long-running Arcade tools through MCP or the Arcade API."
+---
+
+# Run background tool executions
+
+This guide is for agent developers who run tools that may outlive one model turn. It explains how
+to start durable work, retrieve its result, provide requested input, cancel it, and reconcile
+lifecycle webhooks in Arcade Cloud.
+
+<Warning>
+  Background executions are an internal Arcade Cloud preview. They remain unavailable to external
+  tenants, named design partners, self-hosted Arcade Engine deployments, and local deployments
+  until the production-readiness milestone closes.
+</Warning>
+
+## Choose the execution policy
+
+A tool author declares whether a tool may run in the background. Arcade applies that policy before
+it invokes the tool.
+
+| Policy | Direct execution | Background execution | Task-time input |
+| --- | --- | --- | --- |
+| `required` | No | Always | Modern remote MCP servers only |
+| `optional` | Yes | When Arcade selects it | Modern remote MCP servers only |
+| `forbidden` or undeclared | Always | No | No |
+
+Arcade-hosted tools can run in the background, but they cannot pause for task-time input in this
+preview. Arcade rejects a hosted tool that declares such input before invocation. If a remote MCP
+server requests an unsupported interaction after invocation, Arcade fails the existing execution
+without calling the business tool again.
+
+## Use the native Tasks extension
+
+A native client must negotiate MCP `2026-07-28` and advertise the
+`io.modelcontextprotocol/tasks` extension. A background `tools/call` returns a Task instead of
+waiting for the business result:
+
+```json
+{
+  "resultType": "task",
+  "taskId": "te_3JExampleTaskId",
+  "status": "working",
+  "createdAt": "2026-09-12T15:00:00Z",
+  "lastUpdatedAt": "2026-09-12T15:00:00Z",
+  "ttlMs": 599000,
+  "retentionExpiresAt": "2026-09-13T15:00:00Z",
+  "pollIntervalMs": 1000
+}
+```
+
+Save `taskId`. It is an opaque Arcade identifier. Do not derive remote server IDs, URLs, or routing
+details from it.
+
+### Retrieve native task state
+
+Send the lifecycle method and Task ID in both the request and the Streamable HTTP routing headers:
+
+```bash
+curl --request POST "https://api.arcade.dev/mcp/example-gateway" \
+  --header "Authorization: Bearer $ARCADE_TOKEN" \
+  --header "Content-Type: application/json" \
+  --header "Mcp-Protocol-Version: 2026-07-28" \
+  --header "Mcp-Method: tasks/get" \
+  --header "Mcp-Name: te_3JExampleTaskId" \
+  --data '{
+    "jsonrpc": "2.0",
+    "id": "get-task-1",
+    "method": "tasks/get",
+    "params": {
+      "taskId": "te_3JExampleTaskId",
+      "_meta": {
+        "io.modelcontextprotocol/client-capabilities": {
+          "extensions": {"io.modelcontextprotocol/tasks": {}}
+        }
+      }
+    }
+  }'
+```
+
+Poll no faster than `pollIntervalMs`. A completed Task contains the original MCP tool result:
+
+```json
+{
+  "resultType": "complete",
+  "taskId": "te_3JExampleTaskId",
+  "status": "completed",
+  "result": {
+    "content": [{"type": "text", "text": "Triaged 18 messages."}],
+    "structuredContent": {"triaged": 18}
+  }
+}
+```
+
+### Provide native task input
+
+When `tasks/get` returns `status: "input_required"`, render only the request fields returned by
+Arcade. Submit one response under its exact request key:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "update-task-1",
+  "method": "tasks/update",
+  "params": {
+    "taskId": "te_3JExampleTaskId",
+    "inputResponses": {
+      "ir_publishedRequestKey": {
+        "action": "accept",
+        "content": {"label": "Receipts"}
+      }
+    },
+    "_meta": {
+      "io.modelcontextprotocol/client-capabilities": {
+        "extensions": {"io.modelcontextprotocol/tasks": {}}
+      }
+    }
+  }
+}
+```
+
+Use `Mcp-Method: tasks/update` and `Mcp-Name: te_3JExampleTaskId` for this request. An empty
+`resultType: "complete"` response means Arcade processed the update. It does **not** prove that the
+request key was current or that the remote execution resumed. Call `tasks/get` to observe the
+durable state.
+
+### Cancel a native task
+
+Call `tasks/cancel` with the same capability metadata and routing headers. Cancellation is
+cooperative. A successful acknowledgement means Arcade delivered the request to the owner. Use
+`tasks/get` to confirm `cancelled`. If Arcade can prove that delivery did not happen, retry is safe.
+If delivery is unknown, inspect the durable Task before deciding whether to start new work.
+
+## Use MCP clients without Tasks support
+
+Claude and ChatGPT do not need to call a separate start tool. They call the original business tool,
+such as `Email_Triage`. If the work continues, Arcade returns text plus this structured handle:
+
+```json
+{
+  "type": "arcade.execution/v1",
+  "execution_id": "te_3JExampleTaskId",
+  "state": "working",
+  "next_action": {
+    "tool": "Arcade_GetToolExecution",
+    "arguments": {
+      "execution_id": "te_3JExampleTaskId",
+      "wait_ms": 1000
+    }
+  }
+}
+```
+
+The client can use these ordinary Arcade tools:
+
+- `Arcade_ListToolExecutions` lists retained executions visible to the same caller and gateway.
+- `Arcade_GetToolExecution` waits for at most 45 seconds or returns current state.
+- `Arcade_ProvideToolExecutionInput` acknowledges a response to a published input request.
+- `Arcade_CancelToolExecution` requests cooperative cancellation and reports the delivery outcome.
+
+The compatibility result is not a native MCP Task. It contains an opaque Arcade execution ID and
+never exposes remote Task IDs, transport details, or server URLs.
+
+## Use the Arcade REST API
+
+REST and MCP share the same durable execution. A linked canonical owner can retrieve an execution
+created through either surface. Project membership or possession of an unrelated project API key
+does not grant owner lifecycle access.
+
+Start an eligible execution:
+
+```bash
+curl --request POST \
+  "https://api.arcade.dev/v1/orgs/example-org/projects/example-project/tool-executions" \
+  --header "Authorization: Bearer $ARCADE_TOKEN" \
+  --header "Content-Type: application/json" \
+  --header "Idempotency-Key: triage-2026-09-12" \
+  --data '{
+    "gateway_id": "gw_3JExampleGateway",
+    "tool_name": "Email.Triage",
+    "input": {"mailbox": "support@example.com"},
+    "user_id": "user@example.com"
+  }'
+```
+
+Arcade returns `202 Accepted` with `execution_id`, `status`, `execution_deadline`,
+`retention_expires_at`, and `poll_interval_ms`. Reusing the same idempotency key and semantic
+request returns the retained execution. Reusing it for different work returns `409`.
+
+Use the owner lifecycle endpoints:
+
+| Operation | Request |
+| --- | --- |
+| List owned executions | `GET /v1/orgs/{org_id}/projects/{project_id}/tool-executions` |
+| Get state | `GET /v1/orgs/{org_id}/projects/{project_id}/tool-executions/{execution_id}` |
+| Get result | `GET /v1/orgs/{org_id}/projects/{project_id}/tool-executions/{execution_id}/result` |
+| Provide input | `POST /v1/orgs/{org_id}/projects/{project_id}/tool-executions/{execution_id}/input` |
+| Cancel | `POST /v1/orgs/{org_id}/projects/{project_id}/tool-executions/{execution_id}/cancel` |
+
+The input body is:
+
+```json
+{
+  "request_key": "ir_publishedRequestKey",
+  "response": {
+    "action": "accept",
+    "content": {"label": "Receipts"}
+  }
+}
+```
+
+A `200 {"acknowledged": true}` response does not distinguish a current request from a stale safe
+request. Retrieve the execution to confirm resumption. The result endpoint returns `202` while the
+execution is pollable, `200` with the original result when complete, or `409` when a failed or
+cancelled execution has no result.
+
+<Note>
+  Hyphenated `/tool-executions` is the owner lifecycle API. Underscored `/tool_executions` is
+  project-wide execution history and has a different permission and payload contract.
+</Note>
+
+## Understand deadlines and retention
+
+`execution_deadline` is when Arcade stops waiting for work to finish. `retention_expires_at` is when
+Arcade stops returning the record to its owner. For example, an execution can fail at 15:10 because
+its execution deadline elapsed and remain retrievable until 15:00 the next day. A remote server may
+shorten the execution deadline, but it cannot shorten the retention period for that failure.
+
+After retention expires, Arcade returns the same not-found response for an unknown, unauthorized,
+or expired execution ID.
+
+## Reconcile lifecycle webhooks
+
+Subscribe to `tool.execution.lifecycle` to receive thin signals for `input_required`, `completed`,
+`failed`, and `cancelled`. Arcade does not send a lifecycle webhook for `pending` or `working`.
+Signals contain only `execution_id`, `state`, `created_at`, `updated_at`, and `summary`.
+
+Verify every delivery before using it. Standard Webhooks signs the exact UTF-8 request body with
+the message ID and timestamp. Compute HMAC-SHA256 over:
+
+```text
+{webhook-id}.{webhook-timestamp}.{exact-request-body}
+```
+
+Use the decoded key from the `whsec_` secret, compare it with `webhook-signature` in constant time,
+and reject a `webhook-timestamp` outside your configured freshness window. Do not parse and
+re-serialize the body before signature verification.
+
+Delivery is at least once. Arcade may duplicate or delay signals, and signals may arrive out of
+order. After a valid signal, fetch the execution by `execution_id` through the owner lifecycle API
+and use that durable state as truth. A failed webhook delivery does not delete or change the
+execution.
+
+## Recover from terminal failures
+
+| State or failure | Meaning | Recovery |
+| --- | --- | --- |
+| `input_required` | The existing invocation needs a supported response | Submit the published request key, then retrieve state |
+| `execution_deadline_exceeded` | Work exceeded its execution deadline | Start a new execution with an appropriate runtime |
+| `input_continuation_refused` | The remote owner rejected the response | Resolve the owner-side issue, then start new work |
+| `input_delivery_unknown` | Arcade cannot prove whether input reached the owner | Inspect the owner before starting new work |
+| `owner_lost_after_invocation` | Arcade lost the hosted owner after invocation started | Inspect retained state; Arcade will not invoke it again |
+| `cancelled` | The owner confirmed cancellation | Start new work only if the job is still needed |
+
+Arcade re-evaluates current project access, tool policy, and provider authorization before external
+input or cancellation. A revoked permission fails closed before owner contact. Lifecycle reads do
+not create another billable execution.
+
+<Warning>
+  Permissioned operator status, operator cancellation, quarantine, replay, force-fail, and
+  customer-managed recovery are milestone M3 features. They are unavailable in this preview.
+  Project history access does not grant operator recovery authority.
+</Warning>
