@@ -3,17 +3,19 @@ title: "Run background tool executions"
 description: "Start, inspect, continue, and cancel long-running Arcade tools through MCP or the Arcade API."
 ---
 
+import { Callout } from "nextra/components";
+
 # Run background tool executions
 
 This guide is for agent developers who run tools that may outlive one model turn. It explains how
 to start durable work, retrieve its result, provide requested input, cancel it, and reconcile
 lifecycle webhooks in Arcade Cloud.
 
-<Warning>
+<Callout type="warning">
   Background executions are an internal Arcade Cloud preview. They remain unavailable to external
   tenants, named design partners, self-hosted Arcade Engine deployments, and local deployments
   until the production-readiness milestone closes.
-</Warning>
+</Callout>
 
 ## Choose the execution policy
 
@@ -215,10 +217,10 @@ request. Retrieve the execution to confirm resumption. The result endpoint retur
 execution is pollable, `200` with the original result when complete, or `409` when a failed or
 cancelled execution has no result.
 
-<Note>
+<Callout type="warning">
   Hyphenated `/tool-executions` is the owner lifecycle API. Underscored `/tool_executions` is
   project-wide execution history and has a different permission and payload contract.
-</Note>
+</Callout>
 
 ## Understand deadlines and retention
 
@@ -267,8 +269,8 @@ Arcade re-evaluates current project access, tool policy, and provider authorizat
 input or cancellation. A revoked permission fails closed before owner contact. Lifecycle reads do
 not create another billable execution.
 
-<Warning>
+<Callout type="warning">
   Permissioned operator status, operator cancellation, quarantine, replay, force-fail, and
   customer-managed recovery are milestone M3 features. They are unavailable in this preview.
   Project history access does not grant operator recovery authority.
-</Warning>
+</Callout>
