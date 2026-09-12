@@ -12,10 +12,47 @@ to start durable work, retrieve its result, provide requested input, cancel it, 
 lifecycle webhooks in Arcade Cloud.
 
 <Callout type="warning">
-  Background executions are an internal Arcade Cloud preview. They remain unavailable to external
-  tenants, named design partners, self-hosted Arcade Engine deployments, and local deployments
-  until the production-readiness milestone closes.
+  Native MCP Tasks remain closed to external tenants in Arcade Cloud. Customer-managed and local
+  deployments can opt in. Claude and ChatGPT use the compatibility tools described below,
+  not the native Tasks extension.
 </Callout>
+
+## Configure customer-managed or local deployments
+
+Use Postgres for durable Engine storage, keep the same `security.execution_payload_keys` available
+to every Engine replica, and make the Coordinator authorization service and registered workers
+reachable. Apply Engine database migrations before enabling either surface.
+
+For a direct Engine configuration, enable the surfaces you need and set positive admission bounds:
+
+```yaml
+features:
+  native_mcp_tasks: true
+  mcp_tasks_compatibility: true
+  mcp_tasks_principal_concurrency: 20
+  mcp_tasks_project_concurrency: 40
+  mcp_tasks_organization_concurrency: 80
+  mcp_tasks_backlog: 100
+  mcp_tasks_retained_payload_bytes: 1048576
+```
+
+For the Arcade Helm chart, use the equivalent values:
+
+```yaml
+features:
+  mcpTasks:
+    nativeEnabled: true
+    compatibilityEnabled: true
+    principalConcurrency: 20
+    projectConcurrency: 40
+    organizationConcurrency: 80
+    backlog: 100
+    retainedPayloadBytes: 1048576
+```
+
+Both surfaces are off by default. A zero bound disables that individual limit. Choose positive
+values before exposing a deployment. Local deployments use the same lifecycle contract, but limits
+implemented in memory apply per Engine process rather than across a cluster.
 
 ## Choose the execution policy
 
@@ -73,7 +110,7 @@ curl --request POST "https://api.arcade.dev/mcp/example-gateway" \
     "params": {
       "taskId": "te_3JExampleTaskId",
       "_meta": {
-        "io.modelcontextprotocol/client-capabilities": {
+        "io.modelcontextprotocol/clientCapabilities": {
           "extensions": {"io.modelcontextprotocol/tasks": {}}
         }
       }
@@ -114,7 +151,7 @@ Arcade. Submit one response under its exact request key:
       }
     },
     "_meta": {
-      "io.modelcontextprotocol/client-capabilities": {
+      "io.modelcontextprotocol/clientCapabilities": {
         "extensions": {"io.modelcontextprotocol/tasks": {}}
       }
     }
@@ -133,6 +170,13 @@ Call `tasks/cancel` with the same capability metadata and routing headers. Cance
 cooperative. A successful acknowledgement means Arcade delivered the request to the owner. Use
 `tasks/get` to confirm `cancelled`. If Arcade can prove that delivery did not happen, retry is safe.
 If delivery is unknown, inspect the durable Task before deciding whether to start new work.
+
+### Validate a native client
+
+Arcade's release validation pins MCP Inspector 2.0.0. That build can create a Task but sends the
+wrong `Mcp-Name` while polling it, so the accepted current Tasks-capable substitute is the official
+Rust SDK `rmcp 3.3.0`. Arcade keeps the protocol-required `Mcp-Name: {taskId}` check instead of
+weakening task isolation for a client workaround.
 
 ## Use MCP clients without Tasks support
 
@@ -222,15 +266,57 @@ cancelled execution has no result.
   project-wide execution history and has a different permission and payload contract.
 </Callout>
 
+## Recover executions as an operator
+
+Permissioned operator status is intentionally separate from owner access and payload access. A
+project operator can list safe status through these routes:
+
+- `GET /v1/orgs/{org_id}/projects/{project_id}/operator/tool-executions`
+- `GET /v1/orgs/{org_id}/projects/{project_id}/operator/tool-executions/{execution_id}`
+
+Status permission does not reveal request or result payloads. An administrator with the separate
+payload permission can use
+`GET /v1/orgs/{org_id}/projects/{project_id}/operator/tool-executions/{execution_id}/payload`.
+An administrator with cancellation permission can call
+`POST /v1/orgs/{org_id}/projects/{project_id}/operator/tool-executions/{execution_id}/cancel`.
+Arcade rechecks current policy and audits every operation.
+
+Operator cancellation reports what Arcade can prove: `accepted`, `unsupported`,
+`already_terminal`, `stop_delivery_unknown`, or `stop_already_requested`. In particular,
+`stop_delivery_unknown` does not mean the owner stopped. Inspect the durable execution before
+starting replacement work.
+
 ## Understand deadlines and retention
 
-`execution_deadline` is when Arcade stops waiting for work to finish. `retention_expires_at` is when
-Arcade stops returning the record to its owner. For example, an execution can fail at 15:10 because
-its execution deadline elapsed and remain retrievable until 15:00 the next day. A remote server may
+`execution_deadline` is when Arcade stops waiting for work to finish. The default maximum lifetime
+is 24 hours. `retention_expires_at` is when Arcade stops returning the record to its owner. By
+default, that is seven days after the execution lifetime. For example, an execution can fail at
+15:10 because its execution deadline elapsed and remain retrievable afterward. A remote server may
 shorten the execution deadline, but it cannot shorten the retention period for that failure.
 
 After retention expires, Arcade returns the same not-found response for an unknown, unauthorized,
 or expired execution ID.
+
+## Respond to saturation
+
+Arcade can reject a new execution when work reaches the principal, project, organization, project
+backlog, or retained-payload limit. It returns `429` with `Retry-After` for retryable capacity
+pressure and leaves existing executions unchanged. Wait for that duration, retrieve, or cancel
+existing work where appropriate, and retry with the same idempotency key. Do not create a second
+logical job to work around the limit.
+
+## Recover after an Engine restart
+
+1. Restart Engine replicas against the same Postgres database and with the same execution payload
+   encryption keys. Do not replay the original `tools/call`.
+2. Retrieve the execution through the owner API, or use the operator status route if the owner is
+   unavailable.
+3. If Arcade retained a mapped remote Task or hosted settlement correlation, allow polling or
+   settlement to resume. If Arcade lost owner correlation, wait until `owner_loss_detection_at`.
+   Arcade fails that execution rather than invoking the business tool again.
+4. Use operator cancellation only when the job should stop. Treat an unknown delivery outcome as
+   unresolved, not cancelled.
+5. Treat lifecycle webhooks as hints and reconcile the durable record before taking action.
 
 ## Reconcile lifecycle webhooks
 
@@ -262,7 +348,7 @@ execution.
 | `execution_deadline_exceeded` | Work exceeded its execution deadline | Start a new execution with an appropriate runtime |
 | `input_continuation_refused` | The remote owner rejected the response | Resolve the owner-side issue, then start new work |
 | `input_delivery_unknown` | Arcade cannot prove whether input reached the owner | Inspect the owner before starting new work |
-| `owner_lost_after_invocation` | Arcade lost the hosted owner after invocation started | Inspect retained state; Arcade will not invoke it again |
+| `owner_lost_after_invocation` | Arcade lost the hosted owner after invocation started | Inspect retained state. Arcade will not invoke it again |
 | `cancelled` | The owner confirmed cancellation | Start new work only if the job is still needed |
 
 Arcade re-evaluates current project access, tool policy, and provider authorization before external
@@ -270,7 +356,8 @@ input or cancellation. A revoked permission fails closed before owner contact. L
 not create another billable execution.
 
 <Callout type="warning">
-  Permissioned operator status, operator cancellation, quarantine, replay, force-fail, and
-  customer-managed recovery are milestone M3 features. They are unavailable in this preview.
-  Project history access does not grant operator recovery authority.
+  Customer-managed and local support is opt-in. Native Tasks remain closed in Arcade Cloud until
+  the Cloud recovery, load, operator, and client acceptance gates pass. Quarantine, replay, and
+  force-fail are not part of this release. Project history access does not grant operator recovery
+  authority.
 </Callout>

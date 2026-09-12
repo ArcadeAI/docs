@@ -27,16 +27,33 @@ describe("MCP Tasks guide", () => {
     ["webhook reconciliation", "durable state as truth"],
     ["terminal failures", "owner_lost_after_invocation"],
     ["operator recovery", "Permissioned operator status"],
+    ["native feature flag", "native_mcp_tasks"],
+    ["compatibility feature flag", "mcp_tasks_compatibility"],
+    ["admission bounds", "mcp_tasks_principal_concurrency"],
+    ["operator status route", "/operator/tool-executions"],
+    ["owner-loss deadline", "owner_loss_detection_at"],
+    ["unknown stop delivery", "stop_delivery_unknown"],
+    ["saturation retry guidance", "Retry-After"],
+    ["Inspector substitute", "rmcp 3.3.0"],
+    [
+      "canonical capability metadata",
+      "io.modelcontextprotocol/clientCapabilities",
+    ],
   ])("documents %s", (_topic, evidence) => {
     expect(normalizedGuide).toContain(evidence);
   });
 
-  test.each([
-    "external tenants",
-    "self-hosted Arcade Engine deployments",
-    "local deployments",
-    "milestone M3 features",
-  ])("keeps %s visibly gated", (boundary) => {
-    expect(normalizedGuide).toContain(boundary);
-  });
+  test.each(["external tenants", "Arcade Cloud"])(
+    "keeps %s visibly gated",
+    (boundary) => {
+      expect(normalizedGuide).toContain(boundary);
+    }
+  );
+
+  test.each(["customer-managed", "local deployments"])(
+    "documents opt-in availability for %s",
+    (mode) => {
+      expect(normalizedGuide).toContain(mode);
+    }
+  );
 });
