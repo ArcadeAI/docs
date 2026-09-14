@@ -66,7 +66,7 @@ Because access runs entirely through the authorizing identity's IAM permissions,
 
 - **Understand what the authorized connection can actually do.** These two permissions only let the identity complete the OAuth handshake. They don't grant any AWS service access. Every tool call the AWS MCP Server makes afterward runs under the authorizing identity's own IAM policies. Whatever that identity can't do in the Console or CLI, it can't do through the MCP server either. Scope the authorizing role to exactly the AWS access you intend agents to have, since that role's policies *are* the access-control boundary for everything Arcade does here.
 
-- **Pick the region deliberately.** The AWS MCP Server endpoint and its OAuth resources are region-specific. Use the region where you intend to operate, and keep it consistent between the server URL and the authorizing session.
+- **Pick the region deliberately.** The AWS MCP Server endpoint and its OAuth resources are region-specific, and the server is available in a limited set of regions while AWS rolls it out. Use a region where the endpoint actually resolves, and keep it consistent between the server URL and the authorizing session.
 
 <Callout type="info">
   All OAuth activity (authorization requests, token issuance,
@@ -89,7 +89,7 @@ Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add S
 https://aws-mcp.<region>.api.aws/mcp
 ```
 
-For example, `https://aws-mcp.us-west-2.api.aws/mcp`. The region in the URL should match the region of the identity and session you authorize with.
+For example, `https://aws-mcp.us-east-1.api.aws/mcp`. The region in the URL should match the region of the identity and session you authorize with. If the hostname doesn't resolve, that region isn't served yet: pick one that is, rather than treating it as a connection or permissions problem.
 
 ### Configure OAuth2 authorization
 
@@ -103,7 +103,7 @@ Save the server to open the authorization prompt. Sign in through AWS Sign-In as
 
 ## Troubleshooting
 
-- **"Agent cannot register as an OAuth client" during connection**: Arcade's redirect URI isn't on AWS Sign-In's DCR allowlist for this. Confirm `https://cloud.arcade.dev/api/v1/oauth/*` appears in [AWS's Supported Redirect URIs table](https://docs.aws.amazon.com/signin/latest/userguide/aws-mcp-server.html#aws-mcp-server-supported-redirect-uris). This is resolved on AWS's side, not through Arcade configuration.
+- **"Agent cannot register as an OAuth client" during connection**: AWS Sign-In only permits Dynamic Client Registration from approved redirect URIs, and Arcade's (`https://cloud.arcade.dev/api/v1/oauth/*`) is approved. Note that [AWS's published Supported Redirect URIs table](https://docs.aws.amazon.com/signin/latest/userguide/aws-mcp-server.html#aws-mcp-server-supported-redirect-uris) lags the actual allowlist, so Arcade's absence from that table doesn't indicate a problem and isn't a useful diagnosis. If you hit this error, it's resolved on AWS's side rather than through Arcade configuration.
 - **"Permission denied" when connecting**: the authorizing IAM identity is missing `signin:AuthorizeOAuth2Access` and/or `signin:CreateOAuth2Token`. Attach `AWSMCPSignInOAuthAccessPolicy` to that identity.
 - **The connection authorizes, but specific tool calls fail with access-denied errors**: the authorizing identity's own IAM policies don't permit that AWS action. This isn't an MCP or Arcade issue: authorizing the agent grants no permissions beyond what the identity already has. Broaden the role's IAM policies (deliberately) or re-authorize as an identity with the needed access.
 - **"Invalid target resource"**: the endpoint region or resource is off. Confirm the server URL uses the `https://aws-mcp.<region>.api.aws/mcp` pattern with a supported region.
