@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  resolveApiBaseUrl,
   resolveApiBaseUrlFromEnv,
   resolveApiSource,
 } from "../../src/cli/api-source";
@@ -75,5 +76,22 @@ describe("resolveApiSource", () => {
 
   it("defaults to mock when no API URL is configured", () => {
     expect(resolveApiSource({})).toBe("mock");
+  });
+
+  // An unset GitHub Actions secret arrives as "", which `??` would otherwise
+  // accept as a base URL and turn into an unfetchable relative path.
+  it("treats a blank URL as unset so the default still applies", () => {
+    process.env.PUBLIC_CATALOG_URL = "";
+
+    expect(resolveApiBaseUrlFromEnv()).toBeUndefined();
+    expect(resolveApiBaseUrl(undefined)).toBeUndefined();
+    expect(resolveApiBaseUrl("   ")).toBeUndefined();
+    expect(resolveApiSource({})).toBe("mock");
+  });
+
+  it("trims a configured URL", () => {
+    expect(resolveApiBaseUrl("  https://experience.arcade.dev/api  ")).toBe(
+      "https://experience.arcade.dev/api"
+    );
   });
 });

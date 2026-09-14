@@ -84,7 +84,7 @@ import {
 } from "../utils/run-logs";
 import {
   type ApiSource,
-  resolveApiBaseUrlFromEnv,
+  resolveApiBaseUrl,
   resolveApiSource,
 } from "./api-source";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup";
@@ -496,7 +496,7 @@ interface ToolkitDataSourceOptions {
 
 const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
   const baseUrl =
-    options.apiUrl ?? resolveApiBaseUrlFromEnv() ?? DEFAULT_PUBLIC_CATALOG_URL;
+    resolveApiBaseUrl(options.apiUrl) ?? DEFAULT_PUBLIC_CATALOG_URL;
 
   return {
     baseUrl,

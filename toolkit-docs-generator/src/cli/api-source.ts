@@ -31,7 +31,7 @@ const resolveExplicitApiSource = (apiSource: string): ApiSource => {
  * carries its own default URL.
  */
 const resolveAutoDetectedApiSource = (options: ApiSourceOptions): ApiSource => {
-  const hasApiUrl = !!(options.apiUrl ?? resolveApiBaseUrlFromEnv());
+  const hasApiUrl = resolveApiBaseUrl(options.apiUrl) !== undefined;
 
   if (hasApiUrl) {
     return "public-catalog";
@@ -41,12 +41,30 @@ const resolveAutoDetectedApiSource = (options: ApiSourceOptions): ApiSource => {
 };
 
 /**
+ * Treat a blank value as absent.
+ *
+ * An unset GitHub Actions secret still reaches the job as `""`, and `??` would
+ * accept that as a real base URL and build a relative `/public/tool_catalog`
+ * that fetch cannot parse. The nightly wires PUBLIC_CATALOG_URL from an
+ * optional secret, so this is the normal case, not an edge case.
+ */
+const blankToUndefined = (value: string | undefined): string | undefined => {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+};
+
+/**
  * The catalog now lives on the experience API, whose paths hang off `/api`
  * rather than the engine's `/v1`. An engine host would build a URL that 404s,
  * so ARCADE_API_URL and ENGINE_API_URL are deliberately not consulted here.
  */
 export const resolveApiBaseUrlFromEnv = (): string | undefined =>
-  process.env.PUBLIC_CATALOG_URL;
+  blankToUndefined(process.env.PUBLIC_CATALOG_URL);
+
+/** The configured base URL, or undefined when neither flag nor env supplies one. */
+export const resolveApiBaseUrl = (
+  apiUrl: string | undefined
+): string | undefined => blankToUndefined(apiUrl) ?? resolveApiBaseUrlFromEnv();
 
 export const resolveApiSource = (options: ApiSourceOptions): ApiSource => {
   if (options.apiSource) {
