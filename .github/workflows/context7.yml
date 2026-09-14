@@ -1,6 +1,13 @@
 name: Refresh Context7 library
 
+# Pings Context7 to re-index the /arcadeai/docs library after each main merge.
+# Context7 serves our docs to AI IDEs via their MCP; this is separate from
+# docs.arcade.dev/llms.txt and the other URL-based Context7 entries.
+# Metrics: https://context7.com/arcadeai/docs/admin
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -8,8 +15,8 @@ jobs:
     name: Refresh Context7 library
     runs-on: ubuntu-latest
     steps:
-      - name: refresh context7 library
+      - name: Refresh Context7 library
         run: |
-          curl -X POST https://context7.com/api/refresh-library \
+          curl --fail-with-body -sS -X POST https://context7.com/api/refresh-library \
             -H "Content-Type: application/json" \
             -d '{"libraryName": "/arcadeai/docs"}'
