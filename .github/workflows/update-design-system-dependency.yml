@@ -47,14 +47,6 @@ jobs:
           pnpm vitest run toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts toolkit-docs-generator/tests/sources/oauth-provider-resolver.test.ts
           pnpm run build
 
-      - name: Get app token
-        if: steps.check-changes.outputs.has_changes == 'true'
-        id: app-token
-        uses: ./.github/actions/app-token
-        with:
-          app-id: ${{ secrets.DOCS_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
-
       - name: Create pull request
         if: steps.check-changes.outputs.has_changes == 'true'
         id: cpr
@@ -63,9 +55,7 @@ jobs:
           HUSKY: 0
           SKIP_HUSKY: 1
         with:
-          token: ${{ steps.app-token.outputs.token }}
-          author: ${{ steps.app-token.outputs.committer }}
-          committer: ${{ steps.app-token.outputs.committer }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "chore: update @arcadeai/design-system to latest"
           title: "chore: update @arcadeai/design-system to latest"
           body: |
@@ -87,4 +77,4 @@ jobs:
         continue-on-error: true
         run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

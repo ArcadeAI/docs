@@ -9,6 +9,11 @@ on:
   repository_dispatch:
     types: [porter_deploy_succeeded]
   workflow_dispatch:
+    inputs:
+      public_catalog_url:
+        description: "Override public catalog URL (staging only; production is the default)"
+        required: false
+        type: string
   # 11:00 UTC = 3 AM PST / 4 AM PDT — late enough that DST drift doesn't matter.
   schedule:
     - cron: "0 11 * * *"
@@ -67,11 +72,11 @@ jobs:
             --verbose \
             --api-source public-catalog \
             --llm-provider anthropic \
-            --llm-model "$ANTHROPIC_MODEL" \
+            --llm-model "claude-sonnet-4-6" \
             --llm-api-key "$ANTHROPIC_API_KEY" \
             --llm-max-tokens 8192 \
             --llm-editor-provider anthropic \
-            --llm-editor-model "$ANTHROPIC_EDITOR_MODEL" \
+            --llm-editor-model "claude-sonnet-4-6" \
             --llm-editor-api-key "$ANTHROPIC_API_KEY" \
             --toolkit-concurrency 8 \
             --llm-concurrency 15 \
@@ -84,25 +89,13 @@ jobs:
         working-directory: toolkit-docs-generator
         env:
           # Unset in normal runs: the generator defaults to the production
-          # experience API, which needs no credentials. Set the secret to
-          # point a run at staging or a local BFF.
-          PUBLIC_CATALOG_URL: ${{ secrets.PUBLIC_CATALOG_URL }}
+          # experience API. Pass public_catalog_url on workflow_dispatch to
+          # point a manual run at staging or a local BFF.
+          PUBLIC_CATALOG_URL: ${{ inputs.public_catalog_url }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL || 'claude-sonnet-4-6' }}
-          # Stronger model for the secret-coherence editor. Keeps
-          # stale-secret cleanup precise instead of re-summarizing the whole
-          # artifact.
-          ANTHROPIC_EDITOR_MODEL: ${{ secrets.ANTHROPIC_EDITOR_MODEL || 'claude-sonnet-4-6' }}
 
       - name: Sync toolkit sidebar navigation
         run: pnpm exec tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
-
-      - name: Get app token
-        id: app-token
-        uses: ./.github/actions/app-token
-        with:
-          app-id: ${{ secrets.DOCS_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
 
       - name: Create pull request
         id: cpr
@@ -110,9 +103,7 @@ jobs:
         env:
           HUSKY: 0
         with:
-          token: ${{ steps.app-token.outputs.token }}
-          author: ${{ steps.app-token.outputs.committer }}
-          committer: ${{ steps.app-token.outputs.committer }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "[AUTO] Adding MCP Servers docs update"
           title: "[AUTO] Adding MCP Servers docs update"
           body: |
@@ -139,7 +130,7 @@ jobs:
             echo "::warning::Could not request review on PR #${{ steps.cpr.outputs.pull-request-number }}: $(cat review-error.log)"
           fi
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload generation report
         if: always()
