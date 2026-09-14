@@ -1,0 +1,59 @@
+name: Get app token
+description: >
+  Mint a short-lived installation token for the docs automation GitHub App and
+  resolve the git identity of its bot user.
+
+inputs:
+  app-id:
+    description: App ID or client ID of the docs automation app.
+    required: true
+  private-key:
+    description: Private key of the docs automation app.
+    required: true
+
+outputs:
+  token:
+    description: Installation token, scoped to this repository and valid for one hour.
+    value: ${{ steps.app-token.outputs.token }}
+  user-name:
+    description: Git user name of the app's bot user.
+    value: ${{ steps.bot-user.outputs.user-name }}
+  user-email:
+    description: Git email of the app's bot user, which links commits to the bot account.
+    value: ${{ steps.bot-user.outputs.user-email }}
+  committer:
+    description: Bot identity as a single `Name <email>` string, the form create-pull-request expects.
+    value: ${{ steps.bot-user.outputs.committer }}
+
+runs:
+  using: composite
+  steps:
+    - name: Mint an installation token
+      id: app-token
+      uses: actions/create-github-app-token@v2
+      with:
+        # `app-id` takes either the numeric app ID or the app's client ID.
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+
+    - name: Resolve the bot user identity
+      id: bot-user
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+      run: |
+        # Assign before echoing. `echo "id=$(gh api ...)"` reports echo's exit
+        # code, so a failed lookup would pass the step with an empty id, and
+        # the resulting address is one git accepts but GitHub cannot link to
+        # the bot — misattributed commits, no error anywhere.
+        id=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+
+        name="${APP_SLUG}[bot]"
+        email="${id}+${APP_SLUG}[bot]@users.noreply.github.com"
+
+        {
+          echo "user-name=${name}"
+          echo "user-email=${email}"
+          echo "committer=${name} <${email}>"
+        } >>"$GITHUB_OUTPUT"
