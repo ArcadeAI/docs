@@ -118,13 +118,31 @@ describe("extractToolkitRequirements", () => {
     expect(extractToolkitRequirements(githubCatalogEntry.requirements)).toEqual(
       {
         auth: {
-          providerId: "arcade-github",
+          providerId: "github",
           providerType: "oauth2",
           scopes: ["repo"],
         },
         secrets: ["GITHUB_SERVER_URL"],
       }
     );
+  });
+
+  it("strips the arcade- prefix so the provider id matches its docs page", () => {
+    expect(
+      extractToolkitRequirements({
+        authorization: {
+          items: { powerbi: { provider_id: "arcade-microsoft-powerbi" } },
+        },
+      }).auth?.providerId
+    ).toBe("microsoft-powerbi");
+  });
+
+  it("leaves an unprefixed provider id alone", () => {
+    expect(
+      extractToolkitRequirements({
+        authorization: { items: { salesforce: { provider_id: "salesforce" } } },
+      }).auth?.providerId
+    ).toBe("salesforce");
   });
 
   it("returns no auth when only secrets are required", () => {
@@ -148,7 +166,7 @@ describe("transformPublicToolItem", () => {
     );
 
     expect(tool.auth).toEqual({
-      providerId: "arcade-github",
+      providerId: "github",
       providerType: "oauth2",
       scopes: ["repo"],
     });
@@ -216,7 +234,7 @@ describe("PublicCatalogApiSource", () => {
 
     expect(first).toHaveLength(1);
     expect(second).toHaveLength(1);
-    expect(first[0]?.auth?.providerId).toBe("arcade-github");
+    expect(first[0]?.auth?.providerId).toBe("github");
     expect(catalogCalls).toBe(1);
     expect(toolsCalls).toBe(1);
   });

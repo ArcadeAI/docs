@@ -63,6 +63,20 @@ export type PublicCatalogRequirements = z.infer<
 
 const DEFAULT_OAUTH_PROVIDER_TYPE = "oauth2";
 
+const ARCADE_PROVIDER_PREFIX = /^arcade-/;
+
+/**
+ * Drop the `arcade-` prefix the catalog puts on Arcade-hosted providers.
+ *
+ * The generated `providerId` becomes the auth provider docs slug
+ * (`/en/references/auth-providers/<providerId>`), and those pages are named
+ * `github`, `airtable`, `microsoft-powerbi` — never `arcade-github`. Providers
+ * that arrive unprefixed (`salesforce`, `zendesk`, and the rest of the BYOC
+ * set) already match their page and pass through untouched.
+ */
+const toDocsProviderId = (providerId: string): string =>
+  providerId.replace(ARCADE_PROVIDER_PREFIX, "");
+
 export const extractToolkitRequirements = (
   requirements: PublicCatalogRequirements | null | undefined
 ): { auth: ToolAuth | null; secrets: string[] } => {
@@ -74,8 +88,9 @@ export const extractToolkitRequirements = (
     return { auth: null, secrets };
   }
 
-  const providerId =
+  const rawProviderId =
     authEntries.find((entry) => entry.provider_id)?.provider_id ?? null;
+  const providerId = rawProviderId ? toDocsProviderId(rawProviderId) : null;
   const providerType =
     authEntries.find((entry) => entry.provider_type)?.provider_type ??
     DEFAULT_OAUTH_PROVIDER_TYPE;
