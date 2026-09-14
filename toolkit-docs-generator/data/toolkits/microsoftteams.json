@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftTeams",
   "label": "Microsoft Teams",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "Arcade.dev LLM tools for Microsoft Teams",
   "metadata": {
     "category": "social",
@@ -17,15 +17,23 @@
     "type": "oauth2",
     "providerId": "microsoft",
     "allScopes": [
+      "Calendars.Read",
+      "Calendars.ReadWrite",
       "Channel.ReadBasic.All",
+      "ChannelMember.Read.All",
       "ChannelMessage.Read.All",
+      "ChannelMessage.ReadWrite",
       "ChannelMessage.Send",
       "Chat.Create",
       "Chat.Read",
       "Chat.ReadBasic",
+      "Chat.ReadWrite",
+      "ChatMember.ReadWrite",
       "ChatMessage.Read",
       "ChatMessage.Send",
       "Group.Read.All",
+      "OnlineMeetingTranscript.Read.All",
+      "OnlineMeetings.Read",
       "People.Read",
       "Team.ReadBasic.All",
       "TeamMember.Read.All",
@@ -35,10 +43,83 @@
   },
   "tools": [
     {
+      "name": "CancelMeeting",
+      "qualifiedName": "MicrosoftTeams.CancelMeeting",
+      "fullyQualifiedName": "MicrosoftTeams.CancelMeeting@0.7.0",
+      "description": "Cancels a Microsoft Teams meeting the signed-in user organizes, notifying attendees.\n\nOnly the meeting's organizer can cancel it; cancelling a meeting organized by someone else\nfails.",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the meeting to cancel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": false,
+          "description": "An optional message included in the cancellation notice sent to attendees. Defaults to empty (no comment).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Calendars.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation that the meeting was cancelled."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.CancelMeeting",
+        "parameters": {
+          "meeting_id": {
+            "value": "AAMkADY2YjNjOTktNTZiNy00ZjVhLWI3NmQtYjE2MzA4NjQ4ZGRkBGEgAAAAAAAiPAAA=",
+            "type": "string",
+            "required": true
+          },
+          "comment": {
+            "value": "Due to a scheduling conflict, this meeting has been cancelled. We will reschedule and send a new invite shortly. Apologies for any inconvenience.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "CreateChat",
       "qualifiedName": "MicrosoftTeams.CreateChat",
-      "fullyQualifiedName": "MicrosoftTeams.CreateChat@0.6.3",
-      "description": "Creates a Microsoft Teams chat.\n\nIf the chat already exists with the specified members, the MS Graph API will return the\nexisting chat.\n\nProvide any combination of user_ids and/or user_names. When available, prefer providing\nuser_ids for optimal performance.",
+      "fullyQualifiedName": "MicrosoftTeams.CreateChat@0.7.0",
+      "description": "Creates a Microsoft Teams chat.\n\nFor a 1:1 chat (exactly one other member besides the caller), the MS Graph API deduplicates\nreliably: if a one-on-one chat already exists with that member, this returns the existing\nchat instead of creating a new one.\n\nFor a group chat (two or more other members), the MS Graph API does NOT guarantee dedup: a\nnew group chat may be created even when a group chat with the exact same member set already\nexists. To reuse an existing group chat, look it up first (e.g. via `Teams.GetChatMetadata`\nor `Teams.ListChats`) rather than relying on this tool to return it.\n\nProvide any combination of user_ids and/or user_names. When available, prefer providing\nuser_ids for optimal performance.",
       "parameters": [
         {
           "name": "user_ids",
@@ -119,9 +200,356 @@
       }
     },
     {
+      "name": "CreateMeeting",
+      "qualifiedName": "MicrosoftTeams.CreateMeeting",
+      "fullyQualifiedName": "MicrosoftTeams.CreateMeeting@0.7.0",
+      "description": "Schedules a new Microsoft Teams online meeting on the signed-in user's calendar.\n\nCreates a calendar event with an attached Teams meeting (join link, dial-in info) and sends\ninvites to any attendees provided. The response's join_url is what attendees use to join.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's subject/title.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_datetime",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's start date and time, interpreted in time_zone. Provide a string in the format 'YYYY-MM-DD HH:MM:SS'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_datetime",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's end date and time, interpreted in time_zone. Provide a string in the format 'YYYY-MM-DD HH:MM:SS'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "time_zone",
+          "type": "string",
+          "required": false,
+          "description": "The IANA (e.g. 'America/Los_Angeles') or Windows (e.g. 'Pacific Standard Time') time zone that start_datetime and end_datetime are expressed in. Defaults to 'UTC'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Email addresses of people to invite to the meeting. Optional.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attendee_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Names of people to invite to the meeting; each is resolved to a unique email address. Prefer attendee_emails when the email address is already known, since name resolution adds latency and fails when a name is ambiguous or not found. Optional.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Plain-text meeting description/agenda shown in the invite body. Defaults to empty (no description).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Calendars.ReadWrite",
+          "User.Read",
+          "User.ReadBasic.All",
+          "People.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The Teams meeting that was scheduled."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.CreateMeeting",
+        "parameters": {
+          "subject": {
+            "value": "Q3 Product Roadmap Review",
+            "type": "string",
+            "required": true
+          },
+          "start_datetime": {
+            "value": "2024-09-15 14:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_datetime": {
+            "value": "2024-09-15 15:30:00",
+            "type": "string",
+            "required": true
+          },
+          "time_zone": {
+            "value": "America/New_York",
+            "type": "string",
+            "required": false
+          },
+          "attendee_emails": {
+            "value": [
+              "alice.johnson@example.com",
+              "bob.smith@example.com",
+              "carol.white@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "attendee_names": {
+            "value": [
+              "David Lee",
+              "Emma Brown"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "description": {
+            "value": "Quarterly review of the product roadmap. Please come prepared with updates from your respective teams and any blockers to discuss.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteChannelMessage",
+      "qualifiedName": "MicrosoftTeams.DeleteChannelMessage",
+      "fullyQualifiedName": "MicrosoftTeams.DeleteChannelMessage@0.7.0",
+      "description": "Deletes a previously sent Microsoft Teams channel message.\n\nThis soft-deletes the message: it is marked as deleted and its content is replaced with a\nplaceholder for other members, not permanently erased. Only the original sender's own\nmessage can be deleted.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to delete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id_or_name",
+          "type": "string",
+          "required": true,
+          "description": "The ID or name of the channel the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team the channel belongs to. If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "ChannelMessage.ReadWrite",
+          "Channel.ReadBasic.All",
+          "Team.ReadBasic.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The result of the delete."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.DeleteChannelMessage",
+        "parameters": {
+          "message_id": {
+            "value": "1623456789012",
+            "type": "string",
+            "required": true
+          },
+          "channel_id_or_name": {
+            "value": "General",
+            "type": "string",
+            "required": true
+          },
+          "team_id_or_name": {
+            "value": "Engineering Team",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteChatMessage",
+      "qualifiedName": "MicrosoftTeams.DeleteChatMessage",
+      "fullyQualifiedName": "MicrosoftTeams.DeleteChatMessage@0.7.0",
+      "description": "Deletes a previously sent Microsoft Teams chat message.\n\nThis soft-deletes the message: it is marked as deleted and its content is replaced with a\nplaceholder for other members, not permanently erased. Only the original sender's own\nmessage can be deleted.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to delete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the chat the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users in the chat the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users in the chat the message was sent to. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Chat.ReadWrite",
+          "User.Read",
+          "User.ReadBasic.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The result of the delete."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.DeleteChatMessage",
+        "parameters": {
+          "message_id": {
+            "value": "1623456789012",
+            "type": "string",
+            "required": true
+          },
+          "chat_id": {
+            "value": "19:abc123def456@thread.v2",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": [
+              "28:a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "28:f9e8d7c6-b5a4-3210-fedc-ba9876543210"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": [
+              "Alice Johnson",
+              "Bob Smith"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetChannelMessageReplies",
       "qualifiedName": "MicrosoftTeams.GetChannelMessageReplies",
-      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessageReplies@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessageReplies@0.7.0",
       "description": "Retrieves the replies to a Microsoft Teams channel message.",
       "parameters": [
         {
@@ -135,8 +563,8 @@
         {
           "name": "channel_id_or_name",
           "type": "string",
-          "required": true,
-          "description": "The ID or name of the channel to get the replies of.",
+          "required": false,
+          "description": "The ID or name of the channel to get the replies of. If not provided: in case the channel can be resolved to a single one within the team, the tool will use it; otherwise an error will be returned with a list of all channels to pick from.",
           "enum": null,
           "inferrable": true
         },
@@ -169,14 +597,14 @@
         "toolName": "MicrosoftTeams.GetChannelMessageReplies",
         "parameters": {
           "message_id": {
-            "value": "1615912728894",
+            "value": "1615471943816",
             "type": "string",
             "required": true
           },
           "channel_id_or_name": {
             "value": "General",
             "type": "string",
-            "required": true
+            "required": false
           },
           "team_id_or_name": {
             "value": "Engineering Team",
@@ -209,8 +637,8 @@
     {
       "name": "GetChannelMessages",
       "qualifiedName": "MicrosoftTeams.GetChannelMessages",
-      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessages@0.6.3",
-      "description": "Retrieves the messages in a Microsoft Teams channel.\n\nThe Microsoft Graph API does not support pagination for this endpoint.",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessages@0.7.0",
+      "description": "Retrieves the messages in a Microsoft Teams channel, newest first.\n\nThe channel-messages endpoint rejects server-side date filtering outright, so start_datetime\nand end_datetime are applied client-side over the most recent messages this tool walks from\nupstream: it may miss older matches beyond that window, and the response's scanned_count\nfield reports how many messages were inspected before filtering.",
       "parameters": [
         {
           "name": "channel_id",
@@ -229,10 +657,18 @@
           "inferrable": true
         },
         {
+          "name": "channel_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the channel to get the messages of. Equivalent to providing either channel_id or channel_name; use whichever of the three parameters is convenient.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of messages to return. Defaults to 50, max is 50.",
+          "description": "The maximum number of messages to return. Each message can carry a large amount of content (body, mentions, embedded replies), so keep this small unless a wide history scan is actually needed. Defaults to 15, max is 50.",
           "enum": null,
           "inferrable": true
         },
@@ -241,6 +677,22 @@
           "type": "string",
           "required": false,
           "description": "The ID or name of the team to get the messages of. If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_datetime",
+          "type": "string",
+          "required": false,
+          "description": "Only include messages created on or after this moment. Provide a string in the format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'. Applied over the most recent messages this tool can fetch in a single call, so an old start_datetime may miss matches if there are more than that many newer messages. Defaults to None (no start date filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_datetime",
+          "type": "string",
+          "required": false,
+          "description": "Only include messages created on or before this moment. Provide a string in the format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'. Defaults to None (no end date filter).",
           "enum": null,
           "inferrable": true
         }
@@ -270,17 +722,32 @@
             "required": false
           },
           "channel_name": {
-            "value": "General",
+            "value": "general",
+            "type": "string",
+            "required": false
+          },
+          "channel_id_or_name": {
+            "value": "announcements",
             "type": "string",
             "required": false
           },
           "limit": {
-            "value": 25,
+            "value": 20,
             "type": "integer",
             "required": false
           },
           "team_id_or_name": {
             "value": "Engineering Team",
+            "type": "string",
+            "required": false
+          },
+          "start_datetime": {
+            "value": "2024-01-15",
+            "type": "string",
+            "required": false
+          },
+          "end_datetime": {
+            "value": "2024-06-30 23:59:59",
             "type": "string",
             "required": false
           }
@@ -310,8 +777,8 @@
     {
       "name": "GetChannelMetadata",
       "qualifiedName": "MicrosoftTeams.GetChannelMetadata",
-      "fullyQualifiedName": "MicrosoftTeams.GetChannelMetadata@0.6.3",
-      "description": "Retrieves metadata about a Microsoft Teams channel and its members.\n\nProvide either a channel_id or channel_name, not both. When available, prefer providing a\nchannel_id for optimal performance.\n\nThe Microsoft Graph API returns only up to the first 999 members in the channel.\n\nThis tool does not return messages exchanged in the channel. To retrieve channel messages,\nuse the `Teams.GetChannelMessages` tool.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use.",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMetadata@0.7.0",
+      "description": "Retrieves metadata about a Microsoft Teams channel and its members.\n\nProvide exactly one of channel_id, channel_name, or channel_id_or_name. When available,\nprefer providing a channel_id for optimal performance.\n\nThe Microsoft Graph API returns only up to the first 999 members in the channel.\n\nThis tool does not return messages exchanged in the channel. To retrieve channel messages,\nuse the `Teams.GetChannelMessages` tool.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use.",
       "parameters": [
         {
           "name": "channel_id",
@@ -330,6 +797,14 @@
           "inferrable": true
         },
         {
+          "name": "channel_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the channel to get. Equivalent to providing either channel_id or channel_name; use whichever of the three parameters is convenient.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
           "name": "team_id_or_name",
           "type": "string",
           "required": false,
@@ -343,6 +818,7 @@
         "providerType": "oauth2",
         "scopes": [
           "Channel.ReadBasic.All",
+          "ChannelMember.Read.All",
           "Group.Read.All",
           "Team.ReadBasic.All"
         ]
@@ -358,12 +834,17 @@
         "toolName": "MicrosoftTeams.GetChannelMetadata",
         "parameters": {
           "channel_id": {
-            "value": "19:abc123def456@thread.tacv2",
+            "value": "19:abc123def456ghi789@thread.tacv2",
             "type": "string",
             "required": false
           },
           "channel_name": {
-            "value": "",
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "channel_id_or_name": {
+            "value": null,
             "type": "string",
             "required": false
           },
@@ -398,8 +879,8 @@
     {
       "name": "GetChatMessageById",
       "qualifiedName": "MicrosoftTeams.GetChatMessageById",
-      "fullyQualifiedName": "MicrosoftTeams.GetChatMessageById@0.6.3",
-      "description": "Retrieves a Microsoft Teams chat message.",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMessageById@0.7.0",
+      "description": "Retrieves a Microsoft Teams chat message.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nWhen user_names is provided instead of chat_id, this tool also searches the caller's People\n(contacts and interaction history) to resolve the chat.",
       "parameters": [
         {
           "name": "message_id",
@@ -412,7 +893,7 @@
         {
           "name": "chat_id",
           "type": "string",
-          "required": true,
+          "required": false,
           "description": "The ID of the chat to get the message from.",
           "enum": null,
           "inferrable": true
@@ -457,19 +938,19 @@
         "toolName": "MicrosoftTeams.GetChatMessageById",
         "parameters": {
           "message_id": {
-            "value": "1648475136000",
+            "value": "1634567890123",
             "type": "string",
             "required": true
           },
           "chat_id": {
-            "value": "19:meeting_ZDc5OTY3YWMtNGI5Mi00MDk4LWJlNmEtZWE1YzZhMTU2ZGFi@thread.v2",
+            "value": "19:abc123def456@thread.v2",
             "type": "string",
-            "required": true
+            "required": false
           },
           "user_ids": {
             "value": [
-              "87d349ed-44d7-43e1-9a83-5f2406dee5bd",
-              "3c4b6f89-1a2e-4d7c-b5a8-9e0f1d2c3e4a"
+              "28:a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "28:b2c3d4e5-f6a7-8901-bcde-f12345678901"
             ],
             "type": "array",
             "required": false
@@ -508,7 +989,7 @@
     {
       "name": "GetChatMessages",
       "qualifiedName": "MicrosoftTeams.GetChatMessages",
-      "fullyQualifiedName": "MicrosoftTeams.GetChatMessages@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMessages@0.7.0",
       "description": "Retrieves messages from a Microsoft Teams chat (individual or group).\n\nProvide one of chat_id OR any combination of user_ids and/or user_names. When available, prefer\nproviding a chat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool.\n\nMessages will be sorted in descending order by the messages' `created_datetime` field.\n\nThe Microsoft Teams API does not support pagination for this tool.",
       "parameters": [
         {
@@ -557,7 +1038,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of messages to return. Defaults to 50, max is 50.",
+          "description": "The maximum number of messages to return. Each message can carry a large amount of content (body, mentions, attachments), so keep this small unless a wide history scan is actually needed. Defaults to 15, max is 50.",
           "enum": null,
           "inferrable": true
         }
@@ -645,8 +1126,8 @@
     {
       "name": "GetChatMetadata",
       "qualifiedName": "MicrosoftTeams.GetChatMetadata",
-      "fullyQualifiedName": "MicrosoftTeams.GetChatMetadata@0.6.3",
-      "description": "Retrieves metadata about a Microsoft Teams chat.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf multiple roup chats exist with those exact members, returns the most recently updated one.\n\nMax 20 DIFFERENT users can be provided in user_ids/user_names.\n\nThis tool DOES NOT return messages in a chat. Use the `Teams.GetChatMessages` tool to get\nchat messages.",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMetadata@0.7.0",
+      "description": "Retrieves metadata about a Microsoft Teams chat.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf multiple roup chats exist with those exact members, returns the most recently updated one.\n\nMax 20 DIFFERENT users can be provided in user_ids/user_names.\n\nThis tool DOES NOT return messages in a chat. Use the `Teams.GetChatMessages` tool to get\nchat messages.\n\nWhen user_names is provided instead of chat_id, this tool also searches the caller's People\n(contacts and interaction history) to resolve the chat.",
       "parameters": [
         {
           "name": "chat_id",
@@ -742,10 +1223,157 @@
       }
     },
     {
+      "name": "GetMeeting",
+      "qualifiedName": "MicrosoftTeams.GetMeeting",
+      "fullyQualifiedName": "MicrosoftTeams.GetMeeting@0.7.0",
+      "description": "Retrieves a Microsoft Teams meeting scheduled on the signed-in user's calendar.\n\nUse `Teams.ListMeetings` to discover meeting_id values, or the id returned by\n`Teams.CreateMeeting` after scheduling a new one.",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the meeting to retrieve.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Calendars.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The meeting's details, including its join link."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetMeeting",
+        "parameters": {
+          "meeting_id": {
+            "value": "AAMkADlkZTMwMjI3LTRmZjAtNGQ2Ny1iMzA0LTBkZjM4YjRiMDEyNgBGAAAAAADRlY7ewL5ASZkFtCLnKBp8BwCvHKZbHJtGSbFcMn6p0zAAAAAAAAENAACvHKZbHJtGSbFcMn6p0zA=",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMeetingTranscript",
+      "qualifiedName": "MicrosoftTeams.GetMeetingTranscript",
+      "fullyQualifiedName": "MicrosoftTeams.GetMeetingTranscript@0.7.0",
+      "description": "Fetches the text content of a Teams meeting transcript.\n\nPrefers speaker-attributed content; when the signed-in user's role does not permit speaker\nattribution, automatically falls back to unattributed text instead of failing outright. The\nformat field on the response states which one was returned.",
+      "parameters": [
+        {
+          "name": "transcript_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the transcript to fetch, as returned by ListMeetingTranscripts.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Teams meeting the transcript belongs to. Provide either this or join_url.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "join_url",
+          "type": "string",
+          "required": false,
+          "description": "The Teams meeting's join URL the transcript belongs to. Provide either this or meeting_id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "OnlineMeetings.Read",
+          "OnlineMeetingTranscript.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The transcript's content."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetMeetingTranscript",
+        "parameters": {
+          "transcript_id": {
+            "value": "MSMjMCMjNzU3ODkwYWItMzYyMS00OTc4LWI2YmMtYWM5ZDRiYWE3OTQy",
+            "type": "string",
+            "required": true
+          },
+          "meeting_id": {
+            "value": "MSoxNzI2NzM2MTg3NTYxMzY2NzMhMTk6bWVldGluZ19aR1kxWlRjeU5UY3RZekl5T0MwMFl6WXhMVGxsWWpNdE16Z3hNVFEyTmpGaFpXTmxAdGhyZWFkLnYy",
+            "type": "string",
+            "required": false
+          },
+          "join_url": {
+            "value": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZGY5ZTcyNTctYzIyOC00YzYxLTllYjMtMzgxMTQ2NjFhZWNl%40thread.v2/0?context=%7b%22Tid%22%3a%2272f988bf-86f1-41af-91ab-2d7cd011db47%22%2c%22Oid%22%3a%228246b4cd-4b47-48ec-8bf4-d37cda809891%22%7d",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetSignedInUser",
       "qualifiedName": "MicrosoftTeams.GetSignedInUser",
-      "fullyQualifiedName": "MicrosoftTeams.GetSignedInUser@0.6.3",
-      "description": "Get the user currently signed in Microsoft Teams.\n\nThis tool is not necessary to call before calling other tools.",
+      "fullyQualifiedName": "MicrosoftTeams.GetSignedInUser@0.7.0",
+      "description": "Get the current user's full profile (name, job title, employment, contacts, location).\n\nUse this to fetch profile details about the signed-in user, not to confirm caller identity\nor tenant context before acting - use `Teams.WhoAmI` for that instead. This tool is not\nnecessary to call before calling other tools.",
       "parameters": [],
       "auth": {
         "providerId": "microsoft",
@@ -789,7 +1417,7 @@
     {
       "name": "GetTeam",
       "qualifiedName": "MicrosoftTeams.GetTeam",
-      "fullyQualifiedName": "MicrosoftTeams.GetTeam@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.GetTeam@0.7.0",
       "description": "Retrieves metadata about a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will retrieve\nit; 2) if the user has multiple teams, an error will be returned with a list of all teams to\npick from.",
       "parameters": [
         {
@@ -862,8 +1490,8 @@
     {
       "name": "ListChannels",
       "qualifiedName": "MicrosoftTeams.ListChannels",
-      "fullyQualifiedName": "MicrosoftTeams.ListChannels@0.6.3",
-      "description": "Lists channels in Microsoft Teams (including shared incoming channels).\n\nThis tool does not return messages nor members in the channels. To retrieve channel messages,\nuse the `Teams.GetChannelMessages` tool. To retrieve channel members, use the\n`Teams.ListChannelMembers` tool.",
+      "fullyQualifiedName": "MicrosoftTeams.ListChannels@0.7.0",
+      "description": "Lists the channels owned by a Microsoft Teams team (standard, private, and shared\nchannels it hosts). Does not include channels shared into this team by another team.\n\nThis tool does not return messages nor members in the channels. To retrieve channel messages,\nuse the `Teams.GetChannelMessages` tool. To retrieve channel members, use the\n`Teams.ListChannelMembers` tool.",
       "parameters": [
         {
           "name": "limit",
@@ -949,7 +1577,7 @@
     {
       "name": "ListChats",
       "qualifiedName": "MicrosoftTeams.ListChats",
-      "fullyQualifiedName": "MicrosoftTeams.ListChats@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.ListChats@0.7.0",
       "description": "List the Microsoft Teams chats to which the current user is a member of.",
       "parameters": [
         {
@@ -1020,9 +1648,182 @@
       }
     },
     {
+      "name": "ListMeetings",
+      "qualifiedName": "MicrosoftTeams.ListMeetings",
+      "fullyQualifiedName": "MicrosoftTeams.ListMeetings@0.7.0",
+      "description": "Lists Microsoft Teams online meetings on the signed-in user's calendar within a date\nrange, oldest first.\n\nOnly returns calendar events that are Teams online meetings; regular (non-meeting) calendar\nevents in the same date range are excluded.",
+      "parameters": [
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings starting on or after this moment. Provide a string in the format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'. Leave empty to start from today.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings starting on or before this moment. Provide a string in the format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'. A bare 'YYYY-MM-DD' date (no time of day) is treated as through the end of that calendar day, so the same value as start_date covers meetings anytime on that day rather than none. Leave empty for 7 days after start_date.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of meetings to return. Defaults to 20, max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Calendars.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The Teams meetings scheduled in the date range."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ListMeetings",
+        "parameters": {
+          "start_date": {
+            "value": "2024-03-01",
+            "type": "string",
+            "required": false
+          },
+          "end_date": {
+            "value": "2024-03-31 23:59:59",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListMeetingTranscripts",
+      "qualifiedName": "MicrosoftTeams.ListMeetingTranscripts",
+      "fullyQualifiedName": "MicrosoftTeams.ListMeetingTranscripts@0.7.0",
+      "description": "Lists the transcripts Microsoft Graph has generated for a Teams meeting, most recent\nfirst.\n\nWorks for meetings the signed-in user attended without organizing them, not just ones they\norganize. Returns an empty list for a meeting that has not yet occurred or has no generated\ntranscript, rather than an error. Requires the tenant to have transcript access enabled for\nTeams; when it is not, the call fails naming the tenant-level setting an admin must enable.",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of a previously scheduled Teams meeting, as returned by CreateMeeting, GetMeeting, or ListMeetings. Provide either this or join_url.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "join_url",
+          "type": "string",
+          "required": false,
+          "description": "The Teams meeting's join URL, as returned in a meeting's join_url field. Provide either this or meeting_id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "OnlineMeetings.Read",
+          "OnlineMeetingTranscript.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The transcripts available for the meeting."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ListMeetingTranscripts",
+        "parameters": {
+          "meeting_id": {
+            "value": "MSoxYjQ3YWQ4OS1kYjE4LTQzNzUtYWY5My1lOGYyNGYzNGI1ODZAM2U4YTI5NTItYzZiNi00MWI5LWFlOWMtNjQ1MDJmMmZjMjBi",
+            "type": "string",
+            "required": false
+          },
+          "join_url": {
+            "value": "https://teams.microsoft.com/l/meetup-join/19%3ameeting_ZTYyNTkwMDItMzUxNS00NmI3LWE4YmQtMjA3MzU1YzJlNGZh%40thread.v2/0?context=%7b%22Tid%22%3a%2272f988bf-86f1-41af-91ab-2d7cd011db47%22%2c%22Oid%22%3a%22b47ad89-db18-4375-af93-e8f24f34b586%22%7d",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListTeamMembers",
       "qualifiedName": "MicrosoftTeams.ListTeamMembers",
-      "fullyQualifiedName": "MicrosoftTeams.ListTeamMembers@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.ListTeamMembers@0.7.0",
       "description": "Lists the members of a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will use it;\n2) if the user has multiple teams, an error will be returned with a list of all teams to pick\nfrom.\n\nThe Microsoft Graph API returns only up to the first 999 members.",
       "parameters": [
         {
@@ -1122,7 +1923,7 @@
     {
       "name": "ListTeams",
       "qualifiedName": "MicrosoftTeams.ListTeams",
-      "fullyQualifiedName": "MicrosoftTeams.ListTeams@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.ListTeams@0.7.0",
       "description": "Lists the teams the current user is associated with in Microsoft Teams.",
       "parameters": [
         {
@@ -1185,8 +1986,8 @@
     {
       "name": "ListUsers",
       "qualifiedName": "MicrosoftTeams.ListUsers",
-      "fullyQualifiedName": "MicrosoftTeams.ListUsers@0.6.3",
-      "description": "Lists the users in the Microsoft Teams tenant.\n\nThe Microsoft Graph API returns only up to the first 999 users.",
+      "fullyQualifiedName": "MicrosoftTeams.ListUsers@0.7.0",
+      "description": "Lists the users in the Microsoft Teams tenant.",
       "parameters": [
         {
           "name": "limit",
@@ -1257,9 +2058,279 @@
       }
     },
     {
+      "name": "ReactToChannelMessage",
+      "qualifiedName": "MicrosoftTeams.ReactToChannelMessage",
+      "fullyQualifiedName": "MicrosoftTeams.ReactToChannelMessage@0.7.0",
+      "description": "Adds or removes an emoji reaction on a Microsoft Teams channel message.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to react to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reaction",
+          "type": "string",
+          "required": true,
+          "description": "The emoji reaction to add or remove.",
+          "enum": [
+            "like",
+            "heart",
+            "laugh",
+            "surprised",
+            "sad",
+            "angry"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "channel_id_or_name",
+          "type": "string",
+          "required": true,
+          "description": "The ID or name of the channel the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "required": false,
+          "description": "Whether to add or remove the reaction. Defaults to 'add'.",
+          "enum": [
+            "add",
+            "remove"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team the channel belongs to. If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "ChannelMessage.Send",
+          "Channel.ReadBasic.All",
+          "Team.ReadBasic.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The result of the reaction change."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ReactToChannelMessage",
+        "parameters": {
+          "message_id": {
+            "value": "1617981360000",
+            "type": "string",
+            "required": true
+          },
+          "reaction": {
+            "value": "👍",
+            "type": "string",
+            "required": true
+          },
+          "channel_id_or_name": {
+            "value": "General",
+            "type": "string",
+            "required": true
+          },
+          "action": {
+            "value": "add",
+            "type": "string",
+            "required": false
+          },
+          "team_id_or_name": {
+            "value": "Engineering Team",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ReactToChatMessage",
+      "qualifiedName": "MicrosoftTeams.ReactToChatMessage",
+      "fullyQualifiedName": "MicrosoftTeams.ReactToChatMessage@0.7.0",
+      "description": "Adds or removes an emoji reaction on a Microsoft Teams chat message.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to react to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reaction",
+          "type": "string",
+          "required": true,
+          "description": "The emoji reaction to add or remove.",
+          "enum": [
+            "like",
+            "heart",
+            "laugh",
+            "surprised",
+            "sad",
+            "angry"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the chat the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "required": false,
+          "description": "Whether to add or remove the reaction. Defaults to 'add'.",
+          "enum": [
+            "add",
+            "remove"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users in the chat the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users in the chat the message was sent to. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "ChatMessage.Send",
+          "Chat.ReadBasic",
+          "User.Read",
+          "User.ReadBasic.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The result of the reaction change."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ReactToChatMessage",
+        "parameters": {
+          "message_id": {
+            "value": "1672531200000",
+            "type": "string",
+            "required": true
+          },
+          "reaction": {
+            "value": "👍",
+            "type": "string",
+            "required": true
+          },
+          "chat_id": {
+            "value": "19:abc123def456@thread.v2",
+            "type": "string",
+            "required": false
+          },
+          "action": {
+            "value": "add",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": [
+              "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": [
+              "Alice Johnson",
+              "Bob Smith"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ReplyToChannelMessage",
       "qualifiedName": "MicrosoftTeams.ReplyToChannelMessage",
-      "fullyQualifiedName": "MicrosoftTeams.ReplyToChannelMessage@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.ReplyToChannelMessage@0.7.0",
       "description": "Sends a reply to a Microsoft Teams channel message.\n\nWhen available, prefer providing a channel_id for optimal performance.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use.",
       "parameters": [
         {
@@ -1360,8 +2431,8 @@
     {
       "name": "ReplyToChatMessage",
       "qualifiedName": "MicrosoftTeams.ReplyToChatMessage",
-      "fullyQualifiedName": "MicrosoftTeams.ReplyToChatMessage@0.6.3",
-      "description": "Sends a reply to a Microsoft Teams chat message.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool either.",
+      "fullyQualifiedName": "MicrosoftTeams.ReplyToChatMessage@0.7.0",
+      "description": "Sends a reply to a Microsoft Teams chat message.\n\nKnown limitation: the Microsoft Graph API currently rejects threaded replies in 1:1, group,\nand meeting chats with an \"unsupported item types\" error, regardless of chat, message, or\nreply content. This does not affect channel messages; use `Teams.ReplyToChannelMessage` for\nthose. For 1:1, group, and meeting chats, use `Teams.SendMessageToChat` with its\n`quote_message_id` parameter instead, which quotes the target message for reply-with-context\nwithout relying on native threading.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool either.\n\nWhen user_names is provided instead of chat_id, this tool also searches the caller's People\n(contacts and interaction history) to resolve the chat.",
       "parameters": [
         {
           "name": "reply_content",
@@ -1485,8 +2556,8 @@
     {
       "name": "SearchChannels",
       "qualifiedName": "MicrosoftTeams.SearchChannels",
-      "fullyQualifiedName": "MicrosoftTeams.SearchChannels@0.6.3",
-      "description": "Searches for channels in a given Microsoft Teams team.",
+      "fullyQualifiedName": "MicrosoftTeams.SearchChannels@0.7.0",
+      "description": "Searches for channels owned by a given Microsoft Teams team (standard, private, and\nshared channels it hosts). Does not include channels shared into this team by another team.",
       "parameters": [
         {
           "name": "keywords",
@@ -1606,14 +2677,14 @@
     {
       "name": "SearchMessages",
       "qualifiedName": "MicrosoftTeams.SearchMessages",
-      "fullyQualifiedName": "MicrosoftTeams.SearchMessages@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.SearchMessages@0.7.0",
       "description": "Searches for messages across Microsoft Teams chats and channels.\n\nNote: the Microsoft Graph API search is not strongly consistent. Recent messages may not be\nincluded in search results.",
       "parameters": [
         {
           "name": "keywords",
           "type": "string",
           "required": true,
-          "description": "The keywords to match against messages' content.",
+          "description": "A single search query string to match against messages' content. Unlike the other search tools in this toolkit, this is a single string, not a list — combine multiple terms into one string (e.g. 'budget report').",
           "enum": null,
           "inferrable": true
         },
@@ -1694,8 +2765,8 @@
     {
       "name": "SearchPeople",
       "qualifiedName": "MicrosoftTeams.SearchPeople",
-      "fullyQualifiedName": "MicrosoftTeams.SearchPeople@0.6.3",
-      "description": "Searches for people the user has interacted with in Microsoft Teams and other 365 products.\n\nThis tool only returns users that the currently signed in user has interacted with. It may also\ninclude people that are part of external tenants/organizations. If you need to retrieve users\nthat may not have interacted with the current user and/or that are exclusively part of the same\ntenant, use the `Teams.SearchUsers` tool instead.",
+      "fullyQualifiedName": "MicrosoftTeams.SearchPeople@0.7.0",
+      "description": "Searches for people the user has interacted with in Microsoft Teams and other 365 products.\n\nThis tool only returns users that the currently signed in user has interacted with. It may also\ninclude people that are part of external tenants/organizations. If you need to retrieve users\nthat may not have interacted with the current user and/or that are exclusively part of the same\ntenant, use the `Teams.SearchUsers` tool instead.\n\nResults are ranked by an opaque relevance graph, not a plain name match: a person the caller\nhas genuinely messaged or chatted with can still be absent from the results for a given\nkeyword. Do not conclude \"no such person\" from an empty result; fall back to\n`Teams.SearchUsers` or `Teams.SearchTeamMembers` before reporting that no match was found.",
       "parameters": [
         {
           "name": "keywords",
@@ -1801,7 +2872,7 @@
     {
       "name": "SearchTeamMembers",
       "qualifiedName": "MicrosoftTeams.SearchTeamMembers",
-      "fullyQualifiedName": "MicrosoftTeams.SearchTeamMembers@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.SearchTeamMembers@0.7.0",
       "description": "Searches for members of a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will use it;\n2) if the user has multiple teams, an error will be raised with a list of available teams to\npick from.\n\nThe Microsoft Graph API returns only up to the first 999 members of a team.",
       "parameters": [
         {
@@ -1914,7 +2985,7 @@
     {
       "name": "SearchTeams",
       "qualifiedName": "MicrosoftTeams.SearchTeams",
-      "fullyQualifiedName": "MicrosoftTeams.SearchTeams@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.SearchTeams@0.7.0",
       "description": "Searches for teams available to the current user in Microsoft Teams.",
       "parameters": [
         {
@@ -2000,8 +3071,8 @@
     {
       "name": "SearchUsers",
       "qualifiedName": "MicrosoftTeams.SearchUsers",
-      "fullyQualifiedName": "MicrosoftTeams.SearchUsers@0.6.3",
-      "description": "Searches for users in the Microsoft Teams tenant.\n\nThis tool only return users that are directly linked to the tenant the current signed in user\nis a member of. If you need to retrieve users that have interacted with the current user but\nare from external tenants/organizations, use `Teams.SearchPeople`, instead.\n\nThe Microsoft Graph API returns only up to the first 999 users.",
+      "fullyQualifiedName": "MicrosoftTeams.SearchUsers@0.7.0",
+      "description": "Searches for users in the Microsoft Teams tenant.\n\nThis tool only return users that are directly linked to the tenant the current signed in user\nis a member of. If you need to retrieve users that have interacted with the current user but\nare from external tenants/organizations, use `Teams.SearchPeople`, instead.",
       "parameters": [
         {
           "name": "keywords",
@@ -2108,7 +3179,7 @@
     {
       "name": "SendMessageToChannel",
       "qualifiedName": "MicrosoftTeams.SendMessageToChannel",
-      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChannel@0.6.3",
+      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChannel@0.7.0",
       "description": "Sends a message to a Microsoft Teams channel.\n\nWhen available, prefer providing a channel_id for optimal performance.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use.",
       "parameters": [
         {
@@ -2196,8 +3267,8 @@
     {
       "name": "SendMessageToChat",
       "qualifiedName": "MicrosoftTeams.SendMessageToChat",
-      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChat@0.6.3",
-      "description": "Sends a message to a Microsoft Teams chat.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool either.",
+      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChat@0.7.0",
+      "description": "Sends a message to a Microsoft Teams chat.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nSet quote_message_id to reply to an earlier message in the chat: Microsoft Graph does not\nsupport true threaded replies in 1:1, group, or meeting chats (only channel messages support\nthat; use `Teams.ReplyToChannelMessage` there), so this quotes the target message's sender\nand content at the top of the new message instead of threading under it.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool either.\n\nWhen user_names is provided instead of chat_id, this tool also searches the caller's People\n(contacts and interaction history) to resolve the chat.",
       "parameters": [
         {
           "name": "message",
@@ -2232,6 +3303,14 @@
           "description": "The names of the users in the chat to send the message. Prefer providing user_ids, when available, since the performance is better.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "quote_message_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of an earlier message in this chat to quote at the top of the new message, as a stand-in for a threaded reply. Omit to send a plain message with no quote.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
@@ -2242,6 +3321,7 @@
           "User.Read",
           "User.ReadBasic.All",
           "People.Read",
+          "Chat.Read",
           "Chat.ReadBasic"
         ]
       },
@@ -2256,29 +3336,34 @@
         "toolName": "MicrosoftTeams.SendMessageToChat",
         "parameters": {
           "message": {
-            "value": "Hey team, just a reminder that the project sync meeting starts in 15 minutes. See you all there!",
+            "value": "Hey team, just a reminder that our sync meeting starts in 15 minutes. See you there!",
             "type": "string",
             "required": true
           },
           "chat_id": {
-            "value": "19:2da4c29f6d7041eca70b638b43d45437@thread.v2",
+            "value": "19:abc123def456ghi789jkl012mno345p@thread.v2",
             "type": "string",
             "required": false
           },
           "user_ids": {
             "value": [
-              "8b081ef6-4792-4def-b2c9-dc119a3a0c44",
-              "3a6f4b3e-9b21-4f3c-8d92-7e1a5c2f9d01"
+              "e3b0c442-98fc-1c14-9afb-f4c8996fb924",
+              "a1d0c6e8-3f7b-2c19-8bfa-d4e9107gb135"
             ],
             "type": "array",
             "required": false
           },
           "user_names": {
             "value": [
-              "Alice Johnson",
-              "Bob Martinez"
+              "Jane Smith",
+              "John Doe"
             ],
             "type": "array",
+            "required": false
+          },
+          "quote_message_id": {
+            "value": "1680000000000",
+            "type": "string",
             "required": false
           }
         },
@@ -2305,10 +3390,347 @@
       }
     },
     {
+      "name": "UpdateChannelMessage",
+      "qualifiedName": "MicrosoftTeams.UpdateChannelMessage",
+      "fullyQualifiedName": "MicrosoftTeams.UpdateChannelMessage@0.7.0",
+      "description": "Edits the text content of a previously sent Microsoft Teams channel message.\n\nOnly the original sender's own message can be edited. This replaces the entire message body\nwith new_content; it does not append a reply or thread a new message under it.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to edit.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_content",
+          "type": "string",
+          "required": true,
+          "description": "The new text content that replaces the message's current body entirely.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id_or_name",
+          "type": "string",
+          "required": true,
+          "description": "The ID or name of the channel the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team the channel belongs to. If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "ChannelMessage.ReadWrite",
+          "Channel.ReadBasic.All",
+          "Team.ReadBasic.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The edited message."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.UpdateChannelMessage",
+        "parameters": {
+          "message_id": {
+            "value": "1617981234567",
+            "type": "string",
+            "required": true
+          },
+          "new_content": {
+            "value": "Updated: The meeting has been rescheduled to Thursday at 3:00 PM. Please update your calendars accordingly.",
+            "type": "string",
+            "required": true
+          },
+          "channel_id_or_name": {
+            "value": "General",
+            "type": "string",
+            "required": true
+          },
+          "team_id_or_name": {
+            "value": "Engineering Team",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateChatMembers",
+      "qualifiedName": "MicrosoftTeams.UpdateChatMembers",
+      "fullyQualifiedName": "MicrosoftTeams.UpdateChatMembers@0.7.0",
+      "description": "Adds members to, or removes members from, the roster of an existing Microsoft Teams\ngroup chat.\n\nUnlike `Teams.CreateChat`, which creates a brand-new chat (or reuses one only when the\nrequested member set is an exact match for an existing chat), this tool mutates chat_id's\nroster in place, preserving the chat's id and message history for all members.\n\nOnly group chats support roster changes after creation; oneOnOne chats cannot be modified\nthis way. Provide at least one of user_ids or user_names.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the existing group chat to add members to or remove members from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "action",
+          "type": "string",
+          "required": false,
+          "description": "Whether to add or remove the given members. Defaults to 'add'.",
+          "enum": [
+            "add",
+            "remove"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users to add or remove.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users to add or remove. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "ChatMember.ReadWrite",
+          "User.Read",
+          "User.ReadBasic.All",
+          "People.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The per-user result of the membership change."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.UpdateChatMembers",
+        "parameters": {
+          "chat_id": {
+            "value": "19:abc123def456@thread.v2",
+            "type": "string",
+            "required": true
+          },
+          "action": {
+            "value": "add",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": [
+              "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+              "b2c3d4e5-f6a7-8901-bcde-f12345678901"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": [
+              "Alice Johnson",
+              "Bob Smith"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateChatMessage",
+      "qualifiedName": "MicrosoftTeams.UpdateChatMessage",
+      "fullyQualifiedName": "MicrosoftTeams.UpdateChatMessage@0.7.0",
+      "description": "Edits the text content of a previously sent Microsoft Teams chat message.\n\nOnly the original sender's own message can be edited. This replaces the entire message body\nwith new_content; it does not send a reply or a new message.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to edit.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_content",
+          "type": "string",
+          "required": true,
+          "description": "The new text content that replaces the message's current body entirely.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the chat the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users in the chat the message was sent to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users in the chat the message was sent to. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Chat.ReadWrite",
+          "User.Read",
+          "User.ReadBasic.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The edited message."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.UpdateChatMessage",
+        "parameters": {
+          "message_id": {
+            "value": "1672531200000",
+            "type": "string",
+            "required": true
+          },
+          "new_content": {
+            "value": "Updated: The meeting has been rescheduled to 3:00 PM on Friday.",
+            "type": "string",
+            "required": true
+          },
+          "chat_id": {
+            "value": "19:abc123def456@thread.v2",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": [
+              "87d349ed-44d7-43e1-9a83-5f2406dee5bd",
+              "3b7f8e2a-1c4d-4f6e-9a12-7d3b5e8c2f1a"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": [
+              "Alice Johnson",
+              "Bob Smith"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftTeams.WhoAmI",
-      "fullyQualifiedName": "MicrosoftTeams.WhoAmI@0.6.3",
-      "description": "Get information about the current user and their Microsoft Teams environment.",
+      "fullyQualifiedName": "MicrosoftTeams.WhoAmI@0.7.0",
+      "description": "Get information about the current user and their Microsoft Teams environment.\n\nUse this to confirm caller identity and tenant context (e.g. before acting on the user's\nbehalf), not to fetch a person's profile details. For a richer profile (job title,\nemployment, contacts, location), use `Teams.GetSignedInUser` instead.",
       "parameters": [],
       "auth": {
         "providerId": "microsoft",
@@ -2361,6 +3783,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "232f9052dc42ba69f3acd3413e511023d44d2c48e2ea1933c7b85510c701770c",
-  "generatedAt": "2026-07-16T11:38:45.354Z",
-  "summary": "## Microsoft Teams Toolkit\n\nThe Microsoft Teams toolkit provides Arcade LLM tools for interacting with Microsoft Teams via the Microsoft Graph API, enabling agents to read and send messages, manage chats and channels, and look up users and teams.\n\n## Capabilities\n\n- **Messaging — chats:** Create chats, retrieve chat metadata and messages, send messages, and reply to messages in one-on-one or group chats; addressable by chat ID or user names/IDs.\n- **Messaging — channels:** Retrieve channel messages and their replies, send messages to channels, and reply to channel messages; addressable by channel ID or name.\n- **Chat & channel discovery:** List all chats the current user belongs to, list channels within a team (including shared incoming channels), and search for channels by name.\n- **Team & member management:** List teams the user belongs to, retrieve team metadata, list or search team members (up to 999 per Graph API limit), and list all tenant users.\n- **User & people search:** Search users within the signed-in user's tenant (`SearchUsers`), search people the user has previously interacted with across Microsoft 365 — including external tenants (`SearchPeople`), and retrieve the currently signed-in user's profile.\n- **Cross-scope search:** Search messages across chats and channels tenant-wide (note: Graph API search is not strongly consistent; very recent messages may be absent).\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Microsoft (Entra ID / Azure AD). See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details, required permissions, and configuration."
+  "generatedAt": "2026-09-02T11:19:37.849Z",
+  "summary": "The Microsoft Teams toolkit lets Arcade-powered LLM agents interact with Microsoft Teams on behalf of signed-in users via the Microsoft Graph API. It covers messaging, meetings, channels, chats, user/team discovery, and meeting transcripts.\n\n## Capabilities\n\n- **Messaging (chats & channels):** Send, reply, edit, soft-delete, and react to messages in 1:1 chats, group chats, and team channels; quote-reply in non-channel chats where native threading is unsupported.\n- **Chat & channel management:** Create chats (1:1 or group), manage group chat rosters (add/remove members), list and search chats, retrieve channel metadata and member lists, and search across teams and channels.\n- **Meetings:** Schedule and cancel Teams online meetings, retrieve meeting details, list meetings within a date range, and access meeting transcripts (with automatic fallback from speaker-attributed to unattributed format).\n- **User & people discovery:** Search tenant users, people from the signed-in user's interaction history (including external tenants), team members, and resolve identities by name or ID across tools.\n- **Cross-context search:** Full-text search across messages in both chats and channels (subject to Graph API eventual consistency).\n- **Identity & context:** Retrieve the signed-in user's profile or confirm caller identity and tenant context before acting.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with **Microsoft** as the identity provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details, required permissions, and setup steps.\n\n## Secrets\n\nNo secrets are required for this toolkit."
 }

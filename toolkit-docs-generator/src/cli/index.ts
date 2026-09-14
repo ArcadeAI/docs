@@ -54,11 +54,10 @@ import {
 import { createMockMetadataSource } from "../sources/mock-metadata";
 import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
 import {
-  createArcadeToolkitDataSource,
   createCachedToolkitDataSource,
-  createEngineToolkitDataSource,
   createMockToolkitDataSource,
-  type IToolkitDataSource,
+  createPublicCatalogSources,
+  type PublicCatalogSources,
   type ToolkitData,
 } from "../sources/toolkit-data-source";
 import {
@@ -83,7 +82,11 @@ import {
   readFailedToolsReport,
   writeFailedToolsReport,
 } from "../utils/run-logs";
-import { type ApiSource, resolveApiSource } from "./api-source";
+import {
+  type ApiSource,
+  resolveApiBaseUrl,
+  resolveApiSource,
+} from "./api-source";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup";
 import {
   assertSafeCurrentToolkitSnapshot,
@@ -477,107 +480,72 @@ const resolveSecretEditGenerator = (
   });
 };
 
+/**
+ * The experience API merges the engine's public catalog with design-system
+ * branding, so one anonymous read supplies both tools and toolkit metadata.
+ * Override with --api-url / PUBLIC_CATALOG_URL to point at staging
+ * or a local BFF.
+ */
+const DEFAULT_PUBLIC_CATALOG_URL = "https://experience.arcade.dev/api";
+
 interface ToolkitDataSourceOptions {
   apiSource?: string;
-  listToolsUrl?: string;
-  listToolsKey?: string;
-  listToolsPageSize?: number;
-  toolMetadataUrl?: string;
-  toolMetadataKey?: string;
-  toolMetadataPageSize?: number;
+  apiUrl?: string;
+  apiPageSize?: number;
 }
 
-const resolveListToolsConfig = (options: ToolkitDataSourceOptions) => {
+const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
   const baseUrl =
-    options.listToolsUrl ??
-    process.env.ARCADE_API_URL ??
-    "https://api.arcade.dev";
-  const apiKey = options.listToolsKey ?? process.env.ARCADE_API_KEY;
-
-  if (!apiKey) {
-    return null;
-  }
+    resolveApiBaseUrl(options.apiUrl) ?? DEFAULT_PUBLIC_CATALOG_URL;
 
   return {
     baseUrl,
-    apiKey,
-    ...(options.listToolsPageSize
-      ? { pageSize: options.listToolsPageSize }
-      : {}),
+    ...(options.apiPageSize ? { toolsPageSize: options.apiPageSize } : {}),
   };
 };
 
-const resolveToolMetadataConfig = (options: ToolkitDataSourceOptions) => {
-  const baseUrl = options.toolMetadataUrl ?? process.env.ENGINE_API_URL;
-  const apiKey = options.toolMetadataKey ?? process.env.ENGINE_API_KEY;
-
-  if (!(baseUrl && apiKey)) {
-    return null;
+const createPublicCatalogSourcesForCli = (
+  options: ToolkitDataSourceOptions,
+  verbose: boolean
+): PublicCatalogSources => {
+  const config = resolvePublicCatalogConfig(options);
+  if (verbose) {
+    console.log(
+      chalk.dim(
+        `Using public/tool_catalog + public/tools: ${config.baseUrl} (tools and toolkit branding)`
+      )
+    );
   }
-
-  return {
-    baseUrl,
-    apiKey,
-    ...(options.toolMetadataPageSize
-      ? { pageSize: options.toolMetadataPageSize }
-      : {}),
-  };
+  return createPublicCatalogSources(config);
 };
 
-const createToolkitDataSourceForApi = (
+/**
+ * Build the toolkit data source, plus the metadata source that name
+ * resolution and `--require-complete` filtering should consult.
+ *
+ * Under the public catalog those two are the same read, so a toolkit is never
+ * filtered out for missing branding that the catalog actually has. Only the
+ * mock path still needs a separate metadata source, and it is built on demand
+ * so a live run never loads the design-system package.
+ */
+const createToolkitDataSourceForApi = async (
   apiSource: ApiSource,
   options: ToolkitDataSourceOptions,
-  metadataSource: ReturnType<typeof createMockMetadataSource>,
+  getFallbackMetadataSource: () => Promise<MetadataSource>,
   mockDataDir: string,
-  verbose: boolean,
-  spinner?: ReturnType<typeof ora>
-): IToolkitDataSource => {
-  if (apiSource === "list-tools") {
-    const config = resolveListToolsConfig(options);
-    if (!config) {
-      throw new Error(
-        "List tools API requires --list-tools-key (or ARCADE_API_KEY environment variable)."
-      );
-    }
-    if (verbose) {
-      console.log(chalk.dim(`Using /v1/tools endpoint: ${config.baseUrl}`));
-    }
-    // Add progress callback for API pagination
-    const onProgress = spinner
-      ? (fetched: number, total: number) => {
-          spinner.text = `Fetching tools from API... ${fetched}/${total}`;
-        }
-      : undefined;
-    return createArcadeToolkitDataSource({
-      arcade: { ...config, onProgress },
-      metadataSource,
-    });
-  }
-
-  if (apiSource === "tool-metadata") {
-    const config = resolveToolMetadataConfig(options);
-    if (!config) {
-      throw new Error(
-        "Tool metadata API requires --tool-metadata-url and --tool-metadata-key."
-      );
-    }
-    if (verbose) {
-      console.log(
-        chalk.dim(`Using /v1/tool_metadata endpoint: ${config.baseUrl}`)
-      );
-    }
-    return createEngineToolkitDataSource({
-      engine: config,
-      metadataSource,
-    });
+  verbose: boolean
+): Promise<PublicCatalogSources> => {
+  if (apiSource === "public-catalog") {
+    return createPublicCatalogSourcesForCli(options, verbose);
   }
 
   if (verbose) {
     console.log(chalk.dim(`Using mock data: ${mockDataDir}`));
   }
-  return createMockToolkitDataSource({
-    dataDir: mockDataDir,
-  });
+  return {
+    toolkitDataSource: createMockToolkitDataSource({ dataDir: mockDataDir }),
+    metadataSource: await getFallbackMetadataSource(),
+  };
 };
 
 const normalizeToolkitKey = (toolkitId: string): string =>
@@ -831,29 +799,15 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
   )
   .option(
-    "--list-tools-url <url>",
-    "List tools API URL (default: https://api.arcade.dev)"
+    "--api-url <url>",
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
   )
   .option(
-    "--list-tools-key <key>",
-    "List tools API key (or ARCADE_API_KEY env)"
-  )
-  .option(
-    "--list-tools-page-size <number>",
-    "List tools API page size",
-    (value) => Number.parseInt(value, 10)
-  )
-  .option("--tool-metadata-url <url>", "Tool metadata API URL")
-  .option(
-    "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env)"
-  )
-  .option(
-    "--tool-metadata-page-size <number>",
-    "Tool metadata API page size",
+    "--api-page-size <number>",
+    "Public catalog tools page size",
     (value) => Number.parseInt(value, 10)
   )
   .option("--previous-output <dir>", "Path to previous output directory")
@@ -976,12 +930,8 @@ program
       mockDataDir?: string;
       metadataFile?: string;
       apiSource?: string;
-      listToolsUrl?: string;
-      listToolsKey?: string;
-      listToolsPageSize?: number;
-      toolMetadataUrl?: string;
-      toolMetadataKey?: string;
-      toolMetadataPageSize?: number;
+      apiUrl?: string;
+      apiPageSize?: number;
       previousOutput?: string;
       forceRegenerate: boolean;
       overwriteOutput?: boolean;
@@ -1123,11 +1073,23 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = await createMetadataSource({
-          metadataFile,
-          useMetadataFile: Boolean(options.metadataFile),
-          verbose: options.verbose,
-        });
+        const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: options.verbose,
+            }),
+          mockDataDir,
+          options.verbose
+        );
+        const metadataSource = sources.metadataSource;
+        const toolkitDataSource = createCachedToolkitDataSource(
+          sources.toolkitDataSource
+        );
 
         // Resolve provider names to canonical toolkit IDs (best effort).
         if (providers && providers.length > 0) {
@@ -1163,19 +1125,6 @@ program
             process.exit(0);
           }
         }
-
-        // Create toolkit data source based on API source
-        const apiSource = resolveApiSource(options);
-        const toolkitDataSource = createCachedToolkitDataSource(
-          createToolkitDataSourceForApi(
-            apiSource,
-            options,
-            metadataSource,
-            mockDataDir,
-            options.verbose,
-            spinner
-          )
-        );
 
         const needsExamples = !options.skipExamples;
         const needsSummary = !options.skipSummary;
@@ -1954,29 +1903,15 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
   )
   .option(
-    "--list-tools-url <url>",
-    "List tools API URL (default: https://api.arcade.dev)"
+    "--api-url <url>",
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
   )
   .option(
-    "--list-tools-key <key>",
-    "List tools API key (or ARCADE_API_KEY env)"
-  )
-  .option(
-    "--list-tools-page-size <number>",
-    "List tools API page size",
-    (value) => Number.parseInt(value, 10)
-  )
-  .option("--tool-metadata-url <url>", "Tool metadata API URL")
-  .option(
-    "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env)"
-  )
-  .option(
-    "--tool-metadata-page-size <number>",
-    "Tool metadata API page size",
+    "--api-page-size <number>",
+    "Public catalog tools page size",
     (value) => Number.parseInt(value, 10)
   )
   .option("--previous-output <dir>", "Path to previous output directory")
@@ -2085,12 +2020,8 @@ program
       mockDataDir?: string;
       metadataFile?: string;
       apiSource?: string;
-      listToolsUrl?: string;
-      listToolsKey?: string;
-      listToolsPageSize?: number;
-      toolMetadataUrl?: string;
-      toolMetadataKey?: string;
-      toolMetadataPageSize?: number;
+      apiUrl?: string;
+      apiPageSize?: number;
       previousOutput?: string;
       forceRegenerate: boolean;
       overwriteOutput?: boolean;
@@ -2164,23 +2095,22 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = await createMetadataSource({
-          metadataFile,
-          useMetadataFile: Boolean(options.metadataFile),
-          verbose: options.verbose,
-        });
-
         // Create toolkit data source based on API source
         const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: options.verbose,
+            }),
+          mockDataDir,
+          options.verbose
+        );
         const toolkitDataSource = createCachedToolkitDataSource(
-          createToolkitDataSourceForApi(
-            apiSource,
-            options,
-            metadataSource,
-            mockDataDir,
-            options.verbose,
-            spinner
-          )
+          sources.toolkitDataSource
         );
 
         const needsExamples = !options.skipExamples;
@@ -2802,25 +2732,16 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
   )
   .option(
-    "--list-tools-url <url>",
-    "List tools API URL (default: https://api.arcade.dev)"
+    "--api-url <url>",
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
   )
   .option(
-    "--list-tools-key <key>",
-    "List tools API key (or ARCADE_API_KEY env)"
-  )
-  .option(
-    "--list-tools-page-size <number>",
-    "List tools API page size",
+    "--api-page-size <number>",
+    "Public catalog tools page size",
     (value) => Number.parseInt(value, 10)
-  )
-  .option("--tool-metadata-url <url>", "Tool metadata API URL")
-  .option(
-    "--tool-metadata-key <key>",
-    "Tool metadata API key (or ENGINE_API_KEY env)"
   )
   .option(
     "--custom-sections <path>",
@@ -2835,11 +2756,8 @@ program
       mockDataDir?: string;
       metadataFile?: string;
       apiSource?: string;
-      listToolsUrl?: string;
-      listToolsKey?: string;
-      listToolsPageSize?: number;
-      toolMetadataUrl?: string;
-      toolMetadataKey?: string;
+      apiUrl?: string;
+      apiPageSize?: number;
       customSections?: string;
       verbose: boolean;
       json: boolean;
@@ -2853,22 +2771,21 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = await createMetadataSource({
-          metadataFile,
-          useMetadataFile: Boolean(options.metadataFile),
-          verbose: false,
-        });
-
         const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: false,
+            }),
+          mockDataDir,
+          false // not verbose during fetch
+        );
         const toolkitDataSource = createCachedToolkitDataSource(
-          createToolkitDataSourceForApi(
-            apiSource,
-            options,
-            metadataSource,
-            mockDataDir,
-            false, // not verbose during fetch
-            spinner
-          )
+          sources.toolkitDataSource
         );
 
         // Fetch current data from API

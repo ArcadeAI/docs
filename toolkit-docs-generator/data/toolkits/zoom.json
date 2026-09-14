@@ -1,7 +1,7 @@
 {
   "id": "Zoom",
   "label": "Zoom",
-  "version": "1.1.2",
+  "version": "2.0.0",
   "description": "Arcade.dev LLM tools for Zoom",
   "metadata": {
     "category": "social",
@@ -17,22 +17,89 @@
     "type": "oauth2",
     "providerId": "zoom",
     "allScopes": [
+      "cloud_recording:read:list_recording_files",
+      "cloud_recording:read:list_user_recordings",
       "meeting:read:invitation",
-      "meeting:read:list_upcoming_meetings"
+      "meeting:read:list_meetings",
+      "meeting:read:list_past_instances",
+      "meeting:read:list_upcoming_meetings",
+      "meeting:read:past_meeting",
+      "meeting:read:summary",
+      "user:read:user"
     ]
   },
   "tools": [
     {
-      "name": "GetMeetingInvitation",
-      "qualifiedName": "Zoom.GetMeetingInvitation",
-      "fullyQualifiedName": "Zoom.GetMeetingInvitation@1.1.2",
-      "description": "Retrieve the invitation note for a specific Zoom meeting.",
+      "name": "FindMeetings",
+      "qualifiedName": "Zoom.FindMeetings",
+      "fullyQualifiedName": "Zoom.FindMeetings@2.0.0",
+      "description": "Find the Zoom meeting a user means, from a phrase, a period, or a meeting id.\n\nUse this single call for every \"which meeting\" question rather than listing\nhistory and matching topics yourself. It reads all three of the records Zoom\nsplits a meeting across -- meetings scheduled ahead of time, meetings it knows\nonly through their cloud recording, and the runs of meetings that recur with no\nfixed time -- so a standing 1:1 and a call started ad hoc are as findable as a\nscheduled one. Every candidate strong enough to act on is reported rather than one\nbeing picked silently, so an ambiguous or weak phrase can be taken back to the\nuser, and a period in which nothing ran is an empty listing rather than a failure.\n\nGive a phrase to rank the account's meetings against it, a meeting_id to list one\nmeeting's past runs, or neither to list the whole period. Results are paginated:\nwhile next_cursor is non-empty it is passed back verbatim to reach the rest. A\nperiod too wide for one call is covered from its newest end, and next_to_date is\nthen the to_date to call again with to reach the older part.",
       "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "The phrase the user used for the meeting, matched word by word against meeting topics, so a partial reference still finds the meeting. Words that name a period rather than a meeting are ignored, so passing the phrase as the user said it works better than stripping it down first, and a meeting that recurs with no fixed time is also reachable by the words people use for its kind rather than its topic. Leave empty to list the period rather than search it.",
+          "enum": null,
+          "inferrable": true
+        },
         {
           "name": "meeting_id",
           "type": "string",
-          "required": true,
-          "description": "The meeting's numeric ID (as a string).",
+          "required": false,
+          "description": "A meeting to list the past runs of, as its numeric id or the uuid a listing reported; a pasted Zoom join link or a meeting number written with spaces is accepted and reduced to that id. Leave empty to list or search a period instead. An identifier matching no meeting raises rather than reporting a meeting that has never met.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "when",
+          "type": "string",
+          "required": false,
+          "description": "Which direction in time to cover. Defaults to PAST.",
+          "enum": [
+            "past",
+            "upcoming",
+            "all"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings starting on or after this date (YYYY-MM-DD), read as a whole day in the account's own timezone. Leave empty for 30 days before to_date; when when is UPCOMING, leave empty to start from right now, and a date already past starts the window at right now, since a meeting that has already begun is not still to come.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings starting on or before the end of this date (YYYY-MM-DD), read as a whole day in the account's own timezone. Leave empty for today; when when is UPCOMING, leave empty for 24 hours after the start of the window, which may then span at most 90 days.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "only_recorded",
+          "type": "boolean",
+          "required": false,
+          "description": "Keep only the meetings that hold a cloud recording, which is what answers \"which of these can I send someone\" and \"which have a transcript I can read\". Defaults to false, which covers every meeting the account holds a record of.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum meetings to return per page (1-300). Defaults to 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Opaque pagination token from a prior call's next_cursor; it must be passed back verbatim and never constructed. Leave empty for the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -41,21 +108,124 @@
         "providerId": "zoom",
         "providerType": "oauth2",
         "scopes": [
-          "meeting:read:invitation"
+          "meeting:read:list_meetings",
+          "meeting:read:list_past_instances",
+          "meeting:read:past_meeting",
+          "meeting:read:list_upcoming_meetings",
+          "cloud_recording:read:list_user_recordings",
+          "user:read:user"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Meeting invitation string"
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zoom.FindMeetings",
+        "parameters": {
+          "query": {
+            "value": "weekly team standup",
+            "type": "string",
+            "required": false
+          },
+          "meeting_id": {
+            "value": "825 4992 6371",
+            "type": "string",
+            "required": false
+          },
+          "when": {
+            "value": "PAST",
+            "type": "string",
+            "required": false
+          },
+          "from_date": {
+            "value": "2024-03-01",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "2024-03-31",
+            "type": "string",
+            "required": false
+          },
+          "only_recorded": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJwYWdlX251bWJlciI6MiwibGFzdF9pZCI6Ijg4OTk5NDMyMSJ9",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "zoom",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMeetingInvitation",
+      "qualifiedName": "Zoom.GetMeetingInvitation",
+      "fullyQualifiedName": "Zoom.GetMeetingInvitation@2.0.0",
+      "description": "Retrieve the invitation note for a specific Zoom meeting.\n\nThe note is Zoom's own wording and is ready to paste into a message. A meeting\nZoom holds no invitation for -- one started instantly or ad hoc, which is\ntypically the meeting that just ended -- is reported as a normal result\ncarrying the reason, so it is not mistaken for a meeting that never happened.\nAn identifier matching no meeting at all still raises.",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's numeric id, or the uuid a meeting listing reported. A pasted Zoom join link or a meeting number written with spaces is accepted and reduced to that id.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "zoom",
+        "providerType": "oauth2",
+        "scopes": [
+          "meeting:read:invitation",
+          "meeting:read:past_meeting",
+          "meeting:read:list_meetings",
+          "meeting:read:list_past_instances"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Zoom.GetMeetingInvitation",
         "parameters": {
           "meeting_id": {
-            "value": "1234567890",
+            "value": "825 4948 5724",
             "type": "string",
             "required": true
           }
@@ -83,16 +253,16 @@
       }
     },
     {
-      "name": "ListUpcomingMeetings",
-      "qualifiedName": "Zoom.ListUpcomingMeetings",
-      "fullyQualifiedName": "Zoom.ListUpcomingMeetings@1.1.2",
-      "description": "List a Zoom user's upcoming meetings within the next 24 hours.",
+      "name": "GetMeetingRecording",
+      "qualifiedName": "Zoom.GetMeetingRecording",
+      "fullyQualifiedName": "Zoom.GetMeetingRecording@2.0.0",
+      "description": "Get a past Zoom meeting's cloud recording as links that can be forwarded.\n\nUse this when someone missed a meeting and wants to watch it, rather than\nreading its transcript: it returns the share link and passcode to send them,\nalongside the per-file play and download urls. A meeting with no recording is\nreported as a normal result carrying the reason, while an identifier matching no\nmeeting raises. An occurrence uuid is answered about that occurrence and no\nother, so an identifier that leaves the occurrence open is refused rather than\nanswered with whichever run happened most recently.",
       "parameters": [
         {
-          "name": "user_id",
+          "name": "meeting_id",
           "type": "string",
-          "required": false,
-          "description": "The user's user ID or email address. Defaults to 'me' for the current user.",
+          "required": true,
+          "description": "The meeting's numeric id, the uuid a meeting listing reported, or the uuid an occurrence listing reported; a pasted Zoom join link is accepted too. Whichever is given is resolved to the occurrence that holds the recording.",
           "enum": null,
           "inferrable": true
         }
@@ -101,25 +271,339 @@
         "providerId": "zoom",
         "providerType": "oauth2",
         "scopes": [
-          "meeting:read:list_upcoming_meetings"
+          "cloud_recording:read:list_recording_files",
+          "meeting:read:list_past_instances",
+          "meeting:read:past_meeting",
+          "meeting:read:list_meetings"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "List of upcoming meetings within the next 24 hours"
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zoom.GetMeetingRecording",
+        "parameters": {
+          "meeting_id": {
+            "value": "85746321987",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "zoom",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMeetingSummary",
+      "qualifiedName": "Zoom.GetMeetingSummary",
+      "fullyQualifiedName": "Zoom.GetMeetingSummary@2.0.0",
+      "description": "Read the AI Companion meeting summary of a past Zoom meeting.\n\nA meeting with no summary is reported as a normal result carrying the reason,\nso the caller can say so plainly, or reach for the meeting's transcript or its\nattendance, instead of treating it as a failure. An identifier matching no\nmeeting raises instead, so \"no summary\" is never claimed about a meeting that\ndoes not exist. An occurrence uuid is answered about that occurrence and no\nother, so an identifier that leaves the occurrence open is refused rather than\nanswered with whichever run happened most recently.",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's numeric id, the uuid a meeting listing reported, or the uuid an occurrence listing reported; a pasted Zoom join link is accepted too. Whichever is given is resolved to the occurrence Zoom summarized.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "zoom",
+        "providerType": "oauth2",
+        "scopes": [
+          "meeting:read:summary",
+          "meeting:read:list_past_instances",
+          "meeting:read:past_meeting",
+          "meeting:read:list_meetings"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zoom.GetMeetingSummary",
+        "parameters": {
+          "meeting_id": {
+            "value": "84754521937",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "zoom",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMeetingTranscript",
+      "qualifiedName": "Zoom.GetMeetingTranscript",
+      "fullyQualifiedName": "Zoom.GetMeetingTranscript@2.0.0",
+      "description": "Read the audio transcript of a cloud-recorded Zoom meeting.\n\nA meeting with no transcript to read is reported as a normal result carrying\nthe reason, so the caller can say so plainly, or reach for the meeting's\nsummary or its attendance, instead of treating it as a failure. An identifier\nmatching no meeting raises instead, so \"never recorded\" is never claimed about\na meeting that does not exist. An occurrence uuid is answered about that\noccurrence and no other, so an identifier that leaves the occurrence open is\nrefused rather than answered with whichever run happened most recently.",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": true,
+          "description": "The meeting's numeric id, the uuid a meeting listing reported, or the uuid an occurrence listing reported; a pasted Zoom join link is accepted too. Whichever is given is resolved to the occurrence that holds the recording.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_transcript_chars",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum characters of transcript text to return (1000-500000). Defaults to 60000, which fits a typical one-hour meeting. A longer transcript is cut at a cue boundary and transcript_truncated is then true; raise this limit to read more of a long meeting when the extra context is affordable.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "zoom",
+        "providerType": "oauth2",
+        "scopes": [
+          "cloud_recording:read:list_recording_files",
+          "meeting:read:list_past_instances",
+          "meeting:read:past_meeting",
+          "meeting:read:list_meetings"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zoom.GetMeetingTranscript",
+        "parameters": {
+          "meeting_id": {
+            "value": "https://zoom.us/j/96783241058",
+            "type": "string",
+            "required": true
+          },
+          "max_transcript_chars": {
+            "value": 120000,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "zoom",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListUpcomingMeetings",
+      "qualifiedName": "Zoom.ListUpcomingMeetings",
+      "fullyQualifiedName": "Zoom.ListUpcomingMeetings@2.0.0",
+      "description": "List the Zoom meetings a user is scheduled to join, soonest first.\n\nCovers the next 24 hours by default and any window up to 90 days ahead when\ndates are given. Within the next 24 hours the listing includes meetings the\nuser merely joins; beyond that Zoom exposes only the meetings they host, and\ninvited_coverage_end marks where that boundary falls inside the window -- an\nempty stretch past it means no hosted meetings, not a confirmed free calendar.\nA fixed-time recurring series is listed at the one start Zoom reports for it\nrather than once per run, and recurring_series names each such series so a\nwindow holding a daily standup cannot read as clear; a meeting recurring with\nno fixed time -- which belongs to no window at all -- is named alongside the\nwindow instead, so a standing 1:1 can still be found by topic. A clear\ncalendar is reported as an empty listing that names the account whose calendar\nwas read and the window that was searched, not as a failure.",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "The user ID or email address whose calendar to read. Defaults to the authenticated user, whose own email or Zoom user id also works here. Another user's calendar is not readable through this connection: Zoom denies the request, and re-authorizing cannot change that, so only supply a different address to confirm that denial rather than to read their meetings.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings starting on or after this date (YYYY-MM-DD). Leave empty to start from right now; a date already past also starts the window at right now, since a meeting that already began is not still to come.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "Only include meetings starting on or before the end of this date (YYYY-MM-DD). Leave empty for 24 hours after the start of the window. The window may span at most 90 days.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum meetings to return per page (1-300). Defaults to 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Opaque pagination token from a prior call's next_cursor; it must be passed back verbatim and never constructed. Leave empty for the first page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timezone",
+          "type": "string",
+          "required": false,
+          "description": "IANA timezone to read from_date and to_date in, for example America/Los_Angeles. Leave empty to use the calendar owner's Zoom profile timezone. Supply it when the user's timezone is known from the conversation and may differ from the profile, and when Zoom reports no timezone for the calendar -- supplied dates are then refused until one is given.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "zoom",
+        "providerType": "oauth2",
+        "scopes": [
+          "meeting:read:list_upcoming_meetings",
+          "meeting:read:list_meetings",
+          "user:read:user"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Zoom.ListUpcomingMeetings",
         "parameters": {
           "user_id": {
-            "value": "me",
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "from_date": {
+            "value": "2025-08-01",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "2025-08-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJwYWdlX251bWJlciI6Mn0",
+            "type": "string",
+            "required": false
+          },
+          "timezone": {
+            "value": "America/New_York",
             "type": "string",
             "required": false
           }
         },
+        "requiresAuth": true,
+        "authProvider": "zoom",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "video_conferencing"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Zoom.WhoAmI",
+      "fullyQualifiedName": "Zoom.WhoAmI@2.0.0",
+      "description": "Identify the Zoom user the connection is authenticated as.\n\nCall this to ground a possessive reference like \"my meetings\" before acting\non it.",
+      "parameters": [],
+      "auth": {
+        "providerId": "zoom",
+        "providerType": "oauth2",
+        "scopes": [
+          "user:read:user"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zoom.WhoAmI",
+        "parameters": {},
         "requiresAuth": true,
         "authProvider": "zoom",
         "tabLabel": "Call the Tool with User Authorization"
@@ -160,6 +644,7 @@
       "relativePath": "install/page.mdx"
     }
   ],
-  "generatedAt": "2026-02-26T20:45:10.449Z",
-  "summary": "Arcade.dev provides a toolkit for integrating with Zoom, enabling developers to leverage its functionalities in applications seamlessly. This toolkit allows for efficient access to Zoom meetings and invitations.\n\n**Capabilities**\n- Retrieve detailed information about specific Zoom meetings.\n- List upcoming meetings for a user within the next 24 hours.\n- Simplify access and interaction with Zoom's meeting management features.\n\n**OAuth**\n- Provider: Zoom  \n- Scopes: meeting:read:invitation, meeting:read:list_upcoming_meetings  \n\n**Secrets**\n- No secret types required for this toolkit."
+  "curationSourceHash": "6007dc440877986aa2d1f0f7a108a94354c90a195ee571865830c7eeb1734c7b",
+  "generatedAt": "2026-09-02T11:19:30.652Z",
+  "summary": "The Zoom toolkit integrates Zoom's meeting and recording APIs with Arcade-powered LLM tooling, enabling agents to find, inspect, and summarize Zoom meetings on behalf of authenticated users.\n\n## Capabilities\n\n- **Meeting discovery & identity**: Resolve ambiguous meeting references (phrase, ID, or time period) across scheduled, ad-hoc, recurring fixed-time, and recurring no-fixed-time meetings; identify the authenticated user to ground possessive references.\n- **Upcoming schedule**: List meetings the user is scheduled to join (next 24 h) or host (up to 90 days), with explicit handling of recurring series and calendar-coverage boundaries.\n- **Recordings & sharing**: Retrieve cloud recording share links, passcodes, and per-file play/download URLs for a specific meeting occurrence.\n- **Post-meeting content**: Read AI Companion meeting summaries and full audio transcripts from cloud recordings, with explicit differentiation between \"no content\" and \"meeting not found\".\n- **Invitations**: Fetch Zoom's formatted invitation text for a meeting, ready to forward, with graceful handling of ad-hoc meetings that carry no invitation.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Zoom** provider. Arcade manages the OAuth flow; see the [Zoom auth provider docs](https://docs.arcade.dev/en/references/auth-providers/zoom) for setup details."
 }

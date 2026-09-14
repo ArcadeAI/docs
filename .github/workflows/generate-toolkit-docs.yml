@@ -1,5 +1,5 @@
 name: Generate toolkit docs
-# Description: Generate toolkit JSON from Engine API, then sync sidebar navigation.
+# Description: Generate toolkit JSON from the public tool catalog, then sync sidebar navigation.
 # Flow:
 # 1) Generate toolkit JSON into toolkit-docs-generator/data/toolkits
 # 2) Sync integrations sidebar _meta.tsx from toolkit-docs-generator/data/toolkits
@@ -65,9 +65,7 @@ jobs:
             --skip-unchanged \
             --preserve-last-known-good \
             --verbose \
-            --api-source tool-metadata \
-            --tool-metadata-url "$ENGINE_API_URL" \
-            --tool-metadata-key "$ENGINE_API_KEY" \
+            --api-source public-catalog \
             --llm-provider anthropic \
             --llm-model "$ANTHROPIC_MODEL" \
             --llm-api-key "$ANTHROPIC_API_KEY" \
@@ -85,8 +83,10 @@ jobs:
           echo "succeeded=true" >>"$GITHUB_OUTPUT"
         working-directory: toolkit-docs-generator
         env:
-          ENGINE_API_URL: ${{ secrets.ENGINE_API_URL }}
-          ENGINE_API_KEY: ${{ secrets.ENGINE_API_KEY }}
+          # Unset in normal runs: the generator defaults to the production
+          # experience API, which needs no credentials. Set the secret to
+          # point a run at staging or a local BFF.
+          PUBLIC_CATALOG_URL: ${{ secrets.PUBLIC_CATALOG_URL }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL || 'claude-sonnet-4-6' }}
           # Stronger model for the secret-coherence editor. Keeps

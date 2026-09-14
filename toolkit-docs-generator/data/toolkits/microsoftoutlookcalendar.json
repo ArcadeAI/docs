@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookCalendar",
   "label": "Microsoft Outlook Calendar",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "Arcade.dev LLM tools for Outlook Calendar",
   "metadata": {
     "category": "productivity",
@@ -28,7 +28,7 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CreateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@0.3.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@0.4.0",
       "description": "Create an event in the authenticated user's default calendar.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
       "parameters": [
         {
@@ -185,7 +185,7 @@
     {
       "name": "GetEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.GetEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@0.3.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@0.4.0",
       "description": "Get an event by its ID from the user's calendar.",
       "parameters": [
         {
@@ -244,9 +244,114 @@
       }
     },
     {
+      "name": "GetSchedule",
+      "qualifiedName": "MicrosoftOutlookCalendar.GetSchedule",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@0.4.0",
+      "description": "Get the free/busy availability of one or more people over a time range.\n\nTimezone offsets in start_date_time and end_date_time are ignored. The window is anchored\nin the returned time_zone, which is the authenticated user's mailbox timezone, and may be a\nWindows name such as \"Eastern Standard Time\" rather than an IANA identifier - that names a\nzone observing daylight saving, not a fixed offset. time_zone_source is \"mailbox\" only when\nthe user's mailbox named that zone; it is \"fallback\" whenever the window is anchored to UTC,\nwhich cannot be distinguished from a mailbox that names no zone at all. On \"fallback\" treat\nevery time in the response as unconfirmed and check the intended zone before acting.\n\nEach person's availability_view has one digit per interval, beginning at start_date_time in\nthat time_zone: 0 = free (or working elsewhere), 1 = tentative, 2 = busy, 3 = out of\noffice. For the specific times a person is busy, prefer schedule_items, which lists each\nblock with absolute start and end times; each item's status is one of free, tentative,\nbusy, oof, workingElsewhere, or unknown.\n\nWhen Graph provides it, working_hours gives the days and hours a person works. These are on\nthat person's own clock - named by working_hours.time_zone when Graph resolves it - and are\nnot converted to the window's time_zone, so do not compare them directly against\navailability_view without accounting for the difference.\n\nResults cover only each person's primary calendar. Events that live solely on a secondary\ncalendar do not mark them busy, so free/busy can read clear while such an event exists.\n\nVisibility depends on your access to each person's calendar. Colleagues, rooms, and\nresources whose free/busy is shared with you return busy/free times; an event's subject,\nlocation, and is_private flag appear only when its details are shared with you. A calendar\nyou cannot see is returned all-free with no error, which is indistinguishable from\ngenuinely free, so every all-free result carries a \"note\" marking it unconfirmed. An\naddress Graph could not resolve or read carries an \"error\" instead, and is still listed so\nthat no requested address is silently dropped. One address failing does not affect the rest,\nand an error naming too many calendar entries is worth retrying for that address alone over\na shorter range.",
+      "parameters": [
+        {
+          "name": "email_addresses",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Email addresses whose free/busy availability to check - people, rooms, resources, or distribution lists. Up to 20 entities per call, where a distribution list counts as every one of its members, so prefer naming individuals when the membership is known. Split larger groups across multiple calls. Repeated addresses are ignored, so the result may cover fewer people than were passed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The start of the window to check, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Timezone offset is ignored; the authenticated user's calendar timezone is used.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The end of the window to check, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Timezone offset is ignored; the authenticated user's calendar timezone is used. The window must be less than 62 days.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "availability_view_interval",
+          "type": "integer",
+          "required": false,
+          "description": "Duration in minutes of each slot in the availability_view string (5-1440). Defaults to 30.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.GetSchedule",
+        "parameters": {
+          "email_addresses": {
+            "value": [
+              "alice.johnson@example.com",
+              "bob.smith@example.com",
+              "conf-room-a@example.com"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "start_date_time": {
+            "value": "2024-06-10T09:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_date_time": {
+            "value": "2024-06-10T17:00:00",
+            "type": "string",
+            "required": true
+          },
+          "availability_view_interval": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListCalendars",
       "qualifiedName": "MicrosoftOutlookCalendar.ListCalendars",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@0.3.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@0.4.0",
       "description": "List all calendars the user has access to.\n\nReturns the user's own calendars plus any shared or delegated calendars.\nEach calendar includes its ID, name, owner, and permissions.\n\nUse a calendar_id from the results to target a specific calendar\nin other calendar tools.",
       "parameters": [
         {
@@ -319,7 +424,7 @@
     {
       "name": "ListEventAttachments",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@0.3.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@0.4.0",
       "description": "List attachment metadata for a calendar event.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to a calendar event\nor meeting.\n\nPass a calendar_id to list attachments on events in shared or delegated calendars.",
       "parameters": [
         {
@@ -419,7 +524,7 @@
     {
       "name": "ListEventsInTimeRange",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@0.3.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@0.4.0",
       "description": "List events in the user's calendar in a specific time range.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
       "parameters": [
         {
@@ -506,7 +611,7 @@
     {
       "name": "SearchEvents",
       "qualifiedName": "MicrosoftOutlookCalendar.SearchEvents",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@0.3.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@0.4.0",
       "description": "Search calendar events within a time range with optional filters.\n\nResults are in chronological order.\n\nEvent bodies are truncated to 200 characters for efficient skimming.\nUse the event_id from the results to retrieve full event details.",
       "parameters": [
         {
@@ -718,7 +823,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookCalendar.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@0.3.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@0.4.0",
       "description": "Get information about the current user and their Outlook Calendar environment.",
       "parameters": [],
       "auth": {
@@ -774,6 +879,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "b7d44fd15d5bc867db3809cdfc3c4bd55fc6c82a4884bfa8d6c79206065bda7f",
-  "generatedAt": "2026-07-16T11:38:45.321Z",
-  "summary": "## Microsoft Outlook Calendar Toolkit\n\nThe Microsoft Outlook Calendar toolkit lets Arcade-powered LLMs interact with a user's Outlook Calendar via the Microsoft Graph API, enabling calendar reads, writes, and queries on behalf of authenticated users.\n\n## Capabilities\n\n- **Calendar discovery & context:** List all calendars the user owns, shares, or has delegated access to; retrieve current user identity and calendar environment details.\n- **Event creation:** Create events in the user's default calendar; timezone handling defers to the calendar's configured timezone (falls back to UTC if unset).\n- **Event retrieval & listing:** Fetch a specific event by ID, or list all events within a defined time range using the calendar's native timezone.\n- **Search & filtering:** Search events across a time range with optional filters; results are chronologically ordered with body content truncated to 200 characters for efficiency — use the returned event ID to fetch full details.\n- **Attachment inspection:** List attachment metadata (name, size, type) for any calendar event, including events on shared or delegated calendars; attachment content is not returned.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 delegated auth via **Microsoft**. Arcade handles the OAuth flow automatically. See the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
+  "generatedAt": "2026-09-04T15:27:35.850Z",
+  "summary": "## Microsoft Outlook Calendar Toolkit\n\nThe Microsoft Outlook Calendar toolkit lets agents and LLM-powered apps read, search, and manage Outlook Calendar data for authenticated Microsoft 365 users via the Microsoft Graph API.\n\n## Capabilities\n\n- **Event management** — Create events in the user's default calendar, retrieve a single event by ID, and list events within a specific time range.\n- **Search and discovery** — Search calendar events across a time range with optional filters; results are chronologically ordered with truncated bodies for efficient skimming, and full details are retrievable by event ID.\n- **Scheduling and availability** — Fetch free/busy schedules for one or more people over a time range, including per-interval availability views, detailed schedule blocks with absolute start/end times, and working-hours data where available.\n- **Calendar and attachment metadata** — List all calendars the user has access to (own, shared, and delegated), and retrieve attachment metadata (name, size, type) for specific calendar events.\n- **Identity context** — Retrieve information about the authenticated user and their Outlook Calendar environment.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 using Microsoft as the provider. Arcade manages the OAuth flow automatically.\n\nSee the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
 }

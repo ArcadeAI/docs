@@ -1,7 +1,7 @@
 {
   "id": "Linear",
   "label": "Linear",
-  "version": "4.3.1",
+  "version": "5.8.0",
   "description": "Arcade tools designed for LLMs to interact with Linear",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "AddComment",
       "qualifiedName": "Linear.AddComment",
-      "fullyQualifiedName": "Linear.AddComment@4.3.1",
+      "fullyQualifiedName": "Linear.AddComment@5.8.0",
       "description": "Add a comment to an issue.",
       "parameters": [
         {
@@ -101,7 +101,7 @@
     {
       "name": "AddProjectComment",
       "qualifiedName": "Linear.AddProjectComment",
-      "fullyQualifiedName": "Linear.AddProjectComment@4.3.1",
+      "fullyQualifiedName": "Linear.AddProjectComment@5.8.0",
       "description": "Add a comment to a project's document content.\n\nIMPORTANT: Due to Linear API limitations, comments created via the API will NOT\nappear visually anchored inline in the document (no yellow highlight on text).\nThe comment will be stored and can be retrieved via list_project_comments, but\nit will appear in the comments panel rather than inline in the document.\n\nFor true inline comments that are visually anchored to text, users should create\nthem directly in the Linear UI by selecting text and adding a comment.\n\nThe quoted_text parameter stores metadata about what text the comment references,\nwhich is useful for context even though the comment won't be visually anchored.",
       "parameters": [
         {
@@ -201,7 +201,7 @@
     {
       "name": "AddProjectToInitiative",
       "qualifiedName": "Linear.AddProjectToInitiative",
-      "fullyQualifiedName": "Linear.AddProjectToInitiative@4.3.1",
+      "fullyQualifiedName": "Linear.AddProjectToInitiative@5.8.0",
       "description": "Link a project to an initiative.\n\nBoth initiative and project can be specified by ID or name.\nIf a name is provided, fuzzy matching is used to resolve it.",
       "parameters": [
         {
@@ -288,7 +288,7 @@
     {
       "name": "ArchiveInitiative",
       "qualifiedName": "Linear.ArchiveInitiative",
-      "fullyQualifiedName": "Linear.ArchiveInitiative@4.3.1",
+      "fullyQualifiedName": "Linear.ArchiveInitiative@5.8.0",
       "description": "Archive an initiative.\n\nArchived initiatives are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -362,7 +362,7 @@
     {
       "name": "ArchiveIssue",
       "qualifiedName": "Linear.ArchiveIssue",
-      "fullyQualifiedName": "Linear.ArchiveIssue@4.3.1",
+      "fullyQualifiedName": "Linear.ArchiveIssue@5.8.0",
       "description": "Archive an issue.\n\nArchived issues are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -423,7 +423,7 @@
     {
       "name": "ArchiveProject",
       "qualifiedName": "Linear.ArchiveProject",
-      "fullyQualifiedName": "Linear.ArchiveProject@4.3.1",
+      "fullyQualifiedName": "Linear.ArchiveProject@5.8.0",
       "description": "Archive a project.\n\nArchived projects are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -495,9 +495,95 @@
       }
     },
     {
+      "name": "CreateDocument",
+      "qualifiedName": "Linear.CreateDocument",
+      "fullyQualifiedName": "Linear.CreateDocument@5.8.0",
+      "description": "Create a standalone Linear document: a page of markdown such as a spec or a runbook.\n\nEvery document hangs from exactly one object — a project, an initiative, a team, an issue\nor a cycle — and one has to be named, since Linear refuses a document with no parent.\n\nThis creates a document, not text on another object. A project's or an initiative's own\ndescription is part of that object rather than a document, and so is a comment on an issue;\nwriting either of those is an edit to that object and does not produce a document.\n\nTwo identical calls create two documents.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Title for the new document. Cannot be blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_type",
+          "type": "string",
+          "required": true,
+          "description": "What kind of object the document should hang from.",
+          "enum": [
+            "project",
+            "initiative",
+            "team",
+            "issue",
+            "cycle"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "parent",
+          "type": "string",
+          "required": true,
+          "description": "The parent's ID, or its name. A team can also be given as its key, and an issue as its identifier (like ABC-123) or its title — a title is matched against issue titles, so a phrase that appears only in an issue's body will not resolve it. A cycle must be given as its ID: a cycle number names one cycle per team, so it cannot identify a single cycle. A name that matches more than one object comes back with the candidates rather than a guess.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "The document's body as markdown. Default is empty, which creates a document with a title and no body. Cannot exceed 250000 characters.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy parent matches above 90% confidence. Applies when the parent is given by name or title rather than by ID; a cycle is always given by ID, so this does not affect it. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read",
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created document and the object it hangs from"
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "CreateInitiative",
       "qualifiedName": "Linear.CreateInitiative",
-      "fullyQualifiedName": "Linear.CreateInitiative@4.3.1",
+      "fullyQualifiedName": "Linear.CreateInitiative@5.8.0",
       "description": "Create a new Linear initiative.\n\nInitiatives are high-level strategic goals that group related projects.",
       "parameters": [
         {
@@ -603,7 +689,7 @@
     {
       "name": "CreateIssue",
       "qualifiedName": "Linear.CreateIssue",
-      "fullyQualifiedName": "Linear.CreateIssue@4.3.1",
+      "fullyQualifiedName": "Linear.CreateIssue@5.8.0",
       "description": "Create a new Linear issue with validation.\n\nWhen assignee is None or '@me', the issue is assigned to the authenticated user.\nAll entity references (team, assignee, labels, state, project, cycle, parent)\nare validated before creation. If an entity is not found, suggestions are\nreturned to help correct the input.",
       "parameters": [
         {
@@ -665,7 +751,7 @@
           "name": "state",
           "type": "string",
           "required": false,
-          "description": "Initial workflow state name. Default is team's default state.",
+          "description": "Initial workflow state name. Required on teams with triage enabled; otherwise defaults to the team's default state.",
           "enum": null,
           "inferrable": true
         },
@@ -721,7 +807,7 @@
           "name": "attachment_url",
           "type": "string",
           "required": false,
-          "description": "URL to attach to the issue. Default is None.",
+          "description": "A public URL to attach to the issue. Omit to attach nothing; do not pass an empty or blank string, which is rejected.",
           "enum": null,
           "inferrable": true
         },
@@ -729,7 +815,7 @@
           "name": "attachment_title",
           "type": "string",
           "required": false,
-          "description": "Title for the attached URL. Default is None (URL used as title).",
+          "description": "Title for the attached URL. Omitting it leaves Linear to derive a title from the URL it fetches. Defaults to None.",
           "enum": null,
           "inferrable": true
         },
@@ -870,7 +956,7 @@
     {
       "name": "CreateIssueRelation",
       "qualifiedName": "Linear.CreateIssueRelation",
-      "fullyQualifiedName": "Linear.CreateIssueRelation@4.3.1",
+      "fullyQualifiedName": "Linear.CreateIssueRelation@5.8.0",
       "description": "Create a relation between two issues.\n\nRelation types define the relationship from the source issue's perspective:\n- blocks: Source issue blocks the related issue\n- blockedBy: Source issue is blocked by the related issue\n- duplicate: Source issue is a duplicate of the related issue\n- related: Issues are related (bidirectional)",
       "parameters": [
         {
@@ -962,7 +1048,7 @@
     {
       "name": "CreateProject",
       "qualifiedName": "Linear.CreateProject",
-      "fullyQualifiedName": "Linear.CreateProject@4.3.1",
+      "fullyQualifiedName": "Linear.CreateProject@5.8.0",
       "description": "Create a new Linear project.\n\nTeam is validated before creation. If team is not found, suggestions are\nreturned to help correct the input. Lead is validated if provided.",
       "parameters": [
         {
@@ -1127,7 +1213,7 @@
     {
       "name": "CreateProjectStatus",
       "qualifiedName": "Linear.CreateProjectStatus",
-      "fullyQualifiedName": "Linear.CreateProjectStatus@4.3.1",
+      "fullyQualifiedName": "Linear.CreateProjectStatus@5.8.0",
       "description": "Create a new project status in the Linear workspace.\n\nRequires Linear workspace admin access; without it the create fails.\n\nStatus names are unique per category: the same name may exist once per type. When a status\nwith the same name and type already exists, this returns a retryable error carrying the\nexisting status's id so it can be reused instead of duplicated. A same-named status of a\ndifferent type is allowed.",
       "parameters": [
         {
@@ -1235,7 +1321,7 @@
     {
       "name": "CreateProjectUpdate",
       "qualifiedName": "Linear.CreateProjectUpdate",
-      "fullyQualifiedName": "Linear.CreateProjectUpdate@4.3.1",
+      "fullyQualifiedName": "Linear.CreateProjectUpdate@5.8.0",
       "description": "Create a project status update.\n\nProject updates are posts that communicate progress, blockers, or status\nchanges to stakeholders. They appear in the project's Updates tab and\ncan include a health status indicator.",
       "parameters": [
         {
@@ -1325,8 +1411,8 @@
     {
       "name": "GetCycle",
       "qualifiedName": "Linear.GetCycle",
-      "fullyQualifiedName": "Linear.GetCycle@4.3.1",
-      "description": "Get detailed information about a specific Linear cycle.",
+      "fullyQualifiedName": "Linear.GetCycle@5.8.0",
+      "description": "Get detailed information about a specific Linear cycle.\n\nReports the documents attached to the cycle alongside its dates and progress. Only the\nfirst page of them comes back; the response says when the cycle has more.",
       "parameters": [
         {
           "name": "cycle_id",
@@ -1383,9 +1469,95 @@
       }
     },
     {
+      "name": "GetDocument",
+      "qualifiedName": "Linear.GetDocument",
+      "fullyQualifiedName": "Linear.GetDocument@5.8.0",
+      "description": "Read a Linear document's content as markdown.\n\nLong documents come back a chunk at a time: when has_more is true, pass the response's\nnext_offset back as offset to continue. The response also reports whether the document is\nin the trash, which is worth relaying before quoting it as current.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The document's ID, its short slug id, or its Linear URL. A URL can be passed as it is.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Character offset to start reading from. Default is 0 (the start of the document).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum characters to return. Max 50000. Default is 10000.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "One chunk of the document's markdown content"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetDocument",
+        "parameters": {
+          "document_id": {
+            "value": "https://linear.app/my-team/document/project-spec-abc123",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 10000,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetInitiative",
       "qualifiedName": "Linear.GetInitiative",
-      "fullyQualifiedName": "Linear.GetInitiative@4.3.1",
+      "fullyQualifiedName": "Linear.GetInitiative@5.8.0",
       "description": "Get detailed information about a specific Linear initiative.\n\nSupports lookup by ID or name (with fuzzy matching for name).",
       "parameters": [
         {
@@ -1487,7 +1659,7 @@
     {
       "name": "GetInitiativeDescription",
       "qualifiedName": "Linear.GetInitiativeDescription",
-      "fullyQualifiedName": "Linear.GetInitiativeDescription@4.3.1",
+      "fullyQualifiedName": "Linear.GetInitiativeDescription@5.8.0",
       "description": "Get an initiative's full description with pagination support.\n\nUse this tool when you need the complete description of an initiative that\nwas truncated in the get_initiative response. Supports chunked reading for\nvery large descriptions.",
       "parameters": [
         {
@@ -1573,7 +1745,7 @@
     {
       "name": "GetIssue",
       "qualifiedName": "Linear.GetIssue",
-      "fullyQualifiedName": "Linear.GetIssue@4.3.1",
+      "fullyQualifiedName": "Linear.GetIssue@5.8.0",
       "description": "Get detailed information about a specific Linear issue.\n\nAccepts either the issue UUID or the human-readable identifier (like TOO-123).",
       "parameters": [
         {
@@ -1685,7 +1857,7 @@
     {
       "name": "GetMilestone",
       "qualifiedName": "Linear.GetMilestone",
-      "fullyQualifiedName": "Linear.GetMilestone@4.3.1",
+      "fullyQualifiedName": "Linear.GetMilestone@5.8.0",
       "description": "Get a milestone by ID or name inside a project.",
       "parameters": [
         {
@@ -1771,7 +1943,7 @@
     {
       "name": "GetNotifications",
       "qualifiedName": "Linear.GetNotifications",
-      "fullyQualifiedName": "Linear.GetNotifications@4.3.1",
+      "fullyQualifiedName": "Linear.GetNotifications@5.8.0",
       "description": "Get the authenticated user's notifications.\n\nReturns notifications including issue mentions, comments, assignments,\nand state changes.",
       "parameters": [
         {
@@ -1857,7 +2029,7 @@
     {
       "name": "GetProject",
       "qualifiedName": "Linear.GetProject",
-      "fullyQualifiedName": "Linear.GetProject@4.3.1",
+      "fullyQualifiedName": "Linear.GetProject@5.8.0",
       "description": "Get detailed information about a specific Linear project.\n\nSupports lookup by ID, slug_id, or name (with fuzzy matching for name).",
       "parameters": [
         {
@@ -1973,7 +2145,7 @@
     {
       "name": "GetProjectDescription",
       "qualifiedName": "Linear.GetProjectDescription",
-      "fullyQualifiedName": "Linear.GetProjectDescription@4.3.1",
+      "fullyQualifiedName": "Linear.GetProjectDescription@5.8.0",
       "description": "Get a project's full description with pagination support.\n\nUse this tool when you need the complete description of a project that\nwas truncated in the get_project response. Supports chunked reading for\nvery large descriptions.",
       "parameters": [
         {
@@ -2059,7 +2231,7 @@
     {
       "name": "GetRecentActivity",
       "qualifiedName": "Linear.GetRecentActivity",
-      "fullyQualifiedName": "Linear.GetRecentActivity@4.3.1",
+      "fullyQualifiedName": "Linear.GetRecentActivity@5.8.0",
       "description": "Get the authenticated user's recent issue activity.\n\nReturns issues the user has recently created or been assigned to\nwithin the specified time period.",
       "parameters": [
         {
@@ -2132,7 +2304,7 @@
     {
       "name": "GetTeam",
       "qualifiedName": "Linear.GetTeam",
-      "fullyQualifiedName": "Linear.GetTeam@4.3.1",
+      "fullyQualifiedName": "Linear.GetTeam@5.8.0",
       "description": "Get detailed information about a specific Linear team.\n\nSupports lookup by ID, key (like TOO, ENG), or name (with fuzzy matching).",
       "parameters": [
         {
@@ -2220,96 +2392,9 @@
       }
     },
     {
-      "name": "LinkGithubToIssue",
-      "qualifiedName": "Linear.LinkGithubToIssue",
-      "fullyQualifiedName": "Linear.LinkGithubToIssue@4.3.1",
-      "description": "Link a GitHub PR, commit, or issue to a Linear issue.\n\nAutomatically detects the artifact type from the URL and generates\nan appropriate title if not provided.",
-      "parameters": [
-        {
-          "name": "issue",
-          "type": "string",
-          "required": true,
-          "description": "Issue ID or identifier to link to.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "github_url",
-          "type": "string",
-          "required": true,
-          "description": "GitHub URL to link (PR, commit, or issue).",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "title",
-          "type": "string",
-          "required": false,
-          "description": "Custom title for the link. If not provided, auto-generated from URL.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "linear",
-        "providerType": "oauth2",
-        "scopes": [
-          "read",
-          "write"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Link result with attachment details"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Linear.LinkGithubToIssue",
-        "parameters": {
-          "issue": {
-            "value": "ENG-1042",
-            "type": "string",
-            "required": true
-          },
-          "github_url": {
-            "value": "https://github.com/myorg/myrepo/pull/318",
-            "type": "string",
-            "required": true
-          },
-          "title": {
-            "value": "Fix authentication bug - PR #318",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "linear",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "project_management"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "ListAvailableProjectStatuses",
       "qualifiedName": "Linear.ListAvailableProjectStatuses",
-      "fullyQualifiedName": "Linear.ListAvailableProjectStatuses@4.3.1",
+      "fullyQualifiedName": "Linear.ListAvailableProjectStatuses@5.8.0",
       "description": "List the project statuses a project can be put in, in the Linear workspace.\n\nIncludes custom statuses, not just the built-in categories, so the exact name, id, and\ntype of each status can be discovered before filtering projects by status or assigning a\nstatus to a project. Returned in lifecycle order (backlog → planned → started → paused →\ncompleted → canceled), then by position within each category. Project statuses are a small\nworkspace-level vocabulary and the whole set is returned in one call (no pagination).",
       "parameters": [
         {
@@ -2376,7 +2461,7 @@
     {
       "name": "ListComments",
       "qualifiedName": "Linear.ListComments",
-      "fullyQualifiedName": "Linear.ListComments@4.3.1",
+      "fullyQualifiedName": "Linear.ListComments@5.8.0",
       "description": "List comments on an issue.\n\nReturns comments with user info, timestamps, and reply threading info.",
       "parameters": [
         {
@@ -2462,7 +2547,7 @@
     {
       "name": "ListCycles",
       "qualifiedName": "Linear.ListCycles",
-      "fullyQualifiedName": "Linear.ListCycles@4.3.1",
+      "fullyQualifiedName": "Linear.ListCycles@5.8.0",
       "description": "List Linear cycles, optionally filtered by team and status.\n\nCycles are time-boxed iterations (like sprints) for organizing work.",
       "parameters": [
         {
@@ -2572,9 +2657,166 @@
       }
     },
     {
+      "name": "ListDocuments",
+      "qualifiedName": "Linear.ListDocuments",
+      "fullyQualifiedName": "Linear.ListDocuments@5.8.0",
+      "description": "Browse Linear documents, optionally narrowed to the object they are attached to.\n\nLists the documents attached to an issue, project, initiative, team or cycle — name that\nobject with parent_type and parent to narrow the listing to it.\n\nMatches document titles only; it does not look inside document bodies. Returns the most\nrecently updated documents first. Each document comes back\nwith a truncated preview of its markdown body, not the whole thing. Documents in the trash\nare never listed.\n\nThe creator, title and date filters need no parent — they span every one.\n\nThis covers standalone Linear documents. The description or spec written into a project or\nan initiative itself is part of that object rather than a document, so it is not listed\nhere even when a person calls it \"the spec\" — an empty result for a parent that plainly has\nwritten content usually means the text lives on the parent itself and is read from the\nparent rather than from its documents.",
+      "parameters": [
+        {
+          "name": "parent_type",
+          "type": "string",
+          "required": false,
+          "description": "What kind of object the documents hang from. Pass together with parent. Default is None, which spans every parent.",
+          "enum": [
+            "project",
+            "initiative",
+            "team",
+            "issue",
+            "cycle"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "parent",
+          "type": "string",
+          "required": false,
+          "description": "The parent's ID, or its name. A team can also be given as its key. A cycle can be given as its number, but a number names one cycle in every team that has one, so pass the cycle's ID whenever one is in hand. An issue is the one exception to naming: give it as its ID or its identifier (like ABC-123), since issues cannot be matched by title here. Pass together with parent_type. Default is None (documents under any parent).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Only include documents whose title contains this text; document bodies are not matched. Default is None (any title).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "creator",
+          "type": "string",
+          "required": false,
+          "description": "Filter by the document's creator. Use '@me' for the current user, or give the creator's user ID, their email address, or their name — a name is matched as a case-insensitive substring. Default is None (any creator).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_after",
+          "type": "string",
+          "required": false,
+          "description": "Only include documents created on or after this date (YYYY-MM-DD), inclusive. Default is None (no lower bound).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_before",
+          "type": "string",
+          "required": false,
+          "description": "Only include documents created on or before this date (YYYY-MM-DD), inclusive — the whole of the named day counts. Default is None (no upper bound).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of documents to return. Min 1, max 50. Default is 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from a previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Documents matching the filters, with content previews"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListDocuments",
+        "parameters": {
+          "parent_type": {
+            "value": "project",
+            "type": "string",
+            "required": false
+          },
+          "parent": {
+            "value": "Marketing Q3 Roadmap",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "design spec",
+            "type": "string",
+            "required": false
+          },
+          "creator": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "created_after": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "created_before": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "eyJsYXN0SWQiOiJhYmMxMjMiLCJsYXN0Q3JlYXRlZEF0IjoiMjAyNC0wNS0xNVQxMjowMDowMFoifQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListInitiatives",
       "qualifiedName": "Linear.ListInitiatives",
-      "fullyQualifiedName": "Linear.ListInitiatives@4.3.1",
+      "fullyQualifiedName": "Linear.ListInitiatives@5.8.0",
       "description": "List Linear initiatives, optionally filtered by keywords and other criteria.\n\nReturns all initiatives when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -2680,7 +2922,7 @@
     {
       "name": "ListIssues",
       "qualifiedName": "Linear.ListIssues",
-      "fullyQualifiedName": "Linear.ListIssues@4.3.1",
+      "fullyQualifiedName": "Linear.ListIssues@5.8.0",
       "description": "List Linear issues, optionally filtered by keywords and other criteria.\n\nReturns all issues when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -2863,7 +3105,7 @@
     {
       "name": "ListLabels",
       "qualifiedName": "Linear.ListLabels",
-      "fullyQualifiedName": "Linear.ListLabels@4.3.1",
+      "fullyQualifiedName": "Linear.ListLabels@5.8.0",
       "description": "List available issue labels in the workspace.\n\nReturns labels that can be applied to issues. Use label IDs or names\nwhen creating or updating issues.",
       "parameters": [
         {
@@ -2936,7 +3178,7 @@
     {
       "name": "ListMilestones",
       "qualifiedName": "Linear.ListMilestones",
-      "fullyQualifiedName": "Linear.ListMilestones@4.3.1",
+      "fullyQualifiedName": "Linear.ListMilestones@5.8.0",
       "description": "List milestones in a Linear project.",
       "parameters": [
         {
@@ -3035,7 +3277,7 @@
     {
       "name": "ListProjectComments",
       "qualifiedName": "Linear.ListProjectComments",
-      "fullyQualifiedName": "Linear.ListProjectComments@4.3.1",
+      "fullyQualifiedName": "Linear.ListProjectComments@5.8.0",
       "description": "List comments on a project's document content.\n\nReturns comments with user info, timestamps, quoted text for inline comments,\nand reply threading info. Replies are nested under their parent comments.\n\nUse comment_filter to control which comments are returned:\n- only_quoted (default): Only comments attached to a quote in the text\n- only_unquoted: Only comments not attached to a particular quote\n- all: All comments regardless of being attached to a quote or not",
       "parameters": [
         {
@@ -3164,7 +3406,7 @@
     {
       "name": "ListProjects",
       "qualifiedName": "Linear.ListProjects",
-      "fullyQualifiedName": "Linear.ListProjects@4.3.1",
+      "fullyQualifiedName": "Linear.ListProjects@5.8.0",
       "description": "List Linear projects, optionally filtered by keywords, status, team, or creation date.\n\nWith no filters this returns projects up to the page limit (default 20, max 50). Narrow by a\nspecific status with ``status`` (a status name or id), or by a whole category with\n``status_type``; the two are mutually exclusive. Each returned project includes its id, name,\nstatus, teams, and progress.",
       "parameters": [
         {
@@ -3309,7 +3551,7 @@
     {
       "name": "ListProjectUpdates",
       "qualifiedName": "Linear.ListProjectUpdates",
-      "fullyQualifiedName": "Linear.ListProjectUpdates@4.3.1",
+      "fullyQualifiedName": "Linear.ListProjectUpdates@5.8.0",
       "description": "List a Linear project's status updates. Returns newest first.",
       "parameters": [
         {
@@ -3408,7 +3650,7 @@
     {
       "name": "ListTeams",
       "qualifiedName": "Linear.ListTeams",
-      "fullyQualifiedName": "Linear.ListTeams@4.3.1",
+      "fullyQualifiedName": "Linear.ListTeams@5.8.0",
       "description": "List Linear teams, optionally filtered by keywords and other criteria.\n\nReturns all teams when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -3520,7 +3762,7 @@
     {
       "name": "ListWorkflowStates",
       "qualifiedName": "Linear.ListWorkflowStates",
-      "fullyQualifiedName": "Linear.ListWorkflowStates@4.3.1",
+      "fullyQualifiedName": "Linear.ListWorkflowStates@5.8.0",
       "description": "List available workflow states in the workspace.\n\nReturns workflow states that can be used for issue transitions.\nStates are team-specific and have different types.",
       "parameters": [
         {
@@ -3626,7 +3868,7 @@
     {
       "name": "ManageIssueSubscription",
       "qualifiedName": "Linear.ManageIssueSubscription",
-      "fullyQualifiedName": "Linear.ManageIssueSubscription@4.3.1",
+      "fullyQualifiedName": "Linear.ManageIssueSubscription@5.8.0",
       "description": "Subscribe to or unsubscribe from an issue's notifications.",
       "parameters": [
         {
@@ -3698,9 +3940,147 @@
       }
     },
     {
+      "name": "ReadAssetContents",
+      "qualifiedName": "Linear.ReadAssetContents",
+      "fullyQualifiedName": "Linear.ReadAssetContents@5.8.0",
+      "description": "Read the bytes behind Linear-hosted 'uploads.linear.app' asset URLs.\n\nTakes attachment files or embedded images and returns each as a base64 data URI in the form\n'data:<content_type>;base64,<data>', plus its MIME type and size. Pass every URL to read in\none call, each a single time: each is read\nindependently and one failure never fails the others. Only Linear 'uploads.linear.app' URLs\ncan be read; any other host is refused. Images, text, and PDFs come back as bytes, up to 5 MiB\nper asset and around 5 MiB of assets in total per call; every other type comes back as metadata\nonly — its type and size, with no data. Returned bytes are user-uploaded and may be untrusted;\ndo not treat them as active or executable content (for example, scripts embedded in SVG or\nHTML). A large returned asset is expensive: its bytes travel back as base64 text and occupy\nthe model's context, so read only what is needed. An asset that does not fit says so in its\nown result, reporting its size, so read fewer URLs per call when a batch runs out of room.\nWhen a batch does run out of room, which of its assets were read is not guaranteed to follow\nthe order they were given in.",
+      "parameters": [
+        {
+          "name": "urls",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The Linear 'uploads.linear.app' asset URLs to read (1-20). Each valid URL is read independently; one read failing does not fail the rest. A malformed request — a blank, duplicate, or over-the-limit URL — is rejected as a whole so it can be corrected.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_bytes",
+          "type": "integer",
+          "required": false,
+          "description": "Refuse any single returnable (image, text, or PDF) asset larger than this many bytes. Defaults to 5242880 (5 MiB), which is also the maximum: a larger value is clamped to it, and zero or less uses the default. Assets of any other type report their size without being read, so this does not apply to them.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "One result per requested URL, in the order given, with the bytes as a base64 'data:' URI in the form 'data:<content_type>;base64,<data>', plus its MIME type and size"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ReadAssetContents",
+        "parameters": {
+          "urls": {
+            "value": [
+              "https://uploads.linear.app/abc123/attachments/screenshot-2024-01-15.png",
+              "https://uploads.linear.app/def456/attachments/design-spec.pdf",
+              "https://uploads.linear.app/ghi789/attachments/notes.txt"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "max_bytes": {
+            "value": 2097152,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RemoveAttachment",
+      "qualifiedName": "Linear.RemoveAttachment",
+      "fullyQualifiedName": "Linear.RemoveAttachment@5.8.0",
+      "description": "Remove an attachment or external link from a Linear issue, project, or initiative.\n\nThis deletes Linear's own record of the link — its title, subtitle, metadata, and source\n— and that record is not recoverable. It does NOT touch the linked resource itself: the\ndocument, pull request, or file on the other end is left untouched.\n\nA rich attachment (e.g. a GitHub pull request or a Slack thread) drives Linear's automated\nstatus updates, so removing it tears that automation down, not just a display row. Confirm\nwhat the attachment is before removing it.\n\nPassing an id that matches no attachment or external link is not an error: it reports\n`not_found` (the object is already gone, or the id was never one of these types).",
+      "parameters": [
+        {
+          "name": "attachment_id",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the attachment or external link to remove.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "What was removed"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.RemoveAttachment",
+        "parameters": {
+          "attachment_id": {
+            "value": "att_9f3c2e1b4d7a8056",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ReplyToComment",
       "qualifiedName": "Linear.ReplyToComment",
-      "fullyQualifiedName": "Linear.ReplyToComment@4.3.1",
+      "fullyQualifiedName": "Linear.ReplyToComment@5.8.0",
       "description": "Reply to an existing comment on an issue.\n\nCreates a threaded reply to the specified parent comment.",
       "parameters": [
         {
@@ -3787,7 +4167,7 @@
     {
       "name": "ReplyToProjectComment",
       "qualifiedName": "Linear.ReplyToProjectComment",
-      "fullyQualifiedName": "Linear.ReplyToProjectComment@4.3.1",
+      "fullyQualifiedName": "Linear.ReplyToProjectComment@5.8.0",
       "description": "Reply to an existing comment on a project document.\n\nCreates a threaded reply to the specified parent comment.",
       "parameters": [
         {
@@ -3887,7 +4267,7 @@
     {
       "name": "ResolveComment",
       "qualifiedName": "Linear.ResolveComment",
-      "fullyQualifiedName": "Linear.ResolveComment@4.3.1",
+      "fullyQualifiedName": "Linear.ResolveComment@5.8.0",
       "description": "Resolve or reopen a Linear comment thread by its id.\n\nWorks for any comment regardless of what it is anchored to — issue comments, project\ncomments, and comments anchored to a project description alike. Resolving a comment that\nis already resolved (or reopening one already open) succeeds without making a change; in\nthat no-op case a supplied resolving_comment_id is not applied, since the thread's\nexisting resolution is left untouched.\n\nIMPORTANT: Linear's API updates the comment record but not the inline-comment mark stored\nin a project description. For comments anchored to project-description text, resolving may\nnot appear until the Linear view is reopened, while reopening may leave the comment hidden\nin Linear's UI until it is reopened manually there. The returned resolution state and\nsubsequent API reads remain authoritative.",
       "parameters": [
         {
@@ -3975,9 +4355,95 @@
       }
     },
     {
+      "name": "SearchDocuments",
+      "qualifiedName": "Linear.SearchDocuments",
+      "fullyQualifiedName": "Linear.SearchDocuments@5.8.0",
+      "description": "Full-text search across Linear document titles and body content.\n\nSearches the whole workspace, excluding documents in the trash. Results come back ranked by\nrelevance, each with a truncated preview of its markdown body and the object it hangs from,\nso a match can be narrowed by parent without another call. The search index trails writes by\na few seconds, so a document created moments ago may not be findable yet.\n\nOnly standalone Linear documents are indexed here. Text written into a project's or an\ninitiative's own description is part of that object rather than a document, so a phrase that\nappears only there will not be found by this search; it is read from the project or\ninitiative itself.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Words or a phrase to look for, matched against document titles and their markdown bodies. Comments on a document are not searched.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of documents to return. Min 1, max 50. Default is 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from a previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Documents matching the query, most relevant first"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.SearchDocuments",
+        "parameters": {
+          "query": {
+            "value": "product roadmap Q3 2024",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "eyJpZCI6ImFiYzEyMyIsInNvcnRLZXkiOjE2OTg3NjU0MzJ9",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "TransitionIssueState",
       "qualifiedName": "Linear.TransitionIssueState",
-      "fullyQualifiedName": "Linear.TransitionIssueState@4.3.1",
+      "fullyQualifiedName": "Linear.TransitionIssueState@5.8.0",
       "description": "Transition a Linear issue to a new workflow state.\n\nThe target state is validated against the team's available states.",
       "parameters": [
         {
@@ -4062,9 +4528,70 @@
       }
     },
     {
+      "name": "TrashDocument",
+      "qualifiedName": "Linear.TrashDocument",
+      "fullyQualifiedName": "Linear.TrashDocument@5.8.0",
+      "description": "Move a Linear document to the trash — the way to delete or archive one.\n\nLinear offers no separate archive for documents, so trashing is what both \"delete this doc\"\nand \"archive this doc\" amount to. The document leaves listings, searches and default views\nstraight away. It stays recoverable from Linear's trash for 30 days, and after that Linear\npurges it and the content is gone for good — so this is worth relaying rather than\nreporting as simply done. Recovery is done in Linear itself.\n\nThis trashes the document as a whole. Taking a document out of the project or issue it\nhangs from, and emptying its body, are both edits that leave the document in place — a\nrequest to remove a document *from* something is one of those, not this.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The document's ID, its short slug id, or its Linear URL. A URL can be passed as it is.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read",
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "What was trashed, and whether it is now in the trash"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.TrashDocument",
+        "parameters": {
+          "document_id": {
+            "value": "https://linear.app/my-team/document/project-brief-abc123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "UpdateComment",
       "qualifiedName": "Linear.UpdateComment",
-      "fullyQualifiedName": "Linear.UpdateComment@4.3.1",
+      "fullyQualifiedName": "Linear.UpdateComment@5.8.0",
       "description": "Update an existing comment.",
       "parameters": [
         {
@@ -4135,9 +4662,141 @@
       }
     },
     {
+      "name": "UpdateDocument",
+      "qualifiedName": "Linear.UpdateDocument",
+      "fullyQualifiedName": "Linear.UpdateDocument@5.8.0",
+      "description": "Edit a Linear document's title, body, or the object it hangs from.\n\nOnly what is passed changes. Moving the document under a new parent detaches it from the\nold one, because a document hangs from exactly one object — so this is how a document is\ntaken out of a project without being deleted.\n\nThe body is replaced wholesale, not appended to. Adding a line to a document means reading\nits current body first and sending the whole thing back with the line in it.\n\nThis edits a document. Text written into a project's or an initiative's own description, or\na comment on an issue, belongs to that object rather than to a document and is edited there.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The document's ID, its short slug id, or its Linear URL. A URL can be passed as it is.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "A new title. Default is None, which leaves the existing title unchanged. It cannot be set to blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "The document's whole new body as markdown. This replaces the existing body rather than adding to it, so an edit that adds a line must send the existing text along with it. An empty string clears the body. Default is None, which leaves the body unchanged. Cannot exceed 250000 characters.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_type",
+          "type": "string",
+          "required": false,
+          "description": "What kind of object to move the document under. Pass together with parent. Default is None, which leaves the document where it is.",
+          "enum": [
+            "project",
+            "initiative",
+            "team",
+            "issue",
+            "cycle"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "parent",
+          "type": "string",
+          "required": false,
+          "description": "The new parent's ID, or its name. A team can also be given as its key, and an issue as its identifier (like ABC-123) or its title. A cycle must be given as its ID. Pass together with parent_type. Default is None, which leaves the document where it is.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy parent matches above 90% confidence. Applies when the parent is given by name or title rather than by ID; a cycle is always given by ID, so this does not affect it. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read",
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The document as it stands after the edit"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.UpdateDocument",
+        "parameters": {
+          "document_id": {
+            "value": "https://linear.app/myteam/document/project-overview-abc123",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Q3 Product Roadmap Overview",
+            "type": "string",
+            "required": false
+          },
+          "content": {
+            "value": "## Overview\n\nThis document outlines the key initiatives for Q3.\n\n### Goals\n\n- Launch new onboarding flow\n- Improve API performance by 30%\n- Release mobile app v2.0\n\n### Timeline\n\nAll milestones target end of September.",
+            "type": "string",
+            "required": false
+          },
+          "parent_type": {
+            "value": "project",
+            "type": "string",
+            "required": false
+          },
+          "parent": {
+            "value": "Mobile App Redesign",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "UpdateInitiative",
       "qualifiedName": "Linear.UpdateInitiative",
-      "fullyQualifiedName": "Linear.UpdateInitiative@4.3.1",
+      "fullyQualifiedName": "Linear.UpdateInitiative@5.8.0",
       "description": "Update a Linear initiative with partial updates.\n\nOnly fields that are explicitly provided will be updated.",
       "parameters": [
         {
@@ -4256,7 +4915,7 @@
     {
       "name": "UpdateIssue",
       "qualifiedName": "Linear.UpdateIssue",
-      "fullyQualifiedName": "Linear.UpdateIssue@4.3.1",
+      "fullyQualifiedName": "Linear.UpdateIssue@5.8.0",
       "description": "Update a Linear issue with partial updates.\n\nOnly fields that are explicitly provided will be updated. All entity\nreferences are validated before update.",
       "parameters": [
         {
@@ -4383,7 +5042,7 @@
           "name": "attachment_url",
           "type": "string",
           "required": false,
-          "description": "URL to attach to the issue. Default is None.",
+          "description": "A public URL to attach to the issue. Omit to attach nothing; do not pass an empty or blank string, which is rejected.",
           "enum": null,
           "inferrable": true
         },
@@ -4391,7 +5050,7 @@
           "name": "attachment_title",
           "type": "string",
           "required": false,
-          "description": "Title for the attached URL. Default is None (URL used as title).",
+          "description": "Title for the attached URL. Omitting it leaves Linear to derive a title from the URL it fetches. Defaults to None.",
           "enum": null,
           "inferrable": true
         },
@@ -4538,7 +5197,7 @@
     {
       "name": "UpdateProject",
       "qualifiedName": "Linear.UpdateProject",
-      "fullyQualifiedName": "Linear.UpdateProject@4.3.1",
+      "fullyQualifiedName": "Linear.UpdateProject@5.8.0",
       "description": "Update a Linear project with partial updates.\n\nOnly fields that are explicitly provided will be updated. All entity\nreferences are validated before update.\n\nIMPORTANT: Updating the 'content' field will break any existing inline\ncomment anchoring. The comments will still exist and be retrievable via\nlist_project_comments, but they will no longer appear visually anchored\nto text in the Linear UI. The 'description' field can be safely updated\nwithout affecting inline comments.",
       "parameters": [
         {
@@ -4735,9 +5394,104 @@
       }
     },
     {
+      "name": "UpsertAttachment",
+      "qualifiedName": "Linear.UpsertAttachment",
+      "fullyQualifiedName": "Linear.UpsertAttachment@5.8.0",
+      "description": "Attach a URL or a local file to a Linear issue, project, or initiative.\n\nA URL that is already attached to the target is not duplicated on any target type: a\ndifferent title renames the existing attachment, and otherwise nothing changes.\n\nA local file is uploaded to Linear and stored as a native attachment on an issue, or as an\nexternal link to the stored file on a project or initiative. Each attach uploads the file\nagain, so repeating one adds a second attachment. Attaching a local file needs a one-time\nclient-side hook so the file's bytes never enter the model's context; if a 'file://' source\nreaches the server, the hook did not run and the tool returns the setup steps instead of\nattaching anything.",
+      "parameters": [
+        {
+          "name": "attachment",
+          "type": "json",
+          "required": true,
+          "description": "The resource to attach. Its `source` is either a publicly reachable http(s) URL, or a local file given as a 'file://' URI with its absolute path (a one-time client hook setup is required for local files; the tool returns the setup steps if it is missing). URLs on private or internal networks are refused. `title` names the attachment; `filename` and `mime_type` apply only to a local file and are ignored for an http(s) URL.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_id",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the issue, project, or initiative to attach to, matching target_type. An issue accepts its UUID or its identifier (e.g. ABC-123); a project or initiative must be given as its UUID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_type",
+          "type": "string",
+          "required": false,
+          "description": "Whether target_id names an issue, project, or initiative. Defaults to ISSUE.",
+          "enum": [
+            "issue",
+            "project",
+            "initiative"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read",
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Identifier and URL of the attachment, and what the call did"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.UpsertAttachment",
+        "parameters": {
+          "attachment": {
+            "value": {
+              "source": "https://www.example.com/docs/design-spec.pdf",
+              "title": "Design Specification Document"
+            },
+            "type": "string",
+            "required": true
+          },
+          "target_id": {
+            "value": "ABC-456",
+            "type": "string",
+            "required": true
+          },
+          "target_type": {
+            "value": "ISSUE",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "project_management"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "UpsertMilestone",
       "qualifiedName": "Linear.UpsertMilestone",
-      "fullyQualifiedName": "Linear.UpsertMilestone@4.3.1",
+      "fullyQualifiedName": "Linear.UpsertMilestone@5.8.0",
       "description": "Upsert a project's milestone.",
       "parameters": [
         {
@@ -4864,7 +5618,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Linear.WhoAmI",
-      "fullyQualifiedName": "Linear.WhoAmI@4.3.1",
+      "fullyQualifiedName": "Linear.WhoAmI@5.8.0",
       "description": "Get the authenticated user's profile and team memberships.\n\nReturns the current user's information including their name, email,\norganization, and the teams they belong to.",
       "parameters": [],
       "auth": {
@@ -4919,6 +5673,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "3dbc4f7bd59d0fef5426882adc94d0f50f571dcee8c12f3fa5b651b4b7df2625",
-  "generatedAt": "2026-08-13T11:19:54.143Z",
-  "summary": "## Linear Toolkit\n\nThe Linear toolkit lets LLMs interact with Linear's project management platform through Arcade, covering the full lifecycle of issues, projects, initiatives, cycles, milestones, comments, and teams.\n\n## Capabilities\n\n- **Issue management:** Create, update, archive, and transition issues through workflow states; manage labels, relations (blocks/blocked-by/duplicate/related), GitHub PR/commit links, and issue subscriptions.\n- **Project & initiative management:** Create, update, archive, and track projects and initiatives; link projects to initiatives; manage project statuses (including custom workspace statuses), content updates, and progress posts.\n- **Cycles & milestones:** List and inspect time-boxed cycles; upsert and retrieve milestones within projects.\n- **Comments & threads:** Add, update, reply to, and resolve comment threads on issues and project documents; list comments with threading and quote metadata (note: inline visual anchoring in project documents is a Linear UI-only feature — API-created comments appear in the comments panel).\n- **Workspace discovery:** List and query teams, workflow states, labels, available project statuses, and initiatives; look up entities by ID, key, or name with fuzzy matching.\n- **User context & activity:** Retrieve the authenticated user's profile, team memberships, recent issue activity, and notifications.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with **Linear** as the provider. See the [Linear auth provider docs](https://docs.arcade.dev/en/references/auth-providers/linear) for setup details."
+  "generatedAt": "2026-09-02T11:19:31.750Z",
+  "summary": "## Linear Toolkit for Arcade\n\nArcade's Linear toolkit gives LLMs full programmatic access to Linear workspaces — managing issues, projects, initiatives, documents, cycles, comments, and more through 54 tools.\n\n## Capabilities\n\n- **Issue lifecycle**: Create, update, archive, transition workflow states, manage relations (blocks/blocked-by/duplicate/related), subscribe to notifications, and add or reply to threaded comments.\n- **Projects & milestones**: Create and update projects, manage milestones, post project status updates, attach URLs or files, and read or paginate project descriptions and inline comments.\n- **Initiatives**: Create, update, archive, and retrieve initiatives; link projects to initiatives; read or paginate initiative descriptions.\n- **Documents**: Create, read (with chunked pagination), search full-text, update, move between parents, and trash standalone Linear documents attached to issues, projects, initiatives, teams, or cycles.\n- **Workspace discovery**: List teams, workflow states, labels, project statuses, cycles, notifications, and recent activity; look up any object by ID, name, or fuzzy match; read Linear-hosted asset URLs (images, PDFs, text) as base64 data URIs.\n- **Identity & context**: Resolve the authenticated user via `WhoAmI`; validate all entity references before writes and return suggestions on mismatch.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with **Linear** as the provider. See the [Linear auth provider docs](https://docs.arcade.dev/en/references/auth-providers/linear) for setup details."
 }
