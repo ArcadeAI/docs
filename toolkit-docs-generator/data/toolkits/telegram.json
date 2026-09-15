@@ -32,9 +32,14 @@
       ],
       "auth": null,
       "secrets": [
+        "OPENAI_API_KEY",
         "TELEGRAM_BOT_TOKEN"
       ],
       "secretsInfo": [
+        {
+          "name": "OPENAI_API_KEY",
+          "type": "api_key"
+        },
         {
           "name": "TELEGRAM_BOT_TOKEN",
           "type": "token"
@@ -108,12 +113,17 @@
       ],
       "auth": null,
       "secrets": [
+        "OPENAI_API_KEY",
         "TELEGRAM_BOT_TOKEN"
       ],
       "secretsInfo": [
         {
-          "name": "TELEGRAM_BOT_TOKEN",
+          "name": "OPENAI_API_KEY",
           "type": "api_key"
+        },
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "token"
         }
       ],
       "output": {
@@ -125,17 +135,17 @@
         "toolName": "Telegram.GetMessages",
         "parameters": {
           "chat_id": {
-            "value": "987654321",
+            "value": "123456789",
             "type": "string",
             "required": true
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "offset": {
-            "value": 1234567890,
+            "value": 98765432,
             "type": "integer",
             "required": false
           }
@@ -224,12 +234,17 @@
       ],
       "auth": null,
       "secrets": [
+        "OPENAI_API_KEY",
         "TELEGRAM_BOT_TOKEN"
       ],
       "secretsInfo": [
         {
-          "name": "TELEGRAM_BOT_TOKEN",
+          "name": "OPENAI_API_KEY",
           "type": "api_key"
+        },
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "token"
         }
       ],
       "output": {
@@ -246,7 +261,7 @@
             "required": true
           },
           "text": {
-            "value": "Would you like to confirm your appointment for tomorrow at 10:00 AM?",
+            "value": "📅 Which time slot works best for your meeting tomorrow?",
             "type": "string",
             "required": true
           },
@@ -262,9 +277,10 @@
           },
           "buttons": {
             "value": [
-              "✅ Yes, confirm",
-              "❌ No, cancel",
-              "🔄 Reschedule"
+              "9:00 AM",
+              "12:00 PM",
+              "3:00 PM",
+              "5:00 PM"
             ],
             "type": "array",
             "required": false
@@ -364,8 +380,8 @@
       ],
       "auth": null,
       "secrets": [
-        "TELEGRAM_BOT_TOKEN",
-        "OPENAI_API_KEY"
+        "OPENAI_API_KEY",
+        "TELEGRAM_BOT_TOKEN"
       ],
       "secretsInfo": [
         {
@@ -470,12 +486,17 @@
       ],
       "auth": null,
       "secrets": [
+        "OPENAI_API_KEY",
         "TELEGRAM_BOT_TOKEN"
       ],
       "secretsInfo": [
         {
-          "name": "TELEGRAM_BOT_TOKEN",
+          "name": "OPENAI_API_KEY",
           "type": "api_key"
+        },
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "token"
         }
       ],
       "output": {
@@ -487,7 +508,7 @@
         "toolName": "Telegram.WaitForButtonPress",
         "parameters": {
           "chat_id": {
-            "value": "123456789",
+            "value": "987654321",
             "type": "string",
             "required": true
           },
@@ -497,7 +518,7 @@
             "required": true
           },
           "offset": {
-            "value": 98765,
+            "value": 150000017,
             "type": "integer",
             "required": false
           }
@@ -557,12 +578,17 @@
       ],
       "auth": null,
       "secrets": [
+        "OPENAI_API_KEY",
         "TELEGRAM_BOT_TOKEN"
       ],
       "secretsInfo": [
         {
-          "name": "TELEGRAM_BOT_TOKEN",
+          "name": "OPENAI_API_KEY",
           "type": "api_key"
+        },
+        {
+          "name": "TELEGRAM_BOT_TOKEN",
+          "type": "token"
         }
       ],
       "output": {
@@ -579,7 +605,7 @@
             "required": true
           },
           "timeout_seconds": {
-            "value": 15,
+            "value": 20,
             "type": "integer",
             "required": false
           },
@@ -619,9 +645,14 @@
       "parameters": [],
       "auth": null,
       "secrets": [
+        "OPENAI_API_KEY",
         "TELEGRAM_BOT_TOKEN"
       ],
       "secretsInfo": [
+        {
+          "name": "OPENAI_API_KEY",
+          "type": "api_key"
+        },
         {
           "name": "TELEGRAM_BOT_TOKEN",
           "type": "token"
@@ -660,6 +691,7 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-07-01T12:07:55.509Z",
-  "summary": "# Telegram Toolkit\n\nThe Telegram toolkit lets you build Arcade-powered agents that interact with Telegram bots — sending messages, polling for replies, delivering audio, and inspecting chats — using Telegram's Bot API and OpenAI TTS.\n\n## Capabilities\n\n- **Bot identity & chat metadata**: Retrieve the bot's own profile and inspect any chat, group, or channel the bot belongs to (type, title, description, member count).\n- **Messaging**: Send text messages to any chat, group, or channel the bot has access to; attach inline keyboard buttons and optionally block until a button is tapped, returning the selected option automatically.\n- **Polling for incoming messages**: Long-poll for new private-chat messages or resume a timed-out wait with a `next_offset` cursor; fetch pending unacknowledged updates from private chats via `getUpdates`.\n- **Button-tap resumption**: Continue waiting for an inline-button press on a previously sent message without re-sending it, with automatic keyboard collapse on selection.\n- **Text-to-speech audio**: Convert text to MP3 using OpenAI TTS and deliver it as an audio message to a Telegram chat.\n\n## Secrets\n\n`TELEGRAM_BOT_TOKEN` — The authentication token for your Telegram bot. Create a bot by messaging [@BotFather](https://t.me/BotFather) on Telegram (`/newbot`), then copy the token it returns (format: `123456789:ABCDefgh...`). The bot must be added to any group or channel before it can send or read messages there. Webhooks must **not** be set on the bot when using polling-based tools (`GetMessages`, `WaitForNewMessage`, `WaitForButtonPress`), because Telegram's `getUpdates` and webhooks are mutually exclusive. See [Telegram Bot API docs](https://core.telegram.org/bots#how-do-i-create-a-bot).\n\n`OPENAI_API_KEY` — An OpenAI API key used exclusively by `SendTtsAudio` to call OpenAI's text-to-speech API. Obtain it from the [OpenAI API keys page](https://platform.openai.com/api-keys) in your OpenAI account dashboard. The key must have access to the TTS endpoint (`tts-1` or `tts-1-hd`); a standard paid-tier key is sufficient. No additional organization-level permissions beyond default API access are required.\n\nStore both secrets via the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-15T11:16:08.864Z",
+  "summary": "Arcade's Telegram toolkit lets agents send and receive Telegram messages, poll for user input, and deliver OpenAI-generated audio — all through a configured bot account.\n\n## Capabilities\n\n- **Chat inspection** — retrieve bot identity and metadata (type, title, description, member count) for any chat, group, or channel the bot has joined.\n- **Messaging** — send text messages to private chats, groups, or channels; attach inline keyboard buttons and automatically collapse the keyboard when the user taps a choice.\n- **Interactive waiting** — bounded long-poll tools for waiting on new private messages or inline-button taps, with `timed_out` and `next_offset` cursors for resumable loops without re-sending.\n- **Message retrieval** — fetch pending unacknowledged updates from private chats (group/channel messages excluded for security); acknowledging updates is permanent.\n- **AI-generated audio** — convert text to speech via OpenAI TTS (MP3) and deliver it directly as a Telegram audio message.\n\n## Secrets\n\nThis toolkit requires two secrets.\n\n### `TELEGRAM_BOT_TOKEN`\n\nThe authentication token for your Telegram bot. Obtain it by messaging [@BotFather](https://t.me/BotFather) on Telegram, using the `/newbot` command to create a bot (or `/token` for an existing one), and copying the token it returns (format: `123456789:AAF...`). The bot must be added to any group or channel you intend to use. **Do not enable a webhook** on the bot if you plan to use `GetMessages`, `WaitForNewMessage`, or `WaitForButtonPress` — `getUpdates` and webhooks are mutually exclusive. See [Telegram Bot API docs](https://core.telegram.org/bots/api#authorizing-your-bot).\n\n### `OPENAI_API_KEY`\n\nAn OpenAI API key used exclusively by `SendTtsAudio` to call OpenAI's text-to-speech API. Generate one in the [OpenAI platform dashboard](https://platform.openai.com/api-keys) under **API keys → Create new secret key**. The key requires access to the `tts-1` or `tts-1-hd` models; a standard paid-tier OpenAI account is sufficient. Keep this key scoped and rotated separately from any key used for agent reasoning.\n\nConfigure secrets via the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly in the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
 }
