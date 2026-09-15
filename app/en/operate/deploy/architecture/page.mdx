@@ -4,12 +4,48 @@ description: "The services that make up a self-hosted Arcade deployment and how 
 ---
 
 import { Callout } from "nextra/components";
+import Image from "next/image";
 
 # Platform architecture
 
 A self-hosted Arcade deployment runs the services below on your Kubernetes cluster. The [Helm chart](/operate/deploy/helm) and the [Azure](/operate/deploy/azure) and [AWS](/operate/deploy/aws) marketplace deployments install the same platform.
 
 This page describes what each service does and what it connects to. For installation steps, see [Self-host with Helm](/operate/deploy/helm).
+
+## Reference topology
+
+The diagram below shows a complete deployment: the Kubernetes clusters that run the platform and its workers, the network boundaries each call crosses, and the data tier behind every service. The sections that follow describe each piece.
+
+{/*
+  Source diagram, edit it here and re-export the PNG:
+  https://whimsical.com/arcade719/arcade-reference-topology-diagram-8DCV7aoMm9rmBkZg2xvpem
+
+  The export has a baked-in white background, so the figure keeps a light
+  canvas in both themes rather than inverting. The border and caption are
+  theme-aware, which frames the white panel as deliberate in dark mode.
+*/}
+
+<figure className="my-6 md:-mx-8 lg:-mx-12">
+  <a
+    className="group block cursor-zoom-in overflow-hidden rounded-xl border border-neutral-300 bg-white p-3 shadow-sm ring-1 ring-black/5 transition hover:border-neutral-400 hover:shadow-md dark:border-neutral-700 dark:ring-white/10 dark:hover:border-neutral-500"
+    href="/images/architecture/arcade-reference-topology.png"
+    rel="noopener"
+    target="_blank"
+    title="Open the full-size topology diagram"
+  >
+    <Image
+      alt="Arcade reference topology diagram: agents and tool developers reach the ingress gateway, which fronts the Kubernetes clusters running the Engine, Coordinator, Experience API, dashboard, and workers; egress gateways reach identity providers, telemetry, and connected services; PostgreSQL, Redis, and blob storage sit in the data tier below"
+      className="h-auto w-full"
+      height={5362}
+      sizes="(max-width: 768px) 100vw, 1000px"
+      src="/images/architecture/arcade-reference-topology.png"
+      width={9772}
+    />
+  </a>
+  <figcaption className="mt-3 text-center text-neutral-600 text-sm dark:text-neutral-400">
+    The Arcade reference topology. Open the diagram in a new tab to zoom in and read the labels.
+  </figcaption>
+</figure>
 
 ## Services
 
