@@ -47,6 +47,8 @@ jobs:
           pnpm vitest run toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts toolkit-docs-generator/tests/sources/oauth-provider-resolver.test.ts
           pnpm run build
 
+      # GITHUB_TOKEN PRs do not start other workflows. Docs Bot is a GitHub
+      # App, so the opened automation PR still runs Test.
       - name: Get app token
         if: steps.check-changes.outputs.has_changes == 'true'
         id: app-token

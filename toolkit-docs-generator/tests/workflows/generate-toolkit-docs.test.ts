@@ -48,6 +48,11 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("HUSKY: 0");
   expect(workflowContents).toContain("[AUTO] Adding MCP Servers docs update");
   expect(workflowContents).toContain("pull-requests: write");
+  // GITHUB_TOKEN PRs do not start other workflows, so Test would never run
+  // on the automation PR. Docs Bot is a GitHub App and avoids that restriction.
+  expect(workflowContents).toContain("uses: ./.github/actions/app-token");
+  expect(workflowContents).toContain("steps.app-token.outputs.token");
+  expect(workflowContents).not.toContain("secrets.GITHUB_TOKEN");
 });
 
 test("porter workflow does not build the docs generator before running it", () => {

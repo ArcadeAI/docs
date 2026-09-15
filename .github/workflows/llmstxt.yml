@@ -27,10 +27,6 @@ jobs:
     name: Generate LLMSTXT
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-      pull-requests: write
-
     steps:
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -66,6 +62,8 @@ jobs:
             echo "has_changes=false" >> $GITHUB_OUTPUT
           fi
 
+      # GITHUB_TOKEN pushes and PRs do not start other workflows. Docs Bot
+      # is a GitHub App, so Test still runs on the new SHA.
       - name: Get app token
         if: steps.check-changes.outputs.has_changes == 'true'
         id: app-token
@@ -113,6 +111,7 @@ jobs:
 
       - name: Enable Pull Request Automerge
         if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request' && steps.cpr.outputs.pull-request-number != ''
+        continue-on-error: true
         run: gh pr merge --squash --auto ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
