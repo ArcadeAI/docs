@@ -15,6 +15,8 @@ export const STEP_3_DARK_WIDTH = 1104;
 export const STEP_3_DARK_HEIGHT = 874;
 export const STEP_3_LIGHT_WIDTH = 1094;
 export const STEP_3_LIGHT_HEIGHT = 882;
+export const AUTH_OPTIONS_WIDTH = 356;
+export const AUTH_OPTIONS_HEIGHT = 701;
 export const STEP_4_DARK_WIDTH = 1860;
 export const STEP_4_DARK_HEIGHT = 206;
 export const STEP_4_LIGHT_WIDTH = 1826;
@@ -101,7 +103,13 @@ On the settings page, click on the "Connectors" tab, and then on the "Add custom
   height={STEP_2_DARK_HEIGHT / IMAGE_SCALE_FACTOR}
 />
 
-A modal dialog will open asking you for a name and a URL. Enter a name for your connector, and the URL of your MCP Gateway. Then, click on the "Add" button.
+A dialog opens for a name and a URL. Enter a name for your connector and your MCP Gateway URL:
+
+```
+https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}
+```
+
+If you self-host the Arcade Engine, use your Engine hostname in place of `api.arcade.dev`. Then continue.
 
 <Image
   alt={"Step 3: Enter a name and URL for your connector"}
@@ -118,7 +126,38 @@ A modal dialog will open asking you for a name and a URL. Enter a name for your 
   height={STEP_3_DARK_HEIGHT / IMAGE_SCALE_FACTOR}
 />
 
-### authenticate with your Arcade account
+### Keep the detected defaults
+
+Claude checks the gateway URL and shows **Authentication** and **OAuth client** options. Keep the values marked **Detected**:
+
+- **Sign in now** for Authentication
+- **Use Claude's published identity** for OAuth client
+
+Those defaults match Arcade Auth and [User Sources](/operate/identity/user-sources). Do not switch to **Sign in when needed** or **No sign-in**. Those options skip or delay the OAuth flow Arcade uses. Do not switch to **Register automatically** or **Use your own OAuth client**. Arcade already supports Claude's published identity (CIMD). Leave **Request headers** empty. Leave **Advanced** collapsed.
+
+Then click **Add**.
+
+<Image
+  alt={"Claude Add custom connector dialog with Sign in now and Use Claude's published identity marked Detected, and Request headers left empty"}
+  className="mt-4 w-full max-w-lg"
+  src={"/images/mcp-gateway/claude-desktop/step-3-auth-options-v2.png"}
+  width={AUTH_OPTIONS_WIDTH}
+  height={AUTH_OPTIONS_HEIGHT}
+/>
+
+<Callout type="info">
+  If your dialog is a single screen with **Advanced settings** instead of these
+  options, leave Advanced settings empty and click **Add**. The result is the
+  same.
+
+  On Claude Team and Enterprise plans, only an Owner can add a custom
+  connector. In **Organization settings → Connectors**, click **Add**, then
+  **Custom**, then **Web**. Paste the gateway URL, keep the Detected defaults,
+  and click **Add**. Each member then clicks **Connect** under **Customize →
+  Connectors**.
+</Callout>
+
+### Authenticate with your Arcade account
 
 You will see a new connector added to your list of connectors. Click on the "Connect" button to authenticate with your Arcade account.
 
