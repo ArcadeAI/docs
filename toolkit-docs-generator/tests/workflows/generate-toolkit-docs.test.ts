@@ -51,7 +51,7 @@ test("porter workflow generates docs and opens a PR", () => {
   // GITHUB_TOKEN PRs do not start other workflows. Generate llms.txt here
   // instead of depending on llmstxt.yml, and open the PR with github.token.
   expect(workflowContents).toContain("pnpm llmstxt");
-  expect(workflowContents).toContain("token: ${{ github.token }}");
+  expect(workflowContents).toContain(`token: ${"${"}{ github.token }}`);
   expect(workflowContents).not.toContain("uses: ./.github/actions/app-token");
   expect(workflowContents).not.toContain("DOCS_BOT");
 });
