@@ -96,28 +96,32 @@ The Salesforce API requires the App developer to create [OAuth custom scopes](ht
 
 The custom scopes required by the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce) are listed below, along with their descriptions:
 
-<Callout type="info">
-  The custom scopes listed below are only required if you are using the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce).
-
-If you're creating your own [custom Salesforce tools](/build/create-tools/tool-basics/build-mcp-server) or using Arcade to authorize users and call Salesforce APIs directly, you are free to define custom scope(s) that fit best your application use cases. Observe that you must have at least one custom scope assigned to your Salesforce app in order to use the Salesforce API.
-
-</Callout>
-
 - `read_account`: Read access to account data.
 - `read_contact`: Read access to contact data.
 - `read_lead`: Read access to lead data.
 - `read_note`: Read access to note data.
 - `read_opportunity`: Read access to opportunity data.
 - `read_task`: Read access to task data.
+- `read_user`: Read access to user data.
 - `write_contact`: Write access to create contact.
+- `write_lead`: Write access to create/update leads.
+- `write_opportunity`: Write access to create/update opportunities.
+- `write_task`: Write access to create/update tasks.
 
 Follow the [Create an OAuth Custom Scope](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes_create.htm&type=5) and [Assign an OAuth Custom Scope to an External Client App](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes_assign.htm&type=5) Salesforce documentation to understand how to define and assign these scopes to your Salesforce app.
 
+<Callout type="info">
+  If you use the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce), you must create, assign, and request every custom scope in the list above. Salesforce requires at least one custom scope on the app. One scope is not enough for the MCP server.
+</Callout>
+
+<Callout type="info">
+  The authorize URL will still include Salesforce's built-in `api` and `refresh_token` scopes from [Create a Salesforce app](#create-a-salesforce-app), even if you only pass custom names to `auth.start()`. Those are not custom scopes. Don't create them in the custom-scope UI.
+</Callout>
+
 <Callout>
-  The scope names aren't really attached to any endpoint or action. It's the
-  developer's job to honor the permissions communicated to the user when
-  authorizing the app. You could, in theory, assign one single scope (e.g.
-  `fullaccess`) and use it to query any Salesforce API endpoint.
+  If you're creating your own [custom Salesforce tools](/build/create-tools/tool-basics/build-mcp-server) or using Arcade to authorize users and call Salesforce APIs directly, you are free to define custom scopes that fit your application. You must assign at least one custom scope to your Salesforce app.
+
+  For custom tools, the scope names aren't attached to any endpoint or action. Honor the permissions you communicate to the user when they authorize the app. You could assign one single scope (e.g. `fullaccess`) and use it to query any Salesforce API endpoint.
 </Callout>
 
 ## Configuring Salesforce Auth
@@ -149,19 +153,19 @@ Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard) and log in with y
 #### Configure the auth endpoints
 
 <Callout type="info">
-  Replace `salesforce-org-subdomain` with your [Salesforce Org
+  Replace `<salesforce-org-subdomain>` with your [Salesforce Org
   Subdomain](#get-your-salesforce-org-subdomain).
 </Callout>
 
 - Enter the auth endpoints:
-  - **Authorization Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/authorize`
-  - **Token Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/token`
+  - **Authorization Endpoint**: `https://<salesforce-org-subdomain>.my.salesforce.com/services/oauth2/authorize`
+  - **Token Endpoint**: `https://<salesforce-org-subdomain>.my.salesforce.com/services/oauth2/token`
 - Under **Refresh Token Settings**:
-  - Enter the **Refresh Token Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/token`
+  - Enter the **Refresh Token Endpoint**: `https://<salesforce-org-subdomain>.my.salesforce.com/services/oauth2/token`
   - In **Response Content Type**, select `application/json`.
 - Under **Token Introspection Settings**:
   - Check the **Enable Token Introspection** option.
-  - Enter the **Token Introspection Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/introspect`
+  - Enter the **Token Introspection Endpoint**: `https://<salesforce-org-subdomain>.my.salesforce.com/services/oauth2/introspect`
   - In **HTTP Method**, select `POST`
   - In **Authentication Method**, select `Client Secret Basic`
   - In **Request Content Type**, select `application/x-www-form-urlencoded`.
@@ -243,7 +247,19 @@ client = Arcade(base_url="http://localhost:9099")  # Automatically finds the `AR
 salesforce_provider_id = "salesforce"
 salesforce_org_subdomain = "salesforce-org-subdomain"
 user_id = "{arcade_user_id}"
-scopes = ["read_account"]
+scopes = [
+    "read_account",
+    "read_contact",
+    "read_lead",
+    "read_note",
+    "read_opportunity",
+    "read_task",
+    "read_user",
+    "write_contact",
+    "write_lead",
+    "write_opportunity",
+    "write_task",
+]
 ```
 
 Here's a break down of each value:
@@ -251,7 +267,7 @@ Here's a break down of each value:
 - **`salesforce_provider_id`**: the ID you entered when setting up the [Salesforce auth provider](#configuring-salesforce-auth);
 - **`salesforce_org_subdomain`**: your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain);
 - **`user_id`**: an internal identifier for your application user (it could be an email address, a username, UUID, etc); for demonstration purposes, in this example, enter your own email address;
-- **`scopes`**: the list of scopes you want to request from the user; if you assigned the [custom scopes required by the Arcade Salesforce MCP Server](#create-and-assign-custom-scopes-to-your-external-client-app) use `["read_account"]` in this example.
+- **`scopes`**: the custom scopes to request from the user. Creating and assigning them on the Salesforce app is not enough. `auth.start()` only consents to this list. For the [Arcade Salesforce MCP Server](#create-and-assign-custom-scopes-to-your-external-client-app), pass every scope in the list above.
 
 ### Start the authorization process and wait for completion
 
@@ -329,7 +345,19 @@ client = Arcade(base_url="http://localhost:9099") # Automatically finds the `ARC
 salesforce_provider_id = "salesforce"
 salesforce_org_subdomain = "salesforce-org-subdomain"
 user_id = "{arcade_user_id}"
-scopes = ["read_account"]
+scopes = [
+    "read_account",
+    "read_contact",
+    "read_lead",
+    "read_note",
+    "read_opportunity",
+    "read_task",
+    "read_user",
+    "write_contact",
+    "write_lead",
+    "write_opportunity",
+    "write_task",
+]
 
 # Start the authorization process
 
@@ -410,7 +438,19 @@ const client = new Arcade((baseURL = "http://localhost:9099")); // Automatically
 const salesforceProviderId = "salesforce";
 const salesforceOrgSubdomain = "salesforce-org-subdomain";
 const userId = "{arcade_user_id}";
-const scopes = ["read_account"];
+const scopes = [
+  "read_account",
+  "read_contact",
+  "read_lead",
+  "read_note",
+  "read_opportunity",
+  "read_task",
+  "read_user",
+  "write_contact",
+  "write_lead",
+  "write_opportunity",
+  "write_task",
+];
 ```
 
 Here's a break down of each value:
@@ -418,7 +458,7 @@ Here's a break down of each value:
 - **`salesforceProviderId`**: the ID you entered when setting up the [Salesforce auth provider](#configuring-salesforce-auth);
 - **`salesforceOrgSubdomain`**: your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain);
 - **`userId`**: an internal identifier for your application user (it could be an email address, a username, UUID, etc); for demonstration purposes, in this example, enter your own email address;
-- **`scopes`**: the list of scopes you want to request from the user; if you assigned the [custom scopes required by the Arcade Salesforce MCP Server](#create-and-assign-custom-scopes-to-your-external-client-app) use `["read_account"]` in this example.
+- **`scopes`**: the custom scopes to request from the user. Creating and assigning them on the Salesforce app is not enough. `auth.start()` only consents to this list. For the [Arcade Salesforce MCP Server](#create-and-assign-custom-scopes-to-your-external-client-app), pass every scope in the list above.
 
 ### Start the authorization process and wait for completion
 
@@ -505,7 +545,19 @@ const client = new Arcade((baseURL = "http://localhost:9099")); // Automatically
 const salesforceProviderId = "salesforce";
 const salesforceOrgSubdomain = "salesforce-org-subdomain";
 const userId = "{arcade_user_id}";
-const scopes = ["read_account"];
+const scopes = [
+  "read_account",
+  "read_contact",
+  "read_lead",
+  "read_note",
+  "read_opportunity",
+  "read_task",
+  "read_user",
+  "write_contact",
+  "write_lead",
+  "write_opportunity",
+  "write_task",
+];
 
 // Start the authorization process
 let authResponse = await client.auth.start(userId, {
