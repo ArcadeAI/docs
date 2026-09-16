@@ -37,9 +37,8 @@ flowchart TD
 
     json --> verify["Verify output"]
     verify --> sidebar["Sync sidebar _meta.tsx"]
-    sidebar --> pr["Pull request on<br/>automation/toolkit-docs"]
-    pr --> llms["llms.txt workflow<br/>regenerates public/llms.txt"]
-    llms --> pr
+    sidebar --> llms["pnpm llmstxt<br/>regenerates public/llms.txt"]
+    llms --> pr["Pull request on<br/>automation/toolkit-docs"]
     pr -->|"a human merges"| main["main"]
     main --> vercel["Vercel: next build"]
     vercel --> pages["Static toolkit pages"]
@@ -64,9 +63,10 @@ files live in this repository and merge like any other change, so a prose edit
 reaches the site through the next generation run rather than through a manual
 edit of the generated JSON.
 
-Two things the diagram deliberately shows as separate. A second workflow
-regenerates `llms.txt` when the data files change, so the generator never writes
-it. The sidebar sync writes navigation only, and never touches toolkit JSON.
+Two things the diagram deliberately shows as separate. The same workflow
+regenerates `llms.txt` after sidebar sync, so the generator never writes it and
+the automation PR does not depend on a second workflow starting. The sidebar sync
+writes navigation only, and never touches toolkit JSON.
 
 ## Core components
 
