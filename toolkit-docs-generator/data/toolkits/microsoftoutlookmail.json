@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookMail",
   "label": "Microsoft Outlook Mail",
-  "version": "0.5.1",
+  "version": "1.1.0",
   "description": "Arcade.dev LLM tools for Outlook Mail",
   "metadata": {
     "category": "productivity",
@@ -31,8 +31,8 @@
     {
       "name": "CreateAndSendEmail",
       "qualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail@0.5.1",
-      "description": "Create and immediately send a new email in Outlook to the specified recipients.\n\nReturns the sent message's ``message_id`` and ``conversation_id`` so callers\ncan immediately chain follow-ups (e.g. reply to what they just sent) without\nhaving to search Sent Items.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail@1.1.0",
+      "description": "Create and immediately send a new email in Outlook to the specified recipients.\n\nReturns the sent message's ``message_id`` and ``conversation_id`` so callers\ncan immediately chain follow-ups (e.g. reply to what they just sent) without\nhaving to search Sent Items.\n\nThe confirmation message names how many recipient addresses the email went to\nacross To, Cc and Bcc.",
       "parameters": [
         {
           "name": "subject",
@@ -78,12 +78,12 @@
           "inferrable": true
         },
         {
-          "name": "body_type",
+          "name": "body_format",
           "type": "string",
           "required": false,
-          "description": "The content type of the email body. Defaults to 'text'",
+          "description": "The content type of the email body. Defaults to plain text.",
           "enum": [
-            "text",
+            "plain_text",
             "html"
           ],
           "inferrable": true
@@ -93,8 +93,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
           "Mail.ReadWrite",
-          "Mail.Send"
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -108,151 +114,12 @@
         "toolName": "MicrosoftOutlookMail.CreateAndSendEmail",
         "parameters": {
           "subject": {
-            "value": "Project Update: Q3 Milestone Review",
+            "value": "Project Update: Q3 Milestones and Next Steps",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Hi Team,\n\nI wanted to share a quick update on our Q3 milestones. We are on track to meet all deliverables by the end of the month. Please review the attached summary and let me know if you have any questions.\n\nBest regards,\nAlex",
-            "type": "string",
-            "required": true
-          },
-          "to_recipients": {
-            "value": [
-              "jane.doe@example.com",
-              "john.smith@example.com"
-            ],
-            "type": "array",
-            "required": true
-          },
-          "cc_recipients": {
-            "value": [
-              "manager@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "bcc_recipients": {
-            "value": [
-              "records@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "body_type": {
-            "value": "text",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "CreateDraftEmail",
-      "qualifiedName": "MicrosoftOutlookMail.CreateDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.CreateDraftEmail@0.5.1",
-      "description": "Compose a new draft email in Outlook",
-      "parameters": [
-        {
-          "name": "subject",
-          "type": "string",
-          "required": true,
-          "description": "The subject of the draft email to create",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "body",
-          "type": "string",
-          "required": true,
-          "description": "The body of the draft email to create",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "to_recipients",
-          "type": "array",
-          "innerType": "string",
-          "required": true,
-          "description": "The email addresses that will be the recipients of the draft email",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "cc_recipients",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The email addresses that will be the CC recipients of the draft email.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "bcc_recipients",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The email addresses that will be the BCC recipients of the draft email.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "body_type",
-          "type": "string",
-          "required": false,
-          "description": "The content type of the email body. Defaults to 'text'",
-          "enum": [
-            "text",
-            "html"
-          ],
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "MailboxSettings.Read",
-          "Mail.ReadWrite"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "A dictionary containing the created email details"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftOutlookMail.CreateDraftEmail",
-        "parameters": {
-          "subject": {
-            "value": "Project Update: Q3 Milestones Review",
-            "type": "string",
-            "required": true
-          },
-          "body": {
-            "value": "Hi Team,\n\nI wanted to share the latest updates on our Q3 milestones. Please review the attached report and let me know if you have any questions.\n\nBest regards,\nAlex",
+            "value": "Hi Team,\n\nI wanted to share a quick update on our Q3 milestones. We are on track to meet all major deliverables by the end of the month. Please review the attached document and let me know if you have any questions.\n\nBest regards,\nAlex",
             "type": "string",
             "required": true
           },
@@ -273,12 +140,12 @@
           },
           "bcc_recipients": {
             "value": [
-              "compliance@example.com"
+              "archive@example.com"
             ],
             "type": "array",
             "required": false
           },
-          "body_type": {
+          "body_format": {
             "value": "text",
             "type": "string",
             "required": false
@@ -309,8 +176,8 @@
     {
       "name": "CreateDraftReply",
       "qualifiedName": "MicrosoftOutlookMail.CreateDraftReply",
-      "fullyQualifiedName": "MicrosoftOutlookMail.CreateDraftReply@0.5.1",
-      "description": "Create a reply or reply-all draft for an existing Outlook email without sending it.\n\nThe draft is threaded to the original message and saved to the Drafts folder,\nso it can be reviewed, edited, and sent later. For a reply-all, the original\nrecipients (excluding the mailbox owner) are populated automatically. This\ntool never sends the email.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.CreateDraftReply@1.1.0",
+      "description": "Create a reply or reply-all draft for an existing Outlook email without sending it.\n\nThe draft is threaded to the original message and saved to the Drafts folder,\nso it can be reviewed, edited, and sent later. For a reply-all, the original\nrecipients (excluding the mailbox owner) are populated automatically. Use\ncc_add to copy someone in on the draft, including someone who was never on\nthe thread, and cc_remove to take somebody off the copied line; who the\nreply is addressed to is the thread's own and reply_type decides it. This\ntool never sends the email.",
       "parameters": [
         {
           "name": "message_id",
@@ -338,39 +205,96 @@
             "reply_all"
           ],
           "inferrable": true
+        },
+        {
+          "name": "cc_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to copy on the reply draft, in addition to whoever Outlook already copied. On a reply to all recipients Outlook copies the thread's other participants, and they stay copied — this only adds. Omit it to copy nobody new. Each address is copied once, and an address the draft already addresses is left addressed rather than also copied, so nobody receives the reply twice.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to take off the reply draft's copied line. Anyone Outlook copied and this does not name stays copied. Omit it to remove nobody; an address that is not on the copied line is ignored. An address the draft addresses cannot be taken off it — reply_type decides that line — so naming one is refused and no draft is kept.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to blind-copy on the reply draft. This does not remove an address from To or Cc: it remains visible to other recipients if it is also on either line, including through cc_add. To move someone from Cc to Bcc, include them in cc_remove and bcc, not cc_add; an address on To cannot be hidden through bcc. Outlook never blind-copies anyone on a reply, so this is the whole line rather than a change to one. Omit it to blind-copy nobody.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.ReadWrite"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the created reply draft details"
+        "description": "The created draft. message_id is the draft's own id, not the id of the message being replied to."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookMail.CreateDraftReply",
         "parameters": {
           "message_id": {
-            "value": "AAMkAGI2TG93AAA=",
+            "value": "AAMkAGQ1YjM4NzFlLWE2ZjQtNGQ3Mi1iNDIwLTk5ZTFjNTQ2ZDFmYwBGAAAAAABsK2pXvQzBT6qB3kLmFwNaBwCzR4pLmVoNSqBXeTkD1OkZAAAAA1qCAAA=",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Thank you for reaching out! I'll review the documents you shared and get back to you by end of week.",
+            "value": "Thank you for reaching out. I have reviewed your proposal and would like to schedule a call to discuss the details further. Please let me know your availability this week.",
             "type": "string",
             "required": true
           },
           "reply_type": {
             "value": "ReplyType.REPLY_ALL",
             "type": "string",
+            "required": false
+          },
+          "cc_add": {
+            "value": [
+              "manager@example.com",
+              "legal@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "cc_remove": {
+            "value": [
+              "noreply@newsletter.com",
+              "olddistribution@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "compliance@example.com",
+              "archive@internal.example.com"
+            ],
+            "type": "array",
             "required": false
           }
         },
@@ -399,8 +323,8 @@
     {
       "name": "GetEmail",
       "qualifiedName": "MicrosoftOutlookMail.GetEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.GetEmail@0.5.1",
-      "description": "Retrieve a single email message by its ID.\n\nReturns email metadata and body content. By default, the body is returned\nas plain text (HTML tags stripped) and capped at 5000 characters. Set\nbody_format to HTML to get the original markup. Use body_offset to\ncontinue reading long emails, or set max_body_characters to None for the\nfull body.\n\nUse this tool to read the full content of an email after finding it via\nsearch_emails or any listing tool.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.GetEmail@1.1.0",
+      "description": "Retrieve a single email message by its ID.\n\nReturns email metadata and body content. By default, the body is returned\nas plain text (HTML tags stripped) and capped at 5000 characters. Set\nbody_format to HTML to get the original markup. Use body_offset to\ncontinue reading long emails, or set max_body_characters to None for the\nfull body.\n\nUse this tool to read the full content of an email whose ID is already\nknown, and to page through a body too long for one response.",
       "parameters": [
         {
           "name": "message_id",
@@ -442,15 +366,21 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.Read"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the email message."
+        "description": "One page of the message body. body_next_offset is 0 when no further chunk exists, otherwise pass it back to read on. received_date_time_local and sent_date_time_local are always present, with empty strings when the mailbox has no timezone."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -502,7 +432,7 @@
     {
       "name": "ListEmailAttachments",
       "qualifiedName": "MicrosoftOutlookMail.ListEmailAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailAttachments@0.5.1",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailAttachments@1.1.0",
       "description": "List attachment metadata for an email message.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to an email.",
       "parameters": [
         {
@@ -522,10 +452,10 @@
           "inferrable": true
         },
         {
-          "name": "pagination_token",
-          "type": "string",
+          "name": "page",
+          "type": "integer",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "Which page of results to return, counting from 1, up to 1000. Repeat the same arguments alongside it: every page is described by the call that asked for it, so a filter left out on page two widens page two. A page past 1000 is refused rather than answered with another one. Defaults to 1.",
           "enum": null,
           "inferrable": true
         }
@@ -534,15 +464,21 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.Read"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing a list of attachment metadata objects."
+        "description": "Attachment metadata without the file bytes. has_more is false when no further page exists."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -558,9 +494,9 @@
             "type": "integer",
             "required": false
           },
-          "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIlMjUyQlJDVCUyNTJCY29udGVudCUyNTJCY29udGVudCUyNTJCY29udGVudCUyNTJC",
-            "type": "string",
+          "page": {
+            "value": 1,
+            "type": "integer",
             "required": false
           }
         },
@@ -589,9 +525,150 @@
     {
       "name": "ListEmails",
       "qualifiedName": "MicrosoftOutlookMail.ListEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmails@0.5.1",
-      "description": "List emails in the user's mailbox across all folders.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).\n\nSince this tool lists email across all folders, it may return sent items,\ndrafts, and other items that are not in the inbox.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmails@1.1.0",
+      "description": "List email messages in the user's mailbox.\n\nReturns ordinary mail by default: Deleted Items, Junk Email, Sent Items and\nDrafts are left out unless named in folders, folder_ids or conversation_id.\n\nRows carry a 255-character body preview unless include_body is set, which\nreturns each message in full up to max_body_characters.",
       "parameters": [
+        {
+          "name": "folders",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Well-known folders to list mail from. Omit to read every folder except Deleted Items, Junk Email, Sent Items and Drafts. Naming folders replaces that default rather than adding to it, so pass deleteditems to read deleted mail. Combined with conversation_id, this narrows the thread to these folders. Defaults to None.",
+          "enum": [
+            "archive",
+            "deleteditems",
+            "drafts",
+            "inbox",
+            "junkemail",
+            "sentitems"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "folder_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Ids of user-created folders to list mail from. Combined with any value given for folders. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conversation_id",
+          "type": "string",
+          "required": false,
+          "description": "Return only messages in this conversation, across every folder including Sent Items and Deleted Items. Use it to read a whole thread. Naming folders or folder_ids alongside it narrows the thread to those folders, so leave both out to see all of it. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "json",
+          "required": false,
+          "description": "Subject match, as a value plus the operator to compare it with. Defaults to None (no subject filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sender",
+          "type": "json",
+          "required": false,
+          "description": "Sender email address match, as a value plus the operator to compare it with. Defaults to None (no sender filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_read",
+          "type": "boolean",
+          "required": false,
+          "description": "True for read mail, False for unread. Defaults to None (both).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "has_attachments",
+          "type": "boolean",
+          "required": false,
+          "description": "True for mail carrying attachments, False for mail without. Defaults to None (both).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "importance",
+          "type": "string",
+          "required": false,
+          "description": "Return only mail at this importance level, and nothing else. Never use it to express an exclusion: setting it to normal to mean 'not low' drops every high-importance message. Use exclude_importance for that. Defaults to None (any).",
+          "enum": [
+            "low",
+            "normal",
+            "high"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "exclude_importance",
+          "type": "string",
+          "required": false,
+          "description": "Return mail at every importance level except this one. Leave importance out alongside it: naming both narrows to a single level instead of excluding one. Defaults to None (any).",
+          "enum": [
+            "low",
+            "normal",
+            "high"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "flag_status",
+          "type": "string",
+          "required": false,
+          "description": "Return only mail in this follow-up flag state. Defaults to None (any).",
+          "enum": [
+            "notFlagged",
+            "flagged",
+            "complete"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "received_after",
+          "type": "string",
+          "required": false,
+          "description": "Return only mail received on or after this date (YYYY-MM-DD, UTC). Omit it, or leave it empty, for no lower bound. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "received_before",
+          "type": "string",
+          "required": false,
+          "description": "Return only mail received on or before this date (YYYY-MM-DD, UTC). The whole of that day is included. Omit it, or leave it empty, for no upper bound. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "only_focused",
+          "type": "boolean",
+          "required": false,
+          "description": "Return only mail the mailbox itself classified as Focused, using Outlook's Focused Inbox split. Sender addresses are not inspected. Mailboxes with Focused Inbox turned off classify everything as focused, so this filters nothing there. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_body",
+          "type": "boolean",
+          "required": false,
+          "description": "Return each message's full body. Defaults to False, which returns a preview of at most 255 characters per row.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_body_characters",
+          "type": "integer",
+          "required": false,
+          "description": "Cap on body characters per row when include_body is True. Defaults to 5000. Pass None for no cap. Ignored when include_body is False.",
+          "enum": null,
+          "inferrable": true
+        },
         {
           "name": "sort_by",
           "type": "string",
@@ -620,15 +697,15 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 10.",
+          "description": "Number of messages to return. Values above 50 are clamped to 50 and the response reports limit_clamped_to_max; values below 1 are raised to 1. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "pagination_token",
+          "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "Position of a further page, copied from a previous response's cursor. Repeat the same listing arguments alongside it: a cursor names a listing rather than a row number, and one handed back beside different arguments is refused. Defaults to None (the first page).",
           "enum": null,
           "inferrable": true
         }
@@ -637,326 +714,110 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.Read"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing a list of emails"
+        "description": "One page of the matching messages. cursor is an empty string when this listing will serve no further page, and excluded_folders names what was left out of it."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookMail.ListEmails",
         "parameters": {
-          "sort_by": {
-            "value": "receivedDateTime",
+          "folders": {
+            "value": [
+              "inbox",
+              "sentitems"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "folder_ids": {
+            "value": [
+              "AAMkAGI2NGVhZTVlLTI1OGMtNDI4My1iZmFiLWVkYzI1YmYwZmQ5OQAUAAAAAAB"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "conversation_id": {
+            "value": "AAQkAGI2NGVhZTVlLTI1OGMtNDI4My1iZmFiLWVkYzI1YmYwZmQ5OQAQAGgP2TkQz0KQqF3aBcDefGY=",
             "type": "string",
             "required": false
           },
-          "sort_order": {
-            "value": "ascending",
+          "subject": {
+            "value": {
+              "value": "Project Update",
+              "operator": "contains"
+            },
             "type": "string",
             "required": false
           },
-          "limit": {
-            "value": 25,
+          "sender": {
+            "value": {
+              "value": "alice@example.com",
+              "operator": "eq"
+            },
+            "type": "string",
+            "required": false
+          },
+          "is_read": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "has_attachments": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "importance": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "exclude_importance": {
+            "value": "low",
+            "type": "string",
+            "required": false
+          },
+          "flag_status": {
+            "value": "flagged",
+            "type": "string",
+            "required": false
+          },
+          "received_after": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "received_before": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "only_focused": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_body": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "max_body_characters": {
+            "value": 2000,
             "type": "integer",
-            "required": false
-          },
-          "pagination_token": {
-            "value": "AQMkADAwATM0MDAAMS1hNzUwLTQzYjItMDACLTAwCgBGAAAD",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "ListEmailsByProperty",
-      "qualifiedName": "MicrosoftOutlookMail.ListEmailsByProperty",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailsByProperty@0.5.1",
-      "description": "List emails in the user's mailbox across all folders filtering by a property.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).\n\nSorting by RECEIVED_DATE_TIME works with any filter property. Sorting by\na different property (SUBJECT, SENDER, IMPORTANCE) while filtering by an\nunrelated property may fail due to a Microsoft Graph API restriction. If\nthis happens, either sort by RECEIVED_DATE_TIME, or use list_emails (no\nfilter) with the desired sort_by.",
-      "parameters": [
-        {
-          "name": "mail_property",
-          "type": "string",
-          "required": true,
-          "description": "The property to filter the emails by.",
-          "enum": [
-            "subject",
-            "conversationId",
-            "receivedDateTime",
-            "sender/emailAddress/address",
-            "isRead",
-            "hasAttachments",
-            "importance",
-            "flag/flagStatus"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "operator",
-          "type": "string",
-          "required": true,
-          "description": "The operator to use for the filter.",
-          "enum": [
-            "eq",
-            "ne",
-            "gt",
-            "ge",
-            "lt",
-            "le",
-            "startsWith",
-            "endsWith",
-            "contains"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "value",
-          "type": "string",
-          "required": true,
-          "description": "The value to filter the emails by",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sort_by",
-          "type": "string",
-          "required": false,
-          "description": "Property to sort results by. Defaults to received date. Sorting by received date works with any filter property. Sorting by a different property while filtering by another may not be supported — if the combination fails, use sort_by=RECEIVED_DATE_TIME or use list_emails with the desired sort_by instead.",
-          "enum": [
-            "receivedDateTime",
-            "subject",
-            "sender_email_address",
-            "importance"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "sort_order",
-          "type": "string",
-          "required": false,
-          "description": "Sort direction. Defaults to descending.",
-          "enum": [
-            "ascending",
-            "descending"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "limit",
-          "type": "integer",
-          "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 10.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "pagination_token",
-          "type": "string",
-          "required": false,
-          "description": "The pagination token to continue a previous request",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "MailboxSettings.Read",
-          "Mail.Read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "A dictionary containing a list of emails"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftOutlookMail.ListEmailsByProperty",
-        "parameters": {
-          "mail_property": {
-            "value": "subject",
-            "type": "string",
-            "required": true
-          },
-          "operator": {
-            "value": "contains",
-            "type": "string",
-            "required": true
-          },
-          "value": {
-            "value": "Project Update",
-            "type": "string",
-            "required": true
-          },
-          "sort_by": {
-            "value": "RECEIVED_DATE_TIME",
-            "type": "string",
-            "required": false
-          },
-          "sort_order": {
-            "value": "descending",
-            "type": "string",
-            "required": false
-          },
-          "limit": {
-            "value": 25,
-            "type": "integer",
-            "required": false
-          },
-          "pagination_token": {
-            "value": "AQMkADAwATM0MDAAMS1iOGE5LTYwNjMtMDACLTAwCgAuAAADqZ2Xv9GqTkia9bNFWUkBzgEAf5F9HpCqSEiVp2oLt7QAAAI=",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "ListEmailsInFolder",
-      "qualifiedName": "MicrosoftOutlookMail.ListEmailsInFolder",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailsInFolder@0.5.1",
-      "description": "List the user's emails in the specified folder.\n\nExactly one of `well_known_folder_name` or `folder_id` MUST be provided.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).",
-      "parameters": [
-        {
-          "name": "well_known_folder_name",
-          "type": "string",
-          "required": false,
-          "description": "The name of the folder to list emails from. Defaults to None.",
-          "enum": [
-            "deleteditems",
-            "drafts",
-            "inbox",
-            "junkemail",
-            "sentitems",
-            "starred",
-            "tasks"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "folder_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the folder to list emails from if the folder is not a well-known folder. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sort_by",
-          "type": "string",
-          "required": false,
-          "description": "Property to sort results by. Defaults to received date.",
-          "enum": [
-            "receivedDateTime",
-            "subject",
-            "sender_email_address",
-            "importance"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "sort_order",
-          "type": "string",
-          "required": false,
-          "description": "Sort direction. Defaults to descending.",
-          "enum": [
-            "ascending",
-            "descending"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "limit",
-          "type": "integer",
-          "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 10.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "pagination_token",
-          "type": "string",
-          "required": false,
-          "description": "The pagination token to continue a previous request",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "MailboxSettings.Read",
-          "Mail.Read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "A dictionary containing a list of emails and a pagination token, if applicable"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftOutlookMail.ListEmailsInFolder",
-        "parameters": {
-          "well_known_folder_name": {
-            "value": "inbox",
-            "type": "string",
-            "required": false
-          },
-          "folder_id": {
-            "value": null,
-            "type": "string",
             "required": false
           },
           "sort_by": {
@@ -974,8 +835,8 @@
             "type": "integer",
             "required": false
           },
-          "pagination_token": {
-            "value": "AQMkADAwATM0MDAAMS1iNGZmLWU4NjktMDACLTAwCgAuAAAD",
+          "cursor": {
+            "value": "eyJza2lwVG9rZW4iOiJBUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQT09In0=",
             "type": "string",
             "required": false
           }
@@ -1005,8 +866,8 @@
     {
       "name": "ListMailFolders",
       "qualifiedName": "MicrosoftOutlookMail.ListMailFolders",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListMailFolders@0.5.1",
-      "description": "List mail folders in the user's mailbox.\n\nReturns folder names, IDs, unread counts, and total item counts.\nUse the folder ID in follow-up calls to list_emails_in_folder.\nOmit parent_folder_id to list top-level folders, or provide a folder ID\nto list its child folders.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListMailFolders@1.1.0",
+      "description": "List mail folders in the user's mailbox.\n\nReturns folder names, IDs, unread counts, and total item counts. A returned\nfolder ID is what scopes a mail listing to a user-created folder.\nOmit parent_folder_id to list top-level folders, or provide a folder ID\nto list its child folders.",
       "parameters": [
         {
           "name": "parent_folder_id",
@@ -1033,10 +894,10 @@
           "inferrable": true
         },
         {
-          "name": "pagination_token",
-          "type": "string",
+          "name": "page",
+          "type": "integer",
           "required": false,
-          "description": "The pagination token to continue a previous request.",
+          "description": "Which page of results to return, counting from 1, up to 1000. Repeat the same arguments alongside it: every page is described by the call that asked for it, so a filter left out on page two widens page two. A page past 1000 is refused rather than answered with another one. Defaults to 1.",
           "enum": null,
           "inferrable": true
         }
@@ -1045,26 +906,33 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Mail.Read"
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing a list of mail folders."
+        "description": "One page of folders. sub_folders reports whether a folder has children and how many, without listing them."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookMail.ListMailFolders",
         "parameters": {
           "parent_folder_id": {
-            "value": "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDMwLWUwYzc1NTBiNDgwNwAuAAAAAAAiQ8W967B7TKBjgx9nVEUrAQCiIsqMbYjsT5e-T7KIlDZMAAAAAAEMAAA=",
+            "value": "AAMkAGZjNmY0MDYtNmNlMy00YTdjLWE5NTgtZDM3OTI4YjEwMjAzAAAAAAA=",
             "type": "string",
             "required": false
           },
           "include_hidden": {
-            "value": true,
+            "value": false,
             "type": "boolean",
             "required": false
           },
@@ -1073,9 +941,9 @@
             "type": "integer",
             "required": false
           },
-          "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIlMjRza2lwPTI1IiwidG9wIjoyNX0=",
-            "type": "string",
+          "page": {
+            "value": 1,
+            "type": "integer",
             "required": false
           }
         },
@@ -1104,8 +972,8 @@
     {
       "name": "MoveEmailToFolder",
       "qualifiedName": "MicrosoftOutlookMail.MoveEmailToFolder",
-      "fullyQualifiedName": "MicrosoftOutlookMail.MoveEmailToFolder@0.5.1",
-      "description": "Move an email message to a different folder in Outlook.\n\nExactly one of `destination_well_known_folder_name` or\n`destination_folder_id` MUST be provided. Use `list_mail_folders` to\ndiscover custom folder IDs.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.MoveEmailToFolder@1.1.0",
+      "description": "Move an email message to a different folder in Outlook.\n\nExactly one of `destination_well_known_folder_name` or\n`destination_folder_id` MUST be provided. Custom folder IDs come from\nlisting the mailbox's folders.",
       "parameters": [
         {
           "name": "message_id",
@@ -1121,13 +989,12 @@
           "required": false,
           "description": "The well-known destination folder. Provide this when moving to inbox, drafts, sent items, deleted items, or another built-in folder; otherwise omit and set destination_folder_id.",
           "enum": [
+            "archive",
             "deleteditems",
             "drafts",
             "inbox",
             "junkemail",
-            "sentitems",
-            "starred",
-            "tasks"
+            "sentitems"
           ],
           "inferrable": true
         },
@@ -1144,8 +1011,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.ReadWrite"
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -1199,8 +1072,8 @@
     {
       "name": "ReplyToEmail",
       "qualifiedName": "MicrosoftOutlookMail.ReplyToEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ReplyToEmail@0.5.1",
-      "description": "Reply to an existing email in Outlook.\n\nUse this tool to reply to the sender or all recipients of the email.\nSpecify the reply_type to determine the scope of the reply.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ReplyToEmail@1.1.0",
+      "description": "Reply to an existing email in Outlook.\n\nUse this tool to reply to the sender or all recipients of the email.\nSpecify the reply_type to determine the scope of the reply. Use cc_add to\ncopy someone in on the reply, including someone who was never on the thread,\nand cc_remove to take somebody off the copied line; who the reply is\naddressed to is the thread's own and reply_type decides it.\n\nThe confirmation message names how many recipient addresses the reply went to\nacross To, Cc and Bcc, when Outlook reported both the To and Cc lines.",
       "parameters": [
         {
           "name": "message_id",
@@ -1228,14 +1101,47 @@
             "reply_all"
           ],
           "inferrable": true
+        },
+        {
+          "name": "cc_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to copy on the reply, in addition to whoever Outlook already copied. On a reply to all recipients Outlook copies the thread's other participants, and they stay copied — this only adds. Omit it to copy nobody new. Each address is copied once, and an address the reply already addresses is left addressed rather than also copied, so nobody receives the reply twice.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to take off the reply's copied line. Anyone Outlook copied and this does not name stays copied. Omit it to remove nobody; an address that is not on the copied line is ignored. An address the reply addresses cannot be taken off it — reply_type decides that line — so naming one is refused and nothing is sent.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to blind-copy on the reply. This does not remove an address from To or Cc: it remains visible to other recipients if it is also on either line, including through cc_add. To move someone from Cc to Bcc, include them in cc_remove and bcc, not cc_add; an address on To cannot be hidden through bcc. Outlook never blind-copies anyone on a reply, so this is the whole line rather than a change to one. Omit it to blind-copy nobody.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
           "Mail.ReadWrite",
-          "Mail.Send"
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -1254,13 +1160,35 @@
             "required": true
           },
           "body": {
-            "value": "Thank you for reaching out! I have reviewed the details you shared and everything looks good on my end. Let me know if you need anything else.",
+            "value": "Thank you for your message. I have reviewed the details and will follow up by end of day tomorrow.",
             "type": "string",
             "required": true
           },
           "reply_type": {
             "value": "ReplyType.REPLY_ALL",
             "type": "string",
+            "required": false
+          },
+          "cc_add": {
+            "value": [
+              "manager@example.com",
+              "teamlead@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "cc_remove": {
+            "value": [
+              "oldcontact@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "compliance@example.com"
+            ],
+            "type": "array",
             "required": false
           }
         },
@@ -1287,10 +1215,169 @@
       }
     },
     {
+      "name": "SaveDraftEmail",
+      "qualifiedName": "MicrosoftOutlookMail.SaveDraftEmail",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SaveDraftEmail@1.1.0",
+      "description": "Save an email draft in Outlook, creating a new one or revising one that exists.\n\nSupplying message_id revises that draft; omitting it creates a new one. Only the\nfields supplied are written — anything left out keeps whatever the draft already\nhad. Nothing is ever sent.\n\nReturns a DraftMessage. Its message_id identifies the saved draft and can be passed\nstraight back to this tool to make further changes to it.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": false,
+          "description": "The draft to save the changes onto. Omit it to create a new draft instead. Any un-sent message works, including a reply or forward draft. The id of a draft saved earlier in this conversation is the message_id this tool returned; the id of a draft that already existed comes from listing the Drafts folder.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "The subject to set. Omit it to leave the current subject unchanged; pass an empty string to clear it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The body to set. Omit it to leave the current body unchanged; pass an empty string to clear it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The complete list of To recipients, replacing whatever the draft currently carries: any address left out of this list is removed from the draft, so include the ones to keep as well as the ones to add. Read the draft first when the current list is not already known. Omit it to leave the To line untouched; pass an empty list to remove every To recipient.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The complete list of Cc recipients, replacing whatever the draft currently carries: any address left out of this list is removed from the draft, so include the ones to keep as well as the ones to add. Read the draft first when the current list is not already known. Omit it to leave the Cc line untouched; pass an empty list to remove every Cc recipient.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The complete list of Bcc recipients, replacing whatever the draft currently carries: any address left out of this list is removed from the draft, so include the ones to keep as well as the ones to add. Read the draft first when the current list is not already known. Omit it to leave the Bcc line untouched; pass an empty list to remove every Bcc recipient.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "The content type of body. Has no effect unless body is supplied. Omit it to keep whatever content type the draft already carries when revising one, or to write plain text on a new draft.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookMail.SaveDraftEmail",
+        "parameters": {
+          "message_id": {
+            "value": "AAMkAGI2THkzAAA=",
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "value": "Project Update: Q3 Milestones",
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "value": "Hi Team,\n\nPlease find the latest updates on our Q3 milestones attached. Let me know if you have any questions.\n\nBest regards,\nAlex",
+            "type": "string",
+            "required": false
+          },
+          "to_recipients": {
+            "value": [
+              "alice@example.com",
+              "bob@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "cc_recipients": {
+            "value": [
+              "manager@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc_recipients": {
+            "value": [
+              "compliance@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "body_format": {
+            "value": "text",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "SearchEmails",
       "qualifiedName": "MicrosoftOutlookMail.SearchEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SearchEmails@0.5.1",
-      "description": "Search emails across the user's entire mailbox.\n\nCombines full-text keyword search with structured filters for sender,\nread status, attachments, importance, and more. All provided parameters\nare combined with AND. Results are ordered by date sent (most recent first).\n\nEmail bodies are truncated to 255 characters for efficient skimming.\nUse get_email with the message_id to retrieve the full email content.\n\nUse this tool when the user wants to find emails by content, topic, sender,\nor a combination of criteria. For exact property filtering (e.g., by\nconversationId or flag status), use list_emails_by_property instead.\n\n.. note::\n   Microsoft Graph's ``$search`` on messages is backed by the Microsoft\n   Search index, which returns message IDs in the legacy REST-ID format\n   even when the client opts into Immutable IDs (which other tools in\n   this toolkit do by default). Do not directly compare a ``message_id``\n   from ``search_emails`` against one from ``list_emails`` /\n   ``get_email`` — the ID shapes differ. To chain from a search hit,\n   pass the returned ID straight back into ``get_email`` (which accepts\n   either format), and use ``conversation_id`` as the deduplication\n   key across result sets.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SearchEmails@1.1.0",
+      "description": "Search emails across the user's entire mailbox.\n\nCombines full-text keyword search with structured filters for sender,\nread status, attachments, importance, and more. All provided parameters\nare combined with AND.\n\nAt least one search criterion is required. folder, only_focused,\ninclude_body and limit narrow or page a result set rather than build one,\nso they are not enough on their own.\n\nJunk Email and Deleted Items are left out unless `folder` names one of them;\nsent mail and drafts stay searchable. Rows carry a 255-character body preview\nunless include_body is set.\n\nResults come back in the search index's own order and cannot be re-sorted.\n\nOutlook's search index answers one query with at most 1,000 messages, so a\nwalk that runs out of pages has reached the end of what the index serves\nrather than the end of the mailbox. The folders left out and the Focused\nsplit are applied to those 1,000 after they are chosen, so a broad term\nmatching a lot of junk can come back with few rows, or none, while matching\nmail exists. A narrower term reaches it; a smaller limit does not.\n\nUse this tool when the user wants to find emails by content, topic, sender,\nor a combination of criteria.\n\n.. note::\n   Microsoft Graph's ``$search`` on messages is backed by the Microsoft\n   Search index, which returns message IDs in the legacy REST-ID format\n   even when the client opts into Immutable IDs. Do not directly compare\n   these message IDs with Immutable IDs; the formats differ. Use\n   ``conversation_id`` to correlate conversations across result sets.",
       "parameters": [
         {
           "name": "keywords",
@@ -1298,6 +1385,14 @@
           "innerType": "string",
           "required": false,
           "description": "Words or phrases to search for across email subject, body, and sender fields. All terms must match (AND operator). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "Narrow the hunt to the subject line. Matched as words within the subject rather than as the whole line. Defaults to None (no subject narrowing).",
           "enum": null,
           "inferrable": true
         },
@@ -1368,7 +1463,7 @@
           "name": "received_after",
           "type": "string",
           "required": false,
-          "description": "Filter for emails received on or after this date (YYYY-MM-DD). Dates are interpreted in UTC. Defaults to None (no filter).",
+          "description": "Filter for emails received on or after this date (YYYY-MM-DD). Dates are interpreted in UTC. Omit it, or leave it empty, for no lower bound. Defaults to None.",
           "enum": null,
           "inferrable": true
         },
@@ -1376,7 +1471,46 @@
           "name": "received_before",
           "type": "string",
           "required": false,
-          "description": "Filter for emails received on or before this date (YYYY-MM-DD). Dates are interpreted in UTC. Defaults to None (no filter).",
+          "description": "Filter for emails received on or before this date (YYYY-MM-DD). Dates are interpreted in UTC. Omit it, or leave it empty, for no upper bound. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false,
+          "description": "Search a single folder instead of the whole mailbox. Omit to search everywhere except Junk Email and Deleted Items; naming a folder replaces that default, so pass deleteditems to search deleted mail. Defaults to None.",
+          "enum": [
+            "archive",
+            "deleteditems",
+            "drafts",
+            "inbox",
+            "junkemail",
+            "sentitems"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "only_focused",
+          "type": "boolean",
+          "required": false,
+          "description": "Return only mail the mailbox itself classified as Focused, using Outlook's Focused Inbox split. Sender addresses are not inspected. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_body",
+          "type": "boolean",
+          "required": false,
+          "description": "Return each message's full body. Defaults to False, which returns a preview of at most 255 characters per row.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_body_characters",
+          "type": "integer",
+          "required": false,
+          "description": "Cap on body characters per row when include_body is True. Defaults to 5000. Pass None for no cap. Ignored when include_body is False.",
           "enum": null,
           "inferrable": true
         },
@@ -1384,15 +1518,15 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of search results to return. Max is 25. Defaults to 10.",
+          "description": "Maximum number of results to return. Values above 50 are clamped to 50 and the response reports limit_clamped_to_max; values below 1 are raised to 1. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "pagination_token",
+          "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request.",
+          "description": "Position of a further page, copied from a previous response's cursor. Repeat the same search arguments alongside it, only_focused included: a cursor names a search rather than a position in a result set, and one handed back beside different arguments is refused. Defaults to None (the first page).",
           "enum": null,
           "inferrable": true
         }
@@ -1401,15 +1535,21 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.Read"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing a list of matching emails."
+        "description": "One page of matches, bodies capped for skimming. cursor is an empty string when this search will serve no further page, and query echoes the search that produced the page -- a cursor handed back beside different arguments is refused rather than continued."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -1417,31 +1557,36 @@
         "parameters": {
           "keywords": {
             "value": [
-              "project deadline",
-              "quarterly report"
+              "project kickoff",
+              "budget approval"
             ],
             "type": "array",
             "required": false
           },
+          "subject": {
+            "value": "Q3 financial report",
+            "type": "string",
+            "required": false
+          },
           "sender": {
             "value": [
-              "alice.johnson@example.com",
-              "bob.smith@contoso.com"
+              "alice@example.com",
+              "Bob Johnson"
             ],
             "type": "array",
             "required": false
           },
           "recipient": {
             "value": [
-              "team-leads@example.com",
-              "carol.white@example.com"
+              "team@example.com",
+              "carol@example.com"
             ],
             "type": "array",
             "required": false
           },
           "attachment_name": {
             "value": [
-              "Q3_Report.pdf",
+              "report.pdf",
               "budget_2024.xlsx"
             ],
             "type": "array",
@@ -1477,13 +1622,33 @@
             "type": "string",
             "required": false
           },
-          "limit": {
-            "value": 15,
+          "folder": {
+            "value": "Inbox",
+            "type": "string",
+            "required": false
+          },
+          "only_focused": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_body": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "max_body_characters": {
+            "value": 2000,
             "type": "integer",
             "required": false
           },
-          "pagination_token": {
-            "value": "AQMkADAwATM0MDAAMS1hYjcd==",
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "AQMkADAwATM0MDAAMS1hZTkwLWI4ZjYtMDACLTAwCgBGAAAD",
             "type": "string",
             "required": false
           }
@@ -1513,7 +1678,7 @@
     {
       "name": "SendDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.SendDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SendDraftEmail@0.5.1",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SendDraftEmail@1.1.0",
       "description": "Send an existing draft email in Outlook.\n\nSends any un-sent message — draft, reply-draft, reply-all draft, or\nforward draft — and returns the message's ``message_id`` and\n``conversation_id`` so callers can chain follow-ups (e.g. reply to\nthe message they just sent) without searching Sent Items.",
       "parameters": [
         {
@@ -1530,7 +1695,13 @@
         "providerType": "oauth2",
         "scopes": [
           "Mail.Read",
-          "Mail.Send"
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -1544,7 +1715,7 @@
         "toolName": "MicrosoftOutlookMail.SendDraftEmail",
         "parameters": {
           "message_id": {
-            "value": "AAMkAGUwNjQ4ZjIxLTQ3Y2YtNDgwOS1hOWYzLWIwNzdhNmU5ZDc4NgBGAAAAAADCNMkgKwRbT5VHmFgCwBp9BwBtL9yFiRvMSoqAzLlMvOqIAAAAAAEPAABtL9yFiRvMSoqAzLlMvOqIAABZ3k7XAAA=",
+            "value": "AAMkAGI2TG93AAA=",
             "type": "string",
             "required": true
           }
@@ -1574,7 +1745,7 @@
     {
       "name": "SharedMailboxCheckCapabilities",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxCheckCapabilities",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCheckCapabilities@0.5.1",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCheckCapabilities@1.1.0",
       "description": "Check which provided mailboxes are reachable via shared mailbox APIs.\n\nThis is a capability checker, not an Exchange permission inventory. It\nverifies whether each provided mailbox can be reached through a cheap,\nread-only Graph call. When checking multiple mailboxes, pass them together\nin one ``owner_emails`` list so results can be deduplicated and rate-limited\nconsistently. Microsoft Graph does not expose exact ``Send As`` vs ``Send\non behalf`` permissions, so the response names that limitation explicitly\ninstead of guessing.",
       "parameters": [
         {
@@ -1591,7 +1762,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Mail.Read.Shared"
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -1606,9 +1784,10 @@
         "parameters": {
           "owner_emails": {
             "value": [
-              "alice@contoso.com",
-              "bob@fabrikam.org",
-              "support-team@northwindtraders.net"
+              "alice.johnson@contoso.com",
+              "bob.smith@fabrikam.org",
+              "support-team@adventureworks.net",
+              "finance.shared@northwindtraders.com"
             ],
             "type": "array",
             "required": true
@@ -1639,8 +1818,8 @@
     {
       "name": "SharedMailboxCreateAndSendEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateAndSendEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateAndSendEmail@0.5.1",
-      "description": "Create and immediately send an email from a shared or delegated mailbox.\n\nUse this when the user wants the email to be sent from a team inbox (like\nsales@ or support@) or from an executive's mailbox they have been\ndelegated access to, rather than from their own address.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateAndSendEmail@1.1.0",
+      "description": "Create and immediately send an email from a shared or delegated mailbox.\n\nUse this when the user wants the email to be sent from a team inbox (like\nsales@ or support@) or from an executive's mailbox they have been\ndelegated access to, rather than from their own address.\n\nThe confirmation message names how many recipient addresses the email went to\nacross To, Cc and Bcc.",
       "parameters": [
         {
           "name": "owner_email",
@@ -1694,12 +1873,12 @@
           "inferrable": true
         },
         {
-          "name": "body_type",
+          "name": "body_format",
           "type": "string",
           "required": false,
-          "description": "The content type of the email body. Defaults to 'text'",
+          "description": "The content type of the email body. Defaults to plain text.",
           "enum": [
-            "text",
+            "plain_text",
             "html"
           ],
           "inferrable": true
@@ -1709,8 +1888,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
           "Mail.ReadWrite.Shared",
-          "Mail.Send.Shared"
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -1724,24 +1909,24 @@
         "toolName": "MicrosoftOutlookMail.SharedMailboxCreateAndSendEmail",
         "parameters": {
           "owner_email": {
-            "value": "support@contoso.com",
+            "value": "sales@contoso.com",
             "type": "string",
             "required": true
           },
           "subject": {
-            "value": "Your Support Ticket Has Been Received",
+            "value": "Q3 Partnership Proposal Follow-Up",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Dear Customer,\n\nThank you for reaching out to our support team. We have received your request and a team member will get back to you within 24 hours.\n\nBest regards,\nContoso Support Team",
+            "value": "Hi Sarah,\n\nThank you for taking the time to meet with us last week. We wanted to follow up on the partnership proposal we discussed and see if you had any questions or feedback.\n\nPlease don't hesitate to reach out if you need any additional information.\n\nBest regards,\nThe Sales Team",
             "type": "string",
             "required": true
           },
           "to_recipients": {
             "value": [
-              "jane.doe@example.com",
-              "john.smith@example.com"
+              "sarah.johnson@partnerco.com",
+              "michael.lee@partnerco.com"
             ],
             "type": "array",
             "required": true
@@ -1755,164 +1940,12 @@
           },
           "bcc_recipients": {
             "value": [
-              "ticketing-log@contoso.com"
+              "archive@contoso.com"
             ],
             "type": "array",
             "required": false
           },
-          "body_type": {
-            "value": "text",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "SharedMailboxCreateDraftEmail",
-      "qualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateDraftEmail@0.5.1",
-      "description": "Compose a new draft email in a shared or delegated mailbox.",
-      "parameters": [
-        {
-          "name": "owner_email",
-          "type": "string",
-          "required": true,
-          "description": "The mailbox address to create the draft in. Can be a team or shared mailbox, or a specific person's mailbox you have delegate access to. Provide as a Microsoft Graph UPN (local-part@verified-domain).",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "subject",
-          "type": "string",
-          "required": true,
-          "description": "The subject of the draft email to create",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "body",
-          "type": "string",
-          "required": true,
-          "description": "The body of the draft email to create",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "to_recipients",
-          "type": "array",
-          "innerType": "string",
-          "required": true,
-          "description": "The email addresses that will be the recipients of the draft email",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "cc_recipients",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The email addresses that will be the CC recipients of the draft email.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "bcc_recipients",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The email addresses that will be the BCC recipients of the draft email.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "body_type",
-          "type": "string",
-          "required": false,
-          "description": "The content type of the email body. Defaults to 'text'",
-          "enum": [
-            "text",
-            "html"
-          ],
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "MailboxSettings.Read",
-          "Mail.ReadWrite.Shared"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftOutlookMail.SharedMailboxCreateDraftEmail",
-        "parameters": {
-          "owner_email": {
-            "value": "sales-team@contoso.com",
-            "type": "string",
-            "required": true
-          },
-          "subject": {
-            "value": "Q3 Budget Review Meeting Follow-Up",
-            "type": "string",
-            "required": true
-          },
-          "body": {
-            "value": "Hi team,\n\nThank you for attending today's Q3 budget review meeting. Please find the action items attached. Let me know if you have any questions.\n\nBest regards,\nThe Sales Team",
-            "type": "string",
-            "required": true
-          },
-          "to_recipients": {
-            "value": [
-              "alice.johnson@contoso.com",
-              "bob.smith@fabrikam.com"
-            ],
-            "type": "array",
-            "required": true
-          },
-          "cc_recipients": {
-            "value": [
-              "manager@contoso.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "bcc_recipients": {
-            "value": [
-              "compliance@contoso.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "body_type": {
+          "body_format": {
             "value": "text",
             "type": "string",
             "required": false
@@ -1943,8 +1976,8 @@
     {
       "name": "SharedMailboxCreateDraftReply",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateDraftReply",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateDraftReply@0.5.1",
-      "description": "Create a reply or reply-all draft in a shared or delegated mailbox without sending it.\n\nThe draft is threaded to the original message and saved to the mailbox's\nDrafts folder, so it can be reviewed, edited, and sent later. For a\nreply-all, the original recipients (excluding the mailbox owner) are\npopulated automatically. This tool never sends the email.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateDraftReply@1.1.0",
+      "description": "Create a reply or reply-all draft in a shared or delegated mailbox without sending it.\n\nThe draft is threaded to the original message and saved to the mailbox's\nDrafts folder, so it can be reviewed, edited, and sent later. For a\nreply-all, the original recipients (excluding the mailbox owner) are\npopulated automatically. Use cc_add to copy someone in on the draft,\nincluding someone who was never on the thread, and cc_remove to take\nsomebody off the copied line; who the reply is addressed to is the thread's\nown and reply_type decides it. This tool never sends the email.",
       "parameters": [
         {
           "name": "owner_email",
@@ -1980,14 +2013,47 @@
             "reply_all"
           ],
           "inferrable": true
+        },
+        {
+          "name": "cc_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to copy on the reply draft, in addition to whoever Outlook already copied. On a reply to all recipients Outlook copies the thread's other participants, and they stay copied — this only adds. Omit it to copy nobody new. Each address is copied once, and an address the draft already addresses is left addressed rather than also copied, so nobody receives the reply twice.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to take off the reply draft's copied line. Anyone Outlook copied and this does not name stays copied. Omit it to remove nobody; an address that is not on the copied line is ignored. An address the draft addresses cannot be taken off it — reply_type decides that line — so naming one is refused and no draft is kept.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to blind-copy on the reply draft. A blind-copied address receives the reply, once it is sent, without appearing on any other recipient's copy of it. Outlook never blind-copies anyone on a reply, so this is the whole line rather than a change to one. Omit it to blind-copy nobody.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.ReadWrite.Shared"
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -2001,23 +2067,45 @@
         "toolName": "MicrosoftOutlookMail.SharedMailboxCreateDraftReply",
         "parameters": {
           "owner_email": {
-            "value": "shared-inbox@contoso.com",
+            "value": "support-team@contoso.com",
             "type": "string",
             "required": true
           },
           "message_id": {
-            "value": "AAMkAGI2TG93AAA=",
+            "value": "AAMkAGQ1YjM2OTYtNzI4NS00ZTUxLWE5ZDMtNzA4ZGQ3YjE2ZGU3BGEgAAAAAAABGAAA=",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Thank you for reaching out. We have reviewed your request and will get back to you with a detailed response by end of business tomorrow.",
+            "value": "Thank you for reaching out. We have reviewed your request and will get back to you with a resolution by end of business tomorrow. Please let us know if you have any additional questions.",
             "type": "string",
             "required": true
           },
           "reply_type": {
             "value": "ReplyType.REPLY_ALL",
             "type": "string",
+            "required": false
+          },
+          "cc_add": {
+            "value": [
+              "manager@contoso.com",
+              "qa-lead@contoso.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "cc_remove": {
+            "value": [
+              "noreply@vendor.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "compliance-archive@contoso.com"
+            ],
+            "type": "array",
             "required": false
           }
         },
@@ -2046,7 +2134,7 @@
     {
       "name": "SharedMailboxGetEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxGetEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxGetEmail@0.5.1",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxGetEmail@1.1.0",
       "description": "Retrieve a single email from a shared or delegated mailbox by message ID.\n\nReturns email metadata and body content. By default, the body is returned\nas plain text (HTML tags stripped) and capped at 5000 characters. Use\nbody_offset to continue reading long emails, or set max_body_characters\nto None for the full body.",
       "parameters": [
         {
@@ -2097,8 +2185,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.Read.Shared"
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -2117,7 +2211,7 @@
             "required": true
           },
           "message_id": {
-            "value": "AAMkAGI2TG93AAA=",
+            "value": "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTZhYmY4OABGAAAAAAAiQ8W967B7TKBjgx9rVEURBwAiIsqMbYjsT5e-T7KIsjUXAAAAAAEMAAAvRzdC8v0lT6SfX8RcJE6XAAB6Rl2mAAA=",
             "type": "string",
             "required": true
           },
@@ -2162,7 +2256,7 @@
     {
       "name": "SharedMailboxListEmailAttachments",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailAttachments@0.5.1",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailAttachments@1.1.0",
       "description": "List attachment metadata for an email in a shared or delegated mailbox.",
       "parameters": [
         {
@@ -2190,10 +2284,10 @@
           "inferrable": true
         },
         {
-          "name": "pagination_token",
-          "type": "string",
+          "name": "page",
+          "type": "integer",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "Which page of results to return, counting from 1, up to 1000. Repeat the same arguments alongside it: every page is described by the call that asked for it, so a filter left out on page two widens page two. A page past 1000 is refused rather than answered with another one. Defaults to 1.",
           "enum": null,
           "inferrable": true
         }
@@ -2202,8 +2296,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.Read.Shared"
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -2217,12 +2317,12 @@
         "toolName": "MicrosoftOutlookMail.SharedMailboxListEmailAttachments",
         "parameters": {
           "owner_email": {
-            "value": "sharedmailbox@contoso.com",
+            "value": "shared-projects@contoso.com",
             "type": "string",
             "required": true
           },
           "message_id": {
-            "value": "AAMkAGI2TG93AAA=",
+            "value": "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY5OTU4MTNkYQBGAAAAAADRlY7ewL4xToHyFMBqJSBBBwC6NDqzICIkRoWrfBEMtGZ1AAAAAAEMAAC6NDqzICIkRoWrfBEMtGZ1AAABHqDqAAA=",
             "type": "string",
             "required": true
           },
@@ -2231,9 +2331,9 @@
             "type": "integer",
             "required": false
           },
-          "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIxMDAifQ==",
-            "type": "string",
+          "page": {
+            "value": 1,
+            "type": "integer",
             "required": false
           }
         },
@@ -2262,14 +2362,155 @@
     {
       "name": "SharedMailboxListEmails",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmails@0.5.1",
-      "description": "List emails in a shared or delegated mailbox, across all folders.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmails@1.1.0",
+      "description": "List email messages in a shared or delegated mailbox.\n\nReturns ordinary mail by default: Deleted Items, Junk Email, Sent Items and\nDrafts are left out unless named in folders, folder_ids or conversation_id.\nEach row reports the folder it came from in parent_folder_id.\n\nEvery filter narrows the same result set, so unread mail in one folder is a\nsingle call.\n\nNaming exactly one folder reads that folder itself, which is also the only\nread a mailbox shared one folder at a time can serve. If a call that names\nno folder, or several, is refused for lack of access to the whole mailbox,\nrepeat it naming one folder at a time.",
       "parameters": [
         {
           "name": "owner_email",
           "type": "string",
           "required": true,
-          "description": "The mailbox address to read from. Can be a team or shared mailbox, or a specific person's mailbox you have delegate access to. Provide as a Microsoft Graph UPN (local-part@verified-domain).",
+          "description": "Email address of the mailbox to read, for example a team or resource mailbox.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folders",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Well-known folders to list mail from. Omit to read every folder except Deleted Items, Junk Email, Sent Items and Drafts. Naming folders replaces that default rather than adding to it. Combined with conversation_id, this narrows the thread to these folders. Defaults to None.",
+          "enum": [
+            "archive",
+            "deleteditems",
+            "drafts",
+            "inbox",
+            "junkemail",
+            "sentitems"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "folder_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Ids of user-created folders to list mail from. Combined with any value given for folders. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conversation_id",
+          "type": "string",
+          "required": false,
+          "description": "Return only messages in this conversation, across every folder including Sent Items and Deleted Items. Naming folders or folder_ids alongside it narrows the thread to those folders, so leave both out to see all of it. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "json",
+          "required": false,
+          "description": "Subject match, as a value plus the operator to compare it with. Defaults to None (no subject filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sender",
+          "type": "json",
+          "required": false,
+          "description": "Sender email address match, as a value plus the operator to compare it with. Defaults to None (no sender filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_read",
+          "type": "boolean",
+          "required": false,
+          "description": "True for read mail, False for unread. Defaults to None (both).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "has_attachments",
+          "type": "boolean",
+          "required": false,
+          "description": "True for mail carrying attachments, False for mail without. Defaults to None (both).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "importance",
+          "type": "string",
+          "required": false,
+          "description": "Return only mail at this importance level, and nothing else. Never use it to express an exclusion: setting it to normal to mean 'not low' drops every high-importance message. Use exclude_importance for that. Defaults to None (any).",
+          "enum": [
+            "low",
+            "normal",
+            "high"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "exclude_importance",
+          "type": "string",
+          "required": false,
+          "description": "Return mail at every importance level except this one. Leave importance out alongside it: naming both narrows to a single level instead of excluding one. Defaults to None (any).",
+          "enum": [
+            "low",
+            "normal",
+            "high"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "flag_status",
+          "type": "string",
+          "required": false,
+          "description": "Return only mail in this follow-up flag state. Defaults to None (any).",
+          "enum": [
+            "notFlagged",
+            "flagged",
+            "complete"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "received_after",
+          "type": "string",
+          "required": false,
+          "description": "Return only mail received on or after this date (YYYY-MM-DD, UTC). Omit it, or leave it empty, for no lower bound. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "received_before",
+          "type": "string",
+          "required": false,
+          "description": "Return only mail received on or before this date (YYYY-MM-DD, UTC). The whole of that day is included. Omit it, or leave it empty, for no upper bound. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "only_focused",
+          "type": "boolean",
+          "required": false,
+          "description": "Return only mail the mailbox itself classified as Focused, using Outlook's Focused Inbox split. Sender addresses are not inspected. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_body",
+          "type": "boolean",
+          "required": false,
+          "description": "Return each message's full body. Defaults to False, which returns a preview of at most 255 characters per row.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_body_characters",
+          "type": "integer",
+          "required": false,
+          "description": "Cap on body characters per row when include_body is True. Defaults to 5000. Pass None for no cap. Ignored when include_body is False.",
           "enum": null,
           "inferrable": true
         },
@@ -2301,15 +2542,15 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 10.",
+          "description": "Number of messages to return. Values above 50 are clamped to 50 and the response reports limit_clamped_to_max; values below 1 are raised to 1. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "pagination_token",
+          "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "Position of a further page, copied from a previous response's cursor. Repeat the same listing arguments alongside it: a cursor names a listing rather than a row number, and one handed back beside different arguments is refused. Defaults to None (the first page).",
           "enum": null,
           "inferrable": true
         }
@@ -2318,357 +2559,115 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.Read.Shared"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "No description provided."
+        "description": "The matching messages, and whether a further page exists."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookMail.SharedMailboxListEmails",
         "parameters": {
           "owner_email": {
-            "value": "support-team@contoso.com",
+            "value": "team-inbox@contoso.com",
             "type": "string",
             "required": true
           },
-          "sort_by": {
-            "value": "receivedDateTime",
+          "folders": {
+            "value": [
+              "inbox",
+              "sentItems"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "folder_ids": {
+            "value": [
+              "AAMkAGZhY2I4NzYtZGY5Mi00"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "conversation_id": {
+            "value": "AAQkAGZhY2I4NzYtZGY5Mi00NjZlLWJkNTMtMDQ2ZmZlNTY3ODkwAAQAAAAABX==",
             "type": "string",
             "required": false
           },
-          "sort_order": {
-            "value": "descending",
+          "subject": {
+            "value": {
+              "value": "Project Update",
+              "operator": "contains"
+            },
             "type": "string",
             "required": false
           },
-          "limit": {
-            "value": 25,
+          "sender": {
+            "value": {
+              "value": "alice@example.com",
+              "operator": "eq"
+            },
+            "type": "string",
+            "required": false
+          },
+          "is_read": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "has_attachments": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "importance": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "exclude_importance": {
+            "value": "low",
+            "type": "string",
+            "required": false
+          },
+          "flag_status": {
+            "value": "flagged",
+            "type": "string",
+            "required": false
+          },
+          "received_after": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "received_before": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "only_focused": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_body": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "max_body_characters": {
+            "value": 3000,
             "type": "integer",
-            "required": false
-          },
-          "pagination_token": {
-            "value": "AQMkADAwATM0MDAAMS1iNmY5LTYwNjktMDACLTAwCgAuAAADqXmCGSjHQEuVapL9V2LZBQEJ7kX2z0aFQpCqW7X8EjsAAAA=",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "SharedMailboxListEmailsByProperty",
-      "qualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailsByProperty",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailsByProperty@0.5.1",
-      "description": "List emails in a shared or delegated mailbox filtered by a property.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).",
-      "parameters": [
-        {
-          "name": "owner_email",
-          "type": "string",
-          "required": true,
-          "description": "The mailbox address to read from. Can be a team or shared mailbox, or a specific person's mailbox you have delegate access to. Provide as a Microsoft Graph UPN (local-part@verified-domain).",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "mail_property",
-          "type": "string",
-          "required": true,
-          "description": "The property to filter the emails by.",
-          "enum": [
-            "subject",
-            "conversationId",
-            "receivedDateTime",
-            "sender/emailAddress/address",
-            "isRead",
-            "hasAttachments",
-            "importance",
-            "flag/flagStatus"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "operator",
-          "type": "string",
-          "required": true,
-          "description": "The operator to use for the filter.",
-          "enum": [
-            "eq",
-            "ne",
-            "gt",
-            "ge",
-            "lt",
-            "le",
-            "startsWith",
-            "endsWith",
-            "contains"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "value",
-          "type": "string",
-          "required": true,
-          "description": "The value to filter the emails by",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sort_by",
-          "type": "string",
-          "required": false,
-          "description": "Property to sort results by. Defaults to received date. Sorting by received date works with any filter property.",
-          "enum": [
-            "receivedDateTime",
-            "subject",
-            "sender_email_address",
-            "importance"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "sort_order",
-          "type": "string",
-          "required": false,
-          "description": "Sort direction. Defaults to descending.",
-          "enum": [
-            "ascending",
-            "descending"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "limit",
-          "type": "integer",
-          "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 10.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "pagination_token",
-          "type": "string",
-          "required": false,
-          "description": "The pagination token to continue a previous request",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "MailboxSettings.Read",
-          "Mail.Read.Shared"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftOutlookMail.SharedMailboxListEmailsByProperty",
-        "parameters": {
-          "owner_email": {
-            "value": "sharedmailbox@contoso.com",
-            "type": "string",
-            "required": true
-          },
-          "mail_property": {
-            "value": "sender/emailAddress/address",
-            "type": "string",
-            "required": true
-          },
-          "operator": {
-            "value": "eq",
-            "type": "string",
-            "required": true
-          },
-          "value": {
-            "value": "notifications@example.com",
-            "type": "string",
-            "required": true
-          },
-          "sort_by": {
-            "value": "receivedDateTime",
-            "type": "string",
-            "required": false
-          },
-          "sort_order": {
-            "value": "descending",
-            "type": "string",
-            "required": false
-          },
-          "limit": {
-            "value": 25,
-            "type": "integer",
-            "required": false
-          },
-          "pagination_token": {
-            "value": "AQMkADAwATNiZmYAZC1hYjEyLTQ4NzUtMDACLTAwCgAuAAADexample123tokenXYZ==",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "SharedMailboxListEmailsInFolder",
-      "qualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailsInFolder",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailsInFolder@0.5.1",
-      "description": "List emails in a specific folder of a shared or delegated mailbox.\n\nExactly one of `well_known_folder_name` or `folder_id` MUST be provided.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).",
-      "parameters": [
-        {
-          "name": "owner_email",
-          "type": "string",
-          "required": true,
-          "description": "The mailbox address to read from. Can be a team or shared mailbox, or a specific person's mailbox you have delegate access to. Provide as a Microsoft Graph UPN (local-part@verified-domain).",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "well_known_folder_name",
-          "type": "string",
-          "required": false,
-          "description": "The name of the folder to list emails from. Defaults to None.",
-          "enum": [
-            "deleteditems",
-            "drafts",
-            "inbox",
-            "junkemail",
-            "sentitems",
-            "starred",
-            "tasks"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "folder_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the folder to list emails from if the folder is not a well-known folder. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "sort_by",
-          "type": "string",
-          "required": false,
-          "description": "Property to sort results by. Defaults to received date.",
-          "enum": [
-            "receivedDateTime",
-            "subject",
-            "sender_email_address",
-            "importance"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "sort_order",
-          "type": "string",
-          "required": false,
-          "description": "Sort direction. Defaults to descending.",
-          "enum": [
-            "ascending",
-            "descending"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "limit",
-          "type": "integer",
-          "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 10.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "pagination_token",
-          "type": "string",
-          "required": false,
-          "description": "The pagination token to continue a previous request",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "MailboxSettings.Read",
-          "Mail.Read.Shared"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftOutlookMail.SharedMailboxListEmailsInFolder",
-        "parameters": {
-          "owner_email": {
-            "value": "support-team@contoso.com",
-            "type": "string",
-            "required": true
-          },
-          "well_known_folder_name": {
-            "value": "inbox",
-            "type": "string",
-            "required": false
-          },
-          "folder_id": {
-            "value": "",
-            "type": "string",
             "required": false
           },
           "sort_by": {
@@ -2686,8 +2685,8 @@
             "type": "integer",
             "required": false
           },
-          "pagination_token": {
-            "value": "AQMkADAwATNiZmYAZC1hYjEyLTQ5ZjQtMDACLTAwCgBGAAAD",
+          "cursor": {
+            "value": "AQMkAGZhY2I4NzYtZGY5Mi00NjZlLWJkNTMtMDQ2ZmZlNTY3ODkwAAABBCAAA==",
             "type": "string",
             "required": false
           }
@@ -2717,8 +2716,8 @@
     {
       "name": "SharedMailboxListMailFolders",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxListMailFolders",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListMailFolders@0.5.1",
-      "description": "List mail folders in a shared or delegated mailbox.\n\nReturns folder names, IDs, unread counts, and total item counts.\nUse the folder ID when listing emails in a specific folder.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListMailFolders@1.1.0",
+      "description": "List mail folders in a shared or delegated mailbox.\n\nReturns folder names, IDs, unread counts, and total item counts. A returned\nfolder ID is what scopes a mail listing to a user-created folder.",
       "parameters": [
         {
           "name": "owner_email",
@@ -2753,10 +2752,10 @@
           "inferrable": true
         },
         {
-          "name": "pagination_token",
-          "type": "string",
+          "name": "page",
+          "type": "integer",
           "required": false,
-          "description": "The pagination token to continue a previous request.",
+          "description": "Which page of results to return, counting from 1, up to 1000. Repeat the same arguments alongside it: every page is described by the call that asked for it, so a filter left out on page two widens page two. A page past 1000 is refused rather than answered with another one. Defaults to 1.",
           "enum": null,
           "inferrable": true
         }
@@ -2765,7 +2764,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Mail.Read.Shared"
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -2779,12 +2785,12 @@
         "toolName": "MicrosoftOutlookMail.SharedMailboxListMailFolders",
         "parameters": {
           "owner_email": {
-            "value": "shared-support@contoso.com",
+            "value": "team-support@contoso.com",
             "type": "string",
             "required": true
           },
           "parent_folder_id": {
-            "value": "AAMkAGVmMDEzMTM4LTZmYWUtNDdkNC1hMDZiLTU1OGY3OTgxODQ5OABGAAAAAAA",
+            "value": "AQMkADAwATM0MDAAMS1hYzQyLTAwAi0wMAoARgAAA1k9X2f3qUCTqHs7X2ZV9BcA",
             "type": "string",
             "required": false
           },
@@ -2798,9 +2804,9 @@
             "type": "integer",
             "required": false
           },
-          "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIlMjFDQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSIsInBhZ2VTaXplIjoyNX0=",
-            "type": "string",
+          "page": {
+            "value": 1,
+            "type": "integer",
             "required": false
           }
         },
@@ -2829,8 +2835,8 @@
     {
       "name": "SharedMailboxMoveEmailToFolder",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxMoveEmailToFolder",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxMoveEmailToFolder@0.5.1",
-      "description": "Move an email message to a different folder in a shared or delegated mailbox.\n\nExactly one of `destination_well_known_folder_name` or\n`destination_folder_id` MUST be provided. Use\n`shared_mailbox_list_mail_folders` (with the same `owner_email`) to\ndiscover custom folder IDs; folder IDs are specific to the target\nmailbox.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxMoveEmailToFolder@1.1.0",
+      "description": "Move an email message to a different folder in a shared or delegated mailbox.\n\nExactly one of `destination_well_known_folder_name` or\n`destination_folder_id` MUST be provided. Custom folder IDs come from\nlisting the folders of the same `owner_email` mailbox; folder IDs are\nspecific to the mailbox that contains them.",
       "parameters": [
         {
           "name": "owner_email",
@@ -2854,13 +2860,12 @@
           "required": false,
           "description": "The well-known destination folder. Provide this when moving to inbox, drafts, sent items, deleted items, or another built-in folder; otherwise omit and set destination_folder_id.",
           "enum": [
+            "archive",
             "deleteditems",
             "drafts",
             "inbox",
             "junkemail",
-            "sentitems",
-            "starred",
-            "tasks"
+            "sentitems"
           ],
           "inferrable": true
         },
@@ -2877,8 +2882,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.ReadWrite.Shared"
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -2892,17 +2903,17 @@
         "toolName": "MicrosoftOutlookMail.SharedMailboxMoveEmailToFolder",
         "parameters": {
           "owner_email": {
-            "value": "support-team@contoso.com",
+            "value": "sharedteam@contoso.com",
             "type": "string",
             "required": true
           },
           "message_id": {
-            "value": "AAMkAGU2ZjBhNTEtZDQ3MC00YWE5LWJkYjAtNmFhZDg4MzQ1NzExBGAAAAAAA",
+            "value": "AAMkAGI2TG93AAA=",
             "type": "string",
             "required": true
           },
           "destination_well_known_folder_name": {
-            "value": "deleteditems",
+            "value": "inbox",
             "type": "string",
             "required": false
           },
@@ -2937,8 +2948,8 @@
     {
       "name": "SharedMailboxReplyToEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxReplyToEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxReplyToEmail@0.5.1",
-      "description": "Reply to an email in a shared or delegated mailbox.\n\nThe reply is sent from the shared mailbox address, not the signed-in\nuser's personal address. Specify reply_type to reply only to the sender\nor to all recipients.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxReplyToEmail@1.1.0",
+      "description": "Reply to an email in a shared or delegated mailbox.\n\nThe reply is sent from the shared mailbox address, not the signed-in\nuser's personal address. Specify reply_type to reply only to the sender\nor to all recipients. Use cc_add to copy someone in on the reply, including\nsomeone who was never on the thread, and cc_remove to take somebody off the\ncopied line; who the reply is addressed to is the thread's own and reply_type\ndecides it.\n\nThe confirmation message names how many recipient addresses the reply went to\nacross To, Cc and Bcc, when Outlook reported the line it was addressed to.",
       "parameters": [
         {
           "name": "owner_email",
@@ -2974,14 +2985,47 @@
             "reply_all"
           ],
           "inferrable": true
+        },
+        {
+          "name": "cc_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to copy on the reply, in addition to whoever Outlook already copied. On a reply to all recipients Outlook copies the thread's other participants, and they stay copied — this only adds. Omit it to copy nobody new. Each address is copied once, and an address the reply already addresses is left addressed rather than also copied, so nobody receives the reply twice.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to take off the reply's copied line. Anyone Outlook copied and this does not name stays copied. Omit it to remove nobody; an address that is not on the copied line is ignored. An address the reply addresses cannot be taken off it — reply_type decides that line — so naming one is refused and nothing is sent.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to blind-copy on the reply. A blind-copied address receives the reply without appearing on any other recipient's copy of it. Outlook never blind-copies anyone on a reply, so this is the whole line rather than a change to one. Omit it to blind-copy nobody.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
           "Mail.ReadWrite.Shared",
-          "Mail.Send.Shared"
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -3005,13 +3049,35 @@
             "required": true
           },
           "body": {
-            "value": "Thank you for reaching out! We have received your request and will get back to you within 24 hours. Please let us know if you have any additional questions in the meantime.",
+            "value": "Thank you for reaching out. We have reviewed your request and will get back to you within 24 hours.",
             "type": "string",
             "required": true
           },
           "reply_type": {
             "value": "ReplyType.REPLY_ALL",
             "type": "string",
+            "required": false
+          },
+          "cc_add": {
+            "value": [
+              "manager@contoso.com",
+              "helpdesk@contoso.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "cc_remove": {
+            "value": [
+              "oldcolleague@contoso.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "audit-log@contoso.com"
+            ],
+            "type": "array",
             "required": false
           }
         },
@@ -3038,10 +3104,182 @@
       }
     },
     {
+      "name": "SharedMailboxSaveDraftEmail",
+      "qualifiedName": "MicrosoftOutlookMail.SharedMailboxSaveDraftEmail",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSaveDraftEmail@1.1.0",
+      "description": "Save an email draft in a shared or delegated Outlook mailbox.\n\nSupplying message_id revises that draft; omitting it creates a new one. Only the\nfields supplied are written — anything left out keeps whatever the draft already\nhad. Nothing is ever sent.\n\nReturns a DraftMessage. Its message_id identifies the saved draft and can be passed\nstraight back to this tool to make further changes to it.",
+      "parameters": [
+        {
+          "name": "owner_email",
+          "type": "string",
+          "required": true,
+          "description": "The mailbox to save the draft in. Can be a team or shared mailbox, or a specific person's mailbox you have delegate access to. Provide as a Microsoft Graph UPN (local-part@verified-domain).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": false,
+          "description": "The draft to save the changes onto. Omit it to create a new draft instead. Any un-sent message works, including a reply or forward draft. The id of a draft saved earlier in this conversation is the message_id this tool returned; the id of a draft that already existed comes from listing the mailbox's Drafts folder.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "The subject to set. Omit it to leave the current subject unchanged; pass an empty string to clear it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The body to set. Omit it to leave the current body unchanged; pass an empty string to clear it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The complete list of To recipients, replacing whatever the draft currently carries: any address left out of this list is removed from the draft, so include the ones to keep as well as the ones to add. Read the draft first when the current list is not already known. Omit it to leave the To line untouched; pass an empty list to remove every To recipient.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The complete list of Cc recipients, replacing whatever the draft currently carries: any address left out of this list is removed from the draft, so include the ones to keep as well as the ones to add. Read the draft first when the current list is not already known. Omit it to leave the Cc line untouched; pass an empty list to remove every Cc recipient.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The complete list of Bcc recipients, replacing whatever the draft currently carries: any address left out of this list is removed from the draft, so include the ones to keep as well as the ones to add. Read the draft first when the current list is not already known. Omit it to leave the Bcc line untouched; pass an empty list to remove every Bcc recipient.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "The content type of body. Has no effect unless body is supplied. Omit it to keep whatever content type the draft already carries when revising one, or to write plain text on a new draft.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookMail.SharedMailboxSaveDraftEmail",
+        "parameters": {
+          "owner_email": {
+            "value": "support-team@contoso.com",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "AAMkAGE1M2IyNGNmLTI5MTktNDUyZi1iOWVlLWQ4YjcxOWJlZjI3ZgBGAAAAAADUuTJK1K9aTpCdqXop_4NaBwCd9nJ-tVysT6qiLgd6pYsAAAAAAAEPAAA=",
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "value": "Q3 Budget Review - Action Required",
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "value": "<p>Hi Team,</p><p>Please review the attached Q3 budget report and provide your feedback by Friday.</p><p>Best regards,<br>Support Team</p>",
+            "type": "string",
+            "required": false
+          },
+          "to_recipients": {
+            "value": [
+              "alice.johnson@fabrikam.com",
+              "bob.smith@fabrikam.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "cc_recipients": {
+            "value": [
+              "manager@contoso.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc_recipients": {
+            "value": [
+              "compliance@contoso.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "body_format": {
+            "value": "HTML",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "SharedMailboxSearchEmails",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxSearchEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSearchEmails@0.5.1",
-      "description": "Search emails in a shared or delegated mailbox.\n\nCombines full-text keyword search with structured filters for sender,\nread status, attachments, importance, and more. All provided parameters\nare combined with AND. Results are ordered by date sent (most recent first).\n\nEmail bodies are truncated to 255 characters. Retrieve a message by its\nmessage ID when the full content is needed.\n\n.. note::\n   Search results may use a different Graph ID shape than list/get\n   results. Use returned message IDs directly for message retrieval and\n   ``conversation_id`` for deduplication across result sets.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSearchEmails@1.1.0",
+      "description": "Search emails in a shared or delegated mailbox.\n\nCombines full-text keyword search with structured filters for sender,\nread status, attachments, importance, and more. All provided parameters\nare combined with AND.\n\nAt least one search criterion is required. folder, only_focused,\ninclude_body and limit narrow or page a result set rather than build one,\nso they are not enough on their own.\n\nJunk Email and Deleted Items are left out unless `folder` names one of them;\nsent mail and drafts stay searchable. Rows carry a 255-character body preview\nunless include_body is set.\n\nResults come back in the search index's own order and cannot be re-sorted.\n\nOutlook's search index answers one query with at most 1,000 messages, so a\nwalk that runs out of pages has reached the end of what the index serves\nrather than the end of the mailbox. The folders left out and the Focused\nsplit are applied to those 1,000 after they are chosen, so a broad term\nmatching a lot of junk can come back with few rows, or none, while matching\nmail exists. A narrower term reaches it; a smaller limit does not.\n\n.. note::\n   Search results may use a different Graph ID shape than list/get\n   results. Use returned message IDs directly for message retrieval and\n   ``conversation_id`` for deduplication across result sets.",
       "parameters": [
         {
           "name": "owner_email",
@@ -3057,6 +3295,14 @@
           "innerType": "string",
           "required": false,
           "description": "Words or phrases to search for across email subject, body, and sender fields. All terms must match (AND operator). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "Narrow the hunt to the subject line. Matched as words within the subject rather than as the whole line. Defaults to None (no subject narrowing).",
           "enum": null,
           "inferrable": true
         },
@@ -3127,7 +3373,7 @@
           "name": "received_after",
           "type": "string",
           "required": false,
-          "description": "Filter for emails received on or after this date (YYYY-MM-DD). Dates are interpreted in UTC. Defaults to None (no filter).",
+          "description": "Filter for emails received on or after this date (YYYY-MM-DD). Dates are interpreted in UTC. Omit it, or leave it empty, for no lower bound. Defaults to None.",
           "enum": null,
           "inferrable": true
         },
@@ -3135,7 +3381,46 @@
           "name": "received_before",
           "type": "string",
           "required": false,
-          "description": "Filter for emails received on or before this date (YYYY-MM-DD). Dates are interpreted in UTC. Defaults to None (no filter).",
+          "description": "Filter for emails received on or before this date (YYYY-MM-DD). Dates are interpreted in UTC. Omit it, or leave it empty, for no upper bound. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder",
+          "type": "string",
+          "required": false,
+          "description": "Search a single folder instead of the whole mailbox. Omit to search everywhere except Junk Email and Deleted Items. Defaults to None.",
+          "enum": [
+            "archive",
+            "deleteditems",
+            "drafts",
+            "inbox",
+            "junkemail",
+            "sentitems"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "only_focused",
+          "type": "boolean",
+          "required": false,
+          "description": "Return only mail the mailbox itself classified as Focused. Sender addresses are not inspected. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_body",
+          "type": "boolean",
+          "required": false,
+          "description": "Return each message's full body. Defaults to False, which returns a preview of at most 255 characters per row.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_body_characters",
+          "type": "integer",
+          "required": false,
+          "description": "Cap on body characters per row when include_body is True. Defaults to 5000. Pass None for no cap. Ignored when include_body is False.",
           "enum": null,
           "inferrable": true
         },
@@ -3143,15 +3428,15 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of search results to return. Max is 25. Defaults to 10.",
+          "description": "Maximum number of results to return. Values above 50 are clamped to 50 and the response reports limit_clamped_to_max; values below 1 are raised to 1. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "pagination_token",
+          "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request.",
+          "description": "Position of a further page, copied from a previous response's cursor. Repeat the same search arguments alongside it, only_focused included: a cursor names a search rather than a position in a result set, and one handed back beside different arguments is refused. Defaults to None (the first page).",
           "enum": null,
           "inferrable": true
         }
@@ -3160,8 +3445,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
           "MailboxSettings.Read",
-          "Mail.Read.Shared"
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -3175,22 +3466,27 @@
         "toolName": "MicrosoftOutlookMail.SharedMailboxSearchEmails",
         "parameters": {
           "owner_email": {
-            "value": "sharedmailbox@contoso.com",
+            "value": "shared-support@contoso.com",
             "type": "string",
             "required": true
           },
           "keywords": {
             "value": [
-              "project update",
-              "Q3 report"
+              "invoice",
+              "overdue"
             ],
             "type": "array",
             "required": false
           },
+          "subject": {
+            "value": "quarterly report",
+            "type": "string",
+            "required": false
+          },
           "sender": {
             "value": [
-              "john.doe@example.com",
-              "Jane Smith"
+              "alice.johnson@example.com",
+              "Bob Smith"
             ],
             "type": "array",
             "required": false
@@ -3204,8 +3500,7 @@
           },
           "attachment_name": {
             "value": [
-              "Q3_Report.pdf",
-              "budget.xlsx"
+              "Q3_Report.pdf"
             ],
             "type": "array",
             "required": false
@@ -3240,13 +3535,33 @@
             "type": "string",
             "required": false
           },
-          "limit": {
-            "value": 15,
+          "folder": {
+            "value": "Inbox",
+            "type": "string",
+            "required": false
+          },
+          "only_focused": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "include_body": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "max_body_characters": {
+            "value": 3000,
             "type": "integer",
             "required": false
           },
-          "pagination_token": {
-            "value": "AQMkADAwATNiZmYAZC0xMjM0LTU2NzgtOTBhYi1jZGVmMTIzNDU2NzgALgAAA1bX9k2Q3E6TpHw8zLmVoAEAn7RtKp2FxUqJvBcDe4XQAAACBQAAAA==",
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "AQMkADAwATM0MDAAMS1kZWQwLTAwAi0wMAoARgAAA5Xk9z7Q",
             "type": "string",
             "required": false
           }
@@ -3276,7 +3591,7 @@
     {
       "name": "SharedMailboxSendDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxSendDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSendDraftEmail@0.5.1",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSendDraftEmail@1.1.0",
       "description": "Send an existing draft email from a shared or delegated mailbox.\n\nThis tool can send any un-sent email in the shared mailbox:\n    - draft\n    - reply-draft\n    - reply-all draft\n    - forward draft\n\nReturns the message's ``message_id`` and ``conversation_id`` so callers\ncan chain follow-ups (e.g. reply to the message they just sent) without\nsearching Sent Items.",
       "parameters": [
         {
@@ -3300,8 +3615,14 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Mail.Read",
           "Mail.Read.Shared",
-          "Mail.Send.Shared"
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -3320,7 +3641,7 @@
             "required": true
           },
           "message_id": {
-            "value": "AAMkAGI2NGVhZTVlLTI1OGMtNDI4Mi1iZWYwLTljNGYwZjk1ZGI3MABGAAAAAADUuTJK1K9AfQ6M9FcA",
+            "value": "AAMkAGQ1YjM4ZTU2LWE4NjQtNGFhZS1iYzE3LTkxZmE4ZDVlOWM3MQBGAAAAAABkP2hQqW8xR6aLmNvOeQp3BwCdF1uYkZqESoRmXvTlU9YZAAAAAAEMAAC",
             "type": "string",
             "required": true
           }
@@ -3348,405 +3669,30 @@
       }
     },
     {
-      "name": "SharedMailboxUpdateDraftEmail",
-      "qualifiedName": "MicrosoftOutlookMail.SharedMailboxUpdateDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxUpdateDraftEmail@0.5.1",
-      "description": "Update an existing draft email in a shared or delegated mailbox.\n\nOverwrites the subject and body of a draft (if provided) and modifies its\nrecipient lists by selectively adding or removing email addresses.",
-      "parameters": [
-        {
-          "name": "owner_email",
-          "type": "string",
-          "required": true,
-          "description": "The mailbox address that owns the draft. Can be a team or shared mailbox, or a specific person's mailbox you have delegate access to. Provide as a Microsoft Graph UPN (local-part@verified-domain).",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "message_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the draft email to update",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "subject",
-          "type": "string",
-          "required": false,
-          "description": "The new subject of the draft email. If provided, the existing subject will be overwritten",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "body",
-          "type": "string",
-          "required": false,
-          "description": "The new body of the draft email. If provided, the existing body will be overwritten",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "to_add",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to add as 'To' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "to_remove",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to remove from the current 'To' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "cc_add",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to add as 'CC' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "cc_remove",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to remove from the current 'CC' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "bcc_add",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to add as 'BCC' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "bcc_remove",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to remove from the current 'BCC' recipients.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "MailboxSettings.Read",
-          "Mail.ReadWrite.Shared"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftOutlookMail.SharedMailboxUpdateDraftEmail",
-        "parameters": {
-          "owner_email": {
-            "value": "sharedmailbox@contoso.com",
-            "type": "string",
-            "required": true
-          },
-          "message_id": {
-            "value": "AAMkADZiMmZiZjYwLTY1MjQtNGI4OS1hNGVhLTM3ZDQ5NzQ4ZjQ3ZgBGAAAAAADsKBCH1234ABCDEFGH",
-            "type": "string",
-            "required": true
-          },
-          "subject": {
-            "value": "Updated Project Proposal - Q3 2024",
-            "type": "string",
-            "required": false
-          },
-          "body": {
-            "value": "Hi Team,\n\nPlease find the updated project proposal for Q3 2024 attached. Let us know if you have any questions.\n\nBest regards,\nThe Project Team",
-            "type": "string",
-            "required": false
-          },
-          "to_add": {
-            "value": [
-              "alice.johnson@example.com",
-              "bob.smith@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "to_remove": {
-            "value": [
-              "old.contact@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "cc_add": {
-            "value": [
-              "manager@contoso.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "cc_remove": {
-            "value": [
-              "former.manager@contoso.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "bcc_add": {
-            "value": [
-              "compliance@contoso.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "bcc_remove": {
-            "value": [
-              "test.user@contoso.com"
-            ],
-            "type": "array",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "UpdateDraftEmail",
-      "qualifiedName": "MicrosoftOutlookMail.UpdateDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.UpdateDraftEmail@0.5.1",
-      "description": "Update an existing draft email in Outlook.\n\nThis tool overwrites the subject and body of a draft email (if provided),\nand modifies its recipient lists by selectively adding or removing email addresses.\n\nThis tool can update any un-sent email:\n    - draft\n    - reply-draft\n    - reply-all draft\n    - forward draft",
-      "parameters": [
-        {
-          "name": "message_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the draft email to update",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "subject",
-          "type": "string",
-          "required": false,
-          "description": "The new subject of the draft email. If provided, the existing subject will be overwritten",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "body",
-          "type": "string",
-          "required": false,
-          "description": "The new body of the draft email. If provided, the existing body will be overwritten",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "to_add",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to add as 'To' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "to_remove",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to remove from the current 'To' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "cc_add",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to add as 'CC' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "cc_remove",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to remove from the current 'CC' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "bcc_add",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to add as 'BCC' recipients.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "bcc_remove",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Email addresses to remove from the current 'BCC' recipients.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "MailboxSettings.Read",
-          "Mail.ReadWrite"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "A dictionary containing the updated email details"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftOutlookMail.UpdateDraftEmail",
-        "parameters": {
-          "message_id": {
-            "value": "AAMkAGI2TI0MjU3LThmZDAtNDhkNC04ZGFjLTMxYmE1ZWI1ZGQyNgBGAAAAAADUuTJK1K9ER6M",
-            "type": "string",
-            "required": true
-          },
-          "subject": {
-            "value": "Updated: Q3 Budget Review Meeting",
-            "type": "string",
-            "required": false
-          },
-          "body": {
-            "value": "Hi team,\n\nPlease find the updated agenda for our Q3 budget review meeting scheduled for Friday at 2 PM.\n\nBest regards,\nAlex",
-            "type": "string",
-            "required": false
-          },
-          "to_add": {
-            "value": [
-              "jane.doe@example.com",
-              "mark.smith@company.org"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "to_remove": {
-            "value": [
-              "old.contact@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "cc_add": {
-            "value": [
-              "manager@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "cc_remove": {
-            "value": [
-              "former.colleague@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "bcc_add": {
-            "value": [
-              "compliance@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "bcc_remove": {
-            "value": [
-              "temp.observer@example.com"
-            ],
-            "type": "array",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookMail.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookMail.WhoAmI@0.5.1",
-      "description": "Get comprehensive user profile and Outlook Mail environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, mailbox settings, automatic replies configuration, and other\nimportant profile details from Outlook Mail services.",
+      "fullyQualifiedName": "MicrosoftOutlookMail.WhoAmI@1.1.0",
+      "description": "Get the signed-in user's profile and the mailbox this toolkit acts on.\n\nReturns the user's name, email, tenant and other profile details, plus the mailbox\nthe toolkit reads mail from. mailbox_timezone identifies the mailbox's configured\ntime zone or the fallback identified by mailbox_timezone_source. received_date_time\nremains in UTC; received_date_time_local contains its local representation when\navailable.\n\nmailbox_timezone may be a Windows name such as \"Eastern Standard Time\" rather than an\nIANA identifier - that names a zone observing daylight saving, not a fixed offset.\nmailbox_timezone_source says where that zone came from: \"mailbox\" and \"mailbox_utc\"\nmean the mailbox itself names the zone, whereas \"default_not_configured\" (the mailbox\nnames none) and \"default_unreadable\" (the setting could not be read) mean UTC is a\nfallback this toolkit applied, not a zone the mailbox is set to. On either fallback,\ndo not tell the user their mailbox is configured for that zone.",
       "parameters": [],
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "User.Read",
-          "Mail.Read"
+          "Mail.Read",
+          "Mail.Read.Shared",
+          "Mail.ReadWrite",
+          "Mail.ReadWrite.Shared",
+          "Mail.Send",
+          "Mail.Send.Shared",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Get comprehensive user profile and Outlook Mail environment information."
+        "description": "The signed-in user's profile, the mailbox this toolkit acts on, and its time zone."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -3786,6 +3732,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "a4731e3762b5a2b6a7e351b9d80bf23dd3f2bbc29a5b19028ce8f9e86792634e",
-  "generatedAt": "2026-07-16T11:38:45.328Z",
-  "summary": "The **Microsoft Outlook Mail** toolkit connects Arcade to the Microsoft Graph Mail API, enabling LLMs to read, compose, send, search, and organize emails in both personal and shared/delegated Outlook mailboxes.\n\n## Capabilities\n\n- **Compose & send** — Create and immediately send emails, compose drafts (new, reply, or reply-all), update draft recipients/subject/body, and send any existing draft; returns `message_id` and `conversation_id` for immediate chaining.\n- **Read & retrieve** — Fetch a single email by ID with configurable body format (plain text or HTML), body length cap, and offset for long messages; list attachment metadata for any message.\n- **List & filter** — Browse emails across all folders or a specific folder, filter by structured properties (sender, flag, conversation ID, importance, read status), and sort by received date, subject, sender, or importance.\n- **Search** — Full-text keyword search combined with structured filters across the entire mailbox; results include 255-character body previews with `get_email` used to retrieve full content.\n- **Folder management** — List top-level and child mail folders (with unread/total counts), move messages between folders using well-known folder names or folder IDs.\n- **Shared & delegated mailboxes** — Full parallel surface (compose, send, draft, reply, search, list, move, folder management, capability check) for team inboxes and delegated executive mailboxes, sending from the shared address rather than the authenticated user's address.\n\n## OAuth\n\nAuthentication uses **Microsoft** OAuth 2.0. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details, required permissions, and configuration."
+  "generatedAt": "2026-09-16T20:39:26.705Z",
+  "summary": "The Microsoft Outlook Mail toolkit connects Arcade to the Microsoft Graph Mail API, enabling LLMs to read, compose, send, search, and organize email in both personal and shared/delegated Outlook mailboxes.\n\n## Capabilities\n\n- **Read & search mail** — Retrieve individual messages (with body paging and format control), list messages per folder or conversation, and run full-text + structured searches across the mailbox; attachment metadata is also available.\n- **Compose & send** — Create and immediately send new emails or replies (reply / reply-all), with To/Cc/Bcc control and returned `message_id`/`conversation_id` for chaining.\n- **Draft management** — Save new drafts or revise existing ones, create threaded reply drafts with Cc add/remove support, and send any saved draft when ready.\n- **Folder & organization** — List mail folders (including child folders), move messages to well-known or custom folders, and scope listings to specific folders.\n- **Shared & delegated mailboxes** — Full parallel API surface (compose, send, draft, list, search, move, attachments) for team inboxes or delegated executive mailboxes, plus a capability checker to verify which mailboxes are reachable.\n- **Identity & mailbox context** — Retrieve the signed-in user's profile, active mailbox address, tenant, and configured time zone (with source attribution for fallback detection).\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 using the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details."
 }

@@ -1,7 +1,7 @@
 {
   "id": "GoogleDocs",
   "label": "Google Docs",
-  "version": "9.0.0",
+  "version": "9.1.0",
   "description": "Arcade.dev LLM tools for Google Docs",
   "metadata": {
     "category": "productivity",
@@ -26,8 +26,8 @@
     {
       "name": "CommentOnDocument",
       "qualifiedName": "GoogleDocs.CommentOnDocument",
-      "fullyQualifiedName": "GoogleDocs.CommentOnDocument@9.0.0",
-      "description": "Comment on a specific document by its ID.\n\nReaches only documents this app has been granted edit access to — by default,\nthose it created or the user picked.\nThe comment is posted as the connected account and notifies the document's\ncollaborators.",
+      "fullyQualifiedName": "GoogleDocs.CommentOnDocument@9.1.0",
+      "description": "Comment on a specific document by its ID.\n\nReaches only documents this app has been granted edit access to — by default,\nthose it created or the user picked.\nThe comment is posted as the connected account and notifies the document's\ncollaborators.\n\nThe comment covers the whole document. No API can anchor a new Google Docs comment to a\npassage, so the Docs UI lists it in the sidebar without highlighting any text. Quote the\npassage inside comment_text when the comment is about one.",
       "parameters": [
         {
           "name": "document_id",
@@ -50,7 +50,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -76,7 +78,7 @@
             "required": true
           },
           "comment_text": {
-            "value": "This section needs more clarity. Please revise the third paragraph to better explain the methodology.",
+            "value": "Please review the third paragraph for accuracy — the statistics cited appear to be outdated and should reference the 2023 report instead.",
             "type": "string",
             "required": true
           }
@@ -106,7 +108,7 @@
     {
       "name": "CreateBlankDocument",
       "qualifiedName": "GoogleDocs.CreateBlankDocument",
-      "fullyQualifiedName": "GoogleDocs.CreateBlankDocument@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.CreateBlankDocument@9.1.0",
       "description": "Create an empty Google Docs document with the specified title.\n\nThe document is owned by the connected account and lands in its Drive root. Returns\nthe new document's id, which every other tool here takes as its target. To create a\ndocument that already has content, use the tool that takes text rather than creating\nan empty one and appending to it.",
       "parameters": [
         {
@@ -122,11 +124,20 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "The created document's title, ID and URL"
@@ -136,7 +147,7 @@
         "toolName": "GoogleDocs.CreateBlankDocument",
         "parameters": {
           "title": {
-            "value": "Meeting Notes - 2026-02-21",
+            "value": "Q3 Marketing Report 2024",
             "type": "string",
             "required": true
           }
@@ -166,7 +177,7 @@
     {
       "name": "CreateDocumentFromText",
       "qualifiedName": "GoogleDocs.CreateDocumentFromText",
-      "fullyQualifiedName": "GoogleDocs.CreateDocumentFromText@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.CreateDocumentFromText@9.1.0",
       "description": "Create a Google Docs document with the specified title and text content.\n\nWhen input_format is MARKDOWN, the text_content is parsed as Markdown and the resulting\ndocument is formatted with headings, bold, italic, bullet lists, and numbered lists.",
       "parameters": [
         {
@@ -201,11 +212,20 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "The created document's title, ID and URL"
@@ -220,7 +240,7 @@
             "required": true
           },
           "text_content": {
-            "value": "# Project Kickoff Meeting\n\n**Date:** October 15, 2024\n\n## Agenda\n\n- Introduction and team overview\n- Project goals and timeline\n- Task assignments\n\n## Key Decisions\n\n1. Launch date set for Q1 2025\n2. Weekly syncs every Monday at 10am\n3. Use Slack for daily communication\n\n## Next Steps\n\n*All team members* should review the project brief before the next meeting.\n\n### Action Items\n\n- Alice: Finalize requirements document\n- Bob: Set up the development environment\n- Carol: Schedule stakeholder interviews",
+            "value": "# Project Kickoff Meeting\n\n## Attendees\n- Alice Johnson\n- Bob Smith\n- Carol White\n\n## Agenda\n1. Project overview\n2. Timeline discussion\n3. Resource allocation\n\n## Key Decisions\n**Decision 1:** The project will launch on **March 15, 2025**.\n\n*Note: All deadlines are subject to change based on team availability.*\n\n## Next Steps\n- Schedule weekly stand-ups\n- Set up project repository\n- Assign initial tasks",
             "type": "string",
             "required": true
           },
@@ -255,7 +275,7 @@
     {
       "name": "EditDocument",
       "qualifiedName": "GoogleDocs.EditDocument",
-      "fullyQualifiedName": "GoogleDocs.EditDocument@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.EditDocument@9.1.0",
       "description": "Read or edit a Google Docs document using structured batchUpdate requests.\n\nReaches only documents this app has been granted edit access to — by default,\nthose it created or the user picked.\n\n\nWhen called without requests, returns the document content in DocMD format (block IDs,\ncharacter indices, and text styles). When called with requests, applies the edits and\nreturns the updated DocMD. Use the DocMD indices from the response to construct\nrequests for subsequent calls.",
       "parameters": [
         {
@@ -288,7 +308,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -332,8 +354,8 @@
               {
                 "updateTextStyle": {
                   "range": {
-                    "startIndex": 10,
-                    "endIndex": 35,
+                    "startIndex": 45,
+                    "endIndex": 78,
                     "tabId": "t.0"
                   },
                   "textStyle": {
@@ -346,10 +368,10 @@
               {
                 "insertText": {
                   "location": {
-                    "index": 5,
+                    "index": 12,
                     "tabId": "t.0"
                   },
-                  "text": "Introduction: "
+                  "text": "Updated Introduction: "
                 }
               }
             ],
@@ -357,7 +379,7 @@
             "required": false
           },
           "revision_id": {
-            "value": "AOV_f08kLq2xZ3pN7mT1vYcWjRsDhEbI",
+            "value": "AOV_f42kLp9mNq3rT7wXzYcBdEsHuJvKiR1",
             "type": "string",
             "required": false
           }
@@ -388,16 +410,27 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl@9.1.0",
       "description": "Generate a URL where the user can grant this app access to specific Drive files.\n\nCheck `url` first. An empty `url` with a `reason` means this app already reaches every\ndocument the connected account can open, so there is no per-file grant to request: this\ntool cannot change any outcome, and a document that could not be read is one the\naccount itself cannot open. Do not retry it.\n\nOtherwise the URL opens Google's first-party Drive picker, where the user selects which\nfiles to share with this application — it is not a sign-in or credential prompt. Use\nthis when a prior tool reported that a file was not found or access was denied, and the\nuser expects the file to exist. After the user completes the picker flow, retry the\nprior tool.",
       "parameters": [],
       "auth": {
         "providerId": "google",
         "providerType": "oauth2",
-        "scopes": []
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
+        ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "No description provided."
@@ -431,7 +464,7 @@
     {
       "name": "GetDocumentAsDocmd",
       "qualifiedName": "GoogleDocs.GetDocumentAsDocmd",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentAsDocmd@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentAsDocmd@9.1.0",
       "description": "Get the latest version of the specified Google Docs document as DocMD.\n\nReaches only documents this app has been granted access to — by default, those it\ncreated or the user picked.\n\nThe DocMD output will include tags that can be used to annotate the document with location\ninformation, the type of block, block IDs, and other metadata. If the document has tabs,\nall tabs are included in sequential order unless a specific tab_id is provided.",
       "parameters": [
         {
@@ -455,7 +488,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -481,7 +516,7 @@
             "required": true
           },
           "tab_id": {
-            "value": "t.abc123xyz",
+            "value": "t.abc123xyz456",
             "type": "string",
             "required": false
           }
@@ -511,7 +546,7 @@
     {
       "name": "GetDocumentById",
       "qualifiedName": "GoogleDocs.GetDocumentById",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentById@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentById@9.1.0",
       "description": "Get a Google Docs document as the raw Google Docs API document resource.\n\nReturns the API's own structure, including every tab's content. Reaches only\ndocuments this app has been granted access to — by default, those it created or the\nuser picked. Use this when the document's exact structure matters, such as reading\nstyle runs, named ranges or inline object properties. For reading or summarizing the\ntext, prefer the DocMD form, which is far smaller and carries the character indices\nedits are built from.",
       "parameters": [
         {
@@ -527,7 +562,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -578,7 +615,7 @@
     {
       "name": "GetDocumentMetadata",
       "qualifiedName": "GoogleDocs.GetDocumentMetadata",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentMetadata@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentMetadata@9.1.0",
       "description": "Get metadata for a Google Docs document including hierarchical tab structure.\n\nReaches only documents this app has been granted access to — by default, those it\ncreated or the user picked.\n\nReturns document title, ID, URL, total character count, and nested tab information\nwith character counts for each tab.",
       "parameters": [
         {
@@ -594,7 +631,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -645,7 +684,7 @@
     {
       "name": "InsertTextAtEndOfDocument",
       "qualifiedName": "GoogleDocs.InsertTextAtEndOfDocument",
-      "fullyQualifiedName": "GoogleDocs.InsertTextAtEndOfDocument@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.InsertTextAtEndOfDocument@9.1.0",
       "description": "Appends text to the end of a Google Docs document.\n\nReaches only documents this app has been granted edit access to — by default,\nthose it created or the user picked.\n\n\nEach tab keeps its own content and its own character indices, so the text lands at the\nend of one tab rather than the end of the file.",
       "parameters": [
         {
@@ -677,7 +716,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -703,12 +744,12 @@
             "required": true
           },
           "text_content": {
-            "value": "This is the appended text at the end of the document.",
+            "value": "This is additional text appended to the end of the document.",
             "type": "string",
             "required": true
           },
           "tab_id": {
-            "value": "t.abc123xyz456",
+            "value": "t.abc123xyz",
             "type": "string",
             "required": false
           }
@@ -738,8 +779,8 @@
     {
       "name": "ListDocumentComments",
       "qualifiedName": "GoogleDocs.ListDocumentComments",
-      "fullyQualifiedName": "GoogleDocs.ListDocumentComments@9.0.0",
-      "description": "List comments on the specified Google Docs document.\n\nReaches only documents this app has been granted access to — by default, those it\ncreated or the user picked.\nReturns each comment's text, its replies, and the display name of whoever wrote it.\nDrive does not document an order for comments, so do not read the first one as the\nmost recent; compare createdTime when recency matters. A long-running document can\ncarry thousands of comments, so results are paged rather than returned whole, and the\ncounts describe the page in hand rather than the document.",
+      "fullyQualifiedName": "GoogleDocs.ListDocumentComments@9.1.0",
+      "description": "List comments on the specified Google Docs document.\n\nReaches only documents this app has been granted access to — by default, those it\ncreated or the user picked.\nReturns each comment's text, its replies, and the display name of whoever wrote it.\nDrive does not document an order for comments, so do not read the first one as the\nmost recent; compare createdTime when recency matters. A long-running document can\ncarry thousands of comments, so results are paged rather than returned whole, and the\ncounts describe the page in hand rather than the document.\n\nA comment anchored in the Docs UI carries quotedFileContent, the passage it is attached\nto, so finding that text in the document body places the comment. A comment that covers\nthe whole document has no quotedFileContent. Each comment also reports whether its thread\nhas been resolved.",
       "parameters": [
         {
           "name": "document_id",
@@ -778,7 +819,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -814,7 +857,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "eyJzdGFydEluZGV4IjoyNSwicGFnZVNpemUiOjI1fQ==",
+            "value": "eyJzdGFydEluZGV4IjoyNX0=",
             "type": "string",
             "required": false
           }
@@ -844,7 +887,7 @@
     {
       "name": "SearchAndRetrieveDocuments",
       "qualifiedName": "GoogleDocs.SearchAndRetrieveDocuments",
-      "fullyQualifiedName": "GoogleDocs.SearchAndRetrieveDocuments@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.SearchAndRetrieveDocuments@9.1.0",
       "description": "Searches for documents in the user's Google Drive and returns documents with their main body\ncontent and tab metadata. Excludes documents that are in the trash.\n\nSearches only the documents this app has been granted access to — by default, those\nit created or the user picked.\nContent it returns was written by whoever has edited each document, which need not be\nthe connected account and need not be the owner.\n\n\nReturns main body content only with metadata about tabs. Use get_document_as_docmd() to retrieve\nfull tab content for specific documents. Use search_documents() for metadata-only searches.",
       "parameters": [
         {
@@ -955,7 +998,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -997,7 +1042,7 @@
             "required": false
           },
           "search_only_in_shared_drive_id": {
-            "value": "0AF1234abcXYZ567",
+            "value": "0AJ9x8kFz3mNkUk9PVA",
             "type": "string",
             "required": false
           },
@@ -1020,12 +1065,12 @@
             "required": false
           },
           "limit": {
-            "value": 10,
+            "value": 15,
             "type": "integer",
             "required": false
           },
           "pagination_token": {
-            "value": "eyJzdGFydEluZGV4IjoyMCwicGFnZVRva2VuIjoiYWJjMTIzIn0=",
+            "value": "eyJzdGFydEluZGV4IjoxNSwibGltaXQiOjE1fQ==",
             "type": "string",
             "required": false
           }
@@ -1055,7 +1100,7 @@
     {
       "name": "SearchDocuments",
       "qualifiedName": "GoogleDocs.SearchDocuments",
-      "fullyQualifiedName": "GoogleDocs.SearchDocuments@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.SearchDocuments@9.1.0",
       "description": "Searches for documents in the user's Google Drive. Excludes documents in trash.\n\nSearches only the documents this app has been granted access to — by default, those\nit created or the user picked.\n\nReturns metadata only. Use get_document_metadata or get_document_as_docmd for content.",
       "parameters": [
         {
@@ -1153,7 +1198,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -1176,7 +1223,7 @@
           "document_contains": {
             "value": [
               "quarterly report",
-              "budget 2024"
+              "budget forecast"
             ],
             "type": "array",
             "required": false
@@ -1190,7 +1237,7 @@
             "required": false
           },
           "search_only_in_shared_drive_id": {
-            "value": "0AFs3hMr6gJQRUk9PVA",
+            "value": "0AFs3zHJVabc1Uk9PVA",
             "type": "string",
             "required": false
           },
@@ -1218,7 +1265,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "eyJzdGFydEluZGV4IjoyNX0=",
+            "value": "eyJzdGFydEluZGV4IjoyNSwicGFnZVRva2VuIjoiYWJjMTIzIn0=",
             "type": "string",
             "required": false
           }
@@ -1248,19 +1295,27 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleDocs.WhoAmI",
-      "fullyQualifiedName": "GoogleDocs.WhoAmI@9.0.0",
+      "fullyQualifiedName": "GoogleDocs.WhoAmI@9.1.0",
       "description": "Get the connected Google account's profile: name, email address and profile picture.\n\nUse this to confirm which account the connection is acting as before creating or\nediting a document, or when the user asks who they are signed in as.\n\nIt reads the Google profile and opens no document, so it does not report which\ndocuments this app can reach. To find out whether a particular document is reachable,\nsearch for it or open it. Fields Google does not return are omitted rather than empty.",
       "parameters": [],
       "auth": {
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "unknown"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "The connected Google account's name, email address and profile picture."
@@ -1319,6 +1374,6 @@
   ],
   "subPages": [],
   "curationSourceHash": "33910354b796df23626997fca5e7d53bbf1479131ac0d258bc282833e12de451",
-  "generatedAt": "2026-09-04T15:27:40.655Z",
-  "summary": "## Google Docs Toolkit\n\nThe Google Docs toolkit connects Arcade to Google Docs (and the Drive layer beneath it), enabling LLMs to create, read, edit, search, and comment on documents via the connected user's Google account.\n\n## Capabilities\n\n- **Document creation:** Create blank documents or documents pre-populated with plain text or Markdown (with heading, bold, italic, and list formatting applied automatically).\n- **Reading and inspection:** Retrieve documents as raw Google Docs API resources, as compact DocMD (with block IDs and character indices for precise editing), or as metadata-only summaries (title, ID, URL, tab structure, character counts).\n- **Structured editing and appending:** Apply `batchUpdate` requests using DocMD indices for surgical edits, or append text to the end of a specific tab in a document.\n- **Search:** Query the user's accessible Drive for documents by keyword, returning either metadata or metadata plus main-body content.\n- **Comments:** Post comments on documents (as the connected account, notifying collaborators) and list existing comments with text, replies, and author display names, paged for large documents.\n- **Access management and identity:** Generate a Google Drive inline file-picker URL so users can grant the app access to specific files, and look up the connected account's profile (name, email, picture).\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details, required scopes, and configuration.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — An API key that enables the `GenerateGoogleFilePickerUrl` tool to produce a Google Drive file-picker URL. This key gates access to the inline picker feature; without it, the tool cannot generate picker URLs. Obtain it from the [Arcade dashboard secrets page](https://api.arcade.dev/dashboard/auth/secrets) or by contacting Arcade support, as this is an Arcade-managed feature flag rather than a key issued directly by Google.\n\nFor general guidance on configuring secrets in Arcade tools, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+  "generatedAt": "2026-09-16T20:38:28.547Z",
+  "summary": "## Google Docs Toolkit\n\nArcade's Google Docs toolkit lets LLMs create, read, edit, search, and annotate Google Docs documents on behalf of a connected Google account via the Google Docs and Drive APIs.\n\n## Capabilities\n\n- **Document creation:** Create blank documents or documents pre-populated with plain text or parsed Markdown (headings, bold, italic, lists).\n- **Document reading:** Retrieve documents as raw Google Docs API resources, as compact DocMD (with block IDs and character indices), or as lightweight metadata (title, ID, URL, tab structure, character counts).\n- **Editing and text insertion:** Apply structured `batchUpdate` requests for precise in-place edits using DocMD indices, or append text to the end of any tab.\n- **Search and discovery:** Search Drive for documents by keyword, returning metadata or body content with tab metadata; results exclude trashed files and are scoped to documents the app can access.\n- **Comments:** Post whole-document comments as the connected account and list existing comments with text, replies, authors, timestamps, resolution status, and quoted passage anchors.\n- **Access management and identity:** Generate a Google Drive file picker URL to grant per-file access when a document is not reachable, and retrieve the connected account's profile (name, email, avatar).\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — Controls whether the `GenerateGoogleFilePickerUrl` tool can produce an inline Google Drive file picker URL, allowing users to grant the app access to specific Drive files directly from within a tool call. The exact value and how to obtain or configure it depends on your Arcade deployment; consult your Arcade instance configuration or the Arcade dashboard.\n\nFor general guidance on configuring secrets, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). Secrets can also be managed at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }
