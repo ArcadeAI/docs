@@ -12,6 +12,9 @@ export const meta: MetaRecord = {
     title: "Quickstart: build an MCP server",
     href: "/get-started/quickstarts/mcp-server-quickstart",
   },
+  eventing: {
+    title: "Events and webhooks",
+  },
   "tool-calling": {
     title: "Call tools",
   },
