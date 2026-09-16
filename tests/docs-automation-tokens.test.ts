@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "vitest";
 
@@ -12,22 +12,21 @@ const AUTOMATION_WORKFLOWS = [
 ] as const;
 
 for (const name of AUTOMATION_WORKFLOWS) {
-  test(`${name} authenticates PR writes with Docs Bot, not GITHUB_TOKEN`, () => {
+  test(`${name} opens PRs with GITHUB_TOKEN, not Docs Bot`, () => {
     const yaml = readWorkflow(name);
 
-    expect(yaml).toContain("uses: ./.github/actions/app-token");
-    expect(yaml).toContain("secrets.DOCS_BOT_CLIENT_ID");
-    expect(yaml).toContain("secrets.DOCS_BOT_PRIVATE_KEY");
-    expect(yaml).toContain("steps.app-token.outputs.token");
-    expect(yaml).not.toContain("secrets.GITHUB_TOKEN");
+    expect(yaml).not.toContain("uses: ./.github/actions/app-token");
+    expect(yaml).not.toContain("DOCS_BOT_CLIENT_ID");
+    expect(yaml).not.toContain("DOCS_BOT_PRIVATE_KEY");
+    expect(yaml).not.toContain("create-github-app-token");
+    expect(yaml).toContain("github.token");
   });
 }
 
-test("app-token composite action mints a GitHub App installation token", () => {
-  const action = readFileSync(
-    join(process.cwd(), ".github", "actions", "app-token", "action.yml"),
-    "utf-8"
-  );
-
-  expect(action).toContain("actions/create-github-app-token@v2");
+test("docs automation no longer ships a GitHub App token action", () => {
+  expect(
+    existsSync(
+      join(process.cwd(), ".github", "actions", "app-token", "action.yml")
+    )
+  ).toBe(false);
 });

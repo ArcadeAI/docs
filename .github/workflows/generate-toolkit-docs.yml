@@ -3,7 +3,11 @@ name: Generate toolkit docs
 # Flow:
 # 1) Generate toolkit JSON into toolkit-docs-generator/data/toolkits
 # 2) Sync integrations sidebar _meta.tsx from toolkit-docs-generator/data/toolkits
-# 3) Create or update a PR if changes were produced
+# 3) Regenerate public/llms.txt so the automation PR is self-contained
+# 4) Create or update a PR if changes were produced
+#
+# Opens the PR with GITHUB_TOKEN. That does not start other workflows, so this
+# job generates llms.txt here instead of depending on llmstxt.yml to fire.
 
 on:
   repository_dispatch:
@@ -97,14 +101,12 @@ jobs:
       - name: Sync toolkit sidebar navigation
         run: pnpm exec tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
-      # GITHUB_TOKEN PRs do not start other workflows. Docs Bot is a GitHub
-      # App, so the opened automation PR still runs Test.
-      - name: Get app token
-        id: app-token
-        uses: ./.github/actions/app-token
-        with:
-          app-id: ${{ secrets.DOCS_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
+      # GITHUB_TOKEN PRs do not start llmstxt.yml, so generate the file here.
+      # The toolkit generator CLI still does not write llms.txt.
+      - name: Generate llms.txt
+        run: pnpm llmstxt
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Create pull request
         id: cpr
@@ -112,9 +114,7 @@ jobs:
         env:
           HUSKY: 0
         with:
-          token: ${{ steps.app-token.outputs.token }}
-          author: ${{ steps.app-token.outputs.committer }}
-          committer: ${{ steps.app-token.outputs.committer }}
+          token: ${{ github.token }}
           commit-message: "[AUTO] Adding MCP Servers docs update"
           title: "[AUTO] Adding MCP Servers docs update"
           body: |
@@ -141,7 +141,7 @@ jobs:
             echo "::warning::Could not request review on PR #${{ steps.cpr.outputs.pull-request-number }}: $(cat review-error.log)"
           fi
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload generation report
         if: always()
@@ -224,7 +224,7 @@ jobs:
 
           if [ "$GENERATION_SUCCEEDED" = "true" ]; then
             headline=":warning: Toolkit docs generated, but the workflow failed afterward"
-            detail="Generation succeeded, so the toolkit JSON is fine. A later workflow step failed — inspect the run to determine whether sidebar sync, PR creation, artifact upload, or Slack notification needs attention."
+            detail="Generation succeeded, so the toolkit JSON is fine. A later workflow step failed — inspect the run to determine whether sidebar sync, llms.txt generation, PR creation, artifact upload, or Slack notification needs attention."
           else
             headline=":rotating_light: Toolkit docs generation failed"
             detail="The failed run contains the exact file path and validation error."
