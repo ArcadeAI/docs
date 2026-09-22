@@ -45,6 +45,8 @@ Membership is resolved by querying your identity provider, then cached per user 
 | Toolkit | `Slack.*` | Every tool in the toolkit |
 | Global | `*` | Every tool |
 
+Group names are matched **exactly, including case**, while tool matchers are not. A rule requiring `Finance-Admins` is not satisfied by membership in `finance-admins`. The asymmetry is deliberate: a mis-cased tool matcher governs nothing, whereas a loosely matched group would widen who satisfies the rule. Group IDs are matched without regard to case, since an ID is opaque.
+
 When several rules match the same call, only the most specific rule applies: an exact match beats a toolkit match, and a toolkit match beats the global match. The caller is evaluated against that one rule only.
 
 **A tool no rule matches stays visible.** This matters when you write a matcher by hand: a typo produces a rule that governs nothing, rather than a rule that hides everything. Use a global `*` rule when you want a default that covers tools you have not named.
@@ -59,7 +61,7 @@ One configuration uses one backend. All three are read-only integrations that ne
 | Microsoft Entra ID | Directory (tenant) ID, application (client) ID, client secret | The `GroupMember.Read.All` application permission, with administrator consent granted |
 | SailPoint Identity Security Cloud | Tenant URL, client ID, client secret | See the SailPoint section below, because the rights that sound correct are not the ones that work |
 
-With Okta, a rule's required groups are group names. With Entra ID they are group names or group object IDs, which is a distinction worth reading below. With SailPoint, they are role or access profile names, or their IDs, which is also covered below.
+Every backend accepts either a name or an ID for a required group: an Okta group name or group ID, an Entra ID group name or object ID, a SailPoint role or access profile name or its ID. Names are easier to read in a rule; an ID is exact, cannot collide, and follows the item through a rename, so it is the better choice for anything sensitive. The Entra distinction is worth reading below, because a display name there is less safe than it looks.
 
 ### Naming an Entra group: name or object ID
 
@@ -82,9 +84,17 @@ Restricting a display-name match to ordinary security groups removes the surface
 
 ### Matching a caller to a directory user
 
-The backend looks the caller up in your directory **by the identity the request carries**. In practice the Arcade user ID has to equal the directory login exactly.
+The backend looks the caller up in your directory **by the identity the request carries**. Arcade does not interpret that value or assume it is an email address: it is passed to your directory as-is, and your directory decides what it matches against.
 
-This is the most common source of surprise in a real deployment. A caller whose Arcade identity is an internal ID, or an email that differs in case or domain from the directory login, matches nothing. Because the hook fails closed, that surfaces as tools quietly missing for everyone rather than as an error someone can act on. Confirm that the identity your gateway sends is the same string your directory knows the person by before you turn a rule on.
+What each backend does with it differs:
+
+| Backend | How the caller is resolved |
+| --- | --- |
+| Okta | The value is used directly in the user lookup, so it must be an identifier Okta accepts for that user |
+| Microsoft Entra ID | The same, against Microsoft Graph |
+| SailPoint | Looked up against the identity's `email` **or** `alias`, because SailPoint's access read needs an internal identity ID first |
+
+This is the most common source of surprise in a real deployment. A caller whose Arcade identity is an internal ID, or a value that differs in case or domain from what the directory knows, matches nothing. Because the hook fails closed, that surfaces as tools quietly missing for everyone rather than as an error someone can act on. Confirm that the identity your gateway sends is one your directory recognizes before you turn a rule on.
 
 ## SailPoint Identity Security Cloud
 
@@ -130,7 +140,7 @@ Create a read-only API client in Identity Security Cloud using the OAuth 2.0 cli
 
 ### Identity matching in SailPoint
 
-SailPoint's access read is keyed on an internal identity ID rather than a login, so an email caller is resolved to that ID first. Two cases are reported as errors rather than as a clean denial, so that a mapping mistake stays diagnosable instead of looking like a working deny:
+SailPoint's access read is keyed on an internal identity ID rather than a login, so the caller is resolved to that ID first, matching the identity's `email` or its `alias`. Which of those carries the login is a property of how your directory was populated rather than of SailPoint, which is why both are tried. Two cases are reported as errors rather than as a clean denial, so that a mapping mistake stays diagnosable instead of looking like a working deny:
 
 - No identity matches the caller
 - More than one identity matches the caller
