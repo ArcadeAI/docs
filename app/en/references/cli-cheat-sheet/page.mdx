@@ -72,13 +72,31 @@ import '../../../cheat-sheet-print.css'
     | Command | Description |
     |---------|-------------|
     | `arcade login` | Opens browser for OAuth authentication |
-    | `arcade login --host <url>` | Login to custom Arcade instance |
-    | `arcade logout` | Clear local credentials |
+    | `arcade login --url <url>` | Log in to a self-hosted installation |
+    | `arcade logout` | Log out of the active context |
+    | `arcade logout --all` | Log out of every context |
     | `arcade whoami` | Show logged-in user and active context |
     | `arcade dashboard` | Open Arcade web UI in browser |
     | `arcade dashboard --local` | Open local dashboard |
 
     Credentials are stored in `~/.arcade/credentials.yaml` (or `%USERPROFILE%\.arcade\credentials.yaml` on Windows).
+
+  </CheatSheetSection>
+
+  <CheatSheetSection title="Installation Contexts" icon="🗂️" color="orange">
+
+    A context is one Arcade installation you signed in to, with its credentials. Deploy, secret, and server commands use the active one.
+
+    | Command | Description |
+    |---------|-------------|
+    | `arcade context list` | List saved contexts |
+    | `arcade context set <name>` | Set the active context |
+    | `arcade context show [name]` | Show a context's details |
+    | `arcade context add <url>` | Log in to an installation and save it |
+    | `arcade context delete <name>` | Delete a saved context |
+    | `arcade --context <name> <cmd>` | Run one command against another context |
+
+    Set `ARCADE_CONTEXT` to target an installation for a whole session, which suits scripts and CI.
 
   </CheatSheetSection>
 
@@ -486,6 +504,10 @@ import '../../../cheat-sheet-print.css'
     | `OPENAI_API_KEY` | OpenAI API key (for evals) |
     | `ANTHROPIC_API_KEY` | Anthropic API key (for evals) |
     | `ARCADE_API_BASE_URL` | Override Arcade API URL |
+    | `ARCADE_CONTEXT` | Run against this saved context |
+    | `ARCADE_URL` | Installation URL for `arcade login` |
+
+    Set `ARCADE_CONTEXT` and `ARCADE_URL` in your shell, not in a `.env` file. The CLI reads them when it starts, before it loads a project's `.env`.
 
     ```bash
     # In shell
