@@ -84,9 +84,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "write:jira-work",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -100,25 +109,24 @@
         "toolName": "Jira.AddCommentToIssue",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-42",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Hi team,\n\nI've investigated the bug and pushed a fix to the feature branch. Could someone review the changes and confirm if this resolves the problem? If it looks good, please merge and deploy.\n\nThanks,\nJohn Doe",
+            "value": "I've reviewed the requirements and the implementation looks good. We should be ready to merge after the CI pipeline passes.",
             "type": "string",
             "required": true
           },
           "reply_to_comment": {
-            "value": "10245",
+            "value": "10045",
             "type": "string",
             "required": false
           },
           "mention_users": {
             "value": [
               "Jane Smith",
-              "dev.team@example.com",
-              "5f8d0d3a9c1b2e001234abcd"
+              "john.doe@example.com"
             ],
             "type": "array",
             "required": false
@@ -187,11 +195,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "write:sprint:jira-software",
-          "read:sprint:jira-software",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
           "read:board-scope:jira-software",
           "read:issue-details:jira",
-          "read:jira-work"
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -205,7 +220,7 @@
         "toolName": "Jira.AddIssuesToSprint",
         "parameters": {
           "sprint_id": {
-            "value": "12345",
+            "value": "42",
             "type": "string",
             "required": true
           },
@@ -213,13 +228,15 @@
             "value": [
               "PROJ-101",
               "PROJ-102",
-              "PROJ-103"
+              "PROJ-103",
+              "10045",
+              "10046"
             ],
             "type": "array",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "abcd-ef12-3456",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -290,10 +307,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-work",
-          "write:jira-work",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
           "read:jira-user",
-          "manage:jira-configuration"
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -307,14 +332,15 @@
         "toolName": "Jira.AddLabelsToIssue",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-42",
             "type": "string",
             "required": true
           },
           "labels": {
             "value": [
               "bug",
-              "urgent_fix",
+              "high-priority",
+              "needs-review",
               "backend"
             ],
             "type": "array",
@@ -326,7 +352,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "ef12ab34-5678-90cd-efab-1234567890ab",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -420,8 +446,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
           "write:jira-work",
-          "read:jira-user"
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -435,17 +471,17 @@
         "toolName": "Jira.AttachFileToIssue",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-42",
             "type": "string",
             "required": true
           },
           "filename": {
-            "value": "notes.txt",
+            "value": "bug_report.txt",
             "type": "string",
             "required": true
           },
           "file_content_str": {
-            "value": "Hello, this is a test attachment.\nLine 2 of the file.",
+            "value": "Bug Description:\nSteps to reproduce:\n1. Open the app\n2. Click on Settings\n3. Observe the crash\n\nExpected: Settings page opens\nActual: App crashes",
             "type": "string",
             "required": false
           },
@@ -465,7 +501,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "abc123-cloud-id",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -600,10 +636,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-work",
-          "write:jira-work",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
           "read:jira-user",
-          "manage:jira-configuration"
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -617,7 +661,7 @@
         "toolName": "Jira.CreateIssue",
         "parameters": {
           "title": {
-            "value": "Fix login redirect bug",
+            "value": "Fix login page crash on mobile devices",
             "type": "string",
             "required": true
           },
@@ -627,36 +671,37 @@
             "required": true
           },
           "project": {
-            "value": "PROJ",
+            "value": "MOBILE",
             "type": "string",
             "required": false
           },
           "due_date": {
-            "value": "2025-07-01",
+            "value": "2025-06-30",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "Users are occasionally redirected to another user's dashboard after login. Steps to reproduce: 1) Navigate to /login 2) Enter valid credentials 3) Observe redirect. Expected: redirect to authenticated user's dashboard. Frequency: ~1/50 logins.",
+            "value": "Users on iOS and Android are experiencing a crash when attempting to log in with social authentication. The issue appears after the latest release (v2.4.1). Steps to reproduce: 1. Open app on mobile device. 2. Tap 'Login with Google'. 3. App crashes immediately.",
             "type": "string",
             "required": false
           },
           "environment": {
-            "value": "production",
+            "value": "Production",
             "type": "string",
             "required": false
           },
           "labels": {
             "value": [
-              "frontend",
-              "regression",
-              "high_priority"
+              "mobile",
+              "crash",
+              "authentication",
+              "high-priority"
             ],
             "type": "array",
             "required": false
           },
           "parent_issue": {
-            "value": null,
+            "value": "MOBILE-42",
             "type": "string",
             "required": false
           },
@@ -676,7 +721,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "abc123-cloud-id",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -730,8 +775,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -745,12 +800,12 @@
         "toolName": "Jira.DownloadAttachment",
         "parameters": {
           "attachment_id": {
-            "value": "5f8d7c2e-3a9b-4f6d-9c1e-0a123456789b",
+            "value": "10042",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "abcd1234efgh5678",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -804,8 +859,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -819,12 +884,12 @@
         "toolName": "Jira.GetAttachmentMetadata",
         "parameters": {
           "attachment_id": {
-            "value": "5f2a8b7c-1234-4b9b-8f3d-0a1b2c3d4e5f",
+            "value": "10042",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "12345678-90ab-cdef-1234-567890abcdef",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -861,7 +926,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-user"
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -939,8 +1015,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
           "read:board-scope:jira-software",
-          "read:issue-details:jira"
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -954,12 +1040,12 @@
         "toolName": "Jira.GetBoardBacklogIssues",
         "parameters": {
           "board_id": {
-            "value": "1001",
+            "value": "142",
             "type": "string",
             "required": true
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -969,7 +1055,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "cloud-abc123",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1040,10 +1126,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
           "read:board-scope:jira-software",
-          "read:project:jira",
           "read:issue-details:jira",
-          "read:jira-user"
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1058,10 +1152,11 @@
         "parameters": {
           "board_identifiers_list": {
             "value": [
-              "1001",
-              "1002",
-              "Sprint Board - Backend",
-              "Team Alpha Board"
+              "Project Alpha",
+              "42",
+              "Sprint Board",
+              "101",
+              "Marketing Roadmap"
             ],
             "type": "array",
             "required": false
@@ -1077,7 +1172,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "6f1a2b3c-4d5e-6789-abcd-ef0123456789",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1147,8 +1242,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1162,12 +1267,12 @@
         "toolName": "Jira.GetCommentById",
         "parameters": {
           "issue_id": {
-            "value": "PROJ-123",
+            "value": "PROJ-1042",
             "type": "string",
             "required": true
           },
           "comment_id": {
-            "value": "20002",
+            "value": "10234",
             "type": "string",
             "required": true
           },
@@ -1177,7 +1282,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "c0a801f0-7e6b-4c7a-9a2b-4d9f3b7e8c18",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1231,8 +1336,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1246,12 +1361,12 @@
         "toolName": "Jira.GetIssueById",
         "parameters": {
           "issue": {
-            "value": "PROJ-456",
+            "value": "PROJ-1042",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "e4f5a6b7-89cd-0123-4567-89abcdef0123",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1340,8 +1455,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1355,12 +1480,12 @@
         "toolName": "Jira.GetIssueComments",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-142",
             "type": "string",
             "required": true
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -1375,12 +1500,12 @@
             "required": false
           },
           "include_adf_content": {
-            "value": true,
+            "value": false,
             "type": "boolean",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "cloud-abc123",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1523,9 +1648,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-work",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
           "read:jira-user",
-          "manage:jira-configuration"
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1539,17 +1673,17 @@
         "toolName": "Jira.GetIssuesWithoutId",
         "parameters": {
           "keywords": {
-            "value": "payment failure retry",
+            "value": "authentication bug login failure",
             "type": "string",
             "required": false
           },
           "due_from": {
-            "value": "2025-01-01",
+            "value": "2025-03-01",
             "type": "string",
             "required": false
           },
           "due_until": {
-            "value": "2025-02-28",
+            "value": "2025-06-30",
             "type": "string",
             "required": false
           },
@@ -1564,12 +1698,12 @@
             "required": false
           },
           "assignee": {
-            "value": "jane.doe@example.com",
+            "value": "jane.smith@example.com",
             "type": "string",
             "required": false
           },
           "project": {
-            "value": "PAYMENTS",
+            "value": "Backend Services",
             "type": "string",
             "required": false
           },
@@ -1580,14 +1714,15 @@
           },
           "labels": {
             "value": [
+              "security",
               "backend",
-              "urgent"
+              "critical"
             ],
             "type": "array",
             "required": false
           },
           "parent_issue": {
-            "value": "PAY-1024",
+            "value": "BS-42",
             "type": "string",
             "required": false
           },
@@ -1597,12 +1732,12 @@
             "required": false
           },
           "next_page_token": {
-            "value": "token_abc123",
+            "value": "eyJzdGFydEF0IjoyNX0=",
             "type": "string",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "abcd1234-ef56-7890-gh12-ijklmnopqrst",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1656,8 +1791,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1676,7 +1821,7 @@
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "12345678-90ab-cdef-1234-567890abcdef",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1730,8 +1875,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1750,7 +1905,7 @@
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "f6a1b2c3-d4e5-6789-abcd-ef0123456789",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1804,8 +1959,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1819,12 +1984,12 @@
         "toolName": "Jira.GetProjectById",
         "parameters": {
           "project": {
-            "value": "PROJKEY",
+            "value": "PROJ-123",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "7a8b9cde-0123-4f56-7890-abcd1234ef56",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1894,9 +2059,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:sprint:jira-software",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
           "read:issue-details:jira",
-          "read:jql:jira"
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -1910,12 +2084,12 @@
         "toolName": "Jira.GetSprintIssues",
         "parameters": {
           "sprint_id": {
-            "value": "12345",
+            "value": "42",
             "type": "string",
             "required": true
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -1925,7 +2099,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "b72f3d4e-9a1c-4e2b-a6f7-1234567890ab",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -1987,8 +2161,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2002,7 +2186,7 @@
         "toolName": "Jira.GetTransitionById",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-1042",
             "type": "string",
             "required": true
           },
@@ -2012,7 +2196,7 @@
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "abcde-12345-fghij-67890",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2074,8 +2258,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "write:jira-work"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2094,12 +2288,12 @@
             "required": true
           },
           "transition": {
-            "value": "Done",
+            "value": "In Progress",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "1a2b3c4d-5e6f-7a8b-9c0d-123456789abc",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2153,8 +2347,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2168,12 +2372,12 @@
         "toolName": "Jira.GetTransitionsAvailableForIssue",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-42",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2227,7 +2431,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-user"
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2241,12 +2456,12 @@
         "toolName": "Jira.GetUserById",
         "parameters": {
           "user_id": {
-            "value": "557058:1f2e3d4c-9b8a-7e6d-5c4b-3a2f1e0d9c8b",
+            "value": "712020:a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "f0123456-7890-4abc-def0-1234567890ab",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2324,7 +2539,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-user"
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2358,7 +2584,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "abcd1234-ef56-7890-gh12",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2412,7 +2638,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-work"
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2426,12 +2663,12 @@
         "toolName": "Jira.ListIssueAttachmentsMetadata",
         "parameters": {
           "issue": {
-            "value": "PROJ-42",
+            "value": "PROJ-1042",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2501,9 +2738,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-work",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
           "read:jira-user",
-          "manage:jira-configuration"
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2517,7 +2763,7 @@
         "toolName": "Jira.ListIssues",
         "parameters": {
           "project": {
-            "value": "PROJ",
+            "value": "PROJECT-123",
             "type": "string",
             "required": false
           },
@@ -2527,12 +2773,12 @@
             "required": false
           },
           "next_page_token": {
-            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.exampleToken123",
+            "value": "eyJzdGFydEF0IjoyNX0=",
             "type": "string",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "d4f5a6b7-89c0-1234-5678-abcdef012345",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2602,8 +2848,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2617,7 +2873,7 @@
         "toolName": "Jira.ListIssueTypesByProject",
         "parameters": {
           "project": {
-            "value": "PROJ",
+            "value": "Marketing Campaign",
             "type": "string",
             "required": true
           },
@@ -2632,7 +2888,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "e6f1a3d4-1234-4b2a-9cde-abcdef012345",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2694,8 +2950,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2719,7 +2985,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "e1a2b3c4-d5f6-7890-1234-56789abcdef0",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2774,7 +3040,17 @@
         "providerType": "oauth2",
         "scopes": [
           "manage:jira-configuration",
-          "read:jira-user"
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2788,7 +3064,7 @@
         "toolName": "Jira.ListPrioritiesAvailableToAnIssue",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-42",
             "type": "string",
             "required": true
           },
@@ -2848,7 +3124,17 @@
         "providerType": "oauth2",
         "scopes": [
           "manage:jira-configuration",
-          "read:jira-user"
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2862,12 +3148,12 @@
         "toolName": "Jira.ListPrioritiesAvailableToAProject",
         "parameters": {
           "project": {
-            "value": "PROJ",
+            "value": "PROJ-001",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -2938,7 +3224,17 @@
         "providerType": "oauth2",
         "scopes": [
           "manage:jira-configuration",
-          "read:jira-user"
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -2952,12 +3248,12 @@
         "toolName": "Jira.ListPrioritiesByScheme",
         "parameters": {
           "scheme_id": {
-            "value": "scheme-1001",
+            "value": "10042",
             "type": "string",
             "required": true
           },
           "limit": {
-            "value": 20,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -2967,7 +3263,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "abcd1234-ef56-7890-gh12-ijklmnop3456",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3049,7 +3345,17 @@
         "providerType": "oauth2",
         "scopes": [
           "manage:jira-configuration",
-          "read:jira-user"
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -3063,7 +3369,7 @@
         "toolName": "Jira.ListPrioritySchemes",
         "parameters": {
           "scheme_name": {
-            "value": "Critical Priorities",
+            "value": "Default Priority Scheme",
             "type": "string",
             "required": false
           },
@@ -3078,12 +3384,12 @@
             "required": false
           },
           "order_by": {
-            "value": "name asc",
+            "value": "name ascending",
             "type": "string",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3145,8 +3451,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -3160,17 +3476,17 @@
         "toolName": "Jira.ListProjects",
         "parameters": {
           "limit": {
-            "value": 20,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "offset": {
-            "value": 0,
+            "value": 10,
             "type": "integer",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "d9a8f7e6-1234-4b6c-9a2f-abcdef123456",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3249,7 +3565,17 @@
         "providerType": "oauth2",
         "scopes": [
           "manage:jira-configuration",
-          "read:jira-user"
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -3263,12 +3589,12 @@
         "toolName": "Jira.ListProjectsByScheme",
         "parameters": {
           "scheme_id": {
-            "value": "10002",
+            "value": "10042",
             "type": "string",
             "required": true
           },
           "project": {
-            "value": "PROJ",
+            "value": "MYPROJ",
             "type": "string",
             "required": false
           },
@@ -3283,7 +3609,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "abcd1234-ef56-7890-gh12-ijklmnopqrst",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3394,12 +3720,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
           "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
           "read:project:jira",
           "read:sprint:jira-software",
-          "read:issue-details:jira",
-          "read:board-scope.admin:jira-software",
-          "read:jira-user"
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -3414,16 +3746,17 @@
         "parameters": {
           "board_identifiers_list": {
             "value": [
-              "123",
-              "backend-team-board",
-              "456",
-              "frontend-board"
+              "42",
+              "Project Alpha",
+              "87",
+              "Marketing Board",
+              "15"
             ],
             "type": "array",
             "required": false
           },
           "max_sprints_per_board": {
-            "value": 20,
+            "value": 10,
             "type": "integer",
             "required": false
           },
@@ -3433,17 +3766,17 @@
             "required": false
           },
           "state": {
-            "value": null,
+            "value": "active",
             "type": "string",
             "required": false
           },
           "start_date": {
-            "value": "2026-01-01",
+            "value": "2024-01-01",
             "type": "string",
             "required": false
           },
           "end_date": {
-            "value": "2026-01-31",
+            "value": "2024-03-31",
             "type": "string",
             "required": false
           },
@@ -3453,7 +3786,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "cloud-abc123",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3523,7 +3856,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-user"
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -3537,7 +3881,7 @@
         "toolName": "Jira.ListUsers",
         "parameters": {
           "account_type": {
-            "value": null,
+            "value": "atlassian",
             "type": "string",
             "required": false
           },
@@ -3552,7 +3896,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3615,9 +3959,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "write:board-scope:jira-software",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
           "read:sprint:jira-software",
-          "read:issue-details:jira"
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -3631,7 +3984,7 @@
         "toolName": "Jira.MoveIssuesFromSprintToBacklog",
         "parameters": {
           "sprint_id": {
-            "value": "98765",
+            "value": "42",
             "type": "string",
             "required": true
           },
@@ -3639,13 +3992,15 @@
             "value": [
               "PROJ-101",
               "PROJ-102",
-              "PROJ-103"
+              "PROJ-103",
+              "10204",
+              "PROJ-205"
             ],
             "type": "array",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "f7a1b2c3-d4e5-6f78-90ab-cdef12345678",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3716,10 +4071,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-work",
-          "write:jira-work",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
           "read:jira-user",
-          "manage:jira-configuration"
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -3733,14 +4096,14 @@
         "toolName": "Jira.RemoveLabelsFromIssue",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-1042",
             "type": "string",
             "required": true
           },
           "labels": {
             "value": [
               "bug",
-              "urgent",
+              "high-priority",
               "needs-review"
             ],
             "type": "array",
@@ -3752,7 +4115,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "6f3b2a1c-9d4e-4b2f-a123-4e56d7890abc",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3822,8 +4185,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -3837,7 +4210,7 @@
         "toolName": "Jira.SearchIssuesWithJql",
         "parameters": {
           "jql": {
-            "value": "project = PROJ AND status in (\"To Do\",\"In Progress\") AND updated >= -7d ORDER BY priority DESC, updated DESC",
+            "value": "project = MYPROJECT AND status = 'In Progress' AND assignee = currentUser() ORDER BY updated DESC",
             "type": "string",
             "required": true
           },
@@ -3847,12 +4220,12 @@
             "required": false
           },
           "next_page_token": {
-            "value": "eyJ0b2tlbiI6IjEyMzQ1NiJ9",
+            "value": "eyJzdGFydEF0IjoyNX0=",
             "type": "string",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -3995,9 +4368,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-work",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
           "read:jira-user",
-          "manage:jira-configuration"
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -4011,17 +4393,17 @@
         "toolName": "Jira.SearchIssuesWithoutJql",
         "parameters": {
           "keywords": {
-            "value": "payment failure",
+            "value": "login bug authentication",
             "type": "string",
             "required": false
           },
           "due_from": {
-            "value": "2025-01-01",
+            "value": "2025-03-01",
             "type": "string",
             "required": false
           },
           "due_until": {
-            "value": "2025-01-31",
+            "value": "2025-06-30",
             "type": "string",
             "required": false
           },
@@ -4041,7 +4423,7 @@
             "required": false
           },
           "project": {
-            "value": "PROJ",
+            "value": "BACKEND",
             "type": "string",
             "required": false
           },
@@ -4052,14 +4434,15 @@
           },
           "labels": {
             "value": [
-              "backend",
-              "urgent"
+              "frontend",
+              "urgent",
+              "sprint-12"
             ],
             "type": "array",
             "required": false
           },
           "parent_issue": {
-            "value": "PROJ-42",
+            "value": "BACK-42",
             "type": "string",
             "required": false
           },
@@ -4069,12 +4452,12 @@
             "required": false
           },
           "next_page_token": {
-            "value": "token_abc123",
+            "value": "eyJzdGFydEF0IjoyNX0=",
             "type": "string",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "abcd1234-ef56-7890-abcd-ef1234567890",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -4144,8 +4527,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
-          "read:jira-user"
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -4159,12 +4552,12 @@
         "toolName": "Jira.SearchProjects",
         "parameters": {
           "keywords": {
-            "value": "payment gateway",
+            "value": "backend",
             "type": "string",
             "required": false
           },
           "limit": {
-            "value": 20,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -4174,7 +4567,7 @@
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "1a2b3c4d-5e6f-7a8b-9c0d-ef1234567890",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -4236,9 +4629,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
           "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
           "write:jira-work",
-          "read:jira-user"
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -4252,17 +4654,17 @@
         "toolName": "Jira.TransitionIssueToNewStatus",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-142",
             "type": "string",
             "required": true
           },
           "transition": {
-            "value": "Done",
+            "value": "In Progress",
             "type": "string",
             "required": true
           },
           "atlassian_cloud_id": {
-            "value": "a1b2c3d4-ef56-7890-abcd-ef1234567890",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -4405,10 +4807,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-work",
-          "write:jira-work",
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
           "read:jira-user",
-          "manage:jira-configuration"
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -4422,27 +4832,27 @@
         "toolName": "Jira.UpdateIssue",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-142",
             "type": "string",
             "required": true
           },
           "title": {
-            "value": "Fix login redirect bug",
+            "value": "Fix login page crash on mobile devices",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "When users log in via OAuth they are redirected to the homepage instead of their dashboard. Reproduction steps: 1) Go to /login 2) Sign in with OAuth provider 3) Observe redirection. Expected: redirect to /dashboard.",
+            "value": "Users on iOS and Android report the login page crashes when entering credentials. Needs immediate investigation and fix.",
             "type": "string",
             "required": false
           },
           "environment": {
-            "value": "production",
+            "value": "Production",
             "type": "string",
             "required": false
           },
           "due_date": {
-            "value": "2025-07-15",
+            "value": "2025-03-15",
             "type": "string",
             "required": false
           },
@@ -4457,36 +4867,36 @@
             "required": false
           },
           "parent_issue": {
-            "value": "PROJ-120",
+            "value": "PROJ-100",
             "type": "string",
             "required": false
           },
           "assignee": {
-            "value": "alice@example.com",
+            "value": "jane.doe@example.com",
             "type": "string",
             "required": false
           },
           "reporter": {
-            "value": "bob@example.com",
+            "value": "john.smith@example.com",
             "type": "string",
             "required": false
           },
           "labels": {
             "value": [
-              "backend",
-              "auth",
-              "urgent_fix"
+              "mobile",
+              "login",
+              "critical"
             ],
             "type": "array",
             "required": false
           },
           "notify_watchers": {
-            "value": false,
+            "value": true,
             "type": "boolean",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "abcd-1234-cloud",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -4523,7 +4933,18 @@
         "providerId": "atlassian",
         "providerType": "oauth2",
         "scopes": [
-          "read:jira-user"
+          "manage:jira-configuration",
+          "read:board-scope.admin:jira-software",
+          "read:board-scope:jira-software",
+          "read:issue-details:jira",
+          "read:jira-user",
+          "read:jira-work",
+          "read:jql:jira",
+          "read:project:jira",
+          "read:sprint:jira-software",
+          "write:board-scope:jira-software",
+          "write:jira-work",
+          "write:sprint:jira-software"
         ]
       },
       "secrets": [],
@@ -4575,6 +4996,7 @@
       "relativePath": "environment-variables/page.mdx"
     }
   ],
-  "generatedAt": "2026-07-24T11:39:02.137Z",
-  "summary": "The Jira toolkit integrates Arcade with Atlassian Jira, enabling LLMs to manage issues, sprints, boards, users, attachments, and project metadata across Jira Cloud instances.\n\n## Capabilities\n\n- **Issue lifecycle management** — Create, update, transition, search (parameterized or JQL), comment on, label, and attach files to issues; move issues between sprints and backlogs.\n- **Sprint & board operations** — List boards and their sprints (with date-range filtering), retrieve backlog and sprint issues, add/move issues to sprints, and access backlog GUI URLs.\n- **Project & metadata discovery** — Browse projects, issue types, priority schemes, labels, and available transitions; resolve names/keys/emails to IDs automatically without requiring pre-lookup calls.\n- **User & identity management** — Look up users by ID, name, or email; list all users; retrieve the authenticated user's profile and available Atlassian Cloud instances.\n- **Attachment handling** — List attachment metadata, download attachment contents, and upload files (string or base64) to issues.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Atlassian** provider. See the [Atlassian auth provider docs](https://docs.arcade.dev/en/references/auth-providers/atlassian) for setup details, required scopes, and configuration steps."
+  "curationSourceHash": "8f665e06935e6bdc3eb98b876a1dcfce71b4004d4758ddf8c5171c6161aca02e",
+  "generatedAt": "2026-09-22T11:15:20.413Z",
+  "summary": "## Jira Toolkit\n\nArcade toolkit for interacting with Atlassian Jira, enabling LLMs to manage issues, sprints, boards, users, attachments, and project metadata through the Jira REST API.\n\n## Capabilities\n\n- **Issue lifecycle management** — create, update, transition, comment on, label, and search issues using either parameterized queries or raw JQL; prefer the parameterized search tools over JQL unless the user explicitly provides a JQL query.\n- **Attachment handling** — attach files (raw string or base64), list attachment metadata, and download attachment contents.\n- **Sprint & backlog operations** — retrieve sprint issues, add or move issues between sprints and backlogs, and list sprints across boards with date-range and state filtering.\n- **Board & project introspection** — list and retrieve boards, projects, issue types, priority schemes, and labels; batch board lookups into a single call (max 25 boards per operation) for performance.\n- **User & identity management** — look up users by ID, name, or email; resolve the current authenticated user and their available Atlassian cloud instances via `WhoAmI`.\n- **Workflow navigation** — list available transitions for an issue, retrieve transitions by ID or status name, and execute status transitions including any required screen fields.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Atlassian** provider. See the Arcade Atlassian auth provider docs for setup details:\n[https://docs.arcade.dev/en/references/auth-providers/atlassian](https://docs.arcade.dev/en/references/auth-providers/atlassian)"
 }

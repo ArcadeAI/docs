@@ -1,7 +1,7 @@
 {
   "id": "Figma",
   "label": "Figma",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Arcade tools designed for LLMs to interact with Figma",
   "metadata": {
     "category": "productivity",
@@ -21,6 +21,13 @@
       "file_comments:read",
       "file_comments:write",
       "file_content:read",
+      "file_dev_resources:read",
+      "file_dev_resources:write",
+      "file_metadata:read",
+      "file_variables:read",
+      "file_variables:write",
+      "file_versions:read",
+      "library_analytics:read",
       "library_assets:read",
       "library_content:read",
       "projects:read",
@@ -31,7 +38,7 @@
     {
       "name": "AddCommentOrReply",
       "qualifiedName": "Figma.AddCommentOrReply",
-      "fullyQualifiedName": "Figma.AddCommentOrReply@0.3.0",
+      "fullyQualifiedName": "Figma.AddCommentOrReply@1.0.0",
       "description": "Add a comment to a Figma file or reply to an existing comment.\n\nIf parent_comment_id is provided, creates a reply to that comment.\nOtherwise creates a new comment (optionally attached to a node).",
       "parameters": [
         {
@@ -87,7 +94,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "file_comments:write"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -101,32 +122,32 @@
         "toolName": "Figma.AddCommentOrReply",
         "parameters": {
           "file_key": {
-            "value": "abc123def456",
+            "value": "hBmNpzqKLTdWcYsE3oPQfX",
             "type": "string",
             "required": true
           },
           "message": {
-            "value": "This is a test comment.",
+            "value": "This button color needs to be adjusted to match the brand guidelines.",
             "type": "string",
             "required": true
           },
           "parent_comment_id": {
-            "value": "comment789",
+            "value": "1048596",
             "type": "string",
             "required": false
           },
           "node_id": {
-            "value": "node321",
+            "value": "12:45",
             "type": "string",
             "required": false
           },
           "x": {
-            "value": 150,
+            "value": 120.5,
             "type": "integer",
             "required": false
           },
           "y": {
-            "value": 200,
+            "value": 75,
             "type": "integer",
             "required": false
           }
@@ -154,9 +175,487 @@
       }
     },
     {
+      "name": "AddCommentReaction",
+      "qualifiedName": "Figma.AddCommentReaction",
+      "fullyQualifiedName": "Figma.AddCommentReaction@1.0.0",
+      "description": "React to a comment in a Figma file.\n\nReactions are how a thread gets triaged, since Figma exposes no way to resolve one.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the comment to react to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "emoji",
+          "type": "string",
+          "required": true,
+          "description": "Emoji shortcode in colon-delimited form, for example :shortcode:.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation the reaction was added"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.AddCommentReaction",
+        "parameters": {
+          "file_key": {
+            "value": "hch8YlkIrYbU3raDzjPvCz",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "1048596",
+            "type": "string",
+            "required": true
+          },
+          "emoji": {
+            "value": ":thumbsup:",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateDevResources",
+      "qualifiedName": "Figma.CreateDevResources",
+      "fullyQualifiedName": "Figma.CreateDevResources@1.0.0",
+      "description": "Attach links to nodes in a Figma file.\n\nFigma accepts each link independently, so some may be created while others are\nrejected. Both outcomes are reported.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "links",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Links to attach. Each needs a node_id, a name, and a url. All are attached to the file named by file_key.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Links created, and any Figma rejected"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.CreateDevResources",
+        "parameters": {
+          "file_key": {
+            "value": "hBmXY93kLpQzT4NvR2dWoE",
+            "type": "string",
+            "required": true
+          },
+          "links": {
+            "value": [
+              {
+                "node_id": "1:23",
+                "name": "Button Component - Storybook",
+                "url": "https://storybook.example.com/story/components-button--primary"
+              },
+              {
+                "node_id": "4:57",
+                "name": "Header Component - GitHub",
+                "url": "https://github.com/example-org/design-system/blob/main/src/components/Header.tsx"
+              },
+              {
+                "node_id": "7:102",
+                "name": "Card Component - Confluence Docs",
+                "url": "https://confluence.example.com/display/DS/Card+Component"
+              }
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteComment",
+      "qualifiedName": "Figma.DeleteComment",
+      "fullyQualifiedName": "Figma.DeleteComment@1.0.0",
+      "description": "Delete a comment from a Figma file.\n\nDeleting a top-level comment also removes its replies. Figma has no way to resolve a\nthread, so deletion is how a finished thread is cleared.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the comment to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation the comment was deleted"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.DeleteComment",
+        "parameters": {
+          "file_key": {
+            "value": "hch8YlkImlAqoz7Tghtcv",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteCommentReaction",
+      "qualifiedName": "Figma.DeleteCommentReaction",
+      "fullyQualifiedName": "Figma.DeleteCommentReaction@1.0.0",
+      "description": "Remove your reaction from a comment in a Figma file.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the comment to remove the reaction from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "emoji",
+          "type": "string",
+          "required": true,
+          "description": "Emoji shortcode in colon-delimited form, for example :shortcode:. Only the authenticated user's own reaction is removed.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation the reaction was removed"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.DeleteCommentReaction",
+        "parameters": {
+          "file_key": {
+            "value": "hU3kQzPvBnMwLdXyR4tJ9s",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          },
+          "emoji": {
+            "value": ":thumbsup:",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteDevResource",
+      "qualifiedName": "Figma.DeleteDevResource",
+      "fullyQualifiedName": "Figma.DeleteDevResource@1.0.0",
+      "description": "Remove a link from a node in a Figma file.\n\nThe link is gone once removed. The node and its design content are untouched.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dev_resource_id",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the link to remove.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation the link was removed"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.DeleteDevResource",
+        "parameters": {
+          "file_key": {
+            "value": "aBcDeFgHiJkLmNoP",
+            "type": "string",
+            "required": true
+          },
+          "dev_resource_id": {
+            "value": "1:23456789",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ExportImage",
       "qualifiedName": "Figma.ExportImage",
-      "fullyQualifiedName": "Figma.ExportImage@0.3.0",
+      "fullyQualifiedName": "Figma.ExportImage@1.0.0",
       "description": "Export Figma frames/nodes as images.\n\nReturns temporary URLs to download images. URLs valid for approximately 14 days.",
       "parameters": [
         {
@@ -202,7 +701,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "file_content:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -216,21 +729,21 @@
         "toolName": "Figma.ExportImage",
         "parameters": {
           "file_key": {
-            "value": "abc123xyz456",
+            "value": "hZ3mE4kLpQwXvBnRtYuSdA",
             "type": "string",
             "required": true
           },
           "node_ids": {
             "value": [
-              "node1",
-              "node2",
-              "node3"
+              "1:23",
+              "4:56",
+              "7:89"
             ],
             "type": "array",
             "required": true
           },
           "image_format": {
-            "value": "jpg",
+            "value": "png",
             "type": "string",
             "required": false
           },
@@ -265,7 +778,7 @@
     {
       "name": "GetComments",
       "qualifiedName": "Figma.GetComments",
-      "fullyQualifiedName": "Figma.GetComments@0.3.0",
+      "fullyQualifiedName": "Figma.GetComments@1.0.0",
       "description": "Get comments on a Figma file.\n\nReturns comments with pagination support.",
       "parameters": [
         {
@@ -297,7 +810,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "file_comments:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -311,7 +838,7 @@
         "toolName": "Figma.GetComments",
         "parameters": {
           "file_key": {
-            "value": "3KJGvUdTm2ZgX3L9jH8wFQ",
+            "value": "hch8YlkImlAqoz969AZouF",
             "type": "string",
             "required": true
           },
@@ -321,7 +848,7 @@
             "required": false
           },
           "max_items": {
-            "value": 10,
+            "value": 25,
             "type": "integer",
             "required": false
           }
@@ -351,7 +878,7 @@
     {
       "name": "GetComponent",
       "qualifiedName": "Figma.GetComponent",
-      "fullyQualifiedName": "Figma.GetComponent@0.3.0",
+      "fullyQualifiedName": "Figma.GetComponent@1.0.0",
       "description": "Get metadata for a specific component by its key.",
       "parameters": [
         {
@@ -367,7 +894,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "library_assets:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -381,7 +922,7 @@
         "toolName": "Figma.GetComponent",
         "parameters": {
           "component_key": {
-            "value": "abc123xyz456",
+            "value": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
             "type": "string",
             "required": true
           }
@@ -409,9 +950,138 @@
       }
     },
     {
+      "name": "GetComponentActions",
+      "qualifiedName": "Figma.GetComponentActions",
+      "fullyQualifiedName": "Figma.GetComponentActions@1.0.0",
+      "description": "Get how a Figma library's components were inserted and detached, week by week.\n\nDetachments are the signal that a component is not serving its consumers. Requires a\nFigma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "Key of the library file. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by",
+          "type": "string",
+          "required": false,
+          "description": "Whether to return one row per component or one row per acting team, per week. Defaults to ASSET.",
+          "enum": [
+            "asset",
+            "team"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Earliest week to include, as YYYY-MM-DD. Omit for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "required": false,
+          "description": "Latest week to include, as YYYY-MM-DD. Omit for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The next_cursor from a previous call, to fetch the next page. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Weekly insertions and detachments"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetComponentActions",
+        "parameters": {
+          "file_key": {
+            "value": "aBcDeFgHiJkLmNoPqRsTuV",
+            "type": "string",
+            "required": true
+          },
+          "group_by": {
+            "value": "ASSET",
+            "type": "string",
+            "required": false
+          },
+          "start_date": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "end_date": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsaW1pdCI6MTAwLCJvZmZzZXQiOjEwMH0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetComponents",
       "qualifiedName": "Figma.GetComponents",
-      "fullyQualifiedName": "Figma.GetComponents@0.3.0",
+      "fullyQualifiedName": "Figma.GetComponents@1.0.0",
       "description": "Get published components from a file or team library.\n\nFor file: Returns all published components in the file.\nFor team: Returns paginated list of components across team library.",
       "parameters": [
         {
@@ -454,7 +1124,20 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
           "library_content:read",
+          "projects:read",
           "team_library_content:read"
         ]
       },
@@ -474,17 +1157,17 @@
             "required": true
           },
           "source_id": {
-            "value": "12345-team-id",
+            "value": "743829156",
             "type": "string",
             "required": true
           },
           "page_size": {
-            "value": 10,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "after_cursor": {
-            "value": 1,
+            "value": 150,
             "type": "integer",
             "required": false
           }
@@ -514,7 +1197,7 @@
     {
       "name": "GetComponentSet",
       "qualifiedName": "Figma.GetComponentSet",
-      "fullyQualifiedName": "Figma.GetComponentSet@0.3.0",
+      "fullyQualifiedName": "Figma.GetComponentSet@1.0.0",
       "description": "Get metadata for a specific component set by its key.\n\nA component set is a group of related component variants.",
       "parameters": [
         {
@@ -530,7 +1213,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "library_assets:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -544,7 +1241,7 @@
         "toolName": "Figma.GetComponentSet",
         "parameters": {
           "component_set_key": {
-            "value": "abc123xyz",
+            "value": "a1b2c3d4e5f6789012345678abcdef01",
             "type": "string",
             "required": true
           }
@@ -574,7 +1271,7 @@
     {
       "name": "GetComponentSets",
       "qualifiedName": "Figma.GetComponentSets",
-      "fullyQualifiedName": "Figma.GetComponentSets@0.3.0",
+      "fullyQualifiedName": "Figma.GetComponentSets@1.0.0",
       "description": "Get published component sets (groups of component variants) from a file or team library.\n\nComponent sets are groups of related component variants, like a Button\nwith states: default, hover, pressed, disabled.\n\nFor file: Returns all published component sets in the file.\nFor team: Returns paginated list of component sets across team library.",
       "parameters": [
         {
@@ -617,7 +1314,20 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
           "library_content:read",
+          "projects:read",
           "team_library_content:read"
         ]
       },
@@ -637,18 +1347,213 @@
             "required": true
           },
           "source_id": {
-            "value": "abc123xyz",
+            "value": "hYzNc3P2qLkR8tFmVwXsAe1B",
             "type": "string",
             "required": true
           },
           "page_size": {
-            "value": 10,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "after_cursor": {
-            "value": null,
+            "value": 150,
             "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetComponentUsages",
+      "qualifiedName": "Figma.GetComponentUsages",
+      "fullyQualifiedName": "Figma.GetComponentUsages@1.0.0",
+      "description": "Get which files and teams currently use a Figma library's components.\n\nGrouping by asset answers \"how widely is this component used\"; grouping by file\nanswers \"which files depend on this library\". Requires a Figma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "Key of the library file. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by",
+          "type": "string",
+          "required": false,
+          "description": "Whether to return one row per component or one row per consuming file. Defaults to ASSET.",
+          "enum": [
+            "asset",
+            "file"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The next_cursor from a previous call, to fetch the next page. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Where the library's components are used"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetComponentUsages",
+        "parameters": {
+          "file_key": {
+            "value": "hYzNnX1k8rLmPqT3vWdBcA",
+            "type": "string",
+            "required": true
+          },
+          "group_by": {
+            "value": "ASSET",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsaW1pdCI6MTAwLCJvZmZzZXQiOjEwMH0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetDevResources",
+      "qualifiedName": "Figma.GetDevResources",
+      "fullyQualifiedName": "Figma.GetDevResources@1.0.0",
+      "description": "Get the links attached to nodes in a Figma file.\n\nDev resources point from a design node at the code, ticket, or document that\nimplements it.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "node_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Only return links attached to these nodes. Omit to return every link in the file.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Links attached to nodes in the file"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetDevResources",
+        "parameters": {
+          "file_key": {
+            "value": "aBcDeFgHiJkLmNoPqRsTuV",
+            "type": "string",
+            "required": true
+          },
+          "node_ids": {
+            "value": [
+              "1:23",
+              "4:56",
+              "7:89"
+            ],
+            "type": "array",
             "required": false
           }
         },
@@ -677,7 +1582,7 @@
     {
       "name": "GetFile",
       "qualifiedName": "Figma.GetFile",
-      "fullyQualifiedName": "Figma.GetFile@0.3.0",
+      "fullyQualifiedName": "Figma.GetFile@1.0.0",
       "description": "Get a Figma file's structure including pages and metadata.\n\nReturns the file name, version, thumbnail, and list of pages.\nUse depth parameter to limit how much of the tree is returned for large files.",
       "parameters": [
         {
@@ -701,7 +1606,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "file_content:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -715,7 +1634,7 @@
         "toolName": "Figma.GetFile",
         "parameters": {
           "file_key": {
-            "value": "abc123xyz",
+            "value": "hEzD3sPkL9mQwRtYvXnBcF2j",
             "type": "string",
             "required": true
           },
@@ -748,9 +1667,83 @@
       }
     },
     {
+      "name": "GetFileMetadata",
+      "qualifiedName": "Figma.GetFileMetadata",
+      "fullyQualifiedName": "Figma.GetFileMetadata@1.0.0",
+      "description": "Identify a Figma file: its name, editor type, owner, and last edit.\n\nWorks for every editor type, including Slides and FigJam. The content_readable field\nreports whether the file's document tree can be read at all.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "What the file is, who touched it, and when"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetFileMetadata",
+        "parameters": {
+          "file_key": {
+            "value": "hUzpYbMsT3kLqRvN2dXcWo",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetFileNodes",
       "qualifiedName": "Figma.GetFileNodes",
-      "fullyQualifiedName": "Figma.GetFileNodes@0.3.0",
+      "fullyQualifiedName": "Figma.GetFileNodes@1.0.0",
       "description": "Get specific nodes from a Figma file by their IDs.\n\nReturns the requested nodes with their properties and optionally their children.\nUse this to fetch specific parts of a file without loading the entire document.\n\nSet include_raw_data=True to get raw paint/style details including fills, effects,\nboundVariables, and other node properties needed for inspecting gradients, styles,\nand state tokens.",
       "parameters": [
         {
@@ -791,7 +1784,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "file_content:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -805,21 +1812,21 @@
         "toolName": "Figma.GetFileNodes",
         "parameters": {
           "file_key": {
-            "value": "1a2B3cD4E5F6gH7i8J9K",
+            "value": "hG3kLmNpQrStUvWxYz123456",
             "type": "string",
             "required": true
           },
           "node_ids": {
             "value": [
               "0:1",
-              "1:2",
-              "12:34"
+              "12:34",
+              "56:78"
             ],
             "type": "array",
             "required": true
           },
           "depth": {
-            "value": 1,
+            "value": 2,
             "type": "integer",
             "required": false
           },
@@ -852,9 +1859,183 @@
       }
     },
     {
+      "name": "GetFileVersions",
+      "qualifiedName": "Figma.GetFileVersions",
+      "fullyQualifiedName": "Figma.GetFileVersions@1.0.0",
+      "description": "Get a Figma file's version history, newest first.\n\nReturns the named checkpoints and autosaves Figma retains for the file, with who\nsaved each one.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum versions to return (1-50). Defaults to 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The next_cursor from a previous call, to continue into older versions. Omit to start from the most recent version.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The file's version history, newest first"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetFileVersions",
+        "parameters": {
+          "file_key": {
+            "value": "hBmXkL9Qp2RvTyUwZnCdEf",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsaW1pdCI6MTUsImJlZm9yZSI6MTY4MDAwMDAwMH0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetLocalVariables",
+      "qualifiedName": "Figma.GetLocalVariables",
+      "fullyQualifiedName": "Figma.GetLocalVariables@1.0.0",
+      "description": "Get the design tokens a Figma file defines or subscribes to.\n\nReturns each variable with its value per mode, and the collections that group them.\nRequires a Figma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Variables and collections the file can use"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetLocalVariables",
+        "parameters": {
+          "file_key": {
+            "value": "hIa3nTE2kL9mVqXpD4oBwY",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetPages",
       "qualifiedName": "Figma.GetPages",
-      "fullyQualifiedName": "Figma.GetPages@0.3.0",
+      "fullyQualifiedName": "Figma.GetPages@1.0.0",
       "description": "Get a list of pages in a Figma file.\n\nReturns page IDs and names without the full node tree.",
       "parameters": [
         {
@@ -870,7 +2051,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "file_content:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -884,7 +2079,7 @@
         "toolName": "Figma.GetPages",
         "parameters": {
           "file_key": {
-            "value": "abc123xyz456",
+            "value": "hWAz1kQmFv3TpXyN9dRcBe",
             "type": "string",
             "required": true
           }
@@ -914,7 +2109,7 @@
     {
       "name": "GetProjectFiles",
       "qualifiedName": "Figma.GetProjectFiles",
-      "fullyQualifiedName": "Figma.GetProjectFiles@0.3.0",
+      "fullyQualifiedName": "Figma.GetProjectFiles@1.0.0",
       "description": "Get all files in a Figma project.\n\nFiles are Figma design documents containing pages and frames.",
       "parameters": [
         {
@@ -930,7 +2125,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "projects:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -944,7 +2153,81 @@
         "toolName": "Figma.GetProjectFiles",
         "parameters": {
           "project_id": {
-            "value": "1234567890abcdef",
+            "value": "48291753",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetPublishedVariables",
+      "qualifiedName": "Figma.GetPublishedVariables",
+      "fullyQualifiedName": "Figma.GetPublishedVariables@1.0.0",
+      "description": "Get the design tokens a Figma library publishes to the files that subscribe to it.\n\nThis is the canonical set other files consume, as opposed to what one file defines\nlocally. Requires a Figma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "Key of the library file. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Variables the library publishes"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetPublishedVariables",
+        "parameters": {
+          "file_key": {
+            "value": "hKbBmGKCsHpTmHfdADmVbK",
             "type": "string",
             "required": true
           }
@@ -974,7 +2257,7 @@
     {
       "name": "GetStyle",
       "qualifiedName": "Figma.GetStyle",
-      "fullyQualifiedName": "Figma.GetStyle@0.3.0",
+      "fullyQualifiedName": "Figma.GetStyle@1.0.0",
       "description": "Get metadata for a specific style by its key.",
       "parameters": [
         {
@@ -990,7 +2273,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "library_assets:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -1004,7 +2301,7 @@
         "toolName": "Figma.GetStyle",
         "parameters": {
           "style_key": {
-            "value": "12345-abcde-67890-fghij",
+            "value": "a1b2c3d4e5f6789012345678abcdef01234567",
             "type": "string",
             "required": true
           }
@@ -1032,9 +2329,138 @@
       }
     },
     {
+      "name": "GetStyleActions",
+      "qualifiedName": "Figma.GetStyleActions",
+      "fullyQualifiedName": "Figma.GetStyleActions@1.0.0",
+      "description": "Get how a Figma library's styles were applied and detached, week by week.\n\nRequires a Figma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "Key of the library file. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by",
+          "type": "string",
+          "required": false,
+          "description": "Whether to return one row per style or one row per acting team, per week. Defaults to ASSET.",
+          "enum": [
+            "asset",
+            "team"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Earliest week to include, as YYYY-MM-DD. Omit for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "required": false,
+          "description": "Latest week to include, as YYYY-MM-DD. Omit for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The next_cursor from a previous call, to fetch the next page. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Weekly applications and detachments"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetStyleActions",
+        "parameters": {
+          "file_key": {
+            "value": "aBcDeFgHiJkLmNoPqRsTuV",
+            "type": "string",
+            "required": true
+          },
+          "group_by": {
+            "value": "ASSET",
+            "type": "string",
+            "required": false
+          },
+          "start_date": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "end_date": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsaW1pdCI6MTAwLCJvZmZzZXQiOjEwMH0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetStyles",
       "qualifiedName": "Figma.GetStyles",
-      "fullyQualifiedName": "Figma.GetStyles@0.3.0",
+      "fullyQualifiedName": "Figma.GetStyles@1.0.0",
       "description": "Get published styles from a file or team library.\n\nFor file: Returns all published styles in the file.\nFor team: Returns paginated list of styles across team library.",
       "parameters": [
         {
@@ -1077,7 +2503,20 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
           "library_content:read",
+          "projects:read",
           "team_library_content:read"
         ]
       },
@@ -1092,23 +2531,126 @@
         "toolName": "Figma.GetStyles",
         "parameters": {
           "source": {
-            "value": "file",
+            "value": "team",
             "type": "string",
             "required": true
           },
           "source_id": {
-            "value": "12345ABC",
+            "value": "123456789",
             "type": "string",
             "required": true
           },
           "page_size": {
-            "value": 10,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "after_cursor": {
-            "value": 0,
+            "value": 50,
             "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetStyleUsages",
+      "qualifiedName": "Figma.GetStyleUsages",
+      "fullyQualifiedName": "Figma.GetStyleUsages@1.0.0",
+      "description": "Get which files and teams currently use a Figma library's styles.\n\nRequires a Figma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "Key of the library file. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by",
+          "type": "string",
+          "required": false,
+          "description": "Whether to return one row per style or one row per consuming file. Defaults to ASSET.",
+          "enum": [
+            "asset",
+            "file"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The next_cursor from a previous call, to fetch the next page. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Where the library's styles are used"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetStyleUsages",
+        "parameters": {
+          "file_key": {
+            "value": "aBcDeFgHiJkLmNoPqRsTuV",
+            "type": "string",
+            "required": true
+          },
+          "group_by": {
+            "value": "ASSET",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsaW1pdCI6MTAwLCJvZmZzZXQiOjEwMH0=",
+            "type": "string",
             "required": false
           }
         },
@@ -1137,7 +2679,7 @@
     {
       "name": "GetTeamProjects",
       "qualifiedName": "Figma.GetTeamProjects",
-      "fullyQualifiedName": "Figma.GetTeamProjects@0.3.0",
+      "fullyQualifiedName": "Figma.GetTeamProjects@1.0.0",
       "description": "Get all projects in a Figma team.\n\nProjects are containers within a team that group related design files.",
       "parameters": [
         {
@@ -1153,7 +2695,21 @@
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "projects:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -1167,7 +2723,7 @@
         "toolName": "Figma.GetTeamProjects",
         "parameters": {
           "team_id": {
-            "value": "abc123xyz",
+            "value": "123456789012345678",
             "type": "string",
             "required": true
           }
@@ -1195,16 +2751,591 @@
       }
     },
     {
+      "name": "GetVariableActions",
+      "qualifiedName": "Figma.GetVariableActions",
+      "fullyQualifiedName": "Figma.GetVariableActions@1.0.0",
+      "description": "Get how a Figma library's variables were bound and detached, week by week.\n\nRequires a Figma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "Key of the library file. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by",
+          "type": "string",
+          "required": false,
+          "description": "Whether to return one row per variable or one row per acting team, per week. Defaults to ASSET.",
+          "enum": [
+            "asset",
+            "team"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Earliest week to include, as YYYY-MM-DD. Omit for no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "required": false,
+          "description": "Latest week to include, as YYYY-MM-DD. Omit for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The next_cursor from a previous call, to fetch the next page. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Weekly bindings and detachments"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetVariableActions",
+        "parameters": {
+          "file_key": {
+            "value": "aBcDeFgHiJkLmNoPqRsTuV",
+            "type": "string",
+            "required": true
+          },
+          "group_by": {
+            "value": "ASSET",
+            "type": "string",
+            "required": false
+          },
+          "start_date": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "end_date": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsaW1pdCI6NTAsIm9mZnNldCI6NTB9",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetVariableUsages",
+      "qualifiedName": "Figma.GetVariableUsages",
+      "fullyQualifiedName": "Figma.GetVariableUsages@1.0.0",
+      "description": "Get which files and teams currently bind a Figma library's variables.\n\nThis is the blast radius of a token change. Requires a Figma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "Key of the library file. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by",
+          "type": "string",
+          "required": false,
+          "description": "Whether to return one row per variable or one row per consuming file. Defaults to ASSET.",
+          "enum": [
+            "asset",
+            "file"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The next_cursor from a previous call, to fetch the next page. Omit for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Where the library's variables are bound"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetVariableUsages",
+        "parameters": {
+          "file_key": {
+            "value": "hJuQfEx3yRnGt8VzP2dMwK",
+            "type": "string",
+            "required": true
+          },
+          "group_by": {
+            "value": "ASSET",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsaW1pdCI6MTAwLCJvZmZzZXQiOjEwMH0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ModifyVariables",
+      "qualifiedName": "Figma.ModifyVariables",
+      "fullyQualifiedName": "Figma.ModifyVariables@1.0.0",
+      "description": "Create, update, and delete Figma variables, collections, and modes in one call.\n\nFigma applies the whole batch or none of it. Entities created in the same call can\nreference each other by the temporary ids you supply, and the response maps each of\nthose to the real id Figma assigned. Deleting a variable is permanent.\n\nRequires a Figma Enterprise organization.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "variable_collections",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Collections to create, update, or delete. Omit to leave collections alone.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "variable_modes",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Modes to create, update, or delete. Omit to leave modes alone.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "variables",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Variables to create, update, or delete. Omit to leave variables alone.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "variable_values",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Values to set per variable per mode. Omit to leave values alone.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation, and ids assigned to created entities"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.ModifyVariables",
+        "parameters": {
+          "file_key": {
+            "value": "aBcDeFgHiJkLmNoPqRsTuV",
+            "type": "string",
+            "required": true
+          },
+          "variable_collections": {
+            "value": [
+              {
+                "action": "CREATE",
+                "id": "temp-collection-1",
+                "name": "Design Tokens",
+                "initialModeId": "temp-mode-1"
+              },
+              {
+                "action": "UPDATE",
+                "id": "VariableCollectionId:123:456",
+                "name": "Brand Colors"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "variable_modes": {
+            "value": [
+              {
+                "action": "CREATE",
+                "id": "temp-mode-1",
+                "name": "Light",
+                "variableCollectionId": "temp-collection-1"
+              },
+              {
+                "action": "CREATE",
+                "id": "temp-mode-2",
+                "name": "Dark",
+                "variableCollectionId": "temp-collection-1"
+              },
+              {
+                "action": "UPDATE",
+                "id": "VariableModeId:789:101",
+                "name": "High Contrast"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "variables": {
+            "value": [
+              {
+                "action": "CREATE",
+                "id": "temp-var-1",
+                "name": "color/primary",
+                "variableCollectionId": "temp-collection-1",
+                "resolvedType": "COLOR",
+                "description": "Primary brand color",
+                "hiddenFromPublishing": false,
+                "scopes": [
+                  "ALL_FILLS"
+                ]
+              },
+              {
+                "action": "CREATE",
+                "id": "temp-var-2",
+                "name": "spacing/base",
+                "variableCollectionId": "temp-collection-1",
+                "resolvedType": "FLOAT",
+                "description": "Base spacing unit in pixels",
+                "hiddenFromPublishing": false,
+                "scopes": [
+                  "GAP",
+                  "WIDTH_HEIGHT"
+                ]
+              },
+              {
+                "action": "UPDATE",
+                "id": "VariableID:202:303",
+                "name": "color/secondary",
+                "description": "Updated secondary color"
+              },
+              {
+                "action": "DELETE",
+                "id": "VariableID:404:505"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "variable_values": {
+            "value": [
+              {
+                "variableId": "temp-var-1",
+                "modeId": "temp-mode-1",
+                "value": {
+                  "r": 0.18,
+                  "g": 0.44,
+                  "b": 0.96,
+                  "a": 1
+                }
+              },
+              {
+                "variableId": "temp-var-1",
+                "modeId": "temp-mode-2",
+                "value": {
+                  "r": 0.47,
+                  "g": 0.68,
+                  "b": 0.99,
+                  "a": 1
+                }
+              },
+              {
+                "variableId": "temp-var-2",
+                "modeId": "temp-mode-1",
+                "value": 8
+              },
+              {
+                "variableId": "temp-var-2",
+                "modeId": "temp-mode-2",
+                "value": 8
+              }
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateDevResource",
+      "qualifiedName": "Figma.UpdateDevResource",
+      "fullyQualifiedName": "Figma.UpdateDevResource@1.0.0",
+      "description": "Rename a link attached to a Figma node, or repoint it at a different URL.\n\nA link cannot be moved to a different node. Delete it and attach a new one instead.",
+      "parameters": [
+        {
+          "name": "dev_resource_id",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the link to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New display name. Providing this renames the link; omitting it leaves the existing name unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "required": false,
+          "description": "New target URL. Providing this repoints the link; omitting it leaves the existing URL unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": [
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated link"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.UpdateDevResource",
+        "parameters": {
+          "dev_resource_id": {
+            "value": "7340289156842031",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Design Tokens Documentation",
+            "type": "string",
+            "required": false
+          },
+          "url": {
+            "value": "https://storybook.example.com/design-tokens",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "design"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "WhoAmI",
       "qualifiedName": "Figma.WhoAmI",
-      "fullyQualifiedName": "Figma.WhoAmI@0.3.0",
+      "fullyQualifiedName": "Figma.WhoAmI@1.0.0",
       "description": "Get the authenticated user's profile.",
       "parameters": [],
       "auth": {
         "providerId": "figma",
         "providerType": "oauth2",
         "scopes": [
-          "current_user:read"
+          "current_user:read",
+          "file_comments:read",
+          "file_comments:write",
+          "file_content:read",
+          "file_dev_resources:read",
+          "file_dev_resources:write",
+          "file_metadata:read",
+          "file_variables:read",
+          "file_variables:write",
+          "file_versions:read",
+          "library_analytics:read",
+          "library_assets:read",
+          "library_content:read",
+          "projects:read",
+          "team_library_content:read"
         ]
       },
       "secrets": [],
@@ -1250,6 +3381,7 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-03-24T11:24:59.214Z",
-  "summary": "Figma Arcade toolkit lets LLMs interact with Figma files and team libraries via the Figma API, enabling programmatic inspection, export, and lightweight collaboration on designs. It supports fetching file trees, nodes, pages, components, styles, projects, exporting images, and managing comments.\n\n**Capabilities**\n- Inspect and traverse file and node trees with optional raw paint/style data for detailed analysis.\n- Export frames/nodes as temporary image assets and retrieve thumbnails for visual outputs.\n- Discover and read published components, component sets, and styles across files and team libraries.\n- Read/write comments and access project, team, and file metadata to support collaboration and workflows.\n\n**OAuth**\nProvider: figma\nScopes: current_user:read, file_comments:read, file_comments:write, file_content:read, library_assets:read, library_content:read, projects:read, team_library_content:read"
+  "curationSourceHash": "7f3d2b6f6830dd1000c6116fcb52837726023f63fce13328c4fda15311ebfc21",
+  "generatedAt": "2026-09-22T11:14:38.936Z",
+  "summary": "## Figma Toolkit\n\nArcade's Figma toolkit lets LLMs read, annotate, and manage Figma files, components, styles, variables, and dev resources through the Figma REST API.\n\n## Capabilities\n\n- **File & node inspection:** Retrieve file structure, pages, specific nodes, version history, and export frames/nodes as images (URLs valid ~14 days).\n- **Comments & reactions:** Read, post, reply to, and delete comments; add or remove emoji reactions (reactions serve as the triage mechanism since Figma has no thread-resolve API).\n- **Components, component sets & styles:** Fetch published components, component sets, and styles from individual files or team libraries; retrieve usage analytics and weekly insert/detach/apply trends (Enterprise only).\n- **Design tokens (variables):** Read local and published variables with per-mode values; batch-create, update, or permanently delete variables, collections, and modes in a single atomic call (Enterprise only); query weekly bind/detach actions and cross-file usage (Enterprise only).\n- **Dev resources:** Attach, retrieve, rename, repoint, and delete links connecting design nodes to code, tickets, or documents.\n- **Team & project navigation:** List teams' projects and projects' files; identify files across editor types (Design, FigJam, Slides); inspect authenticated user profile.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Figma** provider. See the [Arcade Figma auth provider docs](https://docs.arcade.dev/en/references/auth-providers/figma) for setup details."
 }
