@@ -1,0 +1,113 @@
+---
+title: "Tool Recommendation"
+description: "How Tool Recommendation lets an agent ask an MCP Gateway for the tools that fit a task instead of loading every tool into context"
+---
+
+import { Cards } from "nextra/components";
+
+# Tool Recommendation
+
+Tool Recommendation lets an agent describe a task and get back only the tools that fit it, instead of holding every tool on a gateway in its context. This page is for agent developers and platform operators who run gateways with many tools. It explains what an MCP client gets when Tool Recommendation is on, how the agent finds and calls tools, and what decides the quality of the results. Read it before you [turn Tool Recommendation on](/operate/governance/mcp-gateways/tool-recommendation/configure) for a gateway.
+
+## Why it exists
+
+An MCP client normally lists every tool on a gateway and passes all of their names, descriptions, and input schemas to the model. A gateway that federates a handful of MCP servers can expose hundreds of tools. At that size the tool definitions consume a large share of the context window, and the model picks the wrong tool more often because it has too many near-matches to choose from.
+
+With Tool Recommendation on, the gateway lists a small, fixed set of Arcade tools. The agent asks for the tools it needs when it needs them, and Arcade returns the few that match.
+
+## What an MCP client gets
+
+When Tool Recommendation is on for a gateway, the gateway's tool list starts with these Arcade tools:
+
+| Tool | What it does |
+| --- | --- |
+| `Arcade.SelectTools` | Takes one or more task descriptions and returns the tools that match each task most closely, with their full input schemas. |
+| `Arcade.UseTool` | Runs a tool by name with the inputs you pass. |
+| `Arcade.ListApps` | Lists the apps the caller can act on and whether the caller has connected each one. |
+
+The MCP tool list spells these names with an underscore separator, for example `Arcade_SelectTools`. Arcade accepts either form in a tool call.
+
+The gateway also serves `Arcade.SearchTools`, a keyword search over the same tools. It does not appear in the tool list, but an agent can call it by name. See [Selection and search](#selection-and-search).
+
+As the agent discovers tools through `Arcade.SelectTools`, the gateway adds those tools to that user's tool list. When an MCP client lists tools again later, the list includes them alongside the Arcade tools, and the agent can call them directly.
+
+## How an agent finds and calls a tool
+
+The agent works in two steps.
+
+First, it calls `Arcade.SelectTools` with the tasks it wants to complete. Each entry in `tasks` describes one separate action:
+
+```json
+{
+  "tasks": ["send a Slack message to a channel", "create a GitHub issue"],
+  "context": "The user is triaging a production incident"
+}
+```
+
+Arcade returns up to five tools per task, ranked by how well they match. Each result includes the tool's name, description, and input schema, plus a `query_id` for the whole request.
+
+Second, the agent calls `Arcade.UseTool` with the tool it picked and that tool's own arguments nested inside `inputs`:
+
+```json
+{
+  "tool_name": "Slack.SendMessage",
+  "inputs": {
+    "channel_name": "incidents",
+    "message": "Investigating elevated error rates on checkout."
+  },
+  "query_id": "the query_id returned by Arcade.SelectTools"
+}
+```
+
+`query_id` is optional. Arcade uses it to connect the tool execution to the recommendation that surfaced it.
+
+The tool descriptions that Arcade serves tell the model how to use this flow, so most agents need no extra prompting.
+
+## Selection and search
+
+Arcade offers two ways to find tools, and they answer different questions.
+
+| | `Arcade.SelectTools` | `Arcade.SearchTools` |
+| --- | --- | --- |
+| Name of the capability | Tool Recommendation | Tool Search |
+| How it matches | Semantic. It compares the meaning of a task with the meaning of each tool. | Keyword. It ranks tools by the words they share with the query, using BM25. |
+| Input | One or more task descriptions | A keyword query and an optional result count (`top_k`, default 10, maximum 25) |
+| Returns | Up to five tools per task, with full input schemas | Tool names and descriptions |
+| Use it to | Find the tool to call for a specific task | Browse what tools exist, or look up a tool whose name you already know |
+
+Semantic selection finds a tool even when the task shares no words with the tool's name, for example "let the team know the deploy finished" matching a Slack tool. Keyword search is more predictable when the agent already knows a product or tool name.
+
+## What Arcade can recommend
+
+Tool Recommendation only works within the tools the gateway already allows. `Arcade.SelectTools` and `Arcade.SearchTools` return only tools that are in the gateway's **Allowed Tools** list, and `Arcade.UseTool` runs only those tools. Turning on Tool Recommendation never gives an agent access to a tool the gateway does not allow.
+
+If a tool is on the allowed list, an agent can run it through `Arcade.UseTool` even if `Arcade.SelectTools` has not returned it yet.
+
+[Contextual Access](/operate/governance/contextual-access) rules still apply. A tool that your access rules hide from a user is not recommended to that user.
+
+## How it works with MCP clients
+
+Tool Recommendation runs inside the gateway and speaks standard MCP. The Arcade tools are ordinary MCP tools, so any MCP client that can connect to an Arcade MCP Gateway can use them. You don't need an Arcade SDK, a client plugin, or code changes in your agent.
+
+## What makes recommendations good
+
+Arcade matches a task against each tool's name and description. The input parameters are not part of the match, and Arcade reads only the first line of each description.
+
+That makes tool descriptions the main factor you control. A tool with a vague or empty first line is hard to recommend, however useful the tool is. When you [build your own tools](/build/create-tools) or register a [remote MCP server](/operate/governance/remote-mcp-servers):
+
+- Start each description with one sentence that says what the tool does and to what, for example "Send a message to a Slack channel or user."
+- Name the service or object the tool acts on. "Create an issue in a GitHub repository" matches more tasks than "Create an item."
+- Give tools that do different jobs descriptions that read differently. Two tools whose first lines are nearly identical compete for the same tasks.
+
+## Next steps
+
+<Cards>
+  <Cards.Card
+    title="Configure Tool Recommendation"
+    href="/operate/governance/mcp-gateways/tool-recommendation/configure"
+  />
+  <Cards.Card
+    title="When not to use Tool Recommendation"
+    href="/operate/governance/mcp-gateways/tool-recommendation/limitations"
+  />
+</Cards>
