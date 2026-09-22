@@ -7,6 +7,9 @@ export const meta: MetaRecord = {
   "create-via-ai": {
     title: "Create via AI Assistant",
   },
+  "tool-recommendation": {
+    title: "Tool Recommendation",
+  },
 };
 
 export default meta;
