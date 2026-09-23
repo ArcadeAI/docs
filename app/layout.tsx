@@ -6,7 +6,6 @@ import { getDashboardUrl } from "@/app/_components/dashboard-link";
 import { Footer } from "@/app/_components/footer";
 import { Logo } from "@/app/_components/logo";
 import NavBarButton from "@/app/_components/nav-bar-button";
-import { TranslationBanner } from "@/app/_components/translation-banner";
 import "@/app/globals.css";
 import { Discord, Github } from "@arcadeai/design-system";
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -96,15 +95,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // proxy.ts redirects every request to a "/en/..." path — "es" and
-  // "pt-BR" routes bounce to their "/en" equivalent and unlocaled routes
-  // pick up "/en" from getPreferredLocale, which is hardcoded to return
-  // "en" unconditionally. So this layout only ever renders under "/en",
-  // and reading the locale here can be a constant instead of a header
-  // lookup. Awaiting headers() in the root layout previously forced the
-  // entire route tree into dynamic rendering. Restoring real i18n means
-  // moving this layout under an `app/[lang]/` route segment so the
-  // locale comes from routing params, not a request header.
+  // Docs are English-only. proxy.ts redirects legacy /es and /pt-BR URLs to /en.
   const lang = "en";
 
   const dictionary = await getDictionary(lang);
@@ -149,9 +140,6 @@ export default async function RootLayout({
         <Script id="disable-zenscroll-anchors" strategy="beforeInteractive">
           {"window.noZensmooth = true;"}
         </Script>
-        {lang !== "en" && (
-          <TranslationBanner dictionary={dictionary} locale={lang} />
-        )}
         <Layout
           copyPageButton={true}
           docsRepositoryBase="https://github.com/ArcadeAI/docs/tree/main/"

@@ -10,11 +10,11 @@ import {
   InMemoryMetadataSource,
   InMemoryToolDataSource,
 } from "../../src/sources/in-memory";
-import type { IMetadataSource } from "../../src/sources/internal";
+import type { MetadataSource } from "../../src/sources/internal";
 import {
   createCachedToolkitDataSource,
   createCombinedToolkitDataSource,
-  type IToolkitDataSource,
+  type ToolkitDataSource,
 } from "../../src/sources/toolkit-data-source";
 import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index";
 
@@ -334,7 +334,7 @@ describe("CombinedToolkitDataSource", () => {
       async listToolkitIds() {
         return [];
       },
-    } satisfies IMetadataSource;
+    } satisfies MetadataSource;
 
     const dataSource = createCombinedToolkitDataSource({
       toolSource,
@@ -367,7 +367,7 @@ describe("CombinedToolkitDataSource", () => {
       async listToolkitIds() {
         return ["Slack"];
       },
-    } satisfies IMetadataSource;
+    } satisfies MetadataSource;
 
     const dataSource = createCombinedToolkitDataSource({
       toolSource,
@@ -398,7 +398,7 @@ describe("CombinedToolkitDataSource", () => {
       async listToolkitIds() {
         return ["Github"];
       },
-    } satisfies IMetadataSource;
+    } satisfies MetadataSource;
 
     const dataSource = createCombinedToolkitDataSource({
       toolSource,
@@ -427,7 +427,7 @@ describe("createCachedToolkitDataSource", () => {
       throw new Error("Expected GitHub fixture");
     }
     let fetchAllCalls = 0;
-    const source: IToolkitDataSource = {
+    const source: ToolkitDataSource = {
       fetchToolkitData: async () => githubData,
       fetchAllToolkitsData: async () => {
         fetchAllCalls += 1;
