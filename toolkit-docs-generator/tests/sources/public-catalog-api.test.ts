@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { PublicCatalogApiSource } from "../../src/sources/public-catalog-api";
 import { fetchAllPages } from "../../src/sources/public-catalog-pagination";
 import {
-  extractToolkitRequirements,
   groupToolsByToolkit,
   transformPublicToolItem,
   transformPublicToolkitMetadata,
@@ -58,6 +57,16 @@ const githubTool = {
   },
   input: { parameters: [] },
   output: null,
+  requirements: {
+    authorization: [
+      {
+        provider_id: "arcade-github",
+        provider_type: "oauth2",
+        scopes: ["repo"],
+      },
+    ],
+    secrets: [{ key: "GITHUB_SERVER_URL" }],
+  },
   metadata: {
     behavior: {
       operations: ["create"],
@@ -155,57 +164,31 @@ describe("fetchAllPages", () => {
   });
 });
 
-describe("extractToolkitRequirements", () => {
-  it("maps catalog authorization and secrets onto tool auth fields", () => {
-    expect(extractToolkitRequirements(githubCatalogEntry.requirements)).toEqual(
-      {
-        auth: {
-          providerId: "github",
-          providerType: "oauth2",
-          scopes: ["repo"],
-        },
-        secrets: ["GITHUB_SERVER_URL"],
-      }
-    );
-  });
+type PublicToolRequirements = Parameters<
+  typeof transformPublicToolItem
+>[0]["requirements"];
 
-  it("strips the arcade- prefix so the provider id matches its docs page", () => {
-    expect(
-      extractToolkitRequirements({
-        authorization: {
-          items: { powerbi: { provider_id: "arcade-microsoft-powerbi" } },
-        },
-      }).auth?.providerId
-    ).toBe("microsoft-powerbi");
-  });
+/** A public tool carrying the requirements the engine publishes for it. */
+const toolWithRequirements = (
+  toolkit: string,
+  name: string,
+  requirements: PublicToolRequirements
+) => ({
+  ...githubTool,
+  fully_qualified_name: `${toolkit}.${name}@1.0.0`,
+  qualified_name: `${toolkit}.${name}`,
+  name,
+  toolkit: { name: toolkit, version: "1.0.0", description: null },
+  requirements,
+});
 
-  it("leaves an unprefixed provider id alone", () => {
-    expect(
-      extractToolkitRequirements({
-        authorization: { items: { salesforce: { provider_id: "salesforce" } } },
-      }).auth?.providerId
-    ).toBe("salesforce");
-  });
-
-  it("returns no auth when only secrets are required", () => {
-    expect(
-      extractToolkitRequirements({
-        authorization: { items: {} },
-        secrets: { items: { SERP_API_KEY: {} } },
-      })
-    ).toEqual({
-      auth: null,
-      secrets: ["SERP_API_KEY"],
-    });
-  });
+const oauth = (providerId: string, scopes: string[]) => ({
+  authorization: [{ provider_id: providerId, provider_type: "oauth2", scopes }],
 });
 
 describe("transformPublicToolItem", () => {
-  it("fans toolkit requirements out to each tool", () => {
-    const tool = transformPublicToolItem(
-      githubTool,
-      githubCatalogEntry.requirements
-    );
+  it("maps the tool's own authorization and secrets onto tool auth fields", () => {
+    const tool = transformPublicToolItem(githubTool);
 
     expect(tool.auth).toEqual({
       providerId: "github",
@@ -214,6 +197,49 @@ describe("transformPublicToolItem", () => {
     });
     expect(tool.secrets).toEqual(["GITHUB_SERVER_URL"]);
     expect(tool.metadata?.behavior.readOnly).toBe(false);
+  });
+
+  it("strips the arcade- prefix so the provider id matches its docs page", () => {
+    const tool = transformPublicToolItem(
+      toolWithRequirements(
+        "PowerBI",
+        "ListReports",
+        oauth("arcade-microsoft-powerbi", ["Report.Read.All"])
+      )
+    );
+
+    expect(tool.auth?.providerId).toBe("microsoft-powerbi");
+  });
+
+  it("leaves an unprefixed provider id alone", () => {
+    const tool = transformPublicToolItem(
+      toolWithRequirements(
+        "Salesforce",
+        "GetAccount",
+        oauth("salesforce", ["api"])
+      )
+    );
+
+    expect(tool.auth?.providerId).toBe("salesforce");
+  });
+
+  it("reports no auth for a tool that only reads a secret", () => {
+    const tool = transformPublicToolItem(
+      toolWithRequirements("GoogleSearch", "Search", {
+        secrets: [{ key: "SERP_API_KEY" }],
+      })
+    );
+
+    expect(tool.auth).toBeNull();
+    expect(tool.secrets).toEqual(["SERP_API_KEY"]);
+  });
+
+  it("reports no requirements for a tool that publishes none", () => {
+    const { requirements: _omitted, ...plainTool } = githubTool;
+    const tool = transformPublicToolItem(plainTool);
+
+    expect(tool.auth).toBeNull();
+    expect(tool.secrets).toEqual([]);
   });
 });
 
@@ -279,6 +305,91 @@ describe("PublicCatalogApiSource", () => {
     expect(first[0]?.auth?.providerId).toBe("github");
     expect(catalogCalls).toBe(1);
     expect(toolsCalls).toBe(1);
+  });
+
+  it("documents each tool with its own requirements, not the toolkit rollup", async () => {
+    const daytonaCatalogEntry = {
+      ...githubCatalogEntry,
+      name: "Daytona",
+      tool_count: 2,
+      requirements: {
+        authorization: {
+          items: { github: { provider_id: "arcade-github", scopes: ["repo"] } },
+        },
+      },
+    };
+    const gitClone = toolWithRequirements(
+      "Daytona",
+      "GitClone",
+      oauth("arcade-github", ["repo"])
+    );
+    const deleteSandbox = toolWithRequirements(
+      "Daytona",
+      "DeleteSandbox",
+      null
+    );
+
+    const source = new PublicCatalogApiSource({
+      baseUrl: "https://api.example",
+      fetchFn: stubCatalogFetch(
+        [daytonaCatalogEntry],
+        [gitClone, deleteSandbox]
+      ),
+    });
+
+    const tools = await source.fetchToolsByToolkit("Daytona");
+    const byName = new Map(tools.map((tool) => [tool.name, tool]));
+
+    expect(byName.get("GitClone")?.auth).toEqual({
+      providerId: "github",
+      providerType: "oauth2",
+      scopes: ["repo"],
+    });
+    expect(byName.get("DeleteSandbox")?.auth).toBeNull();
+  });
+
+  it("keeps each tool's own scopes when two tools share a provider", async () => {
+    const gmailCatalogEntry = {
+      ...githubCatalogEntry,
+      name: "Gmail",
+      requirements: {
+        authorization: {
+          items: {
+            google: {
+              provider_id: "arcade-google",
+              scopes: ["gmail.readonly", "gmail.send"],
+            },
+          },
+        },
+      },
+    };
+
+    const source = new PublicCatalogApiSource({
+      baseUrl: "https://api.example",
+      fetchFn: stubCatalogFetch(
+        [gmailCatalogEntry],
+        [
+          toolWithRequirements(
+            "Gmail",
+            "ListEmails",
+            oauth("arcade-google", ["gmail.readonly"])
+          ),
+          toolWithRequirements(
+            "Gmail",
+            "SendEmail",
+            oauth("arcade-google", ["gmail.send"])
+          ),
+        ]
+      ),
+    });
+
+    const tools = await source.fetchToolsByToolkit("Gmail");
+    const scopesByName = new Map(
+      tools.map((tool) => [tool.name, tool.auth?.scopes])
+    );
+
+    expect(scopesByName.get("ListEmails")).toEqual(["gmail.readonly"]);
+    expect(scopesByName.get("SendEmail")).toEqual(["gmail.send"]);
   });
 
   it("serves toolkit branding from the same catalog read", async () => {

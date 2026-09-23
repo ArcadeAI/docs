@@ -84,9 +84,6 @@ export const PublicCatalogToolResponseSchema = z.object({
 });
 
 export type PublicCatalogToolkit = z.infer<typeof PublicCatalogToolkitSchema>;
-export type PublicCatalogRequirements = z.infer<
-  typeof PublicCatalogRequirementsSchema
->;
 
 /**
  * Map a catalog entry's branding block onto the generator's ToolkitMetadata.
@@ -129,8 +126,6 @@ export const transformPublicToolkitMetadata = (
   return parsed.success ? parsed.data : null;
 };
 
-const DEFAULT_OAUTH_PROVIDER_TYPE = "oauth2";
-
 const ARCADE_PROVIDER_PREFIX = /^arcade-/;
 
 /**
@@ -145,58 +140,28 @@ const ARCADE_PROVIDER_PREFIX = /^arcade-/;
 const toDocsProviderId = (providerId: string): string =>
   providerId.replace(ARCADE_PROVIDER_PREFIX, "");
 
-export const extractToolkitRequirements = (
-  requirements: PublicCatalogRequirements | null | undefined
-): { auth: ToolAuth | null; secrets: string[] } => {
-  const authItems = requirements?.authorization?.items ?? {};
-  const authEntries = Object.values(authItems);
-  const secrets = Object.keys(requirements?.secrets?.items ?? {});
-
-  if (authEntries.length === 0) {
-    return { auth: null, secrets };
+/**
+ * Map one public tool onto the generator's ToolDefinition using the
+ * requirements that tool itself publishes.
+ *
+ * The catalog entry's `requirements` must not be used here: it is a rollup that
+ * unions every provider and scope across the toolkit's tools, so stamping it on
+ * each tool documents a tool like `Daytona.DeleteSandbox` as needing GitHub
+ * OAuth because a sibling tool does.
+ */
+export const transformPublicToolItem = (
+  apiTool: z.infer<typeof ToolMetadataItemSchema>
+): ToolDefinition => {
+  const tool = transformToolMetadataItem(apiTool);
+  if (!tool.auth?.providerId) {
+    return tool;
   }
 
-  const rawProviderId =
-    authEntries.find((entry) => entry.provider_id)?.provider_id ?? null;
-  const providerId = rawProviderId ? toDocsProviderId(rawProviderId) : null;
-  const providerType =
-    authEntries.find((entry) => entry.provider_type)?.provider_type ??
-    DEFAULT_OAUTH_PROVIDER_TYPE;
-  const scopes = [
-    ...new Set(authEntries.flatMap((entry) => entry.scopes ?? [])),
-  ];
-
-  return {
-    auth: {
-      providerId,
-      providerType,
-      scopes,
-    },
-    secrets,
+  const auth: ToolAuth = {
+    ...tool.auth,
+    providerId: toDocsProviderId(tool.auth.providerId),
   };
-};
-
-export const transformPublicToolItem = (
-  apiTool: z.infer<typeof ToolMetadataItemSchema>,
-  toolkitRequirements: PublicCatalogRequirements | null | undefined
-): ToolDefinition => {
-  const { auth, secrets } = extractToolkitRequirements(toolkitRequirements);
-
-  return transformToolMetadataItem({
-    ...apiTool,
-    requirements: {
-      authorization: auth
-        ? [
-            {
-              provider_id: auth.providerId,
-              provider_type: auth.providerType,
-              scopes: auth.scopes,
-            },
-          ]
-        : null,
-      secrets: secrets.length > 0 ? secrets.map((key) => ({ key })) : null,
-    },
-  });
+  return { ...tool, auth };
 };
 
 export const groupToolsByToolkit = <T extends { toolkit?: { name?: string } }>(
