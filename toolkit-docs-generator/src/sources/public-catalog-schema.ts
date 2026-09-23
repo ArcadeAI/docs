@@ -145,9 +145,9 @@ const toDocsProviderId = (providerId: string): string =>
  * requirements that tool itself publishes.
  *
  * The catalog entry's `requirements` must not be used here: it is a rollup that
- * unions every provider and scope across the toolkit's tools, so stamping it on
+ * unions every provider and scope across the toolkit's tools, so copying it onto
  * each tool documents a tool like `Daytona.DeleteSandbox` as needing GitHub
- * OAuth because a sibling tool does.
+ * OAuth because another tool in the toolkit does.
  */
 export const transformPublicToolItem = (
   apiTool: z.infer<typeof ToolMetadataItemSchema>
