@@ -13,6 +13,10 @@ const meta: MetaRecord = {
     title: "Freshdesk",
     href: "/en/resources/integrations/customer-support/freshdesk",
   },
+  freshservice: {
+    title: "Freshservice",
+    href: "/en/resources/integrations/customer-support/freshservice",
+  },
   pylon: {
     title: "Pylon",
     href: "/en/resources/integrations/customer-support/pylon",
