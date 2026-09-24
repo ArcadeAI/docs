@@ -1,0 +1,345 @@
+---
+title: "ServiceNow"
+description: "Configure a ServiceNow auth provider in Arcade to authorize tools and agents against a ServiceNow instance"
+---
+
+import { Tabs, Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# ServiceNow
+
+The ServiceNow auth provider enables tools and agents to call ServiceNow APIs on behalf of a user.
+
+## What's documented here
+
+This page describes how to use and configure ServiceNow auth with Arcade.
+
+This auth provider is used by:
+
+- The [Arcade ServiceNow MCP Server](/resources/integrations/customer-support/servicenow), which provides pre-built tools for incidents, changes, catalog requests, knowledge articles, and the CMDB
+- Your [app code](#calling-servicenow-apis-directly) that needs to call ServiceNow APIs
+- Or, your [custom tools](#using-servicenow-auth-in-custom-tools) that need to call ServiceNow APIs
+
+<Callout type="info">
+  Arcade does not offer a default ServiceNow auth provider. To use ServiceNow
+  auth, you must create a [custom provider
+  configuration](/references/auth-providers/oauth2) as described below. You
+  create the OAuth client in your ServiceNow instance, then register it in
+  Arcade as an OAuth 2.0 provider with the ID `servicenow`.
+</Callout>
+
+<Callout type="warning">
+  The provider is scoped to an Arcade project. Confirm you're in the project
+  you intend to test against before you start, with
+  `arcade project set your-project-id`. A provider created in the wrong project
+  is invisible to everything else.
+</Callout>
+
+## Create a ServiceNow OAuth app
+
+Creating the OAuth client requires the `oauth_admin`, `mi_admin`, or `admin` role on the instance. Zurich and later register OAuth clients through Machine Identity Console. Earlier releases use Application Registry.
+
+<Tabs items={["Machine Identity Console (Zurich and later)", "Application Registry (pre-Zurich)"]}>
+<Tabs.Tab>
+
+<Steps>
+
+#### Create the inbound integration
+
+Navigate to **System OAuth > Machine Identity Console > Inbound integrations > New integration**, then choose **OAuth - Authorization code grant**.
+
+#### Name the integration
+
+Give it a name that identifies the client, for example `Arcade`. Create one integration per external client rather than reusing an existing one.
+
+#### Leave "This is a public client" unchecked
+
+Arcade is a confidential client and authenticates with a client secret, so this option stays off.
+
+#### Copy the client ID and secret
+
+ServiceNow generates the **Client ID** and **Client secret** on this screen. Copy both now. The secret may only be displayed once.
+
+#### Leave Redirect URLs blank for now
+
+You'll fill this in after Arcade generates the redirect URL.
+
+#### Select the useraccount auth scope
+
+Under **Auth scope**, select `useraccount`. This is the scope that preserves the caller's own ACLs, which is what makes the toolkit's fulfiller and requestor access model behave correctly.
+
+Two things happen when you select it, and both are expected:
+
+- The **restrict to selected APIs** checkbox disables itself, showing "scope already grants access to all signed-in user resources". Leave it alone.
+- A yellow banner warns you to "assign only non-sensitive API scopes". This is ServiceNow's generic nag for any `useraccount`-scoped integration, not an error. Don't narrow the scope to make it go away.
+
+Once saved, the record title shows a **Useraccount scoped** badge confirming the scope took effect.
+
+#### Save the integration
+
+Leave **Active** checked and save.
+
+</Steps>
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+<Steps>
+
+#### Create the OAuth endpoint
+
+Navigate to **All > System OAuth > Application Registry**, click **New**, then choose **Create an OAuth API endpoint for external clients**.
+
+#### Name the app
+
+Give it a name that identifies the client, for example `Arcade`.
+
+#### Copy the client ID and secret
+
+ServiceNow generates the **Client ID** immediately and the **Client Secret** when you save. You can also leave the secret field blank and let ServiceNow populate it.
+
+Copy both after saving. ServiceNow masks the secret afterward, so use the lock icon to reveal it.
+
+#### Leave Redirect URL blank for now
+
+You'll fill this in after Arcade generates the redirect URL.
+
+#### Leave the auth scopes at their default
+
+A new record picks up the `useraccount` scope automatically, which is what you want. That scope preserves the caller's own ACLs, which the toolkit's fulfiller and requestor access model depends on.
+
+<Callout type="warning">
+  Don't add narrower scopes to the **Auth Scopes** related list. Adding even
+  one turns the record into a strict allow-list and blocks APIs the toolkit
+  needs.
+</Callout>
+
+#### Save the app
+
+Leave **Active** checked and the token lifespans at their defaults (access `1800` seconds, refresh `8640000` seconds), then click **Submit**.
+
+</Steps>
+
+</Tabs.Tab>
+</Tabs>
+
+## Get your ServiceNow instance URL
+
+Your instance URL is the host your instance's REST APIs are served from, in the form `https://your-instance.service-now.com`. For example, if your instance is `acme-inc`, your instance URL is `https://acme-inc.service-now.com`.
+
+<Callout type="info">
+  Every ServiceNow REST API is served from the `service-now.com` host, even on
+  an instance whose browser UI uses a custom vanity domain. Use the
+  `service-now.com` host here rather than the vanity domain.
+</Callout>
+
+## Set the ServiceNow instance URL secret
+
+Set the `SERVICENOW_INSTANCE_URL` secret in the Arcade Dashboard:
+
+- Click the **Secrets** section in the Arcade Dashboard left-side menu.
+- Click the **Add Secret** button.
+- Enter `SERVICENOW_INSTANCE_URL` as the secret ID.
+- Enter your instance URL as the secret value.
+- Click the **Create** button.
+
+The value accepts a bare instance name (`acme-inc`), a host (`acme-inc.service-now.com`), or a full URL (`https://acme-inc.service-now.com`). Arcade normalizes all three to the same origin.
+
+## Configuring ServiceNow auth
+
+<Tabs items={["Dashboard GUI"]}>
+<Tabs.Tab>
+
+### Configure ServiceNow auth using the Arcade Dashboard GUI
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard) and log in with your Arcade account credentials.
+
+#### Navigate to the OAuth providers page
+
+- Under the **Connections** section of the Arcade Dashboard left-side menu, click **Connected Apps**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **OAuth 2.0** tab at the top.
+
+#### Enter the provider details
+
+- Enter `servicenow` as the **ID** for your provider. The ID must be `servicenow` for the [Arcade ServiceNow MCP Server](/resources/integrations/customer-support/servicenow) to resolve it.
+- Optionally enter a **Description**.
+- Enter the **Client ID** and **Client Secret** you copied from ServiceNow.
+
+#### Configure the auth endpoints
+
+<Callout type="info">
+  ServiceNow doesn't publish OpenID Connect discovery metadata for these
+  clients, so set the endpoints explicitly. Replace `your-instance` with your
+  own instance name.
+</Callout>
+
+- **Authorization URL**: `https://your-instance.service-now.com/oauth_auth.do`
+- **Token URL**: `https://your-instance.service-now.com/oauth_token.do`
+
+#### Create the provider
+
+Click the **Create** button. Arcade generates a **Redirect URL** for the provider. Copy it.
+
+#### Add the redirect URL to your ServiceNow integration
+
+Go back to the ServiceNow integration record you created earlier, paste the redirect URL Arcade generated into **Redirect URLs**, and save.
+
+<Callout type="warning">
+  If authorization fails with a redirect mismatch immediately after saving the
+  redirect URL, allow a few minutes for ServiceNow to propagate the change
+  before troubleshooting further.
+</Callout>
+
+</Steps>
+</Tabs.Tab>
+</Tabs>
+
+## Using the Arcade ServiceNow MCP server
+
+The [Arcade ServiceNow MCP Server](/resources/integrations/customer-support/servicenow) provides tools to search and update work records, order catalog items, read knowledge articles, and explore the CMDB.
+
+Every call runs as the authorizing ServiceNow user and honors that user's roles and ACLs, so a tool returns only what that user could see or change in the ServiceNow UI.
+
+<Callout>
+  Check our introductory documentation to understand what are tools and how
+  [tool calling works](/build/tool-calling).
+</Callout>
+
+## Calling ServiceNow APIs directly
+
+Use the ServiceNow auth provider to get a user authorization token and call ServiceNow API endpoints directly, without the use of any tools. See [How Arcade helps with Agent Authorization](/get-started/about-arcade) to understand how this works.
+
+### Prerequisites
+
+1. Create an <SignupLink linkLocation="docs:/home/auth-providers/servicenow">Arcade account</SignupLink>
+1. Get an [Arcade API key](/get-started/setup/api-keys).
+1. Set the `ARCADE_API_KEY` environment variable (`export ARCADE_API_KEY=your-api-key` on Bash, `$env:ARCADE_API_KEY="your-api-key"` on PowerShell).
+1. Make sure to have Python 3.10+ or Node.js 18+ installed.
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+
+```python
+import requests
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+user_id = "you@example.com"
+instance_url = "https://acme-inc.service-now.com"
+
+auth_response = client.auth.start(
+    user_id=user_id,
+    provider="servicenow",
+    scopes=["useraccount"],
+)
+
+if auth_response.status != "completed":
+    print("Click this link to authorize: " + auth_response.url)
+    auth_response = client.auth.wait_for_completion(auth_response)
+
+token = auth_response.context.token
+
+response = requests.get(
+    instance_url + "/api/now/table/incident",
+    headers={"Authorization": "Bearer " + token},
+    params={"sysparm_limit": 5, "sysparm_query": "active=true"},
+)
+
+print(response.json())
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```javascript
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+const userId = "you@example.com";
+const instanceUrl = "https://acme-inc.service-now.com";
+
+let authResponse = await client.auth.start(userId, "servicenow", {
+  scopes: ["useraccount"],
+});
+
+if (authResponse.status !== "completed") {
+  console.log("Click this link to authorize: " + authResponse.url);
+  authResponse = await client.auth.waitForCompletion(authResponse);
+}
+
+const token = authResponse.context.token;
+
+const response = await fetch(
+  instanceUrl + "/api/now/table/incident?sysparm_limit=5&sysparm_query=active=true",
+  { headers: { Authorization: "Bearer " + token } },
+);
+
+console.log(await response.json());
+```
+
+</Tabs.Tab>
+</Tabs>
+
+## Using ServiceNow auth in custom tools
+
+If the [Arcade ServiceNow MCP Server](/resources/integrations/customer-support/servicenow) does not meet your needs, you can author your own [custom tools](/build/create-tools/tool-basics/build-mcp-server) that interact with ServiceNow APIs.
+
+Use the `OAuth2()` auth class to specify that a tool requires authorization with ServiceNow. The `id` must match the ID of the provider you created, and `context.get_auth_token_or_empty()` returns the user's ServiceNow token:
+
+```python
+from typing import Annotated, Any
+
+import httpx
+from arcade_mcp_server import Context, tool
+from arcade_mcp_server.auth import OAuth2
+
+
+@tool(
+    requires_auth=OAuth2(id="servicenow", scopes=["useraccount"]),
+    requires_secrets=["SERVICENOW_INSTANCE_URL"],
+)
+async def get_active_incidents(
+    context: Context,
+) -> Annotated[dict[str, Any], "Active incidents from ServiceNow"]:
+    """Get active incidents from ServiceNow."""
+    token = context.get_auth_token_or_empty()
+    instance = context.get_secret("SERVICENOW_INSTANCE_URL")
+    url = f"https://{instance}.service-now.com/api/now/table/incident"
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/json",
+    }
+    params = {"sysparm_query": "active=true", "sysparm_limit": 10}
+
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(url, headers=headers, params=params)
+        resp.raise_for_status()
+
+        return {"incidents": resp.json().get("result", [])}
+```
+
+<Callout type="info">
+  Every call runs under the authorizing user's own roles and ACLs, so a custom
+  tool sees exactly what that user would see in the ServiceNow UI. Handle an
+  empty result as a permissions outcome rather than an error.
+</Callout>
+
+## Troubleshooting
+
+- **The provider doesn't show up for your tools**: it was created in a different Arcade project. The provider is project-scoped. Confirm the active project with `arcade project set your-project-id` and check the provider exists there.
+- **Authorization succeeds but every tool call returns 403**: the authorizing user lacks the roles needed for the table the tool reads or writes. Re-authorize as a user with broader access, or adjust the ACLs on the target table.
+- **Tools report that the instance URL is not configured**: the `SERVICENOW_INSTANCE_URL` secret is missing, or set in a different project than the one running the tools.
+- **Redirect mismatch errors**: the redirect URL on the ServiceNow integration doesn't match the one Arcade generated. Copy it again from the provider in the Arcade Dashboard.
+- **A setting change doesn't seem to take effect**: existing tokens don't retroactively pick up changes to the OAuth integration. Revoke the existing grant for the affected user and re-authorize to get a fresh token.
+
+## Next steps
+
+- Explore the [Arcade ServiceNow MCP Server](/resources/integrations/customer-support/servicenow) tool reference.
+- Connecting to a ServiceNow-hosted MCP server instead? See [Connect a ServiceNow Hosted MCP Server](/operate/governance/remote-mcp-servers/servicenow).
