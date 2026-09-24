@@ -1,7 +1,7 @@
 {
   "id": "Glean",
   "label": "Glean",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Arcade MCP server exposing Glean Client API search over custom OAuth2.",
   "metadata": {
     "category": "search",
@@ -15,7 +15,7 @@
   },
   "auth": {
     "type": "oauth2",
-    "providerId": null,
+    "providerId": "glean",
     "allScopes": [
       "search"
     ]
@@ -24,7 +24,7 @@
     {
       "name": "Search",
       "qualifiedName": "Glean.Search",
-      "fullyQualifiedName": "Glean.Search@0.2.0",
+      "fullyQualifiedName": "Glean.Search@1.0.0",
       "description": "Search the user's Glean enterprise index and return ranked results.\n\nResults are permission-filtered to the authorized user. Use 'offset' with\n'limit' to page; 'has_next_page' indicates more results remain. Offset\npaging is supported up to roughly 2000 results (20 pages x 100 items);\ndeeper offsets raise an error rather than return a misleading empty page.\nWhen the fetch budget is exhausted before the requested window is filled,\nthe tool raises rather than return a partial page (fail loud over mislead).\nThe result list is trimmed to a size budget when items are large;\n'truncated' flags it and 'has_next_page' stays true so the caller can page\nor narrow the query.",
       "parameters": [
         {
@@ -53,7 +53,7 @@
         }
       ],
       "auth": {
-        "providerId": null,
+        "providerId": "glean",
         "providerType": "oauth2",
         "scopes": [
           "search"
@@ -115,6 +115,7 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-06-17T12:31:28.194Z",
-  "summary": "# Glean Toolkit\n\nThe Glean toolkit connects Arcade to a Glean enterprise deployment, exposing the Glean Client API so authorized users can search their organization's indexed content directly from Arcade workflows.\n\n## Capabilities\n\n- **Enterprise search**: Query the user's Glean index and retrieve permission-filtered, ranked results scoped to the authenticated user.\n- **Paginated results**: Page through results using `offset` and `limit`; `has_next_page` signals additional pages, with offset paging supported up to ~2 000 results (roughly 20 pages × 100 items).\n- **Fail-loud safety**: Raises errors rather than returns misleading partial or empty pages — enforced when the fetch budget is exhausted before the requested window is filled or when offsets exceed the supported depth.\n- **Result trimming with transparency**: When individual result items are large, the result list is trimmed to a size budget; `truncated` flags this condition and `has_next_page` remains `true` so callers can page forward or narrow the query.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0. The provider is custom/self-hosted Glean (provider ID not registered with a standard Arcade provider page), so no standard Arcade provider docs link applies. OAuth credentials and the authorization flow are managed through your Glean enterprise deployment.\n\n## Secrets\n\n- **`GLEAN_API_URL`**: The base URL of your organization's Glean API endpoint (e.g., `https://<your-company>-be.glean.com`). This URL is specific to your Glean enterprise instance. Obtain it from your Glean administrator or by locating your deployment's backend host in the [Glean Admin Console](https://app.glean.com/admin). It is typically documented alongside other API integration details under your company's Glean deployment settings. This is required so the toolkit can route requests to the correct tenant rather than a shared Glean endpoint.\n\nFor guidance on configuring secrets in Arcade, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). Secrets can also be managed at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-24T21:01:55.133Z",
+  "summary": "## Glean Toolkit\n\nArcade toolkit that exposes the Glean Client API, enabling search over a company's Glean enterprise index with results permission-filtered to the authenticated user.\n\n## Capabilities\n\n- **Enterprise search:** Query the Glean index and retrieve ranked, permission-filtered results scoped to the authorized user.\n- **Pagination:** Page through results using `offset` and `limit`; `has_next_page` signals additional pages. Offset paging is supported up to ~2 000 results (e.g. 20 pages × 100 items); deeper offsets raise an error instead of returning a misleading empty page.\n- **Result trimming and transparency:** When the fetch budget is exhausted before the requested window is filled, or when result items are large and the list is trimmed to a size budget, the tool raises or sets `truncated: true` and keeps `has_next_page: true` — failing loud rather than silently returning incomplete data.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Glean** provider. Users must authorize through Glean's OAuth flow before searches are executed on their behalf.\n\n## Secrets\n\n- **`GLEAN_API_URL`** — The base URL for your organization's Glean Client API endpoint (e.g. `https://<your-tenant>-be.glean.com`). This is tenant-specific and can be found in your Glean admin or developer settings. Refer to your Glean workspace administrator or the [Glean developer documentation](https://developers.glean.com/docs/client_api/client_api_overview/) to locate the correct endpoint for your deployment.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to configure secrets, and manage them at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

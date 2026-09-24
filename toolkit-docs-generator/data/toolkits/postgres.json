@@ -1,7 +1,7 @@
 {
   "id": "Postgres",
   "label": "Postgres",
-  "version": "0.6.1",
+  "version": "1.0.0",
   "description": "Tools to query and explore a postgres database",
   "metadata": {
     "category": "databases",
@@ -18,7 +18,7 @@
     {
       "name": "DiscoverSchemas",
       "qualifiedName": "Postgres.DiscoverSchemas",
-      "fullyQualifiedName": "Postgres.DiscoverSchemas@0.6.1",
+      "fullyQualifiedName": "Postgres.DiscoverSchemas@1.0.0",
       "description": "Discover all the schemas in the postgres database.",
       "parameters": [],
       "auth": null,
@@ -61,7 +61,7 @@
     {
       "name": "DiscoverTables",
       "qualifiedName": "Postgres.DiscoverTables",
-      "fullyQualifiedName": "Postgres.DiscoverTables@0.6.1",
+      "fullyQualifiedName": "Postgres.DiscoverTables@1.0.0",
       "description": "Discover all the tables in the postgres database when the list of tables is not known.\n\nALWAYS use this tool before any other tool that requires a table name.",
       "parameters": [
         {
@@ -119,7 +119,7 @@
     {
       "name": "ExecuteSelectQuery",
       "qualifiedName": "Postgres.ExecuteSelectQuery",
-      "fullyQualifiedName": "Postgres.ExecuteSelectQuery@0.6.1",
+      "fullyQualifiedName": "Postgres.ExecuteSelectQuery@1.0.0",
       "description": "You have a connection to a postgres database.\nExecute a SELECT query and return the results against the postgres database.\nNo other queries (INSERT, UPDATE, DELETE, etc.) are allowed.\n\nONLY use this tool if you have already loaded the schema of the tables you need to query.\nUse the <GetTableSchema> tool to load the schema if not already known.\n\nThe final query will be constructed as follows:\nSELECT {select_query_part} FROM {from_clause} JOIN {join_clause}\nWHERE {where_clause} HAVING {having_clause}\nORDER BY {order_by_clause} LIMIT {limit} OFFSET {offset}\n\nWhen running queries, follow these rules which will help avoid errors:\n* Never \"select *\" from a table. Always select the columns you need.\n* Always order your results. Use the most important columns or the primary key if you're unsure.\n* Always use case-insensitive queries to match strings in the query.\n* Always trim strings in the query.\n* Prefer LIKE queries over direct string matches or regex queries.\n* Only join on columns that are indexed or the primary key. Do not join on arbitrary columns.",
       "parameters": [
         {
@@ -294,7 +294,7 @@
     {
       "name": "GetTableSchema",
       "qualifiedName": "Postgres.GetTableSchema",
-      "fullyQualifiedName": "Postgres.GetTableSchema@0.6.1",
+      "fullyQualifiedName": "Postgres.GetTableSchema@1.0.0",
       "description": "Get the schema/structure of a postgres table in the postgres database\nwhen the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.\nAll tables in the query must be discovered first\nusing the <DiscoverTables> tool.",
       "parameters": [
         {
@@ -366,6 +366,7 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-07-18T11:27:49.262Z",
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-24T21:02:13.792Z",
   "summary": "The Arcade Postgres toolkit connects agents and tools to a PostgreSQL database, enabling schema discovery and read-only querying without any OAuth flow.\n\n## Capabilities\n\n- **Schema & table discovery** — enumerate all schemas and tables in a database before issuing queries, ensuring table names are always resolved correctly.\n- **Read-only SELECT execution** — run parameterized SELECT queries with full support for JOINs, WHERE, HAVING, ORDER BY, LIMIT, and OFFSET; INSERT/UPDATE/DELETE are explicitly blocked.\n- **Guided query workflow** — built-in tool instructions enforce a strict discover-schema → get-table-schema → execute-query order to minimize runtime errors.\n\n## Secrets\n\nThis toolkit requires no OAuth; all authentication is handled via a single connection string secret.\n\n- **`POSTGRES_DATABASE_CONNECTION_STRING`** — A standard PostgreSQL connection URI (e.g., `postgresql://user:password@host:5432/dbname`) that encodes the host, port, database name, username, and password. Obtain or construct this string from whoever administers the target PostgreSQL instance. For managed services, the connection string is typically available in the provider's dashboard (e.g., AWS RDS → *Connectivity & security*, Supabase → *Project Settings → Database*, Render → *Environment → Connection String*). Ensure the database user has at least `CONNECT` and `SELECT` privileges on the relevant schemas and tables; no write permissions are needed or used by this toolkit.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to register secrets, and manage them at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }
