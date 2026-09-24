@@ -1,7 +1,7 @@
 {
   "id": "Salesforce",
   "label": "Salesforce",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "Arcade tools designed for LLMs to interact with Salesforce",
   "metadata": {
     "category": "sales",
@@ -34,7 +34,7 @@
     {
       "name": "ConvertLead",
       "qualifiedName": "Salesforce.ConvertLead",
-      "fullyQualifiedName": "Salesforce.ConvertLead@2.2.1",
+      "fullyQualifiedName": "Salesforce.ConvertLead@2.2.2",
       "description": "Converts a lead into a Contact (and optionally Account + Opportunity).\n\nThis is the canonical lead-to-deal transition in Salesforce. The lead record\nis marked as converted and new Contact/Account/Opportunity records are created.",
       "parameters": [
         {
@@ -82,22 +82,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "write_lead",
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
           "write_contact",
-          "write_opportunity"
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -110,22 +118,22 @@
         "toolName": "Salesforce.ConvertLead",
         "parameters": {
           "lead_id": {
-            "value": "00Q3j00000XyZAbCDE0",
+            "value": "00Q5e000004KXABEA4",
             "type": "string",
             "required": true
           },
           "account_id": {
-            "value": "0013j00000AbC123DE0",
+            "value": "0015e000003GsTKAA0",
             "type": "string",
             "required": false
           },
           "opportunity_name": {
-            "value": "Enterprise Expansion - Q2 2026",
+            "value": "Acme Corp - Enterprise Deal Q3 2024",
             "type": "string",
             "required": false
           },
           "converted_status": {
-            "value": "Closed - Converted",
+            "value": "Qualified",
             "type": "string",
             "required": false
           },
@@ -161,7 +169,7 @@
     {
       "name": "CreateContact",
       "qualifiedName": "Salesforce.CreateContact",
-      "fullyQualifiedName": "Salesforce.CreateContact@2.2.1",
+      "fullyQualifiedName": "Salesforce.CreateContact@2.2.2",
       "description": "Creates a contact in Salesforce.",
       "parameters": [
         {
@@ -241,20 +249,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "write_contact"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
-          "type": "api_key"
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -267,32 +285,32 @@
         "toolName": "Salesforce.CreateContact",
         "parameters": {
           "account_id": {
-            "value": "0012b00000TYDmyA1Y",
+            "value": "0014x000003AbCdEFG",
             "type": "string",
             "required": true
           },
           "last_name": {
-            "value": "Doe",
+            "value": "Johnson",
             "type": "string",
             "required": true
           },
           "first_name": {
-            "value": "John",
+            "value": "Michael",
             "type": "string",
             "required": false
           },
           "email": {
-            "value": "john.doe@example.com",
+            "value": "michael.johnson@acmecorp.com",
             "type": "string",
             "required": false
           },
           "phone": {
-            "value": "+1234567890",
+            "value": "+1-415-555-0192",
             "type": "string",
             "required": false
           },
           "mobile_phone": {
-            "value": "+0987654321",
+            "value": "+1-415-555-0847",
             "type": "string",
             "required": false
           },
@@ -307,12 +325,13 @@
             "required": false
           },
           "description": {
-            "value": "A key contact for new business opportunities.",
+            "value": "Key contact for enterprise account negotiations and partnership discussions.",
             "type": "string",
             "required": false
           }
         },
         "requiresAuth": true,
+        "authProvider": "salesforce",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -336,7 +355,7 @@
     {
       "name": "CreateLead",
       "qualifiedName": "Salesforce.CreateLead",
-      "fullyQualifiedName": "Salesforce.CreateLead@2.2.1",
+      "fullyQualifiedName": "Salesforce.CreateLead@2.2.2",
       "description": "Creates a new lead in Salesforce.\n\nUse this when someone is a potential customer but isn't yet associated with\nan existing account. For contacts under existing accounts, use create_contact.",
       "parameters": [
         {
@@ -432,20 +451,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "write_lead"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -458,57 +487,57 @@
         "toolName": "Salesforce.CreateLead",
         "parameters": {
           "last_name": {
-            "value": "Garcia",
+            "value": "Thompson",
             "type": "string",
             "required": true
           },
           "company": {
-            "value": "Greenfield Solutions",
+            "value": "Apex Innovations LLC",
             "type": "string",
             "required": true
           },
           "first_name": {
-            "value": "Ava",
+            "value": "Rachel",
             "type": "string",
             "required": false
           },
           "email": {
-            "value": "ava.garcia@greenfield.solutions",
+            "value": "rachel.thompson@apexinnovations.com",
             "type": "string",
             "required": false
           },
           "phone": {
-            "value": "+1-415-555-0123",
+            "value": "+1-415-555-0192",
             "type": "string",
             "required": false
           },
           "title": {
-            "value": "Product Manager",
+            "value": "VP of Operations",
             "type": "string",
             "required": false
           },
           "status": {
-            "value": "New",
+            "value": "Open - Not Contacted",
             "type": "string",
             "required": false
           },
           "lead_source": {
-            "value": "Website",
+            "value": "Web",
             "type": "string",
             "required": false
           },
           "industry": {
-            "value": "Software",
+            "value": "Technology",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "Requested an enterprise demo and pricing. Interested in integrations with Salesforce and Slack.",
+            "value": "Reached out via contact form expressing interest in enterprise pricing. Has a team of ~200 users.",
             "type": "string",
             "required": false
           },
           "website": {
-            "value": "https://www.greenfield.solutions",
+            "value": "https://www.apexinnovations.com",
             "type": "string",
             "required": false
           }
@@ -538,7 +567,7 @@
     {
       "name": "CreateOpportunity",
       "qualifiedName": "Salesforce.CreateOpportunity",
-      "fullyQualifiedName": "Salesforce.CreateOpportunity@2.2.1",
+      "fullyQualifiedName": "Salesforce.CreateOpportunity@2.2.2",
       "description": "Creates a new opportunity (deal) in Salesforce.\n\nRequires an account, name, stage, and close date. Validates stage, lead source,\nand type against the org's configured picklist values.",
       "parameters": [
         {
@@ -618,20 +647,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "write_opportunity"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -640,6 +679,59 @@
         "description": "The created opportunity ID."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.CreateOpportunity",
+        "parameters": {
+          "account_id": {
+            "value": "0013000000ABC123",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Acme Corp - Enterprise License Renewal 2025",
+            "type": "string",
+            "required": true
+          },
+          "stage": {
+            "value": "Proposal/Price Quote",
+            "type": "string",
+            "required": true
+          },
+          "close_date": {
+            "value": "2025-09-30",
+            "type": "string",
+            "required": true
+          },
+          "amount": {
+            "value": 48500,
+            "type": "integer",
+            "required": false
+          },
+          "description": {
+            "value": "Enterprise software license renewal for Acme Corp's 200-seat deployment. Client has expressed strong intent to expand usage.",
+            "type": "string",
+            "required": false
+          },
+          "next_step": {
+            "value": "Schedule product demo with CTO and procurement team by end of next week.",
+            "type": "string",
+            "required": false
+          },
+          "lead_source": {
+            "value": "Web",
+            "type": "string",
+            "required": false
+          },
+          "opportunity_type": {
+            "value": "Existing Customer - Upgrade",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -661,7 +753,7 @@
     {
       "name": "CreateTask",
       "qualifiedName": "Salesforce.CreateTask",
-      "fullyQualifiedName": "Salesforce.CreateTask@2.2.1",
+      "fullyQualifiedName": "Salesforce.CreateTask@2.2.2",
       "description": "Creates a task (follow-up, reminder, to-do) in Salesforce.\n\nUse this for future actions like reminders, follow-ups, or to-do items.\nFor logging a completed phone call, use LogACall instead.",
       "parameters": [
         {
@@ -733,20 +825,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
           "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -759,17 +861,17 @@
         "toolName": "Salesforce.CreateTask",
         "parameters": {
           "subject": {
-            "value": "Follow up on proposal",
+            "value": "Follow up with client regarding Q3 proposal",
             "type": "string",
             "required": true
           },
           "due_date": {
-            "value": "2026-03-11",
+            "value": "2024-08-15",
             "type": "string",
             "required": false
           },
           "priority": {
-            "value": "Normal",
+            "value": "High",
             "type": "string",
             "required": false
           },
@@ -779,22 +881,22 @@
             "required": false
           },
           "description": {
-            "value": "Call to review the proposal, answer questions, and confirm next steps. Prepare updated pricing sheet before call.",
+            "value": "Reach out to the client to confirm receipt of the Q3 proposal and address any questions they may have before the deadline.",
             "type": "string",
             "required": false
           },
           "account_or_opportunity_id": {
-            "value": "006A1B2C3D4E5F6G7H",
+            "value": "0013000000AbCdEAAZ",
             "type": "string",
             "required": false
           },
           "contact_or_lead_id": {
-            "value": "003J1K2L3M4N5P6Q7R",
+            "value": "0033000000XyZwVAAZ",
             "type": "string",
             "required": false
           },
           "owner_user_id": {
-            "value": "005S1T2U3V4W5X6Y7Z",
+            "value": "0053000000QrStUAAZ",
             "type": "string",
             "required": false
           }
@@ -824,7 +926,7 @@
     {
       "name": "GetAccountDataById",
       "qualifiedName": "Salesforce.GetAccountDataById",
-      "fullyQualifiedName": "Salesforce.GetAccountDataById@2.2.1",
+      "fullyQualifiedName": "Salesforce.GetAccountDataById@2.2.2",
       "description": "Gets the account with related info: contacts, leads, notes, calls, opportunities, tasks,\nemails, and events (up to 10 items of each type).\n\nAn account is an organization (such as a customer, supplier, or partner, though more commonly\na customer). In some Salesforce account setups, an account can also represent a person.",
       "parameters": [
         {
@@ -845,20 +947,25 @@
           "read_lead",
           "read_note",
           "read_opportunity",
-          "read_task"
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -871,12 +978,13 @@
         "toolName": "Salesforce.GetAccountDataById",
         "parameters": {
           "account_id": {
-            "value": "0012E00000PZT0QAO",
+            "value": "0015g00000XyZAbAAN",
             "type": "string",
             "required": true
           }
         },
         "requiresAuth": true,
+        "authProvider": "salesforce",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -900,7 +1008,7 @@
     {
       "name": "GetAccountDataByKeywords",
       "qualifiedName": "Salesforce.GetAccountDataByKeywords",
-      "fullyQualifiedName": "Salesforce.GetAccountDataByKeywords@2.2.1",
+      "fullyQualifiedName": "Salesforce.GetAccountDataByKeywords@2.2.2",
       "description": "Searches for accounts in Salesforce and returns them with related info: contacts, leads,\nnotes, calls, opportunities, tasks, emails, and events (up to 10 items of each type).\n\nAn account is an organization (such as a customer, supplier, or partner, though more commonly\na customer). In some Salesforce account setups, an account can also represent a person.",
       "parameters": [
         {
@@ -937,20 +1045,25 @@
           "read_lead",
           "read_note",
           "read_opportunity",
-          "read_task"
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -963,7 +1076,7 @@
         "toolName": "Salesforce.GetAccountDataByKeywords",
         "parameters": {
           "query": {
-            "value": "Acme Corp",
+            "value": "Acme Corporation",
             "type": "string",
             "required": true
           },
@@ -979,6 +1092,7 @@
           }
         },
         "requiresAuth": true,
+        "authProvider": "salesforce",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -1002,7 +1116,7 @@
     {
       "name": "GetOpportunityById",
       "qualifiedName": "Salesforce.GetOpportunityById",
-      "fullyQualifiedName": "Salesforce.GetOpportunityById@2.2.1",
+      "fullyQualifiedName": "Salesforce.GetOpportunityById@2.2.2",
       "description": "Gets a single opportunity with enriched related data: contact roles, line items,\nopen tasks, and recent notes.",
       "parameters": [
         {
@@ -1018,23 +1132,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "read_opportunity",
+          "read_account",
           "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
           "read_task",
-          "read_note"
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -1047,7 +1168,7 @@
         "toolName": "Salesforce.GetOpportunityById",
         "parameters": {
           "opportunity_id": {
-            "value": "0061t00000A1b2C3D4E",
+            "value": "0065g00000A1bCDEFG",
             "type": "string",
             "required": true
           }
@@ -1077,7 +1198,7 @@
     {
       "name": "ListMyTasks",
       "qualifiedName": "Salesforce.ListMyTasks",
-      "fullyQualifiedName": "Salesforce.ListMyTasks@2.2.1",
+      "fullyQualifiedName": "Salesforce.ListMyTasks@2.2.2",
       "description": "Lists tasks assigned to you in Salesforce with optional filters.\n\nExcludes call logs and email activities — only shows actionable tasks.\nUse overdue_only=true to see just tasks past their due date.",
       "parameters": [
         {
@@ -1141,20 +1262,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "read_task"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -1167,27 +1298,27 @@
         "toolName": "Salesforce.ListMyTasks",
         "parameters": {
           "status": {
-            "value": "Not Started",
+            "value": "In Progress",
             "type": "string",
             "required": false
           },
           "due_date_from": {
-            "value": "2026-02-01",
+            "value": "2024-01-15",
             "type": "string",
             "required": false
           },
           "due_date_to": {
-            "value": "2026-02-28",
+            "value": "2024-03-31",
             "type": "string",
             "required": false
           },
           "overdue_only": {
-            "value": false,
+            "value": true,
             "type": "boolean",
             "required": false
           },
           "account_or_opportunity_id": {
-            "value": "0015g00000A1b2CDE3",
+            "value": "0014x000003AbCdEFG",
             "type": "string",
             "required": false
           },
@@ -1197,7 +1328,7 @@
             "required": false
           },
           "page": {
-            "value": 1,
+            "value": 2,
             "type": "integer",
             "required": false
           }
@@ -1227,7 +1358,7 @@
     {
       "name": "LogACall",
       "qualifiedName": "Salesforce.LogACall",
-      "fullyQualifiedName": "Salesforce.LogACall@2.2.1",
+      "fullyQualifiedName": "Salesforce.LogACall@2.2.2",
       "description": "Logs a completed phone call as an activity in Salesforce.\n\nUse this to record calls that already happened. For future follow-up actions,\nuse CreateTask instead.",
       "parameters": [
         {
@@ -1283,20 +1414,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
           "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -1309,32 +1450,32 @@
         "toolName": "Salesforce.LogACall",
         "parameters": {
           "subject": {
-            "value": "Follow-up: pricing & timeline",
+            "value": "Follow-up call with Acme Corp regarding Q3 renewal",
             "type": "string",
             "required": true
           },
           "description": {
-            "value": "Reviewed pricing tiers, delivery timeline, and next steps. Customer requested a formal proposal by Friday and a demo next week.",
+            "value": "Discussed renewal terms and pricing. Client is interested in upgrading to the Enterprise plan. Agreed to send a revised proposal by Friday.",
             "type": "string",
             "required": false
           },
           "duration_minutes": {
-            "value": 37,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "account_or_opportunity_id": {
-            "value": "0065g00000OpqR1ABC",
+            "value": "0014x000003AbCdEFG",
             "type": "string",
             "required": false
           },
           "contact_or_lead_id": {
-            "value": "0035g00000XyzAb123",
+            "value": "0034x000005XyZaHIJ",
             "type": "string",
             "required": false
           },
           "call_result": {
-            "value": "Interested - requested proposal",
+            "value": "Interested – follow-up proposal to be sent",
             "type": "string",
             "required": false
           }
@@ -1364,7 +1505,7 @@
     {
       "name": "SearchContacts",
       "qualifiedName": "Salesforce.SearchContacts",
-      "fullyQualifiedName": "Salesforce.SearchContacts@2.2.1",
+      "fullyQualifiedName": "Salesforce.SearchContacts@2.2.2",
       "description": "Searches for contacts in Salesforce with optional filters.\n\nAt least one filter (query, account_id, or title) must be provided.\nUse this to find people at specific accounts or with specific roles.",
       "parameters": [
         {
@@ -1412,20 +1553,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "read_contact"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -1438,17 +1589,17 @@
         "toolName": "Salesforce.SearchContacts",
         "parameters": {
           "query": {
-            "value": "marketing Acme",
+            "value": "Jane Smith",
             "type": "string",
             "required": false
           },
           "account_id": {
-            "value": "0015g00000N8AbCAAQ",
+            "value": "0014x000003TqXYAA0",
             "type": "string",
             "required": false
           },
           "title": {
-            "value": "Director",
+            "value": "Vice President",
             "type": "string",
             "required": false
           },
@@ -1488,7 +1639,7 @@
     {
       "name": "SearchLeads",
       "qualifiedName": "Salesforce.SearchLeads",
-      "fullyQualifiedName": "Salesforce.SearchLeads@2.2.1",
+      "fullyQualifiedName": "Salesforce.SearchLeads@2.2.2",
       "description": "Searches for leads in Salesforce with optional filters.\n\nAlways excludes already-converted leads. Use owner='me' (default) for your leads,\nor owner='all' for all leads in the org.",
       "parameters": [
         {
@@ -1552,20 +1703,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "read_lead"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -1578,12 +1739,12 @@
         "toolName": "Salesforce.SearchLeads",
         "parameters": {
           "query": {
-            "value": "Acme",
+            "value": "Acme Corporation",
             "type": "string",
             "required": false
           },
           "status": {
-            "value": "Open - Not Contacted",
+            "value": "Working - Contacted",
             "type": "string",
             "required": false
           },
@@ -1598,7 +1759,7 @@
             "required": false
           },
           "created_after": {
-            "value": "2026-01-01",
+            "value": "2024-01-01",
             "type": "string",
             "required": false
           },
@@ -1638,7 +1799,7 @@
     {
       "name": "SearchOpportunities",
       "qualifiedName": "Salesforce.SearchOpportunities",
-      "fullyQualifiedName": "Salesforce.SearchOpportunities@2.2.1",
+      "fullyQualifiedName": "Salesforce.SearchOpportunities@2.2.2",
       "description": "Searches for opportunities (deals) in Salesforce with optional filters.\n\nReturns a paginated list of opportunities with key fields like stage, amount,\nclose date, and associated account. Use owner='me' (default) to see your deals,\nor owner='all' for the whole pipeline.",
       "parameters": [
         {
@@ -1710,20 +1871,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "read_opportunity"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -1736,7 +1907,7 @@
         "toolName": "Salesforce.SearchOpportunities",
         "parameters": {
           "query": {
-            "value": "Enterprise renewal",
+            "value": "Enterprise Cloud Migration",
             "type": "string",
             "required": false
           },
@@ -1746,12 +1917,12 @@
             "required": false
           },
           "close_date_from": {
-            "value": "2026-03-01",
+            "value": "2024-01-01",
             "type": "string",
             "required": false
           },
           "close_date_to": {
-            "value": "2026-03-31",
+            "value": "2024-06-30",
             "type": "string",
             "required": false
           },
@@ -1761,7 +1932,7 @@
             "required": false
           },
           "min_amount": {
-            "value": 50000,
+            "value": 25000,
             "type": "integer",
             "required": false
           },
@@ -1771,7 +1942,7 @@
             "required": false
           },
           "page": {
-            "value": 1,
+            "value": 2,
             "type": "integer",
             "required": false
           }
@@ -1801,7 +1972,7 @@
     {
       "name": "UpdateLead",
       "qualifiedName": "Salesforce.UpdateLead",
-      "fullyQualifiedName": "Salesforce.UpdateLead@2.2.1",
+      "fullyQualifiedName": "Salesforce.UpdateLead@2.2.2",
       "description": "Updates fields on an existing lead. Only provided fields are changed.\n\nIf the lead has already been converted, returns an error with the converted\nrecord IDs so the agent can redirect to the correct contact/account.",
       "parameters": [
         {
@@ -1897,20 +2068,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "write_lead"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -1923,7 +2104,7 @@
         "toolName": "Salesforce.UpdateLead",
         "parameters": {
           "lead_id": {
-            "value": "00Q1t00000ABCdEFAZ",
+            "value": "00Q5g00000A3bXyEAJ",
             "type": "string",
             "required": true
           },
@@ -1938,37 +2119,37 @@
             "required": false
           },
           "last_name": {
-            "value": "Parker",
+            "value": "Mitchell",
             "type": "string",
             "required": false
           },
           "email": {
-            "value": "jordan.parker@example.com",
+            "value": "jordan.mitchell@example.com",
             "type": "string",
             "required": false
           },
           "phone": {
-            "value": "+1-415-555-0132",
+            "value": "+1-415-555-0192",
             "type": "string",
             "required": false
           },
           "title": {
-            "value": "Senior Product Manager",
+            "value": "VP of Engineering",
             "type": "string",
             "required": false
           },
           "company": {
-            "value": "Acme Corp",
+            "value": "Nexora Technologies",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "Interested in product demo; follow up next week.",
+            "value": "Interested in enterprise plan. Follow up scheduled for Q3.",
             "type": "string",
             "required": false
           },
           "lead_source": {
-            "value": "Website",
+            "value": "Web",
             "type": "string",
             "required": false
           },
@@ -2003,7 +2184,7 @@
     {
       "name": "UpdateOpportunity",
       "qualifiedName": "Salesforce.UpdateOpportunity",
-      "fullyQualifiedName": "Salesforce.UpdateOpportunity@2.2.1",
+      "fullyQualifiedName": "Salesforce.UpdateOpportunity@2.2.2",
       "description": "Updates fields on an existing opportunity. Only provided fields are changed.\n\nReturns a success indicator and any warnings (e.g., amount ignored due to line items).",
       "parameters": [
         {
@@ -2090,20 +2271,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "write_opportunity"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -2116,47 +2307,47 @@
         "toolName": "Salesforce.UpdateOpportunity",
         "parameters": {
           "opportunity_id": {
-            "value": "0063j00000ABCDefG1X",
+            "value": "0063X00000KpLqQAJ",
             "type": "string",
             "required": true
           },
           "stage": {
-            "value": "Negotiation/Review",
+            "value": "Proposal/Price Quote",
             "type": "string",
             "required": false
           },
           "close_date": {
-            "value": "2026-05-15",
+            "value": "2024-09-30",
             "type": "string",
             "required": false
           },
           "amount": {
-            "value": 125000,
+            "value": 75000,
             "type": "integer",
             "required": false
           },
           "next_step": {
-            "value": "Finalize pricing and send contract",
+            "value": "Send revised proposal to procurement team",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "Customer confirmed requirements; awaiting legal signoff.",
+            "value": "Enterprise license deal for 200 seats. Customer has budget approved for Q3.",
             "type": "string",
             "required": false
           },
           "name": {
-            "value": "Q2 Renewal - Acme Corp",
+            "value": "Acme Corp - Enterprise License Q3 2024",
             "type": "string",
             "required": false
           },
           "probability": {
-            "value": 75,
+            "value": 65,
             "type": "integer",
             "required": false
           },
           "forecast_category": {
-            "value": "Commit",
+            "value": "Best Case",
             "type": "string",
             "required": false
           }
@@ -2186,7 +2377,7 @@
     {
       "name": "UpdateTask",
       "qualifiedName": "Salesforce.UpdateTask",
-      "fullyQualifiedName": "Salesforce.UpdateTask@2.2.1",
+      "fullyQualifiedName": "Salesforce.UpdateTask@2.2.2",
       "description": "Updates fields on an existing task. Only provided fields are changed.\n\nUse status='Completed' to mark a task as done.",
       "parameters": [
         {
@@ -2242,20 +2433,30 @@
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
           "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -2268,7 +2469,7 @@
         "toolName": "Salesforce.UpdateTask",
         "parameters": {
           "task_id": {
-            "value": "00T5f000004XyZ1EAA",
+            "value": "00T5g00000A1bCDEAZ",
             "type": "string",
             "required": true
           },
@@ -2278,7 +2479,7 @@
             "required": false
           },
           "due_date": {
-            "value": "2026-03-10",
+            "value": "2024-03-15",
             "type": "string",
             "required": false
           },
@@ -2288,12 +2489,12 @@
             "required": false
           },
           "subject": {
-            "value": "Follow up on contract review",
+            "value": "Follow up with client regarding contract renewal",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "Confirmed changes with legal; awaiting client signature. Call to confirm next steps.",
+            "value": "Call the client to discuss the renewal terms and send updated proposal by end of week.",
             "type": "string",
             "required": false
           }
@@ -2323,27 +2524,37 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Salesforce.WhoAmI",
-      "fullyQualifiedName": "Salesforce.WhoAmI@2.2.1",
+      "fullyQualifiedName": "Salesforce.WhoAmI@2.2.2",
       "description": "Get information about the currently authenticated Salesforce user.\n\nThis is typically the first tool called to establish user context.\nReturns the user's profile details and organization information.",
       "parameters": [],
       "auth": {
         "providerId": "salesforce",
         "providerType": "oauth2",
         "scopes": [
-          "read_user"
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task",
+          "read_user",
+          "write_contact",
+          "write_lead",
+          "write_opportunity",
+          "write_task"
         ]
       },
       "secrets": [
-        "SALESFORCE_ORG_SUBDOMAIN",
-        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+        "SALESFORCE_ORG_SUBDOMAIN"
       ],
       "secretsInfo": [
         {
-          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
           "type": "unknown"
         },
         {
-          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
           "type": "unknown"
         }
       ],
@@ -2381,6 +2592,7 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-04-20T17:27:26.000Z",
-  "summary": "Arcade's Salesforce toolkit lets LLMs interact with Salesforce orgs to create, update, search, and convert CRM records, log activities, and fetch enriched relational data. It validates against org-configured picklists and returns contextual warnings and IDs to guide multi-step agent workflows.\n\n**Capabilities**\n- CRUD and lifecycle for leads, contacts, opportunities, and tasks, including the canonical lead-to-deal conversion with Contact/Account/Opportunity creation.\n- Rich account and opportunity retrieval with related contacts, leads, notes, calls, tasks, emails, events, contact roles, and line items.\n- Filtered search across accounts, contacts, leads, and opportunities with owner-scoped (me/all) and paginated results.\n- Activity logging and task management: log completed calls, create follow-up tasks, and list or update assigned tasks with overdue filters.\n- Org-aware validation: picklist checks, conversion guards, and WhoAmI for authenticated user and org context.\n\n**OAuth**\nRequires Salesforce OAuth. See the [Arcade Salesforce auth provider docs](https://docs.arcade.dev/en/references/auth-providers/salesforce) for configuration.\n\n**Secrets**\n- `SALESFORCE_ORG_SUBDOMAIN` — target org subdomain.\n- `SALESFORCE_MAX_CONCURRENT_REQUESTS` — concurrency limit for batched related-record fetches.\n\nConfigure both in the [Arcade Dashboard](https://api.arcade.dev/dashboard/auth/secrets) per the [Arcade secret setup guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-24T11:16:32.841Z",
+  "summary": "Arcade's Salesforce toolkit lets LLMs interact with a Salesforce org to read, create, update, and convert CRM records on behalf of an authenticated user.\n\n## Capabilities\n\n- **Identity & context** — Resolve the authenticated user's profile and org details to establish session context before other operations.\n- **Lead lifecycle** — Create, search, update, and convert leads; conversion produces linked Contact, Account, and Opportunity records and guards against acting on already-converted leads.\n- **Contact & account management** — Create contacts, search by query/account/title, and retrieve full account snapshots (contacts, leads, notes, calls, opportunities, tasks, emails, events).\n- **Opportunity (deal) pipeline** — Create, search, update, and fetch opportunities with enriched data (contact roles, line items, open tasks, notes); supports org-validated picklist values for stage, source, and type.\n- **Activity tracking** — Log completed calls, create future tasks, update task fields (including marking complete), and list your own actionable tasks with optional overdue filtering; call logs and task records are kept distinct.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Salesforce** provider. See the [Arcade Salesforce auth provider docs](https://docs.arcade.dev/en/references/auth-providers/salesforce) for setup details.\n\n## Secrets\n\n`SALESFORCE_MAX_CONCURRENT_REQUESTS`\nControls the maximum number of simultaneous in-flight requests the toolkit will make to the Salesforce API. Set this to an integer string (e.g., `\"5\"`) that fits within your org's API concurrency limits. Salesforce enforces per-org API limits documented in [Salesforce API Request Limits](https://developer.salesforce.com/docs/atlas.en-us.salesforce_app_limits_cheatsheet.meta/salesforce_app_limits_cheatsheet/salesforce_app_limits_platform_api.htm); choose a value that won't exhaust those limits under concurrent LLM usage.\n\n`SALESFORCE_ORG_SUBDOMAIN`\nThe subdomain of your Salesforce org's instance URL (e.g., `mycompany` from `mycompany.my.salesforce.com`). Find this in **Salesforce Setup → Company Settings → My Domain**, or simply inspect the URL when logged into your org. Required so the toolkit routes API calls to the correct org endpoint.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to configure secrets, and manage them at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

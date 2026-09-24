@@ -1,7 +1,7 @@
 {
   "id": "GoogleSheets",
   "label": "Google Sheets",
-  "version": "10.0.0",
+  "version": "10.0.1",
   "description": "Arcade.dev LLM tools for Google Sheets.",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "CheckSpreadsheetAccess",
       "qualifiedName": "GoogleSheets.CheckSpreadsheetAccess",
-      "fullyQualifiedName": "GoogleSheets.CheckSpreadsheetAccess@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.CheckSpreadsheetAccess@10.0.1",
       "description": "Check whether this app can already read each of several spreadsheets, in one\nbatched pre-flight call, before attempting to read them.\n\nUse this when the user references multiple spreadsheets, to learn which are readable up\nfront instead of hitting a separate access error for each one. Where this app reaches\nspreadsheets one grant at a time, the ungranted ones can then be granted together in a\nsingle picker step. Each input may be a bare file id or a full Google Sheets/Drive URL.\n\nReturns ``spreadsheets`` (a per-id list with ``accessible``, the ``title`` and\n``mime_type`` when the file was read, and a ``reason`` when not usable),\n``all_accessible`` (true only when every id is an already-accessible spreadsheet),\n``connected_account_email`` (the connected Google account, empty when unknown), and a\n``grant`` block. ``grant`` lists the ungranted ids (``ungranted_ids``) plus, when the\ninline picker is enabled, a single picker URL covering them all. Where this app already\nreaches every spreadsheet the account can open there is no per-file grant to make, so\n``ungranted_ids`` stays empty and only ``access_hint`` comes back.\n\nA ``reason`` of ``not_accessible_or_not_found`` is a spreadsheet this app cannot read:\none not granted to it yet, one that does not exist, or one the connected account itself\ncannot open — indistinguishable here. For those ids specifically, an empty\n``ungranted_ids`` means no grant step exists, so treat them as not found rather than\nasking the user to grant them. Read that only against ``not_accessible_or_not_found``:\n``ungranted_ids`` is also empty when nothing needs granting at all, and for every reason\nbelow, none of which a grant would resolve.\n``not_a_spreadsheet`` is an accessible file of another type (a Doc, PDF, image, or\nExcel/CSV file); granting cannot change a type, so for an Excel/CSV file ask the user\nto open it in Google Sheets and use File, Save as Google Sheets, then share the\nconverted file. ``invalid_reference`` is an input that is not a Drive id or link at all;\nask the user to re-check it. ``rate_limited`` means Google throttled the check for that\nid, so its reachability is still unknown: wait briefly and call again for those ids, and\ndo not ask the user to grant them. ``error`` is any other failure to complete the check\n(a timeout or a Google server error) and is likewise unknown rather than denied.\n``type_unknown`` is a readable file whose type Google did not report - unlike\n``not_a_spreadsheet`` it is not a statement that the file is something else, so retry it\nrather than telling the user to convert it.\n\n``dropped_selector`` is non-empty when the input was a link naming a specific tab or\nrange (``gid=847362514``) that the file id does not carry. The file is still reported\nnormally, but the other tools reject such a link rather than silently applying to the\nworkbook's first tab - so pass the ``id`` from this result plus that tab named\nexplicitly, and do not forward the original URL.",
       "parameters": [
         {
@@ -43,7 +43,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -52,7 +54,7 @@
       "secretsInfo": [
         {
           "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
-          "type": "token"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -67,8 +69,9 @@
             "value": [
               "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
               "https://docs.google.com/spreadsheets/d/1A2B3C4D5E6F7G8H9I0J/edit#gid=0",
-              "https://drive.google.com/file/d/1Z9Y8X7W6V5U4T3S2R1Q/view?usp=sharing",
-              "1Kp3mNqRtLwXyZaObPcDeFgHiJkLmNoPqRsTuVwXyZ"
+              "https://drive.google.com/file/d/1Z9Y8X7W6V5U4T3S2R1Q/view",
+              "https://docs.google.com/spreadsheets/d/1K2L3M4N5O6P7Q8R9S0T/edit?usp=sharing",
+              "1D2E3F4G5H6I7J8K9L0M"
             ],
             "type": "array",
             "required": true
@@ -99,7 +102,7 @@
     {
       "name": "CommentOnSpreadsheet",
       "qualifiedName": "GoogleSheets.CommentOnSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.CommentOnSpreadsheet@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.CommentOnSpreadsheet@10.0.1",
       "description": "Create a comment on a spreadsheet, edit a comment's body, or resolve/reopen it.\n\nComments are created at the file level: the Drive API cannot anchor a NEW Sheets comment to a\nspecific cell or range. Cell/range-anchored comments made in the Sheets UI are still readable\nvia list_spreadsheet_comments (which returns their anchor). Editing a comment's body is\nallowed only for the comment's author.",
       "parameters": [
         {
@@ -142,7 +145,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -168,12 +173,12 @@
             "required": true
           },
           "comment_id": {
-            "value": "AAAABmXv3ko",
+            "value": "AAAABmfu3zk",
             "type": "string",
             "required": false
           },
           "content": {
-            "value": "Please review the Q3 revenue figures in column D before Friday.",
+            "value": "Please review the Q3 figures in rows 14-22 before the Friday deadline.",
             "type": "string",
             "required": false
           },
@@ -209,7 +214,7 @@
     {
       "name": "CreateOrEditSpreadsheet",
       "qualifiedName": "GoogleSheets.CreateOrEditSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@10.0.1",
       "description": "Create a new spreadsheet or batch-edit an existing one.\n\nOmit `spreadsheet_id` to create; provide it to edit. All writes flow through\n`requests[]` — typed operations like updateCells, addSheet, sortRange,\naddConditionalFormatRule, autoResizeDimensions, and more.\n\nFor updateCells use ExtendedValue with an explicit type field (stringValue,\nnumberValue, boolValue, formulaValue).\n\nBy default, build clean, professional-looking tables with restrained, consistent\nformatting and plain-text tab names/headers (no emojis); only use emojis or\ndecorative styling when the user explicitly asks for it.",
       "parameters": [
         {
@@ -242,7 +247,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -251,7 +258,7 @@
       "secretsInfo": [
         {
           "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
-          "type": "token"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -265,34 +272,11 @@
           "requests": {
             "value": [
               {
-                "updateSpreadsheetProperties": {
-                  "properties": {
-                    "title": "Q3 Sales Report 2024"
-                  },
-                  "fields": "title"
-                }
-              },
-              {
-                "addSheet": {
-                  "properties": {
-                    "title": "Summary",
-                    "index": 0,
-                    "gridProperties": {
-                      "rowCount": 500,
-                      "columnCount": 10,
-                      "frozenRowCount": 1
-                    }
-                  }
-                }
-              },
-              {
                 "updateCells": {
-                  "range": {
+                  "start": {
                     "sheetId": 0,
-                    "startRowIndex": 0,
-                    "endRowIndex": 1,
-                    "startColumnIndex": 0,
-                    "endColumnIndex": 4
+                    "rowIndex": 0,
+                    "columnIndex": 0
                   },
                   "rows": [
                     {
@@ -300,59 +284,20 @@
                         {
                           "userEnteredValue": {
                             "stringValue": "Product"
-                          },
-                          "userEnteredFormat": {
-                            "textFormat": {
-                              "bold": true
-                            }
                           }
                         },
                         {
                           "userEnteredValue": {
                             "stringValue": "Units Sold"
-                          },
-                          "userEnteredFormat": {
-                            "textFormat": {
-                              "bold": true
-                            }
                           }
                         },
                         {
                           "userEnteredValue": {
-                            "stringValue": "Unit Price"
-                          },
-                          "userEnteredFormat": {
-                            "textFormat": {
-                              "bold": true
-                            }
-                          }
-                        },
-                        {
-                          "userEnteredValue": {
-                            "stringValue": "Total Revenue"
-                          },
-                          "userEnteredFormat": {
-                            "textFormat": {
-                              "bold": true
-                            }
+                            "stringValue": "Revenue"
                           }
                         }
                       ]
-                    }
-                  ],
-                  "fields": "userEnteredValue,userEnteredFormat.textFormat.bold"
-                }
-              },
-              {
-                "updateCells": {
-                  "range": {
-                    "sheetId": 0,
-                    "startRowIndex": 1,
-                    "endRowIndex": 4,
-                    "startColumnIndex": 0,
-                    "endColumnIndex": 4
-                  },
-                  "rows": [
+                    },
                     {
                       "values": [
                         {
@@ -367,60 +312,7 @@
                         },
                         {
                           "userEnteredValue": {
-                            "numberValue": 29.99
-                          }
-                        },
-                        {
-                          "userEnteredValue": {
-                            "formulaValue": "=B2*C2"
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "values": [
-                        {
-                          "userEnteredValue": {
-                            "stringValue": "Widget B"
-                          }
-                        },
-                        {
-                          "userEnteredValue": {
-                            "numberValue": 145
-                          }
-                        },
-                        {
-                          "userEnteredValue": {
-                            "numberValue": 49.99
-                          }
-                        },
-                        {
-                          "userEnteredValue": {
-                            "formulaValue": "=B3*C3"
-                          }
-                        }
-                      ]
-                    },
-                    {
-                      "values": [
-                        {
-                          "userEnteredValue": {
-                            "stringValue": "Widget C"
-                          }
-                        },
-                        {
-                          "userEnteredValue": {
-                            "numberValue": 210
-                          }
-                        },
-                        {
-                          "userEnteredValue": {
-                            "numberValue": 19.99
-                          }
-                        },
-                        {
-                          "userEnteredValue": {
-                            "formulaValue": "=B4*C4"
+                            "numberValue": 9600
                           }
                         }
                       ]
@@ -429,115 +321,11 @@
                 }
               },
               {
-                "repeatCell": {
-                  "range": {
-                    "sheetId": 0,
-                    "startRowIndex": 1,
-                    "endRowIndex": 100
-                  },
-                  "cell": {
-                    "userEnteredFormat": {
-                      "backgroundColorStyle": {
-                        "rgbColor": {
-                          "red": 0.95,
-                          "green": 0.95,
-                          "blue": 0.95
-                        }
-                      }
-                    }
-                  },
-                  "fields": "userEnteredFormat.backgroundColorStyle"
-                }
-              },
-              {
-                "updateBorders": {
-                  "range": {
-                    "sheetId": 0,
-                    "startRowIndex": 0,
-                    "endRowIndex": 4,
-                    "startColumnIndex": 0,
-                    "endColumnIndex": 4
-                  },
-                  "top": {
-                    "style": "SOLID_THICK"
-                  },
-                  "bottom": {
-                    "style": "SOLID_THICK"
-                  },
-                  "left": {
-                    "style": "SOLID"
-                  },
-                  "right": {
-                    "style": "SOLID"
-                  },
-                  "innerHorizontal": {
-                    "style": "DASHED"
-                  },
-                  "innerVertical": {
-                    "style": "DASHED"
-                  }
-                }
-              },
-              {
-                "setDataValidation": {
-                  "range": {
-                    "sheetId": 0,
-                    "startRowIndex": 1,
-                    "endRowIndex": 100,
-                    "startColumnIndex": 4,
-                    "endColumnIndex": 5
-                  },
-                  "rule": {
-                    "condition": {
-                      "type": "ONE_OF_LIST",
-                      "values": [
-                        {
-                          "userEnteredValue": "PENDING"
-                        },
-                        {
-                          "userEnteredValue": "SHIPPED"
-                        },
-                        {
-                          "userEnteredValue": "DELIVERED"
-                        }
-                      ]
-                    },
-                    "strict": true,
-                    "showCustomUi": true
-                  }
-                }
-              },
-              {
-                "addConditionalFormatRule": {
-                  "index": 0,
-                  "rule": {
-                    "ranges": [
-                      {
-                        "sheetId": 0,
-                        "startRowIndex": 1,
-                        "endRowIndex": 100,
-                        "startColumnIndex": 1,
-                        "endColumnIndex": 2
-                      }
-                    ],
-                    "booleanRule": {
-                      "condition": {
-                        "type": "NUMBER_LESS",
-                        "values": [
-                          {
-                            "userEnteredValue": "100"
-                          }
-                        ]
-                      },
-                      "format": {
-                        "backgroundColorStyle": {
-                          "rgbColor": {
-                            "red": 1,
-                            "green": 0.9,
-                            "blue": 0.9
-                          }
-                        }
-                      }
+                "addSheet": {
+                  "properties": {
+                    "title": "Summary",
+                    "gridProperties": {
+                      "frozenRowCount": 1
                     }
                   }
                 }
@@ -547,65 +335,16 @@
                   "range": {
                     "sheetId": 0,
                     "startRowIndex": 1,
-                    "endRowIndex": 100,
+                    "endRowIndex": 50,
                     "startColumnIndex": 0,
-                    "endColumnIndex": 4
+                    "endColumnIndex": 3
                   },
                   "sortSpecs": [
                     {
-                      "dimensionIndex": 3,
+                      "dimensionIndex": 2,
                       "sortOrder": "DESCENDING"
                     }
                   ]
-                }
-              },
-              {
-                "addChart": {
-                  "chart": {
-                    "spec": {
-                      "title": "Revenue by Product",
-                      "basicChart": {
-                        "chartType": "COLUMN",
-                        "domains": [
-                          {
-                            "domain": {
-                              "sourceRange": {
-                                "sources": [
-                                  {
-                                    "sheetId": 0,
-                                    "startRowIndex": 0,
-                                    "endRowIndex": 4,
-                                    "startColumnIndex": 0,
-                                    "endColumnIndex": 1
-                                  }
-                                ]
-                              }
-                            }
-                          }
-                        ],
-                        "series": [
-                          {
-                            "series": {
-                              "sourceRange": {
-                                "sources": [
-                                  {
-                                    "sheetId": 0,
-                                    "startRowIndex": 0,
-                                    "endRowIndex": 4,
-                                    "startColumnIndex": 3,
-                                    "endColumnIndex": 4
-                                  }
-                                ]
-                              }
-                            }
-                          }
-                        ]
-                      }
-                    },
-                    "position": {
-                      "newSheet": true
-                    }
-                  }
                 }
               },
               {
@@ -614,8 +353,41 @@
                     "sheetId": 0,
                     "dimension": "COLUMNS",
                     "startIndex": 0,
-                    "endIndex": 4
+                    "endIndex": 3
                   }
+                }
+              },
+              {
+                "addConditionalFormatRule": {
+                  "rule": {
+                    "ranges": [
+                      {
+                        "sheetId": 0,
+                        "startRowIndex": 1,
+                        "endRowIndex": 50,
+                        "startColumnIndex": 2,
+                        "endColumnIndex": 3
+                      }
+                    ],
+                    "booleanRule": {
+                      "condition": {
+                        "type": "NUMBER_GREATER",
+                        "values": [
+                          {
+                            "userEnteredValue": "10000"
+                          }
+                        ]
+                      },
+                      "format": {
+                        "backgroundColor": {
+                          "red": 0.7,
+                          "green": 0.9,
+                          "blue": 0.7
+                        }
+                      }
+                    }
+                  },
+                  "index": 0
                 }
               }
             ],
@@ -628,7 +400,7 @@
             "required": false
           },
           "title": {
-            "value": "Q3 Sales Report 2024",
+            "value": "Q3 Sales Report",
             "type": "string",
             "required": false
           }
@@ -660,7 +432,7 @@
     {
       "name": "DeleteComment",
       "qualifiedName": "GoogleSheets.DeleteComment",
-      "fullyQualifiedName": "GoogleSheets.DeleteComment@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.DeleteComment@10.0.1",
       "description": "Delete a comment from a spreadsheet.\n\nOnly the comment's author can delete it (enforced by Google Drive); deleting marks the\nwhole thread (the comment and its replies) as deleted.",
       "parameters": [
         {
@@ -684,7 +456,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -710,7 +484,7 @@
             "required": true
           },
           "comment_id": {
-            "value": "AAAABmFtXNk",
+            "value": "AAAAjeKTBmk",
             "type": "string",
             "required": true
           }
@@ -740,16 +514,27 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@10.0.1",
       "description": "Generate a URL where the user can grant this app access to spreadsheets.\n\nCheck `url` first. An empty `url` means this app already reaches every spreadsheet the\nconnected account can open, so there is no per-file grant to request: this tool cannot\nchange any outcome, and a spreadsheet that could not be read is one the account itself\ncannot open. Do not retry it.\n\nOtherwise the URL opens Google's first-party Drive picker, filtered to Google Sheets,\nwhere the user browses and selects which spreadsheets to share with this application —\nit is not a sign-in or credential prompt. Use this when a prior tool reported that a\nfile was not found or access was denied, and the user expects the file to exist. After\nthe user completes the picker flow, retry the prior operation.",
       "parameters": [],
       "auth": {
         "providerId": "google",
         "providerType": "oauth2",
-        "scopes": []
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
+        ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "Google File Picker URL for user file selection and permission granting"
@@ -783,7 +568,7 @@
     {
       "name": "GetSpreadsheetEditHistory",
       "qualifiedName": "GoogleSheets.GetSpreadsheetEditHistory",
-      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@10.0.1",
       "description": "Report who edited a spreadsheet and when, from Google Drive revisions.\n\nReports the \"who\" and \"when\" only — not which cells changed, and it can't revert.\n\n'summary' (default) answers \"who last edited this and when\" (read from the file's head,\nso always accurate), plus per-window aggregates (revisions read, contributors, first\nedit) and a preview of recent edits — computed over a bounded window of history per call.\nThese aggregates describe the whole history only when `is_incomplete` is false; it is\ntrue when the scan was resumed from a token and/or more history remains. To answer\n\"when was this first edited?\" or \"who contributed?\" reliably, call from the beginning\n(no `pagination_token`) and check `is_incomplete` is false. `pagination_token` is\nreturned when more pages remain so you can resume.\n\n'list' returns one page of individual revisions, oldest first. Drive can't sort\nnewest-first, so the most recent individual revisions are on the final page.",
       "parameters": [
         {
@@ -826,7 +611,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -862,7 +649,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "eyJwYWdlVG9rZW4iOiJBSHdlRVFBQUFBQVhZekp6TURBeE1EQXdNREF3TURBd01EQXdNREF3TURBd01EQXdNREF3In0=",
+            "value": "eyJwYWdlVG9rZW4iOiAiQUYxUTUwbmtYeVo5In0=",
             "type": "string",
             "required": false
           }
@@ -892,7 +679,7 @@
     {
       "name": "InspectSpreadsheet",
       "qualifiedName": "GoogleSheets.InspectSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@10.0.1",
       "description": "Inspect a Google Sheets spreadsheet's structure or read a range of cells.\n\nUse the default 'structure' mode to understand a workbook cheaply before reading.\nSwitch to 'read' mode to pull a range as a grid of rows, optionally with\nper-cell annotations and a rendered markdown/csv/tsv export.\n\nIn 'read' mode the response's per-tab 'sheets' block reports only tab identity and\nthe allocated grid; its scan-derived fields (used_range, populated_cell_count,\nformula_cell_count, first_row, table_regions) are placeholders (0/empty) because read\nmode does not scan the tab — they do NOT mean the tab is empty or that it has no\ntables. The data you read is in the top-level 'range' and 'rows'. Call 'structure'\nmode for those aggregates and for the workbook's charts, merges, protected ranges, and\nconditional formats.\n\nWorkflow for a tab that holds multiple tables, or a table that does not start at A1:\ncall 'structure' first and use that tab's estimated 'table_regions' to choose the\na1_range to read or filter, so you target one table instead of a glued multi-table\nrange.\n\nAlways check the response's top-level 'warnings' list: read mode reports there when a\nresult was capped or trimmed (cell budget, the per-cell annotation cap, or an empty\nfilter scan) and tells you how to recover (page 'next_range', narrow 'a1_range',\n'select_columns', or request fewer annotation kinds).",
       "parameters": [
         {
@@ -1039,7 +826,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -1174,7 +963,7 @@
     {
       "name": "ListSpreadsheetComments",
       "qualifiedName": "GoogleSheets.ListSpreadsheetComments",
-      "fullyQualifiedName": "GoogleSheets.ListSpreadsheetComments@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.ListSpreadsheetComments@10.0.1",
       "description": "List a spreadsheet's comment threads, or the full replies of a single comment.\n\nIn 'comments' mode each comment includes up to a few trimmed reply previews plus the total reply_count; use 'thread' mode for a comment's complete reply list. Without filters/ordering, pagination walks every comment. Client-side filters (has_replies, resolved) and order_by are applied only within a bounded scan of the first 500 comments, so on larger sheets drop them and page through everything with the native (unbounded) pagination. Each comment's Drive anchor is returned when it was cell/range-anchored in the Sheets UI; comments created via the API are file-level. Filtering, ordering, and offset pagination are best-effort: results can drift if comments are added or removed between paginated calls.",
       "parameters": [
         {
@@ -1287,7 +1076,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -1318,17 +1109,17 @@
             "required": false
           },
           "comment_id": {
-            "value": "AAAABcDeFgH",
+            "value": "AAAABmk9tXo",
             "type": "string",
             "required": false
           },
           "limit": {
-            "value": 25,
+            "value": 20,
             "type": "integer",
             "required": false
           },
           "page_token": {
-            "value": "eyJzdGFydEluZGV4IjoyNX0=",
+            "value": "ChEIABCgjoCn3rKY5AEYgICAgICAgAoaEwsS",
             "type": "string",
             "required": false
           },
@@ -1354,20 +1145,20 @@
           },
           "comment_ids": {
             "value": [
-              "AAAABcDeFgH",
-              "AAAAXyZ1234",
-              "AAAA9kLmNop"
+              "AAAABmk9tXo",
+              "AAAABmk9uYp",
+              "AAAABmk9vZq"
             ],
             "type": "array",
             "required": false
           },
           "order_by": {
-            "value": "modifiedTime desc",
+            "value": "modified_desc",
             "type": "string",
             "required": false
           },
           "max_length": {
-            "value": 280,
+            "value": 300,
             "type": "integer",
             "required": false
           }
@@ -1397,7 +1188,7 @@
     {
       "name": "ReplyToComment",
       "qualifiedName": "GoogleSheets.ReplyToComment",
-      "fullyQualifiedName": "GoogleSheets.ReplyToComment@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.ReplyToComment@10.0.1",
       "description": "Add a reply to an existing comment on a spreadsheet.\n\nTo resolve or reopen the comment instead, use comment_on_spreadsheet with a status.",
       "parameters": [
         {
@@ -1429,7 +1220,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -1455,12 +1248,12 @@
             "required": true
           },
           "comment_id": {
-            "value": "AAAABmk3z1A",
+            "value": "AAAABmk5x3Y",
             "type": "string",
             "required": true
           },
           "reply_text": {
-            "value": "Thanks for the note! I've reviewed the data and updated the figures in column C accordingly.",
+            "value": "Thanks for pointing that out! I've reviewed the data and will update the figures by end of day.",
             "type": "string",
             "required": true
           }
@@ -1490,7 +1283,7 @@
     {
       "name": "ScanForDataIssues",
       "qualifiedName": "GoogleSheets.ScanForDataIssues",
-      "fullyQualifiedName": "GoogleSheets.ScanForDataIssues@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.ScanForDataIssues@10.0.1",
       "description": "Deterministically flag 'weird'/bad cells in spreadsheet data.\n\nNo LLM judgement: the same input always returns the same flags. Each cell-level finding\ncarries a coord, a 0-based row_index/column_index (ready for a Sheets GridRange), the rule,\na severity (high -> red, medium/low -> yellow), and a note-ready reason — so the output\ndrops straight into an annotate/format recipe. In the default `mode='grouped'` these are\naggregated per rule+column within each table into `groups` (with A1 `coords`); use\n`mode='list'` to get every flagged cell in `flags` with its 0-based indices.\n\nProvide `spreadsheet_id` to scan a live sheet (scan one tab via sheet_id/sheet_title, or\nevery tab when both are omitted). Set `orientation='rows'` for transposed tables whose\nfields run down a column instead of across a row. Findings come back as flags (cell-level,\nhigh certainty) and alerts (table-level, lower certainty), grouped sheet -> table -> rule.\n\nIn all-sheets mode a tab that cannot be read is collected in `failed_sheets` (and echoed\nas a `warnings` entry) while every other tab still returns; `failed_sheets` is empty for\na single-tab scan and whenever every tab reads cleanly.\n\nCHECK `complete` BEFORE REPORTING. `total_flag_count` counts only the `sheets_scanned`\ntabs out of `sheets_targeted`, so a partial scan that reports zero flags is not a\nstatement that the workbook is clean. When `complete` is false, say which tabs were\ncovered. Rate limiting is the usual cause: all-sheets mode spends one read per tab\nagainst Google's per-minute quota, so a throttle part way through returns the tabs\nalready scanned with `complete: false` and every tab it never reached listed in\n`unscanned_sheet_titles`. Wait about a minute, then scan those - one `sheet_title` per\ncall, or re-run the whole workbook. Every title in that list is still unchecked, so\nstopping after the first one leaves the workbook half-scanned. A throttle before any tab\nwas scanned has nothing to return, so it fails as retryable instead.",
       "parameters": [
         {
@@ -1605,7 +1398,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -1636,7 +1431,7 @@
             "required": false
           },
           "sheet_title": {
-            "value": "Sales_Data_2024",
+            "value": "Sales Data Q1",
             "type": "string",
             "required": false
           },
@@ -1657,11 +1452,10 @@
           },
           "rules": {
             "value": [
-              "blank_required",
-              "type_outlier",
-              "duplicate_row",
-              "out_of_range",
-              "whitespace_anomaly"
+              "BLANK",
+              "TYPE_OUTLIER",
+              "DUPLICATE",
+              "OUT_OF_RANGE"
             ],
             "type": "array",
             "required": false
@@ -1712,7 +1506,7 @@
     {
       "name": "SearchSpreadsheets",
       "qualifiedName": "GoogleSheets.SearchSpreadsheets",
-      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@10.0.1",
       "description": "Searches for spreadsheets in the user's Google Drive based on the titles and content and\nreturns the title, ID, and URL for each matching spreadsheet.\n\nDoes not return the content/data of the sheets in the spreadsheets - only the metadata.\nExcludes spreadsheets that are in the trash.\n\n`pagination_token` is present only when more results remain; pass it back to continue.\nAn empty result set carries an `access_hint` explaining that this app only sees\nspreadsheets it has been granted, along with a URL for granting more when available.",
       "parameters": [
         {
@@ -1810,7 +1604,9 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/drive.file"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [
@@ -1847,7 +1643,7 @@
             "required": false
           },
           "search_only_in_shared_drive_id": {
-            "value": "0AHz3pAZmRzXYUk9PVA",
+            "value": "0AJ9KXq8f3TkZUk9PVA",
             "type": "string",
             "required": false
           },
@@ -1870,12 +1666,12 @@
             "required": false
           },
           "limit": {
-            "value": 15,
+            "value": 20,
             "type": "integer",
             "required": false
           },
           "pagination_token": {
-            "value": "V1*AHRsNm1QZ3h5dGN2ZXJzaW9u",
+            "value": "eyJzdGFydEluZGV4IjoyMCwidG90YWwiOjQ1fQ==",
             "type": "string",
             "required": false
           }
@@ -1905,19 +1701,27 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleSheets.WhoAmI",
-      "fullyQualifiedName": "GoogleSheets.WhoAmI@10.0.0",
+      "fullyQualifiedName": "GoogleSheets.WhoAmI@10.0.1",
       "description": "Identify the Google account this app is connected through.\n\nUse this to tell the user which account is in play, or to resolve \"me\" in a request\nthat names a person. Returns the connected account's display name, given and family\nname, formatted name, primary email address, and profile picture URL, read from the\nGoogle People API.\n\nA field is an empty string when Google does not supply it. This reports identity only\nand does not check whether that account can reach any particular spreadsheet — use\ncheck_spreadsheet_access for that.",
       "parameters": [],
       "auth": {
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email"
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
-      "secrets": [],
-      "secretsInfo": [],
+      "secrets": [
+        "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL",
+          "type": "unknown"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "The connected Google account's name, email, and profile picture URL."
@@ -1955,6 +1759,6 @@
   ],
   "subPages": [],
   "curationSourceHash": "dd8b363d0c5b211c25a2d7aca421340a81cbdc1eebee6d6743d73838563477a4",
-  "generatedAt": "2026-09-04T15:27:34.720Z",
-  "summary": "## Google Sheets Toolkit\n\nArcade toolkit for Google Sheets that enables LLMs to read, write, inspect, search, and annotate spreadsheets via the Google Sheets and Drive APIs, including access-control pre-flight checks and inline file picking.\n\n## Capabilities\n\n- **Access & discovery:** Check batched spreadsheet accessibility before reads, generate Google Drive picker URLs for granting per-file access, search Drive for spreadsheets by title/content, and retrieve connected-account identity.\n- **Read & inspect:** Inspect workbook structure (tabs, merges, charts, protected ranges, conditional formats, table regions) or read arbitrary cell ranges with optional per-cell annotations, markdown/CSV/TSV export, and column filtering.\n- **Write & edit:** Create new spreadsheets or batch-edit existing ones using the full Sheets `requests[]` API (updateCells, addSheet, sortRange, autoResizeDimensions, conditional formatting, and more).\n- **Data quality scanning:** Deterministically flag bad/anomalous cells by rule and severity (no LLM inference), with grouped or per-cell output ready for annotation workflows; supports single-tab or whole-workbook scans with partial-result handling on rate limits.\n- **Comments & collaboration:** List, create, edit, resolve, reopen, reply to, and delete comment threads; retrieve edit history (contributors, timestamps) from Drive revisions.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — Controls whether the toolkit embeds a single Google Drive picker URL directly in `CheckSpreadsheetAccess` responses (the `grant` block) rather than requiring a separate call to `GenerateGoogleFilePickerUrl`. Set this to enable the inline picker feature. This is an Arcade-side configuration secret, not a Google credential — no Google dashboard action is required. Create and manage it in the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets).\n\nFor general guidance on defining secrets in Arcade tools, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+  "generatedAt": "2026-09-24T11:15:29.125Z",
+  "summary": "## Google Sheets Toolkit\n\nArcade toolkit that connects LLMs to Google Sheets (and the surrounding Drive/People APIs), enabling agents to read, write, search, comment on, and audit spreadsheets on behalf of a user's Google account.\n\n## Capabilities\n\n- **Access checking & file discovery:** Batch pre-flight access checks across multiple spreadsheets, generate Drive picker URLs for granting per-file access, and search Drive for spreadsheets by title/content — with pagination and access hints throughout.\n- **Reading & inspecting spreadsheets:** Inspect workbook structure (tabs, charts, merges, protected ranges, conditional formats) or read cell ranges as grids with optional annotations and markdown/CSV/TSV export; workflow guidance for multi-table layouts.\n- **Writing & editing spreadsheets:** Create new spreadsheets or batch-edit existing ones via typed Sheets API requests (cell updates, sheet management, sorting, conditional formatting, auto-resize, and more).\n- **Data quality scanning:** Deterministically flag malformed or suspicious cells across one tab or an entire workbook, returning per-cell coordinates, severity levels, and rule-grouped summaries ready for annotation workflows.\n- **Comments & collaboration:** List, create, edit, resolve/reopen, reply to, and delete comment threads; retrieve edit history (contributors and timestamps) from Drive revisions.\n- **Account identity:** Resolve the connected Google account's name and email via the People API, useful for interpreting \"me\" references or surfacing which account is active.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — Controls whether the toolkit generates an inline Google Drive picker URL inside access-check responses (the `grant.picker_url` field in `CheckSpreadsheetAccess` and `GenerateGoogleFilePickerUrl`). This is not a credential issued by Google; it is an Arcade-side feature flag or configuration value. Set it according to your Arcade deployment's configuration — check your Arcade dashboard or infrastructure config for the expected value and format. When absent or disabled, picker URLs are omitted from responses and callers must handle the grant flow separately.\n\nFor general guidance on defining and managing secrets in Arcade tools, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). Secrets can also be managed at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

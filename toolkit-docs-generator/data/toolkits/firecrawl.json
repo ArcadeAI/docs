@@ -1,8 +1,8 @@
 {
   "id": "Firecrawl",
   "label": "Firecrawl",
-  "version": "3.1.2",
-  "description": "Arcade.dev LLM tools for web scraping related tasks via Firecrawl",
+  "version": "4.0.0",
+  "description": "Arcade.dev LLM tools for reading the web via Firecrawl",
   "metadata": {
     "category": "development",
     "iconUrl": "https://design-system.arcade.dev/icons/firecrawl.svg",
@@ -18,14 +18,14 @@
     {
       "name": "CancelCrawl",
       "qualifiedName": "Firecrawl.CancelCrawl",
-      "fullyQualifiedName": "Firecrawl.CancelCrawl@3.1.2",
-      "description": "Cancel an asynchronous crawl job that is in progress using the Firecrawl API.",
+      "fullyQualifiedName": "Firecrawl.CancelCrawl@4.0.0",
+      "description": "Stop a crawl that is still running.\n\nPages the crawl already collected stay available through GetCrawlData.",
       "parameters": [
         {
-          "name": "crawl_id",
+          "name": "job_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the asynchronous crawl job to cancel",
+          "description": "The crawl job id returned when the crawl started.",
           "enum": null,
           "inferrable": true
         }
@@ -42,14 +42,14 @@
       ],
       "output": {
         "type": "json",
-        "description": "Cancellation status information"
+        "description": "Whether the crawl is no longer running"
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Firecrawl.CancelCrawl",
         "parameters": {
-          "crawl_id": {
-            "value": "123456789abcdef",
+          "job_id": {
+            "value": "crawl_a1b2c3d4e5f67890abcdef1234567890",
             "type": "string",
             "required": true
           }
@@ -65,10 +65,10 @@
         },
         "behavior": {
           "operations": [
-            "update"
+            "delete"
           ],
           "readOnly": false,
-          "destructive": false,
+          "destructive": true,
           "idempotent": true,
           "openWorld": true
         },
@@ -78,48 +78,14 @@
     {
       "name": "CrawlWebsite",
       "qualifiedName": "Firecrawl.CrawlWebsite",
-      "fullyQualifiedName": "Firecrawl.CrawlWebsite@3.1.2",
-      "description": "Crawl a website using Firecrawl. If the crawl is asynchronous, then returns the crawl ID.\nIf the crawl is synchronous, then returns the crawl data.",
+      "fullyQualifiedName": "Firecrawl.CrawlWebsite@4.0.0",
+      "description": "Read many pages of one website and return each page's content.\n\nA crawl that outruns wait_seconds keeps running: the result carries its\njob_id, and GetCrawlStatus, GetCrawlData, and CancelCrawl take it from there.",
       "parameters": [
         {
           "name": "url",
           "type": "string",
           "required": true,
-          "description": "URL to crawl",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "exclude_paths",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "URL patterns to exclude from the crawl",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "include_paths",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "URL patterns to include in the crawl",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_depth",
-          "type": "integer",
-          "required": false,
-          "description": "Maximum depth to crawl relative to the entered URL",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "ignore_sitemap",
-          "type": "boolean",
-          "required": false,
-          "description": "Ignore the website sitemap when crawling",
+          "description": "Absolute http(s) URL to start the crawl from.",
           "enum": null,
           "inferrable": true
         },
@@ -127,39 +93,35 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Limit the number of pages to crawl",
+          "description": "How many pages to read at most, from 1 to 100. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "allow_backward_links",
-          "type": "boolean",
+          "name": "max_discovery_depth",
+          "type": "integer",
           "required": false,
-          "description": "Enable navigation to previously linked pages and enable crawling sublinks that are not children of the 'url' input parameter.",
+          "description": "How many links deep to follow from the starting URL. Defaults to Firecrawl's own depth.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "allow_external_links",
-          "type": "boolean",
-          "required": false,
-          "description": "Allow following links to external websites",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "webhook",
+          "name": "sitemap",
           "type": "string",
           "required": false,
-          "description": "The URL to send a POST request to when the crawl is started, updated and completed.",
-          "enum": null,
+          "description": "How to use the site's own sitemap when finding pages. Defaults to including it alongside discovered links.",
+          "enum": [
+            "include",
+            "skip",
+            "only"
+          ],
           "inferrable": true
         },
         {
-          "name": "async_crawl",
-          "type": "boolean",
+          "name": "wait_seconds",
+          "type": "integer",
           "required": false,
-          "description": "Run the crawl asynchronously",
+          "description": "How long to wait for the crawl before handing back a job id, from 5 to 25 seconds. Defaults to 25.",
           "enum": null,
           "inferrable": true
         }
@@ -176,66 +138,159 @@
       ],
       "output": {
         "type": "json",
-        "description": "Crawl status and data"
+        "description": "Page content from the crawl, or a job id if still running"
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Firecrawl.CrawlWebsite",
         "parameters": {
           "url": {
-            "value": "https://example.com",
+            "value": "https://www.example.com",
             "type": "string",
             "required": true
           },
-          "exclude_paths": {
-            "value": [
-              "/login",
-              "/private/*"
-            ],
-            "type": "array",
+          "limit": {
+            "value": 25,
+            "type": "integer",
             "required": false
           },
-          "include_paths": {
-            "value": [
-              "/public/*",
-              "/about"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "max_depth": {
+          "max_discovery_depth": {
             "value": 3,
             "type": "integer",
             "required": false
           },
-          "ignore_sitemap": {
-            "value": false,
-            "type": "boolean",
-            "required": false
-          },
-          "limit": {
-            "value": 50,
-            "type": "integer",
-            "required": false
-          },
-          "allow_backward_links": {
-            "value": true,
-            "type": "boolean",
-            "required": false
-          },
-          "allow_external_links": {
-            "value": false,
-            "type": "boolean",
-            "required": false
-          },
-          "webhook": {
-            "value": "https://mywebhook.com/crawl-update",
+          "sitemap": {
+            "value": "include",
             "type": "string",
             "required": false
           },
-          "async_crawl": {
-            "value": true,
-            "type": "boolean",
+          "wait_seconds": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ExtractData",
+      "qualifiedName": "Firecrawl.ExtractData",
+      "fullyQualifiedName": "Firecrawl.ExtractData@4.0.0",
+      "description": "Collect structured records from the web from a plain-language description.\n\nUse this when the answer is fields such as products, prices, or contacts.\nUse ScrapeUrl or CrawlWebsite when the answer is the page text itself. An\nextraction that outruns wait_seconds keeps running, and GetExtractStatus\ntakes its job_id.",
+      "parameters": [
+        {
+          "name": "prompt",
+          "type": "string",
+          "required": true,
+          "description": "The data to collect, in plain language, such as every product name and its price.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "urls",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Pages to start from. Defaults to letting Firecrawl find its own sources.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "model",
+          "type": "string",
+          "required": false,
+          "description": "Which model collects the data. Defaults to the fastest and cheapest one; move up only for a site that needs more reasoning.",
+          "enum": [
+            "spark-1-mini",
+            "spark-1-pro",
+            "spark-2"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "effort",
+          "type": "string",
+          "required": false,
+          "description": "How hard the model should work. Higher effort costs more and takes longer. Defaults to the model's own setting.",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "wait_seconds",
+          "type": "integer",
+          "required": false,
+          "description": "How long to wait before handing back a job id, from 5 to 25 seconds. Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The extracted data, or a job id if still running"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.ExtractData",
+        "parameters": {
+          "prompt": {
+            "value": "Extract every product name, price, and availability status from the page.",
+            "type": "string",
+            "required": true
+          },
+          "urls": {
+            "value": [
+              "https://example-store.com/products",
+              "https://example-store.com/sale"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "model": {
+            "value": "gpt-4o",
+            "type": "string",
+            "required": false
+          },
+          "effort": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "wait_seconds": {
+            "value": 20,
+            "type": "integer",
             "required": false
           }
         },
@@ -263,14 +318,14 @@
     {
       "name": "GetCrawlData",
       "qualifiedName": "Firecrawl.GetCrawlData",
-      "fullyQualifiedName": "Firecrawl.GetCrawlData@3.1.2",
-      "description": "Get the data of a Firecrawl 'crawl' that is either in progress or recently completed.",
+      "fullyQualifiedName": "Firecrawl.GetCrawlData@4.0.0",
+      "description": "Read the pages a crawl has collected so far.",
       "parameters": [
         {
-          "name": "crawl_id",
+          "name": "job_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the crawl job",
+          "description": "The crawl job id returned when the crawl started.",
           "enum": null,
           "inferrable": true
         }
@@ -287,14 +342,14 @@
       ],
       "output": {
         "type": "json",
-        "description": "Crawl data information"
+        "description": "The pages the crawl has collected"
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Firecrawl.GetCrawlData",
         "parameters": {
-          "crawl_id": {
-            "value": "abc12345",
+          "job_id": {
+            "value": "crawl_abc123xyz789",
             "type": "string",
             "required": true
           }
@@ -314,7 +369,7 @@
           ],
           "readOnly": true,
           "destructive": false,
-          "idempotent": true,
+          "idempotent": false,
           "openWorld": true
         },
         "extras": null
@@ -323,14 +378,14 @@
     {
       "name": "GetCrawlStatus",
       "qualifiedName": "Firecrawl.GetCrawlStatus",
-      "fullyQualifiedName": "Firecrawl.GetCrawlStatus@3.1.2",
-      "description": "Get the status of a Firecrawl 'crawl' that is either in progress or recently completed.",
+      "fullyQualifiedName": "Firecrawl.GetCrawlStatus@4.0.0",
+      "description": "Check how far a crawl has progressed, without fetching its pages.",
       "parameters": [
         {
-          "name": "crawl_id",
+          "name": "job_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the crawl job",
+          "description": "The crawl job id returned when the crawl started.",
           "enum": null,
           "inferrable": true
         }
@@ -347,14 +402,14 @@
       ],
       "output": {
         "type": "json",
-        "description": "Crawl status information"
+        "description": "How far the crawl has progressed"
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Firecrawl.GetCrawlStatus",
         "parameters": {
-          "crawl_id": {
-            "value": "12345-abcde-67890-fghij",
+          "job_id": {
+            "value": "crawl_a3f8d2c1-7b45-4e9f-82ad-1c3e5f607b29",
             "type": "string",
             "required": true
           }
@@ -374,7 +429,67 @@
           ],
           "readOnly": true,
           "destructive": false,
-          "idempotent": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetExtractStatus",
+      "qualifiedName": "Firecrawl.GetExtractStatus",
+      "fullyQualifiedName": "Firecrawl.GetExtractStatus@4.0.0",
+      "description": "Collect the results of an extraction that is already running.",
+      "parameters": [
+        {
+          "name": "job_id",
+          "type": "string",
+          "required": true,
+          "description": "The extraction job id returned when the extraction started.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The extraction's status and any data it produced"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.GetExtractStatus",
+        "parameters": {
+          "job_id": {
+            "value": "ext_a3f8c2d71b4e9056",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
           "openWorld": true
         },
         "extras": null
@@ -383,14 +498,14 @@
     {
       "name": "MapWebsite",
       "qualifiedName": "Firecrawl.MapWebsite",
-      "fullyQualifiedName": "Firecrawl.MapWebsite@3.1.2",
-      "description": "Map a website from a single URL to a map of the entire website.",
+      "fullyQualifiedName": "Firecrawl.MapWebsite@4.0.0",
+      "description": "List the URLs on a website, without reading the pages.\n\nUse CrawlWebsite to read the content of many pages, or ScrapeUrl for one.",
       "parameters": [
         {
           "name": "url",
           "type": "string",
           "required": true,
-          "description": "The base URL to start crawling from",
+          "description": "Absolute http(s) URL to map from, such as a homepage or section root.",
           "enum": null,
           "inferrable": true
         },
@@ -398,23 +513,7 @@
           "name": "search",
           "type": "string",
           "required": false,
-          "description": "Search query to use for mapping",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "ignore_sitemap",
-          "type": "boolean",
-          "required": false,
-          "description": "Ignore the website sitemap when crawling",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "include_subdomains",
-          "type": "boolean",
-          "required": false,
-          "description": "Include subdomains of the website",
+          "description": "Keep only links related to this keyword. Defaults to returning every link found.",
           "enum": null,
           "inferrable": true
         },
@@ -422,8 +521,28 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of links to return",
+          "description": "How many URLs to return, from 1 to 5000. Defaults to 100.",
           "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_subdomains",
+          "type": "boolean",
+          "required": false,
+          "description": "Also map the site's subdomains. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sitemap",
+          "type": "string",
+          "required": false,
+          "description": "How to use the site's own sitemap when finding URLs. Defaults to including it alongside discovered links.",
+          "enum": [
+            "include",
+            "skip",
+            "only"
+          ],
           "inferrable": true
         }
       ],
@@ -439,25 +558,25 @@
       ],
       "output": {
         "type": "json",
-        "description": "Website map data"
+        "description": "The URLs found on the site"
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Firecrawl.MapWebsite",
         "parameters": {
           "url": {
-            "value": "https://example.com",
+            "value": "https://www.example.com",
             "type": "string",
             "required": true
           },
           "search": {
-            "value": "contact",
+            "value": "blog",
             "type": "string",
             "required": false
           },
-          "ignore_sitemap": {
-            "value": false,
-            "type": "boolean",
+          "limit": {
+            "value": 250,
+            "type": "integer",
             "required": false
           },
           "include_subdomains": {
@@ -465,9 +584,9 @@
             "type": "boolean",
             "required": false
           },
-          "limit": {
-            "value": 100,
-            "type": "integer",
+          "sitemap": {
+            "value": "only",
+            "type": "string",
             "required": false
           }
         },
@@ -486,7 +605,7 @@
           ],
           "readOnly": true,
           "destructive": false,
-          "idempotent": true,
+          "idempotent": false,
           "openWorld": true
         },
         "extras": null
@@ -495,14 +614,14 @@
     {
       "name": "ScrapeUrl",
       "qualifiedName": "Firecrawl.ScrapeUrl",
-      "fullyQualifiedName": "Firecrawl.ScrapeUrl@3.1.2",
-      "description": "Scrape a URL using Firecrawl and return the data in specified formats.",
+      "fullyQualifiedName": "Firecrawl.ScrapeUrl@4.0.0",
+      "description": "Read one web page whose URL is already known and return its content.\n\nUse Search instead when the URL is unknown, MapWebsite to list a site's\nURLs, CrawlWebsite to read many pages of one site, and ExtractData to pull\nstructured fields rather than page text.",
       "parameters": [
         {
           "name": "url",
           "type": "string",
           "required": true,
-          "description": "URL to scrape",
+          "description": "Absolute http(s) URL of the page to read.",
           "enum": null,
           "inferrable": true
         },
@@ -511,14 +630,14 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Formats to retrieve. Defaults to ['markdown'].",
+          "description": "Content formats to return. Defaults to markdown only.",
           "enum": [
             "markdown",
             "html",
             "rawHtml",
             "links",
             "screenshot",
-            "screenshot@fullPage"
+            "summary"
           ],
           "inferrable": true
         },
@@ -526,42 +645,21 @@
           "name": "only_main_content",
           "type": "boolean",
           "required": false,
-          "description": "Only return the main content of the page excluding headers, navs, footers, etc.",
+          "description": "Drop navigation, sidebars, and footers, keeping the page's main content. Defaults to true.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "include_tags",
-          "type": "array",
-          "innerType": "string",
+          "name": "proxy",
+          "type": "string",
           "required": false,
-          "description": "List of tags to include in the output",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "exclude_tags",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "List of tags to exclude from the output",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "wait_for",
-          "type": "integer",
-          "required": false,
-          "description": "Specify a delay in milliseconds before fetching the content, allowing the page sufficient time to load.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "timeout",
-          "type": "integer",
-          "required": false,
-          "description": "Timeout in milliseconds for the request",
-          "enum": null,
+          "description": "Route the fetch through a different proxy. Escalate to a slower, harder-to-block proxy for a page that returns a block page or empty content. Defaults to Firecrawl's own choice.",
+          "enum": [
+            "basic",
+            "stealth",
+            "enhanced",
+            "auto"
+          ],
           "inferrable": true
         }
       ],
@@ -577,14 +675,14 @@
       ],
       "output": {
         "type": "json",
-        "description": "Scraped data in specified formats"
+        "description": "The page's content and metadata"
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Firecrawl.ScrapeUrl",
         "parameters": {
           "url": {
-            "value": "https://example.com",
+            "value": "https://www.example.com/blog/getting-started-with-web-scraping",
             "type": "string",
             "required": true
           },
@@ -601,29 +699,338 @@
             "type": "boolean",
             "required": false
           },
-          "include_tags": {
-            "value": [
-              "h1",
-              "p"
-            ],
-            "type": "array",
+          "proxy": {
+            "value": "stealth",
+            "type": "string",
             "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "Search",
+      "qualifiedName": "Firecrawl.Search",
+      "fullyQualifiedName": "Firecrawl.Search@4.0.0",
+      "description": "Search the web and optionally read each result page in the same call.\n\nUse this when no URL is known yet. Use SearchResearchPapers for scientific\nliterature and SearchDeveloperDocs for API and code documentation.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "What to search the web for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "How many results to return, from 1 to 20. Defaults to 5.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sources",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Which families of results to search. Defaults to web pages only.",
+          "enum": [
+            "web",
+            "news",
+            "images"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "categories",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Narrow the results to one kind of source. The developer category cannot be combined with the others. Defaults to no narrowing.",
+          "enum": [
+            "github",
+            "research",
+            "pdf",
+            "developer"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "scrape_content",
+          "type": "boolean",
+          "required": false,
+          "description": "Also read each result page, so one call returns content rather than just links. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "required": false,
+          "description": "Bias results toward a place, written as 'City, Region, Country'. Defaults to no location bias.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching results, with page content when read"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.Search",
+        "parameters": {
+          "query": {
+            "value": "best electric vehicles 2024 range comparison",
+            "type": "string",
+            "required": true
           },
-          "exclude_tags": {
-            "value": [
-              "script",
-              "style"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "wait_for": {
-            "value": 2000,
+          "limit": {
+            "value": 8,
             "type": "integer",
             "required": false
           },
-          "timeout": {
-            "value": 5000,
+          "sources": {
+            "value": [
+              "web",
+              "news"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "categories": {
+            "value": [
+              "general"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "scrape_content": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "location": {
+            "value": "San Francisco, California, United States",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchDeveloperDocs",
+      "qualifiedName": "Firecrawl.SearchDeveloperDocs",
+      "fullyQualifiedName": "Firecrawl.SearchDeveloperDocs@4.0.0",
+      "description": "Search developer documentation and repositories, quoting the text that matched.\n\nUse this to answer a question about how a library or API works. Use Search\nfor the open web, and SearchGithubIssues to look only at issues.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "What to look for across documentation, READMEs, issues, and PRs.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "k",
+          "type": "integer",
+          "required": false,
+          "description": "How many results to return, from 1 to 25. Defaults to 8.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "passages",
+          "type": "integer",
+          "required": false,
+          "description": "How many quoted passages to return per result, from 1 to 5. Defaults to 2.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repos",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Limit the search to these repositories, each written as owner/name. Defaults to searching every indexed repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "required": false,
+          "description": "Limit the search to one programming language. Defaults to every language.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching documentation with quoted passages"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.SearchDeveloperDocs",
+        "parameters": {
+          "query": {
+            "value": "how to authenticate API requests using OAuth2 tokens",
+            "type": "string",
+            "required": true
+          },
+          "k": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "passages": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          },
+          "repos": {
+            "value": [
+              "firebase/firebase-js-sdk",
+              "axios/axios"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "language": {
+            "value": "TypeScript",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchGithubIssues",
+      "qualifiedName": "Firecrawl.SearchGithubIssues",
+      "fullyQualifiedName": "Firecrawl.SearchGithubIssues@4.0.0",
+      "description": "Search GitHub issues across indexed repositories.\n\nUse SearchDeveloperDocs instead to search documentation, READMEs, and pull\nrequests alongside issues.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The problem or topic to find GitHub issues about.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "k",
+          "type": "integer",
+          "required": false,
+          "description": "How many issues to return, from 1 to 25. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching GitHub issues"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.SearchGithubIssues",
+        "parameters": {
+          "query": {
+            "value": "memory leak in React useEffect cleanup function",
+            "type": "string",
+            "required": true
+          },
+          "k": {
+            "value": 10,
             "type": "integer",
             "required": false
           }
@@ -643,7 +1050,127 @@
           ],
           "readOnly": true,
           "destructive": false,
-          "idempotent": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchResearchPapers",
+      "qualifiedName": "Firecrawl.SearchResearchPapers",
+      "fullyQualifiedName": "Firecrawl.SearchResearchPapers@4.0.0",
+      "description": "Search published scientific papers and return their abstracts.\n\nThis reads a corpus of paper records drawn from PubMed, bioRxiv, medRxiv,\nand arXiv. To find ordinary web pages that happen to sit on academic sites,\nuse Search narrowed to research instead.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The topic or question to find published research on.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "k",
+          "type": "integer",
+          "required": false,
+          "description": "How many papers to return, from 1 to 25. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "authors",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keep only papers by these authors. Defaults to every author.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "categories",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keep only papers filed under these subject categories. Defaults to every category.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_citation_counts",
+          "type": "boolean",
+          "required": false,
+          "description": "Also look up each paper's citation count and subject categories. Costs one extra request per paper, so ask for fewer papers when using it; papers looked up after the time budget runs out come back without those two fields. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching papers with their abstracts"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.SearchResearchPapers",
+        "parameters": {
+          "query": {
+            "value": "CRISPR gene editing for cancer therapy",
+            "type": "string",
+            "required": true
+          },
+          "k": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "authors": {
+            "value": [
+              "Jennifer Doudna",
+              "Feng Zhang"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "categories": {
+            "value": [
+              "Molecular Biology",
+              "Oncology"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "include_citation_counts": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
           "openWorld": true
         },
         "extras": null
@@ -660,6 +1187,7 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.377Z",
-  "summary": "Firecrawl is an Arcade.dev toolkit designed for efficient web scraping tasks. It leverages the Firecrawl API to perform various operations, enabling developers to streamline their data extraction processes.\n\n**Capabilities**  \n- Perform asynchronous and synchronous website crawls  \n- Retrieve crawl status and data for ongoing or recent tasks  \n- Map an entire website from a single URL  \n- Scrape specific URLs and return data in various formats  \n- Cancel ongoing crawl jobs seamlessly  \n\n**OAuth**  \nNo OAuth authentication is required. An API key is utilized for accessing the Firecrawl API.  \n\n**Secrets**  \n- API Key: FIRECRAWL_API_KEY, used for authenticating requests to the Firecrawl API."
+  "curationSourceHash": "dd88665072102dfd955ab648291716def49f5bf1b9b3725ca5dd004e2a1da317",
+  "generatedAt": "2026-09-24T11:15:02.034Z",
+  "summary": "Firecrawl is a web-reading service; this toolkit gives LLMs structured access to it for scraping, crawling, searching, and extracting data from the web.\n\n## Capabilities\n\n- **Single-page and multi-page reading**: Scrape a known URL for its full text, or crawl an entire site and retrieve each page's content — with async job tracking (status, data retrieval, cancellation) for long-running crawls.\n- **Site mapping**: List all URLs on a website without fetching page content, useful for planning targeted scrapes or crawls.\n- **Web and specialized search**: Search the open web (optionally fetching each result page inline), developer documentation and repositories, GitHub issues, and scientific literature (PubMed, bioRxiv, medRxiv, arXiv).\n- **Structured data extraction**: Describe the fields you want (products, prices, contacts, etc.) in plain language and receive structured records rather than raw page text; supports async job tracking for large extractions.\n\n## Secrets\n\n`FIRECRAWL_API_KEY` — A Firecrawl API key that authenticates every request to the Firecrawl API. Obtain it from your [Firecrawl dashboard](https://www.firecrawl.dev/app/api-keys) after creating an account. The key requires no additional scope configuration — all Firecrawl API features are accessible with any valid key, subject to your account's plan limits.\n\nStore secrets in Arcade using the [tool secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or add them directly at [api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

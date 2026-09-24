@@ -1,7 +1,7 @@
 {
   "id": "GoogleCalendar",
   "label": "Google Calendar",
-  "version": "3.6.0",
+  "version": "3.7.1",
   "description": "Arcade.dev LLM tools for Google Calendar",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "GoogleCalendar.CreateEvent",
-      "fullyQualifiedName": "GoogleCalendar.CreateEvent@3.6.0",
+      "fullyQualifiedName": "GoogleCalendar.CreateEvent@3.7.1",
       "description": "Create a new event/meeting/sync/meetup in the specified calendar.\n\nPass `recurrence` to create a repeating event.",
       "parameters": [
         {
@@ -104,7 +104,7 @@
           "name": "send_notifications_to_attendees",
           "type": "string",
           "required": false,
-          "description": "Should attendees be notified by email of the invitation? (none, all, external_only)",
+          "description": "Which guests Google emails an invitation to. externalOnly emails only guests who do not use Google Calendar. Defaults to all.",
           "enum": [
             "none",
             "all",
@@ -134,8 +134,10 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
+          "https://www.googleapis.com/auth/calendar.events",
           "https://www.googleapis.com/auth/calendar.readonly",
-          "https://www.googleapis.com/auth/calendar.events"
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [],
@@ -149,7 +151,7 @@
         "toolName": "GoogleCalendar.CreateEvent",
         "parameters": {
           "summary": {
-            "value": "Team Sprint Planning Meeting",
+            "value": "Team Weekly Sync",
             "type": "string",
             "required": true
           },
@@ -159,7 +161,7 @@
             "required": true
           },
           "end_datetime": {
-            "value": "2025-03-15T11:30:00",
+            "value": "2025-03-15T11:00:00",
             "type": "string",
             "required": true
           },
@@ -169,25 +171,25 @@
             "required": false
           },
           "description": {
-            "value": "Weekly sprint planning session to review backlog, assign tasks, and set goals for the upcoming sprint.",
+            "value": "Weekly sync to discuss project updates, blockers, and upcoming milestones.",
             "type": "string",
             "required": false
           },
           "location": {
-            "value": "Conference Room B, 123 Main St, San Francisco, CA 94105",
+            "value": "Conference Room B, 123 Main St, San Francisco, CA",
             "type": "string",
             "required": false
           },
           "visibility": {
-            "value": "private",
+            "value": "default",
             "type": "string",
             "required": false
           },
           "attendee_emails": {
             "value": [
-              "alice.johnson@example.com",
-              "bob.smith@example.com",
-              "carol.white@example.com"
+              "alice@example.com",
+              "bob@example.com",
+              "carol@example.com"
             ],
             "type": "array",
             "required": false
@@ -204,7 +206,7 @@
           },
           "recurrence": {
             "value": [
-              "RRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=8"
+              "RRULE:FREQ=WEEKLY;BYDAY=FR;COUNT=12"
             ],
             "type": "array",
             "required": false
@@ -235,7 +237,7 @@
     {
       "name": "DeleteEvent",
       "qualifiedName": "GoogleCalendar.DeleteEvent",
-      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@3.6.0",
+      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@3.7.1",
       "description": "Delete an event from Google Calendar.",
       "parameters": [
         {
@@ -271,7 +273,10 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/calendar.events"
+          "https://www.googleapis.com/auth/calendar.events",
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [],
@@ -285,12 +290,12 @@
         "toolName": "GoogleCalendar.DeleteEvent",
         "parameters": {
           "event_id": {
-            "value": "event_123abcXYZ",
+            "value": "7q2kp3m8v1n0d5f6g4h9j",
             "type": "string",
             "required": true
           },
           "calendar_id": {
-            "value": "primary",
+            "value": "user@example.com",
             "type": "string",
             "required": false
           },
@@ -325,7 +330,7 @@
     {
       "name": "FindTimeSlotsWhenEveryoneIsFree",
       "qualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree",
-      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@3.6.0",
+      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@3.7.1",
       "description": "Provides time slots when everyone is free within a given date range and time boundaries.",
       "parameters": [
         {
@@ -374,7 +379,10 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/calendar.readonly"
+          "https://www.googleapis.com/auth/calendar.events",
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [],
@@ -389,19 +397,20 @@
         "parameters": {
           "email_addresses": {
             "value": [
-              "jane.doe@acme-corp.com",
-              "john.smith@acme-corp.com"
+              "alice@example.com",
+              "bob@example.com",
+              "carol@example.com"
             ],
             "type": "array",
             "required": false
           },
           "start_date": {
-            "value": "2026-02-26",
+            "value": "2024-03-11",
             "type": "string",
             "required": false
           },
           "end_date": {
-            "value": "2026-03-04",
+            "value": "2024-03-18",
             "type": "string",
             "required": false
           },
@@ -441,7 +450,7 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "GoogleCalendar.ListCalendars",
-      "fullyQualifiedName": "GoogleCalendar.ListCalendars@3.6.0",
+      "fullyQualifiedName": "GoogleCalendar.ListCalendars@3.7.1",
       "description": "List all calendars accessible by the user.",
       "parameters": [
         {
@@ -481,8 +490,10 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
+          "https://www.googleapis.com/auth/calendar.events",
           "https://www.googleapis.com/auth/calendar.readonly",
-          "https://www.googleapis.com/auth/calendar.events"
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [],
@@ -496,7 +507,7 @@
         "toolName": "GoogleCalendar.ListCalendars",
         "parameters": {
           "max_results": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
@@ -506,12 +517,12 @@
             "required": false
           },
           "show_hidden": {
-            "value": false,
+            "value": true,
             "type": "boolean",
             "required": false
           },
           "next_page_token": {
-            "value": "pageToken_abc123",
+            "value": "CAEQAhgBIBYoAToCCAE=",
             "type": "string",
             "required": false
           }
@@ -541,7 +552,7 @@
     {
       "name": "ListEvents",
       "qualifiedName": "GoogleCalendar.ListEvents",
-      "fullyQualifiedName": "GoogleCalendar.ListEvents@3.6.0",
+      "fullyQualifiedName": "GoogleCalendar.ListEvents@3.7.1",
       "description": "List events from the specified calendar within the given datetime range.\n\nmin_end_datetime serves as the lower bound (exclusive) for an event's end time.\nmax_start_datetime serves as the upper bound (exclusive) for an event's start time.\n\nFor example:\nIf min_end_datetime is set to 2024-09-15T09:00:00 and max_start_datetime\nis set to 2024-09-16T17:00:00, the function will return events that:\n1. End after 09:00 on September 15, 2024 (exclusive)\n2. Start before 17:00 on September 16, 2024 (exclusive)\nThis means an event starting at 08:00 on September 15 and\nending at 10:00 on September 15 would be included, but an\nevent starting at 17:00 on September 16 would not be included.",
       "parameters": [
         {
@@ -581,8 +592,10 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
+          "https://www.googleapis.com/auth/calendar.events",
           "https://www.googleapis.com/auth/calendar.readonly",
-          "https://www.googleapis.com/auth/calendar.events"
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [],
@@ -596,22 +609,22 @@
         "toolName": "GoogleCalendar.ListEvents",
         "parameters": {
           "min_end_datetime": {
-            "value": "2026-03-01T08:00:00",
+            "value": "2024-09-15T09:00:00",
             "type": "string",
             "required": true
           },
           "max_start_datetime": {
-            "value": "2026-03-08T18:00:00",
+            "value": "2024-09-16T17:00:00",
             "type": "string",
             "required": true
           },
           "calendar_id": {
-            "value": "primary",
+            "value": "user@example.com",
             "type": "string",
             "required": false
           },
           "max_results": {
-            "value": 50,
+            "value": 10,
             "type": "integer",
             "required": false
           }
@@ -641,8 +654,8 @@
     {
       "name": "RespondToEvent",
       "qualifiedName": "GoogleCalendar.RespondToEvent",
-      "fullyQualifiedName": "GoogleCalendar.RespondToEvent@3.6.0",
-      "description": "Accept or decline (RSVP to) a meeting invitation on the authenticated user's behalf.\n\nSets the user's responseStatus for an event they were invited to.",
+      "fullyQualifiedName": "GoogleCalendar.RespondToEvent@3.7.1",
+      "description": "Accept, decline, or tentatively accept (RSVP to) a meeting invitation on the\nauthenticated user's behalf.\n\nSets the user's responseStatus for an event they were invited to.",
       "parameters": [
         {
           "name": "event_id",
@@ -656,10 +669,11 @@
           "name": "response",
           "type": "string",
           "required": true,
-          "description": "The RSVP response: accepted or declined.",
+          "description": "The RSVP response.",
           "enum": [
             "accepted",
-            "declined"
+            "declined",
+            "tentative"
           ],
           "inferrable": true
         },
@@ -688,7 +702,10 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/calendar.events"
+          "https://www.googleapis.com/auth/calendar.events",
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [],
@@ -702,7 +719,7 @@
         "toolName": "GoogleCalendar.RespondToEvent",
         "parameters": {
           "event_id": {
-            "value": "7q3k2p1abc456def789ghi_20240315T140000Z",
+            "value": "7q2kldj3p1r8vbn5c9fghw04as",
             "type": "string",
             "required": true
           },
@@ -747,7 +764,7 @@
     {
       "name": "UpdateEvent",
       "qualifiedName": "GoogleCalendar.UpdateEvent",
-      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@3.6.0",
+      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@3.7.1",
       "description": "Update an existing event in the specified calendar with the provided details.\nOnly the provided fields will be updated; others will remain unchanged.\n\nAn event's details can only be changed by the event's organizer, or by a guest\nwhen the organizer has enabled guest editing for that event.\n\n`updated_start_datetime` and `updated_end_datetime` are\nindependent and can be provided separately.",
       "parameters": [
         {
@@ -850,7 +867,7 @@
           "name": "send_notifications_to_attendees",
           "type": "string",
           "required": false,
-          "description": "Should attendees be notified of the update? (none, all, external_only)",
+          "description": "Which guests Google emails about the update. externalOnly emails only guests who do not use Google Calendar. Defaults to all.",
           "enum": [
             "none",
             "all",
@@ -875,7 +892,10 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
-          "https://www.googleapis.com/auth/calendar.events"
+          "https://www.googleapis.com/auth/calendar.events",
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [],
@@ -909,17 +929,17 @@
             "required": false
           },
           "updated_summary": {
-            "value": "Team Year-End Review Meeting",
+            "value": "Team Q4 Planning Meeting",
             "type": "string",
             "required": false
           },
           "updated_description": {
-            "value": "Annual review of team goals, achievements, and plans for the upcoming year.",
+            "value": "Quarterly planning session to review OKRs and set goals for next quarter.",
             "type": "string",
             "required": false
           },
           "updated_location": {
-            "value": "Conference Room B, 123 Main St, San Francisco, CA 94105",
+            "value": "Conference Room B, 123 Main St, San Francisco, CA",
             "type": "string",
             "required": false
           },
@@ -938,14 +958,14 @@
           "attendee_emails_to_add": {
             "value": [
               "alice@example.com",
-              "bob@company.org"
+              "bob@example.com"
             ],
             "type": "array",
             "required": false
           },
           "attendee_emails_to_remove": {
             "value": [
-              "charlie@oldcompany.com"
+              "charlie@example.com"
             ],
             "type": "array",
             "required": false
@@ -986,16 +1006,17 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleCalendar.WhoAmI",
-      "fullyQualifiedName": "GoogleCalendar.WhoAmI@3.6.0",
+      "fullyQualifiedName": "GoogleCalendar.WhoAmI@3.7.1",
       "description": "Get comprehensive user profile and Google Calendar environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Calendar access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
+          "https://www.googleapis.com/auth/calendar.events",
           "https://www.googleapis.com/auth/calendar.readonly",
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/userinfo.email"
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
         ]
       },
       "secrets": [],
@@ -1052,6 +1073,6 @@
   ],
   "subPages": [],
   "curationSourceHash": "cd977f2e66058d686da277f9a3c43e903d6caba18a9124ec18a51996ad31882d",
-  "generatedAt": "2026-08-13T11:19:44.487Z",
-  "summary": "## Google Calendar Toolkit\n\nThe Google Calendar toolkit connects Arcade to Google Calendar, enabling LLMs to read, create, and manage calendar data on behalf of authenticated users.\n\n## Capabilities\n\n- **Calendar discovery & user context:** List all accessible calendars and retrieve the authenticated user's profile, email, permissions, and Calendar environment details.\n- **Event querying:** Fetch events from any calendar within a precise datetime range using independent lower/upper bounds on event end and start times.\n- **Event creation & recurrence:** Create one-off or repeating events (meetings, syncs, meetups) with full recurrence rule support.\n- **Event modification & deletion:** Update any subset of event fields independently (start and end times are decoupled), restricted to the event organizer or guests when the organizer permits editing; delete events by ID.\n- **Availability analysis:** Find time slots when all specified participants are free across a given date range and time boundaries.\n- **RSVP management:** Accept or decline meeting invitations by setting the authenticated user's `responseStatus` on any event they were invited to.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details, required scopes, and configuration."
+  "generatedAt": "2026-09-24T11:15:17.510Z",
+  "summary": "## Google Calendar Toolkit\n\nArcade's Google Calendar toolkit gives LLMs authenticated access to Google Calendar, enabling agents to read, create, and manage calendar data on behalf of users.\n\n## Capabilities\n\n- **Calendar discovery & user context**: List all accessible calendars and retrieve the authenticated user's profile, email, permissions, and environment details.\n- **Event querying**: Fetch events within precise datetime ranges using independent start/end boundary filters (exclusive bounds) across any accessible calendar.\n- **Event creation & recurrence**: Create one-off or repeating events (meetings, syncs, meetups) with full recurrence support via the `recurrence` parameter.\n- **Event modification & deletion**: Update any subset of event fields independently (start and end times are decoupled), or delete events entirely; edits respect organizer permissions and guest-edit settings.\n- **RSVP management**: Accept, decline, or tentatively accept meeting invitations by setting the authenticated user's response status.\n- **Availability analysis**: Find overlapping free time slots for multiple attendees within a specified date range and time boundaries.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup, required scopes, and configuration details."
 }

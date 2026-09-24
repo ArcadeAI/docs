@@ -1,7 +1,7 @@
 {
   "id": "Zendesk",
   "label": "Zendesk",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "description": "",
   "metadata": {
     "category": "customer-support",
@@ -25,7 +25,7 @@
     {
       "name": "AddTicketComment",
       "qualifiedName": "Zendesk.AddTicketComment",
-      "fullyQualifiedName": "Zendesk.AddTicketComment@0.6.0",
+      "fullyQualifiedName": "Zendesk.AddTicketComment@1.0.0",
       "description": "Add a comment to an existing Zendesk ticket.\n\nThe returned ticket object includes an 'html_url' field with the direct link\nto view the ticket in Zendesk.",
       "parameters": [
         {
@@ -57,6 +57,7 @@
         "providerId": "zendesk",
         "providerType": "oauth2",
         "scopes": [
+          "read",
           "tickets:write"
         ]
       },
@@ -66,7 +67,7 @@
       "secretsInfo": [
         {
           "name": "ZENDESK_SUBDOMAIN",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -78,12 +79,12 @@
         "toolName": "Zendesk.AddTicketComment",
         "parameters": {
           "ticket_id": {
-            "value": 123456,
+            "value": 10482,
             "type": "integer",
             "required": true
           },
           "comment_body": {
-            "value": "This is an update on your ticket. Thank you for your patience.",
+            "value": "Thank you for reaching out! We have reviewed your issue and our team is working on a resolution. We will keep you updated on the progress.",
             "type": "string",
             "required": true
           },
@@ -94,6 +95,7 @@
           }
         },
         "requiresAuth": true,
+        "authProvider": "zendesk",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -117,7 +119,7 @@
     {
       "name": "GetTicketComments",
       "qualifiedName": "Zendesk.GetTicketComments",
-      "fullyQualifiedName": "Zendesk.GetTicketComments@0.6.0",
+      "fullyQualifiedName": "Zendesk.GetTicketComments@1.0.0",
       "description": "Get all comments for a specific Zendesk ticket, including the original description.\n\nThe first comment is always the ticket's original description/content.\nSubsequent comments show the conversation history.\n\nEach comment includes:\n- author_id: ID of the comment author\n- body: The comment text\n- created_at: Timestamp when comment was created\n- public: Whether the comment is public or internal\n- attachments: List of file attachments (if any) with file_name, content_url, size, etc.",
       "parameters": [
         {
@@ -133,7 +135,8 @@
         "providerId": "zendesk",
         "providerType": "oauth2",
         "scopes": [
-          "read"
+          "read",
+          "tickets:write"
         ]
       },
       "secrets": [
@@ -142,7 +145,7 @@
       "secretsInfo": [
         {
           "name": "ZENDESK_SUBDOMAIN",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -154,12 +157,13 @@
         "toolName": "Zendesk.GetTicketComments",
         "parameters": {
           "ticket_id": {
-            "value": 12345,
+            "value": 48291,
             "type": "integer",
             "required": true
           }
         },
         "requiresAuth": true,
+        "authProvider": "zendesk",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -183,7 +187,7 @@
     {
       "name": "ListTickets",
       "qualifiedName": "Zendesk.ListTickets",
-      "fullyQualifiedName": "Zendesk.ListTickets@0.6.0",
+      "fullyQualifiedName": "Zendesk.ListTickets@1.0.0",
       "description": "List tickets from your Zendesk account with offset-based pagination.\n\nBy default, returns tickets sorted by ID with newest tickets first (desc).\n\nEach ticket in the response includes an 'html_url' field with the direct link\nto view the ticket in Zendesk.\n\nPAGINATION:\n- The response includes 'next_offset' when more results are available\n- To fetch the next batch, simply pass the 'next_offset' value as the 'offset' parameter\n- If 'next_offset' is not present, you've reached the end of available results",
       "parameters": [
         {
@@ -232,7 +236,8 @@
         "providerId": "zendesk",
         "providerType": "oauth2",
         "scopes": [
-          "read"
+          "read",
+          "tickets:write"
         ]
       },
       "secrets": [
@@ -258,7 +263,7 @@
             "required": false
           },
           "limit": {
-            "value": 15,
+            "value": 10,
             "type": "integer",
             "required": false
           },
@@ -274,6 +279,7 @@
           }
         },
         "requiresAuth": true,
+        "authProvider": "zendesk",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -297,7 +303,7 @@
     {
       "name": "MarkTicketSolved",
       "qualifiedName": "Zendesk.MarkTicketSolved",
-      "fullyQualifiedName": "Zendesk.MarkTicketSolved@0.6.0",
+      "fullyQualifiedName": "Zendesk.MarkTicketSolved@1.0.0",
       "description": "Mark a Zendesk ticket as solved, optionally with a final comment.\n\nThe returned ticket object includes an 'html_url' field with the direct link\nto view the ticket in Zendesk.",
       "parameters": [
         {
@@ -329,6 +335,7 @@
         "providerId": "zendesk",
         "providerType": "oauth2",
         "scopes": [
+          "read",
           "tickets:write"
         ]
       },
@@ -338,7 +345,7 @@
       "secretsInfo": [
         {
           "name": "ZENDESK_SUBDOMAIN",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -350,12 +357,12 @@
         "toolName": "Zendesk.MarkTicketSolved",
         "parameters": {
           "ticket_id": {
-            "value": 12345,
+            "value": 48291,
             "type": "integer",
             "required": true
           },
           "comment_body": {
-            "value": "This ticket has been resolved. Please reach out if you have any further questions.",
+            "value": "Your issue has been resolved. Please feel free to reopen this ticket if you experience any further problems.",
             "type": "string",
             "required": false
           },
@@ -366,6 +373,7 @@
           }
         },
         "requiresAuth": true,
+        "authProvider": "zendesk",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -390,7 +398,7 @@
     {
       "name": "SearchArticles",
       "qualifiedName": "Zendesk.SearchArticles",
-      "fullyQualifiedName": "Zendesk.SearchArticles@0.6.0",
+      "fullyQualifiedName": "Zendesk.SearchArticles@1.0.0",
       "description": "Search for Help Center articles in your Zendesk knowledge base.\n\nThis tool searches specifically for published knowledge base articles that provide\nsolutions and guidance to users. At least one search parameter (query or label_names)\nmust be provided.\n\nPAGINATION:\n- The response includes 'next_offset' when more results are available\n- To fetch the next batch, simply pass the 'next_offset' value as the 'offset' parameter\n- If 'next_offset' is not present, you've reached the end of available results\n- The tool automatically handles fetching from the correct page based on your offset\n\nIMPORTANT: ALL FILTERS CAN BE COMBINED IN A SINGLE CALL\nYou can combine multiple filters (query, labels, dates) in one search request.\nDo NOT make separate tool calls - combine all relevant filters together.",
       "parameters": [
         {
@@ -493,7 +501,8 @@
         "providerId": "zendesk",
         "providerType": "oauth2",
         "scopes": [
-          "read"
+          "read",
+          "tickets:write"
         ]
       },
       "secrets": [
@@ -502,7 +511,7 @@
       "secretsInfo": [
         {
           "name": "ZENDESK_SUBDOMAIN",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -514,30 +523,30 @@
         "toolName": "Zendesk.SearchArticles",
         "parameters": {
           "query": {
-            "value": "account setup",
+            "value": "password reset troubleshooting",
             "type": "string",
             "required": false
           },
           "label_names": {
             "value": [
-              "setup",
-              "account"
+              "account",
+              "security"
             ],
             "type": "array",
             "required": false
           },
           "created_after": {
-            "value": "2021-01-01",
-            "type": "string",
-            "required": false
-          },
-          "created_before": {
             "value": "2023-01-01",
             "type": "string",
             "required": false
           },
+          "created_before": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
           "created_at": {
-            "value": null,
+            "value": "2023-08-15",
             "type": "string",
             "required": false
           },
@@ -547,7 +556,7 @@
             "required": false
           },
           "sort_order": {
-            "value": "ascending",
+            "value": "desc",
             "type": "string",
             "required": false
           },
@@ -567,12 +576,13 @@
             "required": false
           },
           "max_article_length": {
-            "value": 300,
+            "value": 1000,
             "type": "integer",
             "required": false
           }
         },
         "requiresAuth": true,
+        "authProvider": "zendesk",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -596,14 +606,15 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Zendesk.WhoAmI",
-      "fullyQualifiedName": "Zendesk.WhoAmI@0.6.0",
+      "fullyQualifiedName": "Zendesk.WhoAmI@1.0.0",
       "description": "Get comprehensive user profile and Zendesk account information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, role, organization details, and Zendesk account context.",
       "parameters": [],
       "auth": {
         "providerId": "zendesk",
         "providerType": "oauth2",
         "scopes": [
-          "read"
+          "read",
+          "tickets:write"
         ]
       },
       "secrets": [
@@ -624,6 +635,7 @@
         "toolName": "Zendesk.WhoAmI",
         "parameters": {},
         "requiresAuth": true,
+        "authProvider": "zendesk",
         "tabLabel": "Call the Tool with User Authorization"
       },
       "metadata": {
@@ -648,6 +660,7 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-03-01T11:12:08.066Z",
-  "summary": "Arcade's Zendesk toolkit enables seamless integration with Zendesk's customer service platform, allowing developers to interact with tickets and knowledge base articles efficiently.\n\n**Capabilities**  \n- Retrieve and manage ticket comments and statuses.  \n- List and paginate through tickets for dynamic retrieval.  \n- Search for Help Center articles using various parameters.  \n- Fetch comprehensive user profiles and account information.  \n\n**OAuth**  \n- Auth Type: OAuth2  \n- Provider: Unknown  \n- Scopes: read, tickets:write  \n\n**Secrets**  \n- Secret types: unknown, api_key  \n- Example: ZENDESK_SUBDOMAIN  "
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-24T11:17:03.949Z",
+  "summary": "The Zendesk toolkit connects Arcade to your Zendesk account, enabling agents and apps to manage support tickets, retrieve conversation history, resolve issues, and search your Help Center knowledge base.\n\n## Capabilities\n\n- **Ticket management** — List tickets with offset-based pagination, add public or internal comments, and mark tickets as solved (optionally with a closing comment); every ticket response includes a direct `html_url` link.\n- **Conversation retrieval** — Fetch all comments on a ticket (including the original description, author IDs, timestamps, visibility flags, and file attachments).\n- **Knowledge base search** — Search published Help Center articles by query text, labels, or date filters; filters can be combined in a single call, with offset-based pagination for large result sets.\n- **Identity & account context** — Retrieve the authenticated user's profile, role, organization, and Zendesk account metadata via a single lookup tool.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 through the **Zendesk** provider. See the [Zendesk auth provider docs](https://docs.arcade.dev/en/references/auth-providers/zendesk) for setup instructions, required scopes, and configuration details.\n\n## Secrets\n\n- **`ZENDESK_SUBDOMAIN`** — Your Zendesk account subdomain (the `<subdomain>` part of `https://<subdomain>.zendesk.com`). You can find this in your browser's address bar when logged into Zendesk, or under **Admin Center → Account → Branding**. This value tells the toolkit which Zendesk instance to target and is required for all API calls.\n\nSecrets are configured in the Arcade dashboard or via the API. See the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) and the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets) for setup details."
 }

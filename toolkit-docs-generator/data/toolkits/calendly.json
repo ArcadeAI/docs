@@ -1,0 +1,1048 @@
+{
+  "id": "Calendly",
+  "label": "Calendly",
+  "version": "1.1.1",
+  "description": "Arcade tools designed for LLMs to interact with Calendly scheduling",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/calendly.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/calendly",
+    "isComingSoon": true,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "calendly",
+    "allScopes": []
+  },
+  "tools": [
+    {
+      "name": "CancelScheduledEvent",
+      "qualifiedName": "Calendly.CancelScheduledEvent",
+      "fullyQualifiedName": "Calendly.CancelScheduledEvent@1.1.1",
+      "description": "Cancel a booked Calendly meeting and notify its invitees.\n\nThe meeting cannot be restored afterwards; invitees must rebook.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "The meeting to cancel, as a Calendly event URI or UUID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reason",
+          "type": "string",
+          "required": false,
+          "description": "Reason shown to invitees in the cancellation notice. Leave empty to cancel without a stated reason.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation that the meeting was canceled"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.CancelScheduledEvent",
+        "parameters": {
+          "event": {
+            "value": "https://api.calendly.com/scheduled_events/3d2e1f0a-9b8c-7d6e-5f4a-3b2c1d0e9f8a",
+            "type": "string",
+            "required": true
+          },
+          "reason": {
+            "value": "The host has a scheduling conflict and is unable to attend the meeting at this time.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateSchedulingLink",
+      "qualifiedName": "Calendly.CreateSchedulingLink",
+      "fullyQualifiedName": "Calendly.CreateSchedulingLink@1.1.1",
+      "description": "Create a single-use Calendly booking link for one of your event types.\n\nUseful for sending a specific person a link that expires once they book.",
+      "parameters": [
+        {
+          "name": "event_type",
+          "type": "string",
+          "required": true,
+          "description": "The event type to create a booking link for, as an event type URI or UUID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_event_count",
+          "type": "integer",
+          "required": false,
+          "description": "How many bookings the link accepts before it expires. Currently only 1 is supported by Calendly. Defaults to 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A single-use booking link"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.CreateSchedulingLink",
+        "parameters": {
+          "event_type": {
+            "value": "https://api.calendly.com/event_types/ABCDEF1234567890",
+            "type": "string",
+            "required": true
+          },
+          "max_event_count": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetScheduledEvent",
+      "qualifiedName": "Calendly.GetScheduledEvent",
+      "fullyQualifiedName": "Calendly.GetScheduledEvent@1.1.1",
+      "description": "Get the full detail of one booked Calendly meeting.\n\nIncludes start and end times, location or join link, hosts, and cancellation\ndetails when the meeting has been canceled.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "The meeting to retrieve, as a Calendly event URI or UUID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "One scheduled meeting"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.GetScheduledEvent",
+        "parameters": {
+          "event": {
+            "value": "https://api.calendly.com/scheduled_events/ABCDE1234567890FGHIJ",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListAvailabilitySchedules",
+      "qualifiedName": "Calendly.ListAvailabilitySchedules",
+      "fullyQualifiedName": "Calendly.ListAvailabilitySchedules@1.1.1",
+      "description": "List a Calendly user's recurring availability rules and working hours.\n\nShows which hours the user accepts bookings on each weekday, per named schedule.",
+      "parameters": [
+        {
+          "name": "user",
+          "type": "string",
+          "required": false,
+          "description": "Whose schedules to list, as a Calendly user URI or UUID. Leave empty to use the connected account.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The user's recurring availability schedules"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.ListAvailabilitySchedules",
+        "parameters": {
+          "user": {
+            "value": "https://api.calendly.com/users/AAAAAAAAAAAAAAAA",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListBusyTimes",
+      "qualifiedName": "Calendly.ListBusyTimes",
+      "fullyQualifiedName": "Calendly.ListBusyTimes@1.1.1",
+      "description": "Find when a Calendly user is already busy over a time window.\n\nCombines Calendly bookings with events from external calendars the user has marked\n\"Check for conflicts\" in Calendly. A connected calendar without that setting is not\nrepresented, so an empty result is not proof the user is free.",
+      "parameters": [
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": true,
+          "description": "Beginning of the window to check, as an ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": true,
+          "description": "End of the window to check, as an ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ). Must be no more than 7 days after start_time.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user",
+          "type": "string",
+          "required": false,
+          "description": "Whose calendar to check, as a Calendly user URI or UUID. Leave empty to use the connected account.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Busy intervals in the requested window"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.ListBusyTimes",
+        "parameters": {
+          "start_time": {
+            "value": "2024-03-15T09:00:00Z",
+            "type": "string",
+            "required": true
+          },
+          "end_time": {
+            "value": "2024-03-20T17:00:00Z",
+            "type": "string",
+            "required": true
+          },
+          "user": {
+            "value": "https://api.calendly.com/users/AABBCCDD1234567890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEventAvailableTimes",
+      "qualifiedName": "Calendly.ListEventAvailableTimes",
+      "fullyQualifiedName": "Calendly.ListEventAvailableTimes@1.1.1",
+      "description": "Find the open booking slots for a Calendly event type over a time window.\n\nReturns each slot's start time and a direct booking link, soonest first. Narrow the\nwindow rather than raising the limit when `truncated` comes back true.",
+      "parameters": [
+        {
+          "name": "event_type",
+          "type": "string",
+          "required": true,
+          "description": "The event type to check openings for, as an event type URI or UUID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": true,
+          "description": "Beginning of the window to search, as an ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ). Must be in the future.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": true,
+          "description": "End of the window to search, as an ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ). Must be no more than 31 days after start_time.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum slots to return (1-200). Defaults to 50. A wide window on a short meeting can produce hundreds of slots, so the list is cut to this and `truncated` says when that happened.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Bookable slots in the requested window"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.ListEventAvailableTimes",
+        "parameters": {
+          "event_type": {
+            "value": "https://api.calendly.com/event_types/GBGBDCAADAEDCRZ2",
+            "type": "string",
+            "required": true
+          },
+          "start_time": {
+            "value": "2025-09-01T09:00:00Z",
+            "type": "string",
+            "required": true
+          },
+          "end_time": {
+            "value": "2025-09-15T17:00:00Z",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEventInvitees",
+      "qualifiedName": "Calendly.ListEventInvitees",
+      "fullyQualifiedName": "Calendly.ListEventInvitees@1.1.1",
+      "description": "List who booked a Calendly meeting, with their emails, timezones and status.\n\nAlso returns each invitee's self-service cancel and reschedule links.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "The meeting whose invitees to list, as an event URI or UUID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Only return invitees in this state. Omit to return both active and canceled.",
+          "enum": [
+            "active",
+            "canceled"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Only return the invitee with this exact email address. Leave empty to return all invitees.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum invitees to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A page of invitees on the meeting"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.ListEventInvitees",
+        "parameters": {
+          "event": {
+            "value": "https://api.calendly.com/scheduled_events/3d2f8c1a-47b9-4e6d-a832-1f5c9b0e7d23",
+            "type": "string",
+            "required": true
+          },
+          "status": {
+            "value": "active",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIzfQ.abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEventTypes",
+      "qualifiedName": "Calendly.ListEventTypes",
+      "fullyQualifiedName": "Calendly.ListEventTypes@1.1.1",
+      "description": "List the meeting types a Calendly user offers, with their booking links.\n\nReturns event types in Calendly's default order.",
+      "parameters": [
+        {
+          "name": "user",
+          "type": "string",
+          "required": false,
+          "description": "Owner of the event types, as a Calendly user URI or UUID. Leave empty to use the connected account.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "active_only",
+          "type": "boolean",
+          "required": false,
+          "description": "Return only event types currently accepting bookings (true) or every event type including disabled ones (false). Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum event types to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A page of bookable event types"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.ListEventTypes",
+        "parameters": {
+          "user": {
+            "value": "https://api.calendly.com/users/ABCDEFGHIJKLMNOP",
+            "type": "string",
+            "required": false
+          },
+          "active_only": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIzNDV9.abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListOrganizationMembers",
+      "qualifiedName": "Calendly.ListOrganizationMembers",
+      "fullyQualifiedName": "Calendly.ListOrganizationMembers@1.1.1",
+      "description": "List the people in a Calendly organization, with their roles and booking pages.\n\nReturns members in Calendly's default order.",
+      "parameters": [
+        {
+          "name": "organization",
+          "type": "string",
+          "required": false,
+          "description": "Organization to list members of, as a Calendly organization URI or UUID. Leave empty to use the connected account's own organization.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Only return the member with this exact email address. Leave empty to return all members.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "required": false,
+          "description": "Only return members holding this role. Omit to return all roles.",
+          "enum": [
+            "owner",
+            "admin",
+            "user"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum members to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A page of organization members"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.ListOrganizationMembers",
+        "parameters": {
+          "organization": {
+            "value": "https://api.calendly.com/organizations/ABCDE12345FGHIJ67890",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "role": {
+            "value": "admin",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiIxMjM0NTY3ODkwIn0.abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListScheduledEvents",
+      "qualifiedName": "Calendly.ListScheduledEvents",
+      "fullyQualifiedName": "Calendly.ListScheduledEvents@1.1.1",
+      "description": "List a Calendly user's booked meetings, with times, locations and host details.\n\nCovers upcoming meetings unless min_start_time is set to a past timestamp, and\nreturns them sorted by start time in the requested direction.",
+      "parameters": [
+        {
+          "name": "user",
+          "type": "string",
+          "required": false,
+          "description": "Host whose meetings to list, as a Calendly user URI or UUID. Leave empty to use the connected account.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Only return meetings in this state. Omit to return both active and canceled.",
+          "enum": [
+            "active",
+            "canceled"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "invitee_email",
+          "type": "string",
+          "required": false,
+          "description": "Only return meetings booked by this exact email address. Leave empty for no invitee filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "min_start_time",
+          "type": "string",
+          "required": false,
+          "description": "Only return meetings starting at or after this ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ). Defaults to now, so a request that names no window returns upcoming meetings. Pass an explicit timestamp, a max_start_time, or status=CANCELED to read meeting history instead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_start_time",
+          "type": "string",
+          "required": false,
+          "description": "Only return meetings starting at or before this ISO 8601 timestamp (YYYY-MM-DDTHH:MM:SSZ). Leave empty for no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_direction",
+          "type": "string",
+          "required": false,
+          "description": "Order meetings by start time. Defaults to ASCENDING (soonest first).",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum meetings to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A page of scheduled meetings"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.ListScheduledEvents",
+        "parameters": {
+          "user": {
+            "value": "https://api.calendly.com/users/ABCDEF1234567890",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "active",
+            "type": "string",
+            "required": false
+          },
+          "invitee_email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "min_start_time": {
+            "value": "2024-06-01T09:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "max_start_time": {
+            "value": "2024-06-30T17:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "sort_direction": {
+            "value": "ASCENDING",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MTIzfQ.abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "MarkInviteeNoShow",
+      "qualifiedName": "Calendly.MarkInviteeNoShow",
+      "fullyQualifiedName": "Calendly.MarkInviteeNoShow@1.1.1",
+      "description": "Mark an invitee as having not attended their booked Calendly meeting.\n\nThe mark is visible in Calendly reporting and can be removed there.",
+      "parameters": [
+        {
+          "name": "invitee",
+          "type": "string",
+          "required": true,
+          "description": "The invitee who did not attend, as a Calendly invitee URI. Invitee URIs are returned alongside each invitee on a meeting.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation that the invitee was marked as a no-show"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.MarkInviteeNoShow",
+        "parameters": {
+          "invitee": {
+            "value": "https://api.calendly.com/scheduled_events/abc123def456/invitees/7890ghij1234",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Calendly.WhoAmI",
+      "fullyQualifiedName": "Calendly.WhoAmI@1.1.1",
+      "description": "Get the connected Calendly account's profile, timezone and organization.\n\nUseful for confirming whose calendar is being read or changed, and for reporting\nthe account's booking page and timezone back to the user.",
+      "parameters": [],
+      "auth": {
+        "providerId": "calendly",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The connected Calendly account and its organization"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Calendly.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "calendly",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-24T11:14:43.676Z",
+  "summary": "Calendly toolkit for Arcade lets LLMs interact with Calendly scheduling — reading availability, managing bookings, and acting on behalf of a connected Calendly account.\n\n## Capabilities\n\n- **Account & org inspection:** Retrieve the connected account's profile, timezone, and organization; list all members of a Calendly organization with their roles and booking pages.\n- **Availability & open slots:** List a user's recurring working-hours schedules and query real-time busy periods (Calendly bookings + connected external calendars flagged for conflict-checking); find open booking slots for a specific event type over any time window.\n- **Event type discovery:** List all meeting types a user offers, including their public booking links, in Calendly's default order.\n- **Scheduled event management:** List, retrieve, cancel, and no-show-mark booked meetings; list invitees with their emails, timezones, status, and self-service cancel/reschedule links.\n- **Single-use scheduling links:** Generate one-time booking links tied to a specific event type, suitable for sending to a particular person.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 through Calendly. See the [Calendly auth provider docs](https://docs.arcade.dev/en/references/auth-providers/calendly) for configuration details."
+}

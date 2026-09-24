@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookCalendar",
   "label": "Microsoft Outlook Calendar",
-  "version": "0.4.0",
+  "version": "2.0.0",
   "description": "Arcade.dev LLM tools for Outlook Calendar",
   "metadata": {
     "category": "productivity",
@@ -28,7 +28,7 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CreateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@0.4.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@2.0.0",
       "description": "Create an event in the authenticated user's default calendar.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
       "parameters": [
         {
@@ -101,27 +101,30 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Calendars.Read",
+          "Calendars.ReadBasic",
+          "Calendars.ReadWrite",
           "MailboxSettings.Read",
-          "Calendars.ReadWrite"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the created event details"
+        "description": "The created event, carrying the same fields a single-event read returns."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookCalendar.CreateEvent",
         "parameters": {
           "subject": {
-            "value": "Q3 Project Kickoff Meeting",
+            "value": "Q3 Strategy Planning Meeting",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Please join us for the Q3 project kickoff. We will review goals, assign responsibilities, and outline the timeline for the upcoming quarter.",
+            "value": "Please join us to discuss the Q3 roadmap, key milestones, and resource allocation for the upcoming quarter.",
             "type": "string",
             "required": true
           },
@@ -131,12 +134,12 @@
             "required": true
           },
           "end_date_time": {
-            "value": "2025-07-15T11:00:00",
+            "value": "2025-07-15T11:30:00",
             "type": "string",
             "required": true
           },
           "location": {
-            "value": "Conference Room B, 3rd Floor",
+            "value": "Conference Room B, 4th Floor",
             "type": "string",
             "required": false
           },
@@ -185,7 +188,7 @@
     {
       "name": "GetEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.GetEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@0.4.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@2.0.0",
       "description": "Get an event by its ID from the user's calendar.",
       "parameters": [
         {
@@ -201,22 +204,25 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Calendars.Read",
+          "Calendars.ReadBasic",
+          "Calendars.ReadWrite",
           "MailboxSettings.Read",
-          "Calendars.ReadBasic"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing the event details"
+        "description": "The event with its full body."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookCalendar.GetEvent",
         "parameters": {
           "event_id": {
-            "value": "AAMkADI5NmY2OWE4LTRkZjMtNGQzZC1hYmNkLTEyMzQ1Njc4OTAxMg==",
+            "value": "AAMkAGI2TG93AAA=",
             "type": "string",
             "required": true
           }
@@ -246,8 +252,8 @@
     {
       "name": "GetSchedule",
       "qualifiedName": "MicrosoftOutlookCalendar.GetSchedule",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@0.4.0",
-      "description": "Get the free/busy availability of one or more people over a time range.\n\nTimezone offsets in start_date_time and end_date_time are ignored. The window is anchored\nin the returned time_zone, which is the authenticated user's mailbox timezone, and may be a\nWindows name such as \"Eastern Standard Time\" rather than an IANA identifier - that names a\nzone observing daylight saving, not a fixed offset. time_zone_source is \"mailbox\" only when\nthe user's mailbox named that zone; it is \"fallback\" whenever the window is anchored to UTC,\nwhich cannot be distinguished from a mailbox that names no zone at all. On \"fallback\" treat\nevery time in the response as unconfirmed and check the intended zone before acting.\n\nEach person's availability_view has one digit per interval, beginning at start_date_time in\nthat time_zone: 0 = free (or working elsewhere), 1 = tentative, 2 = busy, 3 = out of\noffice. For the specific times a person is busy, prefer schedule_items, which lists each\nblock with absolute start and end times; each item's status is one of free, tentative,\nbusy, oof, workingElsewhere, or unknown.\n\nWhen Graph provides it, working_hours gives the days and hours a person works. These are on\nthat person's own clock - named by working_hours.time_zone when Graph resolves it - and are\nnot converted to the window's time_zone, so do not compare them directly against\navailability_view without accounting for the difference.\n\nResults cover only each person's primary calendar. Events that live solely on a secondary\ncalendar do not mark them busy, so free/busy can read clear while such an event exists.\n\nVisibility depends on your access to each person's calendar. Colleagues, rooms, and\nresources whose free/busy is shared with you return busy/free times; an event's subject,\nlocation, and is_private flag appear only when its details are shared with you. A calendar\nyou cannot see is returned all-free with no error, which is indistinguishable from\ngenuinely free, so every all-free result carries a \"note\" marking it unconfirmed. An\naddress Graph could not resolve or read carries an \"error\" instead, and is still listed so\nthat no requested address is silently dropped. One address failing does not affect the rest,\nand an error naming too many calendar entries is worth retrying for that address alone over\na shorter range.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@2.0.0",
+      "description": "Get the free/busy availability of one or more people over a time range.\n\nTimezone offsets in start_date_time and end_date_time are ignored. The window is anchored\nin the returned time_zone, which is the authenticated user's mailbox timezone, and may be a\nWindows name such as \"Eastern Standard Time\" rather than an IANA identifier - that names a\nzone observing daylight saving, not a fixed offset. time_zone_source says how far to trust\nthat zone: \"mailbox\" means the mailbox names it and the times can be stated as the user's\nown; \"mailbox_utc\" means the mailbox reads UTC, which a mailbox nobody ever configured also\nreads, so it may not be where the user is; \"fallback\" means the mailbox names no zone or its\nsettings could not be read and UTC was applied by default. On \"mailbox_utc\" and \"fallback\"\ntreat every time in the response as unconfirmed and check the intended zone before acting.\n\nEach person's availability_view has one digit per interval, beginning at start_date_time in\nthat time_zone: 0 = free (or working elsewhere), 1 = tentative, 2 = busy, 3 = out of\noffice. For the specific times a person is busy, prefer schedule_items, which lists each\nblock with absolute start and end times; each item's status is one of free, tentative,\nbusy, oof, workingElsewhere, or unknown.\n\nWhen Graph provides it, working_hours gives the days and hours a person works. These are on\nthat person's own clock - named by working_hours.time_zone when Graph resolves it - and are\nnot converted to the window's time_zone, so do not compare them directly against\navailability_view without accounting for the difference.\n\nResults cover only each person's primary calendar. Events that live solely on a secondary\ncalendar do not mark them busy, so free/busy can read clear while such an event exists.\n\nVisibility depends on your access to each person's calendar. Colleagues, rooms, and\nresources whose free/busy is shared with you return busy/free times; an event's subject,\nlocation, and is_private flag appear only when its details are shared with you. A calendar\nyou cannot see is returned all-free with no error, which is indistinguishable from\ngenuinely free, so every all-free result carries a \"note\" marking it unconfirmed. An\naddress Graph could not resolve or read carries an \"error\" instead, and is still listed so\nthat no requested address is silently dropped. One address failing does not affect the rest,\nand an error naming too many calendar entries is worth retrying for that address alone over\na shorter range.",
       "parameters": [
         {
           "name": "email_addresses",
@@ -287,8 +293,11 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Calendars.Read",
+          "Calendars.ReadBasic",
+          "Calendars.ReadWrite",
           "MailboxSettings.Read",
-          "Calendars.Read"
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -303,20 +312,20 @@
         "parameters": {
           "email_addresses": {
             "value": [
-              "alice.johnson@example.com",
-              "bob.smith@example.com",
-              "conf-room-a@example.com"
+              "alice.johnson@contoso.com",
+              "bob.smith@contoso.com",
+              "confroom-seattle@contoso.com"
             ],
             "type": "array",
             "required": true
           },
           "start_date_time": {
-            "value": "2024-06-10T09:00:00",
+            "value": "2025-03-10T08:00:00",
             "type": "string",
             "required": true
           },
           "end_date_time": {
-            "value": "2024-06-10T17:00:00",
+            "value": "2025-03-10T18:00:00",
             "type": "string",
             "required": true
           },
@@ -351,7 +360,7 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "MicrosoftOutlookCalendar.ListCalendars",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@0.4.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@2.0.0",
       "description": "List all calendars the user has access to.\n\nReturns the user's own calendars plus any shared or delegated calendars.\nEach calendar includes its ID, name, owner, and permissions.\n\nUse a calendar_id from the results to target a specific calendar\nin other calendar tools.",
       "parameters": [
         {
@@ -375,14 +384,18 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "Calendars.ReadBasic"
+          "Calendars.Read",
+          "Calendars.ReadBasic",
+          "Calendars.ReadWrite",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing a list of available calendars."
+        "description": "One page of calendars. pagination_token is absent, not empty, when no further page exists."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -394,7 +407,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIlMjRza2lwJTNENTAifQ==",
+            "value": "eyJza2lwVG9rZW4iOiIlMjhSb3dOdW1iZXIlMjAlMkYlMjAlMjglMjhSb3dOdW1iZXIlMjAlMkYlMjAlMjglMjhSb3dOdW1iZXIlMjAlMkYlMjAlMjglMjhSb3dOdW1iZXIlMjAlMkYlMjAoUm93TnVtYmVyJTIwJTJGJTIwKFJvd051bWJlciUyMCUyRiUyMChSb3dOdW1iZXIlMjAlMkYlMjAoUm93TnVtYmVyJTIwJTJGJTIwMjUpJTIwKSUyMCklMjAlMjkpJTIwKSUyMCklMjAlMjkifQ==",
             "type": "string",
             "required": false
           }
@@ -424,7 +437,7 @@
     {
       "name": "ListEventAttachments",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@0.4.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@2.0.0",
       "description": "List attachment metadata for a calendar event.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to a calendar event\nor meeting.\n\nPass a calendar_id to list attachments on events in shared or delegated calendars.",
       "parameters": [
         {
@@ -464,27 +477,30 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Calendars.Read",
+          "Calendars.ReadBasic",
+          "Calendars.ReadWrite",
           "MailboxSettings.Read",
-          "Calendars.Read"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing a list of attachment metadata objects."
+        "description": "Attachment metadata without the file bytes. calendar_id is echoed back only when the lookup named a calendar."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookCalendar.ListEventAttachments",
         "parameters": {
           "event_id": {
-            "value": "AAMkAGI2TG93AAA=",
+            "value": "AAMkADIyNTgwNjM3LWE1NmUtNGI5My1iNzM4LTIxZmYwNjAwZTkwMgBGAAAAAAC5mGh2Wu6ATpHqHpAN5VJiBwBn9nZbcFSeRKmVqoMuH3f1AAAAAAENAABn9nZbcFSeRKmVqoMuH3f1AAAYvT3VAAA=",
             "type": "string",
             "required": true
           },
           "calendar_id": {
-            "value": "AQMkADAwATM0MDAAMS1iNTQ5LTBhZjQtMDACLTAwCgBGAAADyW3X",
+            "value": "AAMkADIyNTgwNjM3LWE1NmUtNGI5My1iNzM4LTIxZmYwNjAwZTkwMgBGAAAAAAC5mGh2Wu6ATpHqHpAN5VJiBwBn9nZbcFSeRKmVqoMuH3f1AAAAAAEGAAA=",
             "type": "string",
             "required": false
           },
@@ -494,7 +510,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIxMjM0NTY3ODkwIn0=",
+            "value": "eyJwYWdlU2l6ZSI6MTAsInNraXBUb2tlbiI6IlJLOFJPUUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQT09In0=",
             "type": "string",
             "required": false
           }
@@ -524,7 +540,7 @@
     {
       "name": "ListEventsInTimeRange",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@0.4.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@2.0.0",
       "description": "List events in the user's calendar in a specific time range.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
       "parameters": [
         {
@@ -556,15 +572,18 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Calendars.Read",
+          "Calendars.ReadBasic",
+          "Calendars.ReadWrite",
           "MailboxSettings.Read",
-          "Calendars.ReadBasic"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing a list of events"
+        "description": "Events overlapping the requested window, each with its full body."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -576,7 +595,7 @@
             "required": true
           },
           "end_date_time": {
-            "value": "2025-06-07T23:59:59",
+            "value": "2025-06-07T18:00:00",
             "type": "string",
             "required": true
           },
@@ -611,7 +630,7 @@
     {
       "name": "SearchEvents",
       "qualifiedName": "MicrosoftOutlookCalendar.SearchEvents",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@0.4.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@2.0.0",
       "description": "Search calendar events within a time range with optional filters.\n\nResults are in chronological order.\n\nEvent bodies are truncated to 200 characters for efficient skimming.\nUse the event_id from the results to retrieve full event details.",
       "parameters": [
         {
@@ -720,15 +739,18 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "Calendars.Read",
+          "Calendars.ReadBasic",
+          "Calendars.ReadWrite",
           "MailboxSettings.Read",
-          "Calendars.Read"
+          "User.Read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "A dictionary containing a list of matching calendar events."
+        "description": "One page of matches, bodies capped for skimming. truncated_by says why the list ended, and on scan_cap no continuation token is issued -- narrow the window rather than paging. filter_expression and client_side_filters say where each filter ran."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -768,7 +790,7 @@
             "required": false
           },
           "start_date_time": {
-            "value": "2024-06-01T08:00:00",
+            "value": "2024-06-01T09:00:00",
             "type": "string",
             "required": false
           },
@@ -778,7 +800,7 @@
             "required": false
           },
           "calendar_id": {
-            "value": "AQMkADAwATM0MDAAMS1hYjcd==",
+            "value": "AAMkAGZhY2Y5NzVmLTQ3YjQtNGI4MS1iZGY0LWFkZGVkMDEyMzQ1ZQBGAAAAAAB",
             "type": "string",
             "required": false
           },
@@ -793,7 +815,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIlMjRza2lwdG9rZW49MTAifQ==",
+            "value": "eyJza2lwIjoyNSwiZmlsdGVycyI6eyJhdHRlbmRlZV9lbWFpbHMiOlsiYWxpY2VAZXhhbXBsZS5jb20iXX19",
             "type": "string",
             "required": false
           }
@@ -823,16 +845,18 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookCalendar.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@0.4.0",
-      "description": "Get information about the current user and their Outlook Calendar environment.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@2.0.0",
+      "description": "Get information about the current user and their Outlook Calendar environment.\n\nmailbox_timezone is the time zone this mailbox's dates are expressed in. It may be a\nWindows name such as \"Eastern Standard Time\" rather than an IANA identifier - that\nnames a zone observing daylight saving, not a fixed offset. mailbox_timezone_source\nsays where it came from: \"mailbox\" and \"mailbox_utc\" mean the mailbox itself names\nthe zone, whereas \"default_not_configured\" (the mailbox names none) and\n\"default_unreadable\" (the setting could not be read) mean UTC is a fallback this\ntoolkit applied, not a zone the mailbox is set to. On either fallback, do not tell\nthe user their mailbox is configured for that zone.",
       "parameters": [],
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
-          "User.Read",
+          "Calendars.Read",
           "Calendars.ReadBasic",
-          "MailboxSettings.Read"
+          "Calendars.ReadWrite",
+          "MailboxSettings.Read",
+          "User.Read"
         ]
       },
       "secrets": [],
@@ -879,6 +903,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "b7d44fd15d5bc867db3809cdfc3c4bd55fc6c82a4884bfa8d6c79206065bda7f",
-  "generatedAt": "2026-09-04T15:27:35.850Z",
-  "summary": "## Microsoft Outlook Calendar Toolkit\n\nThe Microsoft Outlook Calendar toolkit lets agents and LLM-powered apps read, search, and manage Outlook Calendar data for authenticated Microsoft 365 users via the Microsoft Graph API.\n\n## Capabilities\n\n- **Event management** — Create events in the user's default calendar, retrieve a single event by ID, and list events within a specific time range.\n- **Search and discovery** — Search calendar events across a time range with optional filters; results are chronologically ordered with truncated bodies for efficient skimming, and full details are retrievable by event ID.\n- **Scheduling and availability** — Fetch free/busy schedules for one or more people over a time range, including per-interval availability views, detailed schedule blocks with absolute start/end times, and working-hours data where available.\n- **Calendar and attachment metadata** — List all calendars the user has access to (own, shared, and delegated), and retrieve attachment metadata (name, size, type) for specific calendar events.\n- **Identity context** — Retrieve information about the authenticated user and their Outlook Calendar environment.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 using Microsoft as the provider. Arcade manages the OAuth flow automatically.\n\nSee the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
+  "generatedAt": "2026-09-24T11:16:02.610Z",
+  "summary": "## Microsoft Outlook Calendar Toolkit\n\nThe Microsoft Outlook Calendar toolkit connects Arcade-powered LLM agents to a user's Outlook Calendar via the Microsoft Graph API, enabling agents to read, search, create, and inspect calendar data on behalf of authenticated users.\n\n## Capabilities\n\n- **Event management:** Create events in the user's default calendar and retrieve individual events by ID, with timezone handling anchored to the mailbox's configured timezone.\n- **Event discovery:** List events within a time range, search events by keyword and optional filters (results in chronological order, bodies truncated to 200 chars for skimming), and retrieve full event details by ID.\n- **Scheduling and availability:** Fetch free/busy schedules for one or more people over a time range, with per-interval availability views, explicit busy blocks, working hours, and detailed timezone provenance signals (`mailbox`, `mailbox_utc`, `fallback`) to guide agents on how much to trust the returned times.\n- **Calendar and attachment inspection:** List all calendars the user owns, shares, or has delegated access to (returns IDs usable in other tools), and list attachment metadata (name, size, type — no content) for any calendar event.\n- **Identity and environment context:** Retrieve the authenticated user's profile and mailbox timezone details, including provenance (`mailbox`, `mailbox_utc`, `default_not_configured`, `default_unreadable`) to distinguish a configured timezone from a toolkit-applied UTC fallback.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Microsoft** provider. Arcade manages the OAuth flow and token lifecycle automatically. See the [Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details."
 }
