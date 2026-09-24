@@ -878,8 +878,14 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 
 **Basic (Read-only):**
 
-- `count_stargazers`, `get_repository`, `list_repository_activities`, `list_stargazers`, `get_file_contents`
+- `count_stargazers`, `get_repository`, `list_repository_activities`, `get_file_contents`
 - Required: Contents (Read), Metadata (Read)
+
+**Restricted stargazer listing:**
+
+- `list_stargazers`
+- The app needs read access to repository metadata, and the authenticated user must be an administrator or collaborator on the repository
+- Use `count_stargazers` when you only need the public aggregate count
 
 **Write Operations:**
 
@@ -976,6 +982,18 @@ GitHub doesn't reveal which repositories exist when you lack access (security by
 3. Ensure the user has authorized the app
 4. Confirm the repository path is correct
 
+### Stargazer listings require repository access
+
+GitHub limits its list stargazers endpoint to repository administrators and
+collaborators. `list_stargazers` can return `404 Not Found` or `403 Forbidden`
+for a public repository even when the app has Metadata (Read) permission and
+can otherwise read that repository.
+
+Use `count_stargazers` when you only need the public number of stars. It reads
+the repository's aggregate `stargazers_count` instead of enumerating users.
+
+[Learn about GitHub's stargazer access restrictions](https://github.blog/changelog/2026-06-30-upcoming-access-restrictions-to-public-api-endpoints-and-ui-views/)
+
 ### Installing on Additional Repositories
 
 After initial installation, you can add more repositories:
@@ -1017,6 +1035,7 @@ After initial installation, you can add more repositories:
 | **"Installation not found"**                 | Wrong Installation ID                               | Check Installation ID in URL                     |
 | **"403 Forbidden"**                          | Missing permissions, not installed, or rate limited | Review permissions, check installation           |
 | **"404 Not Found" on existing repo**         | Permissions not approved by admin                   | Check app settings → verify permissions approved |
+| **Can't list stargazers on a public repo**    | User isn't a repository administrator or collaborator | Use `count_stargazers` for the public count       |
 | **Can't star repositories**                  | Missing "Act on behalf of user" permission          | Enable in User permissions settings              |
 
 ### Debugging Steps
