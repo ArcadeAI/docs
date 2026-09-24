@@ -14,6 +14,17 @@ const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
 };
 
 /**
+ * Toolkits that have launched but are still flagged `isComingSoon` in the
+ * design-system catalog. Remove an entry once DS ships the flag as `false`.
+ */
+const LAUNCHED_TOOLKIT_IDS = new Set(["workday"]);
+
+const clearLaunchedComingSoon = (toolkit: Toolkit): Toolkit =>
+  LAUNCHED_TOOLKIT_IDS.has(normalizeToolkitId(toolkit.id))
+    ? { ...toolkit, isComingSoon: false }
+    : toolkit;
+
+/**
  * The full integrations catalog the index renders: design-system toolkits
  * (enriched with a `docsLink` from their data file when the catalog entry
  * lacks one, so the card's slug matches the generated page) plus docs-local
@@ -41,7 +52,8 @@ export const getToolkitsWithDocsLinks = async (): Promise<
     })
   );
 
-  const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((toolkit) => {
+  const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((dsToolkit) => {
+    const toolkit = clearLaunchedComingSoon(dsToolkit);
     const existing = getToolkitDocsLink(toolkit);
     const docsLink =
       existing ?? docsLinkById.get(normalizeToolkitId(toolkit.id));
