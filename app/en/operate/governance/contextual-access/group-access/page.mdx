@@ -1,0 +1,220 @@
+---
+title: "Group-Based Tool Access"
+description: "Vary which tools a caller can see and use based on their identity provider group membership, enforced natively by the Arcade Engine"
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Group-Based Tool Access
+
+<Callout type="warning">
+  **Early Access.** Group-based tool access is off by default and turned on per
+  organization. Contact Arcade support to have it enabled for yours. While it is
+  off, the group access extension type is not offered in the Dashboard and the
+  API refuses to create one.
+</Callout>
+
+As a platform operator, you can vary which tools a caller sees based on their identity provider groups. Group-based access is built into the Arcade Engine: you define rules that require membership in a group, and the Engine checks membership and filters the tool list before the caller sees it. Like [rate limits](/operate/governance/contextual-access/rate-limiting), it runs natively inside Arcade, so there is no server to build or host.
+
+Use it when one MCP gateway serves more than one team or customer and they should not all see the same tools, instead of running a separate gateway for each.
+
+## How enforcement works
+
+A group access configuration has an **identity backend** that holds your groups, and a set of **rules**. Each rule combines:
+
+- A **tool matcher** that selects which tools the rule applies to
+- One or more **required groups**. A caller in any one of them satisfies the rule.
+
+Enforcement runs at the tool access hook point, so it covers both discovery and execution. A caller who does not satisfy a rule does not see the tool in their tool list, and a call to it by name is refused.
+
+The Engine checks membership with your identity provider and caches the answer per user and per group for five minutes.
+
+### Tool matchers
+
+| Matcher | Example | Applies to |
+| --- | --- | --- |
+| Exact | `Slack.SendMessage` | One fully qualified tool |
+| Toolkit | `Slack.*` | Every tool in the toolkit |
+| Global | `*` | Every tool |
+
+When more than one rule matches a tool, only the most specific rule applies: an exact match beats a toolkit match, and a toolkit match beats the global match. The caller is checked against that one rule only.
+
+A tool that no rule matches stays visible to everyone. Add a global `*` rule to set a default for tools you have not named.
+
+Tool matchers are not case-sensitive. Group names are: a rule requiring `Finance-Admins` is not satisfied by membership in `finance-admins`. Group IDs are not case-sensitive.
+
+## Choose an identity backend
+
+Each configuration uses one backend. All three integrations are read-only and never write to your directory.
+
+| Backend | You provide | Access it needs |
+| --- | --- | --- |
+| Okta | Org URL and an API token | See [Okta API token](#okta-api-token) |
+| Microsoft Entra ID | Directory (tenant) ID, application (client) ID, client secret | See [Entra ID app permissions](#entra-id-app-permissions) |
+| SailPoint Identity Security Cloud | Tenant URL, client ID, client secret | See [Required API client rights](#required-api-client-rights) |
+
+A required group can be a name or an ID in every backend: an Okta group name or ID, an Entra ID group name or object ID, or a SailPoint role or access profile name or ID. An ID is exact and survives a rename, so use IDs for sensitive rules.
+
+### Okta API token
+
+An Okta API token has the same permissions as the administrator who creates it. Create the token from an account whose administrator role can read users and groups, such as a service account with the Read-Only Administrator role. If that account's role changes, the token's permissions change with it.
+
+### Entra ID app permissions
+
+Register an app in Entra ID and give it the `GroupMember.Read.All` **application** permission (not delegated), then grant administrator consent. Until consent is granted, the app can still sign in but every membership lookup fails.
+
+<Callout type="warning">
+  `User.Read.All` alone is not enough. Without permission to read groups,
+  Microsoft Graph returns a user's groups with their IDs but not their names or
+  types, so every rule that names a group by display name matches nothing.
+</Callout>
+
+### Entra ID group names
+
+Entra ID does not require group display names to be unique, and many tenants let members create their own groups. A rule that names `finance-admins` could be satisfied by someone who creates a group with that name and joins it.
+
+| Rule value | Matched against |
+| --- | --- |
+| `finance-admins` | The group's display name, for security groups only (not Microsoft 365 groups) |
+| `3f2504e0-4f89-11d3-9a0c-0305e82c3301` | The group's object ID |
+
+For sensitive rules, use the object ID. You can copy it from the group's overview page in Entra ID. This does not apply to Okta or SailPoint, where only administrators can create groups, roles, and access profiles.
+
+### Match callers to directory users
+
+The backend looks up the caller in your directory using the user ID the request carries. Arcade passes that value to your directory unchanged and does not assume it is an email address.
+
+| Backend | How the caller is looked up |
+| --- | --- |
+| Okta | The user ID must be an identifier Okta accepts for that user |
+| Microsoft Entra ID | The user ID must be an identifier Microsoft Graph accepts for that user |
+| SailPoint | The user ID is matched against each identity's `email` and `alias` |
+
+A caller whose user ID your directory does not recognize matches no groups, so every gated tool is hidden from them. Before you turn on a rule, confirm that the user IDs your gateway sends are ones your directory knows.
+
+## SailPoint Identity Security Cloud
+
+SailPoint support covers Identity Security Cloud only. IdentityIQ is not supported.
+
+Rules match **roles and access profiles**. Entitlements and identity attributes do not count toward a rule. Name a role or access profile by its name, or by its ID from the item's page in Identity Security Cloud.
+
+Only provisioned access counts. Access that has been requested or approved but not yet provisioned does not satisfy a rule.
+
+A caller is matched to an identity by `email` or `alias`. If no identity matches, or more than one does, membership cannot be verified and the caller's gated tools are hidden.
+
+### Required API client rights
+
+Create a read-only API client in Identity Security Cloud using the OAuth 2.0 client credentials grant. It needs exactly two rights:
+
+- `idn:identity-history:read`
+- `idn:public-identities:read`
+
+<Callout type="warning">
+  `idn:access-profiles:read` and `idn:roles:read` are not needed, and they
+  cannot replace the two rights above. They allow reading role and access
+  profile definitions, not who holds them. A client with only those rights
+  authenticates, then fails every membership lookup, and every gated tool is
+  hidden from every caller.
+</Callout>
+
+## Configure in the Dashboard
+
+<Steps>
+
+### Create a group access extension
+
+Navigate to **Contextual Access** in the Arcade Dashboard, click **Add Extension**, and choose the group access type.
+
+### Pick a scope
+
+Bind the configuration to the organization to apply it across all projects, or to a single project.
+
+### Select a backend and enter credentials
+
+Choose Okta, Microsoft Entra ID, or SailPoint ISC, then fill in that backend's fields. Secrets are write-only and are never shown again after you save.
+
+### Add rules
+
+Each rule row takes a tool matcher and a comma-separated list of required groups. You can add up to 100 rules, each matcher can appear only once, and each rule accepts up to 50 groups.
+
+### Activate
+
+The **Active** toggle controls enforcement. Inactive configurations are kept but not enforced, so you can stage rules before turning them on.
+
+</Steps>
+
+You can edit rules and credentials after you create the extension. When you edit, leave a secret blank to keep the stored one. If you change the backend, org URL, tenant URL, tenant ID, or client ID, you must enter the secret again.
+
+<Callout type="info">
+  A project can have one group access configuration at a time. To apply more
+  than one set of rules, put them in the same configuration.
+</Callout>
+
+## Configure via the API
+
+Create a configuration with the plugins API. The example below hides every Slack tool from callers outside two Okta groups, limits `Slack.SendMessage` to one group, and leaves every other tool visible:
+
+```bash
+curl -s -X POST "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/plugins" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "plugin_type": "group_access",
+    "name": "Team tool boundaries",
+    "group_access_config": {
+      "backend": "okta",
+      "okta": {
+        "org_url": "https://example.okta.com",
+        "api_token": "'"$OKTA_API_TOKEN"'"
+      },
+      "rules": [
+        { "match": "Slack.SendMessage", "required_groups": ["comms-team"] },
+        { "match": "Slack.*", "required_groups": ["comms-team", "support-team"] }
+      ]
+    }
+  }'
+```
+
+To use another backend, replace the `okta` block with an `entra` or `sailpoint` block:
+
+```json
+{ "backend": "entra", "entra": { "tenant_id": "11111111-2222-3333-4444-555555555555", "client_id": "66666666-7777-8888-9999-000000000000", "client_secret": "..." } }
+```
+
+```json
+{ "backend": "sailpoint", "sailpoint": { "tenant_url": "https://acme.identitynow.com", "client_id": "2c9180835d2e5168015d32f890ca1581", "client_secret": "..." } }
+```
+
+To bind the configuration to the organization instead of a project, post to `/v1/orgs/{org_id}/plugins`. The [API reference](/references/api) documents the full plugins API, including listing, updating, and deleting.
+
+When you update a configuration, the rules you send replace the existing rules, so send the complete list. A credential you leave out keeps its stored value, unless the update changes the backend, a URL, the tenant ID, or the client ID, in which case the credential is required.
+
+## How quickly changes take effect
+
+A membership change reaches Arcade after your identity provider applies it and the cached answer expires, which takes up to five minutes:
+
+- **Granting access:** the caller does not see the tool until the change reaches Arcade.
+- **Revoking access:** the caller can keep seeing the tool until the cached answer expires.
+
+## When membership cannot be verified
+
+If the Engine cannot determine membership, because the identity provider is unreachable or does not recognize the caller, the tool is **hidden**. This keeps an outage from silently removing the boundaries you set.
+
+To show the tool instead when membership cannot be verified, turn on **Show the tool when membership cannot be verified** for the rule in the Dashboard, or set `allow_on_unavailable` on the rule in the API:
+
+```json
+{ "match": "Slack.*", "required_groups": ["comms-team"], "allow_on_unavailable": true }
+```
+
+<Callout type="warning">
+  A credential problem and a removed user look the same to the caller: the tool
+  is hidden. If tools disappear for everyone at once, check the backend
+  credentials and the user ID mapping before you check group membership.
+</Callout>
+
+## Next steps
+
+- [How hooks work](/operate/governance/contextual-access/how-hooks-work) - Where group access fits in the hook pipeline
+- [Rate limiting](/operate/governance/contextual-access/rate-limiting) - Cap how often tools can be called
+- [Build your own](/operate/governance/contextual-access/build-your-own) - Enforce custom policies from your own webhook server
+- [API reference](/references/api) - Full plugins API documentation
