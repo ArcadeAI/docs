@@ -88,4 +88,40 @@ describe("LlmToolkitSummaryGenerator", () => {
     expect(capturedPrompt).toContain("Secret types:");
     expect(capturedPrompt).toContain("Secret names:");
   });
+
+  const capturePrompt = async (toolkit: MergedToolkit): Promise<string> => {
+    let capturedPrompt = "";
+    const client: LlmClient = {
+      provider: "openai",
+      generateText: async ({ prompt }) => {
+        capturedPrompt = prompt;
+        return '{"summary":"OK"}';
+      },
+    };
+    const generator = new LlmToolkitSummaryGenerator({
+      client,
+      model: "test-model",
+    });
+    await generator.generate(toolkit);
+    return capturedPrompt;
+  };
+
+  it("links the OAuth section to the provider page when one exists", async () => {
+    const prompt = await capturePrompt(createToolkit());
+
+    expect(prompt).toContain(
+      "https://docs.arcade.dev/en/references/auth-providers/github"
+    );
+  });
+
+  it("does not link to a provider page that does not exist", async () => {
+    const prompt = await capturePrompt(
+      createToolkit({
+        auth: { type: "oauth2", providerId: "box", allScopes: [] },
+      })
+    );
+
+    expect(prompt).not.toContain("references/auth-providers");
+    expect(prompt).toContain("do not link to one");
+  });
 });

@@ -4,6 +4,7 @@ import {
   ARCADE_SECRETS_DASHBOARD_URL,
   ARCADE_SECRETS_DOC_URL,
 } from "../merger/secret-coherence";
+import { hasAuthProviderPage } from "../shared/auth-provider-pages";
 import type { MergedTool, MergedToolkit, SecretType } from "../types/index";
 import type { LlmClient } from "./client";
 
@@ -63,6 +64,19 @@ const collectSecrets = (tools: MergedTool[]) => {
   };
 };
 
+/**
+ * Only point the summary at a provider page that exists. Without this the
+ * model builds the URL from the provider ID and links to a 404 for providers
+ * such as `box`.
+ */
+const formatOAuthRequirement = (toolkit: MergedToolkit): string => {
+  const providerId = toolkit.auth?.providerId;
+  if (providerId && hasAuthProviderPage(providerId)) {
+    return `- If auth type is oauth2 or mixed, add an **OAuth** section that names the provider and links to the Arcade provider docs at ${ARCADE_AUTH_PROVIDERS_BASE_URL}/${providerId.toLowerCase()}. Do NOT list scopes — the provider page already documents them and repeating scopes here drifts.`;
+  }
+  return "- If auth type is oauth2 or mixed, add an **OAuth** section that names the provider. Arcade has no docs page for this provider, so do not link to one. Do NOT list scopes.";
+};
+
 const buildPrompt = (toolkit: MergedToolkit): string => {
   const secrets = collectSecrets(toolkit.tools);
   const hasSecrets = secrets.names.length > 0;
@@ -76,7 +90,7 @@ const buildPrompt = (toolkit: MergedToolkit): string => {
     "Requirements:",
     "- Start with 1 to 2 sentences that explain the provider and what the toolkit enables.",
     "- Add a **Capabilities** section with 3 to 6 bullets summarizing shared capabilities (group tools by theme; do not list tools one by one).",
-    `- If auth type is oauth2 or mixed, add an **OAuth** section that names the provider and links to the Arcade provider docs at ${ARCADE_AUTH_PROVIDERS_BASE_URL}/<providerId> (use the OAuth provider ID supplied in the Auth line below as the slug). Do NOT list scopes — the provider page already documents them and repeating scopes here drifts.`,
+    formatOAuthRequirement(toolkit),
     "- If auth type is api_key or mixed, mention API key usage under **OAuth** or a dedicated heading.",
     `- If any secrets exist, add a **Secrets** section. List every secret by its exact name in backticks. For each secret, give a factual explanation of what it is and how a developer obtains it from the provider — use as much detail as the secret actually needs (a short URL override may be one line; a scoped API key may need several sentences naming the provider dashboard page, required scopes/permissions, and any account tier). When possible include an inline markdown link to the provider's own documentation page that tells the reader how to create/retrieve that specific secret. If you do not know the provider's docs URL, omit the link rather than inventing one. End the section with the Arcade config docs link: ${ARCADE_SECRETS_DOC_URL} (and optionally mention ${ARCADE_SECRETS_DASHBOARD_URL}).`,
     "- Use Markdown. Developer-focused. Say 'Arcade' (never 'Arcade AI'). Do not use h1 headings (no `# Title` lines); use h2 (`##`) or lower for any section headings.",

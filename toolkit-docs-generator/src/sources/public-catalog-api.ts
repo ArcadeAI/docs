@@ -90,18 +90,9 @@ export class PublicCatalogApiSource implements ToolDataSource, MetadataSource {
     ]);
 
     const catalogItems = parsePublicCatalogItems(catalogPages);
-    const parsedTools = parsePublicToolsResponse(toolItems);
-    const requirementsByToolkit = new Map(
-      catalogItems.map((toolkit) => [toolkit.name, toolkit.requirements])
+    const tools = parsePublicToolsResponse(toolItems).map((tool) =>
+      transformPublicToolItem(tool)
     );
-
-    const tools = parsedTools.map((tool) => {
-      const toolkitName = tool.toolkit.name;
-      return transformPublicToolItem(
-        tool,
-        requirementsByToolkit.get(toolkitName) ?? null
-      );
-    });
 
     return {
       toolkits: catalogItems,
