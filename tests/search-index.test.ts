@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { createBm25Index } from "@/app/_lib/search/bm25";
 import { buildSearchIndex } from "@/app/_lib/search/build-index";
+import { documentsFromMdx } from "@/app/_lib/search/mdx-documents";
 import { documentsFromToolkit } from "@/app/_lib/search/toolkit-documents";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
 
@@ -65,6 +66,117 @@ describe("documentsFromToolkit", () => {
       metadata: { ...toolkit.metadata, isHidden: true },
     };
     expect(documentsFromToolkit(hidden)).toEqual([]);
+  });
+});
+
+const sectionAnchors = (source: string): string[] =>
+  documentsFromMdx("/en/page", source)
+    .filter((document) => document.type !== "page")
+    .map((document) => document.url.replace("/en/page#", ""));
+
+describe("documentsFromMdx", () => {
+  it("matches Nextra heading IDs, including duplicates, code, and flags", () => {
+    const anchors = sectionAnchors(`# Page
+
+## Example
+
+First.
+
+## Example
+
+Second.
+
+### \`__init__\`
+
+Constructor.
+
+### \`--use-provider\`, \`-p\`
+
+Flag.
+
+### Using [the dashboard](/en/dashboard) **today**
+
+Link.
+`);
+    expect(anchors).toEqual([
+      "example",
+      "example-1",
+      "__init__",
+      "--use-provider--p",
+      "using-the-dashboard-today",
+    ]);
+  });
+
+  it("keeps inline code in the displayed heading", () => {
+    const init = documentsFromMdx(
+      "/en/page",
+      "# Page\n\n### `__init__`\n\nConstructor.\n"
+    ).find((document) => document.type !== "page");
+    expect(init?.heading).toBe("__init__");
+  });
+
+  it("counts tab labels and summaries toward duplicate suffixes", () => {
+    const anchors = sectionAnchors(`# Page
+
+<Tabs items={["Python", "JavaScript"]}>
+  <Tabs.Tab>
+Python code.
+  </Tabs.Tab>
+  <Tabs.Tab>
+JavaScript code.
+  </Tabs.Tab>
+</Tabs>
+
+<details>
+<summary>Setup</summary>
+Details.
+</details>
+
+## Python
+
+Heading after a Python tab.
+
+## Setup
+
+Heading after a Setup summary.
+`);
+    expect(anchors).toEqual(["python-1", "setup-1"]);
+  });
+
+  it("ignores import and export lines inside code fences", () => {
+    const anchors = sectionAnchors(`# Page
+
+## Install
+
+\`\`\`python
+import httpx
+\`\`\`
+
+\`\`\`bash
+export PATH="$HOME/.local/bin:$PATH"
+\`\`\`
+
+## Next steps
+
+Keep going.
+`);
+    expect(anchors).toEqual(["install", "next-steps"]);
+  });
+
+  it("strips multi-line imports without a trailing semicolon", () => {
+    const anchors = sectionAnchors(`import {
+  CheatSheetGrid,
+  InfoBox
+} from '../_components/cheat-sheet'
+import '../cheat-sheet-print.css'
+
+# Page
+
+  ### Options
+
+Indented inside a component.
+`);
+    expect(anchors).toEqual(["options"]);
   });
 });
 
