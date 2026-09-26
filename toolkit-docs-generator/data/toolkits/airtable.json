@@ -1,0 +1,1072 @@
+{
+  "id": "Airtable",
+  "label": "Airtable",
+  "version": "1.0.0",
+  "description": "Arcade tools designed for LLMs to interact with Airtable bases and records",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/airtable.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/airtable",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "airtable",
+    "allScopes": [
+      "data.records:read",
+      "data.records:write",
+      "schema.bases:read",
+      "user.email:read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateRecords",
+      "qualifiedName": "Airtable.CreateRecords",
+      "fullyQualifiedName": "Airtable.CreateRecords@1.0.0",
+      "description": "Create rows in an Airtable table, up to 10 per call.\n\nRepeating this call creates additional rows rather than replacing the first set.\n`count` and `requested_count` are equal on success, and `record_ids` names the rows.\nIf Airtable confirms fewer rows than requested, this call raises instead of reporting\nan incomplete success, because new rows do not have caller-known IDs to reconcile.",
+      "parameters": [
+        {
+          "name": "base_id",
+          "type": "string",
+          "required": true,
+          "description": "The Airtable base to write to, as a base ID starting with 'app'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": true,
+          "description": "The table to write to, as its name or a table ID starting with 'tbl'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "records",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "The rows to create, at most 10 per call. Each row's fields are {column, value} pairs. Pass ordinary text directly; JSON-quote text that looks like JSON. Pass numbers, booleans, null, arrays, and objects as JSON text so Airtable receives their original type.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "typecast",
+          "type": "boolean",
+          "required": false,
+          "description": "Let Airtable convert values to each column's type and create missing select options (true), or reject values that do not already match (false). Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "data.records:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The records that were created"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.CreateRecords",
+        "parameters": {
+          "base_id": {
+            "value": "appA1B2C3D4E5F6G7",
+            "type": "string",
+            "required": true
+          },
+          "table": {
+            "value": "Projects",
+            "type": "string",
+            "required": true
+          },
+          "records": {
+            "value": [
+              {
+                "fields": [
+                  {
+                    "column": "Name",
+                    "value": "Website Redesign"
+                  },
+                  {
+                    "column": "Status",
+                    "value": "In Progress"
+                  },
+                  {
+                    "column": "Priority",
+                    "value": "2"
+                  },
+                  {
+                    "column": "Completed",
+                    "value": "false"
+                  },
+                  {
+                    "column": "Tags",
+                    "value": "[\"design\", \"frontend\"]"
+                  }
+                ]
+              },
+              {
+                "fields": [
+                  {
+                    "column": "Name",
+                    "value": "Mobile App Launch"
+                  },
+                  {
+                    "column": "Status",
+                    "value": "Planned"
+                  },
+                  {
+                    "column": "Priority",
+                    "value": "1"
+                  },
+                  {
+                    "column": "Completed",
+                    "value": "false"
+                  },
+                  {
+                    "column": "Tags",
+                    "value": "[\"mobile\", \"development\"]"
+                  }
+                ]
+              }
+            ],
+            "type": "array",
+            "required": true
+          },
+          "typecast": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteRecords",
+      "qualifiedName": "Airtable.DeleteRecords",
+      "fullyQualifiedName": "Airtable.DeleteRecords@1.0.0",
+      "description": "Delete rows from an Airtable table, up to 10 per call.\n\nDeleted rows are removed from the table and cannot be restored through the API.\n`record_ids` holds only the rows Airtable confirmed deleted. When `count` is lower than\n`requested_count`, `unconfirmed_record_ids` names the rest; re-read those before\ndeleting again.",
+      "parameters": [
+        {
+          "name": "base_id",
+          "type": "string",
+          "required": true,
+          "description": "The Airtable base to delete from, as a base ID starting with 'app'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": true,
+          "description": "The table to delete from, as its name or a table ID starting with 'tbl'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The rows to delete, at most 10 per call, each as a record ID starting with 'rec'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "data.records:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The records that were deleted"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.DeleteRecords",
+        "parameters": {
+          "base_id": {
+            "value": "appA1B2C3D4E5F6G7",
+            "type": "string",
+            "required": true
+          },
+          "table": {
+            "value": "tblOrdersMainSheet",
+            "type": "string",
+            "required": true
+          },
+          "record_ids": {
+            "value": [
+              "recA1B2C3D4E5F6G7",
+              "recH8I9J0K1L2M3N4",
+              "recO5P6Q7R8S9T0U1"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetBaseSchema",
+      "qualifiedName": "Airtable.GetBaseSchema",
+      "fullyQualifiedName": "Airtable.GetBaseSchema@1.0.0",
+      "description": "Get the column names, column types and select options inside an Airtable base.\n\nRead this before writing records: writes key on column names, a select column\nrejects values outside the options reported here, and a linked-record column only\naccepts record IDs from the table it names.\n\n`views_included` is false whenever a table's views were not returned: include_views\nwas false, or they were left out to fit the response (then `truncated` is true). An\nempty views list with `views_included` true means the table has no saved views.\n\nNarrow with `table` when only one table matters. Airtable returns the whole base,\nso leaving it empty on a wide base costs the context the records themselves need.\n`truncated` says detail was left out to keep the response usable: descriptions and\nviews go first, then columns from the end of a table. Ask for one named table to give\nit the whole response; a table still too wide returns its leading columns in order,\nalways at least its first, whose select options may be cut from the end.",
+      "parameters": [
+        {
+          "name": "base_id",
+          "type": "string",
+          "required": true,
+          "description": "The Airtable base to describe, as a base ID starting with 'app'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": false,
+          "description": "Describe only this table, by name or a table ID starting with 'tbl'. Leave empty to describe every table in the base.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_views",
+          "type": "boolean",
+          "required": false,
+          "description": "Include each table's saved views (true), or return only its columns (false). Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "schema.bases:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The tables in the base, with their columns"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.GetBaseSchema",
+        "parameters": {
+          "base_id": {
+            "value": "appA1B2C3D4E5F6G7",
+            "type": "string",
+            "required": true
+          },
+          "table": {
+            "value": "Projects",
+            "type": "string",
+            "required": false
+          },
+          "include_views": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetRecord",
+      "qualifiedName": "Airtable.GetRecord",
+      "fullyQualifiedName": "Airtable.GetRecord@1.0.0",
+      "description": "Get a single Airtable row by its record ID.\n\nReturns every column unless fields narrows it. Long cell values are clipped the same\nway they are in a listing, and `truncated` says when that happened. A record ID that\ndoes not exist, or was deleted, comes back as a refusal that does not distinguish\nthe two.",
+      "parameters": [
+        {
+          "name": "base_id",
+          "type": "string",
+          "required": true,
+          "description": "The Airtable base to read from, as a base ID starting with 'app'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": true,
+          "description": "The table to read from, as its name or a table ID starting with 'tbl'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_id",
+          "type": "string",
+          "required": true,
+          "description": "The record to retrieve, as a record ID starting with 'rec'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Only return these columns, by column name. Defaults to every column.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "data.records:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "One record with its columns"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.GetRecord",
+        "parameters": {
+          "base_id": {
+            "value": "appA1B2C3D4E5F6G7",
+            "type": "string",
+            "required": true
+          },
+          "table": {
+            "value": "tblH8I9J0K1L2M3N4",
+            "type": "string",
+            "required": true
+          },
+          "record_id": {
+            "value": "recO5P6Q7R8S9T0U1",
+            "type": "string",
+            "required": true
+          },
+          "fields": {
+            "value": [
+              "Name",
+              "Status",
+              "Due Date",
+              "Assignee"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListBases",
+      "qualifiedName": "Airtable.ListBases",
+      "fullyQualifiedName": "Airtable.ListBases@1.0.0",
+      "description": "List the Airtable bases this authorization can reach, with permission levels.\n\nReturns bases in Airtable's default order.",
+      "parameters": [
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "schema.bases:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A page of accessible Airtable bases"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.ListBases",
+        "parameters": {
+          "cursor": {
+            "value": "itrXXXXXXXXXXXXXX/fldYYYYYYYYYYYYYY",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListRecords",
+      "qualifiedName": "Airtable.ListRecords",
+      "fullyQualifiedName": "Airtable.ListRecords@1.0.0",
+      "description": "List rows from an Airtable table, optionally filtered, sorted and column-limited.\n\nUse this when the condition combines columns, or compares numbers or dates. To match\none column against plain text, use the record search tool instead.\n\nReturns records in the view's order, or Airtable's default order when no view is\ngiven, unless sort_field overrides it.",
+      "parameters": [
+        {
+          "name": "base_id",
+          "type": "string",
+          "required": true,
+          "description": "The Airtable base to read from, as a base ID starting with 'app'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": true,
+          "description": "The table to read from, as its name or a table ID starting with 'tbl'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "view",
+          "type": "string",
+          "required": false,
+          "description": "Only return records visible in this view, by view name or view ID. Leave empty to read the whole table.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_formula",
+          "type": "string",
+          "required": false,
+          "description": "An Airtable formula that must evaluate true for a record to be returned, in the form {Column Name} = \"value\". Any literal value inside the formula must have its double quotes and backslashes escaped by the caller; this parameter is sent as written. To match one column against plain text, use the record search tool instead, which escapes the term for you. Leave empty for no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Only return these columns, by column name. Defaults to every column.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_field",
+          "type": "string",
+          "required": false,
+          "description": "Column name to sort by. Leave empty to use the table or view's own order.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_direction",
+          "type": "string",
+          "required": false,
+          "description": "Direction to sort by when sort_field is set. Defaults to ASCENDING.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum records to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "data.records:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A page of records from the table"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.ListRecords",
+        "parameters": {
+          "base_id": {
+            "value": "appXyZ1234567890",
+            "type": "string",
+            "required": true
+          },
+          "table": {
+            "value": "Projects",
+            "type": "string",
+            "required": true
+          },
+          "view": {
+            "value": "Active Projects",
+            "type": "string",
+            "required": false
+          },
+          "filter_formula": {
+            "value": "{Status} = \"In Progress\"",
+            "type": "string",
+            "required": false
+          },
+          "fields": {
+            "value": [
+              "Project Name",
+              "Owner",
+              "Due Date",
+              "Budget"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "sort_field": {
+            "value": "Due Date",
+            "type": "string",
+            "required": false
+          },
+          "sort_direction": {
+            "value": "ASCENDING",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "pagABCDEF1234567890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchRecords",
+      "qualifiedName": "Airtable.SearchRecords",
+      "fullyQualifiedName": "Airtable.SearchRecords@1.0.0",
+      "description": "Find rows in an Airtable table whose column matches a search term.\n\nUse this to match one column against text: quotes and backslashes in the search term\nare escaped, so arbitrary text is safe to pass. Use the formula-based listing instead\nwhen the condition combines columns or compares numbers or dates.\n\nReturns records in the table's order unless sort_field is given.",
+      "parameters": [
+        {
+          "name": "base_id",
+          "type": "string",
+          "required": true,
+          "description": "The Airtable base to search, as a base ID starting with 'app'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": true,
+          "description": "The table to search, as its name or a table ID starting with 'tbl'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "field_name",
+          "type": "string",
+          "required": true,
+          "description": "The column to match against, by column name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_text",
+          "type": "string",
+          "required": true,
+          "description": "The text to look for in that column.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "exact_match",
+          "type": "boolean",
+          "required": false,
+          "description": "Require the whole cell to equal search_text (true), or match any cell containing it, ignoring case (false). Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "view",
+          "type": "string",
+          "required": false,
+          "description": "Only search records visible in this view, by view name or view ID. Leave empty to search the whole table.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Only return these columns, by column name. Defaults to every column.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_field",
+          "type": "string",
+          "required": false,
+          "description": "Column name to sort matches by. Leave empty to use the table's own order.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_direction",
+          "type": "string",
+          "required": false,
+          "description": "Direction to sort by when sort_field is set. Defaults to ASCENDING.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum records to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "data.records:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A page of matching records"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.SearchRecords",
+        "parameters": {
+          "base_id": {
+            "value": "appA1B2C3D4E5F6G7",
+            "type": "string",
+            "required": true
+          },
+          "table": {
+            "value": "Contacts",
+            "type": "string",
+            "required": true
+          },
+          "field_name": {
+            "value": "Email",
+            "type": "string",
+            "required": true
+          },
+          "search_text": {
+            "value": "example@company.com",
+            "type": "string",
+            "required": true
+          },
+          "exact_match": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "view": {
+            "value": "Grid view",
+            "type": "string",
+            "required": false
+          },
+          "fields": {
+            "value": [
+              "Name",
+              "Email",
+              "Phone",
+              "Status"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "sort_field": {
+            "value": "Name",
+            "type": "string",
+            "required": false
+          },
+          "sort_direction": {
+            "value": "ASCENDING",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "itrXXXXXXXXXXXXXX",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateRecords",
+      "qualifiedName": "Airtable.UpdateRecords",
+      "fullyQualifiedName": "Airtable.UpdateRecords@1.0.0",
+      "description": "Change columns on existing Airtable rows, up to 10 per call.\n\nOnly the columns supplied are written; every other column is left untouched.\n`count` is how many rows Airtable confirmed. When it is lower than `requested_count`,\n`unconfirmed_record_ids` names the rest; re-read those before updating them again.",
+      "parameters": [
+        {
+          "name": "base_id",
+          "type": "string",
+          "required": true,
+          "description": "The Airtable base to write to, as a base ID starting with 'app'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table",
+          "type": "string",
+          "required": true,
+          "description": "The table to write to, as its name or a table ID starting with 'tbl'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "records",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "The rows to change, at most 10 per call. Each entry names the record to update and the columns to set on it as {column, value} pairs; columns left out keep their values. Pass ordinary text directly; JSON-quote text that looks like JSON. Pass numbers, booleans, null, arrays, and objects as JSON text so Airtable receives their original type.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "typecast",
+          "type": "boolean",
+          "required": false,
+          "description": "Let Airtable convert values to each column's type and create missing select options (true), or reject values that do not already match (false). Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "data.records:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The records that were updated"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.UpdateRecords",
+        "parameters": {
+          "base_id": {
+            "value": "appXyZ1234AbCdEf",
+            "type": "string",
+            "required": true
+          },
+          "table": {
+            "value": "tblProjects",
+            "type": "string",
+            "required": true
+          },
+          "records": {
+            "value": [
+              {
+                "id": "recAaBbCcDdEeFf01",
+                "fields": {
+                  "Status": "In Progress",
+                  "Priority": "High",
+                  "Due Date": "2024-09-15",
+                  "Budget": "15000",
+                  "Is Active": "true"
+                }
+              },
+              {
+                "id": "recAaBbCcDdEeFf02",
+                "fields": {
+                  "Status": "Completed",
+                  "Priority": "Low",
+                  "Due Date": "2024-08-01",
+                  "Budget": "8500",
+                  "Is Active": "false"
+                }
+              },
+              {
+                "id": "recAaBbCcDdEeFf03",
+                "fields": {
+                  "Status": "Pending Review",
+                  "Priority": "Medium",
+                  "Tags": "[\"urgent\", \"client-facing\"]",
+                  "Notes": "Follow up needed after stakeholder meeting."
+                }
+              }
+            ],
+            "type": "array",
+            "required": true
+          },
+          "typecast": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Airtable.WhoAmI",
+      "fullyQualifiedName": "Airtable.WhoAmI@1.0.0",
+      "description": "Get the Airtable account this authorization belongs to, and its granted scopes.\n\nUseful for confirming whose bases are being read or changed.",
+      "parameters": [],
+      "auth": {
+        "providerId": "airtable",
+        "providerType": "oauth2",
+        "scopes": [
+          "user.email:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The connected Airtable account"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Airtable.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "airtable",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "spreadsheets"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-26T11:13:07.164Z",
+  "summary": "Arcade's Airtable toolkit lets LLMs read and write Airtable bases and records through the Airtable REST API.\n\n## Capabilities\n\n- **Discovery** — List accessible bases with permission levels; retrieve a base's full schema (tables, column names, types, select options, linked-record targets, and saved views) before writing to avoid type or value mismatches.\n- **Record retrieval** — Fetch a single record by ID or list records with optional filtering, sorting, column limiting, and view scoping; use the dedicated search tool for single-column text matching and the formula-based list tool for multi-column or numeric/date conditions.\n- **Record writes** — Create up to 10 rows per call (repeating appends, never replaces); update specific columns on existing rows without touching others (up to 10 per call); delete rows permanently with partial-confirmation handling via `unconfirmed_record_ids`.\n- **Auth introspection** — Confirm which Airtable account the current authorization belongs to and which scopes have been granted.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Airtable** provider. See the [Arcade Airtable auth provider docs](https://docs.arcade.dev/en/references/auth-providers/airtable) for setup details."
+}

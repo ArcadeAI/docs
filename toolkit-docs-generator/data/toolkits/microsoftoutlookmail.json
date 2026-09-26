@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookMail",
   "label": "Microsoft Outlook Mail",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "description": "Arcade.dev LLM tools for Outlook Mail",
   "metadata": {
     "category": "productivity",
@@ -31,7 +31,7 @@
     {
       "name": "CreateAndSendEmail",
       "qualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail@3.3.0",
       "description": "Create and immediately send a new email in Outlook to the specified recipients.\n\nReturns the sent message's ``message_id`` and ``conversation_id`` so callers\ncan immediately chain follow-ups (e.g. reply to what they just sent) without\nhaving to search Sent Items.\n\nThe confirmation message names how many recipient addresses the email went to\nacross To, Cc and Bcc.",
       "parameters": [
         {
@@ -168,9 +168,148 @@
       }
     },
     {
+      "name": "CreateDraftForward",
+      "qualifiedName": "MicrosoftOutlookMail.CreateDraftForward",
+      "fullyQualifiedName": "MicrosoftOutlookMail.CreateDraftForward@3.3.0",
+      "description": "Create a forward of an existing Outlook email, with its attachments, as an unsent draft.\n\nRecipients are optional, but the draft needs one before it can be sent. Returns the draft;\nits message_id is the draft's own id, used to revise or send it later.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the email to forward.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "A note placed above the quoted original. Optional.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to forward to. Omit to address the draft later.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to copy. Addresses already on to_recipients are skipped.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to blind-copy.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "The content type of body. Defaults to plain text.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Mail.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookMail.CreateDraftForward",
+        "parameters": {
+          "message_id": {
+            "value": "AAMkAGI2TG93AAA=",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Please see the forwarded message below for your reference.",
+            "type": "string",
+            "required": false
+          },
+          "to_recipients": {
+            "value": [
+              "alice@example.com",
+              "bob@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "cc_recipients": {
+            "value": [
+              "manager@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc_recipients": {
+            "value": [
+              "audit@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "body_format": {
+            "value": "HTML",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "CreateDraftReply",
       "qualifiedName": "MicrosoftOutlookMail.CreateDraftReply",
-      "fullyQualifiedName": "MicrosoftOutlookMail.CreateDraftReply@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.CreateDraftReply@3.3.0",
       "description": "Create a reply or reply-all draft for an existing Outlook email without sending it.\n\nThe draft is threaded to the original message and saved to the Drafts folder,\nso it can be reviewed, edited, and sent later. For a reply-all, the original\nrecipients (excluding the mailbox owner) are populated automatically. Use\ncc_add to copy someone in on the draft, including someone who was never on\nthe thread, and cc_remove to take somebody off the copied line; who the\nreply is addressed to is the thread's own and reply_type decides it. This\ntool never sends the email.",
       "parameters": [
         {
@@ -226,6 +365,17 @@
           "description": "Addresses to blind-copy on the reply draft. This does not remove an address from To or Cc: it remains visible to other recipients if it is also on either line, including through cc_add. To move someone from Cc to Bcc, include them in cc_remove and bcc, not cc_add; an address on To cannot be hidden through bcc. Outlook never blind-copies anyone on a reply, so this is the whole line rather than a change to one. Omit it to blind-copy nobody.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "How body is read. Plain text reaches the recipient as the characters supplied, line breaks and angle brackets included; html reads body as markup, so tags in it render instead of being shown. Defaults to plain text. A reply draft is always stored as an HTML document because the quoted original is one, so this decides how body is read rather than what is stored.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
         }
       ],
       "auth": {
@@ -252,7 +402,7 @@
             "required": true
           },
           "body": {
-            "value": "Thank you for your message. I have reviewed the details and will follow up by end of week.",
+            "value": "Thank you for reaching out. I've reviewed the details and will get back to you with a full response by end of week.",
             "type": "string",
             "required": true
           },
@@ -263,24 +413,29 @@
           },
           "cc_add": {
             "value": [
-              "alice@example.com",
-              "bob@contoso.com"
+              "manager@example.com",
+              "legal@example.com"
             ],
             "type": "array",
             "required": false
           },
           "cc_remove": {
             "value": [
-              "oldcolleague@example.com"
+              "oldcontact@example.com"
             ],
             "type": "array",
             "required": false
           },
           "bcc": {
             "value": [
-              "manager@example.com"
+              "compliance@example.com"
             ],
             "type": "array",
+            "required": false
+          },
+          "body_format": {
+            "value": "plain",
+            "type": "string",
             "required": false
           }
         },
@@ -309,7 +464,7 @@
     {
       "name": "CreateMailFolder",
       "qualifiedName": "MicrosoftOutlookMail.CreateMailFolder",
-      "fullyQualifiedName": "MicrosoftOutlookMail.CreateMailFolder@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.CreateMailFolder@3.3.0",
       "description": "Create a mail folder in the user's own Outlook mailbox, to keep related messages together.\n\nThe folder is created in the signed-in user's own mailbox, and in no other:\nthis tool cannot reach a mailbox named by address, whether a team mailbox or\nanother person's.\nSafe to call for a folder that may already exist: an existing folder of the\nsame name under the same parent is returned instead of a duplicate. A\nparent_folder that names no folder in the mailbox creates nothing.",
       "parameters": [
         {
@@ -380,9 +535,148 @@
       }
     },
     {
+      "name": "ForwardEmail",
+      "qualifiedName": "MicrosoftOutlookMail.ForwardEmail",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ForwardEmail@3.3.0",
+      "description": "Forward an existing email in Outlook, with its attachments, and send it immediately.\n\nAt least one recipient is required across to_recipients, cc_recipients and bcc_recipients.\nReturns the forward's message_id, its conversation_id (the original thread's) and how many\naddresses it reached.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the email to forward.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Addresses to forward to. Pass an empty list to send only to cc_recipients or bcc_recipients.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "A note placed above the quoted original. Optional.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to copy. Addresses already on to_recipients are skipped.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc_recipients",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Addresses to blind-copy.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "The content type of body. Defaults to plain text.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Mail.ReadWrite",
+          "Mail.Send"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookMail.ForwardEmail",
+        "parameters": {
+          "message_id": {
+            "value": "AAMkAGI2TG93AAA=",
+            "type": "string",
+            "required": true
+          },
+          "to_recipients": {
+            "value": [
+              "alice@example.com",
+              "bob@example.com"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "body": {
+            "value": "Please see the forwarded message below for your reference.",
+            "type": "string",
+            "required": false
+          },
+          "cc_recipients": {
+            "value": [
+              "carol@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc_recipients": {
+            "value": [
+              "audit@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "body_format": {
+            "value": "HTML",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetEmail",
       "qualifiedName": "MicrosoftOutlookMail.GetEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.GetEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.GetEmail@3.3.0",
       "description": "Retrieve a single email message by its ID.\n\nReturns email metadata and body content. By default, the body is returned\nas plain text (HTML tags stripped) and capped at 5000 characters. Set\nbody_format to HTML to get the original markup. Use body_offset to\ncontinue reading long emails: body_total_characters reports how long\nthe body is, and body_next_offset is where the next call resumes.\n\nUse this tool to read the full content of an email whose ID is already\nknown, and to page through a body too long for one response.",
       "parameters": [
         {
@@ -485,7 +779,7 @@
     {
       "name": "ListEmailAttachments",
       "qualifiedName": "MicrosoftOutlookMail.ListEmailAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailAttachments@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailAttachments@3.3.0",
       "description": "List attachment metadata for an email message.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to an email.",
       "parameters": [
         {
@@ -572,7 +866,7 @@
     {
       "name": "ListEmails",
       "qualifiedName": "MicrosoftOutlookMail.ListEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmails@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmails@3.3.0",
       "description": "List email messages in the user's mailbox.\n\nReturns ordinary mail by default: Deleted Items, Junk Email, Sent Items and\nDrafts are left out unless named in folders, folder_ids or conversation_id.\n\nRows carry a 255-character body preview unless include_body is set, which\nreturns each message in full up to max_body_characters.",
       "parameters": [
         {
@@ -908,7 +1202,7 @@
     {
       "name": "ListMailFolders",
       "qualifiedName": "MicrosoftOutlookMail.ListMailFolders",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListMailFolders@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListMailFolders@3.3.0",
       "description": "List mail folders in the user's mailbox.\n\nReturns folder names, IDs, unread counts, and total item counts. A returned\nfolder ID is what scopes a mail listing to a user-created folder.\nOmit parent_folder_id to list top-level folders, or provide a folder ID\nto list its child folders.",
       "parameters": [
         {
@@ -1007,7 +1301,7 @@
     {
       "name": "MarkEmails",
       "qualifiedName": "MicrosoftOutlookMail.MarkEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.MarkEmails@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.MarkEmails@3.3.0",
       "description": "Set the read state or the follow-up flag on a selection of emails in the user's own mailbox.\n\nOne call for a list of ids, a whole thread, or a search, reporting one\noutcome per email. Select exactly one way. An email already in the state\nasked for is a success that changed nothing, and a job needing more than 50\nchanges is refused whole rather than part-done.\n\nA request to star, pin, flag or follow up on mail is this call; it never\nmoves the mail.",
       "parameters": [
         {
@@ -1198,7 +1492,7 @@
     {
       "name": "MoveEmails",
       "qualifiedName": "MicrosoftOutlookMail.MoveEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.MoveEmails@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.MoveEmails@3.3.0",
       "description": "Move a selection of emails into one folder in the user's own mailbox.\n\nUse this single call for a pile of emails instead of moving them one at a\ntime: it takes a list of ids, a whole conversation, or a search, and reports\none outcome per email.\n\nSelect the emails exactly one way. Naming none, or naming two, is refused\nand moves nothing, as is a selection of more than 50 emails.\n\nA conversation spans folders, so filing a thread moves the unsent drafts\nand sent replies in it too unless folders narrows the selection. Run the\nrequest with count_only first when that matters: it reports which folders\nthe mail would leave before anything moves.\n\nAnything the caller got wrong -- the selection, an id, a folder that names\nseveral folders or none -- is refused before the first email moves. After\nthat, an email Outlook refuses is reported as a failed row beside the ones\nthat moved rather than failing the whole request.\n\nFiling into junk is not a reversible hide: Outlook permanently deletes mail\nleft in the Junk Email folder after 14 days, it does not report the sender\nto Microsoft, and it does not train the junk filter. Tell the user that\nbefore junking mail on their behalf.\n\nOutlook does not record where an email came from, so putting mail back is a\nmove to the inbox like any other: name inbox as the destination, and name\nthe folder it is coming out of in folders so mail sitting elsewhere is left\nalone.",
       "parameters": [
         {
@@ -1331,7 +1625,7 @@
     {
       "name": "ReplyToEmail",
       "qualifiedName": "MicrosoftOutlookMail.ReplyToEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ReplyToEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ReplyToEmail@3.3.0",
       "description": "Reply to an existing email in Outlook.\n\nUse this tool to reply to the sender or all recipients of the email.\nSpecify the reply_type to determine the scope of the reply. Use cc_add to\ncopy someone in on the reply, including someone who was never on the thread,\nand cc_remove to take somebody off the copied line; who the reply is\naddressed to is the thread's own and reply_type decides it.\n\nThe confirmation message names how many recipient addresses the reply went to\nacross To, Cc and Bcc, when Outlook reported both the To and Cc lines.",
       "parameters": [
         {
@@ -1387,6 +1681,17 @@
           "description": "Addresses to blind-copy on the reply. This does not remove an address from To or Cc: it remains visible to other recipients if it is also on either line, including through cc_add. To move someone from Cc to Bcc, include them in cc_remove and bcc, not cc_add; an address on To cannot be hidden through bcc. Outlook never blind-copies anyone on a reply, so this is the whole line rather than a change to one. Omit it to blind-copy nobody.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "How body is read. Plain text reaches the recipient as the characters supplied, line breaks and angle brackets included; html reads body as markup, so tags in it render instead of being shown. Defaults to plain text. A reply is always stored as an HTML document because the quoted original is one, so this decides how body is read rather than what is stored.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
         }
       ],
       "auth": {
@@ -1413,7 +1718,7 @@
             "required": true
           },
           "body": {
-            "value": "Thank you for your message. I have reviewed the details and will get back to you with a full response by end of day tomorrow.",
+            "value": "Thank you for your email. I have reviewed the details and will get back to you with a full response by end of day Friday.",
             "type": "string",
             "required": true
           },
@@ -1425,23 +1730,28 @@
           "cc_add": {
             "value": [
               "manager@example.com",
-              "colleague@example.com"
+              "teamlead@example.org"
             ],
             "type": "array",
             "required": false
           },
           "cc_remove": {
             "value": [
-              "oldcontact@example.com"
+              "intern@example.com"
             ],
             "type": "array",
             "required": false
           },
           "bcc": {
             "value": [
-              "records@example.com"
+              "compliance@example.com"
             ],
             "type": "array",
+            "required": false
+          },
+          "body_format": {
+            "value": "plain",
+            "type": "string",
             "required": false
           }
         },
@@ -1470,7 +1780,7 @@
     {
       "name": "SaveDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.SaveDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SaveDraftEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SaveDraftEmail@3.3.0",
       "description": "Save an email draft in Outlook, creating a new one or revising one that exists.\n\nSupplying message_id revises that draft; omitting it creates a new one. Only the\nfields supplied are written — anything left out keeps whatever the draft already\nhad. Nothing is ever sent.\n\nReturns a DraftMessage. Its message_id identifies the saved draft and can be passed\nstraight back to this tool to make further changes to it.",
       "parameters": [
         {
@@ -1623,7 +1933,7 @@
     {
       "name": "SearchEmails",
       "qualifiedName": "MicrosoftOutlookMail.SearchEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SearchEmails@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SearchEmails@3.3.0",
       "description": "Search emails across the user's entire mailbox.\n\nCombines full-text keyword search with structured filters for sender,\nread status, attachments, importance, and more. All provided parameters\nare combined with AND.\n\nAt least one search criterion is required. folder, only_focused,\ninclude_body and limit narrow or page a result set rather than build one,\nso they are not enough on their own.\n\nJunk Email and Deleted Items are left out unless `folder` names one of them;\nsent mail and drafts stay searchable. Rows carry a 255-character body preview\nunless include_body is set.\n\nResults come back in the search index's own order and cannot be re-sorted.\n\nOutlook's search index answers one query with at most 1,000 messages, so a\nwalk that runs out of pages has reached the end of what the index serves\nrather than the end of the mailbox. The folders left out and the Focused\nsplit are applied to those 1,000 after they are chosen, so a broad term\nmatching a lot of junk can come back with few rows, or none, while matching\nmail exists. A narrower term reaches it; a smaller limit does not.\n\nUse this tool when the user wants to find emails by content, topic, sender,\nor a combination of criteria.\n\n.. note::\n   Microsoft Graph's ``$search`` on messages is backed by the Microsoft\n   Search index, which returns message IDs in the legacy REST-ID format\n   even when the client opts into Immutable IDs. Do not directly compare\n   these message IDs with Immutable IDs; the formats differ. Use\n   ``conversation_id`` to correlate conversations across result sets.",
       "parameters": [
         {
@@ -1919,7 +2229,7 @@
     {
       "name": "SendDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.SendDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SendDraftEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SendDraftEmail@3.3.0",
       "description": "Send an existing draft email in Outlook.\n\nSends any un-sent message — draft, reply-draft, reply-all draft, or\nforward draft — and returns the message's ``message_id`` and\n``conversation_id`` so callers can chain follow-ups (e.g. reply to\nthe message they just sent) without searching Sent Items.",
       "parameters": [
         {
@@ -1980,7 +2290,7 @@
     {
       "name": "SharedMailboxCheckCapabilities",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxCheckCapabilities",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCheckCapabilities@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCheckCapabilities@3.3.0",
       "description": "Check which provided mailboxes are reachable via shared mailbox APIs.\n\nThis is a capability checker, not an Exchange permission inventory. It\nverifies whether each provided mailbox can be reached through a cheap,\nread-only Graph call. When checking multiple mailboxes, pass them together\nin one ``owner_emails`` list so results can be deduplicated and rate-limited\nconsistently. Microsoft Graph does not expose exact ``Send As`` vs ``Send\non behalf`` permissions, so the response names that limitation explicitly\ninstead of guessing.",
       "parameters": [
         {
@@ -2045,7 +2355,7 @@
     {
       "name": "SharedMailboxCreateAndSendEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateAndSendEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateAndSendEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateAndSendEmail@3.3.0",
       "description": "Create and immediately send an email from a shared or delegated mailbox.\n\nUse this when the user wants the email to be sent from a team inbox (like\nsales@ or support@) or from an executive's mailbox they have been\ndelegated access to, rather than from their own address.\n\nThe confirmation message names how many recipient addresses the email went to\nacross To, Cc and Bcc.",
       "parameters": [
         {
@@ -2197,7 +2507,7 @@
     {
       "name": "SharedMailboxCreateDraftReply",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateDraftReply",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateDraftReply@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateDraftReply@3.3.0",
       "description": "Create a reply or reply-all draft in a shared or delegated mailbox without sending it.\n\nThe draft is threaded to the original message and saved to the mailbox's\nDrafts folder, so it can be reviewed, edited, and sent later. For a\nreply-all, the original recipients (excluding the mailbox owner) are\npopulated automatically. Use cc_add to copy someone in on the draft,\nincluding someone who was never on the thread, and cc_remove to take\nsomebody off the copied line; who the reply is addressed to is the thread's\nown and reply_type decides it. This tool never sends the email.",
       "parameters": [
         {
@@ -2261,6 +2571,17 @@
           "description": "Addresses to blind-copy on the reply draft. A blind-copied address receives the reply, once it is sent, without appearing on any other recipient's copy of it. Outlook never blind-copies anyone on a reply, so this is the whole line rather than a change to one. Omit it to blind-copy nobody.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "How body is read. Plain text reaches the recipient as the characters supplied, line breaks and angle brackets included; html reads body as markup, so tags in it render instead of being shown. Defaults to plain text. A reply draft is always stored as an HTML document because the quoted original is one, so this decides how body is read rather than what is stored.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
         }
       ],
       "auth": {
@@ -2287,12 +2608,12 @@
             "required": true
           },
           "message_id": {
-            "value": "AAMkADZiMmZiZTk4LTBkNjMtNDg4ZS1iNmRhLTkxYjFlYWI5ZTM2NgBGAAAAAADSKDGPqzHbR7pKkNkLwO1iBwCv2qXmNpT0TJzQeVkLsXpgAAAAAAEMAADSKDGPqzHbR7pKkNkLwO1iBwC8mT3aQ2k",
+            "value": "AAMkADExampleMessageId1234567890abcdefghijklmnopqrstuvwxyz==",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Thank you for reaching out. We have reviewed your request and will follow up with the necessary details by end of business today. Please let us know if you have any additional questions in the meantime.",
+            "value": "Thank you for reaching out. We have reviewed your request and will get back to you with a resolution within 24 hours.",
             "type": "string",
             "required": true
           },
@@ -2304,23 +2625,28 @@
           "cc_add": {
             "value": [
               "manager@contoso.com",
-              "billing@contoso.com"
+              "helpdesk@contoso.com"
             ],
             "type": "array",
             "required": false
           },
           "cc_remove": {
             "value": [
-              "noreply@vendor.com"
+              "noreply@external-vendor.com"
             ],
             "type": "array",
             "required": false
           },
           "bcc": {
             "value": [
-              "audit-log@contoso.com"
+              "compliance-archive@contoso.com"
             ],
             "type": "array",
+            "required": false
+          },
+          "body_format": {
+            "value": "plain",
+            "type": "string",
             "required": false
           }
         },
@@ -2349,7 +2675,7 @@
     {
       "name": "SharedMailboxCreateMailFolder",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateMailFolder",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateMailFolder@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxCreateMailFolder@3.3.0",
       "description": "Create a mail folder in a shared or delegated mailbox, to keep related messages together.\n\nCreates the folder in the mailbox `owner_email` names, which is what a\nrequest for a folder in a team mailbox, or in another person's, asks for.\nThe folder id it returns addresses that mailbox only. Safe to call for a folder that may\nalready exist: an existing folder of the same name under the same parent is\nreturned instead of a duplicate. A parent_folder that names no folder in\nthat mailbox creates nothing.",
       "parameters": [
         {
@@ -2435,7 +2761,7 @@
     {
       "name": "SharedMailboxGetEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxGetEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxGetEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxGetEmail@3.3.0",
       "description": "Retrieve a single email from a shared or delegated mailbox by message ID.\n\nReturns email metadata and body content. By default, the body is returned\nas plain text (HTML tags stripped) and capped at 5000 characters. Use\nbody_offset to continue reading long emails:\nbody_total_characters reports how long the body is, and body_next_offset is\nwhere the next call resumes.",
       "parameters": [
         {
@@ -2551,7 +2877,7 @@
     {
       "name": "SharedMailboxListEmailAttachments",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailAttachments@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmailAttachments@3.3.0",
       "description": "List attachment metadata for an email in a shared or delegated mailbox.",
       "parameters": [
         {
@@ -2651,7 +2977,7 @@
     {
       "name": "SharedMailboxListEmails",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmails@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListEmails@3.3.0",
       "description": "List email messages in a shared or delegated mailbox.\n\nReturns ordinary mail by default: Deleted Items, Junk Email, Sent Items and\nDrafts are left out unless named in folders, folder_ids or conversation_id.\nEach row reports the folder it came from in parent_folder_id.\n\nEvery filter narrows the same result set, so unread mail in one folder is a\nsingle call.\n\nNaming exactly one folder reads that folder itself, which is also the only\nread a mailbox shared one folder at a time can serve. If a call that names\nno folder, or several, is refused for lack of access to the whole mailbox,\nrepeat it naming one folder at a time.",
       "parameters": [
         {
@@ -2999,7 +3325,7 @@
     {
       "name": "SharedMailboxListMailFolders",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxListMailFolders",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListMailFolders@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxListMailFolders@3.3.0",
       "description": "List mail folders in a shared or delegated mailbox.\n\nReturns folder names, IDs, unread counts, and total item counts. A returned\nfolder ID is what scopes a mail listing to a user-created folder.",
       "parameters": [
         {
@@ -3111,7 +3437,7 @@
     {
       "name": "SharedMailboxMarkEmails",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxMarkEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxMarkEmails@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxMarkEmails@3.3.0",
       "description": "Set the read state or the follow-up flag on emails in a shared or delegated mailbox.\n\nOne call for a list of ids, a whole thread, or a search, reporting one\noutcome per email. Select exactly one way. An email already in the state\nasked for is a success that changed nothing, and a job needing more than 50\nchanges is refused whole rather than part-done.\n\nA request to star, pin, flag or follow up on mail is this call; it never\nmoves the mail.\n\nNeeds Full Access to the mailbox; a folder-level share is refused.",
       "parameters": [
         {
@@ -3314,7 +3640,7 @@
     {
       "name": "SharedMailboxMoveEmails",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxMoveEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxMoveEmails@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxMoveEmails@3.3.0",
       "description": "Move a selection of emails into one folder in a shared or delegated mailbox.\n\nUse this single call for a pile of emails instead of moving them one at a\ntime: it takes a list of ids, a whole conversation, or a search, and reports\none outcome per email.\n\nSelect the emails exactly one way. Naming none, or naming two, is refused\nand moves nothing, as is a selection of more than 50 emails.\n\nA conversation spans folders, so filing a thread moves the unsent drafts\nand sent replies in it too unless folders narrows the selection. Run the\nrequest with count_only first when that matters: it reports which folders\nthe mail would leave before anything moves.\n\nAnything the caller got wrong -- the selection, an id, a folder that names\nseveral folders or none -- is refused before the first email moves. After\nthat, an email Outlook refuses is reported as a failed row beside the ones\nthat moved rather than failing the whole request.\n\nFiling into junk is not a reversible hide: Outlook permanently deletes mail\nleft in the Junk Email folder after 14 days, it does not report the sender\nto Microsoft, and it does not train the junk filter. Tell the user that\nbefore junking mail on their behalf.\n\nOutlook does not record where an email came from, so putting mail back is a\nmove to the inbox like any other: name inbox as the destination, and name\nthe folder it is coming out of in folders so mail sitting elsewhere is left\nalone.\n\nFiling needs Full Access to the mailbox. A mailbox the signed-in user holds\none folder at a time instead -- a MAPI folder share -- is refused with that\nsaid, because every selection here reads the mailbox above the shared\nfolder.",
       "parameters": [
         {
@@ -3460,7 +3786,7 @@
     {
       "name": "SharedMailboxReplyToEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxReplyToEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxReplyToEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxReplyToEmail@3.3.0",
       "description": "Reply to an email in a shared or delegated mailbox.\n\nThe reply is sent from the shared mailbox address, not the signed-in\nuser's personal address. Specify reply_type to reply only to the sender\nor to all recipients. Use cc_add to copy someone in on the reply, including\nsomeone who was never on the thread, and cc_remove to take somebody off the\ncopied line; who the reply is addressed to is the thread's own and reply_type\ndecides it.\n\nThe confirmation message names how many recipient addresses the reply went to\nacross To, Cc and Bcc, when Outlook reported the line it was addressed to.",
       "parameters": [
         {
@@ -3524,6 +3850,17 @@
           "description": "Addresses to blind-copy on the reply. A blind-copied address receives the reply without appearing on any other recipient's copy of it. Outlook never blind-copies anyone on a reply, so this is the whole line rather than a change to one. Omit it to blind-copy nobody.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "How body is read. Plain text reaches the recipient as the characters supplied, line breaks and angle brackets included; html reads body as markup, so tags in it render instead of being shown. Defaults to plain text. A reply is always stored as an HTML document because the quoted original is one, so this decides how body is read rather than what is stored.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
         }
       ],
       "auth": {
@@ -3550,12 +3887,12 @@
             "required": true
           },
           "message_id": {
-            "value": "AAMkAGE1M2IyNGNmLTI5MTktNDUyZi1iOTVlLWE1ZWFhYmU3OGYxMgBGAAAAAADkKFdKH9mRSqNfR7tC3e2iBwCqAFjom5J3T6pLhNiTkqNdAAAAAAEMAACqAFjom5J3T6pLhNiTkqNdAABvX2SOAAA=",
+            "value": "AAMkAGE1M2IyNGNmLTI5MTktNDUyZi1iODYxLWY4ZjM0NzE2YTQzZABGAAAAAADUuTJK1K9ER7E4GHgRBMFpBwBFpjmEm7y9QqzK8vD2wAAAAAAAAEMAABFpjmEm7y9QqzK8vD2wAAAAFGHi3AAA=",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Thank you for reaching out to our support team. We have reviewed your request and will get back to you with a resolution within 24 hours. Please don't hesitate to ask if you have any further questions.",
+            "value": "Thank you for reaching out! We have reviewed your request and will get back to you with a resolution within 24 hours. Please let us know if you have any additional questions.",
             "type": "string",
             "required": true
           },
@@ -3567,14 +3904,14 @@
           "cc_add": {
             "value": [
               "manager@contoso.com",
-              "escalations@contoso.com"
+              "billing@contoso.com"
             ],
             "type": "array",
             "required": false
           },
           "cc_remove": {
             "value": [
-              "old-alias@contoso.com"
+              "noreply@external-vendor.com"
             ],
             "type": "array",
             "required": false
@@ -3584,6 +3921,11 @@
               "audit-log@contoso.com"
             ],
             "type": "array",
+            "required": false
+          },
+          "body_format": {
+            "value": "plain",
+            "type": "string",
             "required": false
           }
         },
@@ -3612,7 +3954,7 @@
     {
       "name": "SharedMailboxSaveDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxSaveDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSaveDraftEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSaveDraftEmail@3.3.0",
       "description": "Save an email draft in a shared or delegated Outlook mailbox.\n\nSupplying message_id revises that draft; omitting it creates a new one. Only the\nfields supplied are written — anything left out keeps whatever the draft already\nhad. Nothing is ever sent.\n\nReturns a DraftMessage. Its message_id identifies the saved draft and can be passed\nstraight back to this tool to make further changes to it.",
       "parameters": [
         {
@@ -3778,7 +4120,7 @@
     {
       "name": "SharedMailboxSearchEmails",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxSearchEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSearchEmails@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSearchEmails@3.3.0",
       "description": "Search emails in a shared or delegated mailbox.\n\nCombines full-text keyword search with structured filters for sender,\nread status, attachments, importance, and more. All provided parameters\nare combined with AND.\n\nAt least one search criterion is required. folder, only_focused,\ninclude_body and limit narrow or page a result set rather than build one,\nso they are not enough on their own.\n\nJunk Email and Deleted Items are left out unless `folder` names one of them;\nsent mail and drafts stay searchable. Rows carry a 255-character body preview\nunless include_body is set.\n\nResults come back in the search index's own order and cannot be re-sorted.\n\nOutlook's search index answers one query with at most 1,000 messages, so a\nwalk that runs out of pages has reached the end of what the index serves\nrather than the end of the mailbox. The folders left out and the Focused\nsplit are applied to those 1,000 after they are chosen, so a broad term\nmatching a lot of junk can come back with few rows, or none, while matching\nmail exists. A narrower term reaches it; a smaller limit does not.\n\n.. note::\n   Search results may use a different Graph ID shape than list/get\n   results. Use returned message IDs directly for message retrieval and\n   ``conversation_id`` for deduplication across result sets.",
       "parameters": [
         {
@@ -4086,7 +4428,7 @@
     {
       "name": "SharedMailboxSendDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.SharedMailboxSendDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSendDraftEmail@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SharedMailboxSendDraftEmail@3.3.0",
       "description": "Send an existing draft email from a shared or delegated mailbox.\n\nThis tool can send any un-sent email in the shared mailbox:\n    - draft\n    - reply-draft\n    - reply-all draft\n    - forward draft\n\nReturns the message's ``message_id`` and ``conversation_id`` so callers\ncan chain follow-ups (e.g. reply to the message they just sent) without\nsearching Sent Items.",
       "parameters": [
         {
@@ -4160,7 +4502,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookMail.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookMail.WhoAmI@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.WhoAmI@3.3.0",
       "description": "Get the signed-in user's profile and the mailbox this toolkit acts on.\n\nReturns the user's name, email, tenant and other profile details, plus the mailbox\nthe toolkit reads mail from. mailbox_timezone identifies the mailbox's configured\ntime zone or the fallback identified by mailbox_timezone_source. received_date_time\nremains in UTC; received_date_time_local contains its local representation when\navailable.\n\nmailbox_timezone may be a Windows name such as \"Eastern Standard Time\" rather than an\nIANA identifier - that names a zone observing daylight saving, not a fixed offset.\nmailbox_timezone_source says where that zone came from: \"mailbox\" and \"mailbox_utc\"\nmean the mailbox itself names the zone, whereas \"default_not_configured\" (the mailbox\nnames none) and \"default_unreadable\" (the setting could not be read) mean UTC is a\nfallback this toolkit applied, not a zone the mailbox is set to. On either fallback,\ndo not tell the user their mailbox is configured for that zone.",
       "parameters": [],
       "auth": {
@@ -4216,6 +4558,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "a4731e3762b5a2b6a7e351b9d80bf23dd3f2bbc29a5b19028ce8f9e86792634e",
-  "generatedAt": "2026-09-24T21:02:23.241Z",
-  "summary": "The **MicrosoftOutlookMail** toolkit lets LLM agents read, compose, organize, and manage Outlook mail via Microsoft Graph on behalf of a signed-in user or a shared/delegated mailbox.\n\n## Capabilities\n\n- **Reading & searching mail** — List messages across folders (with body previews or full content), retrieve individual messages with paginated body access, search by full-text keywords combined with structured filters (sender, read state, attachments, importance, date, folder), and list attachment metadata.\n- **Composing & sending** — Create and immediately send new emails; reply to sender or all recipients; send from a personal or shared/delegated mailbox. All send operations return `message_id` and `conversation_id` for immediate chaining.\n- **Draft management** — Save new drafts or revise existing ones without sending; create threaded reply/reply-all drafts with CC add/remove control; send any draft (including reply, reply-all, and forward drafts) when ready.\n- **Mail organization** — Move batches of emails (by ID list, conversation, or search result) into a target folder; mark emails read/unread or flag/unflag for follow-up; create mail folders (idempotent — returns existing folder rather than duplicating).\n- **Shared & delegated mailbox operations** — A parallel set of tools covers every capability above for team inboxes (e.g. `sales@`, `support@`) or delegated executive mailboxes, including a capability checker that verifies Graph reachability before acting and correctly surfaces Full Access vs. folder-level share limitations.\n- **Identity & mailbox context** — Retrieve the signed-in user's profile, tenant, configured mailbox timezone (with source attribution distinguishing mailbox-configured zones from toolkit fallbacks), and the mailbox the toolkit is acting on.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 through the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for provider configuration details."
+  "generatedAt": "2026-09-26T11:13:09.685Z",
+  "summary": "The **MicrosoftOutlookMail** toolkit connects Arcade to Microsoft Outlook Mail via Microsoft Graph, enabling LLM agents to read, compose, send, organize, and search email in both personal and shared/delegated mailboxes.\n\n## Capabilities\n\n- **Read & search mail** — Retrieve individual messages (with pagination for long bodies), list messages by folder/thread/filter, search by keyword and structured criteria across the full mailbox, and inspect attachment metadata.\n- **Compose & send** — Create and immediately send new emails; reply (sender-only or reply-all) and forward existing messages, with control over To/Cc/Bcc and inline Cc additions or removals.\n- **Draft management** — Save new drafts or revise existing ones, create reply/reply-all and forward drafts, then send any draft when ready — all without triggering a send prematurely.\n- **Mail organization** — Move batches of messages (by ID list, thread, or search result) into any folder, mark messages read/unread or flagged, and create mail folders and subfolders.\n- **Shared & delegated mailboxes** — A full parallel set of tools covers team inboxes (e.g. `sales@`, `support@`) and delegated executive mailboxes: list, search, read, compose, reply, forward, draft, send, move, mark, create folders, and check mailbox accessibility.\n- **Identity & timezone** — Resolve the signed-in user's profile, primary mailbox address, tenant, and configured mailbox timezone (including fallback detection).\n\n## OAuth\n\nThis toolkit uses **OAuth 2.0** via the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details including required scopes."
 }

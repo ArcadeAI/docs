@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  airtable: {
+    title: "Airtable",
+    href: "/en/resources/integrations/productivity/airtable",
+  },
   asana: {
     title: "Asana",
     href: "/en/resources/integrations/productivity/asana",
