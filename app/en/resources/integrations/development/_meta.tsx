@@ -65,10 +65,6 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Starter",
   },
-  "arcade-engine-api": {
-    title: "Arcade Engine API",
-    href: "/en/resources/integrations/development/arcade-engine-api",
-  },
   "cursor-agents-api": {
     title: "Cursor Agents API",
     href: "/en/resources/integrations/development/cursor-agents-api",
