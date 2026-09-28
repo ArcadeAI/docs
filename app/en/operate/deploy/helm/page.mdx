@@ -70,6 +70,25 @@ Configure the platform through Helm values. The chart covers:
 The full, versioned values reference lives on [Artifact Hub](https://artifacthub.io/packages/helm/arcade/arcade). Use it as the source of truth for every value and default.
 </Callout>
 
+### Use PgBouncer transaction pooling
+
+Arcade Helm chart 1.10.1 and later supports PostgreSQL through PgBouncer in transaction pooling mode. Route application traffic through PgBouncer, and configure a direct connection to the PostgreSQL primary for migrations and database creation:
+
+```yaml
+postgres:
+  enabled: false
+  host: pgbouncer.database.svc.cluster.local
+  port: 6432
+  directHost: postgres-primary.database.svc.cluster.local
+  directPort: 5432
+```
+
+`postgres.host` and `postgres.port` are used by the running services. `postgres.directHost` and `postgres.directPort` are used for operations that require PostgreSQL session state, which transaction pooling doesn't preserve.
+
+Don't add `prepareThreshold=0` to the connection string. That setting applies to JDBC clients and isn't used by Arcade.
+
+If a service defines its own `<service>.database.host` or `<service>.database.port`, also configure that service's `<service>.database.directHost` and `<service>.database.directPort`.
+
 ## Upgrade and roll back
 
 Upgrade to a new chart version with `helm upgrade`, and roll back with `helm rollback` if needed. See the [Artifact Hub listing](https://artifacthub.io/packages/helm/arcade/arcade) for version-specific upgrade notes.
