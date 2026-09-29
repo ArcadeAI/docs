@@ -16,9 +16,7 @@ The worker ships as two images built from the same commit. The image you choose 
 | Image | Process model |
 | --- | --- |
 | `arcadedev/worker-supervisor` | Serves the tool catalog from a snapshot taken at build time, and starts one isolated runtime per toolkit version on demand. One worker can host multiple versions of the same toolkit. |
-| `arcadedev/worker` | Eager: loads every toolkit into one process at boot. Use it to roll back. |
-
-To switch, set `image.repository` to the other image. You don't need to rebuild anything or change any other value.
+| `arcadedev/worker` | Eager: loads every toolkit into one process at boot. |
 
 ## How the supervisor worker behaves
 
@@ -50,16 +48,11 @@ Set these values under `workerDefaults` to apply them to every worker, or on an 
 
 | Value | Default | What it controls and when to change it |
 | --- | --- | --- |
-| `image.repository` | See the [chart reference](https://artifacthub.io/packages/helm/arcade/arcade) | Which [process model](#process-models) the worker runs. Point it at `arcadedev/worker` to roll back. |
-| `variant` | Derived from the image | `supervisor` or `eager`. Set it only when you mirror the images under other names, so telemetry (`worker_variant`) and supervisor-only resources render correctly. |
 | `supervisor.prewarmToolkits` | Empty | Toolkits started at boot and kept warm, at the highest version of each. Pre-warmed toolkits are exempt from idle eviction and restart if they die. List the toolkits your users call most, so they're never served cold. |
 | `supervisor.serveToolkits` | `*` | Toolkits this worker serves. The worker refuses calls for anything left off and leaves it out of the published tools. Use it to split a fleet, for example to run a dedicated worker for the most-called toolkits. |
 | `supervisor.maxChildren` | `15` | The most runtimes running at once. At the cap, the worker stops the least recently used idle runtime that isn't pre-warmed to admit a new one. `0` means unbounded. Size pod memory from this value, see [Sizing](#sizing). |
 | `supervisor.idleTtlSeconds` | `600` | Seconds a runtime may sit idle before the worker stops it. `0` never stops an idle runtime. |
 | `supervisor.capacityWaitSeconds` | `30` | How long a call waits for a free slot when every runtime is busy at the cap, before it fails with a retryable error. |
-| `supervisor.peerRouting.enabled` | `false` | Replicas agree on which one starts each version and hand first calls to it, so a burst of first calls costs the fleet one cold start instead of one per replica. Turning it on adds a headless Service. A replica that can't reach the owner serves the call itself. |
-| `supervisor.peerRouting.promoteAfterForwards` | `10` | How many calls for one version a replica hands off before it starts its own runtime for that version. |
-| `resources`, `hpa.*`, `replicaCount` | See the chart reference | Pod resources and scaling. See [Sizing](#sizing). |
 
 ### Advanced settings
 
@@ -67,7 +60,6 @@ Set these environment variables through `extraEnv`. See the [chart reference](ht
 
 | Variable | Default | What it controls |
 | --- | --- | --- |
-| `ARCADE_SUPERVISOR_SHARD_PREWARM` | Off | With peer routing on, each replica warms only its share of the pre-warm list. This multiplies the fleet's warm coverage by the replica count. |
 | `ARCADE_SUPERVISOR_INVOKE_TIMEOUT` | 600 seconds | The longest a single tool call may run. |
 | `ARCADE_SUPERVISOR_PREWARM_CONCURRENCY` | `4` | How many runtimes start at once during boot. Keep it near the pod's core count. |
 
@@ -76,8 +68,6 @@ Set these environment variables through `extraEnv`. See the [chart reference](ht
 - **Memory:** each running runtime uses about 100 MB, so a pod needs roughly `maxChildren` × 100 MB plus memory for the supervisor itself, plus headroom.
 - **Boot time:** with ten pre-warmed toolkits on 2 cores, the supervisor worker is ready in about 12 seconds. The eager worker takes 60 seconds or more to load every toolkit.
 - **Image size:** the supervisor image is 2.96 GB. The eager worker plus the deprecated-versions worker it replaces total 3.85 GB.
-
-Set the pod's `resources` from `supervisor.maxChildren`, and scale out with `replicaCount` or `hpa.*`.
 
 ## Next steps
 
