@@ -15,7 +15,7 @@ const githubBranding = {
   type: "arcade",
   docsLink:
     "https://docs.arcade.dev/en/resources/integrations/development/github",
-  publicIconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  publicIconUrl: "https://design-system.arcadians.dev/icons/github.svg",
   isBYOC: false,
   isPro: false,
   isComingSoon: false,
@@ -409,7 +409,7 @@ describe("PublicCatalogApiSource", () => {
       id: "Github",
       label: "GitHub",
       category: "development",
-      iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+      iconUrl: "https://design-system.arcadians.dev/icons/github.svg",
       isBYOC: false,
       isPro: false,
       type: "arcade",
@@ -467,7 +467,7 @@ describe("transformPublicToolkitMetadata", () => {
 
     expect(metadata?.id).toBe("Github");
     expect(metadata?.iconUrl).toBe(
-      "https://design-system.arcade.dev/icons/github.svg"
+      "https://design-system.arcadians.dev/icons/github.svg"
     );
   });
 

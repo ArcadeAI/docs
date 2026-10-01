@@ -8,7 +8,7 @@ const createMetadata = (
   id: "Github",
   label: "GitHub",
   category: "development",
-  iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  iconUrl: "https://design-system.arcadians.dev/icons/github.svg",
   isBYOC: false,
   isPro: false,
   type: "arcade",
@@ -41,7 +41,7 @@ describe("DesignSystemMetadataSource", () => {
     const meta = await source.getToolkitMetadata("GithubApi");
     expect(meta?.label).toBe("GitHub API");
     expect(meta?.iconUrl).toBe(
-      "https://design-system.arcade.dev/icons/github.svg"
+      "https://design-system.arcadians.dev/icons/github.svg"
     );
   });
 

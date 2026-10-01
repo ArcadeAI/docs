@@ -87,7 +87,7 @@ describe("toolkit data loader", () => {
         auth: null,
         metadata: {
           category: "development",
-          iconUrl: "https://design-system.arcade.dev/icons/posthog.svg",
+          iconUrl: "https://design-system.arcadians.dev/icons/posthog.svg",
           isBYOC: false,
           isPro: false,
           type: "arcade_starter",

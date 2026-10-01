@@ -148,7 +148,7 @@ describe("CombinedToolkitDataSource", () => {
         id: "Weaviate",
         label: "Weaviate",
         category: "databases",
-        iconUrl: "https://design-system.arcade.dev/icons/weaviate.svg",
+        iconUrl: "https://design-system.arcadians.dev/icons/weaviate.svg",
       }),
     ]);
 

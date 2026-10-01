@@ -23,7 +23,7 @@ const createMetadata = (
   overrides: Partial<MergedToolkitMetadata> = {}
 ): MergedToolkitMetadata => ({
   category: "development",
-  iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  iconUrl: "https://design-system.arcadians.dev/icons/github.svg",
   isBYOC: false,
   isPro: false,
   type: "arcade",
@@ -105,7 +105,7 @@ describe("detectMetadataChanges", () => {
     expect(result.fieldChanges[0]).toEqual({
       field: "iconUrl",
       previous: "https://old-cdn.example.com/github.svg",
-      current: "https://design-system.arcade.dev/icons/github.svg",
+      current: "https://design-system.arcadians.dev/icons/github.svg",
     });
   });
 
@@ -158,7 +158,7 @@ describe("detectMetadataChanges", () => {
       label: "Pylon",
       metadata: {
         category: "development",
-        iconUrl: "https://design-system.arcade.dev/icons/pylon.svg",
+        iconUrl: "https://design-system.arcadians.dev/icons/pylon.svg",
         docsLink: "https://docs.arcade.dev/en/mcp-servers/development/pylon",
       },
     });
@@ -166,7 +166,7 @@ describe("detectMetadataChanges", () => {
     // Now has real DS metadata with correct category and icon
     const current = createMetadata({
       category: "customer-support",
-      iconUrl: "https://design-system.arcade.dev/icons/pylon.svg",
+      iconUrl: "https://design-system.arcadians.dev/icons/pylon.svg",
       docsLink: "https://docs.arcade.dev/en/mcp-servers/customer-support/pylon",
     });
 
@@ -189,13 +189,13 @@ describe("detectMetadataChanges", () => {
       label: "Salesforce",
       metadata: {
         category: "sales",
-        iconUrl: "https://design-system.arcade.dev/icons/salesforce.svg",
+        iconUrl: "https://design-system.arcadians.dev/icons/salesforce.svg",
       },
     });
 
     const current = createMetadata({
       category: "sales",
-      iconUrl: "https://design-system.arcade.dev/icons/salesforce-new.svg",
+      iconUrl: "https://design-system.arcadians.dev/icons/salesforce-new.svg",
     });
 
     const result = detectMetadataChanges(
@@ -221,13 +221,13 @@ describe("detectMetadataChanges", () => {
       label: "PylonApi",
       metadata: {
         category: "development",
-        iconUrl: "https://design-system.arcade.dev/icons/pylon.svg",
+        iconUrl: "https://design-system.arcadians.dev/icons/pylon.svg",
       },
     });
 
     const current = createMetadata({
       category: "customer-support",
-      iconUrl: "https://design-system.arcade.dev/icons/pylon.svg",
+      iconUrl: "https://design-system.arcadians.dev/icons/pylon.svg",
     });
 
     const result = detectMetadataChanges(
@@ -367,7 +367,7 @@ describe("mergeToolkit metadata freshness integration", () => {
       id: "TestKit",
       label: "Test Kit",
       category: "sales" as const,
-      iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
+      iconUrl: "https://design-system.arcadians.dev/icons/testkit.svg",
       isBYOC: false,
       isPro: false,
       type: "arcade" as const,
@@ -384,7 +384,7 @@ describe("mergeToolkit metadata freshness integration", () => {
       description: "Old",
       metadata: {
         category: "development" as const,
-        iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
+        iconUrl: "https://design-system.arcadians.dev/icons/testkit.svg",
         isBYOC: false,
         isPro: false,
         type: "arcade" as const,
@@ -442,7 +442,7 @@ describe("mergeToolkit metadata freshness integration", () => {
       id: "TestKit",
       label: "Test Kit",
       category: "development" as const,
-      iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
+      iconUrl: "https://design-system.arcadians.dev/icons/testkit.svg",
       isBYOC: false,
       isPro: false,
       type: "arcade" as const,
@@ -458,7 +458,7 @@ describe("mergeToolkit metadata freshness integration", () => {
       description: "Same",
       metadata: {
         category: "development" as const,
-        iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
+        iconUrl: "https://design-system.arcadians.dev/icons/testkit.svg",
         isBYOC: false,
         isPro: false,
         type: "arcade" as const,

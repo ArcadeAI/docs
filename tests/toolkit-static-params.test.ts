@@ -67,7 +67,7 @@ const writeToolkitData = async (
       ...toolkit,
       metadata: {
         category: "productivity",
-        iconUrl: "https://design-system.arcade.dev/icons/placeholder.svg",
+        iconUrl: "https://design-system.arcadians.dev/icons/placeholder.svg",
         isBYOC: false,
         isPro: false,
         type: "arcade",

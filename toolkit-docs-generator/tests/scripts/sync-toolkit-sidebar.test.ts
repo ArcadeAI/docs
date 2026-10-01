@@ -326,7 +326,7 @@ describe("buildToolkitInfoList", () => {
         category: "databases",
         docsLink:
           "https://docs.arcade.dev/en/mcp-servers/databases/weaviate-api",
-        iconUrl: "https://design-system.arcade.dev/icons/placeholder.svg",
+        iconUrl: "https://design-system.arcadians.dev/icons/placeholder.svg",
         isBYOC: false,
         isPro: false,
         type: "arcade",

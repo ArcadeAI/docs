@@ -67,7 +67,7 @@ const createTestMetadata = (
   id: "Github",
   label: "GitHub",
   category: "development",
-  iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  iconUrl: "https://design-system.arcadians.dev/icons/github.svg",
   isBYOC: false,
   isPro: false,
   type: "arcade",

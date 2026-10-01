@@ -60,7 +60,7 @@ const looksLikeDefaultMetadata = (
   metadata: MergedToolkitMetadata
 ): boolean => {
   const normalized = toolkitId.toLowerCase().replace(/[^a-z0-9]/g, "");
-  const expectedDefaultIcon = `https://design-system.arcade.dev/icons/${
+  const expectedDefaultIcon = `https://design-system.arcadians.dev/icons/${
     normalized.endsWith("api") ? normalized.slice(0, -3) : normalized
   }.svg`;
 

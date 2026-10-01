@@ -12,7 +12,7 @@ const createToolkit = (
   description: "Tools for GitHub automation.",
   metadata: {
     category: "development",
-    iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+    iconUrl: "https://design-system.arcadians.dev/icons/github.svg",
     isBYOC: false,
     isPro: false,
     type: "arcade",

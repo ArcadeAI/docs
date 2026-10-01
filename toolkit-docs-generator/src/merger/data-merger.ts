@@ -514,7 +514,7 @@ const DEFAULT_METADATA_CATEGORY: MergedToolkitMetadata["category"] =
 const getDefaultMetadata = (toolkitId: string): MergedToolkitMetadata =>
   applyToolkitTypeOverrides(toolkitId, {
     category: DEFAULT_METADATA_CATEGORY,
-    iconUrl: `https://design-system.arcade.dev/icons/${getDefaultIconId(toolkitId)}.svg`,
+    iconUrl: `https://design-system.arcadians.dev/icons/${getDefaultIconId(toolkitId)}.svg`,
     isBYOC: false,
     isPro: false,
     type: "arcade",
