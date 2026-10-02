@@ -70,15 +70,13 @@ describe("remarkSubstitute", () => {
   it("substitutes inside prose", () => {
     const text: Text = {
       type: "text",
-      value: "Run {{ARCADE_PLUGIN_INSTALL_COMMAND}} to start.",
+      value: "Install {{ARCADE_PLUGIN_REPO}} to start.",
     };
     const paragraph: Paragraph = { type: "paragraph", children: [text] };
     const tree: Root = { type: "root", children: [paragraph] };
 
     substitute(tree, {});
 
-    expect(text.value).toBe(
-      "Run npx plugins add ArcadeAI/arcade-plugin to start."
-    );
+    expect(text.value).toBe("Install ArcadeAI/arcade-plugin to start.");
   });
 });

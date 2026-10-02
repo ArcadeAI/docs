@@ -11,5 +11,3 @@ export const AGENT_PLUGIN_GATEWAY_SLUG = "arcade";
 export const AGENT_PLUGIN_GATEWAY_URL = `${AGENT_PLUGIN_ENGINE_PUBLIC_URL}/mcp/${AGENT_PLUGIN_GATEWAY_SLUG}`;
 
 export const AGENT_PLUGIN_REPO = "ArcadeAI/arcade-plugin";
-
-export const AGENT_PLUGIN_INSTALL_COMMAND = `npx plugins add ${AGENT_PLUGIN_REPO}`;

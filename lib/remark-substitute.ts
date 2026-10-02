@@ -1,10 +1,6 @@
 import type { Root } from "mdast";
 import { visit } from "unist-util-visit";
-import {
-  AGENT_PLUGIN_GATEWAY_URL,
-  AGENT_PLUGIN_INSTALL_COMMAND,
-  AGENT_PLUGIN_REPO,
-} from "./agent-plugin";
+import { AGENT_PLUGIN_GATEWAY_URL, AGENT_PLUGIN_REPO } from "./agent-plugin";
 
 /**
  * Tokens an MDX page can write as `{{NAME}}`. Prose, inline code, fenced code
@@ -15,7 +11,6 @@ import {
 export const substitutions: Record<string, string> = {
   ARCADE_PLUGIN_GATEWAY_URL: AGENT_PLUGIN_GATEWAY_URL,
   ARCADE_PLUGIN_REPO: AGENT_PLUGIN_REPO,
-  ARCADE_PLUGIN_INSTALL_COMMAND: AGENT_PLUGIN_INSTALL_COMMAND,
 };
 
 /**
