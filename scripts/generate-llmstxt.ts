@@ -43,6 +43,10 @@ const DYNAMIC_SEGMENT_REGEX = /\[[^/]+\]/;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
 const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
 const FRONTMATTER_TITLE_REGEX = /^title:\s*(.+)$/m;
+const FRONTMATTER_DESCRIPTION_REGEX = /^description:\s*(.+)$/m;
+const GUIDE_OUTCOMES_REGEX =
+  /<GuideOverview\.Outcomes>\s*([\s\S]*?)\s*<\/GuideOverview\.Outcomes>/;
+const FIRST_PROSE_AFTER_H1_REGEX = /^#\s+.+\n+([^#<\n][^\n]*)/m;
 const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const METADATA_REGEX =
   /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
@@ -376,14 +380,19 @@ async function summarizePage(
     });
 
     const description =
-      response.choices[0]?.message?.content?.trim() || "Documentation page";
+      response.choices[0]?.message?.content?.trim() ||
+      extractPageDescription(page.content);
 
     return { title, description };
-  } catch (error) {
-    console.error(chalk.red(`✗ Error summarizing ${page.path}:`), error);
+  } catch {
+    console.warn(
+      chalk.yellow(
+        `⚠ Could not summarize ${page.path} with OpenAI; using its frontmatter description`
+      )
+    );
     return {
       title: extractPageTitle(page.content, page.path),
-      description: "Documentation page",
+      description: extractPageDescription(page.content),
     };
   }
 }
@@ -498,6 +507,28 @@ function extractPageTitle(content: string, filePath: string): string {
     ?.trim()
     ?.replace(/^['"](.*)['"]$/, "$1");
   return frontmatterTitle ?? deriveTitleFromPath(filePath);
+}
+
+function extractPageDescription(content: string): string {
+  const frontmatterDescription = content
+    .match(FRONTMATTER_REGEX)?.[1]
+    ?.match(FRONTMATTER_DESCRIPTION_REGEX)?.[1]
+    ?.trim()
+    ?.replace(/^['"](.*)['"]$/, "$1");
+  if (frontmatterDescription) {
+    return frontmatterDescription;
+  }
+
+  const fallbackDescription =
+    content.match(GUIDE_OUTCOMES_REGEX)?.[1] ??
+    content.match(FIRST_PROSE_AFTER_H1_REGEX)?.[1];
+  return fallbackDescription
+    ? fallbackDescription
+        .replace(MARKDOWN_LINK_REGEX, "$1")
+        .replace(MARKDOWN_NOISE_REGEX, "")
+        .replace(WHITESPACE_REGEX, " ")
+        .trim()
+    : "Documentation page";
 }
 
 /**
