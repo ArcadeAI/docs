@@ -16,12 +16,6 @@ export type Redirect = {
 };
 
 export const redirects: Redirect[] = [
-  // Arcade Cloud's strong-authentication refusals link to this path.
-  {
-    source: "/:locale/home/account/strong-authentication",
-    destination: "/:locale/get-started/setup/strong-authentication",
-    permanent: true,
-  },
   // The toolkit-page breadcrumb links "Resources" -> /resources, which has
   // no index page. Send it to the integrations registry instead of 404ing.
   {
