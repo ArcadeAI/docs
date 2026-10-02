@@ -12,18 +12,14 @@ import type {
 } from "../types/index";
 import { normalizeId } from "../utils/fp";
 import type { ICustomSectionsSource } from "./interfaces";
-import type {
-  FetchOptions,
-  IMetadataSource,
-  IToolDataSource,
-} from "./internal";
+import type { FetchOptions, MetadataSource, ToolDataSource } from "./internal";
 
 // ============================================================================
 // In-Memory Tool Data Source
 // ============================================================================
 
 /**
- * In-memory implementation of IToolDataSource for testing
+ * In-memory implementation of ToolDataSource for testing
  *
  * Use this instead of mocking the interface. Simply provide
  * realistic test data in the constructor.
@@ -37,7 +33,7 @@ import type {
  * const tools = await source.fetchToolsByToolkit('Github');
  * ```
  */
-export class InMemoryToolDataSource implements IToolDataSource {
+export class InMemoryToolDataSource implements ToolDataSource {
   private readonly tools: readonly ToolDefinition[];
 
   constructor(tools: readonly ToolDefinition[]) {
@@ -93,7 +89,7 @@ export class InMemoryToolDataSource implements IToolDataSource {
 // ============================================================================
 
 /**
- * In-memory implementation of IMetadataSource for testing
+ * In-memory implementation of MetadataSource for testing
  *
  * @example
  * ```typescript
@@ -104,7 +100,7 @@ export class InMemoryToolDataSource implements IToolDataSource {
  * const metadata = await source.getToolkitMetadata('Github');
  * ```
  */
-export class InMemoryMetadataSource implements IMetadataSource {
+export class InMemoryMetadataSource implements MetadataSource {
   private readonly metadata: ReadonlyMap<string, ToolkitMetadata>;
 
   constructor(toolkits: readonly ToolkitMetadata[]) {
@@ -237,14 +233,14 @@ export class EmptyCustomSectionsSource implements ICustomSectionsSource {
  */
 export const createInMemoryToolDataSource = (
   tools: readonly ToolDefinition[]
-): IToolDataSource => new InMemoryToolDataSource(tools);
+): ToolDataSource => new InMemoryToolDataSource(tools);
 
 /**
  * Create an in-memory metadata source from test fixtures
  */
 export const createInMemoryMetadataSource = (
   toolkits: readonly ToolkitMetadata[]
-): IMetadataSource => new InMemoryMetadataSource(toolkits);
+): MetadataSource => new InMemoryMetadataSource(toolkits);
 
 /**
  * Create an in-memory custom sections source from test fixtures

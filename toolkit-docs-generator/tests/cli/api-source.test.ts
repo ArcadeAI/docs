@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { resolveApiSource } from "../../src/cli/api-source";
+import {
+  resolveApiBaseUrl,
+  resolveApiBaseUrlFromEnv,
+  resolveApiSource,
+} from "../../src/cli/api-source";
 
 const ORIGINAL_ENV = { ...process.env };
 
@@ -18,40 +22,76 @@ describe("resolveApiSource", () => {
     // biome-ignore lint/performance/noDelete: Required to actually remove env vars
     delete process.env.ENGINE_API_URL;
     // biome-ignore lint/performance/noDelete: Required to actually remove env vars
-    delete process.env.ARCADE_API_KEY;
-    // biome-ignore lint/performance/noDelete: Required to actually remove env vars
     delete process.env.ARCADE_API_URL;
+    // biome-ignore lint/performance/noDelete: Required to actually remove env vars
+    delete process.env.PUBLIC_CATALOG_URL;
   });
 
   afterEach(() => {
     resetEnv();
   });
 
-  it("returns list-tools only when explicitly requested", () => {
-    expect(resolveApiSource({ apiSource: "list-tools" })).toBe("list-tools");
+  it("returns public-catalog when explicitly requested", () => {
+    expect(resolveApiSource({ apiSource: "public-catalog" })).toBe(
+      "public-catalog"
+    );
+    expect(resolveApiSource({ apiSource: "public" })).toBe("public-catalog");
   });
 
-  it("accepts engine as an alias for tool-metadata", () => {
-    expect(resolveApiSource({ apiSource: "engine" })).toBe("tool-metadata");
+  it("returns mock when explicitly requested", () => {
+    expect(resolveApiSource({ apiSource: "mock" })).toBe("mock");
   });
 
-  it("rejects unsupported aliases", () => {
-    expect(() => resolveApiSource({ apiSource: "arcade" })).toThrow(
-      'Invalid --api-source "arcade"'
+  it("rejects removed legacy sources", () => {
+    expect(() => resolveApiSource({ apiSource: "tool-metadata" })).toThrow(
+      'Invalid --api-source "tool-metadata"'
+    );
+    expect(() => resolveApiSource({ apiSource: "list-tools" })).toThrow(
+      'Invalid --api-source "list-tools"'
     );
   });
 
-  it("auto-selects tool-metadata when Engine credentials exist", () => {
-    process.env.ENGINE_API_KEY = "test-key";
-    process.env.ENGINE_API_URL = "https://api.arcade.dev";
-
-    expect(resolveApiSource({})).toBe("tool-metadata");
+  it("auto-selects public-catalog when an API URL is passed", () => {
+    expect(
+      resolveApiSource({ apiUrl: "https://experience.arcade.dev/api" })
+    ).toBe("public-catalog");
   });
 
-  it("does not auto-select list-tools from Arcade credentials", () => {
-    process.env.ARCADE_API_KEY = "test-key";
+  it("ignores engine hosts, which point at the wrong path prefix", () => {
     process.env.ARCADE_API_URL = "https://api.arcade.dev";
+    process.env.ENGINE_API_URL = "https://api.arcade.dev";
 
+    expect(resolveApiBaseUrlFromEnv()).toBeUndefined();
     expect(resolveApiSource({})).toBe("mock");
+  });
+
+  it("reads the API host from PUBLIC_CATALOG_URL", () => {
+    process.env.PUBLIC_CATALOG_URL = "https://experience.arcade.dev/api";
+
+    expect(resolveApiBaseUrlFromEnv()).toBe(
+      "https://experience.arcade.dev/api"
+    );
+    expect(resolveApiSource({})).toBe("public-catalog");
+  });
+
+  it("defaults to mock when no API URL is configured", () => {
+    expect(resolveApiSource({})).toBe("mock");
+  });
+
+  // An unset GitHub Actions secret arrives as "", which `??` would otherwise
+  // accept as a base URL and turn into an unfetchable relative path.
+  it("treats a blank URL as unset so the default still applies", () => {
+    process.env.PUBLIC_CATALOG_URL = "";
+
+    expect(resolveApiBaseUrlFromEnv()).toBeUndefined();
+    expect(resolveApiBaseUrl(undefined)).toBeUndefined();
+    expect(resolveApiBaseUrl("   ")).toBeUndefined();
+    expect(resolveApiSource({})).toBe("mock");
+  });
+
+  it("trims a configured URL", () => {
+    expect(resolveApiBaseUrl("  https://experience.arcade.dev/api  ")).toBe(
+      "https://experience.arcade.dev/api"
+    );
   });
 });

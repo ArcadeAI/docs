@@ -11,7 +11,7 @@ import { z } from "zod";
 import { normalizeToolkitId } from "../shared/toolkit-primitives";
 import type { ToolkitMetadata } from "../types/index";
 import { ToolkitMetadataSchema } from "../types/index";
-import type { IMetadataSource } from "./internal";
+import type { MetadataSource } from "./internal";
 
 // ============================================================================
 // Types
@@ -69,7 +69,7 @@ function withApiSuffix(label: string): string {
 // Source
 // ============================================================================
 
-export class DesignSystemMetadataSource implements IMetadataSource {
+export class DesignSystemMetadataSource implements MetadataSource {
   private readonly toolkits: readonly ToolkitMetadata[];
   private readonly indexByIdOrLabel: Map<string, ToolkitMetadata>;
 
@@ -122,11 +122,11 @@ export class DesignSystemMetadataSource implements IMetadataSource {
 
 export function createDesignSystemMetadataSourceFromToolkits(
   toolkits: readonly ToolkitMetadata[]
-): IMetadataSource {
+): MetadataSource {
   return new DesignSystemMetadataSource(toolkits);
 }
 
-export async function createDesignSystemMetadataSource(): Promise<IMetadataSource> {
+export async function createDesignSystemMetadataSource(): Promise<MetadataSource> {
   const parsed: ToolkitMetadata[] = [];
   for (const raw of DESIGN_SYSTEM_TOOLKITS) {
     const dsParsed = DesignSystemToolkitSchema.safeParse(raw);

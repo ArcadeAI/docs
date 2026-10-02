@@ -6,15 +6,15 @@
  */
 
 import { createHash } from "node:crypto";
-import type { ISecretEditGenerator } from "../llm/secret-edit-generator";
+import type { SecretEditGenerator } from "../llm/secret-edit-generator";
 import {
   isApiSuffixedToolkitId,
   normalizeToolkitId,
 } from "../shared/toolkit-primitives";
 import type { ICustomSectionsSource } from "../sources/interfaces";
 import type {
-  IToolkitDataSource,
   ToolkitData,
+  ToolkitDataSource,
 } from "../sources/toolkit-data-source";
 import type {
   CustomSections,
@@ -48,7 +48,7 @@ import {
 // ============================================================================
 
 export interface DataMergerConfig {
-  toolkitDataSource: IToolkitDataSource;
+  toolkitDataSource: ToolkitDataSource;
   customSectionsSource: ICustomSectionsSource;
   toolExampleGenerator?: ToolExampleGenerator;
   toolkitSummaryGenerator?: ToolkitSummaryGenerator;
@@ -57,7 +57,7 @@ export interface DataMergerConfig {
    * coverage gaps in summary / documentation chunks. When omitted the
    * scanners still run and emit warnings, but no content is rewritten.
    */
-  secretEditGenerator?: ISecretEditGenerator;
+  secretEditGenerator?: SecretEditGenerator;
   /**
    * When true, the secret-coherence step is disabled entirely — neither
    * the scan nor the LLM edit runs, and no warnings are emitted. Wired
@@ -1079,11 +1079,11 @@ export const mergeToolkit = async (
  * Data merger that combines all sources
  */
 export class DataMerger {
-  private readonly toolkitDataSource: IToolkitDataSource;
+  private readonly toolkitDataSource: ToolkitDataSource;
   private readonly customSectionsSource: ICustomSectionsSource;
   private readonly toolExampleGenerator: ToolExampleGenerator | undefined;
   private readonly toolkitSummaryGenerator: ToolkitSummaryGenerator | undefined;
-  private readonly secretEditGenerator: ISecretEditGenerator | undefined;
+  private readonly secretEditGenerator: SecretEditGenerator | undefined;
   private readonly skipSecretCoherence: boolean;
   private readonly previousToolkits:
     | ReadonlyMap<string, MergedToolkit>

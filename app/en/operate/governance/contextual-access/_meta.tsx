@@ -7,6 +7,9 @@ export const meta: MetaRecord = {
   "rate-limiting": {
     title: "Rate Limiting",
   },
+  "group-access": {
+    title: "Group-Based Tool Access",
+  },
   examples: {
     title: "Running an Extension",
   },

@@ -1,14 +1,23 @@
 name: Generate toolkit docs
-# Description: Generate toolkit JSON from Engine API, then sync sidebar navigation.
+# Description: Generate toolkit JSON from the public tool catalog, then sync sidebar navigation.
 # Flow:
 # 1) Generate toolkit JSON into toolkit-docs-generator/data/toolkits
 # 2) Sync integrations sidebar _meta.tsx from toolkit-docs-generator/data/toolkits
-# 3) Create or update a PR if changes were produced
+# 3) Regenerate public/llms.txt so the automation PR is self-contained
+# 4) Create or update a PR if changes were produced
+#
+# Opens the PR with GITHUB_TOKEN. That does not start other workflows, so this
+# job generates llms.txt here instead of depending on llmstxt.yml to fire.
 
 on:
   repository_dispatch:
     types: [porter_deploy_succeeded]
   workflow_dispatch:
+    inputs:
+      public_catalog_url:
+        description: "Override public catalog URL (staging only; production is the default)"
+        required: false
+        type: string
   # 11:00 UTC = 3 AM PST / 4 AM PDT — late enough that DST drift doesn't matter.
   schedule:
     - cron: "0 11 * * *"
@@ -65,15 +74,13 @@ jobs:
             --skip-unchanged \
             --preserve-last-known-good \
             --verbose \
-            --api-source tool-metadata \
-            --tool-metadata-url "$ENGINE_API_URL" \
-            --tool-metadata-key "$ENGINE_API_KEY" \
+            --api-source public-catalog \
             --llm-provider anthropic \
-            --llm-model "$ANTHROPIC_MODEL" \
+            --llm-model "claude-sonnet-4-6" \
             --llm-api-key "$ANTHROPIC_API_KEY" \
             --llm-max-tokens 8192 \
             --llm-editor-provider anthropic \
-            --llm-editor-model "$ANTHROPIC_EDITOR_MODEL" \
+            --llm-editor-model "claude-sonnet-4-6" \
             --llm-editor-api-key "$ANTHROPIC_API_KEY" \
             --toolkit-concurrency 8 \
             --llm-concurrency 15 \
@@ -85,24 +92,21 @@ jobs:
           echo "succeeded=true" >>"$GITHUB_OUTPUT"
         working-directory: toolkit-docs-generator
         env:
-          ENGINE_API_URL: ${{ secrets.ENGINE_API_URL }}
-          ENGINE_API_KEY: ${{ secrets.ENGINE_API_KEY }}
+          # Unset in normal runs: the generator defaults to the production
+          # experience API. Pass public_catalog_url on workflow_dispatch to
+          # point a manual run at staging or a local BFF.
+          PUBLIC_CATALOG_URL: ${{ inputs.public_catalog_url }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-          ANTHROPIC_MODEL: ${{ secrets.ANTHROPIC_MODEL || 'claude-sonnet-4-6' }}
-          # Stronger model for the secret-coherence editor. Keeps
-          # stale-secret cleanup precise instead of re-summarizing the whole
-          # artifact.
-          ANTHROPIC_EDITOR_MODEL: ${{ secrets.ANTHROPIC_EDITOR_MODEL || 'claude-sonnet-4-6' }}
 
       - name: Sync toolkit sidebar navigation
         run: pnpm exec tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
-      - name: Get app token
-        id: app-token
-        uses: ./.github/actions/app-token
-        with:
-          app-id: ${{ secrets.DOCS_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.DOCS_BOT_PRIVATE_KEY }}
+      # GITHUB_TOKEN PRs do not start llmstxt.yml, so generate the file here.
+      # The toolkit generator CLI still does not write llms.txt.
+      - name: Generate llms.txt
+        run: pnpm llmstxt
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Create pull request
         id: cpr
@@ -110,9 +114,7 @@ jobs:
         env:
           HUSKY: 0
         with:
-          token: ${{ steps.app-token.outputs.token }}
-          author: ${{ steps.app-token.outputs.committer }}
-          committer: ${{ steps.app-token.outputs.committer }}
+          token: ${{ github.token }}
           commit-message: "[AUTO] Adding MCP Servers docs update"
           title: "[AUTO] Adding MCP Servers docs update"
           body: |
@@ -139,7 +141,7 @@ jobs:
             echo "::warning::Could not request review on PR #${{ steps.cpr.outputs.pull-request-number }}: $(cat review-error.log)"
           fi
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ github.token }}
 
       - name: Upload generation report
         if: always()
@@ -222,7 +224,7 @@ jobs:
 
           if [ "$GENERATION_SUCCEEDED" = "true" ]; then
             headline=":warning: Toolkit docs generated, but the workflow failed afterward"
-            detail="Generation succeeded, so the toolkit JSON is fine. A later workflow step failed — inspect the run to determine whether sidebar sync, PR creation, artifact upload, or Slack notification needs attention."
+            detail="Generation succeeded, so the toolkit JSON is fine. A later workflow step failed — inspect the run to determine whether sidebar sync, llms.txt generation, PR creation, artifact upload, or Slack notification needs attention."
           else
             headline=":rotating_light: Toolkit docs generation failed"
             detail="The failed run contains the exact file path and validation error."

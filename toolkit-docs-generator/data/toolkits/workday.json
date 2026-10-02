@@ -1,0 +1,870 @@
+{
+  "id": "Workday",
+  "label": "Workday",
+  "version": "0.1.0",
+  "description": "Arcade.dev tools for interacting with Workday",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/workday.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/workday",
+    "isComingSoon": true,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "workday",
+    "allScopes": [
+      "Staffing",
+      "Time Off and Leave"
+    ]
+  },
+  "tools": [
+    {
+      "name": "ListEligibleTimeOffTypes",
+      "qualifiedName": "Workday.ListEligibleTimeOffTypes",
+      "fullyQualifiedName": "Workday.ListEligibleTimeOffTypes@0.1.0",
+      "description": "List the time-off types the signed-in worker can request, with their rules.\n\nEach entry includes its display name and time_off_type_id. Retrieve the options here\nand pass the chosen ID to the date check and request tools. Each entry also carries what\nWorkday reports for that type: a default quantity, whether a reason is mandatory\nand which reasons are allowed, whether a position must be named, and whether clock\ntimes are required, determine the quantity, or may cross midnight. `draft_support`\nreports evidence of existing drafts. Requests use draft mode by default; set mode\nto submit only when the worker asks for submission.\n\nEach type's unit is the unit to use for request quantities; do not pass fractions\nof a full day for an hourly type. start_and_end_time_required requires both clock\ntimes. calculate_quantity_based_on_start_and_end_time means Workday determines the\nrecorded quantity from those times. crossing_over_midnight_enabled permits an\nearlier end time on the following date, keeping the span under 24 hours.",
+      "parameters": [
+        {
+          "name": "effective_date",
+          "type": "string",
+          "required": false,
+          "description": "Return the types the worker is eligible for as of this date (YYYY-MM-DD). Leave empty to use today. Eligibility varies by date, so use the first date being requested off.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum types to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (the first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "workday",
+        "providerType": "oauth2",
+        "scopes": [
+          "Time Off and Leave"
+        ]
+      },
+      "secrets": [
+        "WORKDAY_BASE_URL",
+        "WORKDAY_TENANT_NAME"
+      ],
+      "secretsInfo": [
+        {
+          "name": "WORKDAY_BASE_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "WORKDAY_TENANT_NAME",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Time-off types the worker can request"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Workday.ListEligibleTimeOffTypes",
+        "parameters": {
+          "effective_date": {
+            "value": "2025-03-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "workday",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListTimeOffBalances",
+      "qualifiedName": "Workday.ListTimeOffBalances",
+      "fullyQualifiedName": "Workday.ListTimeOffBalances@0.1.0",
+      "description": "Show how much time off the signed-in worker has left, by plan.\n\nBalances come back exactly as Workday calculates them for the as-of date; this\ntool never projects or totals an accrual Workday did not return. It reads the\nsigned-in worker record to address the balances to that worker. Read `coverage`\nbefore relaying an empty list: it says whether no plan is tracked for this worker\nor the read simply did not finish, and a worker whose time off is not\nbalance-tracked can still request time off.",
+      "parameters": [
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "description": "Return only balances in this absence category. Defaults to every category Workday returns for the worker, including leave-of-absence balances.",
+          "enum": [
+            "time_off",
+            "absence_table",
+            "leave_of_absence"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "effective_date",
+          "type": "string",
+          "required": false,
+          "description": "Report balances as of this date (YYYY-MM-DD). Leave empty for the balance as of today. A future date returns what Workday projects for that date.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum balances to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (the first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "workday",
+        "providerType": "oauth2",
+        "scopes": [
+          "Staffing",
+          "Time Off and Leave"
+        ]
+      },
+      "secrets": [
+        "WORKDAY_BASE_URL",
+        "WORKDAY_TENANT_NAME"
+      ],
+      "secretsInfo": [
+        {
+          "name": "WORKDAY_BASE_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "WORKDAY_TENANT_NAME",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The worker's remaining absence balances"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Workday.ListTimeOffBalances",
+        "parameters": {
+          "category": {
+            "value": "Vacation",
+            "type": "string",
+            "required": false
+          },
+          "effective_date": {
+            "value": "2024-06-15",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "workday",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListTimeOffHistory",
+      "qualifiedName": "Workday.ListTimeOffHistory",
+      "fullyQualifiedName": "Workday.ListTimeOffHistory@0.1.0",
+      "description": "Browse the time off the signed-in worker has already logged.\n\nMatching entries come back in ascending date order, earliest first. Defaults to a\nthree-month window either side of today. These date bounds are sent to Workday\nbefore paging, so a narrow window does not scan the worker's whole history.\nA request with mixed attributes\nappears as separate groups sharing one request_id. All matching groups stay on\none page and count as one request. Dates and quantities cover only matching day\nentries, including only the in-window portion of an overlapping request. A capped\nread marks groups incomplete and omits totals; narrow the window to reduce the\nupstream read. Existing requests must be changed\nor cancelled in Workday; this toolkit cannot modify them.\n\nrequests[].dates are YYYY-MM-DD dates inside the selected window; out-of-window\ndays of the same request are excluded. Each group's unit applies only to that group.\nresult_count, total_count, limit, and offset count distinct request IDs, not groups.\nPage with has_next_page and next_offset. results_truncated means the upstream read\nwas capped; no offset completes that read, so narrow the date bounds or check Workday.\nrequires_workday_ui_action identifies drafts or sent-back groups needing action;\nuse their workday_ui_action, falling back to the response's shared guidance.\nstatus=unknown means Workday's status was missing or unrecognized. Check Workday\nto confirm its state and any required action; requires_workday_ui_action=false\ndoes not establish that no action is needed for an unknown status.",
+      "parameters": [
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Return day entries on or after this date (YYYY-MM-DD). Leave empty to start three months before today.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "Return day entries on or before this date (YYYY-MM-DD). Leave empty to end three months after today.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "statuses",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Return only groups currently in these statuses. Defaults to every status Workday reports. Use unknown to select entries whose Workday status was missing or unrecognized.",
+          "enum": [
+            "approved",
+            "submitted",
+            "not_submitted",
+            "sent_back",
+            "unknown"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "time_off_type_id",
+          "type": "string",
+          "required": false,
+          "description": "Return only groups of the time-off type with this Workday identifier. Use a time_off_type_id from a previous status/history result or from list_eligible_time_off_types; display names are not accepted. Leave empty for every type. Each returned request echoes its own time-off type.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum requests to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (the first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "workday",
+        "providerType": "oauth2",
+        "scopes": [
+          "Time Off and Leave"
+        ]
+      },
+      "secrets": [
+        "WORKDAY_BASE_URL",
+        "WORKDAY_TENANT_NAME"
+      ],
+      "secretsInfo": [
+        {
+          "name": "WORKDAY_BASE_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "WORKDAY_TENANT_NAME",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The worker's time-off requests in a date window"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Workday.ListTimeOffHistory",
+        "parameters": {
+          "from_date": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "statuses": {
+            "value": [
+              "approved",
+              "pending"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "time_off_type_id": {
+            "value": "TT_001_VACATION",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "workday",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListTimeOffStatus",
+      "qualifiedName": "Workday.ListTimeOffStatus",
+      "fullyQualifiedName": "Workday.ListTimeOffStatus@0.1.0",
+      "description": "Show where the signed-in worker's time-off requests stand right now.\n\nDefaults to no date bound, subject to the read cap. Provide dates to narrow the\nupstream search when results are incomplete. Requests come back in ascending order\nof their earliest matching date. The first page contains the earliest matching\nrequests, which may be years in the past when no lower date bound is supplied.\nFor upcoming or next time off, set from_date to today's date in YYYY-MM-DD;\nthe unbounded first page does not identify the next time off.\n\nA request with different types, units, statuses, positions, reasons, or notes\nappears as separate groups sharing one request_id. All matching groups stay on\none page and count as one request. Dates and quantities describe only matching\nentries within the requested window. Capped reads mark groups incomplete and omit\nquantity totals. Each group reports its own status and action guidance. Existing\nrequests must be changed or cancelled in Workday; this toolkit cannot modify them.\n\nrequests[].dates are YYYY-MM-DD dates inside the selected window; out-of-window\ndays of the same request are excluded. Each group's unit applies only to that group.\nresult_count, total_count, limit, and offset count distinct request IDs, not groups.\nPage with has_next_page and next_offset. results_truncated means the upstream read\nwas capped; no offset completes that read, so narrow the date bounds or check Workday.\nrequires_workday_ui_action identifies drafts or sent-back groups needing action;\nuse their workday_ui_action, falling back to the response's shared guidance.\nstatus=unknown means Workday's status was missing or unrecognized. Check Workday\nto confirm its state and any required action; requires_workday_ui_action=false\ndoes not establish that no action is needed for an unknown status.",
+      "parameters": [
+        {
+          "name": "request_id",
+          "type": "string",
+          "required": false,
+          "description": "A request_id or entry_id from an earlier result. An entry ID selects only that entry; an event ID selects its matching day entries, subject to other filters. Provide dates to narrow collection searches. Leave empty for all matching entries. A complete search with no match reports an error; a capped search reports that its results are incomplete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "statuses",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Return only groups currently in these statuses. Defaults to every status Workday reports, including past approved requests as well as outstanding requests. Use unknown to select entries whose Workday status was missing or unrecognized.",
+          "enum": [
+            "approved",
+            "submitted",
+            "not_submitted",
+            "sent_back",
+            "unknown"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "time_off_type_id",
+          "type": "string",
+          "required": false,
+          "description": "Return only groups of the time-off type with this Workday identifier. Use a time_off_type_id from a previous status/history result or from list_eligible_time_off_types; display names are not accepted. Leave empty for every type. Each returned request echoes its own time-off type.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_date",
+          "type": "string",
+          "required": false,
+          "description": "Return day entries on or after this date (YYYY-MM-DD). Leave empty for no lower bound, which is the default. For upcoming or next time off, resolve today to YYYY-MM-DD and pass it here.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_date",
+          "type": "string",
+          "required": false,
+          "description": "Return day entries on or before this date (YYYY-MM-DD). Leave empty for no upper bound, which is the default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum requests to return (1-100). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0 (the first result).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "workday",
+        "providerType": "oauth2",
+        "scopes": [
+          "Time Off and Leave"
+        ]
+      },
+      "secrets": [
+        "WORKDAY_BASE_URL",
+        "WORKDAY_TENANT_NAME"
+      ],
+      "secretsInfo": [
+        {
+          "name": "WORKDAY_BASE_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "WORKDAY_TENANT_NAME",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Where the worker's time-off requests stand"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Workday.ListTimeOffStatus",
+        "parameters": {
+          "request_id": {
+            "value": "TOR-20240315-00042",
+            "type": "string",
+            "required": false
+          },
+          "statuses": {
+            "value": [
+              "approved",
+              "pending"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "time_off_type_id": {
+            "value": "TT_001_VACATION",
+            "type": "string",
+            "required": false
+          },
+          "from_date": {
+            "value": "2025-01-01",
+            "type": "string",
+            "required": false
+          },
+          "to_date": {
+            "value": "2025-12-31",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "workday",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListValidTimeOffDates",
+      "qualifiedName": "Workday.ListValidTimeOffDates",
+      "fullyQualifiedName": "Workday.ListValidTimeOffDates@0.1.0",
+      "description": "Check whether Workday accepts each date for the selected time-off type.\n\nSend the candidate dates together before creating a request. Each result separates\ndate acceptance from the configured default and existing bookings. A default does\nnot establish a maximum, and a missing default says nothing about the worker's\nschedule. Accepted dates therefore have unknown capacity; Workday validates the\nrequested quantity on submission.\n\nBooking totals include only matching known units and position scope. Incompatible\nunits or ambiguous positions leave the total unknown. Worker-based checks include\nbookings regardless of their position reference; position-scoped checks exclude\nbookings against another position. Incomplete booking lookups omit all booked totals\nand disclose that the booking names shown are partial results.\n\ndates[].valid reports date acceptance, not available quantity. valid_count counts\naccepted dates. bookable_spans stays empty because maximum capacity is unknown;\nthis does not mean none of the dates are valid. Read coverage_note for lookup limits.",
+      "parameters": [
+        {
+          "name": "time_off_type_id",
+          "type": "string",
+          "required": true,
+          "description": "The Workday identifier of the time-off type the dates are being checked for. Use the time_off_type_id returned by list_eligible_time_off_types; display names are not accepted. The response echoes the selected type.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dates",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The calendar dates to check (YYYY-MM-DD each), at most 60 per call. Relative words such as tomorrow are not resolved; send resolved calendar dates.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "position_id",
+          "type": "string",
+          "required": false,
+          "description": "The Workday identifier of the position the time off would be taken against. Leave empty to use the worker's only eligible position, or for types that are not scoped per position. If several positions are eligible, provide one of their identifiers.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "workday",
+        "providerType": "oauth2",
+        "scopes": [
+          "Time Off and Leave"
+        ]
+      },
+      "secrets": [
+        "WORKDAY_BASE_URL",
+        "WORKDAY_TENANT_NAME"
+      ],
+      "secretsInfo": [
+        {
+          "name": "WORKDAY_BASE_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "WORKDAY_TENANT_NAME",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Whether each requested date is valid"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Workday.ListValidTimeOffDates",
+        "parameters": {
+          "time_off_type_id": {
+            "value": "TT_01_Annual_Leave_4a7f2b",
+            "type": "string",
+            "required": true
+          },
+          "dates": {
+            "value": [
+              "2025-08-04",
+              "2025-08-05",
+              "2025-08-06",
+              "2025-08-07",
+              "2025-08-08"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "position_id": {
+            "value": "POS_00123_Senior_Engineer_9c3e1d",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "workday",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RequestTimeOff",
+      "qualifiedName": "Workday.RequestTimeOff",
+      "fullyQualifiedName": "Workday.RequestTimeOff@0.1.0",
+      "description": "Request time off for the signed-in worker, asking for a draft by default.\n\nSet mode to submit only when the worker asks for submission. Existing drafts must\nbe submitted in the Workday UI; existing requests must also be changed or cancelled\nthere. The receipt reports the confirmed state, or created_status_unknown when\nread-back cannot confirm it. In that case, check list_time_off_status using the\nreturned identifiers; do not repeat the create. Recorded amounts appear in days;\nrequested_days preserves the values sent, and missing amounts are unconfirmed. The type's\nrules are resolved from Workday first, so a reason, a position, and an omitted\nquantity are checked against that type before anything is written. Workday owns the\nrest of the validation; its rejections come back as errors describing what to change.\n\nIn the receipt, days[].date matches the requested date and days[].unit labels only\nthat entry's recorded amount. Missing quantity means unconfirmed, never zero.\nrequested_days contains the quantities (including defaults) and clock times sent.\nstatus is draft_saved, submitted, approved, or sent_back when confirmed;\ncreated_status_unknown means the request exists but its state is unknown, and\nblocked_by_warning means nothing was written. requires_workday_ui_action=false\non an unconfirmed receipt means no action was established; read status before advising.",
+      "parameters": [
+        {
+          "name": "time_off_type_id",
+          "type": "string",
+          "required": true,
+          "description": "The Workday identifier of the time-off type being requested. Use the time_off_type_id returned by list_eligible_time_off_types; display names are not accepted. One type per request. The receipt echoes the selected type.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "days",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "One entry per unique date in YYYY-MM-DD format; date is the start date for clock-time requests. Dates need not be consecutive. quantity must be positive and counted in the selected type's unit: for an hourly type, 4 means four hours and 0.5 means half an hour, not half a day. Omit quantity only when the configured daily_default_quantity is positive; otherwise provide an explicit positive amount. start_time and end_time must be paired 24-hour HH:MM or HH:MM:SS times, passed unchanged with no time-zone conversion. Both are mandatory when the type requires them. An earlier end means the next date only when crossing_over_midnight_enabled is true; equal times are invalid.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "Whether to submit the request for approval or leave it as an unfinished draft. Defaults to draft. Use submit only when the worker asks to send the request for approval. An existing draft must be submitted in the Workday UI.",
+          "enum": [
+            "draft",
+            "submit"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "reason_id",
+          "type": "string",
+          "required": false,
+          "description": "The Workday identifier of the reason for the time off. Leave empty when the type does not require one; when it does, use one of that type's allowed reasons.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "required": false,
+          "description": "A short note stored on the request. Leave empty to send no note.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "position_id",
+          "type": "string",
+          "required": false,
+          "description": "The Workday identifier of the position the time off is taken against. Leave empty to use the worker's only eligible position, or for types that are not scoped per position.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "proceed_on_warning",
+          "type": "boolean",
+          "required": false,
+          "description": "Create the request even if Workday returns warning-level validations. Defaults to false, which reports the warnings and writes nothing.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "workday",
+        "providerType": "oauth2",
+        "scopes": [
+          "Time Off and Leave"
+        ]
+      },
+      "secrets": [
+        "WORKDAY_BASE_URL",
+        "WORKDAY_TENANT_NAME"
+      ],
+      "secretsInfo": [
+        {
+          "name": "WORKDAY_BASE_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "WORKDAY_TENANT_NAME",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "What was created in Workday, or what blocked it"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Workday.RequestTimeOff",
+        "parameters": {
+          "time_off_type_id": {
+            "value": "TT_001_ANNUAL_LEAVE",
+            "type": "string",
+            "required": true
+          },
+          "days": {
+            "value": [
+              {
+                "date": "2025-08-11",
+                "quantity": 1
+              },
+              {
+                "date": "2025-08-12",
+                "quantity": 1
+              },
+              {
+                "date": "2025-08-13",
+                "quantity": 4,
+                "start_time": "09:00",
+                "end_time": "13:00"
+              }
+            ],
+            "type": "array",
+            "required": true
+          },
+          "mode": {
+            "value": "draft",
+            "type": "string",
+            "required": false
+          },
+          "reason_id": {
+            "value": "REASON_PERSONAL_VACATION",
+            "type": "string",
+            "required": false
+          },
+          "note": {
+            "value": "Family vacation planned in advance.",
+            "type": "string",
+            "required": false
+          },
+          "position_id": {
+            "value": "POS_ENG_SENIOR_DEV_42",
+            "type": "string",
+            "required": false
+          },
+          "proceed_on_warning": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "workday",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Workday.WhoAmI",
+      "fullyQualifiedName": "Workday.WhoAmI@0.1.0",
+      "description": "Identify the Workday worker the connection is signed in as, and their jobs.\n\nCall this before acting on the worker's record so the answer is anchored to the\nright person and tenant. Every other tool in this toolkit acts on this same worker\nand cannot be pointed at anyone else.",
+      "parameters": [],
+      "auth": {
+        "providerId": "workday",
+        "providerType": "oauth2",
+        "scopes": [
+          "Staffing"
+        ]
+      },
+      "secrets": [
+        "WORKDAY_BASE_URL",
+        "WORKDAY_TENANT_NAME"
+      ],
+      "secretsInfo": [
+        {
+          "name": "WORKDAY_BASE_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "WORKDAY_TENANT_NAME",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The signed-in worker's identity and work context"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Workday.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "workday",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-24T21:02:24.420Z",
+  "summary": "The Workday toolkit lets Arcade agents interact with a Workday tenant on behalf of the signed-in worker via OAuth. It covers the full time-off self-service workflow — from identity resolution through balance checks, date validation, request creation, and status tracking.\n\n## Capabilities\n\n- **Worker identity** — Resolve the authenticated worker and their job context before performing any other operation; all tools act on that same worker and cannot be redirected to another.\n- **Time-off eligibility & balances** — List the time-off types a worker can request (with rules: units, reason requirements, position requirements, clock-time handling, draft support) and retrieve current plan balances exactly as Workday calculates them.\n- **Date validation** — Check candidate dates against a specific time-off type before submitting, with per-date acceptance results and booking context where computable.\n- **Request creation** — Submit or save draft time-off requests; the toolkit resolves type rules from Workday first, then writes the request. Existing requests must be modified or cancelled in Workday directly.\n- **History & status tracking** — Browse past time-off entries with date-windowed paging, and check current request status with group-level action guidance, incomplete-read signals, and UI-action flags for drafts or sent-back requests.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Workday** provider. Users authorize access through their Workday account; the toolkit then operates on the signed-in worker's record.\n\n## Secrets\n\nTwo secrets must be configured for the toolkit to reach the correct Workday environment.\n\n- **`WORKDAY_BASE_URL`** — The base URL of your organization's Workday REST API endpoint. This is the root URL specific to your tenant, typically in the form `https://<hostname>/ccx/api`. Obtain it from your Workday administrator or by inspecting your Workday tenant's API endpoint configuration. The exact path is determined by how your organization has deployed Workday.\n\n- **`WORKDAY_TENANT_NAME`** — The Workday tenant name (also called the tenant ID) that identifies your organization's Workday instance. It appears in your Workday URLs (e.g., `https://wd3.myworkday.com/<tenant_name>/...`). Your Workday administrator can confirm the exact value. If you have access to the Workday admin interface, it is visible in **System Configuration** or in the URL when logged in.\n\nFor instructions on configuring secrets in Arcade, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+}

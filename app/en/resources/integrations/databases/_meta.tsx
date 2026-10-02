@@ -21,6 +21,10 @@ const meta: MetaRecord = {
     title: "Snowflake",
     href: "/en/resources/integrations/databases/snowflake",
   },
+  yugabytedb: {
+    title: "YugabyteDB",
+    href: "/en/resources/integrations/databases/yugabytedb",
+  },
   "-- Starter": {
     type: "separator",
     title: "Starter",
@@ -28,10 +32,6 @@ const meta: MetaRecord = {
   "weaviate-api": {
     title: "Weaviate API",
     href: "/en/resources/integrations/databases/weaviate-api",
-  },
-  yugabytedb: {
-    title: "YugabyteDB",
-    href: "/en/resources/integrations/databases/yugabytedb",
   },
 };
 

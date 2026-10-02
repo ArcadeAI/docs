@@ -30,6 +30,13 @@ export const redirects: Redirect[] = [
     destination: "/:locale/references/auth-providers/square",
     permanent: true,
   },
+  // The Arcade Engine API starter MCP server left the public catalog. Its
+  // tools wrapped the Engine API, so send readers to that reference.
+  {
+    source: "/:locale/resources/integrations/development/arcade-engine-api",
+    destination: "/:locale/references/api",
+    permanent: true,
+  },
   // Dissolved guides/security section
   {
     source: "/:locale/guides/security/security-research-program",

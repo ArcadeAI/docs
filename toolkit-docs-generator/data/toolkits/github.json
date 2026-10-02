@@ -1,7 +1,7 @@
 {
   "id": "Github",
   "label": "GitHub",
-  "version": "4.1.1",
+  "version": "5.0.0",
   "description": "Arcade.dev LLM tools for Github",
   "metadata": {
     "category": "development",
@@ -22,7 +22,7 @@
     {
       "name": "AssignPullRequestUser",
       "qualifiedName": "Github.AssignPullRequestUser",
-      "fullyQualifiedName": "Github.AssignPullRequestUser@4.1.1",
+      "fullyQualifiedName": "Github.AssignPullRequestUser@5.0.0",
       "description": "Assign a user to a pull request with intelligent search and fuzzy matching.",
       "parameters": [
         {
@@ -157,7 +157,7 @@
     {
       "name": "CheckPullRequestMergeStatus",
       "qualifiedName": "Github.CheckPullRequestMergeStatus",
-      "fullyQualifiedName": "Github.CheckPullRequestMergeStatus@4.1.1",
+      "fullyQualifiedName": "Github.CheckPullRequestMergeStatus@5.0.0",
       "description": "Check if a pull request is ready to merge without attempting the merge.",
       "parameters": [
         {
@@ -261,7 +261,7 @@
     {
       "name": "CountStargazers",
       "qualifiedName": "Github.CountStargazers",
-      "fullyQualifiedName": "Github.CountStargazers@4.1.1",
+      "fullyQualifiedName": "Github.CountStargazers@5.0.0",
       "description": "Count the number of stargazers (stars) for a GitHub repository.",
       "parameters": [
         {
@@ -339,7 +339,7 @@
     {
       "name": "CreateBranch",
       "qualifiedName": "Github.CreateBranch",
-      "fullyQualifiedName": "Github.CreateBranch@4.1.1",
+      "fullyQualifiedName": "Github.CreateBranch@5.0.0",
       "description": "Create a new branch in a repository.",
       "parameters": [
         {
@@ -443,7 +443,7 @@
     {
       "name": "CreateFile",
       "qualifiedName": "Github.CreateFile",
-      "fullyQualifiedName": "Github.CreateFile@4.1.1",
+      "fullyQualifiedName": "Github.CreateFile@5.0.0",
       "description": "Create a new file or overwrite an existing file in a repository.\n\nThe explicit mode parameter reduces accidental data loss: the default CREATE mode refuses to\ntouch existing files, while OVERWRITE must be chosen intentionally.",
       "parameters": [
         {
@@ -589,7 +589,7 @@
     {
       "name": "CreateIssue",
       "qualifiedName": "Github.CreateIssue",
-      "fullyQualifiedName": "Github.CreateIssue@4.1.1",
+      "fullyQualifiedName": "Github.CreateIssue@5.0.0",
       "description": "Create an issue in a GitHub repository.\n\nOptionally add the created issue to a project by specifying add_to_project_number\nand add_to_project_scope.",
       "parameters": [
         {
@@ -784,7 +784,7 @@
     {
       "name": "CreateIssueComment",
       "qualifiedName": "Github.CreateIssueComment",
-      "fullyQualifiedName": "Github.CreateIssueComment@4.1.1",
+      "fullyQualifiedName": "Github.CreateIssueComment@5.0.0",
       "description": "Create a comment on an issue in a GitHub repository.",
       "parameters": [
         {
@@ -888,7 +888,7 @@
     {
       "name": "CreatePullRequest",
       "qualifiedName": "Github.CreatePullRequest",
-      "fullyQualifiedName": "Github.CreatePullRequest@4.1.1",
+      "fullyQualifiedName": "Github.CreatePullRequest@5.0.0",
       "description": "Create a pull request in a GitHub repository.",
       "parameters": [
         {
@@ -1090,7 +1090,7 @@
     {
       "name": "CreateReplyForReviewComment",
       "qualifiedName": "Github.CreateReplyForReviewComment",
-      "fullyQualifiedName": "Github.CreateReplyForReviewComment@4.1.1",
+      "fullyQualifiedName": "Github.CreateReplyForReviewComment@5.0.0",
       "description": "Create a reply to a review comment for a pull request.\n\nOptionally resolve the conversation thread after replying by setting resolve_thread=True\nand providing the thread_id (GraphQL Node ID).",
       "parameters": [
         {
@@ -1233,8 +1233,8 @@
     {
       "name": "CreateReviewComment",
       "qualifiedName": "Github.CreateReviewComment",
-      "fullyQualifiedName": "Github.CreateReviewComment@4.1.1",
-      "description": "Create a review comment for a pull request in a GitHub repository.\n\nIMPORTANT: Line numbers must be part of the diff (changed lines only).\nGitHub's API requires line numbers that exist in the pull request diff, not just any line\nin the file. If the line wasn't changed in the PR, the comment will fail with 422 error.\n\nIf the subject_type is not 'file', then the start_line and end_line parameters are required.\nIf the subject_type is 'file', then the start_line and end_line parameters are ignored.\nIf the commit_id is not provided, the latest commit SHA from the PR will be used.\n\nTIP: Use subject_type='file' to comment on the entire file if unsure about line positions.",
+      "fullyQualifiedName": "Github.CreateReviewComment@5.0.0",
+      "description": "Create a review comment for a pull request in a GitHub repository.\n\nIMPORTANT: Line numbers must be part of the diff (changed lines only).\nGitHub's API requires line numbers that exist in the pull request diff, not just any line\nin the file. If the line wasn't changed in the PR, the comment will fail with 422 error.\n\nLine comments require start_line and end_line. When subject_type is omitted, providing either\nline parameter selects a line comment; otherwise the comment applies to the whole file.\nFile comments cannot include line-specific parameters.\nIf the commit_id is not provided, the latest commit SHA from the PR will be used.\n\nTIP: Use subject_type='file' to comment on the entire file if unsure about line positions.",
       "parameters": [
         {
           "name": "owner",
@@ -1316,14 +1316,17 @@
           "type": "string",
           "required": false,
           "description": "The starting side of the diff that the comment applies to.",
-          "enum": null,
+          "enum": [
+            "LEFT",
+            "RIGHT"
+          ],
           "inferrable": true
         },
         {
           "name": "subject_type",
           "type": "string",
           "required": false,
-          "description": "The type of subject that the comment applies to. Default is file.",
+          "description": "The type of subject that the comment applies to. When omitted, line inputs select a line comment; otherwise the comment applies to the file.",
           "enum": [
             "file",
             "line"
@@ -1342,7 +1345,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -1369,27 +1372,27 @@
             "required": true
           },
           "body": {
-            "value": "Nit: Please rename this variable for clarity.\nSuggested name: userCount",
+            "value": "This logic looks correct, but consider adding a null check here to avoid potential runtime errors.",
             "type": "string",
             "required": true
           },
           "path": {
-            "value": "src/controllers/user_controller.py",
+            "value": "src/utils/parser.ts",
             "type": "string",
             "required": true
           },
           "commit_id": {
-            "value": "f5c3d9a7b8e6c1d2f3a4b5c6d7e8f9a0b1c2d3e4",
+            "value": "a1b2c3d4e5f6789012345678901234567890abcd",
             "type": "string",
             "required": false
           },
           "start_line": {
-            "value": null,
+            "value": 15,
             "type": "integer",
             "required": false
           },
           "end_line": {
-            "value": null,
+            "value": 18,
             "type": "integer",
             "required": false
           },
@@ -1399,12 +1402,12 @@
             "required": false
           },
           "start_side": {
-            "value": null,
+            "value": "RIGHT",
             "type": "string",
             "required": false
           },
           "subject_type": {
-            "value": "file",
+            "value": "line",
             "type": "string",
             "required": false
           }
@@ -1434,7 +1437,7 @@
     {
       "name": "GetFileContents",
       "qualifiedName": "Github.GetFileContents",
-      "fullyQualifiedName": "Github.GetFileContents@4.1.1",
+      "fullyQualifiedName": "Github.GetFileContents@5.0.0",
       "description": "Get the contents of a file in a repository.\n\nReturns the decoded content (if text) along with metadata like SHA, size, and line count.\nFor large files, use start_line and end_line to retrieve specific line ranges.",
       "parameters": [
         {
@@ -1564,7 +1567,7 @@
     {
       "name": "GetIssue",
       "qualifiedName": "Github.GetIssue",
-      "fullyQualifiedName": "Github.GetIssue@4.1.1",
+      "fullyQualifiedName": "Github.GetIssue@5.0.0",
       "description": "Get a specific issue from a GitHub repository.",
       "parameters": [
         {
@@ -1655,7 +1658,7 @@
     {
       "name": "GetPullRequest",
       "qualifiedName": "Github.GetPullRequest",
-      "fullyQualifiedName": "Github.GetPullRequest@4.1.1",
+      "fullyQualifiedName": "Github.GetPullRequest@5.0.0",
       "description": "Get details of a pull request in a GitHub repository.",
       "parameters": [
         {
@@ -1759,7 +1762,7 @@
     {
       "name": "GetRepository",
       "qualifiedName": "Github.GetRepository",
-      "fullyQualifiedName": "Github.GetRepository@4.1.1",
+      "fullyQualifiedName": "Github.GetRepository@5.0.0",
       "description": "Get a repository.\n\nRetrieves detailed information about a repository using the GitHub API.",
       "parameters": [
         {
@@ -1837,7 +1840,7 @@
     {
       "name": "GetReviewWorkload",
       "qualifiedName": "Github.GetReviewWorkload",
-      "fullyQualifiedName": "Github.GetReviewWorkload@4.1.1",
+      "fullyQualifiedName": "Github.GetReviewWorkload@5.0.0",
       "description": "Get pull requests awaiting review by the authenticated user.\n\nReturns PRs where user is requested as reviewer and PRs user has recently reviewed.",
       "parameters": [],
       "auth": {
@@ -1887,11 +1890,11 @@
     {
       "name": "GetUserOpenItems",
       "qualifiedName": "Github.GetUserOpenItems",
-      "fullyQualifiedName": "Github.GetUserOpenItems@4.1.1",
+      "fullyQualifiedName": "Github.GetUserOpenItems@5.0.0",
       "description": "Get user's currently open pull requests and issues across all repositories.\n\nReturns open PRs and issues authored by the authenticated user.",
       "parameters": [
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
           "description": "Number of items per category (PRs and issues). Default is 30, max 100.",
@@ -1910,7 +1913,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -1921,8 +1924,8 @@
       "codeExample": {
         "toolName": "Github.GetUserOpenItems",
         "parameters": {
-          "per_page": {
-            "value": 50,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           }
@@ -1952,7 +1955,7 @@
     {
       "name": "GetUserRecentActivity",
       "qualifiedName": "Github.GetUserRecentActivity",
-      "fullyQualifiedName": "Github.GetUserRecentActivity@4.1.1",
+      "fullyQualifiedName": "Github.GetUserRecentActivity@5.0.0",
       "description": "Get the authenticated user's recent pull requests, reviews, issues, and commits.\n\nReturns PRs they authored, merged PRs, PRs they reviewed, issues they opened, and commits pushed",
       "parameters": [
         {
@@ -1964,7 +1967,7 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
           "description": "Number of items per category (PRs and issues). Default is 10, max 50.",
@@ -1983,7 +1986,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -1999,7 +2002,7 @@
             "type": "integer",
             "required": false
           },
-          "per_page": {
+          "limit": {
             "value": 25,
             "type": "integer",
             "required": false
@@ -2030,7 +2033,7 @@
     {
       "name": "ListIssues",
       "qualifiedName": "Github.ListIssues",
-      "fullyQualifiedName": "Github.ListIssues@4.1.1",
+      "fullyQualifiedName": "Github.ListIssues@5.0.0",
       "description": "List issues in a GitHub repository.",
       "parameters": [
         {
@@ -2101,18 +2104,18 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of results per page (max 100). Default: 30",
+          "description": "The number of issues to return (max 100). Default: 30",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Page number of the results to fetch. Default: 1",
+          "description": "0-indexed starting position of the first issue to return. Default: 0. When search_org_wide is true, GitHub limits searchable results to offsets 0-999.",
           "enum": null,
           "inferrable": true
         },
@@ -2136,7 +2139,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -2163,7 +2166,7 @@
             "required": false
           },
           "labels": {
-            "value": "bug,help wanted",
+            "value": "bug,ui,@high",
             "type": "string",
             "required": false
           },
@@ -2178,17 +2181,17 @@
             "required": false
           },
           "since": {
-            "value": "2026-01-01T00:00:00Z",
+            "value": "2024-01-15T08:30:00Z",
             "type": "string",
             "required": false
           },
-          "per_page": {
-            "value": 50,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "page": {
-            "value": 1,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           },
@@ -2223,7 +2226,7 @@
     {
       "name": "ListOrgRepositories",
       "qualifiedName": "Github.ListOrgRepositories",
-      "fullyQualifiedName": "Github.ListOrgRepositories@4.1.1",
+      "fullyQualifiedName": "Github.ListOrgRepositories@5.0.0",
       "description": "List repositories for the specified organization.",
       "parameters": [
         {
@@ -2274,18 +2277,18 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of results per page. Default is 30.",
+          "description": "The number of repositories to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The page number of the results to fetch. Default is 1.",
+          "description": "0-indexed starting position of the first repository to return. Default is 0.",
           "enum": null,
           "inferrable": true
         }
@@ -2301,7 +2304,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -2313,7 +2316,7 @@
         "toolName": "Github.ListOrgRepositories",
         "parameters": {
           "org": {
-            "value": "octo-org",
+            "value": "openai",
             "type": "string",
             "required": true
           },
@@ -2332,13 +2335,13 @@
             "type": "string",
             "required": false
           },
-          "per_page": {
+          "limit": {
             "value": 50,
             "type": "integer",
             "required": false
           },
-          "page": {
-            "value": 2,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           }
@@ -2368,7 +2371,7 @@
     {
       "name": "ListProjectFields",
       "qualifiedName": "Github.ListProjectFields",
-      "fullyQualifiedName": "Github.ListProjectFields@4.1.1",
+      "fullyQualifiedName": "Github.ListProjectFields@5.0.0",
       "description": "List fields for a Projects V2 project.\n\nReturns all custom fields configured for the project, including field types\nand available options for select/iteration fields.",
       "parameters": [
         {
@@ -2492,7 +2495,7 @@
     {
       "name": "ListProjectItems",
       "qualifiedName": "Github.ListProjectItems",
-      "fullyQualifiedName": "Github.ListProjectItems@4.1.1",
+      "fullyQualifiedName": "Github.ListProjectItems@5.0.0",
       "description": "List items for a Projects V2 project with optional filtering.",
       "parameters": [
         {
@@ -2576,10 +2579,10 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Items per page (max 100). Default is 30.",
+          "description": "Maximum number of items to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
@@ -2611,7 +2614,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -2638,12 +2641,12 @@
             "required": true
           },
           "scope_identifier": {
-            "value": "example-org",
+            "value": "my-org",
             "type": "string",
             "required": true
           },
           "filter_assignee": {
-            "value": "octocat",
+            "value": "@me",
             "type": "string",
             "required": false
           },
@@ -2655,7 +2658,7 @@
           "filter_labels": {
             "value": [
               "bug",
-              "priority:high"
+              "high-priority"
             ],
             "type": "array",
             "required": false
@@ -2666,22 +2669,22 @@
             "required": false
           },
           "advanced_query": {
-            "value": "type:issue is:open label:bug author:octocat",
+            "value": "assignee:@me status:\"In Progress\"",
             "type": "string",
             "required": false
           },
-          "per_page": {
-            "value": 50,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "cursor": {
-            "value": "eyJ2IjoiMSIsImsiOiJwYWdlX2N1cnNvciJ9",
+            "value": "Y3Vyc29yOnYyOpK5MjAyMy0xMC0wMVQwMDowMDowMFow",
             "type": "string",
             "required": false
           },
           "auto_accept_matches": {
-            "value": false,
+            "value": true,
             "type": "boolean",
             "required": false
           }
@@ -2711,7 +2714,7 @@
     {
       "name": "ListProjects",
       "qualifiedName": "Github.ListProjects",
-      "fullyQualifiedName": "Github.ListProjects@4.1.1",
+      "fullyQualifiedName": "Github.ListProjects@5.0.0",
       "description": "List Projects V2 across organization or user scopes.",
       "parameters": [
         {
@@ -2774,10 +2777,10 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Items per page (max 100). Default is 30.",
+          "description": "Maximum number of items to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
@@ -2809,7 +2812,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -2821,7 +2824,7 @@
         "toolName": "Github.ListProjects",
         "parameters": {
           "search_mode": {
-            "value": "number",
+            "value": "name",
             "type": "string",
             "required": true
           },
@@ -2831,12 +2834,12 @@
             "required": true
           },
           "scope_identifier": {
-            "value": "octo-org",
+            "value": "acme-corp",
             "type": "string",
             "required": true
           },
           "project_identifier": {
-            "value": 42,
+            "value": "Roadmap 2024",
             "type": "string",
             "required": false
           },
@@ -2850,13 +2853,13 @@
             "type": "string",
             "required": false
           },
-          "per_page": {
-            "value": 50,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "cursor": {
-            "value": "eyJvZmZzZXQiOiI1MCJ9",
+            "value": "Y3Vyc29yOnYyOpK5MjAyNC0wMS0xNVQxMjowMDowMCswMDowMM4A",
             "type": "string",
             "required": false
           },
@@ -2891,7 +2894,7 @@
     {
       "name": "ListPullRequestCommits",
       "qualifiedName": "Github.ListPullRequestCommits",
-      "fullyQualifiedName": "Github.ListPullRequestCommits@4.1.1",
+      "fullyQualifiedName": "Github.ListPullRequestCommits@5.0.0",
       "description": "List commits (from oldest to newest) on a pull request in a GitHub repository.",
       "parameters": [
         {
@@ -2919,18 +2922,18 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of results per page (max 100). Default is 30.",
+          "description": "The number of commits to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The page number of the results to fetch. Default is 1.",
+          "description": "0-indexed starting position of the first commit to return. Default is 0.",
           "enum": null,
           "inferrable": true
         }
@@ -2946,7 +2949,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -2963,7 +2966,7 @@
             "required": true
           },
           "repo": {
-            "value": "Hello-World",
+            "value": "hello-world",
             "type": "string",
             "required": true
           },
@@ -2972,13 +2975,13 @@
             "type": "integer",
             "required": true
           },
-          "per_page": {
-            "value": 50,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "page": {
-            "value": 1,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           }
@@ -3008,8 +3011,8 @@
     {
       "name": "ListPullRequests",
       "qualifiedName": "Github.ListPullRequests",
-      "fullyQualifiedName": "Github.ListPullRequests@4.1.1",
-      "description": "List pull requests in a GitHub repository.\n\nBy default returns newest pull requests first (direction=DESC).",
+      "fullyQualifiedName": "Github.ListPullRequests@5.0.0",
+      "description": "List pull requests in a GitHub repository.\n\nBy default returns newest pull requests first (direction=DESC).\nOrganization-wide search returns GitHub's reduced issue-search summary. It preserves the\nmerged timestamp but does not include repository-list details such as head/base metadata or\ndetailed mergeability and reviewer data.",
       "parameters": [
         {
           "name": "owner",
@@ -3043,7 +3046,7 @@
           "name": "head",
           "type": "string",
           "required": false,
-          "description": "Filter pulls by head user or head organization and branch name in the format of user:ref-name or organization:ref-name.",
+          "description": "Filter pulls by head branch. For repository search, use user:ref-name or organization:ref-name. Organization-wide search accepts only an unqualified branch prefix because GitHub Search does not support owner-qualified head filters.",
           "enum": null,
           "inferrable": true
         },
@@ -3051,7 +3054,7 @@
           "name": "base",
           "type": "string",
           "required": false,
-          "description": "Filter pulls by base branch name. Default is main.",
+          "description": "Filter pulls by base branch name.",
           "enum": null,
           "inferrable": true
         },
@@ -3080,18 +3083,18 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of results per page (max 100). Default is 30.",
+          "description": "The number of pull requests to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The page number of the results to fetch. Default is 1.",
+          "description": "0-indexed starting position of the first pull request to return. Default is 0.",
           "enum": null,
           "inferrable": true
         },
@@ -3115,7 +3118,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -3127,7 +3130,7 @@
         "toolName": "Github.ListPullRequests",
         "parameters": {
           "owner": {
-            "value": "octo-org",
+            "value": "octocat",
             "type": "string",
             "required": true
           },
@@ -3137,12 +3140,12 @@
             "required": true
           },
           "state": {
-            "value": "all",
+            "value": "open",
             "type": "string",
             "required": false
           },
           "head": {
-            "value": "octocat:feature/login",
+            "value": "feature/new-login",
             "type": "string",
             "required": false
           },
@@ -3161,13 +3164,13 @@
             "type": "string",
             "required": false
           },
-          "per_page": {
-            "value": 50,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "page": {
-            "value": 1,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           },
@@ -3202,7 +3205,7 @@
     {
       "name": "ListRepositoryActivities",
       "qualifiedName": "Github.ListRepositoryActivities",
-      "fullyQualifiedName": "Github.ListRepositoryActivities@4.1.1",
+      "fullyQualifiedName": "Github.ListRepositoryActivities@5.0.0",
       "description": "List repository activities.\n\nRetrieves a detailed history of changes to a repository, such as pushes, merges,\nforce pushes, and branch changes, and associates these changes with commits and users.",
       "parameters": [
         {
@@ -3233,10 +3236,10 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of results per page (max 100). Default is 30.",
+          "description": "The number of activities to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
@@ -3313,7 +3316,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -3339,18 +3342,18 @@
             "type": "string",
             "required": false
           },
-          "per_page": {
-            "value": 50,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "before": {
-            "value": "f5a3e2d6c7b8a9e0f1d2c3b4a5e6f7d8c9b0a1e2",
+            "value": "abc123def456abc123def456abc123def456abc1",
             "type": "string",
             "required": false
           },
           "after": {
-            "value": "0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9",
+            "value": "789ghi012jkl789ghi012jkl789ghi012jkl789g",
             "type": "string",
             "required": false
           },
@@ -3360,12 +3363,12 @@
             "required": false
           },
           "actor": {
-            "value": "octocat",
+            "value": "monalisa",
             "type": "string",
             "required": false
           },
           "time_period": {
-            "value": "2025-01-01T00:00:00Z..2025-01-31T23:59:59Z",
+            "value": "month",
             "type": "string",
             "required": false
           },
@@ -3400,7 +3403,7 @@
     {
       "name": "ListRepositoryCollaborators",
       "qualifiedName": "Github.ListRepositoryCollaborators",
-      "fullyQualifiedName": "Github.ListRepositoryCollaborators@4.1.1",
+      "fullyQualifiedName": "Github.ListRepositoryCollaborators@5.0.0",
       "description": "List collaborators for a repository.\n\nReturns users who have access to the repository and can be requested as reviewers\nfor pull requests. Useful for discovering who can review your PR.\n\nDetail levels:\n- basic: Only explicit collaborators (fast, minimal API calls)\n- include_org_members: Add all org members (default, moderate API calls)\n- full_profiles: Add org members + enrich with names/emails (slow, many API calls)",
       "parameters": [
         {
@@ -3466,18 +3469,18 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Number of collaborators per page (max 100). Default is 30.",
+          "description": "Number of collaborators to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Page number of results to fetch. Default is 1.",
+          "description": "0-indexed starting position of the first collaborator to return. Default is 0.",
           "enum": null,
           "inferrable": true
         }
@@ -3493,7 +3496,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -3520,7 +3523,7 @@
             "required": false
           },
           "permission": {
-            "value": "admin",
+            "value": "push",
             "type": "string",
             "required": false
           },
@@ -3534,13 +3537,13 @@
             "type": "boolean",
             "required": false
           },
-          "per_page": {
-            "value": 100,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "page": {
-            "value": 1,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           }
@@ -3570,7 +3573,7 @@
     {
       "name": "ListRepositoryLabels",
       "qualifiedName": "Github.ListRepositoryLabels",
-      "fullyQualifiedName": "Github.ListRepositoryLabels@4.1.1",
+      "fullyQualifiedName": "Github.ListRepositoryLabels@5.0.0",
       "description": "List all labels defined in a repository.",
       "parameters": [
         {
@@ -3590,18 +3593,18 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of results per page (max 100). Default is 100.",
+          "description": "The number of labels to return (max 100). Default is 100.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The page number of the results to fetch. Default is 1.",
+          "description": "0-indexed starting position of the first label to return. Default is 0.",
           "enum": null,
           "inferrable": true
         }
@@ -3617,7 +3620,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -3634,17 +3637,17 @@
             "required": true
           },
           "repo": {
-            "value": "Hello-World",
+            "value": "hello-world",
             "type": "string",
             "required": true
           },
-          "per_page": {
+          "limit": {
             "value": 50,
             "type": "integer",
             "required": false
           },
-          "page": {
-            "value": 1,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           }
@@ -3674,7 +3677,7 @@
     {
       "name": "ListReviewCommentsInARepository",
       "qualifiedName": "Github.ListReviewCommentsInARepository",
-      "fullyQualifiedName": "Github.ListReviewCommentsInARepository@4.1.1",
+      "fullyQualifiedName": "Github.ListReviewCommentsInARepository@5.0.0",
       "description": "List review comments in a GitHub repository.",
       "parameters": [
         {
@@ -3724,18 +3727,18 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of results per page (max 100). Default is 30.",
+          "description": "The number of review comments to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The page number of the results to fetch. Default is 1.",
+          "description": "0-indexed starting position of the first review comment to return. Default is 0.",
           "enum": null,
           "inferrable": true
         }
@@ -3751,7 +3754,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -3768,7 +3771,7 @@
             "required": true
           },
           "repo": {
-            "value": "Hello-World",
+            "value": "hello-world",
             "type": "string",
             "required": true
           },
@@ -3783,17 +3786,17 @@
             "required": false
           },
           "since": {
-            "value": "last_30_days",
+            "value": "2024-01-01T00:00:00Z",
             "type": "string",
             "required": false
           },
-          "per_page": {
+          "limit": {
             "value": 50,
             "type": "integer",
             "required": false
           },
-          "page": {
-            "value": 1,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           }
@@ -3823,8 +3826,8 @@
     {
       "name": "ListReviewCommentsOnPullRequest",
       "qualifiedName": "Github.ListReviewCommentsOnPullRequest",
-      "fullyQualifiedName": "Github.ListReviewCommentsOnPullRequest@4.1.1",
-      "description": "List review comments on a pull request in a GitHub repository.",
+      "fullyQualifiedName": "Github.ListReviewCommentsOnPullRequest@5.0.0",
+      "description": "List review comments on a pull request in a GitHub repository.\n\nGitHub exposes at most 100 threads and 100 comments per thread through the\nGraphQL query used here. When that ceiling may have omitted data, the\nresponse is marked truncated and does not claim authoritative totals.",
       "parameters": [
         {
           "name": "owner",
@@ -3881,18 +3884,18 @@
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of results per page (max 100). Default is 30.",
+          "description": "The number of review comments to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The page number of the results to fetch. Default is 1.",
+          "description": "0-indexed starting position of the first review comment to return. Default is 0.",
           "enum": null,
           "inferrable": true
         },
@@ -3916,7 +3919,7 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
@@ -3948,22 +3951,22 @@
             "required": false
           },
           "direction": {
-            "value": "asc",
+            "value": "desc",
             "type": "string",
             "required": false
           },
           "since": {
-            "value": "last_30_days",
+            "value": "2025-01-01",
             "type": "string",
             "required": false
           },
-          "per_page": {
-            "value": 50,
+          "limit": {
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "page": {
-            "value": 1,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           },
@@ -3998,8 +4001,8 @@
     {
       "name": "ListStargazers",
       "qualifiedName": "Github.ListStargazers",
-      "fullyQualifiedName": "Github.ListStargazers@4.1.1",
-      "description": "List the stargazers for a GitHub repository.\n\nReturns stargazers in chronological order (oldest first).",
+      "fullyQualifiedName": "Github.ListStargazers@5.0.0",
+      "description": "List the stargazers for a GitHub repository.\n\nGitHub restricts access to individual stargazer listings to repository\nadmins and collaborators. The aggregate star count remains public.\n\nReturns stargazers in chronological order (oldest first).",
       "parameters": [
         {
           "name": "owner",
@@ -4018,18 +4021,18 @@
           "inferrable": true
         },
         {
-          "name": "page",
+          "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The page number of the stargazers to fetch. Default is 1.",
+          "description": "The number of stargazers to return (max 100). Default is 30.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "per_page",
+          "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The number of stargazers per page (max 100). Default is 30.",
+          "description": "0-indexed starting position of the first stargazer to return. Default is 0.",
           "enum": null,
           "inferrable": true
         }
@@ -4045,34 +4048,34 @@
       "secretsInfo": [
         {
           "name": "GITHUB_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         }
       ],
       "output": {
         "type": "json",
-        "description": "List of stargazers for the repository"
+        "description": "List stargazers for a repository where the caller is an admin or collaborator"
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Github.ListStargazers",
         "parameters": {
           "owner": {
-            "value": "octocat",
+            "value": "torvalds",
             "type": "string",
             "required": true
           },
           "repo": {
-            "value": "Hello-World",
+            "value": "linux",
             "type": "string",
             "required": true
           },
-          "page": {
-            "value": 1,
+          "limit": {
+            "value": 50,
             "type": "integer",
             "required": false
           },
-          "per_page": {
-            "value": 50,
+          "offset": {
+            "value": 0,
             "type": "integer",
             "required": false
           }
@@ -4102,7 +4105,7 @@
     {
       "name": "ManageLabels",
       "qualifiedName": "Github.ManageLabels",
-      "fullyQualifiedName": "Github.ManageLabels@4.1.1",
+      "fullyQualifiedName": "Github.ManageLabels@5.0.0",
       "description": "Add or remove labels from an issue or pull request.\n\nSupports fuzzy matching for typo tolerance. Both issues and pull requests\nsupport labels through the same API. You can add and remove labels in a\nsingle operation.",
       "parameters": [
         {
@@ -4259,7 +4262,7 @@
     {
       "name": "ManagePullRequestReviewers",
       "qualifiedName": "Github.ManagePullRequestReviewers",
-      "fullyQualifiedName": "Github.ManagePullRequestReviewers@4.1.1",
+      "fullyQualifiedName": "Github.ManagePullRequestReviewers@5.0.0",
       "description": "Manage reviewers for a pull request.",
       "parameters": [
         {
@@ -4416,7 +4419,7 @@
     {
       "name": "MergePullRequest",
       "qualifiedName": "Github.MergePullRequest",
-      "fullyQualifiedName": "Github.MergePullRequest@4.1.1",
+      "fullyQualifiedName": "Github.MergePullRequest@5.0.0",
       "description": "Merge a pull request in a GitHub repository.",
       "parameters": [
         {
@@ -4576,7 +4579,7 @@
     {
       "name": "ResolveReviewThread",
       "qualifiedName": "Github.ResolveReviewThread",
-      "fullyQualifiedName": "Github.ResolveReviewThread@4.1.1",
+      "fullyQualifiedName": "Github.ResolveReviewThread@5.0.0",
       "description": "Resolve or unresolve a pull request review conversation thread.",
       "parameters": [
         {
@@ -4680,7 +4683,7 @@
     {
       "name": "SearchCode",
       "qualifiedName": "Github.SearchCode",
-      "fullyQualifiedName": "Github.SearchCode@4.1.1",
+      "fullyQualifiedName": "Github.SearchCode@5.0.0",
       "description": "Search code across the authorized GitHub scope.\n\nReturns matching files with the matched fragments inlined so the caller\ncan read each match in context without a follow-up file fetch.",
       "parameters": [
         {
@@ -4771,7 +4774,7 @@
     {
       "name": "SearchMyRepos",
       "qualifiedName": "Github.SearchMyRepos",
-      "fullyQualifiedName": "Github.SearchMyRepos@4.1.1",
+      "fullyQualifiedName": "Github.SearchMyRepos@5.0.0",
       "description": "Search repositories accessible to the authenticated user with fuzzy matching.",
       "parameters": [
         {
@@ -4892,7 +4895,7 @@
     {
       "name": "SearchProjectItem",
       "qualifiedName": "Github.SearchProjectItem",
-      "fullyQualifiedName": "Github.SearchProjectItem@4.1.1",
+      "fullyQualifiedName": "Github.SearchProjectItem@5.0.0",
       "description": "Search for a specific item in a Projects V2 project.",
       "parameters": [
         {
@@ -5045,7 +5048,7 @@
     {
       "name": "SetStarred",
       "qualifiedName": "Github.SetStarred",
-      "fullyQualifiedName": "Github.SetStarred@4.1.1",
+      "fullyQualifiedName": "Github.SetStarred@5.0.0",
       "description": "Star or un-star a GitHub repository.",
       "parameters": [
         {
@@ -5136,7 +5139,7 @@
     {
       "name": "SubmitPullRequestReview",
       "qualifiedName": "Github.SubmitPullRequestReview",
-      "fullyQualifiedName": "Github.SubmitPullRequestReview@4.1.1",
+      "fullyQualifiedName": "Github.SubmitPullRequestReview@5.0.0",
       "description": "Submit a review for a pull request.",
       "parameters": [
         {
@@ -5257,7 +5260,7 @@
     {
       "name": "UpdateFileLines",
       "qualifiedName": "Github.UpdateFileLines",
-      "fullyQualifiedName": "Github.UpdateFileLines@4.1.1",
+      "fullyQualifiedName": "Github.UpdateFileLines@5.0.0",
       "description": "Replace a block of lines within a file (1-indexed, inclusive). Set mode=FileUpdateMode.APPEND\nto add new content to the end of the file.",
       "parameters": [
         {
@@ -5429,7 +5432,7 @@
     {
       "name": "UpdateIssue",
       "qualifiedName": "Github.UpdateIssue",
-      "fullyQualifiedName": "Github.UpdateIssue@4.1.1",
+      "fullyQualifiedName": "Github.UpdateIssue@5.0.0",
       "description": "Update an issue in a GitHub repository.\n\nParameters that are not provided (None) will not be updated or cleared.\nUpdates apply to the issue in the repository. If the issue is in a project,\nthe project item will automatically reflect these changes.",
       "parameters": [
         {
@@ -5610,7 +5613,7 @@
     {
       "name": "UpdatePullRequest",
       "qualifiedName": "Github.UpdatePullRequest",
-      "fullyQualifiedName": "Github.UpdatePullRequest@4.1.1",
+      "fullyQualifiedName": "Github.UpdatePullRequest@5.0.0",
       "description": "Update a pull request in a GitHub repository.",
       "parameters": [
         {
@@ -5770,7 +5773,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Github.WhoAmI",
-      "fullyQualifiedName": "Github.WhoAmI@4.1.1",
+      "fullyQualifiedName": "Github.WhoAmI@5.0.0",
       "description": "Get information about the authenticated GitHub user.\n\nReturns profile, organizations, and teams.",
       "parameters": [],
       "auth": {
@@ -5858,6 +5861,6 @@
   ],
   "subPages": [],
   "curationSourceHash": "c650cdab79c81731cd0ee555fe582122e58496b6071761e71e79fdb19a739d69",
-  "generatedAt": "2026-09-04T15:27:33.334Z",
-  "summary": "## GitHub Toolkit\n\nArcade's GitHub toolkit connects LLMs to the GitHub API, enabling agents to manage repositories, issues, pull requests, projects, code search, and user activity on behalf of authenticated users.\n\n## Capabilities\n\n- **Repository & branch management:** Create branches, read/write/update files with explicit create-vs-overwrite modes, list repository activities, collaborators, labels, and org repositories.\n- **Pull request lifecycle:** Create, update, merge, and inspect PRs; manage reviewers and assignees with fuzzy matching; check merge readiness; list commits on a PR; submit, reply to, and resolve review comments and threads.\n- **Issues & labels:** Create, update, and fetch issues; add issues to Projects V2; comment on issues; add or remove labels with typo-tolerant fuzzy matching.\n- **GitHub Projects V2:** List projects across org/user scopes, enumerate project fields and items, search within a project, and attach issues to projects at creation time.\n- **Code & content search:** Search code across authorized scope with matched fragments inlined; retrieve file contents with optional line-range slicing for large files.\n- **User activity & social:** Get authenticated user profile/orgs/teams, open items, recent activity, review workload; star/un-star repos; count and list stargazers.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **GitHub** provider. See the [Arcade GitHub auth provider docs](https://docs.arcade.dev/en/references/auth-providers/github) for setup instructions.\n\n## Secrets\n\n- **`GITHUB_SERVER_URL`** — The base URL of the GitHub API server. Override this when targeting a **GitHub Enterprise Server** (GHES) instance rather than `https://api.github.com`. Set it to your GHES root URL (e.g., `https://github.example.com`). Obtain it from your enterprise administrator or from your GHES instance's site settings. No special permissions are required to look up the URL itself; it is simply the hostname your organization's GitHub Enterprise installation is served from. See [GitHub Enterprise Server documentation](https://docs.github.com/en/enterprise-server@latest/admin/overview/about-github-enterprise-server) for details.\n\nConfigure secrets in the Arcade dashboard at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets) or via the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+  "generatedAt": "2026-09-24T21:01:59.023Z",
+  "summary": "## GitHub Toolkit\n\nThe GitHub toolkit connects Arcade to GitHub, enabling LLMs to read and write across repositories, issues, pull requests, projects, code search, and user activity.\n\n## Capabilities\n\n- **Repository & file management:** Create branches, create/overwrite files, update specific line ranges, retrieve file contents (with line-range slicing), list org repositories, and inspect repository activity and collaborators.\n- **Pull requests & reviews:** Open, update, merge, and check merge readiness of PRs; manage reviewers and labels (with fuzzy matching); create, list, and reply to review comments; submit full reviews; resolve/unresolve review threads.\n- **Issues & comments:** Create, update, and retrieve issues (with optional project attachment); add issue comments; manage labels across issues and PRs in a single call.\n- **GitHub Projects (V2):** List projects across org/user scopes, list and filter project items, search for specific items, and inspect all custom fields and select/iteration options.\n- **Discovery & search:** Search code with matched fragments inlined, fuzzy-search accessible repos, list stargazers, count stars, star/unstar repos, and list repository labels.\n- **User & activity context:** Identify the authenticated user (profile, orgs, teams), retrieve open items authored by the user, fetch recent activity (PRs, reviews, issues, commits), and surface the review workload (PRs awaiting the user's review).\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via GitHub. See the [Arcade GitHub auth provider docs](https://docs.arcade.dev/en/references/auth-providers/github) for setup instructions.\n\n## Secrets\n\n- **`GITHUB_SERVER_URL`** — The base URL of the GitHub API server. This is used to redirect API calls to a GitHub Enterprise Server (GHES) instance instead of the default `https://api.github.com`. If you are using GitHub.com, this secret is not required. For GHES, the value should be your enterprise instance's root URL (e.g., `https://github.your-company.com`). Obtain this from your GitHub Enterprise administrator or your enterprise instance's settings. See [GitHub Enterprise Server documentation](https://docs.github.com/en/enterprise-server/admin/overview/about-github-enterprise-server) for details on your instance URL.\n\nFor general guidance on configuring secrets in Arcade, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

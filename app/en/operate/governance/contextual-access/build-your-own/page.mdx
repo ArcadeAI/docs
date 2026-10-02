@@ -42,7 +42,7 @@ Your server needs to expose HTTP POST endpoints for each hook point you want to 
 | --- | --- | --- |
 | `POST /access` | Access Hook | Only if you need tool access control |
 | `POST /pre` | Pre-Execution Hook | Only if you need tool request validation/modification |
-| `POST /post` | Post-Execution Hook | Only if you need tool output filtering/modification |
+| `POST /post` | Post-Execution Hook | Only if you need to filter or modify the result (output and content blocks) |
 
 You do not need to implement all endpoints. Only implement the ones you configure in the Dashboard.
 
@@ -80,6 +80,7 @@ You do not need to implement all endpoints. Only implement the ones you configur
 | `inputs` | object | Tool inputs |
 | `success` | boolean | Whether the tool call succeeded |
 | `output` | any | The execution output (any JSON type) |
+| `content` | array | Content blocks returned alongside `output` (see [Content blocks](#content-blocks)) |
 | `execution_code` | string | Status from worker |
 | `execution_error` | string | Error message from tool call |
 | `context` | object | Same as pre-execution hook |
@@ -90,7 +91,13 @@ You do not need to implement all endpoints. Only implement the ones you configur
 | --- | --- | --- | --- |
 | `code` | string | Yes | `OK`, `CHECK_FAILED`, or `RATE_LIMIT_EXCEEDED` |
 | `error_message` | string | No | Shown to the agent when denying |
-| `override` | object | No | `output` to replace the response returned to the agent |
+| `override` | object | No | `output` and/or `content` to replace what's returned to the agent |
+
+### Content blocks
+
+`content` holds the blocks a remote MCP server returned alongside its result, in Arcade's content-block format, which follows MCP's. It's absent when the server sent no blocks, and on errors. An empty `override.content` list removes every block, and clients then get `output` as text.
+
+If your hook redacts `output`, redact `content` too. Otherwise the server's text reaches the client unchanged.
 
 ## Access Hook
 

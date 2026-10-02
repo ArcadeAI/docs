@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  airtable: {
+    title: "Airtable",
+    href: "/en/resources/integrations/productivity/airtable",
+  },
   asana: {
     title: "Asana",
     href: "/en/resources/integrations/productivity/asana",
@@ -12,6 +16,10 @@ const meta: MetaRecord = {
   ashby: {
     title: "Ashby",
     href: "/en/resources/integrations/productivity/ashby",
+  },
+  calendly: {
+    title: "Calendly",
+    href: "/en/resources/integrations/productivity/calendly",
   },
   clickup: {
     title: "ClickUp",
@@ -120,6 +128,10 @@ const meta: MetaRecord = {
   resend: {
     title: "Resend",
     href: "/en/resources/integrations/productivity/resend",
+  },
+  workday: {
+    title: "Workday",
+    href: "/en/resources/integrations/productivity/workday",
   },
   "-- Starter": {
     type: "separator",

@@ -29,9 +29,13 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("--skip-unchanged");
   expect(workflowContents).toContain("--preserve-last-known-good");
   expect(workflowContents).toContain("--verbose");
-  expect(workflowContents).toContain("--api-source tool-metadata");
-  expect(workflowContents).toContain("--tool-metadata-url");
-  expect(workflowContents).toContain("--tool-metadata-key");
+  expect(workflowContents).toContain("--api-source public-catalog");
+  // The public catalog is anonymous and the generator carries the production
+  // URL, so the nightly passes no API URL or key at all.
+  expect(workflowContents).not.toContain("--api-url");
+  expect(workflowContents).not.toContain("--tool-metadata-url");
+  expect(workflowContents).not.toContain("--tool-metadata-key");
+  expect(workflowContents).not.toContain("ENGINE_API_URL");
   expect(workflowContents).toContain("--llm-provider anthropic");
   expect(workflowContents).toContain("--llm-model");
   expect(workflowContents).toContain("--llm-api-key");
@@ -44,6 +48,12 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("HUSKY: 0");
   expect(workflowContents).toContain("[AUTO] Adding MCP Servers docs update");
   expect(workflowContents).toContain("pull-requests: write");
+  // GITHUB_TOKEN PRs do not start other workflows. Generate llms.txt here
+  // instead of depending on llmstxt.yml, and open the PR with github.token.
+  expect(workflowContents).toContain("pnpm llmstxt");
+  expect(workflowContents).toContain(`token: ${"${"}{ github.token }}`);
+  expect(workflowContents).not.toContain("uses: ./.github/actions/app-token");
+  expect(workflowContents).not.toContain("DOCS_BOT");
 });
 
 test("porter workflow does not build the docs generator before running it", () => {

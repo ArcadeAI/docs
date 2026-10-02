@@ -3,6 +3,7 @@ title: "Create via Dashboard"
 description: "Create and configure MCP Gateways using the Arcade dashboard"
 ---
 
+import { Callout } from "nextra/components";
 import Image from "next/image";
 import { SignupLink } from "@/app/_components/analytics";
 
@@ -69,6 +70,23 @@ See [Skip consent for trusted MCP clients](/operate/governance/mcp-gateways#skip
 
 ## After Creating a Gateway
 
-Once you've created a gateway, you'll need to add it to your chat client. The assistant will provide the MCP URL (for example, `https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}`).
+Once you've created a gateway, add it to your MCP client. The dashboard shows the MCP URL (for example, `https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}`).
 
 See [Connect to MCP clients](/get-started/mcp-clients) for setup instructions specific to your client.
+
+### Point Claude at the gateway
+
+For Claude Desktop and Claude.ai, set the gateway to **Arcade Auth** or a **User Source**. Claude needs a browser OAuth flow, so **Arcade Headers** does not work here.
+
+Add the gateway URL as a custom connector. Claude shows **Authentication** and **OAuth client** options. Keep the values marked **Detected**:
+
+- **Sign in now** for Authentication
+- **Use Claude's published identity** for OAuth client
+
+On Claude Team and Enterprise plans, only an Owner can add the connector. Members then click **Connect**. See [Keep the detected defaults](/get-started/mcp-clients/claude-desktop#keep-the-detected-defaults).
+
+<Callout type="info">
+  To skip Arcade's consent screen for Claude users, allowlist Claude's published
+  identity on the gateway. See [Skip consent for trusted MCP
+  clients](/operate/governance/mcp-gateways#skip-consent-for-trusted-mcp-clients).
+</Callout>

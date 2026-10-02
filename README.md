@@ -12,10 +12,10 @@ Then, run `pnpm dev` to start the development server and visit localhost:3000.
 
 ### Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in the values:
+Copy `.env.local.example` to `.env.local` and fill in the values:
 
 ```bash
-cp .env.example .env.local
+cp .env.local.example .env.local
 ```
 
 | Variable | Required | Purpose |

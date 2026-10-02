@@ -2,6 +2,8 @@
  * Toolkit documentation constants shared across toolkit UI components.
  */
 
+import { hasAuthProviderPage } from "@/toolkit-docs-generator/src/shared/auth-provider-pages";
+
 // =============================================================================
 // Internal Routes
 // =============================================================================
@@ -39,9 +41,13 @@ export function getPackageName(toolkitId: string): string {
 }
 
 /**
- * Generate auth provider docs URL from provider ID
+ * Auth provider docs URL for a provider ID, or null when the provider has no
+ * page, so callers don't link to a 404.
  */
-export function getAuthProviderDocsUrl(providerId: string): string {
+export function getAuthProviderDocsUrl(providerId: string): string | null {
+  if (!hasAuthProviderPage(providerId)) {
+    return null;
+  }
   return `${AUTH_PROVIDER_DOCS_PATH}/${providerId.toLowerCase()}`;
 }
 
