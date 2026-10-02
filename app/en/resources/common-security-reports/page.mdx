@@ -1,0 +1,142 @@
+---
+title: "Common security reports"
+description: "Answers to the security questions Arcade hears most often, from email headers to how projects, user ids, and OAuth tokens work"
+---
+
+import { Callout } from "nextra/components";
+import { ContactEmail } from "@/app/_components/contact-email";
+
+# Common security reports
+
+This page is for security researchers, and for platform operators who review Arcade before a rollout. It collects the questions we answer most often on mail to the security team: scanner findings about headers and DNS, and reports about OAuth that describe the Arcade Cloud data model.
+
+Read it before you file. A finding that shows one tenant reading or changing another tenant's tokens, secrets, or data is in scope. Send that.
+
+<Callout type="info">
+  These answers describe Arcade Cloud. A self-hosted Arcade Engine is the
+  operator's deployment, with that operator's own keys and network.
+</Callout>
+
+## Mail authentication, DNS, and website headers
+
+### The sender policy framework record ends in soft fail
+
+The SPF record for `arcade.dev` ends in `~all`. That qualifier is SoftFail. Receivers treat a SoftFail result as an unauthorized sender. Neutral is a different qualifier, `?all`.
+
+DMARC for the domain is `p=reject`. Receivers reject mail that claims to be from `arcade.dev` and fails alignment, with the record ending in `~all` or in `-all`. Valimail manages the record and publishes `~all` on purpose.
+
+A report that asks us to replace `~all` with `-all` describes the record we publish.
+
+### An unsigned DNS zone is an accepted configuration
+
+The `arcade.dev` zone has no DNSSEC signature. A report that shows missing RRSIG records describes that configuration. We treat it as a DNS choice, separate from a product vulnerability.
+
+### A missing CAA record is hardening
+
+CAA records are optional. A report that shows the record is absent, and stops there, has no mis-issued certificate to investigate. We monitor for unexpected certificate issuance, and we have worked with our DNS provider on CAA as hardening.
+
+### The marketing site is separate from the app
+
+`www.arcade.dev` is the marketing site. `app.arcade.dev` is where you sign in and run Arcade. A missing Content-Security-Policy header on the marketing site needs a demonstrated injection or data leak on that site before we treat it as a product issue.
+
+Webflow hosts the marketing site. IP-reputation lists and firewall categories flag that host, or file the site under the wrong topic, such as games. That listing is about the marketing host. It is separate from Arcade Cloud.
+
+### Auth error pages come from the identity vendor
+
+Ory serves the error page on `auth.arcade.dev`. Arcade uses Ory for account login. Report content reflected on that page through [Ory's security process](https://www.ory.com/docs/ecosystem/security).
+
+### Public discovery documents stay public
+
+These surfaces are public on purpose:
+
+- `auth.arcade.dev/.well-known/openid-configuration` is the OpenID discovery document. Arcade leaves dynamic client registration off.
+- Signup at `account.arcade.dev` is how a customer creates an Arcade account.
+- Hostnames under `server.arcade.dev` are per-deployment servers.
+
+A scanner that lists those URLs has found the public surface.
+
+## OAuth, projects, and tokens
+
+Arcade Cloud isolates data by tenant and by [project](/resources/glossary#project). A project is the trust boundary. Everyone with membership in a project, or with one of its API keys, shares that project's users, brokered tokens, and secrets, and can start authorization for those users. Invite people you trust, and join projects you trust.
+
+### A project API key is an administrator credential
+
+A project API key authenticates as the administrator of that one project. Calls made with the key can start authorization and can read tokens for users of that project. Keep the key on a server. A report that uses your own project key to read your own project's tokens is that role, working as designed.
+
+### A user id belongs to one project
+
+Arcade stores `user_id` as an opaque string on the project. An email address is a common choice, and any string is valid. The same string in a second project names a different user. `ada@example.com` in your project has no link to `ada@example.com` in another tenant.
+
+When a project API key sends a `user_id`, Arcade stores that value as the administrator's name for a user inside that project. The key can address users in its own project.
+
+### Completing a flow stays in the project that started it
+
+Authorization completion checks two facts:
+
+- The API key belongs to the project that started the flow.
+- The `user_id` matches the id from the start of the flow.
+
+The user id stays off the browser redirect. A flow started in one project finishes with that project's key.
+
+### A custom auth provider replaces the platform provider for your tenant
+
+You can add an auth provider whose id matches a platform provider, such as `google`. That provider then handles authorization for your tenant, and the authorize URL carries your client id. The identity provider still enforces its own rules, including ownership of the redirect URI.
+
+Running that client through Arcade matches running the client on your own server. The consent screen is your OAuth client.
+
+An administrator who saves a broken auth provider can take that tenant's tool catalog offline. The outage stays inside the tenant. Administrators can change providers.
+
+### Default OAuth apps follow project membership
+
+Arcade's default OAuth apps work with the [Arcade user verifier](/build/user-facing-agents/secure-auth-production#use-the-arcade-user-verifier). The verifier asks the end user to sign in to an Arcade account that is a member of the project. Membership means the project may act for that account on connectors that use the default app.
+
+A token that shows up in a second project means that Arcade account joined the second project. A project the account never joined cannot name them and read their mailbox.
+
+For a multi-user production app, add your own OAuth client and a [custom user verifier](/build/user-facing-agents/secure-auth-production#build-a-custom-user-verifier). Default apps fit development and single-tenant use.
+
+We described a related consent-binding issue, and the control Arcade ships for it, in [Confused deputy attacks on OAuth](https://www.arcade.dev/blog/arcade-proactively-addressed-coat-vulnerability-in-agentic-ai/).
+
+### Secret names are public
+
+Platform secret names are public. Toolkit pages list the secret each tool expects, so you can replace a default with your own value. You should expect to see the name.
+
+A response that returns secret values, or another tenant's secret material, is a different finding. Send that.
+
+### Health-check tokens authenticate the health check
+
+Worker health checks use a throwaway credential minted for that check. Steady-state calls to a deployed worker use a secret for that deployment. A token taken from a health check does not authenticate those calls.
+
+Show us that token succeeding on a real worker request, or reaching another tenant's data, and we will investigate that evidence.
+
+### Plan limits are billing
+
+Arcade bills premium tool executions on the plan the project is on.
+
+The chat completions route on a project key was a product feature, including on free projects, and we are removing it. Calling it with your own project key is product behavior.
+
+A race that lets one project pass a plan quota is a metering bug. We look at those, and we file them with billing, apart from access to another tenant's data. Billing-limit bypasses sit outside the reward side of the [security research program](/resources/security-research-program).
+
+### Public pages and retired hosts
+
+A public marketing page publishes its content. Removing a front-end prompt on that page does not cross an access-control boundary.
+
+A hostname we have retired, that can still change content or hold customer data, is worth a report. Name the host and what changed. We have removed retired properties after reports like that.
+
+Archived example repositories are samples. A static scan of an archived repo, with no impact on Arcade Cloud, is outside this program.
+
+### Files on a developer laptop
+
+The Arcade CLI can write a credentials file on the machine where you run it. That file is local developer state. Arcade Cloud keeps brokered tokens in Arcade Cloud. A local file-permission finding needs a cloud impact, or a default that exposes another person's data, before it fits this program.
+
+## What to send
+
+Send a report when you can show one of these, using accounts you own:
+
+- One tenant reading or changing another tenant's tokens, secrets, or data
+- An authorization check that lets a non-member act on a project
+- Injection that changes agent behavior or leaks user data
+- A flaw in a production service, API, or published open source component, with a concrete impact
+
+Include the impact, the accounts you used, and a responsible proof. Write to <ContactEmail domain="arcade.dev" user="security">the security team</ContactEmail> and leave other Arcade addresses off the message.
+
+Program rules, scope, and how we respond live on the [security research program](/resources/security-research-program) page.
