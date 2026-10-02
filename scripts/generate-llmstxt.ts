@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import chalk from "chalk";
@@ -94,46 +94,44 @@ async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
 /**
  * Gets changed files since the last git SHA
  */
-function getChangedFilesSince(lastSha: string): Set<string> {
+function listChangedFilesSince(ref: string): Set<string> {
+  const output = execFileSync(
+    "git",
+    ["diff", "--name-only", "--diff-filter=AMD", ref, "HEAD"],
+    { encoding: "utf-8" }
+  );
+  return new Set(
+    output
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0)
+  );
+}
+
+function getChangedFilesSince(lastSha: string): Set<string> | null {
   try {
-    // Get files that were added, modified, or deleted
-    const added = execSync(
-      `git diff --name-only --diff-filter=A ${lastSha} HEAD`,
-      {
-        encoding: "utf-8",
-      }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const modified = execSync(
-      `git diff --name-only --diff-filter=M ${lastSha} HEAD`,
-      { encoding: "utf-8" }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const deleted = execSync(
-      `git diff --name-only --diff-filter=D ${lastSha} HEAD`,
-      {
-        encoding: "utf-8",
-      }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const allChanged = new Set([...added, ...modified, ...deleted]);
-    return allChanged;
+    return listChangedFilesSince(lastSha);
   } catch (_error) {
+    const baseRef = process.env.GITHUB_BASE_REF;
+    if (baseRef) {
+      const remoteBaseRef = `origin/${baseRef}`;
+      try {
+        console.warn(
+          chalk.yellow(
+            `⚠ Could not get changed files since ${lastSha}; comparing with ${remoteBaseRef}`
+          )
+        );
+        return listChangedFilesSince(remoteBaseRef);
+      } catch (_fallbackError) {
+        // Fall through and summarize everything when neither reference exists.
+      }
+    }
     console.warn(
       chalk.yellow(
-        `⚠ Could not get changed files since ${lastSha}, processing all files`
+        `⚠ Could not determine changes since ${lastSha}; processing all files`
       )
     );
-    return new Set();
+    return null;
   }
 }
 
@@ -597,7 +595,9 @@ function determinePagesToSummarize(
 
   if (previousMetadata && previousMetadata.gitSha !== "unknown") {
     // Get changed files since last generation
-    const changedFiles = getChangedFilesSince(previousMetadata.gitSha);
+    const changedFiles =
+      getChangedFilesSince(previousMetadata.gitSha) ??
+      new Set(pages.map((page) => page.path));
     console.log(
       chalk.blue(
         `\n📊 Found ${changedFiles.size} changed files since last generation`
