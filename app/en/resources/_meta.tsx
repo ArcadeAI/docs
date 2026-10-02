@@ -19,9 +19,6 @@ export const meta: MetaRecord = {
   "security-research-program": {
     title: "Security research program",
   },
-  "common-security-reports": {
-    title: "Common security reports",
-  },
   "contact-us": {
     title: "Contact",
   },

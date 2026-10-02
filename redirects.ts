@@ -1170,4 +1170,10 @@ export const redirects: Redirect[] = [
     destination: "/:locale/build",
     permanent: true,
   },
+  // Folded into the security research program page before this path shipped.
+  {
+    source: "/:locale/resources/common-security-reports",
+    destination: "/:locale/resources/security-research-program",
+    permanent: true,
+  },
 ];
