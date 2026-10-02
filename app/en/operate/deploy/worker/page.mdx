@@ -9,18 +9,20 @@ The Arcade Worker hosts Arcade's toolkits and runs their tool calls for the [Eng
 
 This page explains how the worker behaves and when to change each setting. For every value and its default, see the [chart reference on Artifact Hub](https://artifacthub.io/packages/helm/arcade/arcade), which is the source of truth.
 
-## Process models
+## How the worker runs
 
-The worker ships as two images built from the same commit. The image you choose is the worker's process model:
+The worker image is `arcadedev/worker`. It runs a supervisor that serves the tool catalog from a snapshot taken at build time, and starts one isolated runtime per toolkit version when that version is first called. Because each version runs in its own runtime, one worker serves the current version of every toolkit alongside the older versions Arcade keeps available for clients that still use them.
 
-| Image | Process model |
-| --- | --- |
-| `arcadedev/worker-supervisor` | Serves the tool catalog from a snapshot taken at build time, and starts one isolated runtime per toolkit version on demand. One worker can host multiple versions of the same toolkit. |
-| `arcadedev/worker` | Eager: loads every toolkit into one process at boot. |
+### Upgrading from an earlier chart release
 
-## How the supervisor worker behaves
+Earlier releases of `arcadedev/worker` loaded every toolkit into one process at boot, and older toolkit versions needed a separate worker. The current image replaces both, under the same name and with the same port and `/worker/health` probe, so upgrading the chart needs no value changes. Two settings from the earlier worker behave differently:
 
-Operators can rely on the following behavior from the `arcadedev/worker-supervisor` image.
+- `toolPackages` (`ARCADE_MCP_TOOL_PACKAGE`) still limits which toolkits the worker serves. A concrete `supervisor.serveToolkits` list takes precedence over it.
+- `WORKERS` no longer has an effect: the worker runs one supervisor process and logs a warning when it finds the variable.
+
+## How the worker behaves
+
+Operators can rely on the following behavior.
 
 **Versions**
 
@@ -53,6 +55,9 @@ Set these values under `workerDefaults` to apply them to every worker, or on an 
 | `supervisor.maxChildren` | `15` | The most runtimes running at once. At the cap, the worker stops the least recently used idle runtime that isn't pre-warmed to admit a new one. `0` means unbounded. Size pod memory from this value, see [Sizing](#sizing). |
 | `supervisor.idleTtlSeconds` | `600` | Seconds a runtime may sit idle before the worker stops it. `0` never stops an idle runtime. |
 | `supervisor.capacityWaitSeconds` | `30` | How long a call waits for a free slot when every runtime is busy at the cap, before it fails with a retryable error. |
+| `supervisor.peerRouting.enabled` | `false` | With more than one replica, replicas agree on which of them starts each toolkit version and hand first calls to it, so a burst of first calls costs the fleet one cold start instead of one per replica. Adds a headless Service so replicas can find each other. A replica that can't reach the owner serves the call itself. |
+| `supervisor.peerRouting.promoteAfterForwards` | `10` | How many calls for one version a replica hands off before it starts its own runtime for that version, so a version called everywhere isn't routed through one replica indefinitely. |
+| `toolPackages` | Empty | Toolkit packages this worker serves, for example `[arcade_math]`. Empty serves every toolkit in the image. Narrows the toolkits served when `supervisor.serveToolkits` is `*`. A concrete `serveToolkits` list wins. |
 
 ### Advanced settings
 
@@ -65,12 +70,13 @@ Set these environment variables through `extraEnv`. See the [chart reference](ht
 | `ARCADE_SUPERVISOR_MAX_CHILDREN` | `15` | The most runtimes running at once. `0` means unbounded. The chart always sets this variable from `supervisor.maxChildren`, so change that value instead of adding the variable to `extraEnv`. |
 | `ARCADE_SUPERVISOR_INVOKE_TIMEOUT` | 600 seconds | The longest a single tool call may run. |
 | `ARCADE_SUPERVISOR_PREWARM_CONCURRENCY` | `4` | How many runtimes start at once during boot. Keep it near the pod's core count. |
+| `ARCADE_SUPERVISOR_SHARD_PREWARM` | Unset | With peer routing on, each replica warms only its share of the pre-warm list, so the fleet keeps more toolkits warm in total. |
 
 ## Sizing
 
 - **Memory:** each running runtime uses about 100 MB, so a pod needs roughly `maxChildren` × 100 MB plus memory for the supervisor itself, plus headroom.
-- **Boot time:** with ten pre-warmed toolkits on 2 cores, the supervisor worker is ready in about 12 seconds. The eager worker takes 60 seconds or more to load every toolkit.
-- **Image size:** the supervisor image is 2.96 GB. The eager worker plus the deprecated-versions worker it replaces total 3.85 GB.
+- **Boot time:** with ten pre-warmed toolkits on 2 cores, the worker is ready in about 12 seconds. Each pre-warmed toolkit adds a little boot time, and toolkits that aren't pre-warmed start on their first call instead.
+- **CPU:** the chart's default limit of 512m is enough for a small pre-warm set. Pre-warmed runtimes start in parallel (`ARCADE_SUPERVISOR_PREWARM_CONCURRENCY`), so more cores shorten boot.
 
 ## Next steps
 
