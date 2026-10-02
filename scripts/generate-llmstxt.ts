@@ -1,4 +1,4 @@
-import { execFileSync, execSync } from "node:child_process";
+import { execSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import chalk from "chalk";
@@ -43,10 +43,6 @@ const DYNAMIC_SEGMENT_REGEX = /\[[^/]+\]/;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
 const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
 const FRONTMATTER_TITLE_REGEX = /^title:\s*(.+)$/m;
-const FRONTMATTER_DESCRIPTION_REGEX = /^description:\s*(.+)$/m;
-const GUIDE_OUTCOMES_REGEX =
-  /<GuideOverview\.Outcomes>\s*([\s\S]*?)\s*<\/GuideOverview\.Outcomes>/;
-const FIRST_PROSE_AFTER_H1_REGEX = /^#\s+.+\n+([^#<\n][^\n]*)/m;
 const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const METADATA_REGEX =
   /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
@@ -98,44 +94,46 @@ async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
 /**
  * Gets changed files since the last git SHA
  */
-function listChangedFilesSince(ref: string): Set<string> {
-  const output = execFileSync(
-    "git",
-    ["diff", "--name-only", "--diff-filter=AMD", ref, "HEAD"],
-    { encoding: "utf-8" }
-  );
-  return new Set(
-    output
+function getChangedFilesSince(lastSha: string): Set<string> {
+  try {
+    // Get files that were added, modified, or deleted
+    const added = execSync(
+      `git diff --name-only --diff-filter=A ${lastSha} HEAD`,
+      {
+        encoding: "utf-8",
+      }
+    )
       .trim()
       .split("\n")
-      .filter((line) => line.length > 0)
-  );
-}
+      .filter((line) => line.length > 0);
 
-function getChangedFilesSince(lastSha: string): Set<string> | null {
-  try {
-    return listChangedFilesSince(lastSha);
-  } catch (_error) {
-    const baseRef = process.env.GITHUB_BASE_REF;
-    if (baseRef) {
-      const remoteBaseRef = `origin/${baseRef}`;
-      try {
-        console.warn(
-          chalk.yellow(
-            `⚠ Could not get changed files since ${lastSha}; comparing with ${remoteBaseRef}`
-          )
-        );
-        return listChangedFilesSince(remoteBaseRef);
-      } catch (_fallbackError) {
-        // Fall through and summarize everything when neither reference exists.
+    const modified = execSync(
+      `git diff --name-only --diff-filter=M ${lastSha} HEAD`,
+      { encoding: "utf-8" }
+    )
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
+    const deleted = execSync(
+      `git diff --name-only --diff-filter=D ${lastSha} HEAD`,
+      {
+        encoding: "utf-8",
       }
-    }
+    )
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
+    const allChanged = new Set([...added, ...modified, ...deleted]);
+    return allChanged;
+  } catch (_error) {
     console.warn(
       chalk.yellow(
-        `⚠ Could not determine changes since ${lastSha}; processing all files`
+        `⚠ Could not get changed files since ${lastSha}, processing all files`
       )
     );
-    return null;
+    return new Set();
   }
 }
 
@@ -380,19 +378,14 @@ async function summarizePage(
     });
 
     const description =
-      response.choices[0]?.message?.content?.trim() ||
-      extractPageDescription(page.content);
+      response.choices[0]?.message?.content?.trim() || "Documentation page";
 
     return { title, description };
-  } catch {
-    console.warn(
-      chalk.yellow(
-        `⚠ Could not summarize ${page.path} with OpenAI; using its frontmatter description`
-      )
-    );
+  } catch (error) {
+    console.error(chalk.red(`✗ Error summarizing ${page.path}:`), error);
     return {
       title: extractPageTitle(page.content, page.path),
-      description: extractPageDescription(page.content),
+      description: "Documentation page",
     };
   }
 }
@@ -509,28 +502,6 @@ function extractPageTitle(content: string, filePath: string): string {
   return frontmatterTitle ?? deriveTitleFromPath(filePath);
 }
 
-function extractPageDescription(content: string): string {
-  const frontmatterDescription = content
-    .match(FRONTMATTER_REGEX)?.[1]
-    ?.match(FRONTMATTER_DESCRIPTION_REGEX)?.[1]
-    ?.trim()
-    ?.replace(/^['"](.*)['"]$/, "$1");
-  if (frontmatterDescription) {
-    return frontmatterDescription;
-  }
-
-  const fallbackDescription =
-    content.match(GUIDE_OUTCOMES_REGEX)?.[1] ??
-    content.match(FIRST_PROSE_AFTER_H1_REGEX)?.[1];
-  return fallbackDescription
-    ? fallbackDescription
-        .replace(MARKDOWN_LINK_REGEX, "$1")
-        .replace(MARKDOWN_NOISE_REGEX, "")
-        .replace(WHITESPACE_REGEX, " ")
-        .trim()
-    : "Documentation page";
-}
-
 /**
  * Generates the llms.txt file content
  */
@@ -626,9 +597,7 @@ function determinePagesToSummarize(
 
   if (previousMetadata && previousMetadata.gitSha !== "unknown") {
     // Get changed files since last generation
-    const changedFiles =
-      getChangedFilesSince(previousMetadata.gitSha) ??
-      new Set(pages.map((page) => page.path));
+    const changedFiles = getChangedFilesSince(previousMetadata.gitSha);
     console.log(
       chalk.blue(
         `\n📊 Found ${changedFiles.size} changed files since last generation`
