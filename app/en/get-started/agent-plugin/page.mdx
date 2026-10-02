@@ -1,0 +1,205 @@
+---
+title: "Install the Arcade agent plugin"
+description: "Install Arcade in Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, or Claude Desktop. Your agent gets tools for every app you connect, with browser sign-in and no API keys."
+---
+
+import { Callout, Tabs } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Install the Arcade agent plugin
+
+The Arcade agent plugin bundles a connection to Arcade's hosted MCP gateway with two skills, three commands, and the `arcade-operator` subagent. The gateway gives your agent thousands of tools for email, calendar, chat, issues, docs, and dozens of other apps. The rest of the plugin helps your agent choose and use those tools. You authorize each app in the browser the first time it comes up, with no API keys to create and no gateway to configure.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Install the Arcade agent plugin in your agent and run your first task against a connected app.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+1. A supported client: Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, or Claude Desktop
+2. An <SignupLink linkLocation="docs:agent-plugin-install">Arcade account</SignupLink>
+
+</GuideOverview.Prerequisites>
+
+</GuideOverview>
+
+<Callout type="info">
+  The plugin is built for personal use. When you are ready to put a workflow in
+  front of a team, read [from personal use to team
+  rollout](/get-started/agent-plugin/team-rollout). You will want your own [MCP
+  Gateway](/operate/governance/mcp-gateways) with a curated tool list and your
+  own identity provider.
+</Callout>
+
+## Install
+
+Each client installs plugins differently. Use the path for yours.
+
+<Callout type="info">
+  The cross-client `npx plugins add` command does not finish every client
+  install. Use the client-native steps below so the gateway and every supported
+  plugin component load together.
+</Callout>
+
+<Tabs items={["Claude Code", "Codex", "Cursor", "VS Code", "Copilot CLI", "Claude Desktop"]}>
+<Tabs.Tab>
+
+Add the Arcade marketplace, then install the plugin:
+
+```bash
+claude plugin marketplace add {{ARCADE_PLUGIN_REPO}}
+claude plugin install arcade@arcade
+```
+
+Run `/reload-plugins` if Claude Code is already open. Verify the install with `claude plugin list` or `/plugin`.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+Add the Arcade marketplace, then install the plugin:
+
+```bash
+codex plugin marketplace add {{ARCADE_PLUGIN_REPO}}
+codex plugin add arcade@arcade
+```
+
+Start a new Codex session or ChatGPT desktop chat. Open `/plugins`, confirm **arcade** is installed and enabled, then confirm the **arcade** MCP server is connected.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+For an individual Cursor plan, clone the plugin into Cursor's local plugin directory:
+
+```bash
+git clone https://github.com/{{ARCADE_PLUGIN_REPO}} ~/.cursor/plugins/local/arcade-plugin
+```
+
+Run **Developer: Reload Window**, then open **Customize** and confirm the Arcade skills, `arcade-operator`, rule, and MCP server are present.
+
+On Teams and Enterprise plans, an admin must import `https://github.com/{{ARCADE_PLUGIN_REPO}}` under **Dashboard → Plugins & MCPs → Team Marketplaces**. Each person can then install Arcade from **Customize**.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+Open the Command Palette, select **Chat: Install Plugin From Source**, and paste:
+
+```text
+https://github.com/{{ARCADE_PLUGIN_REPO}}
+```
+
+Turn on `chat.plugins.enabled` if needed, then reload VS Code. Run **MCP: List Servers**, select **arcade**, choose **Start Server**, and sign in when prompted.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+Install with Copilot CLI's plugin command:
+
+```bash
+copilot plugin install {{ARCADE_PLUGIN_REPO}}
+```
+
+Restart the session or run `/restart`.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+Open **Customize → Plugins → Add marketplace → Add from a repository**, paste `{{ARCADE_PLUGIN_REPO}}`, then install **Arcade** (`arcade@arcade`).
+
+See the [Claude Desktop guide](/get-started/agent-plugin/tools-only/claude-desktop) for the terminal commands and tools-only connector option.
+
+</Tabs.Tab>
+</Tabs>
+
+After installation, reload your agent or start a new session. Using another client that does not load plugins? Connect to the same gateway with the [tools-only Arcade bundle](/get-started/agent-plugin/tools-only).
+
+## Sign in
+
+Authentication happens in two layers:
+
+1. **Into the gateway.** Your client will ask you to authenticate when it first connects. You sign in to Arcade in the browser, and the client can reach the gateway from then on.
+2. **Into each app.** When a task needs Gmail, Slack, Linear, or anything else, your agent hands you a link that grants the scopes that task requires. Approve it once and Arcade holds the token for that app. You won't need to authenticate that service again unless a later task requires greater scopes.
+
+You never give your agent an API key or a password for either layer. Ask your agent to run `/arcade-status` to list the applications you enabled, or `/arcade-connect google` to authorize an app with the widest possible scope before you need it.
+
+All of your tool calls, tokens, and secrets route through your own Arcade project, isolated from every other user of that gateway. No one else's agent can ever reach your apps, tools, or tokens.
+
+Every Arcade gateway works this way, not just the one in the plugin. [Server-level and tool-level authorization](/learn/server-level-vs-tool-level-auth) goes deeper on the split.
+
+## What you get in each agent
+
+Every install connects to the same Arcade gateway and gets the same tools. What differs is how much of the rest of the plugin each agent can load.
+
+| Agent                               | Tools | Skills | Subagent | Commands | Rule |  Hooks   |
+| ----------------------------------- | :---: | :----: | :------: | :------: | :--: | :------: |
+| Cursor IDE and Cloud Agents         |  ✅   |   2    |    ✅    |    3¹    |  ✅  |    —²    |
+| Cursor CLI                          |  ✅   |   2    |    ✅    |    3     |  —   |    ✅³   |
+| Claude Code                         |  ✅   |   2    |    ✅    |    3     |  —   |    ✅    |
+| Claude Cowork                       |  ✅   |   2    |    ✅    |    3     |  —   | partial⁴ |
+| GitHub Copilot CLI                  |  ✅   |   2    |    ✅    |    —     |  —   |    ✅⁵   |
+| VS Code                             |  ✅   |   2    |    ✅    |    —     |  —   |    —⁶    |
+| Codex and ChatGPT local runtime     |  ✅   |   2    |    —     |    —     |  —   |    —⁷    |
+| Claude Desktop                      |  ✅   |   2    |    —     |    —     |  —   |    —     |
+| OpenCode                            |  ✅   |   —    |    —     |    —     |  —   |    —     |
+| Any other Streamable HTTP MCP client |  ✅   |   —    |    —     |    —     |  —   |    —     |
+
+- ¹ Cursor IDE lists the commands on the plugin page but does not show them in the `/` menu.
+- ² Cursor IDE and Cloud Agents do not run plugin hooks. The always-apply rule carries the routing guidance instead.
+- ³ Cursor CLI runs the session hook but does not load the always-apply rule.
+- ⁴ Cowork runs the prompt and subagent hooks but does not add the session-start text to the main conversation.
+- ⁵ Copilot CLI runs session and subagent hooks, but drops prompt-hook output from configuration files.
+- ⁶ VS Code reads the Copilot hook file but cannot run its Agent Plugins hook commands yet.
+- ⁷ Codex does not run Agent Plugins lifecycle hooks yet.
+
+Here is what each of those is for.
+
+### Commands
+
+Cursor, Claude Code, and Cowork load all three commands. Claude Code and Cowork namespace them as `/arcade:arcade-status`, `/arcade:arcade-connect`, and `/arcade:arcade-apps`.
+
+#### `/arcade-status`
+
+Reports whether the gateway is reachable, whether you have signed in, and which apps you have authorized.
+
+#### `/arcade-connect <app>`
+
+Authorizes an app on demand, so you are not interrupted mid-task.
+
+#### `/arcade-apps`
+
+Lists the apps you have connected and lets you disconnect one.
+
+### Skills
+
+Skills are instructions your agent reads on its own, so you never have to invoke them. `try-arcade` teaches it to turn a request like "reply to that thread" into the right sequence of tool calls across your apps. `scale-arcade` handles the other kind of question, the one about moving a workflow onto a team gateway, and it walks you through the decisions on [this page](/get-started/agent-plugin/team-rollout) against your own project.
+
+### Subagent
+
+The `arcade-operator` subagent runs an app task in its own context and reports back just the result. Arcade exposes a lot of tools, and searching them fills a conversation with noise that pushes out your actual work. The operator absorbs that. Cursor, Claude Code, Cowork, Copilot CLI, and VS Code load it. Codex and Claude Desktop Chat do not.
+
+### Rule and hooks
+
+The rule and hooks tell your agent that Arcade exists and when reaching for it is the right move, which is the difference between a tool that sits unused and one your agent actually picks up. Cursor IDE and Cloud Agents use an always-apply rule. Cursor CLI, Claude Code, Cowork, and Copilot CLI run the hooks their hosts support.
+
+The columns thin out because the [Agent Plugins](https://agent-plugins.org) 1.0 specification only makes skills and MCP servers portable. Commands, subagents, hooks, and editor rules are specific to each agent, so the plugin ships them where the agents that support them will find them.
+
+## Try it
+
+This gateway includes every [optimized toolkit](/resources/integrations) in the catalog. Try asking your agent:
+
+- "Send a summary of tomorrow's calendar events to me on Slack."
+- "Read my Granola notes from last week, check them against Linear, and file anything I promised that is not a ticket yet. Wait for me before creating anything."
+- "Find unread mail that needs a reply. Look the sender up in HubSpot if you can, draft a response, and Slack me the draft before sending."
+- "Pull my open GitHub pull requests, my Linear issues, and tomorrow's calendar. Write a standup update and send it to me on Slack."
+- "Search my Drive and Notion for the product spec my team uses, then drop a one-paragraph summary in Slack."
+
+Or ask "What can Arcade do?" and pick a workflow from the answer.
+
+## Next steps
+
+- [From personal use to team rollout](/get-started/agent-plugin/team-rollout): move a workflow onto your own gateway
+- [Connect to MCP clients](/get-started/mcp-clients): configure a client against a gateway you control
+- [Integrations catalog](/resources/integrations): every app and toolkit Arcade supports
+- [Agentic development](/get-started/setup/connect-arcade-docs): point your agent at these docs with `llms.txt`
