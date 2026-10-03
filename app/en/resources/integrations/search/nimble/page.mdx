@@ -32,23 +32,44 @@ Set these under **Advanced settings → Custom headers** when you add the server
 
 ## What you can do
 
-Once you register Nimble in your Arcade project, Arcade discovers its tools automatically. They cover these capabilities:
+Once you register Nimble in your Arcade project, Arcade discovers its tools automatically. Nimble groups them into these capabilities:
 
 | Capability | What it does |
 | --- | --- |
-| Search | Real-time web search across multiple engines, with configurable depth and focus. |
-| Extract | Pull structured content from a specific URL, with sync and async extraction. |
-| Crawl | Crawl multiple pages with path filtering, subdomain control, and progress tracking. |
-| Map | Discover the URLs on a site through link-following and sitemaps. |
-| Templates | Run pre-built extraction templates for common websites. |
+| Search | Real-time web search with configurable content richness. |
+| Extract | Pull structured content from a specific URL, synchronously or asynchronously. |
+| Crawl | Crawl multiple pages on a site, then check progress, list jobs, or cancel a run. |
+| Map | Discover the URLs on a site by crawling its pages and sitemap. |
+| Extract templates | Browse the template catalog, run templates against a URL, and generate or refine custom ones. |
+| Web search agents | Create, update, and run research agents, then poll runs and read their results. |
+| Task results | Fetch the status and results of any async task. |
 
-Arcade namespaces each tool under the server ID you choose when you add the server, so tool names appear as `<your-server-id>.<tool>` in the Playground and gateway tool picker.
+Most capabilities ship more than one tool: a synchronous call, an asynchronous variant, and status or listing calls. Expect roughly two dozen individual tools in the tool picker rather than seven. The exact set depends on your Nimble plan and on the account you connect with, so [connect as an admin user](/guides/mcp-gateways/add-remote-servers#save-and-confirm-the-connection) to discover the broadest list, and check the picker for what your project actually has.
+
+Nimble prefixes its own tools with `nimble_`, and Arcade namespaces each tool under the server ID you choose when you add the server. With the server ID `nimble`, tool names appear as `nimble.nimble_search` in the Playground, the gateway tool picker, and SDK calls. Copy the exact name from the tool picker before calling it.
+
+<Callout type="info">
+  Many Nimble tools are asynchronous: they return a task ID immediately, and
+  your agent polls a companion tool such as `nimble_task_results` or
+  `nimble_agents_run_status` for the outcome. When you build a gateway, select
+  the polling tools alongside the tools that start the work, or your agent will
+  kick off jobs it cannot read back.
+</Callout>
+
+Most Nimble tools only read. The exceptions write to your Nimble account: the tools that create, update, run, or delete agents, and the ones that generate extract templates. If you are building a research gateway, leave the write tools out of it.
 
 Compose these tools with Google Docs, Slack, Salesforce, GitHub, or any of Arcade's native servers in a single MCP Gateway, so an agent can research, draft, and act in one flow, with authorization and audit from Arcade's runtime.
 
-## Caching and cost
+## Cost and token usage
 
-Nimble's tools sit behind a cache and a memory layer. The cache stores sources, search history, and responses; the memory layer extracts key learnings after each run and feeds them into the next search plan. Together they retrieve only what an agent needs, which avoids redundant searches and the token cost they add, and refines results for a given domain over time. This behavior runs server-side at Nimble. When you call these tools through an Arcade gateway, Arcade adds per-user authorization and audit on top.
+Nimble designs its [MCP server](https://www.nimbleway.com/mcp) around retrieval efficiency. It describes a proprietary index and memory that "gets smarter with every query" to compound accuracy over time, and cutting token costs "by retrieving exactly what's needed," without redundant searches or parsing raw pages through an LLM. Its tools return schema-consistent JSON, so your model spends tokens reasoning over results rather than parsing raw HTML. This behavior runs server-side at Nimble.
+
+Web retrieval still returns large payloads, and MCP routes every result through the model's context window. Two things keep that in check:
+
+- **Expose only the tools you need.** An MCP Gateway sends just the tools you select, so an agent that only searches never loads the crawl and template tool definitions.
+- **Prefer the narrowest tool.** Reach for search or extract before crawl or the web search agent, which return content across many pages.
+
+For high-volume retrieval, Nimble also documents a [CLI skill](https://docs.nimbleway.com/integrations/agent-skills/web-tools-skills/nimble-web-expert) as a more token-efficient path than MCP. Use the MCP server when you want Nimble governed alongside your other tools, with Arcade adding per-user authorization and audit at runtime.
 
 ## Add Nimble to your Arcade project
 
