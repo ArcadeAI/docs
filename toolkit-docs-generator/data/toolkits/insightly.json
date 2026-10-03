@@ -1,7 +1,7 @@
 {
   "id": "Insightly",
   "label": "Insightly",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Arcade.dev tools for interacting with Insightly",
   "metadata": {
     "category": "sales",
@@ -18,7 +18,7 @@
     {
       "name": "ConvertLead",
       "qualifiedName": "Insightly.ConvertLead",
-      "fullyQualifiedName": "Insightly.ConvertLead@1.0.0",
+      "fullyQualifiedName": "Insightly.ConvertLead@1.0.1",
       "description": "Convert a qualified lead into a contact (when the lead names a person), an organization\n(when the lead names one), and optionally an opportunity, then mark the lead converted.\n\nThe lead's name, email, phone, and title carry onto the contact, and its name/phone/website\nonto the organization. A lead with only a last name becomes a contact under that name, since\nInsightly stores a single-name person in the contact's first-name field. Insightly leaves the\nlead's notes on the lead, so by default they are copied onto the new contact (or organization).\n\nFails if the lead has already been converted. Conversion is several creates followed by the\nfinal lead update; it is not idempotent, so if a later step fails the lead stays unconverted\nand any records already created remain. Check the lead in Insightly before retrying a failed\nconversion so a retry does not duplicate records.",
       "parameters": [
         {
@@ -41,7 +41,7 @@
           "name": "opportunity_name",
           "type": "string",
           "required": false,
-          "description": "Name for the created opportunity. Used only when create_opportunity is true.",
+          "description": "Name for the created opportunity. Used only when create_opportunity is true. Defaults to empty, which names it after the lead's organization or last name.",
           "enum": null,
           "inferrable": true
         },
@@ -49,7 +49,7 @@
           "name": "pipeline_id",
           "type": "string",
           "required": false,
-          "description": "Pipeline id for the created opportunity. Used only when create_opportunity is true.",
+          "description": "Pipeline id for the created opportunity. Used only when create_opportunity is true. Defaults to empty, which leaves the pipeline unset.",
           "enum": null,
           "inferrable": true
         },
@@ -57,7 +57,7 @@
           "name": "stage_id",
           "type": "string",
           "required": false,
-          "description": "Stage id for the created opportunity. Used only when create_opportunity is true.",
+          "description": "Stage id for the created opportunity. Used only when create_opportunity is true. Defaults to empty, which leaves the stage unset.",
           "enum": null,
           "inferrable": true
         },
@@ -73,7 +73,7 @@
           "name": "forecast_close_date",
           "type": "string",
           "required": false,
-          "description": "Forecast close date (YYYY-MM-DD) for the created opportunity. Used only when create_opportunity is true; empty to leave it unset.",
+          "description": "Forecast close date (YYYY-MM-DD) for the created opportunity. Used only when create_opportunity is true. Defaults to empty, which leaves it unset.",
           "enum": null,
           "inferrable": true
         },
@@ -188,7 +188,7 @@
     {
       "name": "CreateNote",
       "qualifiedName": "Insightly.CreateNote",
-      "fullyQualifiedName": "Insightly.CreateNote@1.0.0",
+      "fullyQualifiedName": "Insightly.CreateNote@1.0.1",
       "description": "Log a note against one CRM record. Provide exactly one record id to attach it to.",
       "parameters": [
         {
@@ -203,7 +203,7 @@
           "name": "title",
           "type": "string",
           "required": false,
-          "description": "Short subject line for the note. Empty derives it from the body's first line.",
+          "description": "Short subject line for the note. Defaults to empty, which derives it from the body's first line.",
           "enum": null,
           "inferrable": true
         },
@@ -211,7 +211,7 @@
           "name": "contact_id",
           "type": "string",
           "required": false,
-          "description": "Attach the note to this contact. Empty for none.",
+          "description": "Attach the note to this contact. Defaults to empty (no contact).",
           "enum": null,
           "inferrable": true
         },
@@ -219,7 +219,7 @@
           "name": "opportunity_id",
           "type": "string",
           "required": false,
-          "description": "Attach the note to this opportunity. Empty for none.",
+          "description": "Attach the note to this opportunity. Defaults to empty (no opportunity).",
           "enum": null,
           "inferrable": true
         },
@@ -227,7 +227,7 @@
           "name": "organization_id",
           "type": "string",
           "required": false,
-          "description": "Attach the note to this organization. Empty for none.",
+          "description": "Attach the note to this organization. Defaults to empty (no organization).",
           "enum": null,
           "inferrable": true
         },
@@ -235,7 +235,7 @@
           "name": "project_id",
           "type": "string",
           "required": false,
-          "description": "Attach the note to this project. Empty for none.",
+          "description": "Attach the note to this project. Defaults to empty (no project).",
           "enum": null,
           "inferrable": true
         },
@@ -243,7 +243,7 @@
           "name": "lead_id",
           "type": "string",
           "required": false,
-          "description": "Attach the note to this lead. Empty for none.",
+          "description": "Attach the note to this lead. Defaults to empty (no lead).",
           "enum": null,
           "inferrable": true
         }
@@ -331,7 +331,7 @@
     {
       "name": "GetContact",
       "qualifiedName": "Insightly.GetContact",
-      "fullyQualifiedName": "Insightly.GetContact@1.0.0",
+      "fullyQualifiedName": "Insightly.GetContact@1.0.1",
       "description": "Retrieve a single contact by its identifier.",
       "parameters": [
         {
@@ -396,7 +396,7 @@
     {
       "name": "GetCurrentUser",
       "qualifiedName": "Insightly.GetCurrentUser",
-      "fullyQualifiedName": "Insightly.GetCurrentUser@1.0.0",
+      "fullyQualifiedName": "Insightly.GetCurrentUser@1.0.1",
       "description": "Return the identity of the authenticated Insightly user (the \"who am I\" for this account).\n\nCall this first to confirm who actions will be attributed to.",
       "parameters": [],
       "auth": null,
@@ -446,7 +446,7 @@
     {
       "name": "GetLead",
       "qualifiedName": "Insightly.GetLead",
-      "fullyQualifiedName": "Insightly.GetLead@1.0.0",
+      "fullyQualifiedName": "Insightly.GetLead@1.0.1",
       "description": "Retrieve a single lead by its identifier.",
       "parameters": [
         {
@@ -511,7 +511,7 @@
     {
       "name": "GetMyOpenWork",
       "qualifiedName": "Insightly.GetMyOpenWork",
-      "fullyQualifiedName": "Insightly.GetMyOpenWork@1.0.0",
+      "fullyQualifiedName": "Insightly.GetMyOpenWork@1.0.1",
       "description": "Roll up one user's open deals and open tasks in a single call.\n\nDefaults to the caller (the authenticated user), so \"what's on my plate\" is one read instead\nof a separate pipeline summary and task search. The summed open-deal value covers every\nmatched deal, not just the returned window.",
       "parameters": [
         {
@@ -602,7 +602,7 @@
     {
       "name": "GetOpportunity",
       "qualifiedName": "Insightly.GetOpportunity",
-      "fullyQualifiedName": "Insightly.GetOpportunity@1.0.0",
+      "fullyQualifiedName": "Insightly.GetOpportunity@1.0.1",
       "description": "Retrieve a single opportunity by its identifier.",
       "parameters": [
         {
@@ -667,7 +667,7 @@
     {
       "name": "GetOrganization",
       "qualifiedName": "Insightly.GetOrganization",
-      "fullyQualifiedName": "Insightly.GetOrganization@1.0.0",
+      "fullyQualifiedName": "Insightly.GetOrganization@1.0.1",
       "description": "Retrieve a single organization by its identifier.",
       "parameters": [
         {
@@ -732,7 +732,7 @@
     {
       "name": "GetProject",
       "qualifiedName": "Insightly.GetProject",
-      "fullyQualifiedName": "Insightly.GetProject@1.0.0",
+      "fullyQualifiedName": "Insightly.GetProject@1.0.1",
       "description": "Retrieve a single project by its identifier.",
       "parameters": [
         {
@@ -797,14 +797,14 @@
     {
       "name": "GetRecordActivity",
       "qualifiedName": "Insightly.GetRecordActivity",
-      "fullyQualifiedName": "Insightly.GetRecordActivity@1.0.0",
+      "fullyQualifiedName": "Insightly.GetRecordActivity@1.0.1",
       "description": "Gather one record's recent notes and open tasks in one call, plus the deal stage.\n\nProvide exactly one record id. Use this single call to prepare for a call or recap an\naccount instead of running separate note and task searches. When the record is an\nopportunity, the response also carries that deal's current stage, state, and value; when\nit is a project, it carries the project's parent opportunity and that deal's organization\nso a delivery kickoff brief is one read; when it is a contact or organization, the response\nalso carries the opportunities and delivery projects that touch the account.",
       "parameters": [
         {
           "name": "contact_id",
           "type": "string",
           "required": false,
-          "description": "Gather activity for this contact. Empty for none.",
+          "description": "Gather activity for this contact. Defaults to empty (no contact).",
           "enum": null,
           "inferrable": true
         },
@@ -812,7 +812,7 @@
           "name": "opportunity_id",
           "type": "string",
           "required": false,
-          "description": "Gather activity for this opportunity. Empty for none.",
+          "description": "Gather activity for this opportunity. Defaults to empty (no opportunity).",
           "enum": null,
           "inferrable": true
         },
@@ -820,7 +820,7 @@
           "name": "organization_id",
           "type": "string",
           "required": false,
-          "description": "Gather activity for this organization. Empty for none.",
+          "description": "Gather activity for this organization. Defaults to empty (no organization).",
           "enum": null,
           "inferrable": true
         },
@@ -828,7 +828,7 @@
           "name": "project_id",
           "type": "string",
           "required": false,
-          "description": "Gather activity for this project. Empty for none.",
+          "description": "Gather activity for this project. Defaults to empty (no project).",
           "enum": null,
           "inferrable": true
         },
@@ -836,7 +836,7 @@
           "name": "lead_id",
           "type": "string",
           "required": false,
-          "description": "Gather activity for this lead. Empty for none.",
+          "description": "Gather activity for this lead. Defaults to empty (no lead).",
           "enum": null,
           "inferrable": true
         },
@@ -966,7 +966,7 @@
     {
       "name": "GetTask",
       "qualifiedName": "Insightly.GetTask",
-      "fullyQualifiedName": "Insightly.GetTask@1.0.0",
+      "fullyQualifiedName": "Insightly.GetTask@1.0.1",
       "description": "Retrieve a single task by its identifier.",
       "parameters": [
         {
@@ -1031,8 +1031,8 @@
     {
       "name": "ListLeadFieldOptions",
       "qualifiedName": "Insightly.ListLeadFieldOptions",
-      "fullyQualifiedName": "Insightly.ListLeadFieldOptions@1.0.0",
-      "description": "List the account's configured lead statuses and lead sources so a natural-language\nstatus or source name maps to the id that save_lead expects.",
+      "fullyQualifiedName": "Insightly.ListLeadFieldOptions@1.0.1",
+      "description": "List the account's configured lead statuses and lead sources so a natural-language\nstatus or source name maps to the id used when creating or updating a lead.",
       "parameters": [],
       "auth": null,
       "secrets": [
@@ -1081,7 +1081,7 @@
     {
       "name": "ListPipelines",
       "qualifiedName": "Insightly.ListPipelines",
-      "fullyQualifiedName": "Insightly.ListPipelines@1.0.0",
+      "fullyQualifiedName": "Insightly.ListPipelines@1.0.1",
       "description": "List the configured pipelines, optionally filtered to opportunity or project pipelines.",
       "parameters": [
         {
@@ -1185,7 +1185,7 @@
     {
       "name": "ListPipelineStages",
       "qualifiedName": "Insightly.ListPipelineStages",
-      "fullyQualifiedName": "Insightly.ListPipelineStages@1.0.0",
+      "fullyQualifiedName": "Insightly.ListPipelineStages@1.0.1",
       "description": "List a pipeline's stages in their defined order, so stage moves target real stages.",
       "parameters": [
         {
@@ -1276,14 +1276,14 @@
     {
       "name": "ListUsers",
       "qualifiedName": "Insightly.ListUsers",
-      "fullyQualifiedName": "Insightly.ListUsers@1.0.0",
+      "fullyQualifiedName": "Insightly.ListUsers@1.0.1",
       "description": "List the users in the account, for attributing and assigning records.",
       "parameters": [
         {
           "name": "email",
           "type": "string",
           "required": false,
-          "description": "Only return users whose email contains this text (case-insensitive). Empty matches all.",
+          "description": "Only return users whose email contains this text (case-insensitive). Defaults to empty, which matches all.",
           "enum": null,
           "inferrable": true
         },
@@ -1367,7 +1367,7 @@
     {
       "name": "SaveContact",
       "qualifiedName": "Insightly.SaveContact",
-      "fullyQualifiedName": "Insightly.SaveContact@1.0.0",
+      "fullyQualifiedName": "Insightly.SaveContact@1.0.1",
       "description": "Create or update a contact. Omit contact_id to create (a first or last name is required).",
       "parameters": [
         {
@@ -1524,7 +1524,7 @@
     {
       "name": "SaveLead",
       "qualifiedName": "Insightly.SaveLead",
-      "fullyQualifiedName": "Insightly.SaveLead@1.0.0",
+      "fullyQualifiedName": "Insightly.SaveLead@1.0.1",
       "description": "Create or update a lead. Omit lead_id to create a new lead (supply a last name, an\norganization name, or both).",
       "parameters": [
         {
@@ -1694,7 +1694,7 @@
     {
       "name": "SaveOpportunity",
       "qualifiedName": "Insightly.SaveOpportunity",
-      "fullyQualifiedName": "Insightly.SaveOpportunity@1.0.0",
+      "fullyQualifiedName": "Insightly.SaveOpportunity@1.0.1",
       "description": "Create or update an opportunity, including advancing its stage and recording won/lost.\n\nOmit opportunity_id to create (a name is required). A new opportunity created without a\npipeline_id and stage_id is left unplaced: it still rolls up in the forecast under the\n\"(no stage)\" bucket but cannot advance through a stage-based pipeline, so set pipeline_id\nand stage_id together when you know the deal's pipeline and stage.",
       "parameters": [
         {
@@ -1870,7 +1870,7 @@
     {
       "name": "SaveOrganization",
       "qualifiedName": "Insightly.SaveOrganization",
-      "fullyQualifiedName": "Insightly.SaveOrganization@1.0.0",
+      "fullyQualifiedName": "Insightly.SaveOrganization@1.0.1",
       "description": "Create or update an organization. Omit organization_id to create (a name is required).",
       "parameters": [
         {
@@ -1988,7 +1988,7 @@
     {
       "name": "SaveProject",
       "qualifiedName": "Insightly.SaveProject",
-      "fullyQualifiedName": "Insightly.SaveProject@1.0.0",
+      "fullyQualifiedName": "Insightly.SaveProject@1.0.1",
       "description": "Create or update a delivery project, including advancing its stage.\n\nOmit project_id to create (a name is required).",
       "parameters": [
         {
@@ -2138,7 +2138,7 @@
     {
       "name": "SaveTask",
       "qualifiedName": "Insightly.SaveTask",
-      "fullyQualifiedName": "Insightly.SaveTask@1.0.0",
+      "fullyQualifiedName": "Insightly.SaveTask@1.0.1",
       "description": "Create or update a task, optionally linked to a deal, project, contact, or org.\n\nOmit task_id to create (a title is required).",
       "parameters": [
         {
@@ -2331,14 +2331,14 @@
     {
       "name": "SearchContacts",
       "qualifiedName": "Insightly.SearchContacts",
-      "fullyQualifiedName": "Insightly.SearchContacts@1.0.0",
+      "fullyQualifiedName": "Insightly.SearchContacts@1.0.1",
       "description": "Find contacts by name, email, or organization. Returns the account's default order.",
       "parameters": [
         {
           "name": "query",
           "type": "string",
           "required": false,
-          "description": "Match against contact name or email (case-insensitive substring). Empty matches all.",
+          "description": "Match against contact name or email (case-insensitive substring). Defaults to empty, which matches all.",
           "enum": null,
           "inferrable": true
         },
@@ -2346,7 +2346,7 @@
           "name": "email",
           "type": "string",
           "required": false,
-          "description": "Only return contacts whose email contains this text. Empty for no filter.",
+          "description": "Only return contacts whose email contains this text. Defaults to empty (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2354,7 +2354,7 @@
           "name": "organization_id",
           "type": "string",
           "required": false,
-          "description": "Only return contacts linked to this organization id. Empty for no filter.",
+          "description": "Only return contacts linked to this organization id. Defaults to empty (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2362,7 +2362,7 @@
           "name": "updated_after",
           "type": "string",
           "required": false,
-          "description": "Contacts updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "description": "Contacts updated on/after this UTC date (YYYY-MM-DD). Defaults to empty (no lower bound).",
           "enum": null,
           "inferrable": true
         },
@@ -2461,14 +2461,14 @@
     {
       "name": "SearchLeads",
       "qualifiedName": "Insightly.SearchLeads",
-      "fullyQualifiedName": "Insightly.SearchLeads@1.0.0",
+      "fullyQualifiedName": "Insightly.SearchLeads@1.0.1",
       "description": "Find leads by name, email, conversion state, or status. Returns the account's default\norder.",
       "parameters": [
         {
           "name": "query",
           "type": "string",
           "required": false,
-          "description": "Match against lead name, organization, or email (substring). Empty matches all.",
+          "description": "Match against lead name, organization, or email (substring). Defaults to empty, which matches all.",
           "enum": null,
           "inferrable": true
         },
@@ -2476,7 +2476,7 @@
           "name": "email",
           "type": "string",
           "required": false,
-          "description": "Only return leads whose email contains this text. Empty for no filter.",
+          "description": "Only return leads whose email contains this text. Defaults to empty (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2492,7 +2492,7 @@
           "name": "lead_status_id",
           "type": "integer",
           "required": false,
-          "description": "Only return leads in this status (its id). 0 for no status filter.",
+          "description": "Only return leads in this status (its id). Defaults to 0 (no status filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2500,7 +2500,7 @@
           "name": "updated_after",
           "type": "string",
           "required": false,
-          "description": "Leads updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "description": "Leads updated on/after this UTC date (YYYY-MM-DD). Defaults to empty (no lower bound).",
           "enum": null,
           "inferrable": true
         },
@@ -2604,14 +2604,14 @@
     {
       "name": "SearchNotes",
       "qualifiedName": "Insightly.SearchNotes",
-      "fullyQualifiedName": "Insightly.SearchNotes@1.0.0",
+      "fullyQualifiedName": "Insightly.SearchNotes@1.0.1",
       "description": "Read notes most recently created first within the scanned window, account-wide or for one\nrecord.\n\nOmit every record id for an account-wide activity feed (combine owner_user_id and the\ncreated_after / created_before window for a standup-style recap), or provide exactly one\nrecord id to read the notes on that single record. Date bounds are inclusive.\n\nNotes are gathered by scanning the collection up to a ceiling and ordering that scanned set\nmost-recently-created first; when scan_truncated is true the scan stopped before reaching the\nwhole collection, so the newest notes may lie beyond the scanned window. Narrow with a record\nid, owner, or a created_after / created_before window to bring the result within that window.",
       "parameters": [
         {
           "name": "contact_id",
           "type": "string",
           "required": false,
-          "description": "Read notes attached to this contact. Empty for none.",
+          "description": "Read notes attached to this contact. Defaults to empty (no contact filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2619,7 +2619,7 @@
           "name": "opportunity_id",
           "type": "string",
           "required": false,
-          "description": "Read notes attached to this opportunity. Empty for none.",
+          "description": "Read notes attached to this opportunity. Defaults to empty (no opportunity filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2627,7 +2627,7 @@
           "name": "organization_id",
           "type": "string",
           "required": false,
-          "description": "Read notes attached to this organization. Empty for none.",
+          "description": "Read notes attached to this organization. Defaults to empty (no organization filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2635,7 +2635,7 @@
           "name": "project_id",
           "type": "string",
           "required": false,
-          "description": "Read notes attached to this project. Empty for none.",
+          "description": "Read notes attached to this project. Defaults to empty (no project filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2643,7 +2643,7 @@
           "name": "lead_id",
           "type": "string",
           "required": false,
-          "description": "Read notes attached to this lead. Empty for none.",
+          "description": "Read notes attached to this lead. Defaults to empty (no lead filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2674,7 +2674,7 @@
           "name": "query",
           "type": "string",
           "required": false,
-          "description": "Match this text against the note title or body (case-insensitive substring). Empty matches all notes in scope.",
+          "description": "Match this text against the note title or body (case-insensitive substring). Defaults to empty, which matches all notes in scope.",
           "enum": null,
           "inferrable": true
         },
@@ -2682,7 +2682,7 @@
           "name": "owner_user_id",
           "type": "integer",
           "required": false,
-          "description": "Only return notes authored by this user id. 0 for no owner filter.",
+          "description": "Only return notes authored by this user id. Defaults to 0 (no owner filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2690,7 +2690,7 @@
           "name": "created_after",
           "type": "string",
           "required": false,
-          "description": "Only return notes created on or after this UTC date (YYYY-MM-DD). Empty for no lower bound.",
+          "description": "Only return notes created on or after this UTC date (YYYY-MM-DD). Defaults to empty (no lower bound).",
           "enum": null,
           "inferrable": true
         },
@@ -2698,7 +2698,7 @@
           "name": "created_before",
           "type": "string",
           "required": false,
-          "description": "Only return notes created on or before this UTC date (YYYY-MM-DD). Empty for no upper bound.",
+          "description": "Only return notes created on or before this UTC date (YYYY-MM-DD). Defaults to empty (no upper bound).",
           "enum": null,
           "inferrable": true
         },
@@ -2835,14 +2835,14 @@
     {
       "name": "SearchOpportunities",
       "qualifiedName": "Insightly.SearchOpportunities",
-      "fullyQualifiedName": "Insightly.SearchOpportunities@1.0.0",
+      "fullyQualifiedName": "Insightly.SearchOpportunities@1.0.1",
       "description": "Find opportunities by name, state, pipeline, or organization. Returns the default order.",
       "parameters": [
         {
           "name": "query",
           "type": "string",
           "required": false,
-          "description": "Match against the opportunity name (case-insensitive substring). Empty matches all.",
+          "description": "Match against the opportunity name (case-insensitive substring). Defaults to empty, which matches all.",
           "enum": null,
           "inferrable": true
         },
@@ -2864,7 +2864,7 @@
           "name": "pipeline_id",
           "type": "string",
           "required": false,
-          "description": "Only return opportunities on this pipeline id. Empty for no filter.",
+          "description": "Only return opportunities on this pipeline id. Defaults to empty (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2872,7 +2872,7 @@
           "name": "organization_id",
           "type": "string",
           "required": false,
-          "description": "Only return opportunities linked to this organization id. Empty for no filter.",
+          "description": "Only return opportunities linked to this organization id. Defaults to empty (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -2880,7 +2880,7 @@
           "name": "updated_after",
           "type": "string",
           "required": false,
-          "description": "Opportunities updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "description": "Opportunities updated on/after this UTC date (YYYY-MM-DD). Defaults to empty (no lower bound).",
           "enum": null,
           "inferrable": true
         },
@@ -2984,14 +2984,14 @@
     {
       "name": "SearchOrganizations",
       "qualifiedName": "Insightly.SearchOrganizations",
-      "fullyQualifiedName": "Insightly.SearchOrganizations@1.0.0",
+      "fullyQualifiedName": "Insightly.SearchOrganizations@1.0.1",
       "description": "Find organizations by name or domain. Returns records in the account's default order.",
       "parameters": [
         {
           "name": "query",
           "type": "string",
           "required": false,
-          "description": "Match against the organization name (case-insensitive substring). Empty matches all.",
+          "description": "Match against the organization name (case-insensitive substring). Defaults to empty, which matches all.",
           "enum": null,
           "inferrable": true
         },
@@ -2999,7 +2999,7 @@
           "name": "domain",
           "type": "string",
           "required": false,
-          "description": "Only return orgs whose website contains this domain. Empty for no filter.",
+          "description": "Only return orgs whose website contains this domain. Defaults to empty (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -3007,7 +3007,7 @@
           "name": "updated_after",
           "type": "string",
           "required": false,
-          "description": "Organizations updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "description": "Organizations updated on/after this UTC date (YYYY-MM-DD). Defaults to empty (no lower bound).",
           "enum": null,
           "inferrable": true
         },
@@ -3101,14 +3101,14 @@
     {
       "name": "SearchProjects",
       "qualifiedName": "Insightly.SearchProjects",
-      "fullyQualifiedName": "Insightly.SearchProjects@1.0.0",
+      "fullyQualifiedName": "Insightly.SearchProjects@1.0.1",
       "description": "Find projects by name, status, or pipeline. Returns the account's default order.",
       "parameters": [
         {
           "name": "query",
           "type": "string",
           "required": false,
-          "description": "Match against the project name (case-insensitive substring). Empty matches all.",
+          "description": "Match against the project name (case-insensitive substring). Defaults to empty, which matches all.",
           "enum": null,
           "inferrable": true
         },
@@ -3130,7 +3130,7 @@
           "name": "pipeline_id",
           "type": "string",
           "required": false,
-          "description": "Only return projects on this pipeline id. Empty for no filter.",
+          "description": "Only return projects on this pipeline id. Defaults to empty (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -3138,7 +3138,7 @@
           "name": "updated_after",
           "type": "string",
           "required": false,
-          "description": "Projects updated on/after this UTC date (YYYY-MM-DD). Empty = no lower bound.",
+          "description": "Projects updated on/after this UTC date (YYYY-MM-DD). Defaults to empty (no lower bound).",
           "enum": null,
           "inferrable": true
         },
@@ -3237,14 +3237,14 @@
     {
       "name": "SearchTasks",
       "qualifiedName": "Insightly.SearchTasks",
-      "fullyQualifiedName": "Insightly.SearchTasks@1.0.0",
+      "fullyQualifiedName": "Insightly.SearchTasks@1.0.1",
       "description": "Find tasks by title, status, completion, due date, owner, or link. Due bounds inclusive.",
       "parameters": [
         {
           "name": "query",
           "type": "string",
           "required": false,
-          "description": "Match this text against the task title (case-insensitive substring). Empty matches all.",
+          "description": "Match this text against the task title (case-insensitive substring). Defaults to empty, which matches all.",
           "enum": null,
           "inferrable": true
         },
@@ -3274,7 +3274,7 @@
           "name": "due_before",
           "type": "string",
           "required": false,
-          "description": "Only return tasks due on or before this date (YYYY-MM-DD). Empty for no upper bound.",
+          "description": "Only return tasks due on or before this date (YYYY-MM-DD). Defaults to empty (no upper bound).",
           "enum": null,
           "inferrable": true
         },
@@ -3282,7 +3282,7 @@
           "name": "due_after",
           "type": "string",
           "required": false,
-          "description": "Only return tasks due on or after this date (YYYY-MM-DD). Empty for no lower bound.",
+          "description": "Only return tasks due on or after this date (YYYY-MM-DD). Defaults to empty (no lower bound).",
           "enum": null,
           "inferrable": true
         },
@@ -3290,7 +3290,7 @@
           "name": "responsible_user_id",
           "type": "integer",
           "required": false,
-          "description": "Only return tasks assigned to this user id. 0 for no owner filter.",
+          "description": "Only return tasks assigned to this user id. Defaults to 0 (no owner filter).",
           "enum": null,
           "inferrable": true
         },
@@ -3298,7 +3298,7 @@
           "name": "project_id",
           "type": "string",
           "required": false,
-          "description": "Only return tasks linked to this project id. Empty for no project filter.",
+          "description": "Only return tasks linked to this project id. Defaults to empty (no project filter).",
           "enum": null,
           "inferrable": true
         },
@@ -3306,7 +3306,7 @@
           "name": "opportunity_id",
           "type": "string",
           "required": false,
-          "description": "Only return tasks linked to this opportunity id. Empty for no opportunity filter.",
+          "description": "Only return tasks linked to this opportunity id. Defaults to empty (no opportunity filter).",
           "enum": null,
           "inferrable": true
         },
@@ -3314,7 +3314,7 @@
           "name": "contact_id",
           "type": "string",
           "required": false,
-          "description": "Only return tasks linked to this contact id. Empty for no contact filter.",
+          "description": "Only return tasks linked to this contact id. Defaults to empty (no contact filter).",
           "enum": null,
           "inferrable": true
         },
@@ -3322,7 +3322,7 @@
           "name": "organization_id",
           "type": "string",
           "required": false,
-          "description": "Only return tasks linked to this organization id. Empty for no organization filter.",
+          "description": "Only return tasks linked to this organization id. Defaults to empty (no organization filter).",
           "enum": null,
           "inferrable": true
         },
@@ -3451,7 +3451,7 @@
     {
       "name": "SummarizePipeline",
       "qualifiedName": "Insightly.SummarizePipeline",
-      "fullyQualifiedName": "Insightly.SummarizePipeline@1.0.0",
+      "fullyQualifiedName": "Insightly.SummarizePipeline@1.0.1",
       "description": "Roll up opportunities by pipeline stage with a count and summed value per stage.\n\nA forecast view for closing out the week: groups are ordered by the stage's defined order.",
       "parameters": [
         {
@@ -3472,7 +3472,7 @@
           "name": "pipeline_id",
           "type": "string",
           "required": false,
-          "description": "Roll up only opportunities on this pipeline id. Empty for all pipelines.",
+          "description": "Roll up only opportunities on this pipeline id. Defaults to empty (all pipelines).",
           "enum": null,
           "inferrable": true
         },
@@ -3480,7 +3480,7 @@
           "name": "organization_id",
           "type": "string",
           "required": false,
-          "description": "Roll up only opportunities linked to this organization id. Empty for no filter.",
+          "description": "Roll up only opportunities linked to this organization id. Defaults to empty (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -3488,7 +3488,7 @@
           "name": "responsible_user_id",
           "type": "integer",
           "required": false,
-          "description": "Roll up only opportunities owned by this user id (the caller's own id gives a 'my pipeline' view). 0 for every owner.",
+          "description": "Roll up only opportunities owned by this user id (the caller's own id gives a 'my pipeline' view). Defaults to 0 (every owner).",
           "enum": null,
           "inferrable": true
         },
@@ -3576,6 +3576,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-09-24T21:02:07.905Z",
-  "summary": "Insightly is a CRM platform; this toolkit gives Arcade agents full read/write access to contacts, leads, organizations, opportunities, projects, tasks, notes, and pipelines inside an Insightly account.\n\n## Capabilities\n\n- **Record management** — Create and update core CRM objects (contacts, leads, organizations, opportunities, projects, tasks) with upsert-style tools that create on missing ID and update on presence.\n- **Lead conversion** — Convert qualified leads into contacts and organizations (with optional opportunity), carrying over key fields and notes in a single orchestrated workflow.\n- **Search and lookup** — Query any object type by name, email, domain, status, pipeline, stage, owner, or date range; retrieve individual records by ID.\n- **Activity and pipeline intelligence** — Fetch a record's recent notes and open tasks in one call, roll up a user's open deals and tasks, and get a per-stage forecast summary for any pipeline.\n- **Reference data** — List pipelines, pipeline stages, lead statuses/sources, and account users to resolve human-readable names to the IDs that write operations require.\n- **Note logging** — Attach notes to any single CRM record; search notes account-wide or per-record with date and owner filters.\n\n## Secrets\n\n`INSIGHTLY_API_KEY`\nThe API key that authenticates every request to the Insightly REST API. Retrieve it from your Insightly account under **User Settings → API Key** (accessible via your avatar in the top-right corner of the Insightly UI). The key is tied to the user account that generated it, so all actions are attributed to that user — use a dedicated service or admin account in production. Insightly's own documentation on locating the key: [Insightly API Authentication](https://support.insightly.com/hc/en-us/articles/204864594).\n\n`INSIGHTLY_API_URL`\nThe base URL for the Insightly API endpoint (e.g., `https://api.na1.insightly.com/v3.1`). The correct URL depends on the data-residency region your Insightly account was provisioned in (North America, Europe, Australia, etc.). Find your region's base URL in **User Settings → API** within Insightly, or in the [Insightly API documentation](https://api.insightly.com/v3.1/Help). Supply the full versioned base URL without a trailing slash.\n\nStore both secrets in the Arcade secrets manager: https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets — or add them directly at https://api.arcade.dev/dashboard/auth/secrets."
+  "generatedAt": "2026-10-03T11:33:52.192Z",
+  "summary": "Arcade toolkit for [Insightly](https://www.insightly.com/), a CRM platform. Enables reading, creating, updating, and converting CRM records — contacts, leads, organizations, opportunities, projects, tasks, and notes — via the Insightly REST API.\n\n## Capabilities\n\n- **Record management**: Create and update contacts, leads, organizations, opportunities, projects, and tasks; retrieve any single record by ID.\n- **Lead conversion**: Convert a qualified lead into a contact, optional organization, and optional opportunity in one operation; handles name/phone/website propagation and note copying.\n- **Search and discovery**: Search across contacts, leads, organizations, opportunities, projects, tasks, and notes by name, email, status, pipeline, due date, and other filters.\n- **Activity and work summaries**: Pull a record's recent notes and open tasks in one call; roll up a user's open deals and tasks; summarize pipeline stage counts and values for forecasting.\n- **Pipeline and lookup data**: List pipelines, ordered pipeline stages, lead statuses, lead sources, and account users to resolve names to IDs before writes.\n- **Account identity**: Retrieve the authenticated user's identity to confirm attribution before taking action.\n\n## Secrets\n\n`INSIGHTLY_API_KEY` — Your Insightly API key, used to authenticate every request. Retrieve it from **User Settings → API Key** in your Insightly account (top-right avatar menu → User Settings, then scroll to the API Key section). The key is tied to the individual user account, so all actions are attributed to that user. See [Insightly's API key documentation](https://support.insightly.com/hc/en-us/articles/204864594-Finding-your-API-key) for step-by-step instructions.\n\n`INSIGHTLY_API_URL` — The base URL for your Insightly API endpoint. Insightly uses region-specific URLs (e.g., `https://api.na1.insightly.com/v3.1` for North America). The correct URL for your account appears in **User Settings → API Key** alongside the key itself. If omitted or wrong, all API calls will fail or target the wrong region.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to configure secrets, and manage them at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

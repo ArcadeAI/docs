@@ -1,7 +1,7 @@
 {
   "id": "Linear",
   "label": "Linear",
-  "version": "7.1.0",
+  "version": "8.0.0",
   "description": "Arcade tools designed for LLMs to interact with Linear",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "AddComment",
       "qualifiedName": "Linear.AddComment",
-      "fullyQualifiedName": "Linear.AddComment@7.1.0",
+      "fullyQualifiedName": "Linear.AddComment@8.0.0",
       "description": "Add a comment to an issue.",
       "parameters": [
         {
@@ -101,8 +101,8 @@
     {
       "name": "AddProjectComment",
       "qualifiedName": "Linear.AddProjectComment",
-      "fullyQualifiedName": "Linear.AddProjectComment@7.1.0",
-      "description": "Add a comment to a project's document content.\n\nIMPORTANT: Due to Linear API limitations, comments created via the API will NOT\nappear visually anchored inline in the document (no yellow highlight on text).\nThe comment will be stored and can be retrieved via list_project_comments, but\nit will appear in the comments panel rather than inline in the document.\n\nFor true inline comments that are visually anchored to text, users should create\nthem directly in the Linear UI by selecting text and adding a comment.\n\nThe quoted_text parameter stores metadata about what text the comment references,\nwhich is useful for context even though the comment won't be visually anchored.",
+      "fullyQualifiedName": "Linear.AddProjectComment@8.0.0",
+      "description": "Add a comment to a project's document content.\n\nIMPORTANT: Due to Linear API limitations, comments created via the API will NOT\nappear visually anchored inline in the document (no yellow highlight on text).\nThe comment will be stored and is returned when listing the project's comments, but\nit will appear in the comments panel rather than inline in the document.\n\nFor true inline comments that are visually anchored to text, users should create\nthem directly in the Linear UI by selecting text and adding a comment.\n\nThe quoted_text parameter stores metadata about what text the comment references,\nwhich is useful for context even though the comment won't be visually anchored.",
       "parameters": [
         {
           "name": "project",
@@ -201,7 +201,7 @@
     {
       "name": "AddProjectToInitiative",
       "qualifiedName": "Linear.AddProjectToInitiative",
-      "fullyQualifiedName": "Linear.AddProjectToInitiative@7.1.0",
+      "fullyQualifiedName": "Linear.AddProjectToInitiative@8.0.0",
       "description": "Link a project to an initiative.\n\nBoth initiative and project can be specified by ID or name.\nIf a name is provided, fuzzy matching is used to resolve it.",
       "parameters": [
         {
@@ -288,7 +288,7 @@
     {
       "name": "ArchiveInitiative",
       "qualifiedName": "Linear.ArchiveInitiative",
-      "fullyQualifiedName": "Linear.ArchiveInitiative@7.1.0",
+      "fullyQualifiedName": "Linear.ArchiveInitiative@8.0.0",
       "description": "Archive an initiative.\n\nArchived initiatives are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -362,7 +362,7 @@
     {
       "name": "ArchiveIssue",
       "qualifiedName": "Linear.ArchiveIssue",
-      "fullyQualifiedName": "Linear.ArchiveIssue@7.1.0",
+      "fullyQualifiedName": "Linear.ArchiveIssue@8.0.0",
       "description": "Archive an issue.\n\nArchived issues are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -423,7 +423,7 @@
     {
       "name": "ArchiveProject",
       "qualifiedName": "Linear.ArchiveProject",
-      "fullyQualifiedName": "Linear.ArchiveProject@7.1.0",
+      "fullyQualifiedName": "Linear.ArchiveProject@8.0.0",
       "description": "Archive a project.\n\nArchived projects are hidden from default views but can be restored.",
       "parameters": [
         {
@@ -497,7 +497,7 @@
     {
       "name": "CreateDocument",
       "qualifiedName": "Linear.CreateDocument",
-      "fullyQualifiedName": "Linear.CreateDocument@7.1.0",
+      "fullyQualifiedName": "Linear.CreateDocument@8.0.0",
       "description": "Create a standalone Linear document: a page of markdown such as a spec or a runbook.\n\nEvery document hangs from exactly one object — a project, an initiative, a team, an issue\nor a cycle — and one has to be named, since Linear refuses a document with no parent.\n\nThis creates a document, not text on another object. A project's or an initiative's own\ndescription is part of that object rather than a document, and so is a comment on an issue;\nwriting either of those is an edit to that object and does not produce a document.\n\nTwo identical calls create two documents.",
       "parameters": [
         {
@@ -616,7 +616,7 @@
     {
       "name": "CreateInitiative",
       "qualifiedName": "Linear.CreateInitiative",
-      "fullyQualifiedName": "Linear.CreateInitiative@7.1.0",
+      "fullyQualifiedName": "Linear.CreateInitiative@8.0.0",
       "description": "Create a new Linear initiative.\n\nInitiatives are high-level strategic goals that group related projects.",
       "parameters": [
         {
@@ -753,7 +753,7 @@
     {
       "name": "CreateIssue",
       "qualifiedName": "Linear.CreateIssue",
-      "fullyQualifiedName": "Linear.CreateIssue@7.1.0",
+      "fullyQualifiedName": "Linear.CreateIssue@8.0.0",
       "description": "Create a new Linear issue with validation.\n\nWhen assignee is None or '@me', the issue is assigned to the authenticated user.\nAll entity references (team, assignee, labels, state, project, cycle, parent)\nare validated before creation. If an entity is not found, suggestions are\nreturned to help correct the input.",
       "parameters": [
         {
@@ -801,9 +801,9 @@
           "name": "priority",
           "type": "string",
           "required": false,
-          "description": "Issue priority. Default is None (no priority).",
+          "description": "Issue priority. Defaults to None, which creates the issue with no priority.",
           "enum": [
-            "none",
+            "no_priority",
             "urgent",
             "high",
             "medium",
@@ -921,7 +921,7 @@
             "required": true
           },
           "description": {
-            "value": "## Bug Report\n\nA null pointer exception occurs when a user attempts to log in with an unverified email address.\n\n**Steps to Reproduce:**\n1. Register a new account\n2. Skip email verification\n3. Attempt to log in\n\n**Expected:** Friendly error message\n**Actual:** 500 Internal Server Error",
+            "value": "## Summary\n\nA null pointer exception occurs when a user attempts to log in with an expired token.\n\n## Steps to Reproduce\n1. Let a session token expire\n2. Attempt to log in again\n3. Observe the crash\n\n## Expected Behavior\nUser is redirected to the login page with an appropriate error message.",
             "type": "string",
             "required": false
           },
@@ -932,9 +932,8 @@
           },
           "labels_to_add": {
             "value": [
-              "bug",
-              "high-impact",
-              "backend"
+              "Bug",
+              "High Priority"
             ],
             "type": "array",
             "required": false
@@ -950,22 +949,22 @@
             "required": false
           },
           "project": {
-            "value": "Q3 Platform Stability",
+            "value": "Q3 Auth Improvements",
             "type": "string",
             "required": false
           },
           "cycle": {
-            "value": "Sprint 42",
+            "value": "Cycle 12",
             "type": "string",
             "required": false
           },
           "milestone": {
-            "value": "v2.5 Release",
+            "value": "Beta Release",
             "type": "string",
             "required": false
           },
           "parent_issue": {
-            "value": "ENG-128",
+            "value": "ENG-142",
             "type": "string",
             "required": false
           },
@@ -975,17 +974,17 @@
             "required": false
           },
           "due_date": {
-            "value": "2024-09-15",
+            "value": "2025-08-15",
             "type": "string",
             "required": false
           },
           "attachment_url": {
-            "value": "https://sentry.io/organizations/example/issues/12345/",
+            "value": "https://sentry.io/organizations/example/issues/123456/",
             "type": "string",
             "required": false
           },
           "attachment_title": {
-            "value": "Sentry Error Trace - NPE in AuthService",
+            "value": "Sentry Error Report – NullPointerException",
             "type": "string",
             "required": false
           },
@@ -1020,7 +1019,7 @@
     {
       "name": "CreateIssueRelation",
       "qualifiedName": "Linear.CreateIssueRelation",
-      "fullyQualifiedName": "Linear.CreateIssueRelation@7.1.0",
+      "fullyQualifiedName": "Linear.CreateIssueRelation@8.0.0",
       "description": "Create a relation between two issues.\n\nRelation types define the relationship from the source issue's perspective:\n- blocks: Source issue blocks the related issue\n- blockedBy: Source issue is blocked by the related issue\n- duplicate: Source issue is a duplicate of the related issue\n- related: Issues are related (bidirectional)",
       "parameters": [
         {
@@ -1112,7 +1111,7 @@
     {
       "name": "CreateLabel",
       "qualifiedName": "Linear.CreateLabel",
-      "fullyQualifiedName": "Linear.CreateLabel@7.1.0",
+      "fullyQualifiedName": "Linear.CreateLabel@8.0.0",
       "description": "Create a label for issues, projects, or initiatives, and optionally apply it.\n\nA label whose name is already taken in the same scope is returned rather than duplicated,\nso this is safe to call without checking first: `created` says which happened. Linear scopes\nlabel names per group and per team, so the same name may legitimately exist in a different\ngroup or on a different team.\n\nPass attach_to to label an object in one call. If the label is made but attaching fails,\nthe label still comes back with attach_error set, so a retry reuses it instead of leaving\na duplicate behind.\n\nOnly issue labels can belong to a team. Naming a team for a project or initiative label\nis refused rather than ignored, since those are workspace-scoped.",
       "parameters": [
         {
@@ -1281,7 +1280,7 @@
     {
       "name": "CreateProject",
       "qualifiedName": "Linear.CreateProject",
-      "fullyQualifiedName": "Linear.CreateProject@7.1.0",
+      "fullyQualifiedName": "Linear.CreateProject@8.0.0",
       "description": "Create a new Linear project.\n\nTeam is validated before creation. If team is not found, suggestions are\nreturned to help correct the input. Lead is validated if provided.",
       "parameters": [
         {
@@ -1463,7 +1462,7 @@
     {
       "name": "CreateProjectStatus",
       "qualifiedName": "Linear.CreateProjectStatus",
-      "fullyQualifiedName": "Linear.CreateProjectStatus@7.1.0",
+      "fullyQualifiedName": "Linear.CreateProjectStatus@8.0.0",
       "description": "Create a new project status in the Linear workspace.\n\nRequires Linear workspace admin access; without it the create fails.\n\nStatus names are unique per category: the same name may exist once per type. When a status\nwith the same name and type already exists, this returns a retryable error carrying the\nexisting status's id so it can be reused instead of duplicated. A same-named status of a\ndifferent type is allowed.",
       "parameters": [
         {
@@ -1571,7 +1570,7 @@
     {
       "name": "CreateProjectUpdate",
       "qualifiedName": "Linear.CreateProjectUpdate",
-      "fullyQualifiedName": "Linear.CreateProjectUpdate@7.1.0",
+      "fullyQualifiedName": "Linear.CreateProjectUpdate@8.0.0",
       "description": "Create a project status update.\n\nProject updates are posts that communicate progress, blockers, or status\nchanges to stakeholders. They appear in the project's Updates tab and\ncan include a health status indicator.",
       "parameters": [
         {
@@ -1661,7 +1660,7 @@
     {
       "name": "DeleteLabel",
       "qualifiedName": "Linear.DeleteLabel",
-      "fullyQualifiedName": "Linear.DeleteLabel@7.1.0",
+      "fullyQualifiedName": "Linear.DeleteLabel@8.0.0",
       "description": "Permanently delete a label.\n\nThe label is stripped from everything that carries it and is not recoverable — the label,\nits color, its description, and the record that anything ever carried it all go. Deleting a\ngroup also ungroups the labels inside it.\n\nRetiring a label is the reversible alternative: a retired label cannot be applied to\nanything new but stays on what already has it. Confirm which is wanted before deleting.\n\nPassing an id that matches no label is not an error: it reports `not_found`.",
       "parameters": [
         {
@@ -1752,7 +1751,7 @@
     {
       "name": "GetCycle",
       "qualifiedName": "Linear.GetCycle",
-      "fullyQualifiedName": "Linear.GetCycle@7.1.0",
+      "fullyQualifiedName": "Linear.GetCycle@8.0.0",
       "description": "Get detailed information about a specific Linear cycle.\n\nReports the documents attached to the cycle alongside its dates and progress. Only the\nfirst page of them comes back; the response says when the cycle has more.",
       "parameters": [
         {
@@ -1812,7 +1811,7 @@
     {
       "name": "GetDocument",
       "qualifiedName": "Linear.GetDocument",
-      "fullyQualifiedName": "Linear.GetDocument@7.1.0",
+      "fullyQualifiedName": "Linear.GetDocument@8.0.0",
       "description": "Read a Linear document's content as markdown.\n\nLong documents come back a chunk at a time: when has_more is true, pass the response's\nnext_offset back as offset to continue. The response also reports whether the document is\nin the trash, which is worth relaying before quoting it as current.",
       "parameters": [
         {
@@ -1898,7 +1897,7 @@
     {
       "name": "GetInitiative",
       "qualifiedName": "Linear.GetInitiative",
-      "fullyQualifiedName": "Linear.GetInitiative@7.1.0",
+      "fullyQualifiedName": "Linear.GetInitiative@8.0.0",
       "description": "Get detailed information about a specific Linear initiative.\n\nSupports lookup by ID or name (with fuzzy matching for name).",
       "parameters": [
         {
@@ -2000,8 +1999,8 @@
     {
       "name": "GetInitiativeDescription",
       "qualifiedName": "Linear.GetInitiativeDescription",
-      "fullyQualifiedName": "Linear.GetInitiativeDescription@7.1.0",
-      "description": "Get an initiative's full description with pagination support.\n\nUse this tool when you need the complete description of an initiative that\nwas truncated in the get_initiative response. Supports chunked reading for\nvery large descriptions.",
+      "fullyQualifiedName": "Linear.GetInitiativeDescription@8.0.0",
+      "description": "Get an initiative's full description with pagination support.\n\nUse this tool when you need the complete description of an initiative whose\ndescription came back truncated. Supports chunked reading for very large\ndescriptions.",
       "parameters": [
         {
           "name": "initiative_id",
@@ -2086,7 +2085,7 @@
     {
       "name": "GetIssue",
       "qualifiedName": "Linear.GetIssue",
-      "fullyQualifiedName": "Linear.GetIssue@7.1.0",
+      "fullyQualifiedName": "Linear.GetIssue@8.0.0",
       "description": "Get detailed information about a specific Linear issue.\n\nAccepts either the issue UUID or the human-readable identifier (like TOO-123).",
       "parameters": [
         {
@@ -2198,7 +2197,7 @@
     {
       "name": "GetMilestone",
       "qualifiedName": "Linear.GetMilestone",
-      "fullyQualifiedName": "Linear.GetMilestone@7.1.0",
+      "fullyQualifiedName": "Linear.GetMilestone@8.0.0",
       "description": "Get a milestone by ID or name inside a project.",
       "parameters": [
         {
@@ -2284,7 +2283,7 @@
     {
       "name": "GetNotifications",
       "qualifiedName": "Linear.GetNotifications",
-      "fullyQualifiedName": "Linear.GetNotifications@7.1.0",
+      "fullyQualifiedName": "Linear.GetNotifications@8.0.0",
       "description": "Get the authenticated user's notifications.\n\nReturns notifications including issue mentions, comments, assignments,\nand state changes.",
       "parameters": [
         {
@@ -2370,7 +2369,7 @@
     {
       "name": "GetProject",
       "qualifiedName": "Linear.GetProject",
-      "fullyQualifiedName": "Linear.GetProject@7.1.0",
+      "fullyQualifiedName": "Linear.GetProject@8.0.0",
       "description": "Get detailed information about a specific Linear project.\n\nSupports lookup by ID, slug_id, or name (with fuzzy matching for name).",
       "parameters": [
         {
@@ -2486,7 +2485,7 @@
     {
       "name": "GetProjectDescription",
       "qualifiedName": "Linear.GetProjectDescription",
-      "fullyQualifiedName": "Linear.GetProjectDescription@7.1.0",
+      "fullyQualifiedName": "Linear.GetProjectDescription@8.0.0",
       "description": "Get a project's full description with pagination support.\n\nUse this when a project's description came back truncated and the full text is needed.\nSupports chunked reading for very large descriptions.",
       "parameters": [
         {
@@ -2572,7 +2571,7 @@
     {
       "name": "GetRecentActivity",
       "qualifiedName": "Linear.GetRecentActivity",
-      "fullyQualifiedName": "Linear.GetRecentActivity@7.1.0",
+      "fullyQualifiedName": "Linear.GetRecentActivity@8.0.0",
       "description": "Get the authenticated user's recent issue activity.\n\nReturns issues the user has recently created or been assigned to\nwithin the specified time period.",
       "parameters": [
         {
@@ -2645,7 +2644,7 @@
     {
       "name": "GetTeam",
       "qualifiedName": "Linear.GetTeam",
-      "fullyQualifiedName": "Linear.GetTeam@7.1.0",
+      "fullyQualifiedName": "Linear.GetTeam@8.0.0",
       "description": "Get detailed information about a specific Linear team.\n\nSupports lookup by ID, key (like TOO, ENG), or name (with fuzzy matching).",
       "parameters": [
         {
@@ -2735,7 +2734,7 @@
     {
       "name": "ListAvailableProjectStatuses",
       "qualifiedName": "Linear.ListAvailableProjectStatuses",
-      "fullyQualifiedName": "Linear.ListAvailableProjectStatuses@7.1.0",
+      "fullyQualifiedName": "Linear.ListAvailableProjectStatuses@8.0.0",
       "description": "List the project statuses a project can be put in, in the Linear workspace.\n\nIncludes custom statuses, not just the built-in categories, so the exact name, id, and\ntype of each status can be discovered before filtering projects by status or assigning a\nstatus to a project. Returned in lifecycle order (backlog → planned → started → paused →\ncompleted → canceled), then by position within each category. Project statuses are a small\nworkspace-level vocabulary and the whole set is returned in one call (no pagination).",
       "parameters": [
         {
@@ -2802,7 +2801,7 @@
     {
       "name": "ListComments",
       "qualifiedName": "Linear.ListComments",
-      "fullyQualifiedName": "Linear.ListComments@7.1.0",
+      "fullyQualifiedName": "Linear.ListComments@8.0.0",
       "description": "List comments on an issue.\n\nReturns comments with user info, timestamps, and reply threading info.",
       "parameters": [
         {
@@ -2888,7 +2887,7 @@
     {
       "name": "ListCycles",
       "qualifiedName": "Linear.ListCycles",
-      "fullyQualifiedName": "Linear.ListCycles@7.1.0",
+      "fullyQualifiedName": "Linear.ListCycles@8.0.0",
       "description": "List Linear cycles, optionally filtered by team and status.\n\nCycles are time-boxed iterations (like sprints) for organizing work.",
       "parameters": [
         {
@@ -3000,7 +2999,7 @@
     {
       "name": "ListDocuments",
       "qualifiedName": "Linear.ListDocuments",
-      "fullyQualifiedName": "Linear.ListDocuments@7.1.0",
+      "fullyQualifiedName": "Linear.ListDocuments@8.0.0",
       "description": "Browse Linear documents, optionally narrowed to the object they are attached to.\n\nLists the documents attached to an issue, project, initiative, team or cycle — name that\nobject with parent_type and parent to narrow the listing to it.\n\nMatches document titles only; it does not look inside document bodies. Returns the most\nrecently updated documents first. Each document comes back\nwith a truncated preview of its markdown body, not the whole thing. Documents in the trash\nare never listed.\n\nThe creator, title and date filters need no parent — they span every one.\n\nThis covers standalone Linear documents. The description or spec written into a project or\nan initiative itself is part of that object rather than a document, so it is not listed\nhere even when a person calls it \"the spec\" — an empty result for a parent that plainly has\nwritten content usually means the text lives on the parent itself and is read from the\nparent rather than from its documents.",
       "parameters": [
         {
@@ -3157,7 +3156,7 @@
     {
       "name": "ListInitiatives",
       "qualifiedName": "Linear.ListInitiatives",
-      "fullyQualifiedName": "Linear.ListInitiatives@7.1.0",
+      "fullyQualifiedName": "Linear.ListInitiatives@8.0.0",
       "description": "List Linear initiatives, optionally filtered by keywords and other criteria.\n\nReturns all initiatives when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -3263,7 +3262,7 @@
     {
       "name": "ListIssues",
       "qualifiedName": "Linear.ListIssues",
-      "fullyQualifiedName": "Linear.ListIssues@7.1.0",
+      "fullyQualifiedName": "Linear.ListIssues@8.0.0",
       "description": "List Linear issues, optionally filtered by keywords and other criteria.\n\nReturns all issues when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -3304,7 +3303,7 @@
           "required": false,
           "description": "Filter by priority level. Default is None.",
           "enum": [
-            "none",
+            "no_priority",
             "urgent",
             "high",
             "medium",
@@ -3371,12 +3370,12 @@
         "toolName": "Linear.ListIssues",
         "parameters": {
           "keywords": {
-            "value": "login failure OR authentication error",
+            "value": "authentication bug login",
             "type": "string",
             "required": false
           },
           "team": {
-            "value": "frontend",
+            "value": "Backend",
             "type": "string",
             "required": false
           },
@@ -3401,12 +3400,12 @@
             "required": false
           },
           "project": {
-            "value": "Mobile App",
+            "value": "Q1 2024 Roadmap",
             "type": "string",
             "required": false
           },
           "created_after": {
-            "value": "2026-01-01",
+            "value": "2024-01-01",
             "type": "string",
             "required": false
           },
@@ -3416,7 +3415,7 @@
             "required": false
           },
           "end_cursor": {
-            "value": "cursor_abc123def",
+            "value": "eyJpZCI6ImFiYzEyMyJ9",
             "type": "string",
             "required": false
           }
@@ -3446,7 +3445,7 @@
     {
       "name": "ListLabels",
       "qualifiedName": "Linear.ListLabels",
-      "fullyQualifiedName": "Linear.ListLabels@7.1.0",
+      "fullyQualifiedName": "Linear.ListLabels@8.0.0",
       "description": "List the labels in the workspace for issues, projects, or initiatives.\n\nLinear keeps three separate label vocabularies. A label of one type can never be applied to\nan object of another, and the ids do not overlap, so pick the type that matches what is\nbeing labelled. Initiative labels are workspace-scoped and never belong to a team.\n\nA label with is_group=True is a container for other labels and cannot itself be applied;\npick one of its members instead. Every filter here is applied by Linear, so a narrowed\nlisting is complete rather than a page trimmed after the fact.",
       "parameters": [
         {
@@ -3614,7 +3613,7 @@
     {
       "name": "ListMilestones",
       "qualifiedName": "Linear.ListMilestones",
-      "fullyQualifiedName": "Linear.ListMilestones@7.1.0",
+      "fullyQualifiedName": "Linear.ListMilestones@8.0.0",
       "description": "List milestones in a Linear project.",
       "parameters": [
         {
@@ -3713,7 +3712,7 @@
     {
       "name": "ListProjectComments",
       "qualifiedName": "Linear.ListProjectComments",
-      "fullyQualifiedName": "Linear.ListProjectComments@7.1.0",
+      "fullyQualifiedName": "Linear.ListProjectComments@8.0.0",
       "description": "List comments on a project's document content.\n\nReturns comments with user info, timestamps, quoted text for inline comments,\nand reply threading info. Replies are nested under their parent comments.\n\nUse comment_filter to control which comments are returned:\n- only_quoted (default): Only comments attached to a quote in the text\n- only_unquoted: Only comments not attached to a particular quote\n- all: All comments regardless of being attached to a quote or not",
       "parameters": [
         {
@@ -3842,7 +3841,7 @@
     {
       "name": "ListProjects",
       "qualifiedName": "Linear.ListProjects",
-      "fullyQualifiedName": "Linear.ListProjects@7.1.0",
+      "fullyQualifiedName": "Linear.ListProjects@8.0.0",
       "description": "List Linear projects, optionally filtered by keywords, status, team, or creation date.\n\nWith no filters this returns projects up to the page limit (default 20, max 50). Narrow by a\nspecific status with ``status`` (a status name or id), or by a whole category with\n``status_type``; the two are mutually exclusive. Each returned project includes its id, name,\nstatus, teams, and progress.",
       "parameters": [
         {
@@ -4013,7 +4012,7 @@
     {
       "name": "ListProjectUpdates",
       "qualifiedName": "Linear.ListProjectUpdates",
-      "fullyQualifiedName": "Linear.ListProjectUpdates@7.1.0",
+      "fullyQualifiedName": "Linear.ListProjectUpdates@8.0.0",
       "description": "List a Linear project's status updates. Returns newest first.",
       "parameters": [
         {
@@ -4112,7 +4111,7 @@
     {
       "name": "ListTeams",
       "qualifiedName": "Linear.ListTeams",
-      "fullyQualifiedName": "Linear.ListTeams@7.1.0",
+      "fullyQualifiedName": "Linear.ListTeams@8.0.0",
       "description": "List Linear teams, optionally filtered by keywords and other criteria.\n\nReturns all teams when no filters provided, or filtered results when\nkeywords or other filters are specified.",
       "parameters": [
         {
@@ -4224,7 +4223,7 @@
     {
       "name": "ListWorkflowStates",
       "qualifiedName": "Linear.ListWorkflowStates",
-      "fullyQualifiedName": "Linear.ListWorkflowStates@7.1.0",
+      "fullyQualifiedName": "Linear.ListWorkflowStates@8.0.0",
       "description": "List available workflow states in the workspace.\n\nReturns workflow states that can be used for issue transitions.\nStates are team-specific and have different types.",
       "parameters": [
         {
@@ -4330,7 +4329,7 @@
     {
       "name": "ManageIssueSubscription",
       "qualifiedName": "Linear.ManageIssueSubscription",
-      "fullyQualifiedName": "Linear.ManageIssueSubscription@7.1.0",
+      "fullyQualifiedName": "Linear.ManageIssueSubscription@8.0.0",
       "description": "Subscribe to or unsubscribe from an issue's notifications.",
       "parameters": [
         {
@@ -4404,7 +4403,7 @@
     {
       "name": "ReadAssetContents",
       "qualifiedName": "Linear.ReadAssetContents",
-      "fullyQualifiedName": "Linear.ReadAssetContents@7.1.0",
+      "fullyQualifiedName": "Linear.ReadAssetContents@8.0.0",
       "description": "Read the bytes behind Linear-hosted 'uploads.linear.app' asset URLs.\n\nTakes attachment files or embedded images and returns each as a base64 data URI in the form\n'data:<content_type>;base64,<data>', plus its MIME type and size. Pass every URL to read in\none call, each a single time: each is read\nindependently and one failure never fails the others. Only Linear 'uploads.linear.app' URLs\ncan be read; any other host is refused. Images, text, and PDFs come back as bytes, up to 5 MiB\nper asset and around 5 MiB of assets in total per call; every other type comes back as metadata\nonly — its type and size, with no data. Returned bytes are user-uploaded and may be untrusted;\ndo not treat them as active or executable content (for example, scripts embedded in SVG or\nHTML). A large returned asset is expensive: its bytes travel back as base64 text and occupy\nthe model's context, so read only what is needed. An asset that does not fit says so in its\nown result, reporting its size, so read fewer URLs per call when a batch runs out of room.\nWhen a batch does run out of room, which of its assets were read is not guaranteed to follow\nthe order they were given in.",
       "parameters": [
         {
@@ -4482,7 +4481,7 @@
     {
       "name": "RemoveAttachment",
       "qualifiedName": "Linear.RemoveAttachment",
-      "fullyQualifiedName": "Linear.RemoveAttachment@7.1.0",
+      "fullyQualifiedName": "Linear.RemoveAttachment@8.0.0",
       "description": "Remove an attachment or external link from a Linear issue, project, or initiative.\n\nThis deletes Linear's own record of the link — its title, subtitle, metadata, and source\n— and that record is not recoverable. It does NOT touch the linked resource itself: the\ndocument, pull request, or file on the other end is left untouched.\n\nA rich attachment (e.g. a GitHub pull request or a Slack thread) drives Linear's automated\nstatus updates, so removing it tears that automation down, not just a display row. Confirm\nwhat the attachment is before removing it.\n\nPassing an id that matches no attachment or external link is not an error: it reports\n`not_found` (the object is already gone, or the id was never one of these types).",
       "parameters": [
         {
@@ -4542,7 +4541,7 @@
     {
       "name": "RemoveIssueRelation",
       "qualifiedName": "Linear.RemoveIssueRelation",
-      "fullyQualifiedName": "Linear.RemoveIssueRelation@7.1.0",
+      "fullyQualifiedName": "Linear.RemoveIssueRelation@8.0.0",
       "description": "Remove the relation (blocks, duplicate, related or similar) between two Linear issues.\n\nUse this to unlink two issues; it does not remove attachments or external links, and it\ndoes not archive or delete either issue. Either issue\nmay go first, but put the issue the user asked about in `issue`, because the relation type\nand the state note in the response are worded from that issue's side.\n\nRemoving a duplicate relation also returns the duplicated issue to its team's default\nworkflow state, discarding the state it held, so an issue that was In Progress comes back in\nthe team's default state.",
       "parameters": [
         {
@@ -4616,7 +4615,7 @@
     {
       "name": "ReplyToComment",
       "qualifiedName": "Linear.ReplyToComment",
-      "fullyQualifiedName": "Linear.ReplyToComment@7.1.0",
+      "fullyQualifiedName": "Linear.ReplyToComment@8.0.0",
       "description": "Reply to an existing comment on an issue.\n\nCreates a threaded reply to the specified parent comment.",
       "parameters": [
         {
@@ -4703,7 +4702,7 @@
     {
       "name": "ReplyToProjectComment",
       "qualifiedName": "Linear.ReplyToProjectComment",
-      "fullyQualifiedName": "Linear.ReplyToProjectComment@7.1.0",
+      "fullyQualifiedName": "Linear.ReplyToProjectComment@8.0.0",
       "description": "Reply to an existing comment on a project document.\n\nCreates a threaded reply to the specified parent comment.",
       "parameters": [
         {
@@ -4803,7 +4802,7 @@
     {
       "name": "ResolveComment",
       "qualifiedName": "Linear.ResolveComment",
-      "fullyQualifiedName": "Linear.ResolveComment@7.1.0",
+      "fullyQualifiedName": "Linear.ResolveComment@8.0.0",
       "description": "Resolve or reopen a Linear comment thread by its id.\n\nWorks for any comment regardless of what it is anchored to — issue comments, project\ncomments, and comments anchored to a project description alike. Resolving a comment that\nis already resolved (or reopening one already open) succeeds without making a change; in\nthat no-op case a supplied resolving_comment_id is not applied, since the thread's\nexisting resolution is left untouched.\n\nIMPORTANT: Linear's API updates the comment record but not the inline-comment mark stored\nin a project description. For comments anchored to project-description text, resolving may\nnot appear until the Linear view is reopened, while reopening may leave the comment hidden\nin Linear's UI until it is reopened manually there. The returned resolution state and\nsubsequent API reads remain authoritative.",
       "parameters": [
         {
@@ -4893,7 +4892,7 @@
     {
       "name": "RetireLabel",
       "qualifiedName": "Linear.RetireLabel",
-      "fullyQualifiedName": "Linear.RetireLabel@7.1.0",
+      "fullyQualifiedName": "Linear.RetireLabel@8.0.0",
       "description": "Retire a label, or restore one that was retired.\n\nRetiring is the reversible way to take a label out of use: it stays on everything that\nalready carries it and keeps that history intact, but it can no longer be applied to\nanything new. Prefer it over permanently deleting a label.",
       "parameters": [
         {
@@ -5000,7 +4999,7 @@
     {
       "name": "SearchDocuments",
       "qualifiedName": "Linear.SearchDocuments",
-      "fullyQualifiedName": "Linear.SearchDocuments@7.1.0",
+      "fullyQualifiedName": "Linear.SearchDocuments@8.0.0",
       "description": "Full-text search across Linear document titles and body content.\n\nSearches the whole workspace, excluding documents in the trash. Results come back ranked by\nrelevance, each with a truncated preview of its markdown body and the object it hangs from,\nso a match can be narrowed by parent without another call. The search index trails writes by\na few seconds, so a document created moments ago may not be findable yet.\n\nOnly standalone Linear documents are indexed here. Text written into a project's or an\ninitiative's own description is part of that object rather than a document, so a phrase that\nappears only there will not be found by this search; it is read from the project or\ninitiative itself.",
       "parameters": [
         {
@@ -5086,7 +5085,7 @@
     {
       "name": "TransitionIssueState",
       "qualifiedName": "Linear.TransitionIssueState",
-      "fullyQualifiedName": "Linear.TransitionIssueState@7.1.0",
+      "fullyQualifiedName": "Linear.TransitionIssueState@8.0.0",
       "description": "Transition a Linear issue to a new workflow state.\n\nThe target state is validated against the team's available states.",
       "parameters": [
         {
@@ -5173,7 +5172,7 @@
     {
       "name": "TrashDocument",
       "qualifiedName": "Linear.TrashDocument",
-      "fullyQualifiedName": "Linear.TrashDocument@7.1.0",
+      "fullyQualifiedName": "Linear.TrashDocument@8.0.0",
       "description": "Move a Linear document to the trash — the way to delete or archive one.\n\nLinear offers no separate archive for documents, so trashing is what both \"delete this doc\"\nand \"archive this doc\" amount to. The document leaves listings, searches and default views\nstraight away. It stays recoverable from Linear's trash for 30 days, and after that Linear\npurges it and the content is gone for good — so this is worth relaying rather than\nreporting as simply done. Recovery is done in Linear itself.\n\nThis trashes the document as a whole. Taking a document out of the project or issue it\nhangs from, and emptying its body, are both edits that leave the document in place — a\nrequest to remove a document *from* something is one of those, not this.",
       "parameters": [
         {
@@ -5234,7 +5233,7 @@
     {
       "name": "UpdateComment",
       "qualifiedName": "Linear.UpdateComment",
-      "fullyQualifiedName": "Linear.UpdateComment@7.1.0",
+      "fullyQualifiedName": "Linear.UpdateComment@8.0.0",
       "description": "Update an existing comment.",
       "parameters": [
         {
@@ -5307,7 +5306,7 @@
     {
       "name": "UpdateDocument",
       "qualifiedName": "Linear.UpdateDocument",
-      "fullyQualifiedName": "Linear.UpdateDocument@7.1.0",
+      "fullyQualifiedName": "Linear.UpdateDocument@8.0.0",
       "description": "Edit a Linear document's title, body, or the object it hangs from.\n\nOnly what is passed changes. Moving the document under a new parent detaches it from the\nold one, because a document hangs from exactly one object — so this is how a document is\ntaken out of a project without being deleted.\n\nThe body is replaced wholesale, not appended to. Adding a line to a document means reading\nits current body first and sending the whole thing back with the line in it.\n\nThis edits a document. Text written into a project's or an initiative's own description, or\na comment on an issue, belongs to that object rather than to a document and is edited there.",
       "parameters": [
         {
@@ -5439,7 +5438,7 @@
     {
       "name": "UpdateInitiative",
       "qualifiedName": "Linear.UpdateInitiative",
-      "fullyQualifiedName": "Linear.UpdateInitiative@7.1.0",
+      "fullyQualifiedName": "Linear.UpdateInitiative@8.0.0",
       "description": "Update a Linear initiative with partial updates.\n\nOnly fields that are explicitly provided will be updated.",
       "parameters": [
         {
@@ -5606,7 +5605,7 @@
     {
       "name": "UpdateIssue",
       "qualifiedName": "Linear.UpdateIssue",
-      "fullyQualifiedName": "Linear.UpdateIssue@7.1.0",
+      "fullyQualifiedName": "Linear.UpdateIssue@8.0.0",
       "description": "Update a Linear issue with partial updates.\n\nOnly fields that are explicitly provided will be updated. All entity\nreferences are validated before update.",
       "parameters": [
         {
@@ -5665,7 +5664,7 @@
           "required": false,
           "description": "New priority. Only updated if provided.",
           "enum": [
-            "none",
+            "no_priority",
             "urgent",
             "high",
             "medium",
@@ -5778,12 +5777,12 @@
             "required": true
           },
           "title": {
-            "value": "Fix authentication timeout bug",
+            "value": "Fix authentication bug on login page",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "## Summary\n\nUsers are experiencing session timeouts after 5 minutes of inactivity.\n\n## Steps to Reproduce\n1. Log in to the app\n2. Wait 5 minutes\n3. Attempt any action\n\n## Expected Behavior\nSession should remain active for 30 minutes.",
+            "value": "## Summary\n\nUsers are unable to log in when using SSO. This issue affects all enterprise accounts.\n\n## Steps to Reproduce\n1. Navigate to the login page\n2. Click 'Sign in with SSO'\n3. Observe the 500 error\n\n## Expected Behavior\nUser should be redirected to their SSO provider.",
             "type": "string",
             "required": false
           },
@@ -5818,7 +5817,7 @@
             "required": false
           },
           "project": {
-            "value": "Q4 Platform Improvements",
+            "value": "Q3 Platform Improvements",
             "type": "string",
             "required": false
           },
@@ -5838,22 +5837,22 @@
             "required": false
           },
           "estimate": {
-            "value": 3,
+            "value": 5,
             "type": "integer",
             "required": false
           },
           "due_date": {
-            "value": "2024-12-31",
+            "value": "2025-09-30",
             "type": "string",
             "required": false
           },
           "attachment_url": {
-            "value": "https://docs.example.com/issues/auth-timeout-investigation",
+            "value": "https://www.notion.so/myworkspace/bug-report-auth-123abc",
             "type": "string",
             "required": false
           },
           "attachment_title": {
-            "value": "Auth Timeout Investigation Doc",
+            "value": "Notion Bug Report: SSO Authentication Failure",
             "type": "string",
             "required": false
           },
@@ -5888,7 +5887,7 @@
     {
       "name": "UpdateLabel",
       "qualifiedName": "Linear.UpdateLabel",
-      "fullyQualifiedName": "Linear.UpdateLabel@7.1.0",
+      "fullyQualifiedName": "Linear.UpdateLabel@8.0.0",
       "description": "Update a label's name, color, description, or group.\n\nRenaming a label changes it everywhere it is applied — Linear has one label object per\nname, not a copy per object that carries it.",
       "parameters": [
         {
@@ -6031,7 +6030,7 @@
     {
       "name": "UpdateProject",
       "qualifiedName": "Linear.UpdateProject",
-      "fullyQualifiedName": "Linear.UpdateProject@7.1.0",
+      "fullyQualifiedName": "Linear.UpdateProject@8.0.0",
       "description": "Update a Linear project with partial updates.\n\nOnly fields that are explicitly provided will be updated. All entity\nreferences are validated before update.\n\nIMPORTANT: Updating the 'content' field will break any existing inline\ncomment anchoring. The comments still exist and can still be read back,\nbut they will no longer appear visually anchored to text in the Linear\nUI. The 'description' field can be safely updated without affecting\ninline comments.",
       "parameters": [
         {
@@ -6262,7 +6261,7 @@
     {
       "name": "UpsertAttachment",
       "qualifiedName": "Linear.UpsertAttachment",
-      "fullyQualifiedName": "Linear.UpsertAttachment@7.1.0",
+      "fullyQualifiedName": "Linear.UpsertAttachment@8.0.0",
       "description": "Attach a URL or a local file to a Linear issue, project, or initiative.\n\nA URL that is already attached to the target is not duplicated on any target type: a\ndifferent title renames the existing attachment, and otherwise nothing changes.\n\nA local file is uploaded to Linear and stored as a native attachment on an issue, or as an\nexternal link to the stored file on a project or initiative. Each attach uploads the file\nagain, so repeating one adds a second attachment. Attaching a local file needs a one-time\nclient-side hook so the file's bytes never enter the model's context; if a 'file://' source\nreaches the server, the hook did not run and the tool returns the setup steps instead of\nattaching anything.",
       "parameters": [
         {
@@ -6357,7 +6356,7 @@
     {
       "name": "UpsertMilestone",
       "qualifiedName": "Linear.UpsertMilestone",
-      "fullyQualifiedName": "Linear.UpsertMilestone@7.1.0",
+      "fullyQualifiedName": "Linear.UpsertMilestone@8.0.0",
       "description": "Upsert a project's milestone.",
       "parameters": [
         {
@@ -6484,7 +6483,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Linear.WhoAmI",
-      "fullyQualifiedName": "Linear.WhoAmI@7.1.0",
+      "fullyQualifiedName": "Linear.WhoAmI@8.0.0",
       "description": "Get the authenticated user's profile and team memberships.\n\nReturns the current user's information including their name, email,\norganization, and the teams they belong to.",
       "parameters": [],
       "auth": {
@@ -6539,6 +6538,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "3dbc4f7bd59d0fef5426882adc94d0f50f571dcee8c12f3fa5b651b4b7df2625",
-  "generatedAt": "2026-09-24T21:02:14.496Z",
-  "summary": "## Linear Toolkit for Arcade\n\nArcade's Linear toolkit enables LLMs to read and write across the full Linear workspace — issues, projects, initiatives, documents, cycles, labels, milestones, comments, notifications, and more — through a single OAuth-authenticated surface.\n\n## Capabilities\n\n- **Issue lifecycle**: Create, update, archive, transition workflow states, manage relations (blocks/blocked-by/duplicate/related), subscribe/unsubscribe, and add, reply to, update, or resolve comments and replies.\n- **Projects & initiatives**: Create, update, archive, and link projects to initiatives; manage milestones, project updates (health/progress posts), project comments (with inline-quote metadata), and project statuses; read full descriptions with pagination.\n- **Documents**: Create standalone markdown documents parented to any Linear object (project, initiative, team, issue, cycle); read with chunked pagination; update, move between parents, search full-text, list by parent or filters, and trash (soft-delete with 30-day recovery).\n- **Labels**: Create-or-return, apply, update, retire (reversible), or permanently delete labels across the three separate Linear vocabularies (issue, project, initiative); list with group/team/type filters.\n- **Workspace discovery**: List and filter teams, workflow states, cycles, available project statuses, notifications, and recent activity; look up any team, project, initiative, cycle, milestone, issue, or document by ID, key, slug, or fuzzy name.\n- **Assets & attachments**: Read Linear-hosted asset URLs as base64 data URIs (images, PDFs, text up to 5 MiB/asset); upsert or remove URL and file attachments on issues, projects, and initiatives.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with **Linear** as the provider. Arcade handles the token flow automatically.\n\nSee the [Linear auth provider docs](https://docs.arcade.dev/en/references/auth-providers/linear) for configuration details."
+  "generatedAt": "2026-10-03T11:34:03.711Z",
+  "summary": "Linear is a project management platform; this Arcade toolkit gives LLMs full read/write access to a Linear workspace — issues, projects, initiatives, documents, cycles, teams, labels, comments, and more.\n\n## Capabilities\n\n- **Issue lifecycle**: Create, update, archive, transition workflow states, manage relations (blocks/blocked-by/duplicate/related), subscribe to notifications, and attach files or URLs to issues.\n- **Projects & initiatives**: Create, update, archive, and list projects and initiatives; manage milestones, project status updates, and link projects to initiatives; read or paginate large descriptions.\n- **Documents & comments**: Create, read (with pagination), edit, search full-text, and trash standalone documents; add, reply to, resolve, and list comments on issues and project documents, with inline-anchor caveats documented per tool.\n- **Team & workspace metadata**: List and inspect teams, workflow states, cycles, labels (issue/project/initiative scopes), and available project statuses; create, update, retire, or delete labels.\n- **Asset & attachment handling**: Read Linear-hosted asset bytes (images, PDFs, text up to 5 MiB); upsert or remove URL/file attachments on issues, projects, and initiatives.\n- **User context**: Retrieve the authenticated user's profile, team memberships, recent activity, and notifications.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Linear** provider. See the [Linear auth provider docs](https://docs.arcade.dev/en/references/auth-providers/linear) for configuration details."
 }

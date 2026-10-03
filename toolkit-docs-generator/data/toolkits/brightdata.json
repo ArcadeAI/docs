@@ -1,7 +1,7 @@
 {
   "id": "Brightdata",
   "label": "Bright Data",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Search, Crawl and Scrape any site, at scale, without getting blocked",
   "metadata": {
     "category": "development",
@@ -18,7 +18,7 @@
     {
       "name": "ScrapeAsMarkdown",
       "qualifiedName": "Brightdata.ScrapeAsMarkdown",
-      "fullyQualifiedName": "Brightdata.ScrapeAsMarkdown@1.0.0",
+      "fullyQualifiedName": "Brightdata.ScrapeAsMarkdown@1.0.1",
       "description": "    Scrape a webpage and return content in Markdown format using Bright Data.\n\n    Examples:\n        scrape_as_markdown(\"https://example.com\") -> \"# Example Page\n\nContent...\"\n        scrape_as_markdown(\"https://news.ycombinator.com\") -> \"# Hacker News\n...\"\n    ",
       "parameters": [
         {
@@ -83,7 +83,7 @@
     {
       "name": "SearchEngine",
       "qualifiedName": "Brightdata.SearchEngine",
-      "fullyQualifiedName": "Brightdata.SearchEngine@1.0.0",
+      "fullyQualifiedName": "Brightdata.SearchEngine@1.0.1",
       "description": "    Search using Google, Bing, or Yandex with advanced parameters using Bright Data.\n\n    Examples:\n        search_engine(\"climate change\") -> \"# Search Results\n\n## Climate Change - Wikipedia\n...\"\n        search_engine(\"Python tutorials\", engine=\"bing\", num_results=5) -> \"# Bing Results\n...\"\n        search_engine(\"cats\", search_type=\"images\", country_code=\"us\") -> \"# Image Results\n...\"\n    ",
       "parameters": [
         {
@@ -98,7 +98,7 @@
           "name": "engine",
           "type": "string",
           "required": false,
-          "description": "Search engine to use",
+          "description": "Search engine to use. Defaults to google.",
           "enum": [
             "google",
             "bing",
@@ -178,7 +178,7 @@
           "name": "return_json",
           "type": "boolean",
           "required": false,
-          "description": "Return JSON instead of Markdown",
+          "description": "Return JSON instead of Markdown. Defaults to False.",
           "enum": null,
           "inferrable": true
         }
@@ -281,8 +281,8 @@
     {
       "name": "WebDataFeed",
       "qualifiedName": "Brightdata.WebDataFeed",
-      "fullyQualifiedName": "Brightdata.WebDataFeed@1.0.0",
-      "description": "Extract structured data from various websites like LinkedIn, Amazon, Instagram, etc.\nNEVER MADE UP LINKS - IF LINKS ARE NEEDED, EXECUTE search_engine FIRST.\nSupported source types:\n- amazon_product, amazon_product_reviews\n- linkedin_person_profile, linkedin_company_profile\n- zoominfo_company_profile\n- instagram_profiles, instagram_posts, instagram_reels, instagram_comments\n- facebook_posts, facebook_marketplace_listings, facebook_company_reviews\n- x_posts\n- zillow_properties_listing\n- booking_hotel_listings\n- youtube_videos\n\nExamples:\n    web_data_feed(\"amazon_product\", \"https://amazon.com/dp/B08N5WRWNW\")\n        -> \"{\"title\": \"Product Name\", ...}\"\n    web_data_feed(\"linkedin_person_profile\", \"https://linkedin.com/in/johndoe\")\n        -> \"{\"name\": \"John Doe\", ...}\"\n    web_data_feed(\n        \"facebook_company_reviews\", \"https://facebook.com/company\", num_of_reviews=50\n    ) -> \"[{\"review\": \"...\", ...}]\"",
+      "fullyQualifiedName": "Brightdata.WebDataFeed@1.0.1",
+      "description": "Extract structured data from various websites like LinkedIn, Amazon, Instagram, etc.\nNEVER MAKE UP LINKS. IF LINKS ARE NEEDED, FIND THEM WITH A WEB SEARCH FIRST.\nSupported source types:\n- amazon_product, amazon_product_reviews\n- linkedin_person_profile, linkedin_company_profile\n- zoominfo_company_profile\n- instagram_profiles, instagram_posts, instagram_reels, instagram_comments\n- facebook_posts, facebook_marketplace_listings, facebook_company_reviews\n- x_posts\n- zillow_properties_listing\n- booking_hotel_listings\n- youtube_videos\n\nExamples:\n    web_data_feed(\"amazon_product\", \"https://amazon.com/dp/B08N5WRWNW\")\n        -> \"{\"title\": \"Product Name\", ...}\"\n    web_data_feed(\"linkedin_person_profile\", \"https://linkedin.com/in/johndoe\")\n        -> \"{\"name\": \"John Doe\", ...}\"\n    web_data_feed(\n        \"facebook_company_reviews\", \"https://facebook.com/company\", num_of_reviews=50\n    ) -> \"[{\"review\": \"...\", ...}]\"",
       "parameters": [
         {
           "name": "source_type",
@@ -329,7 +329,7 @@
           "name": "timeout",
           "type": "integer",
           "required": false,
-          "description": "Maximum time in seconds to wait for data retrieval",
+          "description": "Maximum time in seconds to wait for data retrieval, at most 50. Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
@@ -337,7 +337,7 @@
           "name": "polling_interval",
           "type": "integer",
           "required": false,
-          "description": "Time in seconds between polling attempts",
+          "description": "Time in seconds between polling attempts. Defaults to 1.",
           "enum": null,
           "inferrable": true
         }
@@ -420,6 +420,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "e6e82b574ca7ab28710647b1a4a14ff532600f472f9c1b9019d8caf61538b941",
-  "generatedAt": "2026-09-24T21:01:55.078Z",
-  "summary": "Bright Data provides a developer toolkit for large-scale web search, crawling, and scraping, enabling reliable extraction of pages and structured data without getting blocked. It supports search queries, content-to-Markdown conversion, and configurable data feeds across many site types.\n\nDesigned for integration into data pipelines and analytics workflows with parameterized feeds and output formats.\n\n**Capabilities**\n- Scale-resistant crawling and scraping with anti-blocking behavior for sustained collection.\n- Flexible search engine queries with advanced parameters across major engines.\n- Transform pages into clean Markdown and emit structured JSON feeds for profiles, products, reviews, listings, and media.\n- Configurable extraction parameters for batching, pagination, and media handling.\n\n**Secrets**\n\nSee the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to store and reference secrets in your Arcade configuration.\n\n- `BRIGHTDATA_API_KEY`: Your Bright Data API key. Obtain it from the [Bright Data dashboard](https://brightdata.com/cp/setting) under **Account Settings → API Tokens**. Generate a new token and copy the value; it will not be shown again. A paid or trial Bright Data account is required. Example: `BRIGHTDATA_API_KEY=sk_...`.\n- `BRIGHTDATA_ZONE`: The name of the Bright Data zone (proxy zone or dataset zone) the toolkit should target. Zones are created and managed in the Bright Data dashboard under **Proxies & Scraping Infrastructure**. Use the zone's string identifier as shown in the dashboard. Example: `BRIGHTDATA_ZONE=zone123`."
+  "generatedAt": "2026-10-03T11:33:16.034Z",
+  "summary": "Bright Data is a web data platform that enables large-scale scraping, searching, and structured data extraction without getting blocked. This toolkit exposes Bright Data's proxy and scraping infrastructure through Arcade tools.\n\n## Capabilities\n\n- **Web scraping**: Fetch any public webpage and return its content as clean Markdown, suitable for LLM consumption or downstream processing.\n- **Multi-engine search**: Query Google, Bing, or Yandex with control over result count, search type (web/images), and country targeting.\n- **Structured data feeds**: Extract pre-parsed, schema'd data from major platforms — Amazon (products, reviews), LinkedIn (people, companies), Instagram, Facebook, X, YouTube, Zillow, Booking.com, and ZoomInfo — without writing custom parsers.\n\n## Secrets\n\nThis toolkit requires no OAuth flow, but two secrets must be configured before any tool can be called.\n\n- **`BRIGHTDATA_API_KEY`** — Your Bright Data API key, used to authenticate all requests. Obtain it from the [Bright Data control panel](https://brightdata.com/cp/setting) under **Account Settings → API Token**. Any paid Bright Data account can generate one; free-tier access may be limited.\n\n- **`BRIGHTDATA_ZONE`** — The name of a Bright Data proxy zone (also called a \"zone\" or \"dataset zone\") that the toolkit routes requests through. Create or view zones in the [Bright Data control panel](https://brightdata.com/cp/zones). The zone must be active and have sufficient traffic/quota for your use case; different zone types (residential, datacenter, ISP) affect success rates and cost.\n\nConfigure both secrets via the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly in the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
 }
