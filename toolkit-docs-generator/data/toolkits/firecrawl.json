@@ -1,7 +1,7 @@
 {
   "id": "Firecrawl",
   "label": "Firecrawl",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "Arcade.dev LLM tools for reading the web via Firecrawl",
   "metadata": {
     "category": "development",
@@ -18,8 +18,8 @@
     {
       "name": "CancelCrawl",
       "qualifiedName": "Firecrawl.CancelCrawl",
-      "fullyQualifiedName": "Firecrawl.CancelCrawl@4.0.0",
-      "description": "Stop a crawl that is still running.\n\nPages the crawl already collected stay available through GetCrawlData.",
+      "fullyQualifiedName": "Firecrawl.CancelCrawl@4.0.1",
+      "description": "Stop a crawl that is still running.\n\nPages the crawl already collected stay readable by its job id.",
       "parameters": [
         {
           "name": "job_id",
@@ -78,8 +78,8 @@
     {
       "name": "CrawlWebsite",
       "qualifiedName": "Firecrawl.CrawlWebsite",
-      "fullyQualifiedName": "Firecrawl.CrawlWebsite@4.0.0",
-      "description": "Read many pages of one website and return each page's content.\n\nA crawl that outruns wait_seconds keeps running: the result carries its\njob_id, and GetCrawlStatus, GetCrawlData, and CancelCrawl take it from there.",
+      "fullyQualifiedName": "Firecrawl.CrawlWebsite@4.0.1",
+      "description": "Read many pages of one website and return each page's content.\n\nA crawl that outruns wait_seconds keeps running: the result carries its\njob_id for checking progress, reading the pages, or cancelling it later.",
       "parameters": [
         {
           "name": "url",
@@ -194,8 +194,8 @@
     {
       "name": "ExtractData",
       "qualifiedName": "Firecrawl.ExtractData",
-      "fullyQualifiedName": "Firecrawl.ExtractData@4.0.0",
-      "description": "Collect structured records from the web from a plain-language description.\n\nUse this when the answer is fields such as products, prices, or contacts.\nUse ScrapeUrl or CrawlWebsite when the answer is the page text itself. An\nextraction that outruns wait_seconds keeps running, and GetExtractStatus\ntakes its job_id.",
+      "fullyQualifiedName": "Firecrawl.ExtractData@4.0.1",
+      "description": "Collect structured records from the web from a plain-language description.\n\nUse this when the answer is fields such as products, prices, or contacts,\nrather than the page text itself. An extraction that outruns wait_seconds\nkeeps running, and the result carries its job_id for collecting the results\nlater.",
       "parameters": [
         {
           "name": "prompt",
@@ -318,7 +318,7 @@
     {
       "name": "GetCrawlData",
       "qualifiedName": "Firecrawl.GetCrawlData",
-      "fullyQualifiedName": "Firecrawl.GetCrawlData@4.0.0",
+      "fullyQualifiedName": "Firecrawl.GetCrawlData@4.0.1",
       "description": "Read the pages a crawl has collected so far.",
       "parameters": [
         {
@@ -378,7 +378,7 @@
     {
       "name": "GetCrawlStatus",
       "qualifiedName": "Firecrawl.GetCrawlStatus",
-      "fullyQualifiedName": "Firecrawl.GetCrawlStatus@4.0.0",
+      "fullyQualifiedName": "Firecrawl.GetCrawlStatus@4.0.1",
       "description": "Check how far a crawl has progressed, without fetching its pages.",
       "parameters": [
         {
@@ -438,7 +438,7 @@
     {
       "name": "GetExtractStatus",
       "qualifiedName": "Firecrawl.GetExtractStatus",
-      "fullyQualifiedName": "Firecrawl.GetExtractStatus@4.0.0",
+      "fullyQualifiedName": "Firecrawl.GetExtractStatus@4.0.1",
       "description": "Collect the results of an extraction that is already running.",
       "parameters": [
         {
@@ -498,8 +498,8 @@
     {
       "name": "MapWebsite",
       "qualifiedName": "Firecrawl.MapWebsite",
-      "fullyQualifiedName": "Firecrawl.MapWebsite@4.0.0",
-      "description": "List the URLs on a website, without reading the pages.\n\nUse CrawlWebsite to read the content of many pages, or ScrapeUrl for one.",
+      "fullyQualifiedName": "Firecrawl.MapWebsite@4.0.1",
+      "description": "List the URLs on a website, without reading the pages.",
       "parameters": [
         {
           "name": "url",
@@ -614,8 +614,8 @@
     {
       "name": "ScrapeUrl",
       "qualifiedName": "Firecrawl.ScrapeUrl",
-      "fullyQualifiedName": "Firecrawl.ScrapeUrl@4.0.0",
-      "description": "Read one web page whose URL is already known and return its content.\n\nUse Search instead when the URL is unknown, MapWebsite to list a site's\nURLs, CrawlWebsite to read many pages of one site, and ExtractData to pull\nstructured fields rather than page text.",
+      "fullyQualifiedName": "Firecrawl.ScrapeUrl@4.0.1",
+      "description": "Read one web page whose URL is already known and return its content.\n\nIt reads only the page at the given URL. It does not search the web, crawl\nother pages of the site, or pull structured fields out of the page text.",
       "parameters": [
         {
           "name": "url",
@@ -729,8 +729,8 @@
     {
       "name": "Search",
       "qualifiedName": "Firecrawl.Search",
-      "fullyQualifiedName": "Firecrawl.Search@4.0.0",
-      "description": "Search the web and optionally read each result page in the same call.\n\nUse this when no URL is known yet. Use SearchResearchPapers for scientific\nliterature and SearchDeveloperDocs for API and code documentation.",
+      "fullyQualifiedName": "Firecrawl.Search@4.0.1",
+      "description": "Search the web and optionally read each result page in the same call.\n\nUse this when no URL is known yet. It searches the open web rather than a\ncorpus of scientific papers or indexed code documentation.",
       "parameters": [
         {
           "name": "query",
@@ -870,8 +870,8 @@
     {
       "name": "SearchDeveloperDocs",
       "qualifiedName": "Firecrawl.SearchDeveloperDocs",
-      "fullyQualifiedName": "Firecrawl.SearchDeveloperDocs@4.0.0",
-      "description": "Search developer documentation and repositories, quoting the text that matched.\n\nUse this to answer a question about how a library or API works. Use Search\nfor the open web, and SearchGithubIssues to look only at issues.",
+      "fullyQualifiedName": "Firecrawl.SearchDeveloperDocs@4.0.1",
+      "description": "Search developer documentation and repositories, quoting the text that matched.\n\nUse this to answer a question about how a library or API works. It searches\nindexed repositories, not the open web.",
       "parameters": [
         {
           "name": "query",
@@ -987,8 +987,8 @@
     {
       "name": "SearchGithubIssues",
       "qualifiedName": "Firecrawl.SearchGithubIssues",
-      "fullyQualifiedName": "Firecrawl.SearchGithubIssues@4.0.0",
-      "description": "Search GitHub issues across indexed repositories.\n\nUse SearchDeveloperDocs instead to search documentation, READMEs, and pull\nrequests alongside issues.",
+      "fullyQualifiedName": "Firecrawl.SearchGithubIssues@4.0.1",
+      "description": "Search GitHub issues across indexed repositories.\n\nOnly issues are searched; documentation, READMEs, and pull requests are not.",
       "parameters": [
         {
           "name": "query",
@@ -1060,7 +1060,7 @@
     {
       "name": "SearchResearchPapers",
       "qualifiedName": "Firecrawl.SearchResearchPapers",
-      "fullyQualifiedName": "Firecrawl.SearchResearchPapers@4.0.0",
+      "fullyQualifiedName": "Firecrawl.SearchResearchPapers@4.0.1",
       "description": "Search published scientific papers and return their abstracts.\n\nThis reads a corpus of paper records drawn from PubMed, bioRxiv, medRxiv,\nand arXiv. To find ordinary web pages that happen to sit on academic sites,\nuse Search narrowed to research instead.",
       "parameters": [
         {
@@ -1189,6 +1189,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "dd88665072102dfd955ab648291716def49f5bf1b9b3725ca5dd004e2a1da317",
-  "generatedAt": "2026-09-24T21:01:57.953Z",
-  "summary": "## Firecrawl Toolkit\n\nFirecrawl is a web-scraping and crawling service; this toolkit lets Arcade agents read, search, and extract structured data from the web by calling Firecrawl's API.\n\n## Capabilities\n\n- **Single-page and multi-page reading:** Scrape one known URL or crawl an entire site, collecting each page's content with configurable depth and wait behavior.\n- **Site mapping:** List all URLs on a website without fetching page content, useful for planning targeted scrapes or crawls.\n- **Structured data extraction:** Describe the fields you want (products, prices, contacts) in plain language and retrieve them as structured records instead of raw page text.\n- **Web and specialized search:** Search the open web, developer documentation and repositories, GitHub issues, or published scientific papers (PubMed, bioRxiv, medRxiv, arXiv) — each via a dedicated tool optimized for that corpus.\n- **Async job management:** Long-running crawls and extractions return a `job_id`; dedicated status, data-retrieval, and cancel tools let agents poll or stop jobs at any point.\n\n## Secrets\n\n`FIRECRAWL_API_KEY` — A Firecrawl API key that authenticates every request to the Firecrawl service. Obtain it by signing in to the [Firecrawl dashboard](https://www.firecrawl.dev/app/api-keys), navigating to the **API Keys** section, and creating a new key. The free tier issues keys with rate-limited access; higher-volume usage requires a paid plan. Copy the key immediately after creation — Firecrawl does not display it again.\n\nConfigure secrets in Arcade at https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets or via the dashboard at https://api.arcade.dev/dashboard/auth/secrets."
+  "generatedAt": "2026-10-03T11:33:26.562Z",
+  "summary": "Firecrawl is a web-reading service; this toolkit lets LLMs scrape, crawl, extract, map, and search the web through Arcade by calling Firecrawl's API.\n\n## Capabilities\n\n- **Single-page and multi-page reading:** Scrape a known URL or crawl an entire site, collecting each page's content; long-running crawls return a job ID for later polling or cancellation.\n- **Structured data extraction:** Describe the fields you want (products, prices, contacts) in plain language and receive structured records; supports async job tracking.\n- **Site mapping:** Enumerate all URLs on a site without downloading page content.\n- **Crawl lifecycle management:** Check progress, retrieve collected pages incrementally, or cancel an active crawl by job ID.\n- **Web and specialized search:** Search the open web (with optional inline page fetching), developer docs and repositories, GitHub issues, and a research-paper corpus (PubMed, bioRxiv, medRxiv, arXiv) — each endpoint targets a distinct index.\n\n## Secrets\n\n`FIRECRAWL_API_KEY` — A Firecrawl API key that authenticates every request to the Firecrawl API. To obtain one, sign in to the [Firecrawl dashboard](https://www.firecrawl.dev/app/api-keys), navigate to **API Keys**, and generate a new key. Free and paid tiers are available; higher-volume crawls and concurrent extractions may require a paid plan. Copy the key immediately — it is not shown again after creation.\n\nConfigure secrets in Arcade at https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets or via the dashboard at https://api.arcade.dev/dashboard/auth/secrets."
 }

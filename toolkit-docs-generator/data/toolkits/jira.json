@@ -1,7 +1,7 @@
 {
   "id": "Jira",
   "label": "Jira",
-  "version": "3.1.6",
+  "version": "3.3.0",
   "description": "Arcade.dev LLM tools for interacting with Atlassian Jira",
   "metadata": {
     "category": "productivity",
@@ -35,7 +35,7 @@
     {
       "name": "AddCommentToIssue",
       "qualifiedName": "Jira.AddCommentToIssue",
-      "fullyQualifiedName": "Jira.AddCommentToIssue@3.1.6",
+      "fullyQualifiedName": "Jira.AddCommentToIssue@3.3.0",
       "description": "Add a comment to a Jira issue.",
       "parameters": [
         {
@@ -154,7 +154,7 @@
     {
       "name": "AddIssuesToSprint",
       "qualifiedName": "Jira.AddIssuesToSprint",
-      "fullyQualifiedName": "Jira.AddIssuesToSprint@3.1.6",
+      "fullyQualifiedName": "Jira.AddIssuesToSprint@3.3.0",
       "description": "Add a list of issues to a sprint.\nMaximum of 50 issues per operation.",
       "parameters": [
         {
@@ -249,7 +249,7 @@
     {
       "name": "AddLabelsToIssue",
       "qualifiedName": "Jira.AddLabelsToIssue",
-      "fullyQualifiedName": "Jira.AddLabelsToIssue@3.1.6",
+      "fullyQualifiedName": "Jira.AddLabelsToIssue@3.3.0",
       "description": "Add labels to an existing Jira issue.",
       "parameters": [
         {
@@ -356,7 +356,7 @@
     {
       "name": "AttachFileToIssue",
       "qualifiedName": "Jira.AttachFileToIssue",
-      "fullyQualifiedName": "Jira.AttachFileToIssue@3.1.6",
+      "fullyQualifiedName": "Jira.AttachFileToIssue@3.3.0",
       "description": "Add an attachment to an issue.\n\nMust provide exactly one of file_content_str or file_content_base64.",
       "parameters": [
         {
@@ -495,7 +495,7 @@
     {
       "name": "CreateIssue",
       "qualifiedName": "Jira.CreateIssue",
-      "fullyQualifiedName": "Jira.CreateIssue@3.1.6",
+      "fullyQualifiedName": "Jira.CreateIssue@3.3.0",
       "description": "Create a new Jira issue.\n\nProvide a value to one of `project` or `parent_issue` arguments. If `project` and\n`parent_issue` are not provided, the tool will select the single project available.\nIf the user has multiple, an error will be returned with the available projects to choose from.\n\nIf you have an issue type name, or a project key/name, a priority name, an assignee\nname/key/email, or a reporter name/key/email, DO NOT CALL OTHER TOOLS only to list available\nprojects, priorities, issue types, or users. Provide the name, key, or email and the tool\nwill figure out the ID.",
       "parameters": [
         {
@@ -534,7 +534,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "The description of the issue. Defaults to None (no description).",
+          "description": "The description of the issue. Accepts Markdown (headings, bold/italic/strikethrough, inline code, links, bullet/ordered lists, fenced code blocks with a language, blockquotes, horizontal rules), converted to Jira's rich text format; Markdown outside this subset is kept as literal text. Defaults to None (no description).",
           "enum": null,
           "inferrable": true
         },
@@ -542,7 +542,7 @@
           "name": "environment",
           "type": "string",
           "required": false,
-          "description": "The environment of the issue. Defaults to None (no environment).",
+          "description": "The environment of the issue. Accepts Markdown (headings, bold/italic/strikethrough, inline code, links, bullet/ordered lists, fenced code blocks with a language, blockquotes, horizontal rules), converted to Jira's rich text format; Markdown outside this subset is kept as literal text. Defaults to None (no environment).",
           "enum": null,
           "inferrable": true
         },
@@ -588,6 +588,32 @@
           "inferrable": true
         },
         {
+          "name": "components",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Component names to assign to the issue. Company-managed projects only; providing this on a team-managed project is rejected with a retryable error naming this parameter, so the call can be retried without it. Defaults to None (no components).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "fix_versions",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Fix version names to assign to the issue. Company-managed projects only; providing this on a team-managed project is rejected with a retryable error naming this parameter, so the call can be retried without it. Defaults to None (no fix versions).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "additional_fields",
+          "type": "json",
+          "required": false,
+          "description": "Extra Jira field values to set on creation, keyed by Jira field ID (custom fields use the format customfield_NNNNN) with the value shape Jira's REST API expects for that field. A key that duplicates a named parameter is ignored in favor of the named parameter. Defaults to None (no extra fields).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
           "name": "atlassian_cloud_id",
           "type": "string",
           "required": false,
@@ -613,78 +639,6 @@
         "description": "The created issue"
       },
       "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Jira.CreateIssue",
-        "parameters": {
-          "title": {
-            "value": "Fix login redirect bug",
-            "type": "string",
-            "required": true
-          },
-          "issue_type": {
-            "value": "Bug",
-            "type": "string",
-            "required": true
-          },
-          "project": {
-            "value": "PROJ",
-            "type": "string",
-            "required": false
-          },
-          "due_date": {
-            "value": "2025-07-01",
-            "type": "string",
-            "required": false
-          },
-          "description": {
-            "value": "Users are occasionally redirected to another user's dashboard after login. Steps to reproduce: 1) Navigate to /login 2) Enter valid credentials 3) Observe redirect. Expected: redirect to authenticated user's dashboard. Frequency: ~1/50 logins.",
-            "type": "string",
-            "required": false
-          },
-          "environment": {
-            "value": "production",
-            "type": "string",
-            "required": false
-          },
-          "labels": {
-            "value": [
-              "frontend",
-              "regression",
-              "high_priority"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "parent_issue": {
-            "value": null,
-            "type": "string",
-            "required": false
-          },
-          "priority": {
-            "value": "High",
-            "type": "string",
-            "required": false
-          },
-          "assignee": {
-            "value": "jane.doe@example.com",
-            "type": "string",
-            "required": false
-          },
-          "reporter": {
-            "value": "john.smith@example.com",
-            "type": "string",
-            "required": false
-          },
-          "atlassian_cloud_id": {
-            "value": "abc123-cloud-id",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "atlassian",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -706,7 +660,7 @@
     {
       "name": "DownloadAttachment",
       "qualifiedName": "Jira.DownloadAttachment",
-      "fullyQualifiedName": "Jira.DownloadAttachment@3.1.6",
+      "fullyQualifiedName": "Jira.DownloadAttachment@3.3.0",
       "description": "Download the contents of an attachment associated with an issue.",
       "parameters": [
         {
@@ -780,7 +734,7 @@
     {
       "name": "GetAttachmentMetadata",
       "qualifiedName": "Jira.GetAttachmentMetadata",
-      "fullyQualifiedName": "Jira.GetAttachmentMetadata@3.1.6",
+      "fullyQualifiedName": "Jira.GetAttachmentMetadata@3.3.0",
       "description": "Get the metadata of an attachment.",
       "parameters": [
         {
@@ -854,7 +808,7 @@
     {
       "name": "GetAvailableAtlassianClouds",
       "qualifiedName": "Jira.GetAvailableAtlassianClouds",
-      "fullyQualifiedName": "Jira.GetAvailableAtlassianClouds@3.1.6",
+      "fullyQualifiedName": "Jira.GetAvailableAtlassianClouds@3.3.0",
       "description": "Get available Atlassian Clouds.",
       "parameters": [],
       "auth": {
@@ -899,7 +853,7 @@
     {
       "name": "GetBoardBacklogIssues",
       "qualifiedName": "Jira.GetBoardBacklogIssues",
-      "fullyQualifiedName": "Jira.GetBoardBacklogIssues@3.1.6",
+      "fullyQualifiedName": "Jira.GetBoardBacklogIssues@3.3.0",
       "description": "Get all issues in a board's backlog with pagination support.\nReturns issues that are not currently assigned to any active sprint.\n\nThe backlog contains issues that are ready to be planned into future sprints.\nOnly boards that support backlogs (like Scrum and Kanban boards) will return results.",
       "parameters": [
         {
@@ -999,7 +953,7 @@
     {
       "name": "GetBoards",
       "qualifiedName": "Jira.GetBoards",
-      "fullyQualifiedName": "Jira.GetBoards@3.1.6",
+      "fullyQualifiedName": "Jira.GetBoards@3.3.0",
       "description": "Retrieve Jira boards either by specifying their names or IDs, or get all\navailable boards.\nAll requests support offset and limit with a maximum of 50 boards returned per call.\n\nMANDATORY ACTION: ALWAYS when you need to get multiple boards, you must\ninclude all the board identifiers in a single call rather than making\nmultiple separate tool calls, as this provides much better performance, not doing that will\nbring huge performance penalties.\n\nThe tool automatically handles mixed identifier types (names and IDs), deduplicates results, and\nfalls back from ID lookup to name lookup when needed.",
       "parameters": [
         {
@@ -1107,7 +1061,7 @@
     {
       "name": "GetCommentById",
       "qualifiedName": "Jira.GetCommentById",
-      "fullyQualifiedName": "Jira.GetCommentById@3.1.6",
+      "fullyQualifiedName": "Jira.GetCommentById@3.3.0",
       "description": "Get a comment by its ID.",
       "parameters": [
         {
@@ -1207,7 +1161,7 @@
     {
       "name": "GetIssueById",
       "qualifiedName": "Jira.GetIssueById",
-      "fullyQualifiedName": "Jira.GetIssueById@3.1.6",
+      "fullyQualifiedName": "Jira.GetIssueById@3.3.0",
       "description": "Get the details of a Jira issue by its ID.",
       "parameters": [
         {
@@ -1281,7 +1235,7 @@
     {
       "name": "GetIssueComments",
       "qualifiedName": "Jira.GetIssueComments",
-      "fullyQualifiedName": "Jira.GetIssueComments@3.1.6",
+      "fullyQualifiedName": "Jira.GetIssueComments@3.3.0",
       "description": "Get the comments of a Jira issue by its ID.",
       "parameters": [
         {
@@ -1410,8 +1364,8 @@
     {
       "name": "GetIssuesWithoutId",
       "qualifiedName": "Jira.GetIssuesWithoutId",
-      "fullyQualifiedName": "Jira.GetIssuesWithoutId@3.1.6",
-      "description": "Search for Jira issues when you don't have the issue ID(s).\n\nAll text-based arguments (keywords, assignee, project, labels) are case-insensitive.\n\nALWAYS PREFER THIS TOOL OVER THE `Jira.SearchIssuesWithJql` TOOL, UNLESS IT'S ABSOLUTELY\nNECESSARY TO USE A JQL QUERY TO FILTER IN A WAY THAT IS NOT SUPPORTED BY THIS TOOL.",
+      "fullyQualifiedName": "Jira.GetIssuesWithoutId@3.3.0",
+      "description": "Search for Jira issues when you don't have the issue ID(s).\n\nAll text-based arguments (keywords, assignee, project, labels) are case-insensitive.\n\nALWAYS PREFER THIS TOOL OVER A JQL-BASED SEARCH, UNLESS IT'S ABSOLUTELY NECESSARY TO USE\nA JQL QUERY TO FILTER IN A WAY THAT IS NOT SUPPORTED BY THIS TOOL.",
       "parameters": [
         {
           "name": "keywords",
@@ -1632,7 +1586,7 @@
     {
       "name": "GetIssueTypeById",
       "qualifiedName": "Jira.GetIssueTypeById",
-      "fullyQualifiedName": "Jira.GetIssueTypeById@3.1.6",
+      "fullyQualifiedName": "Jira.GetIssueTypeById@3.3.0",
       "description": "Get the details of a Jira issue type by its ID.",
       "parameters": [
         {
@@ -1706,7 +1660,7 @@
     {
       "name": "GetPriorityById",
       "qualifiedName": "Jira.GetPriorityById",
-      "fullyQualifiedName": "Jira.GetPriorityById@3.1.6",
+      "fullyQualifiedName": "Jira.GetPriorityById@3.3.0",
       "description": "Get the details of a priority by its ID.",
       "parameters": [
         {
@@ -1780,7 +1734,7 @@
     {
       "name": "GetProjectById",
       "qualifiedName": "Jira.GetProjectById",
-      "fullyQualifiedName": "Jira.GetProjectById@3.1.6",
+      "fullyQualifiedName": "Jira.GetProjectById@3.3.0",
       "description": "Get the details of a Jira project by its ID or key.",
       "parameters": [
         {
@@ -1854,7 +1808,7 @@
     {
       "name": "GetSprintIssues",
       "qualifiedName": "Jira.GetSprintIssues",
-      "fullyQualifiedName": "Jira.GetSprintIssues@3.1.6",
+      "fullyQualifiedName": "Jira.GetSprintIssues@3.3.0",
       "description": "Get all issues that are currently assigned to a specific sprint with pagination support.\nReturns issues that are planned for or being worked on in the sprint.",
       "parameters": [
         {
@@ -1955,7 +1909,7 @@
     {
       "name": "GetTransitionById",
       "qualifiedName": "Jira.GetTransitionById",
-      "fullyQualifiedName": "Jira.GetTransitionById@3.1.6",
+      "fullyQualifiedName": "Jira.GetTransitionById@3.3.0",
       "description": "Get a transition by its ID.",
       "parameters": [
         {
@@ -2042,7 +1996,7 @@
     {
       "name": "GetTransitionByStatusName",
       "qualifiedName": "Jira.GetTransitionByStatusName",
-      "fullyQualifiedName": "Jira.GetTransitionByStatusName@3.1.6",
+      "fullyQualifiedName": "Jira.GetTransitionByStatusName@3.3.0",
       "description": "Get a transition available for an issue by the transition name.\n\nThe response will contain screen fields available for the transition, if any.",
       "parameters": [
         {
@@ -2129,7 +2083,7 @@
     {
       "name": "GetTransitionsAvailableForIssue",
       "qualifiedName": "Jira.GetTransitionsAvailableForIssue",
-      "fullyQualifiedName": "Jira.GetTransitionsAvailableForIssue@3.1.6",
+      "fullyQualifiedName": "Jira.GetTransitionsAvailableForIssue@3.3.0",
       "description": "Get the transitions available for an existing Jira issue.",
       "parameters": [
         {
@@ -2203,7 +2157,7 @@
     {
       "name": "GetUserById",
       "qualifiedName": "Jira.GetUserById",
-      "fullyQualifiedName": "Jira.GetUserById@3.1.6",
+      "fullyQualifiedName": "Jira.GetUserById@3.3.0",
       "description": "Get user information by their ID.",
       "parameters": [
         {
@@ -2276,7 +2230,7 @@
     {
       "name": "GetUsersWithoutId",
       "qualifiedName": "Jira.GetUsersWithoutId",
-      "fullyQualifiedName": "Jira.GetUsersWithoutId@3.1.6",
+      "fullyQualifiedName": "Jira.GetUsersWithoutId@3.3.0",
       "description": "Get users without their account ID, searching by display name and email address.\n\nThe Jira user search API will return up to 1,000 (one thousand) users for any given name/email\nquery. If you need to get more users, please use the `Jira.ListAllUsers` tool.",
       "parameters": [
         {
@@ -2388,8 +2342,8 @@
     {
       "name": "ListIssueAttachmentsMetadata",
       "qualifiedName": "Jira.ListIssueAttachmentsMetadata",
-      "fullyQualifiedName": "Jira.ListIssueAttachmentsMetadata@3.1.6",
-      "description": "Get the metadata about the files attached to an issue.\n\nThis tool does NOT return the actual file contents. To get a file content,\nuse the `Jira.DownloadAttachment` tool.",
+      "fullyQualifiedName": "Jira.ListIssueAttachmentsMetadata@3.3.0",
+      "description": "Get the metadata about the files attached to an issue.\n\nThis tool does NOT return the actual file contents. To read a file's content,\ndownload the attachment by its ID.",
       "parameters": [
         {
           "name": "issue",
@@ -2461,7 +2415,7 @@
     {
       "name": "ListIssues",
       "qualifiedName": "Jira.ListIssues",
-      "fullyQualifiedName": "Jira.ListIssues@3.1.6",
+      "fullyQualifiedName": "Jira.ListIssues@3.3.0",
       "description": "Get the issues for a given project.",
       "parameters": [
         {
@@ -2562,7 +2516,7 @@
     {
       "name": "ListIssueTypesByProject",
       "qualifiedName": "Jira.ListIssueTypesByProject",
-      "fullyQualifiedName": "Jira.ListIssueTypesByProject@3.1.6",
+      "fullyQualifiedName": "Jira.ListIssueTypesByProject@3.3.0",
       "description": "Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given project.",
       "parameters": [
         {
@@ -2662,7 +2616,7 @@
     {
       "name": "ListLabels",
       "qualifiedName": "Jira.ListLabels",
-      "fullyQualifiedName": "Jira.ListLabels@3.1.6",
+      "fullyQualifiedName": "Jira.ListLabels@3.3.0",
       "description": "Get the existing labels (tags) in the user's Jira instance.",
       "parameters": [
         {
@@ -2749,7 +2703,7 @@
     {
       "name": "ListPrioritiesAvailableToAnIssue",
       "qualifiedName": "Jira.ListPrioritiesAvailableToAnIssue",
-      "fullyQualifiedName": "Jira.ListPrioritiesAvailableToAnIssue@3.1.6",
+      "fullyQualifiedName": "Jira.ListPrioritiesAvailableToAnIssue@3.3.0",
       "description": "Browse the priorities available to be used in the specified Jira issue.",
       "parameters": [
         {
@@ -2823,7 +2777,7 @@
     {
       "name": "ListPrioritiesAvailableToAProject",
       "qualifiedName": "Jira.ListPrioritiesAvailableToAProject",
-      "fullyQualifiedName": "Jira.ListPrioritiesAvailableToAProject@3.1.6",
+      "fullyQualifiedName": "Jira.ListPrioritiesAvailableToAProject@3.3.0",
       "description": "Browse the priorities available to be used in issues in the specified Jira project.\n\nThis tool may need to loop through several API calls to get all priorities associated with\na specific project. In Jira environments with too many Projects or Priority Schemes,\nthe search may take too long, and the tool call will timeout.",
       "parameters": [
         {
@@ -2897,7 +2851,7 @@
     {
       "name": "ListPrioritiesByScheme",
       "qualifiedName": "Jira.ListPrioritiesByScheme",
-      "fullyQualifiedName": "Jira.ListPrioritiesByScheme@3.1.6",
+      "fullyQualifiedName": "Jira.ListPrioritiesByScheme@3.3.0",
       "description": "Browse the priorities associated with a priority scheme.",
       "parameters": [
         {
@@ -2997,7 +2951,7 @@
     {
       "name": "ListPrioritySchemes",
       "qualifiedName": "Jira.ListPrioritySchemes",
-      "fullyQualifiedName": "Jira.ListPrioritySchemes@3.1.6",
+      "fullyQualifiedName": "Jira.ListPrioritySchemes@3.3.0",
       "description": "Browse the priority schemes available in Jira.",
       "parameters": [
         {
@@ -3113,7 +3067,7 @@
     {
       "name": "ListProjects",
       "qualifiedName": "Jira.ListProjects",
-      "fullyQualifiedName": "Jira.ListProjects@3.1.6",
+      "fullyQualifiedName": "Jira.ListProjects@3.3.0",
       "description": "Browse projects available in Jira.",
       "parameters": [
         {
@@ -3200,7 +3154,7 @@
     {
       "name": "ListProjectsByScheme",
       "qualifiedName": "Jira.ListProjectsByScheme",
-      "fullyQualifiedName": "Jira.ListProjectsByScheme@3.1.6",
+      "fullyQualifiedName": "Jira.ListProjectsByScheme@3.3.0",
       "description": "Browse the projects associated with a priority scheme.",
       "parameters": [
         {
@@ -3313,7 +3267,7 @@
     {
       "name": "ListSprintsForBoards",
       "qualifiedName": "Jira.ListSprintsForBoards",
-      "fullyQualifiedName": "Jira.ListSprintsForBoards@3.1.6",
+      "fullyQualifiedName": "Jira.ListSprintsForBoards@3.3.0",
       "description": "Retrieve sprints from Jira boards with filtering options for planning and tracking purposes.\n\nUse this when you need to view sprints from specific boards or find sprints within specific\ndate ranges. For temporal queries like \"last month\", \"next week\", or \"this quarter\",\nprioritize date parameters over state filtering. Leave board_identifiers_list as None\nto get sprints from all available boards.\n\nDATE FILTERING PRIORITY: When users request sprints by time periods (e.g., \"last month\",\n\"next week\"), use date parameters (start_date, end_date, specific_date) rather than\nstate filtering, as temporal criteria take precedence over sprint status.\n\nReturns sprint data along with a backlog GUI URL link where you can see detailed sprint\ninformation and manage sprint items.\n\nMANDATORY ACTION: ALWAYS when you need to get sprints from multiple boards, you must\ninclude all the board identifiers in a single call rather than making\nmultiple separate tool calls, as this provides much better performance, not doing that will\nbring huge performance penalties.\n\nBOARD LIMIT: Maximum of 25 boards can be processed in a single operation. If you need to\nprocess more boards, split the request into multiple batches of 25 or fewer boards each.\n\nHandles mixed board identifiers (names and IDs) with automatic fallback and deduplication.\nAll boards are processed concurrently for optimal performance.",
       "parameters": [
         {
@@ -3483,7 +3437,7 @@
     {
       "name": "ListUsers",
       "qualifiedName": "Jira.ListUsers",
-      "fullyQualifiedName": "Jira.ListUsers@3.1.6",
+      "fullyQualifiedName": "Jira.ListUsers@3.3.0",
       "description": "Browse users in Jira.",
       "parameters": [
         {
@@ -3582,7 +3536,7 @@
     {
       "name": "MoveIssuesFromSprintToBacklog",
       "qualifiedName": "Jira.MoveIssuesFromSprintToBacklog",
-      "fullyQualifiedName": "Jira.MoveIssuesFromSprintToBacklog@3.1.6",
+      "fullyQualifiedName": "Jira.MoveIssuesFromSprintToBacklog@3.3.0",
       "description": "Move issues from active or future sprints back to the board's backlog.",
       "parameters": [
         {
@@ -3675,7 +3629,7 @@
     {
       "name": "RemoveLabelsFromIssue",
       "qualifiedName": "Jira.RemoveLabelsFromIssue",
-      "fullyQualifiedName": "Jira.RemoveLabelsFromIssue@3.1.6",
+      "fullyQualifiedName": "Jira.RemoveLabelsFromIssue@3.3.0",
       "description": "Remove labels from an existing Jira issue.",
       "parameters": [
         {
@@ -3782,8 +3736,8 @@
     {
       "name": "SearchIssuesWithJql",
       "qualifiedName": "Jira.SearchIssuesWithJql",
-      "fullyQualifiedName": "Jira.SearchIssuesWithJql@3.1.6",
-      "description": "Search for Jira issues using a JQL (Jira Query Language) query.\n\nALWAYS PREFER THE `Jira_SearchIssuesWithoutJql` TOOL OVER THIS ONE, UNLESS IT'S ABSOLUTELY\nNECESSARY TO USE A JQL QUERY TO FILTER IN A WAY THAT IS NOT SUPPORTED BY THE\n`Jira_SearchIssuesWithoutJql` TOOL OR IF THE USER PROVIDES A JQL QUERY THEMSELVES.",
+      "fullyQualifiedName": "Jira.SearchIssuesWithJql@3.3.0",
+      "description": "Search for Jira issues using a JQL (Jira Query Language) query.\n\nONLY USE THIS TOOL WHEN THE FILTER CANNOT BE EXPRESSED WITH STRUCTURED SEARCH PARAMETERS\n(PROJECT, ASSIGNEE, STATUS, PRIORITY, LABELS, DATES) OR WHEN THE USER PROVIDES A JQL QUERY\nTHEMSELVES.",
       "parameters": [
         {
           "name": "jql",
@@ -3882,7 +3836,7 @@
     {
       "name": "SearchIssuesWithoutJql",
       "qualifiedName": "Jira.SearchIssuesWithoutJql",
-      "fullyQualifiedName": "Jira.SearchIssuesWithoutJql@3.1.6",
+      "fullyQualifiedName": "Jira.SearchIssuesWithoutJql@3.3.0",
       "description": "Parameterized search for Jira issues (without having to provide a JQL query).\n\nALWAYS PREFER THIS TOOL OVER USING JQL, UNLESS IT'S ABSOLUTELY NECESSARY TO USE A JQL QUERY\nTO FILTER IN A WAY THAT IS NOT SUPPORTED BY THIS TOOL OR IF THE USER PROVIDES A JQL QUERY\nTHEMSELVES.",
       "parameters": [
         {
@@ -4104,7 +4058,7 @@
     {
       "name": "SearchProjects",
       "qualifiedName": "Jira.SearchProjects",
-      "fullyQualifiedName": "Jira.SearchProjects@3.1.6",
+      "fullyQualifiedName": "Jira.SearchProjects@3.3.0",
       "description": "Get the details of all Jira projects.",
       "parameters": [
         {
@@ -4204,7 +4158,7 @@
     {
       "name": "TransitionIssueToNewStatus",
       "qualifiedName": "Jira.TransitionIssueToNewStatus",
-      "fullyQualifiedName": "Jira.TransitionIssueToNewStatus@3.1.6",
+      "fullyQualifiedName": "Jira.TransitionIssueToNewStatus@3.3.0",
       "description": "Transition a Jira issue to a new status.",
       "parameters": [
         {
@@ -4292,7 +4246,7 @@
     {
       "name": "UpdateIssue",
       "qualifiedName": "Jira.UpdateIssue",
-      "fullyQualifiedName": "Jira.UpdateIssue@3.1.6",
+      "fullyQualifiedName": "Jira.UpdateIssue@3.3.0",
       "description": "Update an existing Jira issue.\n\nIf you have a priority name, an assignee name/key/email, or a reporter name/key/email,\nDO NOT CALL OTHER TOOLS only to list available priorities, issue types, or users.\nProvide the name, key, or email and the tool will figure out the ID.",
       "parameters": [
         {
@@ -4315,7 +4269,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "The new issue description. Provide an empty string to clear the description. Defaults to None (does not change the description).",
+          "description": "The new issue description. Accepts Markdown (headings, bold/italic/strikethrough, inline code, links, bullet/ordered lists, fenced code blocks with a language, blockquotes, horizontal rules), converted to Jira's rich text format; Markdown outside this subset is kept as literal text. Provide an empty string to clear the description. Defaults to None (does not change the description).",
           "enum": null,
           "inferrable": true
         },
@@ -4323,7 +4277,7 @@
           "name": "environment",
           "type": "string",
           "required": false,
-          "description": "The new issue environment. Provide an empty string to clear the environment. Defaults to None (does not change the environment).",
+          "description": "The new issue environment. Accepts Markdown (headings, bold/italic/strikethrough, inline code, links, bullet/ordered lists, fenced code blocks with a language, blockquotes, horizontal rules), converted to Jira's rich text format; Markdown outside this subset is kept as literal text. Provide an empty string to clear the environment. Defaults to None (does not change the environment).",
           "enum": null,
           "inferrable": true
         },
@@ -4393,6 +4347,32 @@
           "inferrable": true
         },
         {
+          "name": "components",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Component names to set on the issue. Replaces all existing components. Provide an empty list to remove all components. Company-managed projects only; providing this on a team-managed project is rejected with a retryable error naming this parameter, so the call can be retried without it. Defaults to None (does not change the components).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "fix_versions",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Fix version names to set on the issue. Replaces all existing fix versions. Provide an empty list to remove all fix versions. Company-managed projects only; providing this on a team-managed project is rejected with a retryable error naming this parameter, so the call can be retried without it. Defaults to None (does not change the fix versions).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "additional_fields",
+          "type": "json",
+          "required": false,
+          "description": "Extra Jira field values to set, keyed by Jira field ID (custom fields use the format customfield_NNNNN) with the value shape Jira's REST API expects for that field. A key that duplicates a named parameter is ignored in favor of the named parameter. Defaults to None (no extra fields changed).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
           "name": "atlassian_cloud_id",
           "type": "string",
           "required": false,
@@ -4422,27 +4402,27 @@
         "toolName": "Jira.UpdateIssue",
         "parameters": {
           "issue": {
-            "value": "PROJ-123",
+            "value": "PROJ-456",
             "type": "string",
             "required": true
           },
           "title": {
-            "value": "Fix login redirect bug",
+            "value": "Fix login page crash on mobile devices",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "When users log in via OAuth they are redirected to the homepage instead of their dashboard. Reproduction steps: 1) Go to /login 2) Sign in with OAuth provider 3) Observe redirection. Expected: redirect to /dashboard.",
+            "value": "## Bug Description\n\nThe login page **crashes** on mobile devices when the user taps the submit button.\n\n### Steps to Reproduce\n1. Open the app on a mobile device\n2. Enter valid credentials\n3. Tap **Submit**\n\n### Expected Behavior\nUser should be logged in successfully.\n\n### Actual Behavior\nApp crashes immediately.",
             "type": "string",
             "required": false
           },
           "environment": {
-            "value": "production",
+            "value": "**OS:** iOS 16.4\n**Device:** iPhone 14 Pro\n**App Version:** 3.2.1",
             "type": "string",
             "required": false
           },
           "due_date": {
-            "value": "2025-07-15",
+            "value": "2025-08-15",
             "type": "string",
             "required": false
           },
@@ -4457,36 +4437,64 @@
             "required": false
           },
           "parent_issue": {
-            "value": "PROJ-120",
+            "value": "PROJ-100",
             "type": "string",
             "required": false
           },
           "assignee": {
-            "value": "alice@example.com",
+            "value": "jane.doe@example.com",
             "type": "string",
             "required": false
           },
           "reporter": {
-            "value": "bob@example.com",
+            "value": "john.smith@example.com",
             "type": "string",
             "required": false
           },
           "labels": {
             "value": [
-              "backend",
-              "auth",
-              "urgent_fix"
+              "mobile",
+              "login",
+              "crash",
+              "high_impact"
             ],
             "type": "array",
             "required": false
           },
           "notify_watchers": {
-            "value": false,
+            "value": true,
             "type": "boolean",
             "required": false
           },
+          "components": {
+            "value": [
+              "Authentication",
+              "Mobile"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "fix_versions": {
+            "value": [
+              "v3.3.0",
+              "v3.2.2-hotfix"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "additional_fields": {
+            "value": {
+              "customfield_10201": "Internal QA Team",
+              "customfield_10315": {
+                "value": "Critical"
+              },
+              "story_points": 5
+            },
+            "type": "string",
+            "required": false
+          },
           "atlassian_cloud_id": {
-            "value": "abcd-1234-cloud",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -4516,7 +4524,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Jira.WhoAmI",
-      "fullyQualifiedName": "Jira.WhoAmI@3.1.6",
+      "fullyQualifiedName": "Jira.WhoAmI@3.3.0",
       "description": "CALL THIS TOOL FIRST to establish user profile context.\n\nGet information about the currently logged-in user and their available Jira clouds/clients.",
       "parameters": [],
       "auth": {
@@ -4575,6 +4583,9 @@
       "relativePath": "environment-variables/page.mdx"
     }
   ],
-  "generatedAt": "2026-07-24T11:39:02.137Z",
-  "summary": "The Jira toolkit integrates Arcade with Atlassian Jira, enabling LLMs to manage issues, sprints, boards, users, attachments, and project metadata across Jira Cloud instances.\n\n## Capabilities\n\n- **Issue lifecycle management** — Create, update, transition, search (parameterized or JQL), comment on, label, and attach files to issues; move issues between sprints and backlogs.\n- **Sprint & board operations** — List boards and their sprints (with date-range filtering), retrieve backlog and sprint issues, add/move issues to sprints, and access backlog GUI URLs.\n- **Project & metadata discovery** — Browse projects, issue types, priority schemes, labels, and available transitions; resolve names/keys/emails to IDs automatically without requiring pre-lookup calls.\n- **User & identity management** — Look up users by ID, name, or email; list all users; retrieve the authenticated user's profile and available Atlassian Cloud instances.\n- **Attachment handling** — List attachment metadata, download attachment contents, and upload files (string or base64) to issues.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Atlassian** provider. See the [Atlassian auth provider docs](https://docs.arcade.dev/en/references/auth-providers/atlassian) for setup details, required scopes, and configuration steps."
+  "curationSourceHash": "8f665e06935e6bdc3eb98b876a1dcfce71b4004d4758ddf8c5171c6161aca02e",
+  "generatedAt": "2026-10-03T11:34:02.578Z",
+  "summary": "The Jira toolkit integrates Arcade with Atlassian Jira, enabling LLMs to manage issues, sprints, boards, users, attachments, and project metadata across Jira Cloud instances.\n\n## Capabilities\n\n- **Issue lifecycle management** — Create, update, transition, search (parameterized or JQL), comment on, label, and attach files to issues; move issues between sprints and backlogs.\n- **Sprint & board operations** — List boards and their sprints (with date-range filtering), retrieve backlog and sprint issues, add/move issues to sprints, and access backlog GUI URLs.\n- **Project & metadata discovery** — Browse projects, issue types, priority schemes, labels, and available transitions; resolve names/keys/emails to IDs automatically without requiring pre-lookup calls.\n- **User & identity management** — Look up users by ID, name, or email; list all users; retrieve the authenticated user's profile and available Atlassian Cloud instances.\n- **Attachment handling** — List attachment metadata, download attachment contents, and upload files (string or base64) to issues.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Atlassian** provider. See the [Atlassian auth provider docs](https://docs.arcade.dev/en/references/auth-providers/atlassian) for setup details, required scopes, and configuration steps.",
+  "summaryStale": true,
+  "summaryStaleReason": "llm_generation_failed"
 }
