@@ -1,3 +1,273 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
+@import "@arcadeai/design-system/assets/tokens.css";
+@source "../node_modules/fumadocs-ui/dist/**/*.js";
+@source "../node_modules/@arcadeai/design-system/dist";
+@plugin "tailwindcss-animate";
+
+/* The `dark` variant is defined by fumadocs-ui/css/preset.css (`.dark` class). */
+
+@layer base {
+  body {
+    font-family: var(--font-sans);
+  }
+}
+
+/*
+ * Brand accent — the design-system primary, adapted for contrast on the
+ * surface that follows the active theme. Use this token (`text-brand-accent`,
+ * `bg-brand-accent/10`, `border-brand-accent`, etc.) anywhere the brand color
+ * appears as text / icon / border on a theme-following surface.
+ *
+ * The raw `--primary` (and `text-primary`) is a very light lime designed to
+ * sit under dark foreground content (e.g. on `bg-primary` buttons). It's not
+ * readable as text/icons on a white page background. This token mixes primary
+ * with black in light mode so it stays legible there, and falls back to full
+ * primary in dark mode where the bright lime reads cleanly on the dark surface.
+ *
+ * Keep raw `text-primary` only where the local surface is dark in both modes
+ * (e.g. cards with a fixed dark background) — there the lime needs no shifting.
+ */
+@theme inline {
+  --color-brand-accent: var(--brand-accent);
+}
+
+:root {
+  /* `oklch(from ... L c h)` keeps the chroma and hue of primary while pinning
+     lightness to a readable level — gives a saturated dark green instead of
+     the muted olive `color-mix(... black)` would produce. */
+  --brand-accent: oklch(from var(--primary) 0.45 c h);
+
+  /*
+   * Map Fumadocs' primary color to the design-system --primary token so the
+   * sidebar active state, TOC highlight and accent links follow the brand.
+   * (Replaces the Nextra `--x-color-primary-*` scale.)
+   */
+  --color-fd-primary: var(--brand-accent);
+  --color-fd-ring: var(--brand-accent);
+}
+
+.dark {
+  --brand-accent: var(--primary);
+  --color-fd-primary: var(--primary);
+  --color-fd-ring: var(--primary);
+}
+
+.text-text-color {
+  color: var(--color-foreground);
+}
+
+.border-neutral-dark-medium {
+  border-color: oklch(from var(--border) l c h / 0.3);
+}
+
+.border-neutral-dark-high {
+  border-color: oklch(from var(--border) l c h / 0.8);
+}
+
+.border-neutral-dark-low {
+  border-color: oklch(from var(--border) l c h / 0.2);
+}
+
+.bg-neutral-dark {
+  background-color: oklch(from var(--card) l c h / 0.4);
+}
+
+.bg-neutral-dark-medium {
+  background-color: oklch(from var(--muted) l c h / 0.1);
+}
+
+.hover\:bg-neutral-dark-high:hover {
+  background-color: oklch(from var(--muted) l c h / 0.6);
+}
+
+.bg-neutral-dark-opacity {
+  background-color: oklch(from var(--muted) l c h / 0.05);
+}
+
+.text-neutral-light-high {
+  color: var(--foreground);
+}
+
+code {
+  text-wrap: pretty;
+  white-space: pre-wrap;
+}
+
+/* Hide the "Edit on GitHub" link on toolkit pages (they have their own) */
+html[data-page-kind="toolkit"] {
+  a[href*="github.com/ArcadeAI/docs/tree/main/"],
+  a[href*="github.com/ArcadeAI/docs/blob/main/"] {
+    display: none !important;
+  }
+}
+
+pre code {
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Toolkit pages: Improve code readability in light mode */
+html[data-page-kind="toolkit"].light pre,
+html[data-page-kind="toolkit"]:not(.dark) pre {
+  color: #0f172a;
+  background-color: #f8fafc;
+}
+
+html[data-page-kind="toolkit"].light pre code,
+html[data-page-kind="toolkit"]:not(.dark) pre code {
+  color: inherit;
+}
+
+/*
+ * Toolkit pages: callout colors for better readability. Nextra's
+ * `.nextra-callout.x:bg-*` selectors are replaced by Fumadocs' callout
+ * `data-type` attribute (warn | info | success | idea | error).
+ */
+html[data-page-kind="toolkit"] .fd-callout,
+html[data-page-kind="toolkit"] [data-callout] {
+  border-width: 1px;
+  border-radius: 0.75rem;
+}
+
+html[data-page-kind="toolkit"] [data-callout][data-type="warn"] {
+  color: rgb(113 63 18) !important;
+  background-color: rgb(254 252 232) !important;
+  border-color: rgb(234 179 8) !important;
+}
+
+html.dark[data-page-kind="toolkit"] [data-callout][data-type="warn"] {
+  color: rgb(253 224 71) !important;
+  background-color: rgb(113 63 18 / 0.15) !important;
+  border-color: rgb(234 179 8 / 0.4) !important;
+}
+
+html[data-page-kind="toolkit"] [data-callout][data-type="info"] {
+  color: rgb(29 78 216) !important;
+  background-color: rgb(239 246 255) !important;
+  border-color: rgb(59 130 246) !important;
+}
+
+html.dark[data-page-kind="toolkit"] [data-callout][data-type="info"] {
+  color: rgb(147 197 253) !important;
+  background-color: rgb(30 58 138 / 0.15) !important;
+  border-color: rgb(59 130 246 / 0.4) !important;
+}
+
+html[data-page-kind="toolkit"] [data-callout][data-type="success"],
+html[data-page-kind="toolkit"] [data-callout][data-type="idea"] {
+  color: rgb(21 128 61) !important;
+  background-color: rgb(240 253 244) !important;
+  border-color: rgb(34 197 94) !important;
+}
+
+html.dark[data-page-kind="toolkit"] [data-callout][data-type="success"],
+html.dark[data-page-kind="toolkit"] [data-callout][data-type="idea"] {
+  color: rgb(134 239 172) !important;
+  background-color: rgb(20 83 45 / 0.15) !important;
+  border-color: rgb(34 197 94 / 0.4) !important;
+}
+
+/*
+ * Nextra-only rules dropped: the "position search next to logo" navbar hacks
+ * (`nav > a[aria-label="Home page"]`, `.algolia-search-button`) — Fumadocs
+ * places the search trigger in the sidebar/navbar itself.
+ */
+
+/* Algolia search hit highlight — brand color */
+.ais-Highlight-highlighted,
+.ais-Snippet-highlighted,
+[data-search-dialog] mark {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--primary);
+  background: color-mix(in oklch, var(--primary) 15%, transparent);
+  border-radius: 2px;
+}
+
+.dark .ais-Highlight-highlighted,
+.dark .ais-Snippet-highlighted,
+.dark [data-search-dialog] mark {
+  background: color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+/* Code highlight colors: green instead of the default accent */
+[data-highlighted-line],
+.shiki .highlighted {
+  --tw-shadow: 2px 0 #22c55e inset !important;
+  background-color: color-mix(in oklab, #22c55e 20%, transparent) !important;
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow) !important;
+}
+
+/* Terminal-style code blocks (components/mdx/pre.tsx) */
+.terminal-code-block {
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-300);
+}
+
+.terminal-code-block > div:first-child {
+  color: var(--color-gray-700);
+  background-color: var(--color-gray-200);
+}
+
+.dark .terminal-code-block {
+  background-color: var(--color-gray-900);
+  border-color: var(--color-gray-700);
+}
+
+.dark .terminal-code-block > div:first-child {
+  color: var(--color-gray-300);
+  background-color: var(--color-gray-800);
+}
+
+/* Remove top margin from nested lists in GuideOverview component */
+.guide-overview ul ul {
+  margin-top: 0;
+}
+
+@keyframes tool-name-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/*
+ * Steps: Nextra numbered `###` headings with CSS counters and the rules below
+ * suppressed numbering on deeper headings. Fumadocs numbers `<Step>` wrappers
+ * (produced by lib/remark-nextra-steps.ts) instead, so nested headings never
+ * get a number. Headings inside a step should not carry the prose top margin.
+ */
+.fd-step > :is(h2, h3, h4, h5, h6):first-child {
+  margin-top: 0;
+}
+
+/*
+ * Anchor scroll offset. Set it unconditionally, with room to breathe, so a
+ * heading never lands hidden under the sticky navbar. Headings and sections
+ * should not add their own `scroll-mt-*`; it stacks on top of this.
+ */
+html:root {
+  scroll-padding-top: calc(var(--fd-nav-height, 3.5rem) + 1.5rem);
+}
+
+/*
+ * The smooth anchor scrolling on this site came from zenscroll (bundled with
+ * swagger-ui-react), which app/layout.tsx stands down because it ignored the
+ * offset above. Ask the browser for the same easing instead — native
+ * scrolling honors scroll-padding-top.
+ */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}

@@ -1,0 +1,166 @@
+import { readFileSync } from "node:fs";
+import { readdir, stat } from "node:fs/promises";
+import { join } from "node:path";
+import { expect, test, vi } from "vitest";
+import { redirects } from "../redirects";
+
+// app/sitemap.ts reads the page list from lib/source.ts, whose generated
+// `.source` module imports every MDX page (and its components) into the test
+// process. Build the same loader from the files on disk instead; see
+// tests/helpers/fs-source.ts.
+vi.mock("@/lib/source", async () => {
+  const { createFsSource } = await import("./helpers/fs-source");
+  return { source: createFsSource() };
+});
+
+const toolkitDataDir = join(
+  process.cwd(),
+  "toolkit-docs-generator",
+  "data",
+  "toolkits"
+);
+
+test("sitemap lists expected URLs", async () => {
+  const previousSiteUrl = process.env.SITE_URL;
+  process.env.SITE_URL = "https://example.test";
+
+  try {
+    const { default: sitemap } = await import("../app/sitemap");
+    const entries = await sitemap();
+
+    expect(entries.length).toBeGreaterThan(0);
+
+    const urls = entries.map((entry) => entry.url);
+
+    // All URLs should be absolute and use the configured SITE_URL
+    expect(urls.every((url) => url.startsWith("https://example.test/"))).toBe(
+      true
+    );
+
+    // Known page should be present
+    expect(urls).toContain("https://example.test/en/references/changelog");
+
+    // Generated toolkit pages (served by lib/toolkit-route.tsx, which the
+    // content page tree can't see) must still make it into the sitemap. This
+    // fails if the toolkit-route merge in app/sitemap.ts is reverted.
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/development/github"
+    );
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/productivity/gmail"
+    );
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/search/exa-api"
+    );
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/productivity/notion"
+    );
+
+    const toolkitJson = await readdir(toolkitDataDir, {
+      withFileTypes: true,
+    });
+    const toolkitMtimes = await Promise.all(
+      toolkitJson
+        .filter((entry) => entry.isFile() && entry.name.endsWith(".json"))
+        .map((entry) => stat(join(toolkitDataDir, entry.name)))
+    );
+    const latestToolkitMtime = toolkitMtimes.reduce(
+      (latest, current) => (current.mtime > latest ? current.mtime : latest),
+      new Date(0)
+    );
+    const github = entries.find(
+      (entry) =>
+        entry.url ===
+        "https://example.test/en/resources/integrations/development/github"
+    );
+    expect(github?.lastModified).toEqual(latestToolkitMtime);
+
+    // No duplicates
+    const duplicates = urls.filter(
+      (url, index, arr) => arr.indexOf(url) !== index
+    );
+    expect(duplicates).toHaveLength(0);
+  } finally {
+    if (previousSiteUrl === undefined) {
+      process.env.SITE_URL = undefined;
+    } else {
+      process.env.SITE_URL = previousSiteUrl;
+    }
+  }
+});
+
+test("sitemap contains no URL that we redirect away", async () => {
+  const previousSiteUrl = process.env.SITE_URL;
+  process.env.SITE_URL = "https://example.test";
+
+  try {
+    const { default: sitemap } = await import("../app/sitemap");
+    const entries = await sitemap();
+    const paths = entries.map((entry) =>
+      entry.url.replace("https://example.test", "")
+    );
+
+    // Every redirect `source` in redirects.ts is a path we 3xx away, so a live
+    // page must never sit there — otherwise the sitemap ships a redirecting URL
+    // (Ahrefs flags "3XX redirect in sitemap"). Guards against pages left behind
+    // after a rename.
+    const exactSources = new Set<string>();
+    const prefixSources: string[] = [];
+
+    for (const redirect of redirects) {
+      const normalized = redirect.source
+        .replace(/:locale\([^)]*\)/g, "en")
+        .replace(/:locale/g, "en");
+
+      if (normalized.includes("/:")) {
+        // Wildcard source (e.g. ".../:path*"): match by its static prefix, but
+        // skip any that collapse to just the locale to avoid matching everything.
+        const prefix = normalized.slice(0, normalized.indexOf("/:"));
+        if (prefix.split("/").filter(Boolean).length >= 2) {
+          prefixSources.push(prefix);
+        }
+      } else {
+        exactSources.add(normalized);
+      }
+    }
+
+    const offenders = paths.filter(
+      (path) =>
+        exactSources.has(path) ||
+        prefixSources.some(
+          (prefix) => path === prefix || path.startsWith(`${prefix}/`)
+        )
+    );
+
+    for (const offender of offenders) {
+      console.error(
+        `Sitemap includes ${offender}, which matches a redirect source in redirects.ts. ` +
+          "Delete the stale page (or remove the redirect) so the sitemap ships no 3XX URLs."
+      );
+    }
+
+    expect(offenders).toEqual([]);
+  } finally {
+    if (previousSiteUrl === undefined) {
+      process.env.SITE_URL = undefined;
+    } else {
+      process.env.SITE_URL = previousSiteUrl;
+    }
+  }
+});
+
+test("robots.txt references the sitemap", () => {
+  const robotsPath = join(process.cwd(), "public", "robots.txt");
+  const robotsContent = readFileSync(robotsPath, "utf-8");
+
+  expect(robotsContent).toContain(
+    "Sitemap: https://docs.arcade.dev/sitemap.xml"
+  );
+});
+
+test("robots.txt references llms.txt", () => {
+  const robotsPath = join(process.cwd(), "public", "robots.txt");
+  const robotsContent = readFileSync(robotsPath, "utf-8");
+
+  expect(robotsContent).toContain("# https://docs.arcade.dev/llms.txt");
+});

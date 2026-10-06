@@ -1,0 +1,311 @@
+import { mkdir, mkdtemp, rm } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
+import { afterEach, describe, expect, it } from "vitest";
+import {
+  assertSafeCurrentToolkitSnapshot,
+  collectRemovedToolkitIds,
+  computeProcessingStats,
+  filterProvidersBySkipIds,
+  getCombinedChangedToolkitIds,
+  resolveCustomSectionsPath,
+} from "../../src/cli/generate-flow";
+import type { ChangeDetectionResult } from "../../src/diff/index";
+import { assertRequireCompleteMetadata } from "../../src/merger/data-merger";
+import type { ToolkitData } from "../../src/sources/toolkit-data-source";
+
+// ── Minimal ChangeDetectionResult builder ─────────────────────────────────────
+
+const makeResult = (
+  changes: Array<{ toolkitId: string; changeType: string }>
+): ChangeDetectionResult =>
+  ({
+    summary: {
+      modifiedToolkits: 0,
+      modifiedTools: 0,
+      newToolkits: 0,
+      newTools: 0,
+      removedToolkits: 0,
+      removedTools: 0,
+      totalToolkits: 0,
+      unchangedToolkits: 0,
+      versionOnlyToolkits: 0,
+    },
+    toolkitChanges: changes.map((c) => ({ ...c })),
+  }) as unknown as ChangeDetectionResult;
+
+// ── collectRemovedToolkitIds ───────────────────────────────────────────────────
+
+describe("collectRemovedToolkitIds", () => {
+  it("returns IDs of removed toolkits as a lowercase set", () => {
+    const result = makeResult([
+      { changeType: "removed", toolkitId: "Github" },
+      { changeType: "removed", toolkitId: "Slack" },
+    ]);
+    const ids = collectRemovedToolkitIds(result);
+    expect(ids).toEqual(new Set(["github", "slack"]));
+  });
+
+  it("returns empty set when no toolkits are removed", () => {
+    const result = makeResult([
+      { changeType: "modified", toolkitId: "Github" },
+      { changeType: "unchanged", toolkitId: "Slack" },
+    ]);
+    expect(collectRemovedToolkitIds(result).size).toBe(0);
+  });
+
+  it("excludes added, modified, and unchanged toolkits", () => {
+    const result = makeResult([
+      { changeType: "added", toolkitId: "Added" },
+      { changeType: "modified", toolkitId: "Modified" },
+      { changeType: "unchanged", toolkitId: "Unchanged" },
+      { changeType: "removed", toolkitId: "Removed" },
+    ]);
+    const ids = collectRemovedToolkitIds(result);
+    expect(ids).toEqual(new Set(["removed"]));
+  });
+
+  it("lowercases toolkit IDs regardless of original casing", () => {
+    const result = makeResult([
+      { changeType: "removed", toolkitId: "GoogleCalendar" },
+      { changeType: "removed", toolkitId: "SLACK" },
+    ]);
+    const ids = collectRemovedToolkitIds(result);
+    expect(ids).toContain("googlecalendar");
+    expect(ids).toContain("slack");
+  });
+
+  it("returns empty set for empty change list", () => {
+    expect(collectRemovedToolkitIds(makeResult([])).size).toBe(0);
+  });
+});
+
+describe("getCombinedChangedToolkitIds", () => {
+  it("deduplicates API and curation changes case-insensitively", () => {
+    expect(
+      getCombinedChangedToolkitIds(
+        makeResult([{ changeType: "modified", toolkitId: "Github" }]),
+        ["github"]
+      )
+    ).toEqual(["github"]);
+  });
+});
+
+describe("resolveCustomSectionsPath", () => {
+  const tempDirs: string[] = [];
+
+  afterEach(async () => {
+    await Promise.all(
+      tempDirs.splice(0).map((dir) => rm(dir, { recursive: true }))
+    );
+  });
+
+  it("uses curation/ by default when it exists", async () => {
+    const workingDir = await mkdtemp(join(tmpdir(), "toolkit-curation-"));
+    tempDirs.push(workingDir);
+    await mkdir(join(workingDir, "curation"));
+
+    await expect(
+      resolveCustomSectionsPath(undefined, workingDir)
+    ).resolves.toBe(join(workingDir, "curation"));
+  });
+
+  it("preserves an explicit custom-sections path", async () => {
+    await expect(
+      resolveCustomSectionsPath("./custom-prose", "/unused")
+    ).resolves.toBe("./custom-prose");
+  });
+});
+
+describe("assertSafeCurrentToolkitSnapshot", () => {
+  it("rejects an empty current snapshot when previous output exists", () => {
+    expect(() => assertSafeCurrentToolkitSnapshot(0, 115)).toThrow(
+      "refusing to remove all 115 existing toolkits"
+    );
+  });
+
+  it("allows an empty initial snapshot and non-empty updates", () => {
+    expect(() => assertSafeCurrentToolkitSnapshot(0, 0)).not.toThrow();
+    expect(() => assertSafeCurrentToolkitSnapshot(114, 115)).not.toThrow();
+  });
+});
+
+describe("computeProcessingStats", () => {
+  it("ignores skip IDs that do not exist in the fetched toolkit list", () => {
+    const toolkitList = new Map([
+      ["github", {}],
+      ["slack", {}],
+      ["jira", {}],
+    ]);
+    const skipToolkitIds = new Set(["github", "nonexistent", "alsomissing"]);
+
+    const stats = computeProcessingStats(toolkitList, skipToolkitIds);
+
+    expect(stats.totalToolkits).toBe(3);
+    expect(stats.effectiveSkipped).toBe(1);
+    expect(stats.toProcess).toBe(2);
+    expect(stats.unknownSkipIds).toEqual(
+      expect.arrayContaining(["nonexistent", "alsomissing"])
+    );
+    expect(stats.unknownSkipIds).toHaveLength(2);
+  });
+
+  it("never returns negative toProcess", () => {
+    const toolkitList = new Map([["github", {}]]);
+    const skipToolkitIds = new Set(["github", "slack", "jira", "extra"]);
+
+    const stats = computeProcessingStats(toolkitList, skipToolkitIds);
+
+    expect(stats.toProcess).toBeGreaterThanOrEqual(0);
+    expect(stats.effectiveSkipped).toBe(1);
+    expect(stats.toProcess).toBe(0);
+  });
+
+  it("returns correct stats when all toolkits are processed", () => {
+    const toolkitList = new Map([
+      ["github", {}],
+      ["slack", {}],
+    ]);
+    const skipToolkitIds = new Set<string>();
+
+    const stats = computeProcessingStats(toolkitList, skipToolkitIds);
+
+    expect(stats.totalToolkits).toBe(2);
+    expect(stats.effectiveSkipped).toBe(0);
+    expect(stats.toProcess).toBe(2);
+    expect(stats.unknownSkipIds).toHaveLength(0);
+  });
+
+  it("is case-insensitive when matching skip IDs against toolkit list", () => {
+    const toolkitList = new Map([
+      ["GitHub", {}],
+      ["Slack", {}],
+    ]);
+    const skipToolkitIds = new Set(["github", "slack"]);
+
+    const stats = computeProcessingStats(toolkitList, skipToolkitIds);
+
+    expect(stats.effectiveSkipped).toBe(2);
+    expect(stats.toProcess).toBe(0);
+    expect(stats.unknownSkipIds).toHaveLength(0);
+  });
+});
+
+describe("filterProvidersBySkipIds", () => {
+  it("filters provider entries when normalized provider ID is in skip IDs", () => {
+    const providers = [
+      { provider: "Github" },
+      { provider: "Slack" },
+      { provider: "Jira" },
+    ];
+    const skipToolkitIds = new Set(["github", "jira"]);
+
+    const { providersToProcess, skippedProviders } = filterProvidersBySkipIds(
+      providers,
+      skipToolkitIds
+    );
+
+    expect(providersToProcess).toHaveLength(1);
+    expect(providersToProcess[0]?.provider).toBe("Slack");
+    expect(skippedProviders).toHaveLength(2);
+  });
+
+  it("is case-insensitive", () => {
+    const providers = [
+      { provider: "GITHUB" },
+      { provider: "slack" },
+      { provider: "Jira" },
+    ];
+    const skipToolkitIds = new Set(["github", "SLACK", "JIRA"]);
+
+    const { providersToProcess, skippedProviders } = filterProvidersBySkipIds(
+      providers,
+      skipToolkitIds
+    );
+
+    expect(providersToProcess).toHaveLength(0);
+    expect(skippedProviders).toHaveLength(3);
+  });
+
+  it("returns all providers when skip set is empty", () => {
+    const providers = [{ provider: "Github" }, { provider: "Slack" }];
+    const skipToolkitIds = new Set<string>();
+
+    const { providersToProcess, skippedProviders } = filterProvidersBySkipIds(
+      providers,
+      skipToolkitIds
+    );
+
+    expect(providersToProcess).toHaveLength(2);
+    expect(skippedProviders).toHaveLength(0);
+  });
+
+  it("keeps non-ignored providers from a mixed list", () => {
+    const providers = [
+      { provider: "Github", version: "1.0.0" },
+      { provider: "Slack" },
+      { provider: "Jira", version: "2.0.0" },
+    ];
+    const skipToolkitIds = new Set(["github"]);
+
+    const { providersToProcess } = filterProvidersBySkipIds(
+      providers,
+      skipToolkitIds
+    );
+
+    expect(providersToProcess).toHaveLength(2);
+    const providerNames = providersToProcess.map((p) => p.provider);
+    expect(providerNames).toContain("Slack");
+    expect(providerNames).toContain("Jira");
+  });
+});
+
+describe("assertRequireCompleteMetadata", () => {
+  it("throws when any toolkit is missing design-system metadata", () => {
+    const complete: ToolkitData = {
+      metadata: {
+        category: "development",
+        docsLink: "https://docs.example.com",
+        iconUrl: "https://example.com/icon.svg",
+        id: "Github",
+        isBYOC: false,
+        isComingSoon: false,
+        isHidden: false,
+        isPro: false,
+        label: "Github",
+        type: "arcade",
+      },
+      tools: [],
+    };
+    const missing: ToolkitData = { metadata: null, tools: [] };
+
+    expect(() =>
+      assertRequireCompleteMetadata([
+        ["Github", complete],
+        ["Unknown", missing],
+      ])
+    ).toThrow(/missing design-system metadata.*Unknown/);
+  });
+
+  it("passes when every toolkit has metadata", () => {
+    const complete: ToolkitData = {
+      metadata: {
+        category: "development",
+        docsLink: "https://docs.example.com",
+        iconUrl: "https://example.com/icon.svg",
+        id: "Github",
+        isBYOC: false,
+        isComingSoon: false,
+        isHidden: false,
+        isPro: false,
+        label: "Github",
+        type: "arcade",
+      },
+      tools: [],
+    };
+
+    expect(() =>
+      assertRequireCompleteMetadata([["Github", complete]])
+    ).not.toThrow();
+  });
+});

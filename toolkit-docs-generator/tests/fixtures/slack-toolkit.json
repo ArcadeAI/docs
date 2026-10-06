@@ -1,0 +1,256 @@
+{
+  "id": "Slack",
+  "label": "Slack",
+  "version": "1.2.0",
+  "description": "Slack communication and collaboration tools for sending messages, managing channels, and interacting with workspaces.",
+  "summary": "The Arcade Slack toolkit provides tools for interacting with Slack workspaces. Build agents and AI apps that can:\n\n- Send and manage messages in channels and DMs\n- Create, archive, and manage channels\n- List and search workspace members\n- React to messages with emoji\n- Upload and share files",
+  "metadata": {
+    "category": "social",
+    "iconUrl": "https://design-system.arcade.dev/icons/slack.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/social/slack",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "slack",
+    "allScopes": [
+      "channels:read",
+      "channels:write",
+      "chat:write",
+      "users:read",
+      "files:write",
+      "reactions:write"
+    ]
+  },
+  "tools": [
+    {
+      "name": "SendMessage",
+      "qualifiedName": "Slack.SendMessage",
+      "fullyQualifiedName": "Slack.SendMessage@1.2.0",
+      "description": "Send a message to a Slack channel or direct message. Supports rich text formatting with blocks.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the channel or conversation to send the message to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "The message text. Supports Slack's mrkdwn formatting",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "thread_ts",
+          "type": "string",
+          "required": false,
+          "description": "Timestamp of the parent message to reply in thread",
+          "enum": null,
+          "inferrable": false
+        },
+        {
+          "name": "unfurl_links",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to enable URL unfurling",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": ["chat:write"]
+      },
+      "secrets": [],
+      "output": {
+        "type": "object",
+        "description": "Message send confirmation with timestamp and channel"
+      },
+      "documentationChunks": [
+        {
+          "type": "info",
+          "location": "parameters",
+          "position": "after",
+          "content": "To get the `channel_id`, use the `ListChannels` tool or find it in the channel details in Slack (right-click channel > View channel details > scroll to bottom).",
+          "title": "Finding Channel IDs"
+        }
+      ],
+      "codeExample": {
+        "toolName": "Slack.SendMessage",
+        "parameters": {
+          "channel_id": {
+            "value": "C0123456789",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "Hello from Arcade! :wave:",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListChannels",
+      "qualifiedName": "Slack.ListChannels",
+      "fullyQualifiedName": "Slack.ListChannels@1.2.0",
+      "description": "List public and private channels in the workspace that the authenticated user has access to.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of channels to return (default 100, max 1000)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "types",
+          "type": "string",
+          "required": false,
+          "description": "Comma-separated list of channel types to include",
+          "enum": ["public_channel", "private_channel", "mpim", "im"],
+          "inferrable": true
+        },
+        {
+          "name": "exclude_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to exclude archived channels",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": ["channels:read"]
+      },
+      "secrets": [],
+      "output": {
+        "type": "array",
+        "description": "List of channel objects with id, name, and metadata"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.ListChannels",
+        "parameters": {
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "exclude_archived": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "AddReaction",
+      "qualifiedName": "Slack.AddReaction",
+      "fullyQualifiedName": "Slack.AddReaction@1.2.0",
+      "description": "Add an emoji reaction to a message in Slack.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the channel containing the message",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timestamp",
+          "type": "string",
+          "required": true,
+          "description": "The timestamp of the message to react to",
+          "enum": null,
+          "inferrable": false
+        },
+        {
+          "name": "emoji",
+          "type": "string",
+          "required": true,
+          "description": "The emoji name without colons (e.g., 'thumbsup' not ':thumbsup:')",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": ["reactions:write"]
+      },
+      "secrets": [],
+      "output": {
+        "type": "object",
+        "description": "Confirmation of the reaction being added"
+      },
+      "documentationChunks": [
+        {
+          "type": "tip",
+          "location": "parameters",
+          "position": "after",
+          "content": "Common emoji names: `thumbsup`, `thumbsdown`, `heart`, `eyes`, `white_check_mark`, `x`",
+          "title": "Common Emoji"
+        }
+      ],
+      "codeExample": {
+        "toolName": "Slack.AddReaction",
+        "parameters": {
+          "channel_id": {
+            "value": "C0123456789",
+            "type": "string",
+            "required": true
+          },
+          "timestamp": {
+            "value": "1234567890.123456",
+            "type": "string",
+            "required": true
+          },
+          "emoji": {
+            "value": "white_check_mark",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "warning",
+      "location": "header",
+      "position": "after",
+      "content": "Slack rate limits vary by method. Most methods allow 1+ request per second, but some (like `chat.postMessage`) are limited to 1 request per second per channel. Implement appropriate rate limiting in your application.",
+      "title": "Rate Limits",
+      "variant": "warning"
+    }
+  ],
+  "customImports": [],
+  "subPages": ["environment-variables"],
+  "generatedAt": "2026-01-14T12:00:00Z"
+}

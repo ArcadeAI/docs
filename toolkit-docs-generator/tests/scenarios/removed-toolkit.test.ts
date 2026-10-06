@@ -1,0 +1,114 @@
+/**
+ * Scenario Test: Toolkit not returned by API but exists in docs
+ *
+ * Verifies that when a toolkit is missing from API but exists in previous output:
+ * - The toolkit is detected as removed by detectChanges()
+ * - Change detection reports it correctly (removed toolkits are excluded from
+ *   getChangedToolkitIds so they're not regenerated)
+ *
+ * The file deletion behaviour is covered in removed-toolkit-cleanup.test.ts.
+ */
+import { describe, expect, it } from "vitest";
+
+import { detectChanges } from "../../src/diff/index";
+import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
+
+const createMergedToolkit = (id: string): MergedToolkit => ({
+  auth: null,
+  customImports: [],
+  description: "A toolkit",
+  documentationChunks: [],
+  generatedAt: new Date().toISOString(),
+  id,
+  label: id,
+  metadata: {
+    category: "development",
+    docsLink: "https://docs.example.com",
+    iconUrl: "https://example.com/icon.svg",
+    isBYOC: false,
+    isComingSoon: false,
+    isHidden: false,
+    isPro: false,
+    type: "arcade",
+  },
+  subPages: [],
+  tools: [
+    {
+      auth: null,
+      description: "A tool",
+      documentationChunks: [],
+      fullyQualifiedName: `${id}.Tool1@1.0.0`,
+      name: "Tool1",
+      output: null,
+      parameters: [],
+      qualifiedName: `${id}.Tool1`,
+      secrets: [],
+      secretsInfo: [],
+    },
+  ],
+  version: "1.0.0",
+});
+
+describe("Scenario: Toolkit removed from API", () => {
+  it("detects toolkit as removed", () => {
+    const currentToolkitTools = new Map<string, readonly ToolDefinition[]>();
+    const previousToolkits = new Map([
+      ["Github", createMergedToolkit("Github")],
+      ["Slack", createMergedToolkit("Slack")],
+    ]);
+
+    const result = detectChanges(currentToolkitTools, previousToolkits);
+
+    expect(result.summary.removedToolkits).toBe(2);
+    expect(
+      result.toolkitChanges.filter((c) => c.changeType === "removed")
+    ).toHaveLength(2);
+  });
+
+  it("marks removed toolkits correctly", () => {
+    const currentToolkitTools = new Map<string, readonly ToolDefinition[]>();
+    const previousToolkits = new Map([
+      ["OldKit", createMergedToolkit("OldKit")],
+    ]);
+
+    const result = detectChanges(currentToolkitTools, previousToolkits);
+
+    const removedChange = result.toolkitChanges.find(
+      (c) => c.toolkitId === "OldKit"
+    );
+    expect(removedChange?.changeType).toBe("removed");
+    expect(removedChange?.currentToolCount).toBe(0);
+    expect(removedChange?.previousToolCount).toBe(1);
+  });
+
+  it("includes removed toolkits in change log", () => {
+    const currentToolkitTools = new Map<string, readonly ToolDefinition[]>();
+    const previousToolkits = new Map([
+      ["RemovedKit", createMergedToolkit("RemovedKit")],
+    ]);
+
+    const result = detectChanges(currentToolkitTools, previousToolkits);
+
+    expect(
+      result.toolkitChanges.some(
+        (c) => c.changeType === "removed" && c.toolkitId === "RemovedKit"
+      )
+    ).toBe(true);
+  });
+
+  it("does not count removed toolkits as needing regeneration", () => {
+    const currentToolkitTools = new Map<string, readonly ToolDefinition[]>();
+    const previousToolkits = new Map([
+      ["RemovedKit", createMergedToolkit("RemovedKit")],
+    ]);
+
+    const result = detectChanges(currentToolkitTools, previousToolkits);
+
+    // Removed toolkits should not appear in changed IDs (they don't need regeneration)
+    const changedIds = result.toolkitChanges
+      .filter((c) => c.changeType !== "unchanged" && c.changeType !== "removed")
+      .map((c) => c.toolkitId);
+
+    expect(changedIds).not.toContain("RemovedKit");
+  });
+});

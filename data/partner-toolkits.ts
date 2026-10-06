@@ -1,0 +1,64 @@
+import type { Toolkit } from "@arcadeai/design-system";
+
+/**
+ * Docs-local partner toolkits (remote MCP Servers offered by our partners).
+ *
+ * These entries are merged into the live integrations catalog alongside the
+ * TOOLKITS exported from @arcadeai/design-system. Each partner toolkit uses
+ * a standard ToolkitType (typically "verified") plus an `isPartner: true`
+ * flag that renders a Partner badge next to BYOC/Pro on catalog cards.
+ *
+ * This list is also what the category sidebars are built from, so an entry
+ * here needs a matching page at the path its `relativeDocsLink` points to.
+ * See buildPartnerToolkitInfoList in
+ * toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts, and
+ * tests/partner-integration-nav.test.ts for the assertions that keep the
+ * two in step.
+ *
+ * Once DS adds an explicit `isPartner` field to its Toolkit shape, migrate
+ * these entries into the DS TOOLKITS array and delete this file.
+ */
+
+export type PartnerToolkit = Toolkit & {
+  isPartner: true;
+  /**
+   * Remote MCP Server URL displayed on the partner detail page. Use a
+   * placeholder like `YOUR_API_KEY` for any per-user secrets so the URL can
+   * be copied without leaking credentials. Updating this field updates the
+   * detail page automatically.
+   */
+  mcpUrl: string;
+};
+
+export const PARTNER_TOOLKITS: PartnerToolkit[] = [
+  {
+    category: "search",
+    docsLink: "https://docs.arcade.dev/en/resources/integrations/search/tavily",
+    id: "Tavily",
+    isBYOC: true,
+    isComingSoon: false,
+    isHidden: false,
+    isPartner: true,
+    isPro: false,
+    label: "Tavily",
+    mcpUrl: "https://mcp.tavily.com/mcp/?tavilyApiKey=YOUR_API_KEY",
+    publicIconUrl: "/images/partners/tavily.svg",
+    relativeDocsLink: "/en/resources/integrations/search/tavily",
+    type: "verified",
+  },
+  {
+    category: "search",
+    docsLink: "https://docs.arcade.dev/en/resources/integrations/search/nimble",
+    id: "Nimble",
+    isBYOC: true,
+    isComingSoon: false,
+    isHidden: false,
+    isPartner: true,
+    isPro: false,
+    label: "Nimble",
+    mcpUrl: "https://mcp.nimbleway.com/mcp",
+    publicIconUrl: "/images/partners/nimble.png",
+    relativeDocsLink: "/en/resources/integrations/search/nimble",
+    type: "verified",
+  },
+];

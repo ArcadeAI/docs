@@ -1,0 +1,786 @@
+{
+  "id": "Freshservice",
+  "label": "Freshservice",
+  "version": "1.0.0",
+  "description": "Arcade.dev LLM tools for Freshservice IT service management",
+  "metadata": {
+    "category": "customer-support",
+    "iconUrl": "https://design-system.arcade.dev/icons/freshservice.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/customer-support/freshservice",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "freshservice",
+    "allScopes": [
+      "freshservice.changes.view",
+      "freshservice.departments.view",
+      "freshservice.problems.view",
+      "freshservice.requesters.view",
+      "freshservice.service_catalog.view",
+      "freshservice.solutions.view",
+      "freshservice.tickets.conversations.view",
+      "freshservice.tickets.tasks.view",
+      "freshservice.tickets.view"
+    ]
+  },
+  "tools": [
+    {
+      "name": "FindKnownCause",
+      "qualifiedName": "Freshservice.FindKnownCause",
+      "fullyQualifiedName": "Freshservice.FindKnownCause@1.0.0",
+      "description": "Find the change or known problem that already explains a wave of tickets about one system.\n\nSearches recent changes and tracked problems together and ranks them as one\nmost-recent-first list, so a caller asking \"what explains this\" makes one\ncall instead of two and does not have to merge the answers itself. Changes\nand problems stay in their own fields of the response, since a change that\nwent out and a problem being tracked call for different next steps.\n\nGive change_id or problem_id on its own to fetch that one record with its\nfull description; combining either with the other, or with any filter, is\nrejected rather than silently resolved one way or the other.\n\nA filtered search covers a bounded, most-recent working set rather than the\nentire history, so an empty result is not proof that no such change or\nproblem exists; the response states how far the scan actually reached.",
+      "parameters": [
+        {
+          "name": "about",
+          "type": "string",
+          "required": false,
+          "description": "A free-text term naming the affected system, matched case-insensitively against each change's and problem's subject and description. Every whitespace-separated word must appear in the same field, in any order, so 'vpn gateway' and 'gateway vpn' match the same records and a word that appears nowhere excludes the record. Defaults to empty, which returns recent causes unnarrowed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Only include causes in this status. Changes use open, planning, approval, pending_release, pending_review, or closed; problems use open, change_requested, or closed. A status only one of the two defines narrows the search to that kind. A tenant-customized status's numeric code applies to both. Defaults to empty, which applies no status filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "change_id",
+          "type": "integer",
+          "required": false,
+          "description": "The internal id of one change to fetch, e.g. one a ticket linked to. 0 searches rather than fetches one. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "problem_id",
+          "type": "integer",
+          "required": false,
+          "description": "The internal id of one problem to fetch, e.g. one a ticket linked to. 0 searches rather than fetches one. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "planned_after",
+          "type": "string",
+          "required": false,
+          "description": "Only include changes planned on or after this date (YYYY-MM-DD). Narrows the search to changes, since problems carry no planned window. Defaults to empty, which applies no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum causes to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "freshservice",
+        "providerType": "oauth2",
+        "scopes": [
+          "freshservice.changes.view",
+          "freshservice.problems.view",
+          "freshservice.requesters.view"
+        ]
+      },
+      "secrets": [
+        "FRESHSERVICE_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHSERVICE_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Changes and problems matching the request."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshservice.FindKnownCause",
+        "parameters": {
+          "about": {
+            "value": "vpn gateway",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "change_id": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "problem_id": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "planned_after": {
+            "value": "2024-06-01",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "freshservice",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "FindRequester",
+      "qualifiedName": "Freshservice.FindRequester",
+      "fullyQualifiedName": "Freshservice.FindRequester@1.0.0",
+      "description": "Find a Freshservice requester by internal id, exact email, or name.\n\nExactly one of requester_id, email, or name must be given; supplying none\nor more than one is rejected.\n\nAn email lookup matches character-for-character, so a guessed or\nslightly-off address returns nothing even when the person is in the\ndirectory. Retry by name when an email guess comes back empty.",
+      "parameters": [
+        {
+          "name": "requester_id",
+          "type": "integer",
+          "required": false,
+          "description": "The internal requester id a ticket carries. 0 means no id lookup. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Exact email address of the requester to look up; an email that does not match a record character-for-character returns no results even if the person exists under a different address. Defaults to empty, meaning no email lookup.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "A first or last name to search for among requesters, matched case-insensitively against each requester's full name. Every whitespace-separated word must appear somewhere in the name, in any order, so 'Ada Lovelace', 'Lovelace Ada', and 'Ada' all match the same person. Defaults to empty, meaning no name lookup.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum requesters to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "freshservice",
+        "providerType": "oauth2",
+        "scopes": [
+          "freshservice.requesters.view",
+          "freshservice.departments.view"
+        ]
+      },
+      "secrets": [
+        "FRESHSERVICE_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHSERVICE_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Requesters matching the lookup."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshservice.FindRequester",
+        "parameters": {
+          "requester_id": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "email": {
+            "value": "ada.lovelace@example.com",
+            "type": "string",
+            "required": false
+          },
+          "name": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "freshservice",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTicket",
+      "qualifiedName": "Freshservice.GetTicket",
+      "fullyQualifiedName": "Freshservice.GetTicket@1.0.0",
+      "description": "Read one ticket's whole story: fields, conversation, tasks, and any linked change or problem.\n\nWith every embed disabled this makes exactly one upstream request and sends\nno include parameter at all; leaving any one embed enabled also resolves\nthe ticket's formal change and problem linkage.\n\nOnly a change or problem Freshservice itself formally linked to the ticket\nis reported as linked. One merely named in the conversation text is not a\nlink, and has to be found by searching changes or problems for the affected\nsystem's name instead.\n\nThe conversation returned is the most recent history rather than a\nguaranteed-complete thread: a very long thread is reported as shortened, not\nsilently cut.",
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The Freshservice ticket's display number.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_conversations",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the most recent conversation/reply history. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_tasks",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the ticket's tasks. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_requester",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the requester's and department's names. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "freshservice",
+        "providerType": "oauth2",
+        "scopes": [
+          "freshservice.tickets.view",
+          "freshservice.tickets.conversations.view",
+          "freshservice.tickets.tasks.view",
+          "freshservice.requesters.view",
+          "freshservice.departments.view",
+          "freshservice.changes.view",
+          "freshservice.problems.view"
+        ]
+      },
+      "secrets": [
+        "FRESHSERVICE_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHSERVICE_SUBDOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The ticket, its people, its linkage, and its embedded collections."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshservice.GetTicket",
+        "parameters": {
+          "ticket_id": {
+            "value": 10842,
+            "type": "integer",
+            "required": true
+          },
+          "include_conversations": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_tasks": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "include_requester": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "freshservice",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListTickets",
+      "qualifiedName": "Freshservice.ListTickets",
+      "fullyQualifiedName": "Freshservice.ListTickets@1.0.0",
+      "description": "Narrow the Freshservice ticket queue to what is actionable.\n\nNEW_AND_MINE lives on a predefined-view endpoint that rejects status and\npriority filters, so combining them is rejected rather than silently\nresolved; use ALL, UNASSIGNED, or BREACHING with a status/priority filter\ninstead. UNASSIGNED and BREACHING compose with status and priority.\nBREACHING excludes tickets already resolved or closed unless a status is\nexplicitly given, since a past-due ticket that is already resolved or\nclosed no longer needs anyone's attention.",
+      "parameters": [
+        {
+          "name": "view",
+          "type": "string",
+          "required": false,
+          "description": "Which slice of the queue to return. ALL is every ticket, NEW_AND_MINE is the caller's own new and open tickets, UNASSIGNED has no assignee, BREACHING is past due and, unless status is also given, still open or pending (already resolved or closed tickets are excluded). Defaults to ALL.",
+          "enum": [
+            "all",
+            "new_and_mine",
+            "unassigned",
+            "breaching"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets in this status: one of open, pending, resolved, closed, or a tenant-customized status's numeric code (visible in this tenant's Freshservice admin settings) for a status beyond those four defaults. Defaults to empty, which applies no status filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets at this priority: one of low, medium, high, urgent, or a tenant-customized priority's numeric code for a value beyond those four defaults. Defaults to empty, which applies no priority filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "requester_email",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets raised by this exact email address. Defaults to empty, which allows any requester.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_since",
+          "type": "string",
+          "required": false,
+          "description": "Only include tickets updated on or after this date (YYYY-MM-DD). Defaults to empty, which applies no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "Sort field, only applied on the unfiltered ALL and NEW_AND_MINE views. Defaults to UPDATED_AT.",
+          "enum": [
+            "updated_at",
+            "created_at",
+            "due_by",
+            "status"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum tickets to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "freshservice",
+        "providerType": "oauth2",
+        "scopes": [
+          "freshservice.tickets.view",
+          "freshservice.requesters.view"
+        ]
+      },
+      "secrets": [
+        "FRESHSERVICE_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHSERVICE_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Tickets in the requested slice of the queue."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshservice.ListTickets",
+        "parameters": {
+          "view": {
+            "value": "BREACHING",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "requester_email": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "updated_since": {
+            "value": "2024-10-01",
+            "type": "string",
+            "required": false
+          },
+          "order_by": {
+            "value": "UPDATED_AT",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "freshservice",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchServiceItems",
+      "qualifiedName": "Freshservice.SearchServiceItems",
+      "fullyQualifiedName": "Freshservice.SearchServiceItems@1.0.0",
+      "description": "Search the Freshservice service catalog for an item that covers an ask.\n\nThe catalog can be searched by term only and cannot be listed or browsed\nin full under this grant: Freshservice gates the catalog's list and detail\nendpoints behind a write scope this toolkit refuses to declare.",
+      "parameters": [
+        {
+          "name": "search_term",
+          "type": "string",
+          "required": true,
+          "description": "Free-text term to search the service catalog for. Required and must not be blank. The term is sent as typed to Freshservice's own catalog search, which matches it against item names and descriptions; how Freshservice combines several words is its rule, so a single specific word such as 'laptop' is the most reliable query, and a second call with another word beats one long phrase.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum items to return (1-50). Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "freshservice",
+        "providerType": "oauth2",
+        "scopes": [
+          "freshservice.service_catalog.view"
+        ]
+      },
+      "secrets": [
+        "FRESHSERVICE_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHSERVICE_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Service catalog items matching the search term."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshservice.SearchServiceItems",
+        "parameters": {
+          "search_term": {
+            "value": "laptop",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "freshservice",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchSolutions",
+      "qualifiedName": "Freshservice.SearchSolutions",
+      "fullyQualifiedName": "Freshservice.SearchSolutions@1.0.0",
+      "description": "Search the Freshservice knowledge base, or fetch one article in full by id.\n\nExactly one of search_term or article_id must be given; supplying both or\nneither is rejected. Articles come back with their body text, not just a\ntitle, so a single call is normally enough to answer the question.",
+      "parameters": [
+        {
+          "name": "search_term",
+          "type": "string",
+          "required": false,
+          "description": "Free-text term to search the knowledge base for. The term is sent as typed to Freshservice's own article search, which matches it against article titles and bodies; how Freshservice combines several words is its rule, so a single specific word or short phrase is the most reliable query. Defaults to empty; leave it empty when looking up a specific article by article_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "article_id",
+          "type": "integer",
+          "required": false,
+          "description": "The internal id of one article to fetch in full. 0 means no article lookup. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum articles to return (1-20). Defaults to 5.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "0-indexed starting position. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "freshservice",
+        "providerType": "oauth2",
+        "scopes": [
+          "freshservice.solutions.view"
+        ]
+      },
+      "secrets": [
+        "FRESHSERVICE_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FRESHSERVICE_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Solution articles matching the lookup, with their body text."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Freshservice.SearchSolutions",
+        "parameters": {
+          "search_term": {
+            "value": "reset password",
+            "type": "string",
+            "required": false
+          },
+          "article_id": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "freshservice",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "customer_support"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-24T21:01:57.852Z",
+  "summary": "Freshservice is an IT service management platform by Freshworks. This toolkit lets LLM agents interact with Freshservice to triage tickets, search the knowledge base and service catalog, look up requesters, and correlate incidents with known causes.\n\n## Capabilities\n\n- **Ticket management**: Retrieve full ticket details (fields, conversation, tasks, linked changes/problems) and filter the ticket queue by actionable views, status, and priority.\n- **Root cause correlation**: Search recent changes and tracked problems together in a single ranked call to explain a wave of related tickets.\n- **Knowledge base access**: Search solution articles or fetch a full article by ID — body text included — in one call.\n- **Service catalog search**: Find catalog items by search term (browsing the full catalog is blocked by scope constraints).\n- **Requester lookup**: Resolve a Freshservice user by internal ID, exact email, or name.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Freshservice** provider. Arcade manages the OAuth flow; no manual token handling is required.\n\n## Secrets\n\n- **`FRESHSERVICE_SUBDOMAIN`**: Your Freshservice account subdomain — the prefix in your instance URL (e.g., `acme` from `acme.freshservice.com`). Find it by logging into your Freshservice instance and reading the subdomain from the browser address bar. This value identifies which Freshservice tenant API requests are routed to and is required for the toolkit to construct correct API endpoints.\n\nConfigure secrets in the Arcade dashboard or via the API: https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets — secrets can also be managed at https://api.arcade.dev/dashboard/auth/secrets."
+}

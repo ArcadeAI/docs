@@ -1,0 +1,505 @@
+import { mkdtemp, readFile, rename, rm, writeFile } from "fs/promises";
+import { tmpdir } from "os";
+import { basename, join } from "path";
+import { describe, expect, it } from "vitest";
+
+import {
+  createJsonGenerator,
+  verifyOutputDir,
+} from "../../src/generator/index";
+import type { MergedToolkit } from "../../src/types/index";
+
+const loadFixture = async (fileName: string): Promise<MergedToolkit> => {
+  const fixturesDir = new URL("../fixtures/", import.meta.url);
+  const filePath = new URL(fileName, fixturesDir);
+  const content = await readFile(filePath, "utf-8");
+  return JSON.parse(content) as MergedToolkit;
+};
+
+const withTempDir = async (fn: (dir: string) => Promise<void>) => {
+  const dir = await mkdtemp(join(tmpdir(), "toolkit-docs-"));
+  try {
+    await fn(dir);
+  } finally {
+    await rm(dir, { force: true, recursive: true });
+  }
+};
+
+describe("verifyOutputDir", () => {
+  it("flags an empty output directory", async () => {
+    await withTempDir(async (dir) => {
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((error) =>
+          error.includes("No toolkit JSON files found")
+        )
+      ).toBe(true);
+      expect(
+        result.errors.some((error) =>
+          error.includes("Missing or invalid index.json")
+        )
+      ).toBe(true);
+    });
+  });
+
+  it("accepts a valid output directory", async () => {
+    await withTempDir(async (dir) => {
+      const toolkits = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+
+      await generator.generateAll(toolkits);
+
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+  });
+
+  it("flags missing index.json", async () => {
+    await withTempDir(async (dir) => {
+      const toolkits = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+
+      await generator.generateAll(toolkits);
+      await rm(join(dir, "index.json"));
+
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(false);
+      expect(result.errors.some((error) => error.includes("index.json"))).toBe(
+        true
+      );
+    });
+  });
+
+  it("flags index entries that do not match toolkit metadata", async () => {
+    await withTempDir(async (dir) => {
+      const toolkits = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+
+      await generator.generateAll(toolkits);
+
+      const indexPath = join(dir, "index.json");
+      const index = JSON.parse(await readFile(indexPath, "utf-8")) as {
+        toolkits: Record<string, unknown>[];
+      };
+      const githubEntry = index.toolkits.find((entry) => entry.id === "Github");
+      if (githubEntry) {
+        githubEntry.version = "9.9.9";
+        githubEntry.category = "social";
+        githubEntry.type = "community";
+        githubEntry.toolCount = 999;
+        githubEntry.authType = "none";
+      }
+      await writeFile(indexPath, JSON.stringify(index, null, 2), "utf-8");
+
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((error) =>
+          error.includes("version mismatch for Github")
+        )
+      ).toBe(true);
+      expect(
+        result.errors.some((error) =>
+          error.includes("category mismatch for Github")
+        )
+      ).toBe(true);
+      expect(
+        result.errors.some((error) =>
+          error.includes("type mismatch for Github")
+        )
+      ).toBe(true);
+      expect(
+        result.errors.some((error) =>
+          error.includes("toolCount mismatch for Github")
+        )
+      ).toBe(true);
+      expect(
+        result.errors.some((error) =>
+          error.includes("authType mismatch for Github")
+        )
+      ).toBe(true);
+    });
+  });
+
+  it("flags index entries without matching files", async () => {
+    await withTempDir(async (dir) => {
+      const toolkits = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+
+      await generator.generateAll(toolkits);
+
+      const indexPath = join(dir, "index.json");
+      const index = JSON.parse(await readFile(indexPath, "utf-8")) as {
+        toolkits: Record<string, unknown>[];
+      };
+      index.toolkits.push({
+        authType: "none",
+        category: "development",
+        id: "Ghost",
+        label: "Ghost",
+        toolCount: 0,
+        type: "arcade",
+        version: "1.0.0",
+      });
+      await writeFile(indexPath, JSON.stringify(index, null, 2), "utf-8");
+
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((error) =>
+          error.includes("index.json entry has no matching file: Ghost")
+        )
+      ).toBe(true);
+    });
+  });
+
+  it("flags toolkit files that are not lowercase", async () => {
+    await withTempDir(async (dir) => {
+      const toolkits = await Promise.all([loadFixture("github-toolkit.json")]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+
+      await generator.generateAll(toolkits);
+
+      await rename(join(dir, "github.json"), join(dir, "Github.json"));
+
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((error) =>
+          error.includes("File name must be lowercase: Github.json")
+        )
+      ).toBe(true);
+    });
+  });
+
+  it("flags toolkit files that do not match toolkit id", async () => {
+    await withTempDir(async (dir) => {
+      const toolkits = await Promise.all([loadFixture("github-toolkit.json")]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+
+      await generator.generateAll(toolkits);
+
+      await rename(join(dir, "github.json"), join(dir, "mismatch.json"));
+
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((error) =>
+          error.includes("File name does not match toolkit id: mismatch.json")
+        )
+      ).toBe(true);
+    });
+  });
+
+  it("can verify legacy toolkit files when legacy fallback is enabled", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+
+      await generator.generateAll([githubToolkit]);
+
+      const toolkitPath = join(dir, "github.json");
+      const legacyToolkit = JSON.parse(
+        await readFile(toolkitPath, "utf-8")
+      ) as Record<string, unknown>;
+      const chunks = legacyToolkit.documentationChunks as Record<
+        string,
+        unknown
+      >[];
+      if (Array.isArray(chunks) && chunks[0]) {
+        chunks[0].type = "legacy_note";
+        chunks[0].location = "overview";
+      }
+      legacyToolkit.subPages = [{ slug: "advanced" }];
+      await writeFile(
+        toolkitPath,
+        JSON.stringify(legacyToolkit, null, 2),
+        "utf-8"
+      );
+
+      const strictResult = await verifyOutputDir(dir);
+      expect(strictResult.valid).toBe(false);
+      expect(
+        strictResult.errors.some((error) =>
+          error.includes("Invalid toolkit schema in github.json")
+        )
+      ).toBe(true);
+
+      const fallbackResult = await verifyOutputDir(dir, undefined, {
+        allowLegacyFallback: true,
+      });
+      expect(fallbackResult.valid).toBe(true);
+      expect(fallbackResult.errors).toHaveLength(0);
+      expect(
+        fallbackResult.warnings.some((warning) =>
+          warning.includes("Loaded github.json with fallback parser")
+        )
+      ).toBe(true);
+    });
+  });
+
+  it("builds index from output when legacy files exist", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const baselineGenerator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+      await baselineGenerator.generateAll([githubToolkit, slackToolkit]);
+
+      const toolkitPath = join(dir, "github.json");
+      const legacyToolkit = JSON.parse(
+        await readFile(toolkitPath, "utf-8")
+      ) as Record<string, unknown>;
+      const chunks = legacyToolkit.documentationChunks as Record<
+        string,
+        unknown
+      >[];
+      if (Array.isArray(chunks) && chunks[0]) {
+        chunks[0].type = "legacy_note";
+        chunks[0].location = "overview";
+      }
+      legacyToolkit.subPages = [{ slug: "advanced" }];
+      await writeFile(
+        toolkitPath,
+        JSON.stringify(legacyToolkit, null, 2),
+        "utf-8"
+      );
+
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        indexSource: "output",
+        outputDir: dir,
+        prettyPrint: false,
+      });
+      const result = await generator.generateAll([slackToolkit]);
+
+      expect(result.errors).toHaveLength(0);
+
+      const index = JSON.parse(
+        await readFile(join(dir, "index.json"), "utf-8")
+      ) as {
+        toolkits: Array<{ id: string }>;
+      };
+      const ids = new Set(index.toolkits.map((entry) => entry.id));
+      expect(ids.has("Github")).toBe(true);
+      expect(ids.has("Slack")).toBe(true);
+    });
+  });
+});
+
+describe("JsonGenerator.rebuildIndexFromOutput", () => {
+  it("surfaces read errors while still rebuilding index", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+      await generator.generateAll([githubToolkit, slackToolkit]);
+
+      await writeFile(join(dir, "bad.json"), "{not-json", "utf-8");
+
+      const rebuildResult = await generator.rebuildIndexFromOutput();
+
+      expect(rebuildResult.readErrors).toHaveLength(1);
+      expect(rebuildResult.readErrors[0]).toContain("bad.json");
+      expect(rebuildResult.readWarnings).toHaveLength(0);
+      expect(rebuildResult.indexPath).toBe(join(dir, "index.json"));
+    });
+  });
+
+  it("surfaces fallback warnings during rebuild", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        generateIndex: true,
+        outputDir: dir,
+        prettyPrint: false,
+      });
+      await generator.generateAll([githubToolkit, slackToolkit]);
+
+      const toolkitPath = join(dir, "github.json");
+      const legacyToolkit = JSON.parse(
+        await readFile(toolkitPath, "utf-8")
+      ) as Record<string, unknown>;
+      const chunks = legacyToolkit.documentationChunks as Record<
+        string,
+        unknown
+      >[];
+      if (Array.isArray(chunks) && chunks[0]) {
+        chunks[0].type = "legacy_note";
+        chunks[0].location = "overview";
+      }
+      legacyToolkit.subPages = [{ slug: "advanced" }];
+      await writeFile(
+        toolkitPath,
+        JSON.stringify(legacyToolkit, null, 2),
+        "utf-8"
+      );
+
+      const rebuildResult = await generator.rebuildIndexFromOutput();
+
+      expect(rebuildResult.readErrors).toHaveLength(0);
+      expect(rebuildResult.readWarnings).toHaveLength(1);
+      expect(rebuildResult.readWarnings[0]).toContain(
+        "Loaded github.json with fallback parser"
+      );
+    });
+  });
+});
+
+describe("JsonGenerator toolkit file paths", () => {
+  it("rejects toolkit IDs that escape the output directory", async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const escapeName = `${basename(dir)}-escape`;
+      const escapePath = join(dir, "..", `${escapeName}.json`);
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      try {
+        await expect(
+          generator.generateToolkitFile({
+            ...toolkit,
+            id: `../${escapeName}`,
+          })
+        ).rejects.toThrow("Unsafe toolkit ID");
+        await expect(readFile(escapePath, "utf-8")).rejects.toThrow();
+      } finally {
+        await rm(escapePath, { force: true });
+      }
+    });
+  });
+
+  it('reserves "index" for the generated index file', async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      await expect(
+        generator.generateToolkitFile({ ...toolkit, id: "INDEX" })
+      ).rejects.toThrow("reserved toolkit ID");
+      await expect(
+        readFile(join(dir, "index.json"), "utf-8")
+      ).rejects.toThrow();
+    });
+  });
+
+  it("rejects case-insensitive toolkit ID collisions before writing", async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      const result = await generator.generateAll([
+        toolkit,
+        { ...toolkit, id: toolkit.id.toUpperCase() },
+      ]);
+
+      expect(result.filesWritten).toEqual([]);
+      expect(result.errors).toEqual([
+        `Toolkit IDs collide on github.json: ${toolkit.id}, ${toolkit.id.toUpperCase()}`,
+      ]);
+      await expect(
+        readFile(join(dir, "github.json"), "utf-8")
+      ).rejects.toThrow();
+      await expect(
+        readFile(join(dir, "index.json"), "utf-8")
+      ).rejects.toThrow();
+    });
+  });
+
+  it("rejects case-insensitive toolkit ID collisions during incremental writes", async () => {
+    await withTempDir(async (dir) => {
+      const toolkit = await loadFixture("github-toolkit.json");
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      await generator.generateToolkitFile(toolkit);
+
+      await expect(
+        generator.generateToolkitFile({
+          ...toolkit,
+          id: toolkit.id.toUpperCase(),
+        })
+      ).rejects.toThrow("Toolkit IDs collide on github.json");
+    });
+  });
+
+  it("sorts index entries by normalized toolkit ID", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({ outputDir: dir });
+
+      await generator.generateAll([slackToolkit, githubToolkit]);
+
+      const index = JSON.parse(
+        await readFile(join(dir, "index.json"), "utf-8")
+      ) as { toolkits: Array<{ id: string }> };
+      expect(index.toolkits.map(({ id }) => id)).toEqual(["Github", "Slack"]);
+    });
+  });
+});

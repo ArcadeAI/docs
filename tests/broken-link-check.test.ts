@@ -1,0 +1,294 @@
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { scanURLs, validateFiles } from "next-validate-link";
+import { expect, test } from "vitest";
+import {
+  INTEGRATION_CATEGORIES,
+  normalizeToolkitId,
+} from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import {
+  contentFileToUrl,
+  listContentFiles,
+  resolveContentFile,
+  toContentRelativePath,
+} from "./helpers/content-paths";
+
+const TIMEOUT = 30_000;
+
+const staticFiles = ["/llms.txt", "/robots.txt", "/sitemap.xml"];
+
+const toolkitDataDir = join(
+  process.cwd(),
+  "toolkit-docs-generator",
+  "data",
+  "toolkits"
+);
+const normalizeToolkitSlug = (value: string): string =>
+  normalizeToolkitId(value);
+
+function getDocsLinkSlug(docsLink?: string | null): string | null {
+  if (!docsLink) {
+    return null;
+  }
+
+  try {
+    const url = new URL(docsLink);
+    const segments = url.pathname.split("/").filter(Boolean);
+    return segments.at(-1) ?? null;
+  } catch {
+    const segments = docsLink.split("/").filter(Boolean);
+    return segments.at(-1) ?? null;
+  }
+}
+
+interface ToolkitMetadataFile {
+  id?: string;
+  metadata?: { docsLink?: string };
+}
+
+function readToolkitMetadataFile(filePath: string): ToolkitMetadataFile | null {
+  try {
+    const content = readFileSync(filePath, "utf-8");
+    return JSON.parse(content) as ToolkitMetadataFile;
+  } catch {
+    return null;
+  }
+}
+
+function resolveToolkitDataPath(slug: string): string | null {
+  const normalizedSlug = normalizeToolkitSlug(slug);
+  const directPath = join(toolkitDataDir, `${normalizedSlug}.json`);
+  if (existsSync(directPath)) {
+    return directPath;
+  }
+
+  const entries = readdirSync(toolkitDataDir);
+  for (const entry of entries) {
+    if (!entry.endsWith(".json") || entry === "index.json") {
+      continue;
+    }
+
+    const filePath = join(toolkitDataDir, entry);
+    const parsed = readToolkitMetadataFile(filePath);
+    if (!parsed?.id) {
+      continue;
+    }
+
+    const docsSlug = getDocsLinkSlug(parsed.metadata?.docsLink);
+    const candidateSlug = docsSlug ?? normalizeToolkitSlug(parsed.id);
+    if (candidateSlug.toLowerCase() === slug.toLowerCase()) {
+      return filePath;
+    }
+  }
+
+  return null;
+}
+
+// Function to validate anchor fragments by checking file content
+function validateAnchorFragment(filePath: string, fragment: string): boolean {
+  try {
+    const content = readFileSync(filePath, "utf-8");
+
+    // Generate possible anchor IDs from headings
+    const headingRegex = /^#{1,6}\s+(.+)$/gm;
+    const headings: string[] = [];
+    let match: RegExpExecArray | null;
+
+    match = headingRegex.exec(content);
+    while (match !== null) {
+      const headingText = match[1].trim();
+      // Convert heading to anchor ID (lowercase, spaces to hyphens, remove special chars)
+      const anchorId = headingText
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, "") // Remove special characters except hyphens and spaces
+        .replace(/\s+/g, "-") // Replace spaces with hyphens
+        .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+        .replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
+
+      headings.push(anchorId);
+      match = headingRegex.exec(content);
+    }
+
+    return headings.includes(fragment.toLowerCase());
+  } catch {
+    // If we can't read the file, assume the fragment is invalid
+    return false;
+  }
+}
+
+function toToolAnchorId(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, "-").replace(".", "");
+}
+
+const SUPPORTED_LOCALES = ["en", "es", "pt-BR"] as const;
+
+function validateToolkitIntegrationRoute(
+  urlPath: string,
+  fragment?: string
+): boolean {
+  // urlPath can be:
+  // - /resources/integrations/<category>/<toolkitSlug>
+  // - /en/resources/integrations/<category>/<toolkitSlug>
+  // (toolkitSlug can be docs slugs like github-api or normalized ids like githubapi)
+  const parts = urlPath.split("/").filter(Boolean);
+
+  let cursor = 0;
+  const maybeLocale = parts[cursor];
+  if (
+    maybeLocale &&
+    (SUPPORTED_LOCALES as readonly string[]).includes(maybeLocale)
+  ) {
+    cursor += 1;
+  }
+
+  if (parts[cursor] !== "resources" || parts[cursor + 1] !== "integrations") {
+    return false;
+  }
+
+  const category = parts[cursor + 2];
+  const slug = parts[cursor + 3];
+  if (!(category && slug)) {
+    return false;
+  }
+
+  if (!(INTEGRATION_CATEGORIES as readonly string[]).includes(category)) {
+    return false;
+  }
+
+  const jsonPath = resolveToolkitDataPath(slug);
+  if (!jsonPath) {
+    return false;
+  }
+
+  if (!fragment) {
+    return true;
+  }
+
+  const normalized = fragment.toLowerCase();
+  if (normalized === "available-tools" || normalized === "get-building") {
+    return true;
+  }
+
+  try {
+    const content = readFileSync(jsonPath, "utf-8");
+    const toolkit = JSON.parse(content) as {
+      tools?: Array<{ qualifiedName: string }>;
+    };
+    const anchors = new Set<string>();
+    for (const tool of toolkit.tools ?? []) {
+      anchors.add(toToolAnchorId(tool.qualifiedName));
+    }
+    return anchors.has(normalized);
+  } catch {
+    return false;
+  }
+}
+
+test(
+  "check for broken links",
+  async () => {
+    // Every MDX file under content/docs is served by the optional catch-all
+    // route app/en/[[...slug]]/page.tsx. next-validate-link only sees that
+    // route file, so populate the `slug` param with each content page's URL
+    // segments (content/docs/a/b.mdx and content/docs/a/b/index.mdx both map
+    // to /en/a/b; content/docs/index.mdx maps to /en).
+    const contentFiles = await listContentFiles();
+    const slugValues = contentFiles.map((file) => ({
+      value: toContentRelativePath(contentFileToUrl(file))
+        .split("/")
+        .filter(Boolean),
+    }));
+
+    const scanned = await scanURLs({
+      populate: {
+        "en/[[...slug]]": slugValues,
+      },
+      preset: "next",
+    });
+
+    // Create a whitelist function that allows URLs without locale prefixes
+    // if they exist with the default locale prefix
+    const whitelist = (url: string): boolean => {
+      // If the URL starts with a locale, it's already handled by the scanner
+      if (
+        url.startsWith("/en/") ||
+        url.startsWith("/es/") ||
+        url.startsWith("/pt-BR/")
+      ) {
+        // Special-case dynamic toolkit preview routes (not enumerated by scanURLs).
+        const [path, fragment] = url.split("#");
+        if (path.startsWith("/en/resources/integrations/")) {
+          return validateToolkitIntegrationRoute(path, fragment);
+        }
+        if (path.startsWith("/es/resources/integrations/")) {
+          return validateToolkitIntegrationRoute(path, fragment);
+        }
+        if (path.startsWith("/pt-BR/resources/integrations/")) {
+          return validateToolkitIntegrationRoute(path, fragment);
+        }
+
+        return false; // Let the normal validation handle these
+      }
+
+      // Since we've updated all the links, we shouldn't need redirects anymore
+      // If we find any links that still need redirects, they should be updated in the source files
+
+      // For URLs without locale prefix, check if they exist with /en/ prefix
+      if (url.startsWith("/")) {
+        // Split URL and anchor fragment
+        const [path, fragment] = url.split("#");
+
+        // Special-case dynamic toolkit integration routes (not enumerated by scanURLs).
+        if (path.startsWith("/resources/integrations/")) {
+          return validateToolkitIntegrationRoute(path, fragment);
+        }
+
+        const localeUrl = `/en${path}`;
+
+        if (staticFiles.includes(path)) {
+          return true;
+        }
+
+        // Check if the base path exists with locale prefix
+        const baseExists = scanned.urls.has(localeUrl);
+
+        if (!baseExists) {
+          return false;
+        }
+
+        // If there's a fragment, validate it by checking the actual file content
+        if (fragment) {
+          const filePath = resolveContentFile(path);
+          return (
+            filePath !== null && validateAnchorFragment(filePath, fragment)
+          );
+        }
+
+        // If no fragment, the base path exists so it's valid
+        return true;
+      }
+
+      return false;
+    };
+
+    // Pass each page's own URL so relative links (`./sibling`) resolve
+    // against the page, not against the file system path.
+    const files = contentFiles.map((file) => ({
+      content: readFileSync(file, "utf-8"),
+      path: file,
+      url: contentFileToUrl(file),
+    }));
+
+    const found = await validateFiles(files, {
+      scanned,
+      whitelist,
+    });
+
+    for (const error of found) {
+      console.error(`Broken link: ${JSON.stringify(error)}`);
+    }
+
+    expect(found.length).toBe(0);
+  },
+  TIMEOUT
+);

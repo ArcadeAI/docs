@@ -1,0 +1,163 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true
+  },
+
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "nursery": {
+        "useSortedClasses": "off"
+      },
+      "suspicious": {
+        "noUnknownAtRules": "off"
+      },
+      "performance": {
+        "noImgElement": "off"
+      }
+    },
+    "domains": {
+      "next": "recommended",
+      "react": "recommended"
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["app/cheat-sheet-print.css"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDescendingSpecificity": "off"
+          }
+        }
+      }
+    },
+    {
+      // CLI scripts serialize API calls on purpose (rate limits, interactive
+      // prompts, ordered git operations); the external URL check retries one
+      // URL with backoff. Promise.all would change that behavior.
+      "includes": [
+        "scripts/*.ts",
+        "scripts/lib/**",
+        "tests/external-url-check.test.ts"
+      ],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noAwaitInLoops": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noMagicNumbers": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["components/toolkit-docs/**"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "warn"
+          },
+          "performance": {
+            "noBarrelFile": "off"
+          },
+          "style": {
+            "noMagicNumbers": "off",
+            "useFilenamingConvention": "off"
+          }
+        }
+      }
+    },
+    {
+      // The generator serializes its loops on purpose: rate-limited LLM calls,
+      // ordered file reads/writes that later steps depend on, paginated API
+      // fetches, and retry/backoff. Promise.all would change that behavior.
+      "includes": ["toolkit-docs-generator/**/*"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noAwaitInLoops": "off",
+            "noBarrelFile": "off",
+            "noAccumulatingSpread": "off",
+            "useTopLevelRegex": "off"
+          },
+          "suspicious": {
+            "useGuardForIn": "off",
+            "useAwait": "off",
+            "noConsole": "off",
+            "noExplicitAny": "warn",
+            "noShadow": "off"
+          },
+          "style": {
+            "noMagicNumbers": "off",
+            "noParameterProperties": "off",
+            "useConsistentMemberAccessibility": "off",
+            "useConsistentTypeDefinitions": "off",
+            "noNestedTernary": "off",
+            "useCollapsedIf": "off",
+            "useDefaultSwitchClause": "off",
+            "useBlockStatements": "off",
+            "useNodejsImportProtocol": "off",
+            "noIncrementDecrement": "off"
+          },
+          "nursery": {},
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "warn",
+            "useMaxParams": "off"
+          }
+        }
+      }
+    }
+  ],
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "extends": [
+    "ultracite/biome/core",
+    "ultracite/biome/react",
+    "ultracite/biome/next"
+  ],
+  "files": {
+    "ignoreUnknown": false,
+    "maxSize": 10485760,
+    "includes": [
+      "!dist",
+      "!build",
+      "!node_modules",
+      "!public",
+      "!toolkit-docs-generator/data/toolkits",
+      "!toolkit-docs-generator/curation",
+      "!scripts/migration",
+      "!agents",
+      "!.vscode",
+      "!.vscode/launch.json",
+      "!.next",
+      "!.source",
+      "!extract-custom-sections",
+      "!custom-sections-transformer",
+      "!examples",
+      "!app/global.css"
+    ]
+  }
+}

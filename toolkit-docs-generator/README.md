@@ -1,0 +1,312 @@
+# Generate toolkit docs
+
+This guide explains how Arcade generates toolkit JSON, how the GitHub workflow runs, and how the docs site renders the output. Use this file as the single source of truth for toolkit generation in this repository.
+
+## What gets generated
+
+- `toolkit-docs-generator/data/toolkits/<toolkit>.json` for each toolkit
+- `toolkit-docs-generator/data/toolkits/index.json` with category, type, version, and counts
+- Run logs under `toolkit-docs-generator-verification/logs` by default
+- Use `--log-dir` to change the log location
+
+## Data sources
+
+The generator merges two inputs into one JSON output per toolkit:
+
+- **Public tool catalog** on the experience API for tool definitions, auth
+  requirements, scopes, and toolkit branding (category, label, icon, docs link,
+  pro/BYOC flags) in a single anonymous read
+- **Custom sections file** (optional) for preserved or curated docs content
+
+It also reads the previous output when you use `--skip-unchanged` or `--previous-output`.
+
+The catalog lives at `https://experience.arcade.dev/api` by default; override it
+with `--api-url` or `PUBLIC_CATALOG_URL`. The generator fetches one
+complete snapshot from `public/tool_catalog` and `public/tools`, then reuses it
+for change detection, progress calculation, and generation so a run cannot
+compare different API states. Only changed toolkits are regenerated.
+
+The design-system package (`@arcadeai/design-system`) is only consulted by the
+deprecated engine sources. When the experience API cannot reach the design
+system it returns `metadata: null` for a toolkit, and the merger falls back to
+default branding and flags the toolkit; `--require-complete` turns that into a
+hard failure instead.
+
+## GitHub workflow: generate and sync
+
+The workflow file is `/.github/workflows/generate-toolkit-docs.yml`.
+It runs these steps:
+
+1. Type-check and test the toolkit docs generator.
+2. Generate toolkit JSON using `toolkit-docs-generator` and the public tool catalog.
+3. Sync sidebar navigation from `toolkit-docs-generator/data/toolkits` to the category `meta.json` files.
+4. Create or update a pull request if there are changes.
+
+Required secrets:
+
+- `ANTHROPIC_API_KEY` for examples, summaries, and secret-coherence edits
+
+Optional secrets:
+
+- `PUBLIC_CATALOG_URL` (defaults to `https://experience.arcade.dev/api`; set it
+  to point a run at staging or a local BFF)
+- `ANTHROPIC_MODEL` (defaults to `claude-sonnet-4-6` in the workflow)
+- `ANTHROPIC_EDITOR_MODEL` (defaults to `claude-sonnet-4-6` in the workflow)
+
+## Rendering pipeline (docs site)
+
+The docs site consumes the generated JSON directly:
+
+- `lib/toolkit-data.ts` reads `toolkit-docs-generator/data/toolkits/<toolkit>.json`.
+- `lib/toolkit-static-params.ts` builds routes from `index.json` and the design system catalog.
+- `components/toolkit-docs` renders the toolkit page using `metadata.iconUrl`, `metadata.type`, and auth fields.
+- `lib/toolkit-route.tsx` serves every `/en/resources/integrations/<category>/<toolkit>` page from the JSON when no MDX page matches (the docs catch-all route falls back to it).
+- `content/docs/resources/integrations/<category>/meta.json` controls sidebar navigation for each category (Fumadocs folder meta).
+
+## Sidebar sync step (required for navigation)
+
+`toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts` keeps sidebar navigation aligned with generated JSON:
+
+- Reads `toolkit-docs-generator/data/toolkits` for available toolkits.
+- Uses the design system for category and label, with JSON label fallback.
+- Groups toolkits by category and writes a Fumadocs `meta.json` per category.
+- Uses a fixed category order and alphabetical label order within each nav group.
+- Splits `optimized` vs `starter` using `metadata.type` (or an `*Api` fallback).
+- Does not prune categories unless you pass `--prune` (not used in the workflow).
+
+This step does not change JSON output. It only updates navigation files.
+
+## Secret coherence (stale-reference cleanup + coverage check)
+
+When a toolkit loses a secret upstream (typically because the tool that required it was removed), the rendered docs can keep mentioning it in the summary and in hand-authored documentation chunks. Symmetrically, a toolkit can end up with current secrets the summary never names, or name them without any link to the Arcade config docs.
+
+The generator runs two checks after summary generation, in [`src/merger/secret-coherence.ts`](src/merger/secret-coherence.ts) and [`src/llm/secret-edit-generator.ts`](src/llm/secret-edit-generator.ts):
+
+1. **Stale-reference scan** (deterministic): diffs current vs previous toolkit secret sets and searches the summary, every toolkit-level `documentationChunks` entry, and every per-tool chunk for any removed secret name. Exact substring match — secret names are distinctive ALLCAPS_WITH_UNDER.
+2. **Coverage-gap scan** (deterministic): flags any current secret that is not mentioned in the summary and any summary that lacks a link to the Arcade secret config docs.
+
+If an LLM editor is configured (`--llm-editor-provider` / `--llm-editor-model` / `--llm-editor-api-key`), both classes of issue are auto-fixed:
+
+- Stale references are removed with a **minimum-necessary edit** prompt — whole sentences, bullets, or table rows that exist only to describe the removed secret are deleted; sentences that mention the removed secret alongside other content are minimally rewritten; nothing else is touched. This is intentionally different from the summary generator, which rewrites from scratch and tends to oversimplify.
+- Missing secrets get appended to the summary's `**Secrets**` section with as much detail as the secret actually needs — a short URL override may be one line; a scoped API key typically needs several sentences describing the provider dashboard page, required scopes or permissions, and account-tier constraints, plus an inline link to the provider's own documentation for how to create it. The prompt explicitly forbids inventing docs URLs.
+- Missing Arcade-config links are added at the end of the `**Secrets**` section.
+- The editor is instructed to preserve surrounding content verbatim (no re-summarization, no reorder).
+
+When the editor is not configured, the scanners still run and their findings land as non-fatal warnings in the run log. Editor exceptions are caught individually so a single LLM failure does not break the run.
+
+The default editor model is **Claude Sonnet 4.6** — chosen to avoid the oversimplification observed when bulk summaries were regenerated by `gpt-4o-mini`. Override with `--llm-editor-model` or the `LLM_EDITOR_MODEL` / `ANTHROPIC_EDITOR_MODEL` env var.
+
+### OAuth section in summaries
+
+The summary generator is configured to **never list OAuth scopes** in the generated overview. Each per-provider Arcade auth docs page (under `/en/references/auth-providers/<providerId>`) is the source of truth for scopes and configuration; the summary links to it instead of duplicating. This keeps the overview scannable and prevents drift when provider pages update their scope lists.
+
+### CLI flags
+
+- `--llm-editor-provider <openai|anthropic>` — editor provider. Falls back to `LLM_EDITOR_PROVIDER`.
+- `--llm-editor-model <model>` — editor model. Falls back to `LLM_EDITOR_MODEL` / `ANTHROPIC_EDITOR_MODEL`.
+- `--llm-editor-api-key <key>` — editor API key. Falls back to `LLM_EDITOR_API_KEY`, then `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` per provider.
+- `--llm-editor-base-url <url>` — override editor base URL.
+- `--llm-editor-temperature <number>` — editor temperature.
+- `--llm-editor-max-tokens <number>` — editor max output tokens (default `8192`).
+- `--llm-editor-max-retries <number>` — retry attempts on transient errors (default `3`).
+- `--skip-secret-coherence` — disable both the scan and the edit step entirely.
+
+### Local example (editor on)
+
+```bash
+bun src/cli/index.ts generate \
+  --providers "Github" \
+  --api-source public-catalog \
+  --llm-provider openai \
+  --llm-model gpt-4.1-mini \
+  --llm-api-key "$OPENAI_API_KEY" \
+  --llm-editor-provider anthropic \
+  --llm-editor-model claude-sonnet-4-6 \
+  --llm-editor-api-key "$ANTHROPIC_API_KEY" \
+  --output data/toolkits
+```
+
+## Architecture at a glance
+
+- **CLI**: `toolkit-docs-generator/src/cli/index.ts`
+- **Sources**: `src/sources` for the public catalog, mock data, and the deprecated engine APIs
+- **Merger**: `src/merger/data-merger.ts` merges tools, metadata, and custom sections
+- **Generator**: `src/generator/json-generator.ts` writes JSON and `index.json`
+- **Verifier**: `src/generator/output-verifier.ts` validates output and index consistency
+- **Rendering details**: `toolkit-docs-generator/RENDERING.md`
+
+## Local usage
+
+Run these commands from the `toolkit-docs-generator` directory with `bun`,
+which executes TypeScript directly (no `tsx` needed); the sidebar sync command
+below runs from the repo root instead.
+
+`--api-source public-catalog` is spelled out below because a bare run with no
+catalog or engine environment variables falls back to the mock fixtures.
+
+Generate a single toolkit:
+
+```bash
+bun src/cli/index.ts generate \
+  --providers "Github:1.0.0" \
+  --api-source public-catalog \
+  --llm-provider openai \
+  --llm-model gpt-4.1-mini \
+  --llm-api-key "$OPENAI_API_KEY" \
+  --output data/toolkits
+```
+
+Generate all toolkits:
+
+```bash
+bun src/cli/index.ts generate \
+  --all \
+  --skip-unchanged \
+  --api-source public-catalog \
+  --llm-provider openai \
+  --llm-model gpt-4.1-mini \
+  --llm-api-key "$OPENAI_API_KEY" \
+  --output data/toolkits
+```
+
+Generate without LLM output:
+
+```bash
+bun src/cli/index.ts generate \
+  --providers "Asana:0.1.3" \
+  --api-source public-catalog \
+  --skip-examples \
+  --skip-summary \
+  --output data/toolkits
+```
+
+Sync sidebar navigation locally:
+
+```bash
+bun toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
+```
+
+## Ignoring toolkits
+
+Pass `--ignore-file <path>` to skip specific toolkits during generation. Existing
+output files for ignored toolkits are left unchanged — nothing is deleted.
+
+A default empty template ships at `skip-toolkits.txt` in the generator root.
+Add one toolkit ID per line:
+
+```text
+# Toolkits to ignore during docs generation (skip-only, no file deletion)
+SomeInternalTool
+```
+
+```bash
+bun src/cli/index.ts generate --all \
+  --ignore-file ./skip-toolkits.txt
+```
+
+The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
+
+Works with both `generate` and `generate-all`. The ignore list is purely skip-only:
+no existing `.json` files are removed and `index.json` is not rebuilt for ignored
+toolkits.
+
+## Excluding toolkits
+
+Pass `--exclude-file <path>` to skip toolkits **and** delete their existing output
+files if they already exist.
+
+Create a plain-text file with one toolkit ID per line:
+
+```text
+# toolkits to exclude from docs generation
+Jira
+Confluence
+SomeInternalTool
+```
+
+The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
+
+```bash
+bun src/cli/index.ts generate --all \
+  --exclude-file ./remove-toolkits.txt
+```
+
+If a toolkit in the file already has an output `.json` file, the generator
+deletes it and rebuilds `index.json`.
+
+## Key CLI options
+
+- `--all` generate all toolkits
+- `--providers` generate a subset of toolkits
+- `--skip-unchanged` only write changed toolkits
+- `--api-source` select `public-catalog` or `mock`. Auto-detects
+  `public-catalog` when `PUBLIC_CATALOG_URL` is set, and `mock` otherwise
+- `--api-url` public catalog base URL including path prefix
+  (default `https://experience.arcade.dev/api`, or `PUBLIC_CATALOG_URL`)
+- `--previous-output` compare against a previous output directory
+- `--custom-sections` load an authoritative Markdown/MDX curation directory
+- `--skip-examples`, `--skip-summary` disable LLM steps
+- `--skip-secret-coherence` disable the stale-reference scan + coverage fill (see the Secret coherence section)
+- `--llm-editor-provider`, `--llm-editor-model`, `--llm-editor-api-key` configure the secret-coherence editor (Sonnet 4.6 by default)
+- `--no-verify-output` skip output verification
+
+## Authored curation
+
+Store authored content below `curation/<toolkit>/`. Put injectable sections in
+`chunks/*.mdx`, import declarations in `imports/*.mdx`, and rich subpages in
+`pages/**/*.mdx`. Each file begins with YAML frontmatter for structured placement
+metadata; its body is the Markdown or MDX that readers see. Import files use
+`type: import` and contain one ESM import declaration.
+
+When `--custom-sections` is set, the directory is authoritative for every
+toolkit. Removing the final curation file for a toolkit clears that toolkit's
+authored prose on the next generation run. Invalid frontmatter, invalid MDX,
+unknown tool targets, symlinks, unsafe subpage paths, and leftover JSON curation
+fail generation instead of silently falling back to stale generated content.
+
+**[CURATION.md](CURATION.md) is the format reference**: every frontmatter key,
+which `location` and `position` combinations actually render, and the full list
+of failure messages. Before writing a curation file, check your work with:
+
+```bash
+bun src/cli/index.ts validate-curation --toolkit GoogleFlights
+```
+
+That compiles the directory with the same code generation uses and needs no
+credentials. Omit `--toolkit` to check everything.
+
+## Run alerts
+
+The nightly workflow posts to Slack when a toolkit fails and the run recovers
+from it. Two outcomes, and the difference matters:
+
+- **Missing entirely**: the toolkit failed and had no previous artifact to fall
+  back on, so it has no page on the docs site at all.
+- **Still serving the previous docs**: the toolkit failed but still publishes
+  its last good output, so readers see yesterday's page.
+
+Each entry names the reason and the fix. Every run attaches the full report as
+its `failed-tools` artifact. Build the message locally against any report with
+`bun src/cli/index.ts alert --report <file>`. It prints nothing when a
+run has nothing to report.
+
+No red run stays quiet. Three messages can arrive, and they answer different
+questions:
+
+| Message | Means | Who acts |
+| --- | --- | --- |
+| Toolkits missing or stale | Generation recovered from a per-toolkit failure | Follow the fix named in the entry |
+| Toolkit docs generation failed | The generate step itself broke | Open the run for the path and validation error |
+| Generated, but workflow failed afterward | Generation was fine, a later step broke | Open the run to determine whether sidebar sync, PR creation, artifact upload, or Slack notification needs attention |
+
+The first is reported from inside the generate job, gated on the generate step
+rather than on the steps after it, so a broken sidebar sync or PR creation does
+not hide missing pages. The other two come from the alert job. A run that both
+recovers from a toolkit failure and then fails to publish sends the first
+message and the third, because those are two separate things to fix.
+
+## Troubleshooting
+
+- **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
+- **Missing metadata**: when the catalog returns `metadata: null` for a toolkit the merger substitutes defaults and warns. Re-run once the experience API's design-system read recovers, or use `--require-complete` to fail instead of publishing defaults.
+- **Verify output fails**: run `bun src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.

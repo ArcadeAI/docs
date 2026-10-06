@@ -1,21 +1,43 @@
 {
   "name": "arcade-docs",
   "version": "0.1.0",
-  "description": "Arcade Documentation (Fumadocs)",
-  "type": "module",
   "private": true,
+  "description": "Arcade Documentation (Fumadocs)",
+  "license": "MIT",
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "check-meta": "bun scripts/check-meta-keys.ts",
+    "check-redirects": "bun scripts/check-redirects.ts",
+    "dev": "next dev",
+    "format": "bunx ultracite fix",
     "postinstall": "fumadocs-mdx",
     "lint": "bunx ultracite check",
-    "format": "bunx ultracite fix",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest --run",
-    "test:watch": "vitest --watch"
+    "llmstxt": "bun scripts/generate-llmstxt.ts",
+    "metadata-report": "bun toolkit-docs-generator/scripts/report-tool-metadata.ts",
+    "migrate:content": "bun scripts/migration/migrate-content.ts",
+    "prepare": "husky",
+    "start": "next start",
+    "sync-crawler-config": "bun scripts/sync-crawler-config.ts",
+    "sync-toolkit-sidebar": "bun toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts",
+    "test": "bunx vitest --run",
+    "test:external-urls": "bunx vitest run --config vitest.external-urls.config.ts",
+    "test:watch": "bunx vitest --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p scripts/tsconfig.json --noEmit && tsc -p toolkit-docs-generator/tsconfig.json --noEmit",
+    "update-links": "bun scripts/update-internal-links.ts",
+    "vale": "vale",
+    "vale:check": "vale content/docs/",
+    "vale:editorial": "bun scripts/vale-editorial.ts",
+    "vale:fix": "bun scripts/vale-fix.ts",
+    "vale:review": "bun scripts/vale-style-review.ts",
+    "vale:sync": "vale sync",
+    "verify:content": "bun scripts/migration/verify-content.ts"
   },
-  "license": "MIT",
+  "lint-staged": {
+    "!(examples)/**/*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
+      "bunx ultracite fix"
+    ]
+  },
   "dependencies": {
     "@arcadeai/design-system": "7.9.9",
     "@arcadeai/ui-kit": "0.21.0",
@@ -29,8 +51,10 @@
     "fumadocs-mdx": "15.4.6",
     "fumadocs-ui": "16.15.18",
     "lucide-react": "1.51.0",
+    "mermaid": "12.1.0",
     "motion": "14.0.0",
     "next": "16.3.8",
+    "next-themes": "0.4.6",
     "posthog-js": "1.435.8",
     "posthog-node": "5.55.0",
     "react": "19.3.0",
@@ -69,14 +93,15 @@
     "mdast-util-to-string": "4.0.0",
     "next-validate-link": "1.6.7",
     "openai": "7.27.0",
+    "ora": "9.4.1",
     "postcss": "8.5.28",
     "tailwindcss": "4.3.3",
     "typescript": "7.0.2",
     "ultracite": "7.12.2",
     "vitest": "5.0.3"
   },
+  "packageManager": "bun@1.4.2",
   "engines": {
     "bun": ">=1.4.0"
-  },
-  "packageManager": "bun@1.4.2"
+  }
 }

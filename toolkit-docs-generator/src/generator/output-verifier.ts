@@ -1,0 +1,336 @@
+import { readdir, readFile } from "fs/promises";
+import { basename, join } from "path";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output";
+import type { MergedToolkit, ToolkitIndex } from "../types/index";
+import { MergedToolkitSchema, ToolkitIndexSchema } from "../types/index";
+
+export interface OutputVerificationResult {
+  errors: string[];
+  valid: boolean;
+  warnings: string[];
+}
+
+export interface ToolkitReadResult {
+  errors: string[];
+  toolkits: MergedToolkit[];
+  warnings: string[];
+}
+
+export interface VerificationProgress {
+  current: number;
+  fileName?: string;
+  phase: "reading" | "validating" | "cross-referencing";
+  total: number;
+}
+
+export type VerificationProgressCallback = (
+  progress: VerificationProgress
+) => void;
+
+export interface ReadToolkitsOptions {
+  allowLegacyFallback?: boolean;
+}
+
+export interface VerifyOutputOptions {
+  allowLegacyFallback?: boolean;
+}
+
+const isToolkitFile = (fileName: string): boolean =>
+  fileName.endsWith(".json") && fileName !== "index.json";
+
+const normalizeToolkitKey = (toolkitId: string): string =>
+  toolkitId.toLowerCase();
+
+type ReadToolkitFileResult = {
+  toolkit: MergedToolkit | null;
+  error?: string;
+  warning?: string;
+};
+
+const readToolkitFile = async (
+  filePath: string,
+  allowLegacyFallback: boolean
+): Promise<ReadToolkitFileResult> => {
+  const fileName = basename(filePath);
+  let content: string;
+  try {
+    content = await readFile(filePath, "utf-8");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      error: `Failed to read ${fileName}: ${message}`,
+      toolkit: null,
+    };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content) as unknown;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      error: `Invalid JSON in ${fileName}: ${message}`,
+      toolkit: null,
+    };
+  }
+
+  const result = MergedToolkitSchema.safeParse(parsed);
+  if (result.success) {
+    return { toolkit: result.data };
+  }
+
+  if (allowLegacyFallback) {
+    const fallback = parsePreviousToolkitForDiff(
+      parsed,
+      basename(fileName, ".json")
+    );
+    if (fallback.toolkit) {
+      return {
+        toolkit: fallback.toolkit,
+        warning: `Loaded ${fileName} with fallback parser (${fallback.reason ?? "schema mismatch"}).`,
+      };
+    }
+  }
+
+  return {
+    error: `Invalid toolkit schema in ${fileName}: ${result.error.message}`,
+    toolkit: null,
+  };
+};
+
+export const readToolkitsFromDir = async (
+  dir: string,
+  onProgress?: VerificationProgressCallback,
+  options: ReadToolkitsOptions = {}
+): Promise<ToolkitReadResult> => {
+  const toolkits: MergedToolkit[] = [];
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const allowLegacyFallback = options.allowLegacyFallback ?? false;
+
+  let entries: string[] = [];
+  try {
+    entries = await readdir(dir);
+  } catch (error) {
+    return {
+      errors: [`Failed to read output directory: ${error}`],
+      toolkits: [],
+      warnings: [],
+    };
+  }
+
+  const jsonFiles = entries.filter(isToolkitFile);
+  const total = jsonFiles.length;
+
+  for (let i = 0; i < jsonFiles.length; i++) {
+    const fileName = jsonFiles[i];
+    if (!fileName) continue;
+
+    onProgress?.({
+      current: i + 1,
+      fileName,
+      phase: "reading",
+      total,
+    });
+
+    const filePath = join(dir, fileName);
+    const result = await readToolkitFile(filePath, allowLegacyFallback);
+    if (!result.toolkit) {
+      errors.push(result.error ?? `Invalid toolkit JSON: ${fileName}`);
+      continue;
+    }
+    if (result.warning) {
+      warnings.push(result.warning);
+    }
+    toolkits.push(result.toolkit);
+  }
+
+  return { errors, toolkits, warnings };
+};
+
+const readIndexFile = async (dir: string): Promise<ToolkitIndex | null> => {
+  const indexPath = join(dir, "index.json");
+  try {
+    const content = await readFile(indexPath, "utf-8");
+    const parsed = JSON.parse(content) as unknown;
+    const result = ToolkitIndexSchema.safeParse(parsed);
+    if (!result.success) {
+      return null;
+    }
+    return result.data;
+  } catch {
+    return null;
+  }
+};
+
+const buildToolkitMap = (
+  toolkits: MergedToolkit[]
+): Map<string, MergedToolkit> => {
+  const toolkitById = new Map<string, MergedToolkit>();
+  for (const toolkit of toolkits) {
+    const key = normalizeToolkitKey(toolkit.id);
+    toolkitById.set(key, toolkit);
+  }
+  return toolkitById;
+};
+
+const reportProgress = (
+  onProgress: VerificationProgressCallback | undefined,
+  progress: VerificationProgress
+): void => {
+  onProgress?.(progress);
+};
+
+const validateIndexEntry = (
+  toolkit: MergedToolkit,
+  indexEntry: ToolkitIndex["toolkits"][number]
+): string[] => {
+  const errors: string[] = [];
+  if (indexEntry.version !== toolkit.version) {
+    errors.push(
+      `index.json version mismatch for ${toolkit.id}: ${indexEntry.version} vs ${toolkit.version}`
+    );
+  }
+  if (indexEntry.category !== toolkit.metadata.category) {
+    errors.push(
+      `index.json category mismatch for ${toolkit.id}: ${indexEntry.category} vs ${toolkit.metadata.category}`
+    );
+  }
+  if (indexEntry.type !== toolkit.metadata.type) {
+    errors.push(
+      `index.json type mismatch for ${toolkit.id}: ${indexEntry.type} vs ${toolkit.metadata.type}`
+    );
+  }
+  if (indexEntry.toolCount !== toolkit.tools.length) {
+    errors.push(
+      `index.json toolCount mismatch for ${toolkit.id}: ${indexEntry.toolCount} vs ${toolkit.tools.length}`
+    );
+  }
+  const authType = toolkit.auth?.type ?? "none";
+  if (indexEntry.authType !== authType) {
+    errors.push(
+      `index.json authType mismatch for ${toolkit.id}: ${indexEntry.authType} vs ${authType}`
+    );
+  }
+  return errors;
+};
+
+const validateIndex = async (
+  dir: string,
+  toolkitById: Map<string, MergedToolkit>,
+  onProgress?: VerificationProgressCallback
+): Promise<string[]> => {
+  const errors: string[] = [];
+
+  reportProgress(onProgress, {
+    current: 0,
+    fileName: "index.json",
+    phase: "validating",
+    total: 1,
+  });
+
+  const index = await readIndexFile(dir);
+  if (!index) {
+    errors.push("Missing or invalid index.json in output directory.");
+    return errors;
+  }
+
+  const indexIds = new Set(
+    index.toolkits.map((entry) => normalizeToolkitKey(entry.id))
+  );
+
+  const toolkitEntries = Array.from(toolkitById.entries());
+  const totalEntries = toolkitEntries.length;
+
+  for (let i = 0; i < toolkitEntries.length; i++) {
+    const entry = toolkitEntries[i];
+    if (!entry) {
+      continue;
+    }
+    const [toolkitId, toolkit] = entry;
+
+    reportProgress(onProgress, {
+      current: i + 1,
+      fileName: `${toolkit.id}.json`,
+      phase: "cross-referencing",
+      total: totalEntries,
+    });
+
+    if (!indexIds.has(toolkitId)) {
+      errors.push(`index.json missing toolkit entry: ${toolkit.id}`);
+      continue;
+    }
+
+    const indexEntry = index.toolkits.find(
+      (item) => normalizeToolkitKey(item.id) === toolkitId
+    );
+    if (!indexEntry) {
+      continue;
+    }
+
+    errors.push(...validateIndexEntry(toolkit, indexEntry));
+  }
+
+  for (const indexEntry of index.toolkits) {
+    const toolkitId = normalizeToolkitKey(indexEntry.id);
+    if (!toolkitById.has(toolkitId)) {
+      errors.push(`index.json entry has no matching file: ${indexEntry.id}`);
+    }
+  }
+
+  return errors;
+};
+
+const validateFileNames = async (
+  dir: string,
+  toolkitById: Map<string, MergedToolkit>
+): Promise<string[]> => {
+  const errors: string[] = [];
+  const fileNames = await readdir(dir).catch(() => []);
+  const jsonFiles = fileNames.filter(isToolkitFile);
+  for (const fileName of jsonFiles) {
+    const baseName = basename(fileName, ".json");
+    if (baseName !== baseName.toLowerCase()) {
+      errors.push(`File name must be lowercase: ${fileName}`);
+    }
+    const idFromFile = baseName.toLowerCase();
+    if (!toolkitById.has(idFromFile)) {
+      errors.push(`File name does not match toolkit id: ${fileName}`);
+    }
+  }
+  return errors;
+};
+
+export const verifyOutputDir = async (
+  dir: string,
+  onProgress?: VerificationProgressCallback,
+  options: VerifyOutputOptions = {}
+): Promise<OutputVerificationResult> => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const allowLegacyFallback = options.allowLegacyFallback ?? false;
+
+  const {
+    toolkits,
+    errors: toolkitErrors,
+    warnings: toolkitWarnings,
+  } = await readToolkitsFromDir(dir, onProgress, {
+    allowLegacyFallback,
+  });
+  errors.push(...toolkitErrors);
+  warnings.push(...toolkitWarnings);
+
+  if (toolkits.length === 0) {
+    errors.push("No toolkit JSON files found in output directory.");
+  }
+
+  const toolkitById = buildToolkitMap(toolkits);
+  errors.push(...(await validateIndex(dir, toolkitById, onProgress)));
+  errors.push(...(await validateFileNames(dir, toolkitById)));
+
+  return {
+    errors,
+    valid: errors.length === 0,
+    warnings,
+  };
+};

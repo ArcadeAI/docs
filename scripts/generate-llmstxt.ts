@@ -1,0 +1,887 @@
+import { execSync } from "node:child_process";
+import fs from "node:fs/promises";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import chalk from "chalk";
+import glob from "fast-glob";
+import OpenAI from "openai";
+import { getToolkitCanonicalPath } from "../lib/toolkit-static-params";
+import { resolveToolkitDataDir } from "../toolkit-docs-generator/src/shared/toolkit-data-dir";
+import type {
+  MergedToolkit,
+  MergedToolkitMetadata,
+} from "../toolkit-docs-generator/src/shared/toolkit-schemas";
+
+interface PageMetadata {
+  content: string;
+  path: string;
+  url: string;
+}
+
+interface Section {
+  name: string;
+  pages: Array<{
+    title: string;
+    url: string;
+    description: string;
+  }>;
+}
+
+interface LlmsTxtMetadata {
+  generationDate: string;
+  gitSha: string;
+}
+
+const BASE_URL = "https://docs.arcade.dev";
+const OUTPUT_PATH = path.join(process.cwd(), "public", "llms.txt");
+
+// Regex patterns used in path processing
+const CONTENT_ROOT = "content/docs";
+const CONTENT_PREFIX_REGEX = /^content\/docs\//;
+// `content/docs/a/b/index.mdx` and `content/docs/a/b.mdx` both map to /en/a/b.
+const INDEX_FILE_SUFFIX_REGEX = /(^|\/)index\.mdx$/;
+const MDX_SUFFIX_REGEX = /\.mdx$/;
+const TITLE_H1_REGEX = /^#\s+(.+)$/m;
+const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
+const FRONTMATTER_TITLE_REGEX = /^title:\s*(.+)$/m;
+const QUOTED_VALUE_REGEX = /^['"](.*)['"]$/;
+const EN_LOCALE_PREFIX_REGEX = /^en\//;
+const METADATA_REGEX =
+  /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
+const LINK_REGEX = /- \[([^\]]+)\]\(([^)]+)\):\s*(.+)$/gm;
+
+// Constants for content processing
+const MAX_CONTENT_LENGTH = 4000;
+const BATCH_DELAY_MS = 1000;
+const SHA_SHORT_LENGTH = 7;
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+/**
+ * Gets the current git SHA
+ */
+function getCurrentGitSha(): string {
+  try {
+    return execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
+  } catch (error) {
+    console.error(
+      chalk.red(
+        "✗ Could not get git SHA. Make sure you're in a git repository."
+      )
+    );
+    throw new Error("Failed to get git SHA", { cause: error });
+  }
+}
+
+/**
+ * Parses metadata from existing llms.txt file
+ */
+async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
+  try {
+    const content = await fs.readFile(OUTPUT_PATH, "utf-8");
+    const metadataMatch = content.match(METADATA_REGEX);
+    if (metadataMatch) {
+      return {
+        generationDate: metadataMatch[2],
+        gitSha: metadataMatch[1],
+      };
+    }
+  } catch {
+    // File doesn't exist or can't be read - that's okay
+  }
+  return null;
+}
+
+/**
+ * Gets changed files since the last git SHA
+ */
+function getChangedFilesSince(lastSha: string): Set<string> {
+  try {
+    // Get files that were added, modified, or deleted
+    const added = execSync(
+      `git diff --name-only --diff-filter=A ${lastSha} HEAD`,
+      {
+        encoding: "utf-8",
+      }
+    )
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
+    const modified = execSync(
+      `git diff --name-only --diff-filter=M ${lastSha} HEAD`,
+      { encoding: "utf-8" }
+    )
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
+    const deleted = execSync(
+      `git diff --name-only --diff-filter=D ${lastSha} HEAD`,
+      {
+        encoding: "utf-8",
+      }
+    )
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
+    const allChanged = new Set([...added, ...modified, ...deleted]);
+    return allChanged;
+  } catch {
+    console.warn(
+      chalk.yellow(
+        `⚠ Could not get changed files since ${lastSha}, processing all files`
+      )
+    );
+    return new Set();
+  }
+}
+
+/**
+ * Extracts existing page summaries from llms.txt
+ */
+async function extractExistingSummaries(): Promise<
+  Map<string, { title: string; description: string }>
+> {
+  const summaries = new Map<string, { title: string; description: string }>();
+  try {
+    const content = await fs.readFile(OUTPUT_PATH, "utf-8");
+    // Match markdown links with descriptions: - [title](url): description
+    for (const [, title, url, rawDescription] of content.matchAll(LINK_REGEX)) {
+      summaries.set(url, { description: rawDescription.trim(), title });
+    }
+  } catch {
+    // File doesn't exist or can't be read - that's okay
+  }
+  return summaries;
+}
+
+/**
+ * Discovers all pages in the documentation
+ */
+function discoverPages(): Promise<PageMetadata[]> {
+  console.log(chalk.blue("📄 Discovering pages from raw MDX..."));
+  return discoverMdxPages();
+}
+
+/**
+ * Converts a content file path to its public URL.
+ * e.g. content/docs/build/tools.mdx       -> https://docs.arcade.dev/en/build/tools
+ *      content/docs/build/tools/index.mdx -> https://docs.arcade.dev/en/build/tools
+ *      content/docs/index.mdx             -> https://docs.arcade.dev/en
+ */
+export function contentFileToUrl(filePath: string): string {
+  const relativePath = filePath
+    .replace(CONTENT_PREFIX_REGEX, "")
+    .replace(INDEX_FILE_SUFFIX_REGEX, "")
+    .replace(MDX_SUFFIX_REGEX, "");
+
+  return relativePath ? `${BASE_URL}/en/${relativePath}` : `${BASE_URL}/en`;
+}
+
+/**
+ * Discovers pages from raw MDX files under content/docs
+ */
+async function discoverMdxPages(): Promise<PageMetadata[]> {
+  const mdxFiles = glob.sync(`${CONTENT_ROOT}/**/*.mdx`, {
+    cwd: process.cwd(),
+    ignore: ["**/node_modules/**", "**/_*.mdx"],
+  });
+
+  const pages: PageMetadata[] = [];
+
+  for (const filePath of mdxFiles) {
+    const fullPath = path.join(process.cwd(), filePath);
+    const content = await fs.readFile(fullPath, "utf-8");
+
+    const url = contentFileToUrl(filePath);
+
+    pages.push({
+      content,
+      path: filePath,
+      url,
+    });
+  }
+
+  console.log(chalk.green(`✓ Found ${pages.length} pages (raw MDX)`));
+  return pages;
+}
+
+const TOOLKIT_DATA_DIR = resolveToolkitDataDir();
+const MAX_TOOLKIT_DESCRIPTION = 280;
+const MARKDOWN_LINK_REGEX = /\[([^\]]+)\]\([^)]+\)/g;
+const MARKDOWN_NOISE_REGEX = /[#*`>]/g;
+const WHITESPACE_REGEX = /\s+/g;
+
+/**
+ * This script only reads a handful of fields off each toolkit JSON file (it
+ * doesn't validate the whole document), so it declares the subset it needs
+ * as a `Pick` off the real generator schema types rather than re-describing
+ * the shape by hand.
+ */
+type ToolkitData = Partial<
+  Pick<MergedToolkit, "id" | "label" | "description" | "summary">
+> & {
+  tools?: unknown[];
+  metadata?: Partial<
+    Pick<
+      MergedToolkitMetadata,
+      "category" | "docsLink" | "isHidden" | "isComingSoon"
+    >
+  >;
+};
+
+/**
+ * Builds a concise, deterministic description for a toolkit from its own
+ * metadata (no OpenAI): its summary/description with markdown stripped, or a
+ * label + tool-count fallback.
+ */
+function buildToolkitDescription(data: ToolkitData): string {
+  const source = (data.summary || data.description || "").trim();
+  if (source) {
+    const cleaned = source
+      .replace(MARKDOWN_LINK_REGEX, "$1")
+      .replace(MARKDOWN_NOISE_REGEX, " ")
+      .replace(WHITESPACE_REGEX, " ")
+      .trim();
+    if (cleaned) {
+      if (cleaned.length <= MAX_TOOLKIT_DESCRIPTION) {
+        return cleaned;
+      }
+      const truncated = cleaned.slice(0, MAX_TOOLKIT_DESCRIPTION);
+      const lastSpace = truncated.lastIndexOf(" ");
+      const cut = lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated;
+      return `${cut.trim()}…`;
+    }
+  }
+  const label = data.label || data.id || "This";
+  const toolCount = Array.isArray(data.tools) ? data.tools.length : 0;
+  return toolCount > 0
+    ? `${label} MCP server documentation and its ${toolCount} Arcade tools.`
+    : `${label} MCP server documentation.`;
+}
+
+/**
+ * Discovers toolkit (integration) pages from generated toolkit data. These are
+ * dynamic routes, so the MDX glob can't find them; build them straight from the
+ * toolkit JSON, reusing the app's canonical path logic so URLs match the real
+ * pages. Descriptions are templated (no OpenAI call).
+ */
+async function discoverToolkitPages(): Promise<
+  Array<PageMetadata & { title: string; description: string }>
+> {
+  let entries: string[];
+  try {
+    entries = await fs.readdir(TOOLKIT_DATA_DIR);
+  } catch {
+    console.warn(chalk.yellow("⚠ No toolkit data dir; skipping toolkit pages"));
+    return [];
+  }
+
+  // Read index.json if present — it is the source of truth for which toolkit
+  // IDs the app pre-renders. Only process IDs listed there so llms.txt never
+  // links to routes that would 404 in the live app.
+  let allowedIds: Set<string> | null = null;
+  try {
+    const indexPath = path.join(TOOLKIT_DATA_DIR, "index.json");
+    const indexData = JSON.parse(await fs.readFile(indexPath, "utf-8")) as {
+      toolkits?: Array<{ id: string }>;
+    };
+    if (indexData.toolkits && indexData.toolkits.length > 0) {
+      allowedIds = new Set(indexData.toolkits.map((t) => t.id));
+    }
+  } catch {
+    // No index.json — fall back to scanning all JSON files.
+  }
+
+  // Use a Map keyed by canonical URL so that when two JSON files resolve to
+  // the same URL, the last one processed wins — matching the app's behaviour
+  // in listToolkitRoutes/listToolkitRoutesFromDataDir (Map.set overwrites).
+  const pagesByUrl = new Map<
+    string,
+    PageMetadata & { title: string; description: string }
+  >();
+
+  for (const entry of entries) {
+    if (!entry.endsWith(".json") || entry === "index.json") {
+      continue;
+    }
+    try {
+      const filePath = path.join(TOOLKIT_DATA_DIR, entry);
+      const data = JSON.parse(
+        await fs.readFile(filePath, "utf-8")
+      ) as ToolkitData;
+      if (!data.id || data.metadata?.isHidden || data.metadata?.isComingSoon) {
+        continue;
+      }
+      if (allowedIds && !allowedIds.has(data.id)) {
+        continue;
+      }
+      const url = `${BASE_URL}${getToolkitCanonicalPath({
+        category: data.metadata?.category,
+        docsLink: data.metadata?.docsLink,
+        id: data.id,
+      })}`;
+      pagesByUrl.set(url, {
+        content: "",
+        description: buildToolkitDescription(data),
+        path: path.relative(process.cwd(), filePath),
+        title: (data.label || data.id).trim(),
+        url,
+      });
+    } catch {
+      // Ignore malformed toolkit data files.
+    }
+  }
+
+  const pages = [...pagesByUrl.values()];
+  console.log(chalk.green(`✓ Found ${pages.length} toolkit pages`));
+  return pages;
+}
+
+/**
+ * Summarizes a page using OpenAI
+ */
+async function summarizePage(
+  page: PageMetadata
+): Promise<{ title: string; description: string }> {
+  try {
+    const title = extractPageTitle(page.content, page.path);
+
+    // Prepare content for summarization (remove code blocks and imports).
+    let contentForSummary = page.content.replace(
+      /```[\s\S]*?```/g,
+      "[code block]"
+    );
+    contentForSummary = contentForSummary.replace(
+      /import\s+.*from\s+['"].*['"]/g,
+      ""
+    );
+
+    contentForSummary = contentForSummary.slice(0, MAX_CONTENT_LENGTH);
+
+    const response = await openai.chat.completions.create({
+      max_tokens: 50,
+      messages: [
+        {
+          content:
+            "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn.",
+          role: "system",
+        },
+        {
+          content: `Summarize this documentation page:\n\nTitle: ${title}\n\nContent:\n${contentForSummary}`,
+          role: "user",
+        },
+      ],
+      model: "gpt-4o-mini",
+      temperature: 0.3,
+    });
+
+    const description =
+      response.choices[0]?.message?.content?.trim() || "Documentation page";
+
+    return { description, title };
+  } catch (error) {
+    console.error(chalk.red(`✗ Error summarizing ${page.path}:`), error);
+    return {
+      description: "Documentation page",
+      title: extractPageTitle(page.content, page.path),
+    };
+  }
+}
+
+/**
+ * Organizes pages into sections based on their path
+ */
+function organizeSections(
+  pages: Array<PageMetadata & { title: string; description: string }>
+): Section[] {
+  const sectionMap = new Map<string, Section>();
+
+  for (const page of pages) {
+    // Determine section from URL path (strip base URL and locale)
+    const urlPath = page.url
+      .replace(`${BASE_URL}/`, "")
+      .replace(EN_LOCALE_PREFIX_REGEX, "");
+    const parts = urlPath.split("/");
+
+    let sectionName: string;
+    if (parts[0] === "home") {
+      // Organize home pages by subcategory
+      if (parts.length > 1) {
+        sectionName = formatSectionName(parts[1]);
+      } else {
+        sectionName = "Getting Started";
+      }
+    } else if (parts[0] === "mcp-servers") {
+      // Organize MCP servers by category
+      if (parts.length > 1) {
+        sectionName = `MCP Servers - ${formatSectionName(parts[1])}`;
+      } else {
+        sectionName = "MCP Servers";
+      }
+    } else if (parts[0] === "resources" && parts[1] === "integrations") {
+      sectionName = "Integrations";
+    } else if (parts[0] === "references") {
+      sectionName = "API Reference";
+    } else {
+      sectionName = "Documentation";
+    }
+
+    if (!sectionMap.has(sectionName)) {
+      sectionMap.set(sectionName, {
+        name: sectionName,
+        pages: [],
+      });
+    }
+
+    const section = sectionMap.get(sectionName);
+    if (section) {
+      section.pages.push({
+        description: page.description,
+        title: page.title,
+        url: page.url,
+      });
+    }
+  }
+
+  // Sort sections and pages within sections
+  const sections = Array.from(sectionMap.values())
+    .sort((a, b) => {
+      // Custom sorting: Getting Started first, then alphabetical
+      if (a.name === "Getting Started") {
+        return -1;
+      }
+      if (b.name === "Getting Started") {
+        return 1;
+      }
+      return a.name.localeCompare(b.name);
+    })
+    .map((section) => ({
+      ...section,
+      pages: section.pages.sort((a, b) => a.title.localeCompare(b.title)),
+    }));
+
+  return sections;
+}
+
+/**
+ * Formats a section name from a path segment
+ */
+function formatSectionName(segment: string): string {
+  return segment
+    .split("-")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+/**
+ * Derives a readable title from a page's file path, used when the MDX has no
+ * title. For ".../<slug>/index.mdx" this title-cases the parent directory
+ * (e.g. "examples" -> "Examples") instead of the literal filename "index".
+ */
+function deriveTitleFromPath(filePath: string): string {
+  const base = path.basename(filePath, ".mdx");
+  const slug = base === "index" ? path.basename(path.dirname(filePath)) : base;
+  return formatSectionName(slug);
+}
+
+/**
+ * Resolves a page title from MDX content: frontmatter title > H1 > path
+ * fallback. Fumadocs renders the frontmatter `title` as the page heading, so
+ * it is the canonical source; an H1 only remains in legacy bodies.
+ */
+export function extractPageTitle(content: string, filePath: string): string {
+  const frontmatterTitle = content
+    .match(FRONTMATTER_REGEX)?.[1]
+    ?.match(FRONTMATTER_TITLE_REGEX)?.[1]
+    ?.trim()
+    ?.replace(QUOTED_VALUE_REGEX, "$1");
+  if (frontmatterTitle) {
+    return frontmatterTitle;
+  }
+  const titleMatch = content.match(TITLE_H1_REGEX);
+  if (titleMatch) {
+    return titleMatch[1].trim();
+  }
+  return deriveTitleFromPath(filePath);
+}
+
+/**
+ * Generates the llms.txt file content
+ */
+function generateLlmsTxt(
+  sections: Section[],
+  metadata: LlmsTxtMetadata
+): string {
+  const lines: string[] = [];
+
+  // Metadata comment (hidden in markdown but parseable)
+  lines.push(
+    `<!-- git-sha: ${metadata.gitSha} generation-date: ${metadata.generationDate} -->`
+  );
+  lines.push("");
+
+  // Header
+  lines.push("# Arcade");
+  lines.push("");
+  lines.push("> Arcade is the enterprise-ready actions runtime for AI agents.");
+  lines.push("");
+  lines.push(
+    "Arcade is the enterprise-ready actions runtime for AI agents. We enforce your security policies on every action, execute reliably across any system, and govern agents centrally in production. Configure once and use any model, framework, and client — deploy the first agent the same way you deploy the hundredth."
+  );
+  lines.push("");
+  lines.push(
+    "Arcade delivers three capabilities. Enforce (Agent Authorization): deploy agents your security team approves — Arcade handles OAuth and manages user tokens, API keys, and secrets, then enforces your existing IdP, DLP, SIEM, and compliance policies plus per-action authorization at runtime. Execute (Agent-Optimized Tools): the largest catalog of agent-optimized tools — 7,500+ across 81 MCP servers, built for reliable execution at scale, not thin API wrappers. Govern (Agent Lifecycle Governance): a central control plane with a shared registry, version control, visibility filtering, and OpenTelemetry audit logs."
+  );
+  lines.push("");
+
+  // Persona guidance: route readers to the right path before the link
+  // sections. Arcade docs serve two audiences, so start with "to X, go to Y".
+  lines.push("## Who this is for");
+  lines.push("");
+  lines.push(
+    "Arcade docs serve two audiences. Start with the path that matches your goal:"
+  );
+  lines.push("");
+  lines.push(
+    "- To build agents and tools (call tools, create MCP servers, ship user-facing agents), go to Build: https://docs.arcade.dev/en/build. New to Arcade? Start with the agent quickstart: https://docs.arcade.dev/en/get-started/quickstarts/call-tool-agent."
+  );
+  lines.push(
+    "- To deploy, secure, and govern Arcade for an organization (hosting, identity, gateways, audit logs), go to Operate: https://docs.arcade.dev/en/operate. New to operating Arcade? Start with the operator quickstart: https://docs.arcade.dev/en/operate/quickstart."
+  );
+  lines.push("");
+
+  // Main sections
+  const mainSections = sections.filter((s) => !s.name.startsWith("Optional"));
+  for (const section of mainSections) {
+    lines.push(`## ${section.name}`);
+    lines.push("");
+    for (const page of section.pages) {
+      lines.push(`- [${page.title}](${page.url}): ${page.description}`);
+    }
+    lines.push("");
+  }
+
+  // Optional section (if needed)
+  const optionalSections = sections.filter((s) =>
+    s.name.startsWith("Optional")
+  );
+  if (optionalSections.length > 0) {
+    lines.push("## Optional");
+    lines.push("");
+    for (const section of optionalSections) {
+      for (const page of section.pages) {
+        lines.push(`- [${page.title}](${page.url}): ${page.description}`);
+      }
+    }
+    lines.push("");
+  }
+
+  return lines.join("\n");
+}
+
+type SummarizedPage = PageMetadata & { title: string; description: string };
+type SummaryMap = Map<string, { title: string; description: string }>;
+
+/**
+ * Splits MDX pages into those whose summary must be regenerated (new or
+ * changed since the last run) and those whose existing summary can be kept.
+ * Repairs the stale "page"/"index" fallback title that older generations
+ * produced for pages without a title.
+ */
+function partitionMdxPages(
+  pages: PageMetadata[],
+  changedFiles: Set<string>,
+  existingSummaries: SummaryMap
+): {
+  pagesToSummarize: PageMetadata[];
+  pagesToKeep: SummarizedPage[];
+  repairedTitles: number;
+} {
+  const pagesToSummarize: PageMetadata[] = [];
+  const pagesToKeep: SummarizedPage[] = [];
+  let repairedTitles = 0;
+
+  for (const page of pages) {
+    const { url } = page;
+    const existingSummary = existingSummaries.get(url);
+
+    if (changedFiles.has(page.path) || !existingSummary) {
+      pagesToSummarize.push(page);
+      continue;
+    }
+
+    const title =
+      existingSummary.title === "page" || existingSummary.title === "index"
+        ? extractPageTitle(page.content, page.path)
+        : existingSummary.title;
+    if (title !== existingSummary.title) {
+      repairedTitles += 1;
+    }
+    pagesToKeep.push({
+      ...page,
+      description: existingSummary.description,
+      title,
+    });
+  }
+
+  return { pagesToKeep, pagesToSummarize, repairedTitles };
+}
+
+/**
+ * Toolkit pages are rebuilt every run (no OpenAI). A change is any toolkit
+ * page that is new or whose title/description differs from the previous
+ * output. URLs already covered by MDX pages are skipped: those win at merge
+ * and their summaries are tracked by `partitionMdxPages`.
+ */
+function toolkitPagesChanged(
+  toolkitPages: SummarizedPage[],
+  mdxPageUrls: Set<string>,
+  existingSummaries: SummaryMap
+): boolean {
+  return toolkitPages.some((toolkitPage) => {
+    if (mdxPageUrls.has(toolkitPage.url)) {
+      return false;
+    }
+    const existing = existingSummaries.get(toolkitPage.url);
+    return (
+      !existing ||
+      existing.title !== toolkitPage.title ||
+      existing.description !== toolkitPage.description
+    );
+  });
+}
+
+/**
+ * Determines which pages need summarization based on changes
+ */
+function determinePagesToSummarize(
+  pages: PageMetadata[],
+  previousMetadata: LlmsTxtMetadata | null,
+  existingSummaries: SummaryMap,
+  toolkitPages: SummarizedPage[]
+): {
+  pagesToSummarize: PageMetadata[];
+  pagesToKeep: SummarizedPage[];
+  hasChanges: boolean;
+} {
+  if (!previousMetadata || previousMetadata.gitSha === "unknown") {
+    // No previous generation or can't determine, summarize all pages
+    console.log(
+      chalk.yellow("⚠ No previous generation found, summarizing all pages")
+    );
+    return { hasChanges: true, pagesToKeep: [], pagesToSummarize: [...pages] };
+  }
+
+  // Get changed files since last generation
+  const changedFiles = getChangedFilesSince(previousMetadata.gitSha);
+  console.log(
+    chalk.blue(
+      `\n📊 Found ${changedFiles.size} changed files since last generation`
+    )
+  );
+
+  // MDX-authored pages take precedence over toolkit JSON at merge time.
+  const mdxPageUrls = new Set(pages.map((page) => page.url));
+
+  // Create a set of current page URLs for quick lookup. Include toolkit pages
+  // so they aren't mistaken for deleted pages (they aren't in `pages`).
+  const currentPageUrls = new Set(
+    [...pages, ...toolkitPages].map((page) => page.url)
+  );
+
+  // Identify deleted pages (pages that exist in previous llms.txt but not in current filesystem)
+  const deletedPageUrls = Array.from(existingSummaries.keys()).filter(
+    (url) => !currentPageUrls.has(url)
+  );
+
+  if (deletedPageUrls.length > 0) {
+    console.log(
+      chalk.yellow(
+        `\n🗑️  Found ${deletedPageUrls.length} deleted pages (will be removed from output)`
+      )
+    );
+  }
+
+  const { pagesToSummarize, pagesToKeep, repairedTitles } = partitionMdxPages(
+    pages,
+    changedFiles,
+    existingSummaries
+  );
+
+  const hasChanges =
+    deletedPageUrls.length > 0 ||
+    pagesToSummarize.length > 0 ||
+    repairedTitles > 0 ||
+    toolkitPagesChanged(toolkitPages, mdxPageUrls, existingSummaries);
+
+  console.log(
+    chalk.green(
+      `✓ ${pagesToKeep.length} pages unchanged, ${pagesToSummarize.length} pages to summarize${deletedPageUrls.length > 0 ? `, ${deletedPageUrls.length} pages deleted` : ""}`
+    )
+  );
+
+  return { hasChanges, pagesToKeep, pagesToSummarize };
+}
+
+/**
+ * Summarizes pages in batches
+ */
+async function summarizePagesInBatches(
+  pagesToSummarize: PageMetadata[],
+  pagesToKeep: Array<PageMetadata & { title: string; description: string }>
+): Promise<Array<PageMetadata & { title: string; description: string }>> {
+  const summarizedPages: Array<
+    PageMetadata & { title: string; description: string }
+  > = [...pagesToKeep];
+
+  if (pagesToSummarize.length === 0) {
+    return summarizedPages;
+  }
+
+  console.log(chalk.blue("\n📝 Summarizing pages with OpenAI..."));
+  // Process in batches to avoid rate limits
+  const batchSize = 5;
+  for (let i = 0; i < pagesToSummarize.length; i += batchSize) {
+    const batch = pagesToSummarize.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(summarizePage));
+
+    for (let j = 0; j < batch.length; j += 1) {
+      summarizedPages.push({
+        ...batch[j],
+        ...batchResults[j],
+      });
+    }
+
+    console.log(
+      chalk.gray(
+        `  Processed ${Math.min(i + batchSize, pagesToSummarize.length)}/${pagesToSummarize.length} pages`
+      )
+    );
+
+    // Add a small delay between batches
+    if (i + batchSize < pagesToSummarize.length) {
+      await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    }
+  }
+
+  console.log(chalk.green(`✓ Summarized ${pagesToSummarize.length} pages`));
+  return summarizedPages;
+}
+
+/**
+ * Main execution function
+ */
+async function main() {
+  console.log(chalk.bold(chalk.blue("\n🚀 Generating llms.txt file...\n")));
+
+  // Check for OpenAI API key
+  if (!process.env.OPENAI_API_KEY) {
+    console.error(
+      chalk.red("✗ OPENAI_API_KEY environment variable is required")
+    );
+    process.exit(1);
+  }
+
+  try {
+    // Step 0: Get current git SHA and check for previous generation
+    const currentSha = getCurrentGitSha();
+    const previousMetadata = await parseLlmsTxtMetadata();
+    const existingSummaries = await extractExistingSummaries();
+
+    console.log(chalk.blue(`📌 Current git SHA: ${currentSha}`));
+    if (previousMetadata) {
+      console.log(
+        chalk.gray(
+          `   Previous generation: ${previousMetadata.generationDate} (SHA: ${previousMetadata.gitSha.slice(0, SHA_SHORT_LENGTH)})`
+        )
+      );
+    }
+
+    // Step 1: Discover all pages (MDX pages, plus toolkit pages from data)
+    const pages = await discoverPages();
+    const toolkitPages = await discoverToolkitPages();
+
+    // Step 2: Determine which pages need summarization and identify deleted pages
+    const { pagesToSummarize, pagesToKeep, hasChanges } =
+      determinePagesToSummarize(
+        pages,
+        previousMetadata,
+        existingSummaries,
+        toolkitPages
+      );
+
+    // Step 3: Summarize changed/new pages using OpenAI
+    const summarizedPages = await summarizePagesInBatches(
+      pagesToSummarize,
+      pagesToKeep
+    );
+
+    // Toolkit pages already have templated title/description (no OpenAI).
+    // Deduplicate by URL: MDX-authored pages take precedence over toolkit JSON
+    // pages so a static page (e.g. resources/integrations/search/tavily) that
+    // appears in both sets doesn't emit two entries in llms.txt.
+    const seenUrls = new Set<string>();
+    const allPages: Array<
+      PageMetadata & { title: string; description: string }
+    > = [];
+    for (const page of [...summarizedPages, ...toolkitPages]) {
+      if (!seenUrls.has(page.url)) {
+        seenUrls.add(page.url);
+        allPages.push(page);
+      }
+    }
+
+    // Step 4: Organize into sections
+    console.log(chalk.blue("\n📂 Organizing sections..."));
+    const sections = organizeSections(allPages);
+    console.log(chalk.green(`✓ Created ${sections.length} sections`));
+
+    // Step 5: Generate llms.txt content
+    console.log(chalk.blue("\n✍️  Generating llms.txt content..."));
+    // Only update metadata if there are changes, otherwise keep previous metadata
+    const metadata: LlmsTxtMetadata = hasChanges
+      ? {
+          generationDate: new Date().toISOString(),
+          gitSha: currentSha,
+        }
+      : previousMetadata || {
+          generationDate: new Date().toISOString(),
+          gitSha: currentSha,
+        };
+    const content = generateLlmsTxt(sections, metadata);
+
+    // Step 6: Write to file
+    await fs.writeFile(OUTPUT_PATH, content, "utf-8");
+    if (hasChanges) {
+      console.log(chalk.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
+    } else {
+      console.log(
+        chalk.gray(
+          "✓ No changes detected, llms.txt unchanged (SHA and date preserved)"
+        )
+      );
+    }
+
+    console.log(chalk.bold(chalk.green("\n✨ Done!\n")));
+  } catch (error) {
+    console.error(chalk.red("\n✗ Error generating llms.txt:"), error);
+    process.exit(1);
+  }
+}
+
+// Run if called directly (`bun scripts/generate-llmstxt.ts`), not when imported
+// by tests.
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main();
+}
+
+export { main as generateLlmsTxt };

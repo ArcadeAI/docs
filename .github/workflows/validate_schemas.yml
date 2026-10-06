@@ -1,0 +1,37 @@
+name: Validate JSON and YAML schemas
+
+on:
+  push:
+    branches:
+      - main # Always run on merges to main
+  pull_request:
+    types: [opened, synchronize, reopened] # Run against every push to open PRs
+
+jobs:
+  validate_schemas:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Collect YAML and JSON files with $schema
+        id: collect
+        run: |
+          echo "Finding YAML and JSON files with a \$schema property…"
+          files=$(grep -rl "\$schema:" . --include="*.yaml" --include="*.json" --exclude-dir="node_modules" | paste -sd '|' -)
+          json_files=$(grep -rl "\"\$schema\":" . --include="*.json" --exclude-dir="node_modules" | paste -sd '|' -)
+          all_files=$(echo -e "$files\n$json_files" | paste -sd '|' -)
+          if [ -z "$all_files" ]; then
+              echo "No YAML or JSON files with \$schema were found."
+          else
+              echo "Files with \$schema: $all_files"
+          fi
+          # Set 'all_files' as an output so that it can be used later
+          echo "files=$all_files" >> $GITHUB_OUTPUT
+
+      - name: Validate JSON and YAML files using schema-validator-action
+        # Only run this step if there is at least one file with $schema
+        if: ${{ steps.collect.outputs.files != '' }}
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          file: ${{ steps.collect.outputs.files }}

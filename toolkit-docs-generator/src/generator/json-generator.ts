@@ -1,0 +1,342 @@
+/**
+ * JSON Generator
+ *
+ * Outputs merged toolkit data as JSON files.
+ */
+import { randomUUID } from "node:crypto";
+import { mkdir, readFile, rename, rm, stat, writeFile } from "fs/promises";
+import { dirname, join } from "path";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output";
+import type {
+  MergedToolkit,
+  ToolkitIndex,
+  ToolkitIndexEntry,
+} from "../types/index";
+import { MergedToolkitSchema } from "../types/index";
+import { readToolkitsFromDir, type ToolkitReadResult } from "./output-verifier";
+
+const SAFE_TOOLKIT_ID = /^[a-z0-9][a-z0-9_-]*$/i;
+const RESERVED_TOOLKIT_ID = "index";
+
+const getToolkitFileName = (toolkitId: string): string => {
+  const normalizedId = toolkitId.toLowerCase();
+  if (normalizedId === RESERVED_TOOLKIT_ID) {
+    throw new Error(`"${toolkitId}" is a reserved toolkit ID`);
+  }
+  if (!SAFE_TOOLKIT_ID.test(toolkitId)) {
+    throw new Error(`Unsafe toolkit ID: "${toolkitId}"`);
+  }
+  return `${normalizedId}.json`;
+};
+
+const validateToolkitFileNames = (
+  toolkits: readonly MergedToolkit[]
+): string[] => {
+  const errors: string[] = [];
+  const toolkitIdsByFile = new Map<string, string[]>();
+
+  for (const toolkit of toolkits) {
+    try {
+      const fileName = getToolkitFileName(toolkit.id);
+      const toolkitIds = toolkitIdsByFile.get(fileName) ?? [];
+      toolkitIdsByFile.set(fileName, [...toolkitIds, toolkit.id]);
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : String(error));
+    }
+  }
+
+  for (const [fileName, toolkitIds] of toolkitIdsByFile) {
+    if (toolkitIds.length > 1) {
+      errors.push(
+        `Toolkit IDs collide on ${fileName}: ${toolkitIds.join(", ")}`
+      );
+    }
+  }
+
+  return errors;
+};
+
+const compareToolkitIds = (left: string, right: string): number => {
+  const normalizedLeft = left.toLowerCase();
+  const normalizedRight = right.toLowerCase();
+  if (normalizedLeft !== normalizedRight) {
+    return normalizedLeft < normalizedRight ? -1 : 1;
+  }
+  if (left === right) {
+    return 0;
+  }
+  return left < right ? -1 : 1;
+};
+
+const writeFileAtomically = async (
+  filePath: string,
+  content: string
+): Promise<void> => {
+  const tempPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(tempPath, content, "utf-8");
+    await rename(tempPath, filePath);
+  } finally {
+    await rm(tempPath, { force: true });
+  }
+};
+
+// ============================================================================
+// Generator Configuration
+// ============================================================================
+
+export interface JsonGeneratorConfig {
+  /** Whether to generate an index file (default: true) */
+  generateIndex?: boolean;
+  /** Where to source toolkits for the index file */
+  indexSource?: "current" | "output";
+  /** Output directory path */
+  outputDir: string;
+  /** Whether to pretty-print JSON (default: true) */
+  prettyPrint?: boolean;
+  /** Whether to validate output with Zod (default: true) */
+  validateOutput?: boolean;
+}
+
+export interface GeneratorResult {
+  /** List of errors that occurred */
+  errors: string[];
+  /** List of files that were written */
+  filesWritten: string[];
+}
+
+export interface RebuildIndexResult {
+  /** Path to the rebuilt index file */
+  indexPath: string;
+  /** Read/parse errors encountered while loading toolkit files */
+  readErrors: string[];
+  /** Non-fatal read warnings (for example, legacy fallback usage) */
+  readWarnings: string[];
+}
+
+// ============================================================================
+// JSON Generator
+// ============================================================================
+
+/**
+ * Generator that outputs merged toolkit data as JSON files
+ */
+export class JsonGenerator {
+  private readonly outputDir: string;
+  private readonly prettyPrint: boolean;
+  private readonly generateIndex: boolean;
+  private readonly indexSource: "current" | "output";
+  private readonly validateOutput: boolean;
+  private readonly toolkitIdsByFile = new Map<string, string>();
+
+  constructor(config: JsonGeneratorConfig) {
+    this.outputDir = config.outputDir;
+    this.prettyPrint = config.prettyPrint ?? true;
+    this.generateIndex = config.generateIndex ?? true;
+    this.indexSource = config.indexSource ?? "current";
+    this.validateOutput = config.validateOutput ?? true;
+  }
+
+  /**
+   * Generate JSON file for a single toolkit
+   */
+  async generateToolkitFile(toolkit: MergedToolkit): Promise<string> {
+    // Validate if enabled
+    if (this.validateOutput) {
+      const result = MergedToolkitSchema.safeParse(toolkit);
+      if (!result.success) {
+        throw new Error(
+          `Validation failed for ${toolkit.id}: ${result.error.message}`
+        );
+      }
+    }
+
+    const fileName = getToolkitFileName(toolkit.id);
+    const filePath = join(this.outputDir, fileName);
+    const previousToolkitId = this.toolkitIdsByFile.get(fileName);
+    if (previousToolkitId && previousToolkitId !== toolkit.id) {
+      throw new Error(
+        `Toolkit IDs collide on ${fileName}: ${previousToolkitId}, ${toolkit.id}`
+      );
+    }
+    this.toolkitIdsByFile.set(fileName, toolkit.id);
+
+    // Ensure directory exists
+    try {
+      await mkdir(dirname(filePath), { recursive: true });
+
+      // Write file
+      const content = this.prettyPrint
+        ? JSON.stringify(toolkit, null, 2)
+        : JSON.stringify(toolkit);
+
+      await writeFileAtomically(filePath, content);
+      return filePath;
+    } catch (error) {
+      if (previousToolkitId) {
+        this.toolkitIdsByFile.set(fileName, previousToolkitId);
+      } else {
+        this.toolkitIdsByFile.delete(fileName);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Check if a toolkit file already exists in the output directory
+   */
+  async hasToolkitFile(toolkitId: string): Promise<boolean> {
+    try {
+      const fileName = getToolkitFileName(toolkitId);
+      const filePath = join(this.outputDir, fileName);
+      const stats = await stat(filePath);
+      return stats.isFile();
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get set of toolkit IDs that already have output files
+   */
+  async getCompletedToolkitIds(): Promise<Set<string>> {
+    const completedIds = new Set<string>();
+    try {
+      const result = await readToolkitsFromDir(this.outputDir, undefined, {
+        allowLegacyFallback: true,
+      });
+      for (const toolkit of result.toolkits) {
+        completedIds.add(toolkit.id.toLowerCase());
+      }
+    } catch {
+      // Directory doesn't exist or is empty - that's fine
+    }
+    return completedIds;
+  }
+
+  /**
+   * Load an existing toolkit file
+   */
+  async loadToolkitFile(toolkitId: string): Promise<MergedToolkit | null> {
+    try {
+      const fileName = getToolkitFileName(toolkitId);
+      const filePath = join(this.outputDir, fileName);
+      const content = await readFile(filePath, "utf-8");
+      const parsed = JSON.parse(content) as unknown;
+      const result = MergedToolkitSchema.safeParse(parsed);
+      if (result.success) {
+        return result.data;
+      }
+      const fallback = parsePreviousToolkitForDiff(parsed, toolkitId);
+      return fallback.toolkit;
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Generate JSON files for multiple toolkits
+   */
+  async generateAll(
+    toolkits: readonly MergedToolkit[]
+  ): Promise<GeneratorResult> {
+    const filesWritten: string[] = [];
+    const errors = validateToolkitFileNames(toolkits);
+    if (errors.length > 0) {
+      return { errors, filesWritten };
+    }
+
+    // Generate per-toolkit files
+    for (const toolkit of toolkits) {
+      try {
+        const filePath = await this.generateToolkitFile(toolkit);
+        filesWritten.push(filePath);
+      } catch (error) {
+        errors.push(`Failed to write ${toolkit.id}: ${error}`);
+      }
+    }
+
+    // Generate index file
+    if (this.generateIndex && toolkits.length > 0) {
+      try {
+        let indexToolkits = toolkits;
+        if (this.indexSource === "output") {
+          const readResult = await this.getToolkitsFromOutputDir();
+          indexToolkits = readResult.toolkits;
+          if (readResult.errors.length > 0) {
+            errors.push(...readResult.errors);
+          }
+        }
+        const indexPath = await this.generateIndexFile(indexToolkits);
+        filesWritten.push(indexPath);
+      } catch (error) {
+        errors.push(`Failed to write index: ${error}`);
+      }
+    }
+
+    return { errors, filesWritten };
+  }
+
+  /**
+   * Generate index file with toolkit summaries
+   */
+  private async generateIndexFile(
+    toolkits: readonly MergedToolkit[]
+  ): Promise<string> {
+    const entries: ToolkitIndexEntry[] = toolkits
+      .map((t) => ({
+        authType: t.auth?.type ?? "none",
+        category: t.metadata.category,
+        id: t.id,
+        label: t.label,
+        toolCount: t.tools.length,
+        type: t.metadata.type,
+        version: t.version,
+      }))
+      .sort((left, right) => compareToolkitIds(left.id, right.id));
+
+    const index: ToolkitIndex = {
+      generatedAt: new Date().toISOString(),
+      toolkits: entries,
+      version: "1.0.0",
+    };
+
+    const filePath = join(this.outputDir, "index.json");
+
+    await mkdir(dirname(filePath), { recursive: true });
+
+    const content = this.prettyPrint
+      ? JSON.stringify(index, null, 2)
+      : JSON.stringify(index);
+
+    await writeFileAtomically(filePath, content);
+    return filePath;
+  }
+
+  private async getToolkitsFromOutputDir(): Promise<ToolkitReadResult> {
+    return readToolkitsFromDir(this.outputDir, undefined, {
+      allowLegacyFallback: true,
+    });
+  }
+
+  /**
+   * Rebuild index.json from the toolkit files currently in the output directory.
+   */
+  async rebuildIndexFromOutput(): Promise<RebuildIndexResult> {
+    const readResult = await this.getToolkitsFromOutputDir();
+    const indexPath = await this.generateIndexFile(readResult.toolkits);
+    return {
+      indexPath,
+      readErrors: readResult.errors,
+      readWarnings: readResult.warnings,
+    };
+  }
+}
+
+// ============================================================================
+// Factory
+// ============================================================================
+
+export const createJsonGenerator = (
+  config: JsonGeneratorConfig
+): JsonGenerator => new JsonGenerator(config);

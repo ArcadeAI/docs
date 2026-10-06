@@ -1,0 +1,55 @@
+---
+type: warning
+location: custom_section
+position: after
+header: "## Configuration & Setup"
+---
+## Configuration & Setup
+
+### Authentication
+
+<Callout type="warning">
+  **Critical**: This MCP Server uses **GitHub Apps** authentication, not OAuth Apps.
+  
+  You **must** create a GitHub App to use this server. OAuth Apps are not supported.
+</Callout>
+
+The Arcade GitHub MCP Server uses the [GitHub auth provider](/references/auth-providers/github) to connect to users' GitHub accounts.
+
+**For Arcade Cloud:**
+- No configuration needed
+- Your users will see `Arcade` as the requesting application
+- All tools work out of the box
+
+**For Self-Hosted:**
+- You must [create your own GitHub App](/references/auth-providers/github#creating-a-github-app)
+- [Configure the GitHub auth provider](/references/auth-providers/github#configuring-github-auth-in-arcade) with your app credentials
+- Your users will see your application name
+
+<Callout type="info">
+  **New to GitHub Apps?** Read [Why Arcade Uses GitHub Apps](/references/auth-providers/github#why-arcade-uses-github-apps-not-oauth-apps) 
+  to understand the security and compliance benefits.
+</Callout>
+
+### Secrets Setup
+
+GitHub tools read an optional `GITHUB_SERVER_URL` secret from the Arcade Dashboard. It defaults to `https://api.github.com`, so you only need to set it for GitHub Enterprise Server.
+
+**Steps:**
+
+1. Go to [Arcade Dashboard](https://api.arcade.dev/dashboard)
+2. Navigate to **Secrets** in the left sidebar
+3. Click **Add Secret**
+4. Add the following secrets:
+
+| Secret Name | Value | Required For |
+|-------------|-------|--------------|
+| `GITHUB_SERVER_URL` | `https://api.github.com` (default for GitHub.com) | All tools |
+
+<Callout type="info">
+  **Default**: If `GITHUB_SERVER_URL` is not configured, it defaults to `https://api.github.com` (GitHub.com)
+  
+  **GitHub Enterprise Users**: Set `GITHUB_SERVER_URL` to your Enterprise server's API endpoint (e.g., `https://github.yourcompany.com/api/v3`). Note that Enterprise uses `/api/v3` path. See [GitHub Enterprise Support](#github-enterprise-support) for details.
+</Callout>
+
+---

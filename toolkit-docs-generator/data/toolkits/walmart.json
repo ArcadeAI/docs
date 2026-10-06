@@ -1,0 +1,230 @@
+{
+  "id": "Walmart",
+  "label": "Walmart",
+  "version": "4.0.0",
+  "description": "Arcade.dev LLM tools for searching for products sold by Walmart",
+  "metadata": {
+    "category": "search",
+    "iconUrl": "https://design-system.arcade.dev/icons/walmart.svg",
+    "isBYOC": true,
+    "isPro": true,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/search/walmart",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "GetProductDetails",
+      "qualifiedName": "Walmart.GetProductDetails",
+      "fullyQualifiedName": "Walmart.GetProductDetails@4.0.0",
+      "description": "Get product details from Walmart.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "Item ID. E.g. '414600577'. This can be retrieved from the search results of the SearchProducts tool.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "SERP_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERP_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Product details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Walmart.GetProductDetails",
+        "parameters": {
+          "item_id": {
+            "value": "414600577",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "ecommerce"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchProducts",
+      "qualifiedName": "Walmart.SearchProducts",
+      "fullyQualifiedName": "Walmart.SearchProducts@4.0.0",
+      "description": "Search Walmart products using SerpAPI.\n\nSerpAPI does not expose a total result count, so responses omit total_count;\nrely on has_more / next_offset to continue paging.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "Keywords to search for. E.g. 'apple iphone' or 'samsung galaxy'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "Sort the results by the specified criteria. Defaults to 'relevance_according_to_keywords_searched'.",
+          "enum": [
+            "relevance_according_to_keywords_searched",
+            "lowest_price_first",
+            "highest_price_first",
+            "best_selling_products_first",
+            "highest_rating_first",
+            "new_arrivals_first"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "min_price",
+          "type": "number",
+          "required": false,
+          "description": "Minimum price to filter the results by. E.g. 100.00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_price",
+          "type": "number",
+          "required": false,
+          "description": "Maximum price to filter the results by. E.g. 100.00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_day_delivery",
+          "type": "boolean",
+          "required": false,
+          "description": "Filters products that are eligible for next day delivery. Defaults to False (returns all products, regardless of delivery status).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of results to skip before the first returned item. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "SERP_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERP_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of Walmart products matching the search query."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Walmart.SearchProducts",
+        "parameters": {
+          "keywords": {
+            "value": "wireless noise cancelling headphones",
+            "type": "string",
+            "required": true
+          },
+          "sort_by": {
+            "value": "price_low_to_high",
+            "type": "string",
+            "required": false
+          },
+          "min_price": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "max_price": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          },
+          "next_day_delivery": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "ecommerce"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-09-04T15:27:38.988Z",
+  "summary": "## Walmart Toolkit\n\nThe Walmart toolkit provides Arcade tools for searching and retrieving product data from Walmart's catalog via SerpAPI, enabling LLM agents to query products and fetch detailed listings programmatically.\n\n## Capabilities\n\n- **Product search**: Query Walmart's product catalog with keyword-based search, returning paginated results with `has_more` and `next_offset` for continuation (note: `total_count` is not available due to SerpAPI limitations).\n- **Product details**: Retrieve structured product information for a specific Walmart item by ID or URL.\n\n## Secrets\n\nThis toolkit requires one secret:\n\n- **`SERP_API_KEY`**: An API key issued by [SerpAPI](https://serpapi.com/), the service used to query Walmart search results. To obtain it: create an account at [serpapi.com](https://serpapi.com/users/sign_up), then find your private API key on the [API Key page in your SerpAPI dashboard](https://serpapi.com/manage-api-key). Free-tier accounts have a limited monthly search quota; paid plans are required for higher volume. The key must be kept secret and is used to authenticate all outbound requests from the toolkit to SerpAPI.\n\nStore this secret in Arcade using the [Secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly via the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
+}

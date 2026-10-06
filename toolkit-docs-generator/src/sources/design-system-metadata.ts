@@ -1,0 +1,139 @@
+/**
+ * Design System Metadata Source
+ *
+ * Loads toolkit metadata from @arcadeai/design-system (TOOLKITS).
+ *
+ * This is the preferred metadata source when running the generator inside the
+ * Arcade docs repo.
+ */
+import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
+import { z } from "zod";
+import { normalizeToolkitId } from "../shared/toolkit-primitives";
+import type { ToolkitMetadata } from "../types/index";
+import { ToolkitMetadataSchema } from "../types/index";
+import type { MetadataSource } from "./internal";
+
+// ============================================================================
+// Types
+// ============================================================================
+
+// Keep this intentionally loose: the design system can evolve without breaking
+// compilation here. We validate after mapping.
+const DesignSystemToolkitSchema = z.object({
+  category: z.string(),
+  docsLink: z.string(),
+  iconUrl: z.string().optional(),
+  id: z.string(),
+  isBYOC: z.boolean(),
+  isComingSoon: z.boolean(),
+  isHidden: z.boolean(),
+  isPro: z.boolean(),
+  label: z.string(),
+  publicIconUrl: z.string().optional(),
+  type: z.string(),
+});
+
+type DesignSystemToolkit = z.infer<typeof DesignSystemToolkitSchema>;
+
+// ============================================================================
+// Helpers
+// ============================================================================
+
+function toToolkitMetadata(entry: DesignSystemToolkit): ToolkitMetadata | null {
+  const iconUrl = entry.publicIconUrl ?? entry.iconUrl;
+  if (!iconUrl) return null;
+
+  const parsed = ToolkitMetadataSchema.safeParse({
+    category: entry.category,
+    docsLink: entry.docsLink,
+    iconUrl,
+    id: entry.id,
+    isBYOC: entry.isBYOC,
+    isComingSoon: entry.isComingSoon,
+    isHidden: entry.isHidden,
+    isPro: entry.isPro,
+    label: entry.label,
+    type: entry.type,
+  });
+
+  return parsed.success ? parsed.data : null;
+}
+
+function withApiSuffix(label: string): string {
+  // If it already ends with API, keep as-is.
+  if (/\bapi$/i.test(label.trim())) return label;
+  return `${label} API`;
+}
+
+// ============================================================================
+// Source
+// ============================================================================
+
+export class DesignSystemMetadataSource implements MetadataSource {
+  private readonly toolkits: readonly ToolkitMetadata[];
+  private readonly indexByIdOrLabel: Map<string, ToolkitMetadata>;
+
+  constructor(toolkits: readonly ToolkitMetadata[]) {
+    this.toolkits = toolkits;
+    this.indexByIdOrLabel = new Map<string, ToolkitMetadata>();
+
+    for (const toolkit of toolkits) {
+      this.indexByIdOrLabel.set(normalizeToolkitId(toolkit.id), toolkit);
+      this.indexByIdOrLabel.set(normalizeToolkitId(toolkit.label), toolkit);
+    }
+  }
+
+  async getToolkitMetadata(toolkitId: string): Promise<ToolkitMetadata | null> {
+    const key = normalizeToolkitId(toolkitId);
+    const direct = this.indexByIdOrLabel.get(key);
+    if (direct) return direct;
+
+    // Fallback 1: "github-api" / "github_api" style inputs.
+    // (normalizeToolkitId already strips separators)
+
+    // Fallback 2: If this looks like an API toolkit, try the base provider.
+    if (key.endsWith("api")) {
+      const baseKey = key.slice(0, -3);
+      const base = this.indexByIdOrLabel.get(baseKey);
+      if (base) {
+        return {
+          ...base,
+          // Keep base icon, but make the label explicit for API variants.
+          label: withApiSuffix(base.label),
+        };
+      }
+    }
+
+    return null;
+  }
+
+  async getAllToolkitsMetadata(): Promise<readonly ToolkitMetadata[]> {
+    return this.toolkits;
+  }
+
+  async listToolkitIds(): Promise<readonly string[]> {
+    return this.toolkits.map((t) => t.id);
+  }
+}
+
+// ============================================================================
+// Factories
+// ============================================================================
+
+export function createDesignSystemMetadataSourceFromToolkits(
+  toolkits: readonly ToolkitMetadata[]
+): MetadataSource {
+  return new DesignSystemMetadataSource(toolkits);
+}
+
+export async function createDesignSystemMetadataSource(): Promise<MetadataSource> {
+  const parsed: ToolkitMetadata[] = [];
+  for (const raw of DESIGN_SYSTEM_TOOLKITS) {
+    const dsParsed = DesignSystemToolkitSchema.safeParse(raw);
+    if (!dsParsed.success) continue;
+    const mapped = toToolkitMetadata(dsParsed.data);
+    if (mapped) parsed.push(mapped);
+  }
+
+  return new DesignSystemMetadataSource(parsed);
+}

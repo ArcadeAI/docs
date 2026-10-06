@@ -1,0 +1,3082 @@
+#!/usr/bin/env node
+
+/**
+ * Toolkit Docs Generator CLI
+ *
+ * Entry point for the CLI application.
+ * Run with: bun src/cli/index.ts <command>
+ *
+ * Input format for providers:
+ *   --providers "Github:1.0.0,Slack:2.1.0"
+ *   --providers "Github" (uses latest version)
+ */
+
+import chalk from "chalk";
+import { Command } from "commander";
+import { existsSync } from "fs";
+import { readdir, readFile } from "fs/promises";
+import ora from "ora";
+import { join, resolve } from "path";
+import { buildDocsAlert } from "../alerts/docs-alert";
+import {
+  detectChanges,
+  formatChangeSummary,
+  formatDetailedChanges,
+  getChangedToolkitIds,
+  getChangedToolkitIdsFromCustomSections,
+  hasChanges,
+} from "../diff/index";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output";
+import {
+  createJsonGenerator,
+  type VerificationProgress,
+  verifyOutputDir,
+} from "../generator/index";
+import {
+  createLlmClient,
+  type LlmClient,
+  type LlmProvider,
+  LlmSecretEditGenerator,
+  LlmToolExampleGenerator,
+  LlmToolkitSummaryGenerator,
+} from "../llm/index";
+import type { MergeResult } from "../merger/data-merger";
+import {
+  assertRequireCompleteMetadata,
+  createDataMerger,
+} from "../merger/data-merger";
+import { createDesignSystemMetadataSource } from "../sources/design-system-metadata";
+import { createEmptyCustomSectionsSource } from "../sources/in-memory";
+import {
+  compileCurationDirectory,
+  createMarkdownCurationSource,
+} from "../sources/markdown-curation";
+import { createMockMetadataSource } from "../sources/mock-metadata";
+import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver";
+import {
+  createCachedToolkitDataSource,
+  createMockToolkitDataSource,
+  createPublicCatalogSources,
+  type PublicCatalogSources,
+  type ToolkitData,
+} from "../sources/toolkit-data-source";
+import {
+  type MergedToolkit,
+  type ProviderVersion,
+  ProviderVersionSchema,
+} from "../types/index";
+import { readExclusionList } from "../utils/exclusion-list";
+import { normalizeId } from "../utils/fp";
+import { readIgnoreList } from "../utils/ignore-list";
+import {
+  clearSafeOutputDir,
+  resolveDefaultOutputDir,
+} from "../utils/output-dir";
+import {
+  createProgressTracker,
+  formatToolkitComplete,
+} from "../utils/progress";
+import { resolveProviderIdsFromMetadata } from "../utils/provider-matching";
+import {
+  appendLogEntry,
+  readFailedToolsReport,
+  writeFailedToolsReport,
+} from "../utils/run-logs";
+import {
+  type ApiSource,
+  resolveApiBaseUrl,
+  resolveApiSource,
+} from "./api-source";
+import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup";
+import {
+  assertSafeCurrentToolkitSnapshot,
+  collectRemovedToolkitIds,
+  computeProcessingStats,
+  filterProvidersBySkipIds,
+  getCombinedChangedToolkitIds,
+  resolveCustomSectionsPath,
+} from "./generate-flow";
+
+const program = new Command();
+
+/**
+ * Parse providers string into array of ProviderVersion objects
+ * @param input - Comma-separated string like "Github:1.0.0,Slack:2.1.0"
+ */
+const parseProviders = (input: string): ProviderVersion[] => {
+  const parts = input
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+  return parts.map((part) => {
+    const [provider, version] = part.split(":").map((s) => s.trim());
+    if (!provider) {
+      throw new Error(
+        `Invalid provider format: "${part}". Expected "Provider" or "Provider:version"`
+      );
+    }
+    const parsed = ProviderVersionSchema.safeParse({
+      provider,
+      version: version || undefined,
+    });
+    if (!parsed.success) {
+      throw new Error(`Invalid provider: ${parsed.error.message}`);
+    }
+    return parsed.data;
+  });
+};
+
+/**
+ * Get the default fixture paths (for mock mode)
+ */
+const getDefaultMockDataDir = (): string => join(process.cwd(), "mock-data");
+
+const getDefaultVerificationDir = (): string => {
+  const cwd = process.cwd();
+  if (cwd.endsWith("toolkit-docs-generator")) {
+    return resolve(cwd, "..", "toolkit-docs-generator-verification");
+  }
+  return resolve(cwd, "toolkit-docs-generator-verification");
+};
+
+const getDefaultLogDir = (): string =>
+  resolve(getDefaultVerificationDir(), "logs");
+
+const buildLogPaths = (logDir: string) => ({
+  changeLogPath: join(logDir, "changes.log"),
+  failedToolsPath: join(logDir, "failed-tools.json"),
+  runLogPath: join(logDir, "runs.log"),
+});
+
+const createMetadataSource = async (options: {
+  metadataFile: string;
+  useMetadataFile: boolean;
+  verbose: boolean;
+}) => {
+  if (options.useMetadataFile) {
+    if (options.verbose) {
+      console.log(
+        chalk.dim(
+          `Using metadata file source: ${resolve(options.metadataFile)}`
+        )
+      );
+    }
+    return createMockMetadataSource(options.metadataFile);
+  }
+
+  try {
+    const dsSource = await createDesignSystemMetadataSource();
+    const all =
+      "getAllToolkitsMetadata" in dsSource
+        ? await (
+            dsSource as {
+              getAllToolkitsMetadata: () => Promise<readonly unknown[]>;
+            }
+          ).getAllToolkitsMetadata()
+        : [];
+
+    if (Array.isArray(all) && all.length > 0) {
+      if (options.verbose) {
+        console.log(chalk.dim(`Using Design System metadata (${all.length})`));
+      }
+      return dsSource;
+    }
+  } catch (error) {
+    if (options.verbose) {
+      console.log(chalk.dim(`Design System metadata unavailable: ${error}`));
+    }
+  }
+
+  if (options.verbose) {
+    console.log(
+      chalk.dim(
+        `Falling back to metadata file source: ${resolve(options.metadataFile)}`
+      )
+    );
+  }
+  return createMockMetadataSource(options.metadataFile);
+};
+
+type MetadataSource = Awaited<ReturnType<typeof createMetadataSource>>;
+
+const resolveProviderIds = async (
+  providers: ProviderVersion[],
+  metadataSource: MetadataSource
+): Promise<ProviderVersion[]> => {
+  const all = await metadataSource.getAllToolkitsMetadata();
+  return resolveProviderIdsFromMetadata(providers, all);
+};
+
+const filterProvidersByMetadataPresence = async (
+  providers: readonly ProviderVersion[],
+  metadataSource: MetadataSource
+): Promise<{ included: ProviderVersion[]; excluded: string[] }> => {
+  const included: ProviderVersion[] = [];
+  const excluded: string[] = [];
+
+  for (const provider of providers) {
+    const metadata = await metadataSource.getToolkitMetadata(provider.provider);
+    if (metadata) {
+      included.push(provider);
+    } else {
+      excluded.push(provider.provider);
+    }
+  }
+
+  return { excluded, included };
+};
+
+const buildChangeLogDetails = (
+  result: ReturnType<typeof detectChanges>,
+  curationChangedToolkitIds: readonly string[] = []
+): string[] => {
+  const changed = getChangedToolkitIds(result);
+  const removed = result.toolkitChanges
+    .filter((change) => change.changeType === "removed")
+    .map((change) => change.toolkitId);
+  const versionOnly = result.toolkitChanges
+    .filter(
+      (change) =>
+        change.changeType === "modified" &&
+        change.toolChanges.length === 0 &&
+        change.versionChanged &&
+        !change.metadataChanged
+    )
+    .map((change) => change.toolkitId);
+
+  const details = [
+    `summary=${formatChangeSummary(result)}`,
+    `changed=${changed.length > 0 ? changed.join(", ") : "none"}`,
+    `removed=${removed.length > 0 ? removed.join(", ") : "none"}`,
+  ];
+
+  if (versionOnly.length > 0) {
+    details.push(`versionOnly=${versionOnly.join(", ")}`);
+  }
+
+  if (curationChangedToolkitIds.length > 0) {
+    details.push(`curationChanged=${curationChangedToolkitIds.join(", ")}`);
+  }
+
+  return details;
+};
+
+const clearOutputDir = async (
+  outputDir: string,
+  verbose: boolean
+): Promise<void> => {
+  const resolvedDir = await clearSafeOutputDir(outputDir);
+  if (verbose) {
+    console.log(chalk.dim(`Cleared output directory: ${resolvedDir}`));
+  }
+};
+
+const resolveLlmProvider = (
+  value?: string,
+  optionName = "--llm-provider"
+): LlmProvider => {
+  if (value === "openai" || value === "anthropic") {
+    return value;
+  }
+  throw new Error(
+    `LLM provider is required. Use ${optionName} "openai" or "anthropic".`
+  );
+};
+
+const resolveLlmConfig = (
+  options: {
+    llmProvider?: string;
+    llmApiKey?: string;
+    llmModel?: string;
+    llmBaseUrl?: string;
+    llmTemperature?: number;
+    llmMaxTokens?: number;
+    llmSystemPrompt?: string;
+    llmMaxRetries?: number;
+  },
+  verbose: boolean
+): {
+  client: LlmClient;
+  model: string;
+  temperature?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+} => {
+  const provider = resolveLlmProvider(
+    options.llmProvider ?? process.env.LLM_PROVIDER
+  );
+  const model = options.llmModel ?? process.env.LLM_MODEL;
+
+  if (!model) {
+    throw new Error("LLM model is required. Use --llm-model or LLM_MODEL.");
+  }
+
+  const apiKey =
+    options.llmApiKey ??
+    (provider === "openai"
+      ? process.env.OPENAI_API_KEY
+      : process.env.ANTHROPIC_API_KEY);
+
+  if (!apiKey) {
+    throw new Error(
+      provider === "openai"
+        ? "OpenAI API key is required. Use --llm-api-key or OPENAI_API_KEY."
+        : "Anthropic API key is required. Use --llm-api-key or ANTHROPIC_API_KEY."
+    );
+  }
+
+  const onRetry = verbose
+    ? (attempt: number, error: Error, delayMs: number) => {
+        console.log(
+          chalk.yellow(
+            `  ⚠️  LLM call failed (attempt ${attempt}), retrying in ${delayMs}ms: ${error.message}`
+          )
+        );
+      }
+    : undefined;
+
+  const client = createLlmClient({
+    config: {
+      apiKey,
+      ...(options.llmBaseUrl ? { baseUrl: options.llmBaseUrl } : {}),
+      retry: {
+        maxRetries: options.llmMaxRetries ?? 3,
+        onRetry,
+      },
+    },
+    provider,
+  });
+
+  return {
+    client,
+    model,
+    ...(options.llmTemperature === undefined
+      ? {}
+      : { temperature: options.llmTemperature }),
+    ...(options.llmMaxTokens === undefined
+      ? {}
+      : { maxTokens: options.llmMaxTokens }),
+    ...(options.llmSystemPrompt
+      ? { systemPrompt: options.llmSystemPrompt }
+      : {}),
+  };
+};
+
+interface SecretEditorCliOptions {
+  llmEditorApiKey?: string;
+  llmEditorBaseUrl?: string;
+  llmEditorMaxRetries?: number;
+  llmEditorMaxTokens?: number;
+  llmEditorModel?: string;
+  llmEditorProvider?: string;
+  llmEditorTemperature?: number;
+  skipSecretCoherence?: boolean;
+}
+
+// Headroom is calibrated against the largest single artifact the editor
+// might receive: a long documentation chunk that must be reproduced
+// verbatim minus a removed secret (worst-case output size ≈ input size).
+// Largest chunk in current data is ~6K chars (~1.5K tokens); a summary
+// with no word cap for a 40+ tool toolkit with several secrets can land
+// in the 2–3K output-token range. 8K keeps a safe margin without any
+// meaningful cost or latency penalty on Sonnet 4.6.
+const DEFAULT_EDITOR_MAX_TOKENS = 8192;
+
+const resolveEditorApiKey = (
+  provider: LlmProvider,
+  explicit: string | undefined
+): string | undefined => {
+  if (explicit) return explicit;
+  if (process.env.LLM_EDITOR_API_KEY) return process.env.LLM_EDITOR_API_KEY;
+  if (provider === "anthropic") {
+    return process.env.ANTHROPIC_API_KEY;
+  }
+  return process.env.OPENAI_API_KEY;
+};
+
+/**
+ * Resolve the editor model from CLI options, then from env vars in
+ * documented precedence order. Kept as a shared helper so the verbose
+ * log in each `generate` action displays the same model that
+ * resolveSecretEditGenerator will actually use.
+ */
+const resolveEditorModel = (options: {
+  llmEditorModel?: string;
+}): string | undefined =>
+  options.llmEditorModel ??
+  process.env.LLM_EDITOR_MODEL ??
+  process.env.ANTHROPIC_EDITOR_MODEL;
+
+/**
+ * Build an LLM secret-edit generator from CLI options + env. Returns
+ * undefined when the editor is disabled or unconfigured; callers fall back
+ * to scanner-only warnings in that case.
+ */
+const resolveSecretEditGenerator = (
+  options: SecretEditorCliOptions,
+  verbose: boolean
+): LlmSecretEditGenerator | undefined => {
+  if (options.skipSecretCoherence) {
+    return;
+  }
+
+  const providerRaw =
+    options.llmEditorProvider ?? process.env.LLM_EDITOR_PROVIDER;
+  const model = resolveEditorModel(options);
+
+  // Editor stays opt-in: both provider and model must be explicitly set.
+  if (!(providerRaw && model)) {
+    return;
+  }
+
+  const provider = resolveLlmProvider(providerRaw, "--llm-editor-provider");
+  const apiKey = resolveEditorApiKey(provider, options.llmEditorApiKey);
+  if (!apiKey) {
+    // Fail open: unconfigured editor degrades to scanner-only warnings
+    // instead of crashing the whole generation run. CI and local scripts
+    // often point at the same flag set and shouldn't break when the
+    // editor's API key is simply absent.
+    if (verbose) {
+      console.log(
+        chalk.yellow(
+          `⚠ Secret-coherence editor skipped: no API key found for provider ${provider}.`
+        )
+      );
+    }
+    return;
+  }
+
+  const onRetry = verbose
+    ? (attempt: number, error: Error, delayMs: number) => {
+        console.log(
+          chalk.yellow(
+            `  ⚠️  Secret editor call failed (attempt ${attempt}), retrying in ${delayMs}ms: ${error.message}`
+          )
+        );
+      }
+    : undefined;
+
+  const client = createLlmClient({
+    config: {
+      apiKey,
+      ...(options.llmEditorBaseUrl
+        ? { baseUrl: options.llmEditorBaseUrl }
+        : {}),
+      retry: {
+        maxRetries: options.llmEditorMaxRetries ?? 3,
+        onRetry,
+      },
+    },
+    provider,
+  });
+
+  return new LlmSecretEditGenerator({
+    client,
+    model,
+    ...(options.llmEditorTemperature === undefined
+      ? {}
+      : { temperature: options.llmEditorTemperature }),
+    maxTokens: options.llmEditorMaxTokens ?? DEFAULT_EDITOR_MAX_TOKENS,
+  });
+};
+
+/**
+ * The experience API merges the engine's public catalog with design-system
+ * branding, so one anonymous read supplies both tools and toolkit metadata.
+ * Override with --api-url / PUBLIC_CATALOG_URL to point at staging
+ * or a local BFF.
+ */
+const DEFAULT_PUBLIC_CATALOG_URL = "https://experience.arcade.dev/api";
+
+interface ToolkitDataSourceOptions {
+  apiPageSize?: number;
+  apiSource?: string;
+  apiUrl?: string;
+}
+
+const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
+  const baseUrl =
+    resolveApiBaseUrl(options.apiUrl) ?? DEFAULT_PUBLIC_CATALOG_URL;
+
+  return {
+    baseUrl,
+    ...(options.apiPageSize ? { toolsPageSize: options.apiPageSize } : {}),
+  };
+};
+
+const createPublicCatalogSourcesForCli = (
+  options: ToolkitDataSourceOptions,
+  verbose: boolean
+): PublicCatalogSources => {
+  const config = resolvePublicCatalogConfig(options);
+  if (verbose) {
+    console.log(
+      chalk.dim(
+        `Using public/tool_catalog + public/tools: ${config.baseUrl} (tools and toolkit branding)`
+      )
+    );
+  }
+  return createPublicCatalogSources(config);
+};
+
+/**
+ * Build the toolkit data source, plus the metadata source that name
+ * resolution and `--require-complete` filtering should consult.
+ *
+ * Under the public catalog those two are the same read, so a toolkit is never
+ * filtered out for missing branding that the catalog actually has. Only the
+ * mock path still needs a separate metadata source, and it is built on demand
+ * so a live run never loads the design-system package.
+ */
+const createToolkitDataSourceForApi = async (
+  apiSource: ApiSource,
+  options: ToolkitDataSourceOptions,
+  getFallbackMetadataSource: () => Promise<MetadataSource>,
+  mockDataDir: string,
+  verbose: boolean
+): Promise<PublicCatalogSources> => {
+  if (apiSource === "public-catalog") {
+    return createPublicCatalogSourcesForCli(options, verbose);
+  }
+
+  if (verbose) {
+    console.log(chalk.dim(`Using mock data: ${mockDataDir}`));
+  }
+  return {
+    metadataSource: await getFallbackMetadataSource(),
+    toolkitDataSource: createMockToolkitDataSource({ dataDir: mockDataDir }),
+  };
+};
+
+const normalizeToolkitKey = (toolkitId: string): string =>
+  toolkitId.toLowerCase();
+
+interface PreviousToolkitLoadStats {
+  failedFiles: string[];
+  fallbackFiles: number;
+  loadedFiles: number;
+  missingFiles: number;
+  scannedFiles: number;
+}
+
+interface PreviousToolkitLoadResult {
+  stats: PreviousToolkitLoadStats;
+  toolkits: ReadonlyMap<string, MergedToolkit>;
+}
+
+const createPreviousToolkitLoadStats = (): PreviousToolkitLoadStats => ({
+  failedFiles: [],
+  fallbackFiles: 0,
+  loadedFiles: 0,
+  missingFiles: 0,
+  scannedFiles: 0,
+});
+
+const getFileStem = (filePath: string): string => {
+  const fileName = filePath.split("/").pop() ?? "unknown.json";
+  return fileName.replace(/\.json$/i, "");
+};
+
+interface PreviousToolkitLoadOutcome {
+  missing: boolean;
+  reason?: string;
+  toolkit: MergedToolkit | null;
+  usedFallback: boolean;
+}
+
+const loadPreviousToolkit = async (
+  filePath: string
+): Promise<PreviousToolkitLoadOutcome> => {
+  try {
+    const content = await readFile(filePath, "utf-8");
+    const parsed = JSON.parse(content) as unknown;
+    const parsedToolkit = parsePreviousToolkitForDiff(
+      parsed,
+      getFileStem(filePath)
+    );
+    return {
+      missing: false,
+      toolkit: parsedToolkit.toolkit,
+      usedFallback: parsedToolkit.usedFallback,
+      ...(parsedToolkit.reason ? { reason: parsedToolkit.reason } : {}),
+    };
+  } catch (error) {
+    const errorWithCode =
+      error && typeof error === "object" && "code" in error
+        ? (error as { code?: string })
+        : undefined;
+    if (errorWithCode?.code === "ENOENT") {
+      return {
+        missing: true,
+        toolkit: null,
+        usedFallback: false,
+      };
+    }
+
+    return {
+      missing: false,
+      reason: error instanceof Error ? error.message : String(error),
+      toolkit: null,
+      usedFallback: false,
+    };
+  }
+};
+
+const formatPreviousToolkitLoadStats = (
+  stats: PreviousToolkitLoadStats
+): string =>
+  [
+    `${stats.scannedFiles} scanned`,
+    `${stats.loadedFiles} loaded`,
+    `${stats.fallbackFiles} fallback`,
+    `${stats.missingFiles} missing`,
+    `${stats.failedFiles.length} failed`,
+  ].join(", ");
+
+const addLoadedPreviousToolkit = (
+  previousToolkits: Map<string, MergedToolkit>,
+  stats: PreviousToolkitLoadStats,
+  loaded: PreviousToolkitLoadOutcome
+): boolean => {
+  if (!loaded.toolkit) {
+    return false;
+  }
+  previousToolkits.set(normalizeToolkitKey(loaded.toolkit.id), loaded.toolkit);
+  stats.loadedFiles += 1;
+  if (loaded.usedFallback) {
+    stats.fallbackFiles += 1;
+  }
+  return true;
+};
+
+const getPreviousToolkitFailureReason = (
+  loaded: PreviousToolkitLoadOutcome
+): string => loaded.reason ?? "unable to parse previous output";
+
+const logFallbackToolkitLoad = (
+  itemLabel: string,
+  loaded: PreviousToolkitLoadOutcome,
+  verbose: boolean
+): void => {
+  if (!(verbose && loaded.usedFallback)) {
+    return;
+  }
+  console.log(
+    chalk.dim(
+      `Loaded ${itemLabel} with fallback parser (${loaded.reason ?? "schema mismatch"}).`
+    )
+  );
+};
+
+const loadPreviousToolkitsForProviders = async (
+  dir: string,
+  providers: ProviderVersion[],
+  verbose: boolean
+): Promise<PreviousToolkitLoadResult> => {
+  const previousToolkits = new Map<string, MergedToolkit>();
+  const stats = createPreviousToolkitLoadStats();
+
+  for (const provider of providers) {
+    stats.scannedFiles += 1;
+    const providerName = provider.provider;
+    const filePath = join(dir, `${providerName.toLowerCase()}.json`);
+    const loaded = await loadPreviousToolkit(filePath);
+
+    if (addLoadedPreviousToolkit(previousToolkits, stats, loaded)) {
+      logFallbackToolkitLoad(providerName, loaded, verbose);
+      continue;
+    }
+
+    if (loaded.missing) {
+      stats.missingFiles += 1;
+      if (verbose) {
+        console.log(chalk.dim(`No previous output found for ${providerName}.`));
+      }
+      continue;
+    }
+
+    stats.failedFiles.push(
+      `${providerName}: ${getPreviousToolkitFailureReason(loaded)}`
+    );
+    if (verbose) {
+      console.log(
+        chalk.dim(`Failed to parse previous output for ${providerName}.`)
+      );
+    }
+  }
+
+  return { stats, toolkits: previousToolkits };
+};
+
+const loadPreviousToolkitsFromDir = async (
+  dir: string,
+  verbose: boolean
+): Promise<PreviousToolkitLoadResult> => {
+  const previousToolkits = new Map<string, MergedToolkit>();
+  const stats = createPreviousToolkitLoadStats();
+
+  try {
+    const entries = await readdir(dir);
+    const jsonFiles = entries.filter(
+      (entry) => entry.endsWith(".json") && entry !== "index.json"
+    );
+
+    for (const fileName of jsonFiles) {
+      stats.scannedFiles += 1;
+      const filePath = join(dir, fileName);
+      const loaded = await loadPreviousToolkit(filePath);
+      if (addLoadedPreviousToolkit(previousToolkits, stats, loaded)) {
+        logFallbackToolkitLoad(fileName, loaded, verbose);
+        continue;
+      }
+
+      if (loaded.missing) {
+        stats.missingFiles += 1;
+        continue;
+      }
+
+      stats.failedFiles.push(
+        `${fileName}: ${getPreviousToolkitFailureReason(loaded)}`
+      );
+    }
+  } catch (error) {
+    if (verbose) {
+      console.log(chalk.dim(`Failed to read previous output: ${error}`));
+    }
+  }
+
+  return { stats, toolkits: previousToolkits };
+};
+
+const processProviders = async (
+  providers: ProviderVersion[],
+  merger: ReturnType<typeof createDataMerger>,
+  spinner: ReturnType<typeof ora>,
+  verbose: boolean
+): Promise<MergeResult[]> => {
+  const results: MergeResult[] = [];
+
+  for (const pv of providers) {
+    spinner.start(`Processing ${pv.provider}...`);
+
+    try {
+      const result = await merger.mergeToolkit(pv.provider, pv.version);
+      results.push(result);
+
+      if (result.warnings.length > 0 && verbose) {
+        spinner.warn(`${pv.provider}: ${result.warnings.join(", ")}`);
+      } else {
+        spinner.succeed(`${pv.provider}: ${result.toolkit.tools.length} tools`);
+      }
+    } catch (error) {
+      spinner.fail(`${pv.provider}: ${error}`);
+    }
+  }
+
+  return results;
+};
+
+program
+  .name("toolkit-docs-generator")
+  .description("Generate documentation JSON for Arcade toolkits")
+  .version("1.0.0");
+
+program
+  .command("generate")
+  .description("Generate documentation for specific providers or all toolkits")
+  .option(
+    "-p, --providers <providers>",
+    'Comma-separated list of providers with optional versions (e.g., "Github:1.0.0,Slack:2.1.0" or "Github,Slack")'
+  )
+  .option(
+    "--failed-tools-file <file>",
+    "Path to failed tools report to rerun only impacted toolkits"
+  )
+  .option("--all", "Generate documentation for all toolkits", false)
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
+  .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
+  .option("--mock-data-dir <dir>", "Path to mock data directory")
+  .option("--metadata-file <file>", "Path to metadata JSON file")
+  .option(
+    "--api-source <source>",
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
+  )
+  .option(
+    "--api-url <url>",
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
+  )
+  .option(
+    "--api-page-size <number>",
+    "Public catalog tools page size",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option("--previous-output <dir>", "Path to previous output directory")
+  .option("--force-regenerate", "Regenerate all examples and summary", false)
+  .option(
+    "--overwrite-output",
+    "Delete output directory before writing new JSON"
+  )
+  .option("--llm-provider <provider>", "LLM provider (openai|anthropic)")
+  .option("--llm-model <model>", "LLM model to use")
+  .option("--llm-api-key <key>", "LLM API key")
+  .option("--llm-base-url <url>", "LLM base URL")
+  .option("--llm-temperature <number>", "LLM temperature", (value) =>
+    Number.parseFloat(value)
+  )
+  .option("--llm-max-tokens <number>", "LLM max tokens", (value) =>
+    Number.parseInt(value, 10)
+  )
+  .option("--llm-system-prompt <text>", "LLM system prompt override")
+  .option(
+    "--llm-max-retries <number>",
+    "Max LLM retry attempts (default: 3)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--llm-concurrency <number>",
+    "Max concurrent LLM calls per toolkit (default: 10)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--toolkit-concurrency <number>",
+    "Max concurrent toolkit processing (default: 5)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--no-index-from-output",
+    "Do not rebuild index from output directory"
+  )
+  .option("--skip-examples", "Skip LLM example generation", false)
+  .option("--skip-summary", "Skip LLM summary generation", false)
+  .option("--no-verify-output", "Skip output verification")
+  .option(
+    "--custom-sections <path>",
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
+  )
+  .option(
+    "--resume",
+    "Resume from previous run, skipping already-generated toolkits",
+    false
+  )
+  .option(
+    "--incremental",
+    "Write each toolkit immediately after processing (default when --resume)",
+    false
+  )
+  .option(
+    "--skip-unchanged",
+    "Only regenerate toolkits with changed tool definitions",
+    false
+  )
+  .option(
+    "--require-complete",
+    "Require complete metadata. Only include toolkits with data in Engine and Design System.",
+    false
+  )
+  .option(
+    "--preserve-last-known-good",
+    "Publish healthy toolkits while preserving prior docs for recoverable toolkit failures",
+    false
+  )
+  .option(
+    "--exclude-file <file>",
+    "Path to a .txt file with toolkit IDs to skip and delete existing output for (one per line, e.g. remove-toolkits.txt)"
+  )
+  .option(
+    "--ignore-file <file>",
+    "Path to a .txt file with toolkit IDs to skip during generation, leaving existing output untouched (one per line, e.g. skip-toolkits.txt)"
+  )
+  .option("--verbose", "Enable verbose logging", false)
+  .option(
+    "--llm-editor-provider <provider>",
+    "Secret-coherence editor LLM provider (openai|anthropic). Defaults to LLM_EDITOR_PROVIDER env."
+  )
+  .option(
+    "--llm-editor-model <model>",
+    "Secret-coherence editor LLM model (e.g. claude-sonnet-4-6). Defaults to LLM_EDITOR_MODEL or ANTHROPIC_EDITOR_MODEL env."
+  )
+  .option(
+    "--llm-editor-api-key <key>",
+    "Secret-coherence editor API key. Falls back to LLM_EDITOR_API_KEY or the provider-specific env var."
+  )
+  .option("--llm-editor-base-url <url>", "Secret-coherence editor LLM base URL")
+  .option(
+    "--llm-editor-temperature <number>",
+    "Secret-coherence editor temperature",
+    (value) => Number.parseFloat(value)
+  )
+  .option(
+    "--llm-editor-max-tokens <number>",
+    "Secret-coherence editor max tokens (default: 8192)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--llm-editor-max-retries <number>",
+    "Secret-coherence editor max retry attempts (default: 3)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--skip-secret-coherence",
+    "Disable the secret-coherence scan and edit step",
+    false
+  )
+  .action(
+    async (options: {
+      providers?: string;
+      failedToolsFile?: string;
+      all: boolean;
+      output: string;
+      logDir: string;
+      mockDataDir?: string;
+      metadataFile?: string;
+      apiSource?: string;
+      apiUrl?: string;
+      apiPageSize?: number;
+      previousOutput?: string;
+      forceRegenerate: boolean;
+      overwriteOutput?: boolean;
+      llmProvider?: string;
+      llmModel?: string;
+      llmApiKey?: string;
+      llmBaseUrl?: string;
+      llmTemperature?: number;
+      llmMaxTokens?: number;
+      llmSystemPrompt?: string;
+      llmMaxRetries?: number;
+      llmConcurrency?: number;
+      toolkitConcurrency?: number;
+      indexFromOutput: boolean;
+      skipExamples: boolean;
+      skipSummary: boolean;
+      verifyOutput: boolean;
+      customSections?: string;
+      resume: boolean;
+      incremental: boolean;
+      skipUnchanged: boolean;
+      requireComplete: boolean;
+      preserveLastKnownGood: boolean;
+      excludeFile?: string;
+      ignoreFile?: string;
+      verbose: boolean;
+      llmEditorProvider?: string;
+      llmEditorModel?: string;
+      llmEditorApiKey?: string;
+      llmEditorBaseUrl?: string;
+      llmEditorTemperature?: number;
+      llmEditorMaxTokens?: number;
+      llmEditorMaxRetries?: number;
+      skipSecretCoherence?: boolean;
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
+    }) => {
+      const spinner = ora("Parsing input...").start();
+      const logPaths = buildLogPaths(resolve(options.logDir));
+      const { requireComplete } = options;
+      const { preserveLastKnownGood } = options;
+
+      let excludedToolkitIds = new Set<string>();
+      if (options.excludeFile) {
+        spinner.start(`Loading exclusion list from ${options.excludeFile}...`);
+        const loaded = await readExclusionList(options.excludeFile);
+        if (loaded === null) {
+          spinner.fail(`Exclusion file not found: ${options.excludeFile}`);
+          process.exit(1);
+        }
+        excludedToolkitIds = loaded;
+        spinner.succeed(
+          excludedToolkitIds.size > 0
+            ? `Excluding ${excludedToolkitIds.size} toolkit(s) from generation`
+            : "Exclusion file loaded (no toolkits excluded)"
+        );
+      }
+
+      let ignoredToolkitIds = new Set<string>();
+      if (options.ignoreFile) {
+        spinner.start(`Loading ignore list from ${options.ignoreFile}...`);
+        const loaded = await readIgnoreList(options.ignoreFile);
+        if (loaded === null) {
+          spinner.fail(`Ignore file not found: ${options.ignoreFile}`);
+          process.exit(1);
+        }
+        ignoredToolkitIds = loaded;
+        spinner.succeed(
+          ignoredToolkitIds.size > 0
+            ? `Ignoring ${ignoredToolkitIds.size} toolkit(s) during generation`
+            : "Ignore file loaded (no toolkits ignored)"
+        );
+      }
+
+      try {
+        const runAll = options.all;
+        if (runAll && options.providers) {
+          throw new Error('Use either "--all" or "--providers", not both.');
+        }
+        if (runAll && options.failedToolsFile) {
+          throw new Error(
+            'Use either "--all" or "--failed-tools-file", not both.'
+          );
+        }
+        if (options.providers && options.failedToolsFile) {
+          throw new Error(
+            'Use either "--providers" or "--failed-tools-file", not both.'
+          );
+        }
+
+        let providers = runAll
+          ? []
+          : options.providers
+            ? parseProviders(options.providers)
+            : null;
+
+        if (options.failedToolsFile) {
+          const report = await readFailedToolsReport(options.failedToolsFile);
+          const toolkitIds = Array.from(
+            new Set([
+              ...(report.toolkits ?? []),
+              ...(report.failedToolkits ?? []),
+            ])
+          );
+          if (toolkitIds.length === 0) {
+            spinner.succeed("No failed toolkits found in report.");
+            await appendLogEntry(logPaths.runLogPath, {
+              details: [
+                `output=${resolve(options.output)}`,
+                `file=${options.failedToolsFile}`,
+              ],
+              title: "generate (failed-tools-file no-op)",
+            });
+            process.exit(0);
+          }
+          providers = toolkitIds.map((provider) => ({ provider }));
+        }
+
+        if (!(runAll || providers)) {
+          throw new Error('Missing required option "--providers" or "--all".');
+        }
+
+        if (providers) {
+          spinner.succeed(`Parsed ${providers.length} provider(s)`);
+
+          if (options.verbose) {
+            console.log(chalk.cyan("\nProviders to process:"));
+            for (const pv of providers) {
+              const version = pv.version ?? "latest";
+              console.log(chalk.dim(`  - ${pv.provider}:${version}`));
+            }
+          }
+        } else {
+          spinner.succeed("Parsed all toolkits");
+        }
+
+        // Initialize sources
+        spinner.start("Initializing data sources...");
+
+        const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
+        const metadataFile =
+          options.metadataFile ?? join(mockDataDir, "metadata.json");
+        const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: options.verbose,
+            }),
+          mockDataDir,
+          options.verbose
+        );
+        const { metadataSource } = sources;
+        const toolkitDataSource = createCachedToolkitDataSource(
+          sources.toolkitDataSource
+        );
+
+        // Resolve provider names to canonical toolkit IDs (best effort).
+        if (providers && providers.length > 0) {
+          providers = await resolveProviderIds(providers, metadataSource);
+        }
+
+        if (requireComplete && providers && providers.length > 0) {
+          const { included, excluded } =
+            await filterProvidersByMetadataPresence(providers, metadataSource);
+          providers = included;
+
+          if (excluded.length > 0) {
+            const label = excluded.length === 1 ? "provider" : "providers";
+            console.log(
+              chalk.yellow(
+                `Skipping ${excluded.length} ${label} not found in metadata source: ${excluded.join(", ")}`
+              )
+            );
+          }
+
+          if (providers.length === 0) {
+            spinner.succeed(
+              "No providers left after metadata filtering. Nothing to generate."
+            );
+            await appendLogEntry(logPaths.runLogPath, {
+              details: [
+                `output=${resolve(options.output)}`,
+                "mode=providers",
+                "reason=no providers matched metadata source",
+              ],
+              title: "generate (metadata-filter no-op)",
+            });
+            process.exit(0);
+          }
+        }
+
+        const needsExamples = !options.skipExamples;
+        const needsSummary = !options.skipSummary;
+        const needsLlm = needsExamples || needsSummary;
+
+        const llmConfig = needsLlm
+          ? resolveLlmConfig(options, options.verbose)
+          : null;
+
+        let toolExampleGenerator: LlmToolExampleGenerator | undefined;
+        if (needsExamples) {
+          if (!llmConfig) {
+            throw new Error("LLM configuration is required for examples.");
+          }
+          toolExampleGenerator = new LlmToolExampleGenerator(llmConfig);
+        }
+
+        let toolkitSummaryGenerator: LlmToolkitSummaryGenerator | undefined;
+        if (needsSummary) {
+          if (!llmConfig) {
+            throw new Error("LLM configuration is required for summaries.");
+          }
+          toolkitSummaryGenerator = new LlmToolkitSummaryGenerator(llmConfig);
+        }
+
+        const secretEditGenerator = resolveSecretEditGenerator(
+          options,
+          options.verbose
+        );
+        if (options.verbose) {
+          if (secretEditGenerator) {
+            console.log(
+              chalk.dim(
+                `Secret-coherence editor enabled (model: ${resolveEditorModel(options)})`
+              )
+            );
+          } else if (!options.skipSecretCoherence) {
+            console.log(
+              chalk.dim(
+                "Secret-coherence editor not configured; scanners will still emit warnings."
+              )
+            );
+          }
+        }
+
+        const previousOutputDir = options.forceRegenerate
+          ? undefined
+          : (options.previousOutput ??
+            (options.overwriteOutput ? undefined : options.output));
+        const previousToolkitLoad = previousOutputDir
+          ? runAll
+            ? await loadPreviousToolkitsFromDir(
+                previousOutputDir,
+                options.verbose
+              )
+            : await loadPreviousToolkitsForProviders(
+                previousOutputDir,
+                providers ?? [],
+                options.verbose
+              )
+          : undefined;
+        const previousToolkits = previousToolkitLoad?.toolkits;
+        if (previousToolkitLoad) {
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `Loaded previous output: ${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)}`
+              )
+            );
+          }
+          if (previousToolkitLoad.stats.failedFiles.length > 0) {
+            console.log(
+              chalk.yellow(
+                `⚠ Skipped ${previousToolkitLoad.stats.failedFiles.length} previous toolkit file(s) during diffing.`
+              )
+            );
+            if (options.verbose) {
+              for (const failure of previousToolkitLoad.stats.failedFiles) {
+                console.log(chalk.dim(`  - ${failure}`));
+              }
+            }
+          }
+        }
+
+        // Custom sections source. When curation/ is present, use it by default
+        // so manual generation follows the same merge and diff behavior as
+        // check-changes and the nightly workflow.
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
+          : createEmptyCustomSectionsSource();
+
+        // Build provider ID resolver from design system OAuth catalogue
+        const resolveProviderId =
+          (await createDesignSystemProviderIdResolver()) ?? undefined;
+
+        spinner.succeed("Data sources initialized");
+
+        // Create generator (needed early for resume check)
+        const generator = createJsonGenerator({
+          generateIndex: true,
+          indexSource: options.indexFromOutput ? "output" : "current",
+          outputDir: resolve(options.output),
+          prettyPrint: true,
+        });
+
+        // Handle resume mode - check for already completed toolkits
+        const useResume = options.resume && !options.overwriteOutput;
+        const useIncremental = options.incremental || useResume;
+        let skipToolkitIds = new Set<string>();
+
+        if (useResume) {
+          spinner.start("Checking for previously completed toolkits...");
+          skipToolkitIds = await generator.getCompletedToolkitIds();
+          if (skipToolkitIds.size > 0) {
+            spinner.succeed(
+              `Found ${skipToolkitIds.size} already-completed toolkit(s) to skip`
+            );
+          } else {
+            spinner.succeed("No previously completed toolkits found");
+          }
+        }
+
+        for (const id of excludedToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
+        for (const id of ignoredToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
+        // Handle --skip-unchanged: detect changes and only regenerate changed toolkits
+        let changedToolkitIds: Set<string> | undefined;
+        let changeResult: ReturnType<typeof detectChanges> | undefined;
+        if (options.skipUnchanged && runAll && !options.overwriteOutput) {
+          spinner.start("Detecting changes in tool definitions...");
+
+          // Fetch all current tools
+          const fetchStartedAt = Date.now();
+          const currentToolkitsData =
+            await toolkitDataSource.fetchAllToolkitsData();
+          const fetchDurationMs = Date.now() - fetchStartedAt;
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `  Fetched ${currentToolkitsData.size} toolkit(s) from ${apiSource} in ${fetchDurationMs}ms`
+              )
+            );
+          }
+
+          if (requireComplete) {
+            assertRequireCompleteMetadata(
+              Array.from(currentToolkitsData.entries())
+            );
+          }
+
+          // Build map of toolkit ID -> current toolkit data for comparison
+          const currentToolkitDataForDiff = new Map<string, ToolkitData>(
+            currentToolkitsData
+          );
+          assertSafeCurrentToolkitSnapshot(
+            currentToolkitDataForDiff.size,
+            previousToolkits?.size ?? 0
+          );
+
+          // Detect changes
+          const compareStartedAt = Date.now();
+          const detectedChanges = detectChanges(
+            currentToolkitDataForDiff,
+            previousToolkits ?? new Map()
+          );
+          const changedCustomSectionIds = new Set(
+            customSectionsPath
+              ? getChangedToolkitIdsFromCustomSections(
+                  await customSectionsSource.getAllCustomSections(),
+                  previousToolkits ?? new Map()
+                ).map((id) => id.toLowerCase())
+              : []
+          );
+          const compareDurationMs = Date.now() - compareStartedAt;
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `  Compared ${currentToolkitDataForDiff.size} current toolkit(s) against ${previousToolkits?.size ?? 0} previous toolkit(s) in ${compareDurationMs}ms`
+              )
+            );
+          }
+
+          // Auto-delete toolkit JSON files for toolkits that no longer exist in the API.
+          // Adding their IDs to excludedToolkitIds means cleanupExcludedToolkitOutput()
+          // (called below) will delete the stale <id>.json and rebuild index.json.
+          const removedToolkitIds = collectRemovedToolkitIds(detectedChanges);
+          if (removedToolkitIds.size > 0) {
+            for (const id of removedToolkitIds) {
+              excludedToolkitIds.add(id);
+            }
+            if (options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Marking ${removedToolkitIds.size} removed toolkit(s) for cleanup: ${[...removedToolkitIds].join(", ")}`
+                )
+              );
+            }
+          }
+
+          if (
+            !hasChanges(detectedChanges) &&
+            changedCustomSectionIds.size === 0
+          ) {
+            spinner.succeed(
+              "No changes detected. All toolkits are up to date."
+            );
+            console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
+
+            const noChangeCleanup = await cleanupExcludedToolkitOutput({
+              excludedToolkitIds,
+              generator,
+              outputDir: options.output,
+              verbose: options.verbose,
+            });
+            if (noChangeCleanup.deleted.length > 0 && options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Deleted ${noChangeCleanup.deleted.length} excluded toolkit file(s): ${noChangeCleanup.deleted.join(", ")}`
+                )
+              );
+            }
+            for (const warning of noChangeCleanup.warnings) {
+              spinner.warn(warning);
+            }
+
+            await appendLogEntry(logPaths.runLogPath, {
+              details: [
+                `output=${resolve(options.output)}`,
+                `apiSource=${apiSource}`,
+                `summary=${formatChangeSummary(detectedChanges)}`,
+                `excludedFilesDeleted=${noChangeCleanup.deleted.length}`,
+              ],
+              title: "generate --skip-unchanged (no changes)",
+            });
+            await appendLogEntry(logPaths.changeLogPath, {
+              details: [formatChangeSummary(detectedChanges)],
+              title: "changes (no-op)",
+            });
+            return;
+          }
+
+          // Get IDs of changed toolkits
+          const changedIds = getCombinedChangedToolkitIds(detectedChanges, [
+            ...changedCustomSectionIds,
+          ]);
+          changedToolkitIds = new Set(changedIds.map((id) => id.toLowerCase()));
+          changeResult = detectedChanges;
+          const changedPreview =
+            changedIds.length <= 20
+              ? changedIds.join(", ")
+              : `${changedIds.slice(0, 20).join(", ")} ... +${changedIds.length - 20} more`;
+
+          spinner.succeed(
+            `Detected ${changedIds.length} changed toolkit(s): ${changedPreview}`
+          );
+
+          if (options.verbose) {
+            console.log(
+              chalk.dim(`  Summary: ${formatChangeSummary(detectedChanges)}`)
+            );
+            if (changedIds.length > 20) {
+              console.log(
+                chalk.dim(`  Full changed list: ${changedIds.join(", ")}`)
+              );
+            }
+          }
+        }
+
+        if (options.overwriteOutput) {
+          spinner.start("Clearing output directory...");
+          await clearOutputDir(options.output, options.verbose);
+          spinner.succeed("Output directory cleared");
+        }
+
+        // Track files written incrementally
+        const filesWritten: string[] = [];
+        const writeErrors: string[] = [];
+
+        // Incremental write callback
+        const onToolkitComplete = useIncremental
+          ? async (result: MergeResult) => {
+              try {
+                const filePath = await generator.generateToolkitFile(
+                  result.toolkit
+                );
+                filesWritten.push(filePath);
+              } catch (error) {
+                writeErrors.push(
+                  `Failed to write ${result.toolkit.id}: ${error}`
+                );
+              }
+            }
+          : undefined;
+
+        // Track progress for --all mode
+        let onToolkitProgress:
+          | ((
+              toolkitId: string,
+              status: "start" | "done",
+              toolCount?: number
+            ) => void)
+          | undefined;
+
+        // Create merger using unified source
+        const merger = createDataMerger({
+          customSectionsSource,
+          toolkitDataSource,
+          ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
+          ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
+          ...(secretEditGenerator ? { secretEditGenerator } : {}),
+          ...(options.skipSecretCoherence ? { skipSecretCoherence: true } : {}),
+          ...(previousToolkits ? { previousToolkits } : {}),
+          ...(options.llmConcurrency
+            ? { llmConcurrency: options.llmConcurrency }
+            : {}),
+          ...(options.toolkitConcurrency
+            ? { toolkitConcurrency: options.toolkitConcurrency }
+            : {}),
+          ...(runAll ? { onToolkitProgress } : {}),
+          ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
+          preserveLastKnownGood,
+          requireCompleteData: requireComplete,
+          ...(onToolkitComplete ? { onToolkitComplete } : {}),
+          ...(resolveProviderId ? { resolveProviderId } : {}),
+        });
+
+        // Process toolkits
+        let allResults: MergeResult[];
+        if (runAll) {
+          // First, get the toolkit count to set up progress tracking
+          spinner.start("Fetching toolkit list...");
+          const fetchToolkitListStartedAt = Date.now();
+          const toolkitList = await toolkitDataSource.fetchAllToolkitsData();
+          const fetchToolkitListDurationMs =
+            Date.now() - fetchToolkitListStartedAt;
+          const totalToolkits = toolkitList.size;
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `  Toolkit list fetched in ${fetchToolkitListDurationMs}ms (${totalToolkits} toolkit(s))`
+              )
+            );
+          }
+
+          // requireComplete no longer silently drops toolkits without
+          // design-system metadata into skipToolkitIds here. Silently
+          // excluding them was just as opaque as fabricating metadata for
+          // them — DataMerger.assertNoMissingMetadata (run from inside
+          // mergeAllToolkits below) now fails the whole run and names every
+          // affected toolkit instead.
+
+          // If --skip-unchanged, only process changed toolkits
+          // Add unchanged toolkits to skipToolkitIds
+          if (changedToolkitIds) {
+            for (const [id] of toolkitList) {
+              const normalizedId = id.toLowerCase();
+              if (!changedToolkitIds.has(normalizedId)) {
+                skipToolkitIds.add(normalizedId);
+              }
+            }
+          }
+
+          const processingStats = computeProcessingStats(
+            toolkitList,
+            skipToolkitIds
+          );
+          const { toProcess, effectiveSkipped, unknownSkipIds } =
+            processingStats;
+
+          if (options.verbose && unknownSkipIds.length > 0) {
+            console.log(
+              chalk.dim(
+                `  Skipping ${unknownSkipIds.length} unknown toolkit ID(s) not found in fetched list: ${unknownSkipIds.join(", ")}`
+              )
+            );
+          }
+
+          if (toProcess === 0) {
+            spinner.succeed("No toolkits to process after applying filters");
+            allResults = [];
+          } else {
+            const skipReason =
+              effectiveSkipped > 0 ? `(${effectiveSkipped} skipped)` : "";
+            spinner.succeed(
+              `Found ${totalToolkits} toolkit(s), ${toProcess} to process ${skipReason}`.trim()
+            );
+            if (options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Starting merge with toolkitConcurrency=${options.toolkitConcurrency ?? 5}, llmConcurrency=${options.llmConcurrency ?? 10}`
+                )
+              );
+              console.log(
+                chalk.dim(
+                  `  LLM steps: examples=${needsExamples}, summary=${needsSummary}`
+                )
+              );
+            }
+
+            // Set up progress tracker
+            const progressTracker = createProgressTracker({
+              barWidth: 25,
+              onUpdate: (event) => {
+                if (options.verbose && event.type === "complete") {
+                  console.log(
+                    formatToolkitComplete(event.toolkitId, event.toolCount ?? 0)
+                  );
+                }
+              },
+              total: toProcess,
+            });
+
+            onToolkitProgress = (
+              toolkitId: string,
+              status: "start" | "done",
+              toolCount?: number
+            ) => {
+              if (status === "start") {
+                progressTracker.start(toolkitId);
+                spinner.text = progressTracker.getProgressString(toolkitId);
+              } else {
+                progressTracker.complete(toolkitId, toolCount);
+                spinner.text = progressTracker.getProgressString();
+              }
+            };
+
+            // Re-create merger with the progress callback
+            const mergerWithProgress = createDataMerger({
+              customSectionsSource,
+              toolkitDataSource,
+              ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
+              ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
+              ...(secretEditGenerator ? { secretEditGenerator } : {}),
+              ...(options.skipSecretCoherence
+                ? { skipSecretCoherence: true }
+                : {}),
+              ...(previousToolkits ? { previousToolkits } : {}),
+              ...(options.llmConcurrency
+                ? { llmConcurrency: options.llmConcurrency }
+                : {}),
+              ...(options.toolkitConcurrency
+                ? { toolkitConcurrency: options.toolkitConcurrency }
+                : {}),
+              onToolkitProgress,
+              ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
+              preserveLastKnownGood,
+              requireCompleteData: requireComplete,
+              ...(onToolkitComplete ? { onToolkitComplete } : {}),
+              ...(resolveProviderId ? { resolveProviderId } : {}),
+            });
+
+            spinner.start(progressTracker.getProgressString());
+            allResults = await mergerWithProgress.mergeAllToolkits();
+
+            const summary = progressTracker.getSummary();
+            spinner.succeed(
+              `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
+            );
+
+            // Surface per-toolkit warnings to stdout so CI logs show what
+            // the merger saw. Without this, stale-secret / coverage /
+            // summary-generation warnings only land in the run log file
+            // on disk — which isn't visible in GitHub Actions output.
+            for (const mergeResult of allResults) {
+              if (mergeResult.warnings.length === 0) continue;
+              console.log(
+                chalk.yellow(
+                  `⚠ ${mergeResult.toolkit.id}: ${mergeResult.warnings.length} warning(s)`
+                )
+              );
+              for (const warning of mergeResult.warnings) {
+                console.log(chalk.dim(`  - ${warning}`));
+              }
+            }
+          }
+        } else {
+          const { providersToProcess } = filterProvidersBySkipIds(
+            providers ?? [],
+            skipToolkitIds
+          );
+          if (providersToProcess.length === 0) {
+            spinner.succeed("No providers to process after applying filters");
+            allResults = [];
+          } else {
+            allResults = await processProviders(
+              providersToProcess,
+              merger,
+              spinner,
+              options.verbose
+            );
+          }
+        }
+
+        const mergeFailures = allResults.filter((result) => result.error);
+        // Error results can still carry a last-known-good toolkit fallback from
+        // the merger. Keep them in the batch output so one failed merge cannot
+        // silently remove that toolkit from index.json.
+        const writableResults = allResults.filter(
+          (result) => result.recovery !== "omitted"
+        );
+
+        // Generate output files (batch mode if not incremental)
+        if (!useIncremental && writableResults.length > 0) {
+          spinner.start("Writing output files...");
+
+          const toolkits = writableResults.map((result) => result.toolkit);
+          const genResult = await generator.generateAll(toolkits);
+
+          filesWritten.push(...genResult.filesWritten);
+          writeErrors.push(...genResult.errors);
+
+          if (genResult.errors.length > 0) {
+            spinner.warn(`Written with errors: ${genResult.errors.join(", ")}`);
+          } else {
+            spinner.succeed(`Written ${genResult.filesWritten.length} file(s)`);
+          }
+        } else if (useIncremental) {
+          // Generate index file for incremental mode
+          if (writableResults.length > 0 || skipToolkitIds.size > 0) {
+            spinner.start("Generating index file...");
+            try {
+              const existingToolkits = await generator.getCompletedToolkitIds();
+              const allToolkitIds = new Set([
+                ...existingToolkits,
+                ...writableResults.map((result) =>
+                  result.toolkit.id.toLowerCase()
+                ),
+              ]);
+
+              // Load all toolkits for index
+              const toolkitsForIndex: MergedToolkit[] = [];
+              for (const id of allToolkitIds) {
+                const toolkit = await generator.loadToolkitFile(id);
+                if (toolkit) {
+                  toolkitsForIndex.push(toolkit);
+                }
+              }
+
+              const genResult = await generator.generateAll(toolkitsForIndex);
+              // Only add the index file to filesWritten
+              const indexFile = genResult.filesWritten.find((f) =>
+                f.endsWith("index.json")
+              );
+              if (genResult.errors.length > 0) {
+                writeErrors.push(...genResult.errors);
+                spinner.warn(
+                  `Index generation completed with warnings: ${genResult.errors.join(", ")}`
+                );
+              }
+              if (indexFile) {
+                filesWritten.push(indexFile);
+                if (genResult.errors.length === 0) {
+                  spinner.succeed("Index file generated");
+                }
+              } else if (genResult.errors.length === 0) {
+                spinner.warn(
+                  "Index generation completed, but index.json was not written."
+                );
+              }
+            } catch (error) {
+              spinner.warn(`Failed to generate index: ${error}`);
+            }
+          }
+        }
+
+        const exclusionCleanup = await cleanupExcludedToolkitOutput({
+          excludedToolkitIds,
+          generator,
+          outputDir: options.output,
+          verbose: options.verbose,
+        });
+        if (exclusionCleanup.deleted.length > 0 && options.verbose) {
+          console.log(
+            chalk.dim(
+              `  Deleted ${exclusionCleanup.deleted.length} excluded toolkit file(s): ${exclusionCleanup.deleted.join(", ")}`
+            )
+          );
+        }
+        if (exclusionCleanup.warnings.length > 0) {
+          writeErrors.push(...exclusionCleanup.warnings);
+          for (const warning of exclusionCleanup.warnings) {
+            spinner.warn(warning);
+          }
+        }
+
+        // Print summary
+        if (
+          filesWritten.length > 0 ||
+          writeErrors.length > 0 ||
+          mergeFailures.length > 0
+        ) {
+          console.log(chalk.green("\n✓ Generation complete\n"));
+          if (options.verbose) {
+            console.log(chalk.dim("Files:"));
+            for (const file of filesWritten) {
+              console.log(chalk.dim(`  ${file}`));
+            }
+          } else {
+            console.log(chalk.dim(`Written ${filesWritten.length} file(s)`));
+          }
+
+          if (writeErrors.length > 0) {
+            console.log(chalk.yellow("\nWarnings:"));
+            for (const error of writeErrors) {
+              console.log(chalk.yellow(`  ${error}`));
+            }
+          }
+          if (mergeFailures.length > 0) {
+            console.log(chalk.red("\nFailed toolkits:"));
+            for (const failure of mergeFailures) {
+              console.log(
+                chalk.red(`  ${failure.toolkit.id}: ${failure.error}`)
+              );
+            }
+          }
+        }
+
+        if (options.verifyOutput) {
+          spinner.start("Verifying output...");
+          const onVerifyProgress = (progress: VerificationProgress) => {
+            const phaseLabels = {
+              "cross-referencing": "Cross-referencing",
+              reading: "Reading",
+              validating: "Validating",
+            };
+            spinner.text = `${phaseLabels[progress.phase]} ${progress.current}/${progress.total}: ${progress.fileName ?? ""}`;
+          };
+          const allowLegacyFallback = !options.overwriteOutput;
+          const verification = await verifyOutputDir(
+            resolve(options.output),
+            onVerifyProgress,
+            { allowLegacyFallback }
+          );
+          if (!verification.valid) {
+            spinner.fail("Output verification failed.");
+            for (const error of verification.errors) {
+              console.log(chalk.red(`  - ${error}`));
+            }
+            process.exit(1);
+          }
+          spinner.succeed("Output verified");
+        }
+
+        const warningCount = allResults.reduce(
+          (count, result) => count + result.warnings.length,
+          0
+        );
+        const failedToolkits = mergeFailures.map((result) => result.toolkit.id);
+        // The reason travels with the toolkit id: it is what turns "MicrosoftUsers
+        // has no page" into something a reader can act on without opening the log.
+        const recoveredToolkits = mergeFailures
+          .filter((result) => result.recovery !== undefined)
+          .map((result) => ({
+            id: result.toolkit.id,
+            reason: result.error ?? "unknown error",
+            recovery: result.recovery as "preserved" | "omitted",
+          }));
+        const preservedToolkits = recoveredToolkits
+          .filter((entry) => entry.recovery === "preserved")
+          .map((entry) => entry.id);
+        const omittedToolkits = recoveredToolkits
+          .filter((entry) => entry.recovery === "omitted")
+          .map((entry) => entry.id);
+        const failedTools = allResults.flatMap((result) => result.failedTools);
+        const failedToolkitsFromTools = Array.from(
+          new Set(failedTools.map((tool) => tool.toolkitId))
+        );
+        // Toolkits that fell back to getDefaultMetadata's guessed category,
+        // icon, and docsLink because the design system had no entry for
+        // them. --require-complete would have already failed the run for
+        // these (see DataMerger.assertNoMissingMetadata), so reaching here
+        // means requireComplete was off. The per-toolkit warning text
+        // already goes to stdout above; naming these explicitly in the run
+        // log means the omission survives past the CI log window instead
+        // of only ever being visible in real time.
+        const toolkitsWithDefaultMetadata = allResults
+          .filter((result) => result.usedDefaultMetadata)
+          .map((result) => result.toolkit.id);
+
+        const runDetails = [
+          `output=${resolve(options.output)}`,
+          `apiSource=${apiSource}`,
+          `mode=${runAll ? "all" : "providers"}`,
+          `skipUnchanged=${options.skipUnchanged}`,
+          `requireComplete=${requireComplete}`,
+          `preserveLastKnownGood=${preserveLastKnownGood}`,
+          `filesWritten=${filesWritten.length}`,
+          `warnings=${warningCount}`,
+          `writeErrors=${writeErrors.length}`,
+        ];
+
+        if (toolkitsWithDefaultMetadata.length > 0) {
+          runDetails.push(
+            `toolkitsWithDefaultMetadata=${toolkitsWithDefaultMetadata.join(", ")}`
+          );
+        }
+
+        if (!runAll && providers) {
+          runDetails.push(
+            `providers=${providers.map((p) => p.provider).join(", ")}`
+          );
+        }
+
+        if (options.failedToolsFile) {
+          runDetails.push(`failedToolsFile=${options.failedToolsFile}`);
+        }
+
+        if (failedToolkits.length > 0) {
+          runDetails.push(`failedToolkits=${failedToolkits.join(", ")}`);
+        }
+        if (preservedToolkits.length > 0) {
+          runDetails.push(`preservedToolkits=${preservedToolkits.join(", ")}`);
+        }
+        if (omittedToolkits.length > 0) {
+          runDetails.push(`omittedToolkits=${omittedToolkits.join(", ")}`);
+        }
+        if (failedTools.length > 0) {
+          runDetails.push(`failedTools=${failedTools.length}`);
+        }
+
+        if (changeResult) {
+          runDetails.push(...buildChangeLogDetails(changeResult));
+          await appendLogEntry(logPaths.changeLogPath, {
+            details: buildChangeLogDetails(changeResult),
+            title: "changes",
+          });
+        }
+
+        await writeFailedToolsReport(logPaths.failedToolsPath, {
+          failedToolkits,
+          generatedAt: new Date().toISOString(),
+          recoveredToolkits,
+          toolkits: failedToolkitsFromTools,
+          tools: failedTools,
+        });
+
+        await appendLogEntry(logPaths.runLogPath, {
+          details: runDetails,
+          title: "generate",
+        });
+        if (
+          writeErrors.length > 0 ||
+          (mergeFailures.length > 0 && !preserveLastKnownGood)
+        ) {
+          process.exitCode = 1;
+        }
+      } catch (error) {
+        spinner.fail(
+          `Error: ${error instanceof Error ? error.message : String(error)}`
+        );
+        await appendLogEntry(logPaths.runLogPath, {
+          details: [
+            `output=${resolve(options.output)}`,
+            `message=${error instanceof Error ? error.message : String(error)}`,
+          ],
+          title: "generate (error)",
+        });
+        process.exit(1);
+      }
+    }
+  );
+
+program
+  .command("generate-all")
+  .description("Generate documentation for all toolkits in mock data")
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
+  .option("--mock-data-dir <dir>", "Path to mock data directory")
+  .option("--metadata-file <file>", "Path to metadata JSON file")
+  .option(
+    "--api-source <source>",
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
+  )
+  .option(
+    "--api-url <url>",
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
+  )
+  .option(
+    "--api-page-size <number>",
+    "Public catalog tools page size",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option("--previous-output <dir>", "Path to previous output directory")
+  .option("--force-regenerate", "Regenerate all examples and summary", false)
+  .option(
+    "--overwrite-output",
+    "Delete output directory before writing new JSON"
+  )
+  .option("--llm-provider <provider>", "LLM provider (openai|anthropic)")
+  .option("--llm-model <model>", "LLM model to use")
+  .option("--llm-api-key <key>", "LLM API key")
+  .option("--llm-base-url <url>", "LLM base URL")
+  .option("--llm-temperature <number>", "LLM temperature", (value) =>
+    Number.parseFloat(value)
+  )
+  .option("--llm-max-tokens <number>", "LLM max tokens", (value) =>
+    Number.parseInt(value, 10)
+  )
+  .option("--llm-system-prompt <text>", "LLM system prompt override")
+  .option(
+    "--llm-max-retries <number>",
+    "Max LLM retry attempts (default: 3)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--llm-concurrency <number>",
+    "Max concurrent LLM calls per toolkit (default: 10)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--toolkit-concurrency <number>",
+    "Max concurrent toolkit processing (default: 5)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--no-index-from-output",
+    "Do not rebuild index from output directory"
+  )
+  .option("--skip-examples", "Skip LLM example generation", false)
+  .option("--skip-summary", "Skip LLM summary generation", false)
+  .option("--no-verify-output", "Skip output verification")
+  .option(
+    "--custom-sections <path>",
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
+  )
+  .option(
+    "--resume",
+    "Resume from previous run, skipping already-generated toolkits",
+    false
+  )
+  .option(
+    "--incremental",
+    "Write each toolkit immediately after processing (default when --resume)",
+    false
+  )
+  .option(
+    "--require-complete",
+    "Require complete metadata. Only include toolkits with data in Engine and Design System.",
+    false
+  )
+  .option(
+    "--exclude-file <file>",
+    "Path to a .txt file with toolkit IDs to skip and delete existing output for (one per line, e.g. remove-toolkits.txt)"
+  )
+  .option(
+    "--ignore-file <file>",
+    "Path to a .txt file with toolkit IDs to skip during generation, leaving existing output untouched (one per line, e.g. skip-toolkits.txt)"
+  )
+  .option("--verbose", "Enable verbose logging", false)
+  .option(
+    "--llm-editor-provider <provider>",
+    "Secret-coherence editor LLM provider (openai|anthropic). Defaults to LLM_EDITOR_PROVIDER env."
+  )
+  .option(
+    "--llm-editor-model <model>",
+    "Secret-coherence editor LLM model (e.g. claude-sonnet-4-6). Defaults to LLM_EDITOR_MODEL or ANTHROPIC_EDITOR_MODEL env."
+  )
+  .option(
+    "--llm-editor-api-key <key>",
+    "Secret-coherence editor API key. Falls back to LLM_EDITOR_API_KEY or the provider-specific env var."
+  )
+  .option("--llm-editor-base-url <url>", "Secret-coherence editor LLM base URL")
+  .option(
+    "--llm-editor-temperature <number>",
+    "Secret-coherence editor temperature",
+    (value) => Number.parseFloat(value)
+  )
+  .option(
+    "--llm-editor-max-tokens <number>",
+    "Secret-coherence editor max tokens (default: 8192)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--llm-editor-max-retries <number>",
+    "Secret-coherence editor max retry attempts (default: 3)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--skip-secret-coherence",
+    "Disable the secret-coherence scan and edit step",
+    false
+  )
+  .action(
+    async (options: {
+      output: string;
+      mockDataDir?: string;
+      metadataFile?: string;
+      apiSource?: string;
+      apiUrl?: string;
+      apiPageSize?: number;
+      previousOutput?: string;
+      forceRegenerate: boolean;
+      overwriteOutput?: boolean;
+      llmProvider?: string;
+      llmModel?: string;
+      llmApiKey?: string;
+      llmBaseUrl?: string;
+      llmTemperature?: number;
+      llmMaxTokens?: number;
+      llmSystemPrompt?: string;
+      llmMaxRetries?: number;
+      llmConcurrency?: number;
+      toolkitConcurrency?: number;
+      indexFromOutput: boolean;
+      skipExamples: boolean;
+      skipSummary: boolean;
+      verifyOutput: boolean;
+      customSections?: string;
+      resume: boolean;
+      incremental: boolean;
+      excludeFile?: string;
+      ignoreFile?: string;
+      requireComplete: boolean;
+      verbose: boolean;
+      llmEditorProvider?: string;
+      llmEditorModel?: string;
+      llmEditorApiKey?: string;
+      llmEditorBaseUrl?: string;
+      llmEditorTemperature?: number;
+      llmEditorMaxTokens?: number;
+      llmEditorMaxRetries?: number;
+      skipSecretCoherence?: boolean;
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
+    }) => {
+      const spinner = ora("Initializing...").start();
+      const { requireComplete } = options;
+
+      let excludedToolkitIds = new Set<string>();
+      if (options.excludeFile) {
+        spinner.start(`Loading exclusion list from ${options.excludeFile}...`);
+        const loaded = await readExclusionList(options.excludeFile);
+        if (loaded === null) {
+          spinner.fail(`Exclusion file not found: ${options.excludeFile}`);
+          process.exit(1);
+        }
+        excludedToolkitIds = loaded;
+        spinner.succeed(
+          excludedToolkitIds.size > 0
+            ? `Excluding ${excludedToolkitIds.size} toolkit(s) from generation`
+            : "Exclusion file loaded (no toolkits excluded)"
+        );
+      }
+
+      let ignoredToolkitIds = new Set<string>();
+      if (options.ignoreFile) {
+        spinner.start(`Loading ignore list from ${options.ignoreFile}...`);
+        const loaded = await readIgnoreList(options.ignoreFile);
+        if (loaded === null) {
+          spinner.fail(`Ignore file not found: ${options.ignoreFile}`);
+          process.exit(1);
+        }
+        ignoredToolkitIds = loaded;
+        spinner.succeed(
+          ignoredToolkitIds.size > 0
+            ? `Ignoring ${ignoredToolkitIds.size} toolkit(s) during generation`
+            : "Ignore file loaded (no toolkits ignored)"
+        );
+      }
+
+      try {
+        const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
+        const metadataFile =
+          options.metadataFile ?? join(mockDataDir, "metadata.json");
+        // Create toolkit data source based on API source
+        const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: options.verbose,
+            }),
+          mockDataDir,
+          options.verbose
+        );
+        const toolkitDataSource = createCachedToolkitDataSource(
+          sources.toolkitDataSource
+        );
+
+        const needsExamples = !options.skipExamples;
+        const needsSummary = !options.skipSummary;
+        const needsLlm = needsExamples || needsSummary;
+
+        const llmConfig = needsLlm
+          ? resolveLlmConfig(options, options.verbose)
+          : null;
+
+        let toolExampleGenerator: LlmToolExampleGenerator | undefined;
+        if (needsExamples) {
+          if (!llmConfig) {
+            throw new Error("LLM configuration is required for examples.");
+          }
+          toolExampleGenerator = new LlmToolExampleGenerator(llmConfig);
+        }
+
+        let toolkitSummaryGenerator: LlmToolkitSummaryGenerator | undefined;
+        if (needsSummary) {
+          if (!llmConfig) {
+            throw new Error("LLM configuration is required for summaries.");
+          }
+          toolkitSummaryGenerator = new LlmToolkitSummaryGenerator(llmConfig);
+        }
+
+        const secretEditGenerator = resolveSecretEditGenerator(
+          options,
+          options.verbose
+        );
+        if (options.verbose) {
+          if (secretEditGenerator) {
+            console.log(
+              chalk.dim(
+                `Secret-coherence editor enabled (model: ${resolveEditorModel(options)})`
+              )
+            );
+          } else if (!options.skipSecretCoherence) {
+            console.log(
+              chalk.dim(
+                "Secret-coherence editor not configured; scanners will still emit warnings."
+              )
+            );
+          }
+        }
+
+        const previousOutputDir = options.forceRegenerate
+          ? undefined
+          : (options.previousOutput ??
+            (options.overwriteOutput ? undefined : options.output));
+        const previousToolkitLoad = previousOutputDir
+          ? await loadPreviousToolkitsFromDir(
+              previousOutputDir,
+              options.verbose
+            )
+          : undefined;
+        const previousToolkits = previousToolkitLoad?.toolkits;
+        if (previousToolkitLoad) {
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `Loaded previous output: ${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)}`
+              )
+            );
+          }
+          if (previousToolkitLoad.stats.failedFiles.length > 0) {
+            console.log(
+              chalk.yellow(
+                `⚠ Skipped ${previousToolkitLoad.stats.failedFiles.length} previous toolkit file(s) during diffing.`
+              )
+            );
+            if (options.verbose) {
+              for (const failure of previousToolkitLoad.stats.failedFiles) {
+                console.log(chalk.dim(`  - ${failure}`));
+              }
+            }
+          }
+        }
+
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
+          : createEmptyCustomSectionsSource();
+
+        // Build provider ID resolver from design system OAuth catalogue
+        const resolveProviderId =
+          (await createDesignSystemProviderIdResolver()) ?? undefined;
+
+        spinner.succeed("Data sources initialized");
+
+        // Create generator (needed early for resume check)
+        const generator = createJsonGenerator({
+          generateIndex: true,
+          indexSource: options.indexFromOutput ? "output" : "current",
+          outputDir: resolve(options.output),
+          prettyPrint: true,
+        });
+
+        // Handle resume mode
+        const useResume = options.resume && !options.overwriteOutput;
+        const useIncremental = options.incremental || useResume;
+        let skipToolkitIds = new Set<string>();
+
+        if (useResume) {
+          spinner.start("Checking for previously completed toolkits...");
+          skipToolkitIds = await generator.getCompletedToolkitIds();
+          if (skipToolkitIds.size > 0) {
+            spinner.succeed(
+              `Found ${skipToolkitIds.size} already-completed toolkit(s) to skip`
+            );
+          } else {
+            spinner.succeed("No previously completed toolkits found");
+          }
+        }
+
+        for (const id of excludedToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
+        for (const id of ignoredToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
+        if (options.overwriteOutput) {
+          spinner.start("Clearing output directory...");
+          await clearOutputDir(options.output, options.verbose);
+          spinner.succeed("Output directory cleared");
+        }
+
+        // Track files written incrementally
+        const filesWritten: string[] = [];
+        const writeErrors: string[] = [];
+
+        // Incremental write callback
+        const onToolkitComplete = useIncremental
+          ? async (result: MergeResult) => {
+              try {
+                const filePath = await generator.generateToolkitFile(
+                  result.toolkit
+                );
+                filesWritten.push(filePath);
+              } catch (error) {
+                writeErrors.push(
+                  `Failed to write ${result.toolkit.id}: ${error}`
+                );
+              }
+            }
+          : undefined;
+
+        // First, get the toolkit count to set up progress tracking
+        spinner.start("Fetching toolkit list...");
+        const fetchToolkitListStartedAt = Date.now();
+        const toolkitList = await toolkitDataSource.fetchAllToolkitsData();
+        const fetchToolkitListDurationMs =
+          Date.now() - fetchToolkitListStartedAt;
+        const totalToolkits = toolkitList.size;
+        if (options.verbose) {
+          console.log(
+            chalk.dim(
+              `  Toolkit list fetched in ${fetchToolkitListDurationMs}ms (${totalToolkits} toolkit(s))`
+            )
+          );
+        }
+
+        // requireComplete no longer silently drops toolkits without
+        // design-system metadata into skipToolkitIds here. Silently
+        // excluding them was just as opaque as fabricating metadata for
+        // them — DataMerger.assertNoMissingMetadata (run from inside
+        // mergeAllToolkits below) now fails the whole run and names every
+        // affected toolkit instead.
+
+        const processingStats = computeProcessingStats(
+          toolkitList,
+          skipToolkitIds
+        );
+        const { toProcess, effectiveSkipped, unknownSkipIds } = processingStats;
+
+        if (options.verbose && unknownSkipIds.length > 0) {
+          console.log(
+            chalk.dim(
+              `  Skipping ${unknownSkipIds.length} unknown toolkit ID(s) not found in fetched list: ${unknownSkipIds.join(", ")}`
+            )
+          );
+        }
+
+        if (toProcess === 0) {
+          spinner.succeed("No toolkits to process after applying filters");
+        } else {
+          spinner.succeed(
+            `Found ${totalToolkits} toolkit(s), ${toProcess} to process${effectiveSkipped > 0 ? ` (${effectiveSkipped} skipped)` : ""}`
+          );
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `  Starting merge with toolkitConcurrency=${options.toolkitConcurrency ?? 5}, llmConcurrency=${options.llmConcurrency ?? 10}`
+              )
+            );
+            console.log(
+              chalk.dim(
+                `  LLM steps: examples=${needsExamples}, summary=${needsSummary}`
+              )
+            );
+          }
+
+          // Set up progress tracker
+          const progressTracker = createProgressTracker({
+            barWidth: 25,
+            onUpdate: (event) => {
+              if (options.verbose && event.type === "complete") {
+                console.log(
+                  formatToolkitComplete(event.toolkitId, event.toolCount ?? 0)
+                );
+              }
+            },
+            total: toProcess,
+          });
+
+          const onToolkitProgress = (
+            toolkitId: string,
+            status: "start" | "done",
+            toolCount?: number
+          ) => {
+            if (status === "start") {
+              progressTracker.start(toolkitId);
+              spinner.text = progressTracker.getProgressString(toolkitId);
+            } else {
+              progressTracker.complete(toolkitId, toolCount);
+              spinner.text = progressTracker.getProgressString();
+            }
+          };
+
+          // Create merger using unified source
+          const merger = createDataMerger({
+            customSectionsSource,
+            toolkitDataSource,
+            ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
+            ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
+            ...(secretEditGenerator ? { secretEditGenerator } : {}),
+            ...(options.skipSecretCoherence
+              ? { skipSecretCoherence: true }
+              : {}),
+            ...(previousToolkits ? { previousToolkits } : {}),
+            ...(options.llmConcurrency
+              ? { llmConcurrency: options.llmConcurrency }
+              : {}),
+            ...(options.toolkitConcurrency
+              ? { toolkitConcurrency: options.toolkitConcurrency }
+              : {}),
+            onToolkitProgress,
+            ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
+            requireCompleteData: requireComplete,
+            ...(onToolkitComplete ? { onToolkitComplete } : {}),
+            ...(resolveProviderId ? { resolveProviderId } : {}),
+          });
+
+          spinner.start(progressTracker.getProgressString());
+          const results = await merger.mergeAllToolkits();
+          const mergeFailures = results.filter((result) => result.error);
+          // Error results can still carry a last-known-good toolkit fallback.
+          // Preserve it in batch output rather than letting --clear-output
+          // remove the prior JSON artifact.
+          const writableResults = results.filter(
+            (result) => result.recovery !== "omitted"
+          );
+          const summary = progressTracker.getSummary();
+          spinner.succeed(
+            `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
+          );
+
+          // Surface per-toolkit warnings to stdout (stale-secret scan,
+          // coverage gaps, summary-gen failures) so CI logs show what
+          // the merger saw — otherwise they only land in the run log
+          // file on disk.
+          for (const mergeResult of results) {
+            if (mergeResult.warnings.length === 0) continue;
+            console.log(
+              chalk.yellow(
+                `⚠ ${mergeResult.toolkit.id}: ${mergeResult.warnings.length} warning(s)`
+              )
+            );
+            for (const warning of mergeResult.warnings) {
+              console.log(chalk.dim(`  - ${warning}`));
+            }
+          }
+          if (mergeFailures.length > 0) {
+            console.log(chalk.red("\nFailed toolkits:"));
+            for (const failure of mergeFailures) {
+              console.log(
+                chalk.red(`  ${failure.toolkit.id}: ${failure.error}`)
+              );
+            }
+            process.exitCode = 1;
+          }
+
+          // Generate output (batch mode if not incremental)
+          if (!useIncremental && writableResults.length > 0) {
+            spinner.start("Writing output files...");
+            const toolkits = writableResults.map((result) => result.toolkit);
+            const genResult = await generator.generateAll(toolkits);
+
+            filesWritten.push(...genResult.filesWritten);
+            writeErrors.push(...genResult.errors);
+
+            if (genResult.errors.length > 0) {
+              spinner.warn(
+                `Written with errors: ${genResult.errors.join(", ")}`
+              );
+            } else {
+              spinner.succeed(
+                `Written ${genResult.filesWritten.length} file(s)`
+              );
+            }
+          } else if (useIncremental) {
+            // Generate index file for incremental mode
+            spinner.start("Generating index file...");
+            try {
+              const existingToolkits = await generator.getCompletedToolkitIds();
+              const allToolkitIds = new Set([
+                ...existingToolkits,
+                ...writableResults.map((result) =>
+                  result.toolkit.id.toLowerCase()
+                ),
+              ]);
+
+              const toolkitsForIndex: MergedToolkit[] = [];
+              for (const id of allToolkitIds) {
+                const toolkit = await generator.loadToolkitFile(id);
+                if (toolkit) {
+                  toolkitsForIndex.push(toolkit);
+                }
+              }
+
+              const genResult = await generator.generateAll(toolkitsForIndex);
+              const indexFile = genResult.filesWritten.find((f) =>
+                f.endsWith("index.json")
+              );
+              if (genResult.errors.length > 0) {
+                writeErrors.push(...genResult.errors);
+                spinner.warn(
+                  `Index generation completed with warnings: ${genResult.errors.join(", ")}`
+                );
+              }
+              if (indexFile) {
+                filesWritten.push(indexFile);
+                if (genResult.errors.length === 0) {
+                  spinner.succeed("Index file generated");
+                }
+              } else if (genResult.errors.length === 0) {
+                spinner.warn(
+                  "Index generation completed, but index.json was not written."
+                );
+              }
+            } catch (error) {
+              spinner.warn(`Failed to generate index: ${error}`);
+            }
+          }
+        }
+
+        const exclusionCleanup = await cleanupExcludedToolkitOutput({
+          excludedToolkitIds,
+          generator,
+          outputDir: options.output,
+          verbose: options.verbose,
+        });
+        if (exclusionCleanup.deleted.length > 0 && options.verbose) {
+          console.log(
+            chalk.dim(
+              `  Deleted ${exclusionCleanup.deleted.length} excluded toolkit file(s): ${exclusionCleanup.deleted.join(", ")}`
+            )
+          );
+        }
+        if (exclusionCleanup.warnings.length > 0) {
+          writeErrors.push(...exclusionCleanup.warnings);
+          for (const warning of exclusionCleanup.warnings) {
+            spinner.warn(warning);
+          }
+        }
+
+        if (options.verifyOutput) {
+          spinner.start("Verifying output...");
+          const onVerifyProgress = (progress: VerificationProgress) => {
+            const phaseLabels = {
+              "cross-referencing": "Cross-referencing",
+              reading: "Reading",
+              validating: "Validating",
+            };
+            spinner.text = `${phaseLabels[progress.phase]} ${progress.current}/${progress.total}: ${progress.fileName ?? ""}`;
+          };
+          const allowLegacyFallback = !options.overwriteOutput;
+          const verification = await verifyOutputDir(
+            resolve(options.output),
+            onVerifyProgress,
+            { allowLegacyFallback }
+          );
+          if (!verification.valid) {
+            spinner.fail("Output verification failed.");
+            for (const error of verification.errors) {
+              console.log(chalk.red(`  - ${error}`));
+            }
+            process.exit(1);
+          }
+          spinner.succeed("Output verified");
+        }
+
+        console.log(chalk.green("\n✓ Generation complete\n"));
+        if (filesWritten.length > 0) {
+          console.log(chalk.dim(`Written ${filesWritten.length} file(s)`));
+        }
+        if (writeErrors.length > 0) {
+          console.log(chalk.yellow("\nWarnings:"));
+          for (const warning of writeErrors) {
+            console.log(chalk.yellow(`  ${warning}`));
+          }
+          process.exitCode = 1;
+        }
+      } catch (error) {
+        spinner.fail(
+          `Error: ${error instanceof Error ? error.message : String(error)}`
+        );
+        process.exit(1);
+      }
+    }
+  );
+
+program
+  .command("validate <file>")
+  .description("Validate a generated JSON file against the schema")
+  .action(async (file: string) => {
+    const { readFile } = await import("fs/promises");
+    const { MergedToolkitSchema } = await import("../types/index");
+
+    try {
+      const content = await readFile(file, "utf-8");
+      const json = JSON.parse(content);
+      const result = MergedToolkitSchema.safeParse(json);
+
+      if (result.success) {
+        console.log(chalk.green(`✓ ${file} is valid`));
+      } else {
+        console.log(chalk.red(`✗ ${file} is invalid:`));
+        console.log(chalk.dim(result.error.message));
+        process.exit(1);
+      }
+    } catch (error) {
+      console.log(chalk.red(`✗ Failed to validate: ${error}`));
+      process.exit(1);
+    }
+  });
+
+program
+  .command("validate-curation")
+  .description(
+    "Compile the authored curation directory and report problems per toolkit"
+  )
+  .option(
+    "--custom-sections <path>",
+    "Path to the Markdown/MDX curation directory (defaults to ./curation when present)"
+  )
+  .option("--toolkit <id>", "Only validate one toolkit directory")
+  .action(async (options: { customSections?: string; toolkit?: string }) => {
+    const rootPath = await resolveCustomSectionsPath(options.customSections);
+    if (!rootPath) {
+      console.log(
+        chalk.red(
+          "No curation directory found. Pass --custom-sections <path>, or run from a directory containing curation/."
+        )
+      );
+      process.exit(1);
+    }
+
+    let results: Awaited<ReturnType<typeof compileCurationDirectory>>;
+    try {
+      results = await compileCurationDirectory(rootPath);
+    } catch (error) {
+      // A problem with the root itself, so nothing below it was compiled.
+      console.log(
+        chalk.red(`✗ ${error instanceof Error ? error.message : error}`)
+      );
+      process.exit(1);
+    }
+
+    const wanted = options.toolkit ? normalizeId(options.toolkit) : undefined;
+    const selected = wanted
+      ? results.filter((result) => normalizeId(result.toolkitId) === wanted)
+      : results;
+
+    if (selected.length === 0) {
+      console.log(
+        chalk.red(
+          options.toolkit
+            ? `No curation directory for ${options.toolkit} in ${rootPath}`
+            : `No toolkit directories found in ${rootPath}`
+        )
+      );
+      process.exit(1);
+    }
+
+    let failures = 0;
+    let toolChunkTargets = 0;
+    for (const result of selected) {
+      if ("error" in result) {
+        failures++;
+        console.log(chalk.red(`✗ ${result.toolkitId}`));
+        console.log(chalk.dim(`  ${result.error.message}`));
+        continue;
+      }
+      const { documentationChunks, customImports, subPages, toolChunks } =
+        result.sections;
+      const toolChunkCount = Object.values(toolChunks).reduce(
+        (total, chunks) => total + chunks.length,
+        0
+      );
+      toolChunkTargets += Object.keys(toolChunks).length;
+      console.log(
+        `${chalk.green("✓")} ${result.toolkitId}: ${documentationChunks.length} chunks, ${toolChunkCount} tool chunks, ${customImports.length} imports, ${subPages.length} pages`
+      );
+    }
+
+    console.log(
+      `\n${selected.length} toolkit(s) checked, ${failures} with errors`
+    );
+    if (toolChunkTargets > 0) {
+      console.log(
+        chalk.dim(
+          "Note: `tool:` targets are checked against the live tool list during generation, not here."
+        )
+      );
+    }
+    if (failures > 0) {
+      process.exit(1);
+    }
+  });
+
+program
+  .command("list-toolkits")
+  .description("List toolkits available in mock data")
+  .option("--mock-data-dir <dir>", "Path to mock data directory")
+  .option("--json", "Output as JSON", false)
+  .action(async (options: { mockDataDir?: string; json: boolean }) => {
+    try {
+      const toolkits = new Map<string, number>();
+      const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
+      const toolkitDataSource = createMockToolkitDataSource({
+        dataDir: mockDataDir,
+      });
+      const toolkitData = await toolkitDataSource.fetchAllToolkitsData();
+
+      for (const [id, data] of toolkitData) {
+        toolkits.set(id, data.tools.length);
+      }
+
+      if (options.json) {
+        const data = Array.from(toolkits.entries()).map(([id, count]) => ({
+          id,
+          toolCount: count,
+        }));
+        console.log(JSON.stringify(data, null, 2));
+      } else {
+        console.log(chalk.bold(`\nToolkits in fixture (${toolkits.size}):\n`));
+        for (const [id, count] of toolkits) {
+          console.log(`  ${chalk.green(id.padEnd(20))} ${count} tool(s)`);
+        }
+      }
+    } catch (error) {
+      console.log(chalk.red(`Error: ${error}`));
+      process.exit(1);
+    }
+  });
+
+program
+  .command("verify-output")
+  .description("Verify output directory structure and schema")
+  .option("-o, --output <dir>", "Output directory", resolveDefaultOutputDir())
+  .option("--verbose", "Show detailed progress", false)
+  .action(async (options: { output: string; verbose: boolean }) => {
+    const spinner = ora("Verifying output...").start();
+    try {
+      const onVerifyProgress = (progress: VerificationProgress) => {
+        const phaseLabels = {
+          "cross-referencing": "Cross-referencing",
+          reading: "Reading",
+          validating: "Validating",
+        };
+        spinner.text = `${phaseLabels[progress.phase]} ${progress.current}/${progress.total}: ${progress.fileName ?? ""}`;
+      };
+      const verification = await verifyOutputDir(
+        resolve(options.output),
+        onVerifyProgress
+      );
+      if (!verification.valid) {
+        spinner.fail("Output verification failed:");
+        for (const error of verification.errors) {
+          console.log(chalk.red(`  - ${error}`));
+        }
+        process.exit(1);
+      }
+
+      spinner.succeed("Output verified");
+    } catch (error) {
+      spinner.fail(`Error: ${error}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("check-changes")
+  .description(
+    "Check for changes in tool definitions without generating (dry-run)"
+  )
+  .option(
+    "-o, --output <dir>",
+    "Previous output directory",
+    resolveDefaultOutputDir()
+  )
+  .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
+  .option("--mock-data-dir <dir>", "Path to mock data directory")
+  .option("--metadata-file <file>", "Path to metadata JSON file")
+  .option(
+    "--api-source <source>",
+    'API source: "public-catalog" (experience API public/*) or "mock" (default: auto-detect)'
+  )
+  .option(
+    "--api-url <url>",
+    `Public catalog base URL, including path prefix (or PUBLIC_CATALOG_URL env; default: ${DEFAULT_PUBLIC_CATALOG_URL})`
+  )
+  .option(
+    "--api-page-size <number>",
+    "Public catalog tools page size",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--custom-sections <path>",
+    "Path to the authoritative Markdown/MDX curation directory (defaults to ./curation when present)"
+  )
+  .option("--verbose", "Show detailed tool-level changes", false)
+  .option("--json", "Output as JSON", false)
+  .action(
+    async (options: {
+      output: string;
+      logDir: string;
+      mockDataDir?: string;
+      metadataFile?: string;
+      apiSource?: string;
+      apiUrl?: string;
+      apiPageSize?: number;
+      customSections?: string;
+      verbose: boolean;
+      json: boolean;
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
+    }) => {
+      const spinner = ora("Checking for changes...").start();
+      const logPaths = buildLogPaths(resolve(options.logDir));
+
+      try {
+        // Initialize data source
+        const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
+        const metadataFile =
+          options.metadataFile ?? join(mockDataDir, "metadata.json");
+        const apiSource = resolveApiSource(options);
+        const sources = await createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          () =>
+            createMetadataSource({
+              metadataFile,
+              useMetadataFile: Boolean(options.metadataFile),
+              verbose: false,
+            }),
+          mockDataDir,
+          false // not verbose during fetch
+        );
+        const toolkitDataSource = createCachedToolkitDataSource(
+          sources.toolkitDataSource
+        );
+
+        // Fetch current data from API
+        spinner.text = "Fetching current tool definitions from API...";
+        const fetchStartedAt = Date.now();
+        const currentToolkitsData =
+          await toolkitDataSource.fetchAllToolkitsData();
+        const fetchDurationMs = Date.now() - fetchStartedAt;
+
+        // Build map of toolkit ID -> current toolkit data
+        const currentToolkitDataForDiff = new Map<string, ToolkitData>();
+        for (const [id, data] of currentToolkitsData) {
+          currentToolkitDataForDiff.set(id, data);
+        }
+
+        // Load previous output
+        spinner.text = "Loading previous output...";
+        const loadPreviousStartedAt = Date.now();
+        const previousToolkitLoad = await loadPreviousToolkitsFromDir(
+          resolve(options.output),
+          options.verbose
+        );
+        const loadPreviousDurationMs = Date.now() - loadPreviousStartedAt;
+        const previousToolkits = previousToolkitLoad.toolkits;
+
+        assertSafeCurrentToolkitSnapshot(
+          currentToolkitDataForDiff.size,
+          previousToolkits.size
+        );
+
+        // Detect changes
+        spinner.text = "Comparing tool definitions...";
+        const compareStartedAt = Date.now();
+        const changeResult = detectChanges(
+          currentToolkitDataForDiff,
+          previousToolkits
+        );
+        const customSectionsPath = await resolveCustomSectionsPath(
+          options.customSections
+        );
+        const customSectionsSource = customSectionsPath
+          ? createMarkdownCurationSource(customSectionsPath)
+          : createEmptyCustomSectionsSource();
+        const curationChangedToolkitIds = customSectionsPath
+          ? getChangedToolkitIdsFromCustomSections(
+              await customSectionsSource.getAllCustomSections(),
+              previousToolkits
+            )
+          : [];
+        const compareDurationMs = Date.now() - compareStartedAt;
+        const allChangedToolkitIds = getCombinedChangedToolkitIds(
+          changeResult,
+          curationChangedToolkitIds
+        );
+        const hasAnyChanges =
+          hasChanges(changeResult) || curationChangedToolkitIds.length > 0;
+
+        spinner.stop();
+
+        if (options.verbose) {
+          console.log(chalk.dim("\nDiagnostics:"));
+          console.log(
+            chalk.dim(
+              `  Fetched ${currentToolkitDataForDiff.size} current toolkit(s) in ${fetchDurationMs}ms`
+            )
+          );
+          console.log(
+            chalk.dim(
+              `  Loaded previous output in ${loadPreviousDurationMs}ms (${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)})`
+            )
+          );
+          console.log(
+            chalk.dim(`  Compared signatures in ${compareDurationMs}ms`)
+          );
+          if (customSectionsPath) {
+            console.log(
+              chalk.dim(
+                `  Compared curation from ${resolve(customSectionsPath)} (${curationChangedToolkitIds.length} prose change(s))`
+              )
+            );
+          }
+          if (previousToolkitLoad.stats.failedFiles.length > 0) {
+            console.log(
+              chalk.yellow(
+                `  ⚠ ${previousToolkitLoad.stats.failedFiles.length} previous file(s) could not be parsed and were excluded from diffing.`
+              )
+            );
+            for (const failure of previousToolkitLoad.stats.failedFiles) {
+              console.log(chalk.dim(`    - ${failure}`));
+            }
+          }
+          console.log();
+        } else if (previousToolkitLoad.stats.failedFiles.length > 0) {
+          console.log(
+            chalk.yellow(
+              `⚠ Excluded ${previousToolkitLoad.stats.failedFiles.length} previous toolkit file(s) from diffing. Run with --verbose for details.`
+            )
+          );
+        }
+
+        await appendLogEntry(logPaths.runLogPath, {
+          details: [
+            `output=${resolve(options.output)}`,
+            `apiSource=${apiSource}`,
+            `fetchDurationMs=${fetchDurationMs}`,
+            `loadPreviousDurationMs=${loadPreviousDurationMs}`,
+            `compareDurationMs=${compareDurationMs}`,
+            `previousLoadStats=${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)}`,
+            ...(customSectionsPath
+              ? [`customSections=${resolve(customSectionsPath)}`]
+              : []),
+            ...buildChangeLogDetails(changeResult, curationChangedToolkitIds),
+          ],
+          title: "check-changes",
+        });
+        await appendLogEntry(logPaths.changeLogPath, {
+          details: buildChangeLogDetails(
+            changeResult,
+            curationChangedToolkitIds
+          ),
+          title: "changes",
+        });
+
+        // Output results
+        if (options.json) {
+          console.log(
+            JSON.stringify(
+              {
+                ...changeResult,
+                changedToolkitIds: allChangedToolkitIds,
+                curationChangedToolkitIds,
+                diagnostics: {
+                  currentToolkitCount: currentToolkitDataForDiff.size,
+                  customSectionsPath: customSectionsPath
+                    ? resolve(customSectionsPath)
+                    : null,
+                  previousLoad: previousToolkitLoad.stats,
+                  previousToolkitCount: previousToolkits.size,
+                  timingMs: {
+                    compare: compareDurationMs,
+                    fetch: fetchDurationMs,
+                    loadPrevious: loadPreviousDurationMs,
+                  },
+                },
+              },
+              null,
+              2
+            )
+          );
+        } else {
+          console.log(chalk.bold("\n📋 Change Detection Results\n"));
+
+          // Summary
+          console.log(chalk.cyan("Summary:"));
+          console.log(`  ${formatChangeSummary(changeResult)}`);
+          if (curationChangedToolkitIds.length > 0) {
+            console.log(
+              chalk.cyan("Curation:"),
+              `${curationChangedToolkitIds.length} toolkit(s) with prose changes`
+            );
+          }
+          console.log();
+
+          // Check if there are any changes
+          if (hasAnyChanges) {
+            const apiChangedIds = new Set(
+              getChangedToolkitIds(changeResult).map((id) => id.toLowerCase())
+            );
+            const curationOnlyIds = curationChangedToolkitIds.filter(
+              (id) => !apiChangedIds.has(id)
+            );
+
+            console.log(
+              chalk.yellow(
+                `⚠ ${allChangedToolkitIds.length} toolkit(s) need regeneration:\n`
+              )
+            );
+
+            if (options.verbose) {
+              // Detailed view
+              const detailedLines = formatDetailedChanges(changeResult);
+              for (const line of detailedLines) {
+                if (line.startsWith("[NEW]")) {
+                  console.log(chalk.green(line));
+                } else if (line.startsWith("[REMOVED]")) {
+                  console.log(chalk.red(line));
+                } else if (line.startsWith("[MODIFIED]")) {
+                  console.log(chalk.yellow(line));
+                } else if (line.startsWith("  + ")) {
+                  console.log(chalk.green(line));
+                } else if (line.startsWith("  - ")) {
+                  console.log(chalk.red(line));
+                } else if (line.startsWith("  ~ ")) {
+                  console.log(chalk.yellow(line));
+                } else {
+                  console.log(line);
+                }
+              }
+
+              for (const toolkitId of curationOnlyIds) {
+                console.log(chalk.yellow(`[CURATION] ${toolkitId}`));
+              }
+            } else {
+              // Compact view
+              for (const change of changeResult.toolkitChanges) {
+                if (change.changeType === "unchanged") continue;
+
+                const icon = {
+                  added: chalk.green("+ "),
+                  modified: chalk.yellow("~ "),
+                  removed: chalk.red("- "),
+                  unchanged: "  ",
+                }[change.changeType];
+
+                const toolChangeSummary =
+                  change.changeType === "modified"
+                    ? ` (${change.toolChanges.length} tool change(s))`
+                    : "";
+
+                console.log(
+                  `  ${icon}${change.toolkitId} [${change.currentToolCount} tools]${toolChangeSummary}`
+                );
+              }
+
+              for (const toolkitId of curationOnlyIds) {
+                console.log(
+                  `  ${chalk.yellow("~ ")}${toolkitId} [curation prose]`
+                );
+              }
+            }
+
+            console.log();
+            console.log(
+              chalk.dim(
+                'Run "generate --skip-unchanged" to only regenerate changed toolkits.'
+              )
+            );
+          } else {
+            console.log(
+              chalk.green(
+                "✓ No changes detected. All toolkits are up to date.\n"
+              )
+            );
+          }
+        }
+      } catch (error) {
+        spinner.fail(
+          `Error: ${error instanceof Error ? error.message : String(error)}`
+        );
+        await appendLogEntry(logPaths.runLogPath, {
+          details: [
+            `output=${resolve(options.output)}`,
+            `message=${error instanceof Error ? error.message : String(error)}`,
+          ],
+          title: "check-changes (error)",
+        });
+        process.exit(1);
+      }
+    }
+  );
+
+program
+  .command("alert")
+  .description(
+    "Print the Slack payload for a finished run, or nothing when the run had no recoverable failures"
+  )
+  .option(
+    "--report <file>",
+    "Failed tools report to summarize",
+    buildLogPaths(getDefaultLogDir()).failedToolsPath
+  )
+  .option(
+    "--log-url <url>",
+    "Link the message should point at, ideally the job log rather than the run summary"
+  )
+  .action(async (options: { report: string; logUrl?: string }) => {
+    // Silence rather than failure when there is no report: a clean run never
+    // writes one, and CI should not need to know the difference.
+    if (!existsSync(options.report)) {
+      return;
+    }
+
+    const report = await readFailedToolsReport(options.report);
+    const message = buildDocsAlert(
+      report,
+      options.logUrl ? { logUrl: options.logUrl } : {}
+    );
+    if (message) {
+      console.log(JSON.stringify(message));
+    }
+  });
+
+// Parse command line arguments
+program.parse();

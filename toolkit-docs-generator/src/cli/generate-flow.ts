@@ -1,0 +1,149 @@
+import { access } from "fs/promises";
+import { join } from "path";
+import {
+  type ChangeDetectionResult,
+  getChangedToolkitIds,
+} from "../diff/index";
+
+/**
+ * Resolve an explicit custom-sections path, or use curation/ in the working
+ * directory when it exists. This keeps regular generation and change checks
+ * on the same source of truth.
+ */
+export const resolveCustomSectionsPath = async (
+  explicitPath: string | undefined,
+  workingDir = process.cwd()
+): Promise<string | undefined> => {
+  if (explicitPath) {
+    return explicitPath;
+  }
+
+  const defaultPath = join(workingDir, "curation");
+  const exists = await access(defaultPath).then(
+    () => true,
+    () => false
+  );
+  return exists ? defaultPath : undefined;
+};
+
+/**
+ * Combine API and curation changes using the same case-insensitive toolkit ID
+ * semantics used by the generation skip set.
+ */
+export const getCombinedChangedToolkitIds = (
+  changeResult: ChangeDetectionResult,
+  curationChangedToolkitIds: readonly string[]
+): string[] => {
+  const apiChangedIds = getChangedToolkitIds(changeResult).map((id) =>
+    id.toLowerCase()
+  );
+  const curationChangedIds = curationChangedToolkitIds.map((id) =>
+    id.toLowerCase()
+  );
+  return [...new Set([...apiChangedIds, ...curationChangedIds])].sort();
+};
+
+/**
+ * Extract the lowercase toolkit IDs that were removed (present in previous
+ * output but absent from the current API response). The caller should add
+ * these IDs to its excludedToolkitIds set so the cleanup step deletes the
+ * stale JSON files and rebuilds index.json.
+ */
+export const collectRemovedToolkitIds = (
+  result: ChangeDetectionResult
+): Set<string> =>
+  new Set(
+    result.toolkitChanges
+      .filter((c) => c.changeType === "removed")
+      .map((c) => c.toolkitId.toLowerCase())
+  );
+
+/**
+ * Protect incremental runs from treating a transient empty API response as a
+ * request to delete every previously generated toolkit.
+ */
+export const assertSafeCurrentToolkitSnapshot = (
+  currentToolkitCount: number,
+  previousToolkitCount: number
+): void => {
+  if (currentToolkitCount === 0 && previousToolkitCount > 0) {
+    throw new Error(
+      `Current toolkit snapshot is empty; refusing to remove all ${previousToolkitCount} existing toolkits.`
+    );
+  }
+};
+
+export interface ProcessingStats {
+  effectiveSkipped: number;
+  toProcess: number;
+  totalToolkits: number;
+  unknownSkipIds: string[];
+}
+
+export interface ProviderEntry {
+  provider: string;
+  version?: string | undefined;
+}
+
+export interface FilteredProviders<T extends ProviderEntry> {
+  providersToProcess: T[];
+  skippedProviders: T[];
+}
+
+/**
+ * Compute how many toolkits will actually be processed after applying skip IDs.
+ *
+ * Uses the intersection of skipToolkitIds with the actual fetched toolkit list
+ * to avoid negative toProcess values when unknown IDs are in the skip set.
+ */
+export const computeProcessingStats = (
+  toolkitList: ReadonlyMap<string, unknown>,
+  skipToolkitIds: ReadonlySet<string>
+): ProcessingStats => {
+  const normalizedToolkitIds = new Set(
+    Array.from(toolkitList.keys()).map((id) => id.toLowerCase())
+  );
+
+  const unknownSkipIds: string[] = [];
+  let effectiveSkipped = 0;
+
+  for (const skipId of skipToolkitIds) {
+    const normalized = skipId.toLowerCase();
+    if (normalizedToolkitIds.has(normalized)) {
+      effectiveSkipped += 1;
+    } else {
+      unknownSkipIds.push(skipId);
+    }
+  }
+
+  const totalToolkits = toolkitList.size;
+  const toProcess = Math.max(0, totalToolkits - effectiveSkipped);
+
+  return { effectiveSkipped, toProcess, totalToolkits, unknownSkipIds };
+};
+
+/**
+ * Partition providers into those to process and those filtered out by skip IDs.
+ * Comparison is case-insensitive.
+ */
+export const filterProvidersBySkipIds = <T extends ProviderEntry>(
+  providers: T[],
+  skipToolkitIds: ReadonlySet<string>
+): FilteredProviders<T> => {
+  const normalizedSkipIds = new Set(
+    Array.from(skipToolkitIds).map((id) => id.toLowerCase())
+  );
+
+  const providersToProcess: T[] = [];
+  const skippedProviders: T[] = [];
+
+  for (const provider of providers) {
+    if (normalizedSkipIds.has(provider.provider.toLowerCase())) {
+      skippedProviders.push(provider);
+    } else {
+      providersToProcess.push(provider);
+    }
+  }
+
+  return { providersToProcess, skippedProviders };
+};
