@@ -28,9 +28,13 @@ const docsFrontmatterSchema = frontmatterSchema.extend({
   // Landing-style page (Nextra layout: full + toc/breadcrumb off): no title,
   // description or page actions are rendered around the MDX body.
   landing: z.boolean().optional(),
+  // Freshness: the date a human last ran the page end-to-end, and how many
+  // days it stays "verified" (components/verified-badge.tsx).
+  lastVerified: z.string().optional(),
   metaTitle: z.string().optional(),
   sidebarTitle: z.string().optional(),
   toc: z.boolean().optional(),
+  verifyEvery: z.number().int().positive().optional(),
 });
 
 export const docs = defineDocs({

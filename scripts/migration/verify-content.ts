@@ -44,6 +44,46 @@ const SOURCE_ROOT = resolveSourceRoot();
 
 type Mismatch = { kind: string; where: string; detail: string };
 const mismatches: Mismatch[] = [];
+
+/**
+ * Intentional deviations from the 1:1 Nextra mapping, declared per workstream
+ * in scripts/migration/overrides/*.json (one file per owner, merged here):
+ *   moved:      { "<default target rel>": "<new target rel>" }  page relocated (redirect expected)
+ *   deleted:    [ "<default target rel>" ]                       page removed (redirect expected)
+ *   enhanced:   [ "<target rel>" ]                               body intentionally differs; existence only
+ *   extraPages: [ "<target rel>" ]                               new pages with no Nextra source
+ *   metaFree:   [ "<dir rel>" ]                                  meta.json intentionally restructured
+ */
+interface Overrides {
+  moved: Record<string, string>;
+  deleted: Set<string>;
+  enhanced: Set<string>;
+  extraPages: Set<string>;
+  metaFree: Set<string>;
+}
+function loadOverrides(): Overrides {
+  const out: Overrides = { moved: {}, deleted: new Set(), enhanced: new Set(), extraPages: new Set(), metaFree: new Set() };
+  const dir = join(import.meta.dirname, "overrides");
+  if (!existsSync(dir)) {
+    return out;
+  }
+  for (const file of fg.sync("*.json", { cwd: dir })) {
+    const o = JSON.parse(readFileSync(join(dir, file), "utf8")) as Partial<{
+      moved: Record<string, string>; deleted: string[]; enhanced: string[]; extraPages: string[]; metaFree: string[];
+    }>;
+    Object.assign(out.moved, o.moved ?? {});
+    for (const k of ["deleted", "enhanced", "extraPages", "metaFree"] as const) {
+      for (const v of o[k] ?? []) out[k].add(v);
+    }
+  }
+  return out;
+}
+const overrides = loadOverrides();
+/** Target path for a source page, honouring overrides. */
+function resolvedTargetRel(dir: SourceDir): string {
+  const rel = targetMdxRel(dir);
+  return overrides.moved[rel] ?? rel;
+}
 const fail = (kind: string, where: string, detail: string) => mismatches.push({ kind, where, detail });
 
 let pagesChecked = 0;
@@ -63,12 +103,20 @@ function firstDiff(a: string, b: string): string {
 
 function verifyPage(dir: SourceDir) {
   const srcPath = join(dir.abs, "page.mdx");
-  const rel = targetMdxRel(dir);
+  const defaultRel = targetMdxRel(dir);
+  if (overrides.deleted.has(defaultRel)) {
+    pagesChecked++;
+    return;
+  }
+  const rel = resolvedTargetRel(dir);
   const dstPath = join(CONTENT_DIR, rel);
   const where = `app/en/${dir.rel ? `${dir.rel}/` : ""}page.mdx -> content/docs/${rel}`;
   pagesChecked++;
   if (!existsSync(dstPath)) {
     fail("missing-page", where, "target file does not exist");
+    return;
+  }
+  if (overrides.enhanced.has(rel)) {
     return;
   }
   const src = readFileSync(srcPath, "utf8");
@@ -120,7 +168,7 @@ function verifyPage(dir: SourceDir) {
 }
 
 async function verifyMeta(dir: SourceDir, parentHidden: Set<string>) {
-  if (!(dir.metaFile && isFolder(dir)) || isIntegrationCategoryDir(dir.rel)) {
+  if (!(dir.metaFile && isFolder(dir)) || isIntegrationCategoryDir(dir.rel) || overrides.metaFree.has(dir.rel)) {
     return;
   }
   metaChecked++;
@@ -168,7 +216,9 @@ async function main() {
   const expectedTargets = new Set<string>();
   for (const dir of iterateDirs(tree)) {
     if (dir.hasPage) {
-      expectedTargets.add(targetMdxRel(dir));
+      if (!overrides.deleted.has(targetMdxRel(dir))) {
+        expectedTargets.add(resolvedTargetRel(dir));
+      }
       verifyPage(dir);
     }
     await verifyMeta(dir, new Set());
@@ -177,7 +227,7 @@ async function main() {
   // Extra MDX in target that has no source page
   const actualTargets = fg.sync("**/*.mdx", { cwd: CONTENT_DIR });
   for (const t of actualTargets) {
-    if (!expectedTargets.has(t)) {
+    if (!(expectedTargets.has(t) || overrides.extraPages.has(t))) {
       fail("extra-page", `content/docs/${t}`, "no corresponding app/en/**/page.mdx");
     }
   }

@@ -21,7 +21,7 @@ export const redirects: Redirect[] = [
   {
     destination: "/:locale/home",
     permanent: true,
-    source: "/:locale",
+    source: "/:locale(en|es|pt-BR)",
   },
   // The toolkit-page breadcrumb links "Resources" -> /resources, which has
   // no index page. Send it to the integrations registry instead of 404ing.
