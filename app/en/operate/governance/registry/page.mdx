@@ -1,0 +1,223 @@
+---
+title: "Registry"
+description: "Every MCP Gateway URL is also a Registry page where end users browse the gateway's tools and request the ones it does not have yet"
+---
+
+import { Callout } from "nextra/components";
+
+# Registry
+
+Every MCP Gateway URL is also a web page. Open `https://api.arcade.dev/mcp/{your-gateway-slug}` in a browser and Arcade serves the Registry: a sign-in-gated view of that gateway's tools, plus a way for the people using it to ask for the ones it does not have yet. MCP clients that send the same URL an MCP request still get MCP.
+
+This page serves two jobs:
+
+- **Platform operators** share a Registry link so employees can see what a gateway already enables, then review and answer the requests that come back. That work happens in the Arcade dashboard and over the API.
+- **End users** browse the catalog, connect the accounts their tools need, and file requests. They sign in to the gateway itself, so they need no Arcade account and no dashboard access.
+
+Reach for the Registry when a gateway has grown past the handful of people who configured it. Without it, employees cannot tell what an opaque gateway offers, and the requests they do make arrive as email.
+
+<Callout type="info">
+  This is not the [Arcade Registry early access
+  program](/resources/registry-early-access), which is about publishing MCP
+  servers for other developers to use. The Registry on this page is private to
+  one gateway and its end users.
+</Callout>
+
+## How the Registry works
+
+The Registry is a browser page with no backend of its own. It is an MCP client that talks to the gateway over MCP, using the end user's own credentials, so what someone sees in the Registry is what their agent sees through the same gateway.
+
+Four properties follow from that design:
+
+- **It browses exactly one gateway.** The page can only reach the gateway URL it was served from. It offers no address field and no query parameter that aims it elsewhere, because either one would let someone send your employees a link that lands them on a look-alike sign-in screen under Arcade's branding.
+- **Sign-in matches the gateway's authentication mode.** A gateway using Arcade Auth or a User Source gets an OAuth sign-in. A gateway using Arcade Headers gets fields for an Arcade API key and a user ID. The page detects which before anyone clicks, so nobody picks the wrong one. See [MCP Gateway authentication](/operate/governance/mcp-gateways#authentication).
+- **Nothing is persisted.** The access token lives in memory for the life of the tab. Reloading or closing the tab means signing in again, so a token never outlives the visit that produced it.
+- **The catalog view is the full one.** The Registry asks the gateway for every tool it allows rather than the recommended subset, and leaves out Arcade's own helper tools. See [Presentation options](#presentation-options-on-a-gateway-url).
+
+## What an end user can do
+
+After signing in, the Registry opens on **Your Apps**: the gateway's tools grouped by the app they belong to, such as Gmail, Slack, or GitHub, with a line explaining that these apps are available through this MCP URL and that some of them need the person's own login first. A sidebar lists the same apps, and its search narrows the sidebar.
+
+Opening a tool shows its description and arguments, whether the person is logged in to the account it acts on, and a **Try** section that runs it. Results come back as a summary or as raw JSON, and a tool marked destructive warns before it runs.
+
+Tools that act on a third-party account need that account connected once. The Registry reads each tool's authorization status and offers **Connect** for the ones that need it, which is the same `System_ManageAuthorization` flow an agent uses. Authorization is granted per provider, with the scopes of the tools asked about combined, so connecting GitHub once can cover more than one GitHub tool.
+
+A **Show Arcade tools** switch reveals Arcade's own helper tools, which the catalog hides by default.
+
+A bubble in the bottom-right corner holds capability requests. From there an end user can read every request filed on the gateway, back one, file their own, and see the answers. The composer never sends on submit: it opens a review step naming who receives the message and what happens next, and only its send action files the request.
+
+## Capability requests
+
+A request is free text. Someone types what they want, in whatever words fit, and the gateway's administrators see it. The text may be a service name (`Cloudflare`), an address (`mcp.cloudflare.com`), or a description of the task.
+
+Filing a request records demand. It does not add a capability, grant access, or change what the gateway offers. Enablement stays a separate, deliberate edit to the gateway.
+
+### Request tools on every gateway
+
+An end user can complete the whole loop through their agent without opening a browser. Arcade offers four tools on every gateway connection that carries a signed-in end user, alongside `Arcade_ListApps` and `System_ManageAuthorization`:
+
+| Tool | What it does |
+| -- | -- |
+| `Arcade_Registry_Get_Existing_Suggestions` | Search requests already filed on this gateway, most-supported first. Takes `query`, `limit` (1 to 100, default 10), `offset`, and `showResolved` |
+| `Arcade_Registry_Create_Suggestion` | File a request in the end user's own words. Takes `content`, 1 to 1000 characters |
+| `Arcade_Registry_Support_Suggestion` | Add the end user's support to an existing request. Takes the `id` the search returned |
+| `Arcade_Registry_Get_My_Suggestions` | List the signed-in person's own requests and whether they have been answered |
+
+Three behaviors matter when you build on these tools:
+
+- **Support is idempotent and silent about edge cases.** Supporting a request twice, or supporting your own, returns `already_supported` or `own_suggestion`. Both are successes, and neither adds a supporter.
+- **Peer listings never name anyone.** `Arcade_Registry_Get_Existing_Suggestions` returns no submitter or supporter identity. Only the administrator inbox and a person's own submissions show who asked.
+- **Answers are hidden until asked for.** `resolved_at` and `resolution_notes` come back only with `showResolved: true`, and are null while a request is open.
+
+Arcade also adds a line to the gateway's MCP instructions telling an agent to offer to pass an unmet request on rather than apologizing for the gap. A self-hosted deployment sets that text with `registry_suggestions.instruction` in the Arcade Engine configuration.
+
+### Who a request is attributed to
+
+Submitters and supporters are recorded as a user ID inside an identity scope, because a user ID is only unique within its source.
+
+| Gateway authentication | Identity recorded |
+| -- | -- |
+| **User Source** | The end user's subject in that User Source |
+| **Arcade Auth** | The end user's Arcade account |
+| **Arcade Headers** | The `Arcade-User-Id` the calling client asserts, scoped to the gateway's project. Arcade preserves it exactly but cannot verify it against an identity provider |
+
+Because the scope is part of the identity, pointing a gateway at a different User Source orphans the requests recorded under the old one. The existing rows stay, attributed to a scope nobody signs in to any more.
+
+## Review requests in the dashboard
+
+Suggestions arrive in one inbox per project, covering every gateway in it, so you do not review hundreds of gateways one at a time.
+
+Open your project in the dashboard and select **Inbox**. From the **MCP Gateways** list you can also open a gateway's row menu and select **View suggestions inbox**, which opens the same view filtered to that gateway.
+
+Each row carries the request text, the gateway it came from, how many people support it, and the submitter's user ID. The most-supported requests come first, with newer requests breaking ties so paging stays stable.
+
+Narrow the list with these filters:
+
+| Filter | Behavior |
+| -- | -- |
+| Search | Case-insensitive match against the request text |
+| Gateway | One or more gateways in the project, defaulting to all of them |
+| User | One or more submitter user IDs |
+| Include responded | Adds requests you have already answered, which are hidden by default |
+
+Every filter lives in the URL, so a filtered view survives a reload and you can send it to a teammate.
+
+### Answer a request
+
+Select **Respond** on a row to record your decision, with an optional note of up to 1000 characters. The row then reads **Response**, and the end user who filed the request sees your note in the Registry and through `Arcade_Registry_Get_My_Suggestions`.
+
+Two things are worth being explicit about:
+
+- **Responding changes nothing about the gateway.** It is closer to marking an email read than to approving a change. It does not add a tool to the gateway's allowed tools, alter an access policy, or grant anyone access. To act on a request, edit the gateway.
+- **The first answer is the one that sticks.** Responding again to a request you already answered succeeds and preserves the original timestamp and note, so a retry cannot quietly rewrite the history.
+
+Reading the inbox takes a role on the project. Responding takes authority to update the project's gateways.
+
+The inbox covers gateways bound to the project. Requests filed on a static or organization-wide gateway are shared beyond one project, so they do not appear there.
+
+## Share a Registry link
+
+On the **MCP Gateways** page, open a gateway's row menu. Under **Employee registry**, **Open registry** opens the page and **Copy registry link** copies it. The link is the gateway URL, so anyone the gateway admits can sign in and everyone else cannot.
+
+## Turn capability requests on or off
+
+Browsing the catalog is always available to anyone who can sign in to the gateway. The request loop is a per-gateway setting, on unless you turn it off.
+
+In the gateway form, the setting is the **Capability requests** checkbox. Over the API it is `tool_filter.registry_suggestions.enabled`:
+
+```bash
+curl -s -X PATCH "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/gateways/{gateway_id}" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"tool_filter": {"registry_suggestions": {"enabled": false}}}'
+```
+
+A patch that omits `allowed_tools` leaves the gateway's tool selection alone. The current value comes back on a gateway read as `tool_filter.registry_suggestions.enabled`. A static gateway in a self-hosted Arcade Engine configuration uses `registry_suggestions_enabled` instead.
+
+While the setting is off, no connection to that gateway lists the request tools, accepts a call to one, or carries the agent guidance.
+
+### Presentation options on a gateway URL
+
+Three query parameters change what one MCP connection sees. They never widen what a gateway allows, and they do not modify the saved gateway, which is why the Registry can use them to render a human-facing catalog from an agent-facing gateway.
+
+| Option | Default | Effect |
+| -- | -- | -- |
+| `tool_recommendation=false` | `true` | Return the gateway's complete configured catalog instead of a recommended subset |
+| `arcade_tools=false` | `true` | Leave out Arcade's helper tools, their instructions, and the request tools |
+| `registry_suggestions=false` | `true` | Leave out the request tools for this connection only |
+
+Each option may appear once and must read exactly `true` or `false`. The gateway refuses `registry_suggestions=true` alongside `arcade_tools=false`, since the second hides what the first asks for. Add options to MCP requests rather than to the URL you sign in against.
+
+## Read and answer requests over the API
+
+The same inbox is available over the Arcade API. The base URL is `https://api.arcade.dev`, and requests authenticate with a bearer token. Both endpoints accept dashboard account tokens and project API keys.
+
+List the project's open requests:
+
+```bash
+curl -s "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/suggestions?limit=25" \
+  -H "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+```json
+{
+  "items": [
+    {
+      "id": "3HvzkMFaDOAfGWLtqJq0nhoD9Qd",
+      "gateway_id": "gw_3Hvzk8WqPmTnRsKdLbYcXfA2Jw",
+      "gateway_name": "Support agents",
+      "submitter_user_source_id": "us_3HvzkQ7bNpRmTcVdWsXyZgL4Kd",
+      "submitter_user_id": "dana@example.com",
+      "content": "I need a way to read my Granola meeting notes",
+      "supporters": 7,
+      "created_at": "2026-09-30T12:00:00Z",
+      "resolved_at": null,
+      "resolution_notes": null
+    }
+  ],
+  "limit": 25,
+  "offset": 0,
+  "total_count": 31
+}
+```
+
+Requests come back ranked by `supporters` descending. Pages advance by `offset`, and `limit` defaults to 50. Pass `query` to search the text, `show_resolved=true` to include answered requests, and `gateway_id` or `suggestion_submitter` once per value to filter on more than one at a time (`?gateway_id=gw_a&gateway_id=gw_b`). Omitting `gateway_id` covers every gateway bound to the project. A `gateway_id` from another project answers `404` rather than leaking that the gateway exists.
+
+Answer one request. The endpoint is gateway-scoped, and every item in the list carries the `gateway_id` to use:
+
+```bash
+curl -s -X POST "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/gateways/{gateway_id}/suggestions/{id}/resolve" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"resolution_notes": "Added the Granola server to this gateway. Reconnect to pick it up."}'
+```
+
+A successful answer returns `204`. `resolution_notes` is optional and bounded to 1000 characters.
+
+| Endpoint | Method | Description |
+| -- | -- | -- |
+| `/v1/orgs/{org_id}/projects/{project_id}/suggestions` | GET | List requests across the project's gateways |
+| `/v1/orgs/{org_id}/projects/{project_id}/gateways/{gateway_id}/suggestions` | POST | File a request on behalf of an end user |
+| `/v1/orgs/{org_id}/projects/{project_id}/gateways/{gateway_id}/suggestions/{id}/resolve` | POST | Answer a request, with optional notes |
+
+The create endpoint takes `user_id` and `content`, and exists for an app that captures demand in its own front end. The `user_id` it names is asserted by the caller in the form the gateway's authentication mode uses, and Arcade cannot verify it against an identity provider, so treat it the way you treat any caller-supplied identity.
+
+Find your organization and project IDs in the dashboard URL: `/orgs/{org_id}/projects/{project_id}`. For the full request and response schemas, see the [API reference](/references/api).
+
+## Current limits
+
+The Registry covers one gateway's own catalog and the request loop around it. Knowing where it stops saves you from promising more:
+
+- **It shows what the gateway exposes, not what it could.** Tools elsewhere in your project, and entries in Arcade's wider catalog that this gateway does not allow, do not appear. An end user who needs one files a free-text request instead of naming a catalog entry.
+- **A request is open or responded.** Arcade records no accepted, declined, or in-progress state. The note you write carries the nuance.
+- **Branding is Arcade's.** The Registry has no setting for your logo, colors, or domain. Because the page relies on no private API, you can build your own catalog against the same gateway URL over MCP and OAuth, with your own design.
+- **Sign-in does not survive a reload**, by design. See [How the Registry works](#how-the-registry-works).
+- **Changing a gateway's User Source orphans its requests.** See [Who a request is attributed to](#who-a-request-is-attributed-to).
+
+## Related content
+
+- [MCP Gateways](/operate/governance/mcp-gateways): create a gateway and choose who its end users are
+- [User Sources](/operate/identity/user-sources): connect an OIDC identity provider so end users sign in as themselves
+- [Remote MCP servers](/operate/governance/remote-mcp-servers): add a server you run, so its tools can reach a gateway
+- [Tool Executions](/operate/governance/tool-executions): what agents actually ran through a gateway
+- [Integrations](/resources/integrations): the catalog of MCP servers you can add to a gateway
