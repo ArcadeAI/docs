@@ -5,7 +5,7 @@ description: Authorize tools and agents with the Power BI Service on behalf of a
 
 <Callout type="info">
   Microsoft Power BI is a **dedicated** auth provider, separate from the
-  general-purpose [Microsoft](/references/auth-providers/microsoft) provider. To
+  general-purpose [Microsoft](/en/references/auth-providers/microsoft) provider. To
   use it, add a **Microsoft Power BI** auth provider with your own Microsoft
   Entra (Azure AD) OAuth 2.0 credentials as described below.
 </Callout>
@@ -20,7 +20,7 @@ This page describes how to use and configure Microsoft Power BI auth with Arcade
 
 This auth provider is used by:
 
-- The Arcade [Power BI MCP server](/resources/integrations/productivity/microsoft-power-bi), which discovers workspaces, datasets, and reports; inspects and queries semantic models with DAX; and manages dataset refreshes
+- The Arcade [Power BI MCP server](/en/resources/integrations/productivity/microsoft-power-bi), which discovers workspaces, datasets, and reports; inspects and queries semantic models with DAX; and manages dataset refreshes
 - Your [app code](#using-microsoft-power-bi-auth-in-app-code) that needs to call Power BI REST APIs
 - Or, your [custom tools](#using-microsoft-power-bi-auth-in-custom-tools) that need to call Power BI REST APIs
 
@@ -29,7 +29,7 @@ This auth provider is used by:
 <Callout type="info">
   When using your own app credentials, make sure you configure your project to
   use a [custom user
-  verifier](/build/user-facing-agents/secure-auth-production#build-a-custom-user-verifier).
+  verifier](/en/build/user-facing-agents/secure-auth-production#build-a-custom-user-verifier).
   Without this, your end-users will not be able to use your app or agent in
   production.
 </Callout>
@@ -103,14 +103,14 @@ Hit the **Create** button and the provider will be ready to be used.
 
 </Steps>
 
-When you use tools that require Microsoft Power BI auth using your Arcade account credentials, Arcade will automatically use this provider. If you have multiple Microsoft Power BI providers, see [using multiple auth providers of the same type](/references/auth-providers#using-multiple-providers-of-the-same-type) for more information.
+When you use tools that require Microsoft Power BI auth using your Arcade account credentials, Arcade will automatically use this provider. If you have multiple Microsoft Power BI providers, see [using multiple auth providers of the same type](/en/references/auth-providers#using-multiple-providers-of-the-same-type) for more information.
 
 </Tabs.Tab>
 </Tabs>
 
 ## Using Microsoft Power BI auth in app code
 
-Use the Microsoft Power BI auth provider in your own agents and AI apps to get a user token for the Power BI REST API. See [authorizing agents with Arcade](/get-started/about-arcade) to understand how this works.
+Use the Microsoft Power BI auth provider in your own agents and AI apps to get a user token for the Power BI REST API. See [authorizing agents with Arcade](/en/get-started/about-arcade) to understand how this works.
 
 Use `client.auth.start()` with the `microsoft-powerbi` provider to get a user token for Power BI APIs:
 
@@ -182,7 +182,7 @@ const token = authResponse.context.token;
 
 ## Using Microsoft Power BI auth in custom tools
 
-You can author your own [custom tools](/build/create-tools/tool-basics/build-mcp-server) that interact with the Power BI REST API.
+You can author your own [custom tools](/en/build/create-tools/tool-basics/build-mcp-server) that interact with the Power BI REST API.
 
 Use the `MicrosoftPowerBI()` auth class to specify that a tool requires authorization with the dedicated `microsoft-powerbi` provider. The `context.authorization.token` field will be automatically populated with the user's Power BI token:
 
@@ -225,7 +225,7 @@ async def list_datasets(
 
 ### Why Power BI needs its own provider
 
-The Power BI provider authorizes against the **Power BI Service** resource (`https://analysis.windows.net/powerbi/api`). It reuses Microsoft's Entra ID endpoints, but on its own connection, separate from the general-purpose [Microsoft](/references/auth-providers/microsoft) provider.
+The Power BI provider authorizes against the **Power BI Service** resource (`https://analysis.windows.net/powerbi/api`). It reuses Microsoft's Entra ID endpoints, but on its own connection, separate from the general-purpose [Microsoft](/en/references/auth-providers/microsoft) provider.
 
 A Microsoft Entra access token is issued for a single resource (its _audience_). Power BI Service and Microsoft Graph are different resources, so a single authorize request cannot mix scopes from both: Entra rejects the sign-in with **AADSTS70011** (`The provided value for the input parameter scope is not valid`). Keeping Power BI on a dedicated provider guarantees every authorize request on that connection carries Power BI Service scopes only.
 

@@ -1,12 +1,15 @@
 /**
  * Nextra -> Fumadocs content codemod.
  *
- *   bun scripts/migration/migrate-content.ts [--source=/path/to/nextra/docs]
+ *   bun scripts/migration/migrate-content.ts [--source=/path/to/nextra/docs] [--content-only]
  *
  * Reads `<source>/app/en/**` and writes:
  *   - content/docs/**            (page.mdx -> index.mdx | <name>.mdx, _meta.tsx -> meta.json)
  *   - components/pages/**        (page-local tsx/ts/css that lived beside page.mdx)
  *   - public/**                  (verbatim copy)
+ *
+ * `--content-only` regenerates content/docs/** only and leaves components/pages/**
+ * and public/** untouched.
  *
  * It is re-runnable: it wipes what it owns first. It never touches the nine
  * `content/docs/resources/integrations/<category>/meta.json` files nor
@@ -17,6 +20,7 @@
  * `bun scripts/migration/verify-content.ts` afterwards to prove it.
  */
 
+import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
@@ -31,9 +35,11 @@ import {
   INTEGRATIONS_REL,
   isFolder,
   isIntegrationCategoryDir,
+  type LinkPrefixStats,
   type MetaEntry,
   NEXTRA_COMPAT_MODULES,
   PAGE_COMPONENTS_DIR,
+  prefixInternalLinks,
   readSourceTree,
   removeLines,
   removeStatementLines,
@@ -49,6 +55,7 @@ import {
 
 const SOURCE_ROOT = resolveSourceRoot();
 const APP_EN = join(SOURCE_ROOT, "app", "en");
+const CONTENT_ONLY = process.argv.includes("--content-only");
 
 // ---------------------------------------------------------------------------
 // Report accumulators
@@ -59,6 +66,7 @@ const report = {
   metaFiles: 0,
   localFiles: 0,
   assets: 0,
+  links: { markdown: 0, jsx: 0 } as LinkPrefixStats,
   sidebarTitles: [] as { page: string; title: string; sidebarTitle: string }[],
   metaTitles: [] as { page: string; title: string; metaTitle: string }[],
   fallbackTitles: [] as { page: string; title: string }[],
@@ -93,6 +101,9 @@ function cleanTargets() {
   }
   mkdirSync(CONTENT_DIR, { recursive: true });
 
+  if (CONTENT_ONLY) {
+    return;
+  }
   if (existsSync(PAGE_COMPONENTS_DIR)) {
     for (const entry of readdirSync(PAGE_COMPONENTS_DIR)) {
       if (entry === "integrations") {
@@ -264,7 +275,7 @@ function transformPage(ctx: PageContext): string {
   }
   body = removeStatementLines(body, toDrop);
 
-  // 4. fence meta + SubpageList meta prop
+  // 4. fence meta + SubpageList meta prop + `/en` prefix on internal links
   const out: string[] = [];
   forEachMdxLine(body, 0, (line, _i, state) => {
     if (state.fence === "open") {
@@ -272,7 +283,7 @@ function transformPage(ctx: PageContext): string {
     } else if (state.inFence) {
       out.push(line);
     } else {
-      out.push(stripSubpageListMetaProp(line));
+      out.push(prefixInternalLinks(stripSubpageListMetaProp(line), report.links));
     }
   });
   body = out;
@@ -318,19 +329,35 @@ function buildPages(dir: SourceDir, meta: EvaluatedMeta): string[] {
     pages.push(entry.key);
     listed.add(entry.key);
   }
+  // Hidden entries are always written out (`!key`) so the sidebar intent stays
+  // visible in meta.json; `...` is only needed when some child is not listed.
+  for (const h of hidden) {
+    pages.push(`!${h}`);
+  }
   const unlisted = dir.children.filter((c) => !listed.has(c.name));
   if (unlisted.length) {
-    for (const h of hidden) {
-      pages.push(`!${h}`);
-    }
     pages.push("...");
   }
   return pages;
 }
 
+const writtenJson: string[] = [];
+
 function writeJson(path: string, data: Record<string, unknown>) {
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(path, `${JSON.stringify(data, null, 2)}\n`);
+  writtenJson.push(path);
+}
+
+/** Format the meta.json files we wrote with the repo formatter so a re-run leaves a clean tree. */
+function formatWrittenJson() {
+  if (!writtenJson.length) {
+    return;
+  }
+  const result = spawnSync("bunx", ["biome", "format", "--write", ...writtenJson], { cwd: TARGET_ROOT, stdio: "pipe" });
+  if (result.status !== 0) {
+    throw new Error(`biome format failed:\n${result.stderr?.toString() ?? ""}${result.stdout?.toString() ?? ""}`);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -383,7 +410,7 @@ function rewriteTsImports(code: string, ownerRel: string, meta: EvaluatedMeta | 
 }
 
 function copyLocalFiles(dir: SourceDir, meta: EvaluatedMeta | null) {
-  if (!dir.localFiles.length) {
+  if (CONTENT_ONLY || !dir.localFiles.length) {
     return;
   }
   const outDir = join(PAGE_COMPONENTS_DIR, dir.rel);
@@ -502,17 +529,22 @@ function copyPublic() {
 
 async function main() {
   console.log(`Source: ${APP_EN}`);
-  console.log(`Target: ${TARGET_ROOT}`);
+  console.log(`Target: ${TARGET_ROOT}${CONTENT_ONLY ? " (content only)" : ""}`);
   cleanTargets();
   const tree = readSourceTree(SOURCE_ROOT);
   await emitDir(tree, null, undefined);
-  copyPublic();
+  formatWrittenJson();
+  if (!CONTENT_ONLY) {
+    copyPublic();
+  }
 
+  const skipped = CONTENT_ONLY ? " (skipped)" : "";
   console.log("\n== Summary ==");
   console.log(`pages written:        ${report.pages}`);
   console.log(`meta.json written:    ${report.metaFiles}`);
-  console.log(`page-local files:     ${report.localFiles}`);
-  console.log(`public assets copied: ${report.assets}`);
+  console.log(`page-local files:     ${report.localFiles}${skipped}`);
+  console.log(`public assets copied: ${report.assets}${skipped}`);
+  console.log(`links prefixed /en:   ${report.links.markdown} markdown, ${report.links.jsx} jsx props`);
 
   console.log(`\n== sidebarTitle set (${report.sidebarTitles.length}) ==`);
   for (const s of report.sidebarTitles) {

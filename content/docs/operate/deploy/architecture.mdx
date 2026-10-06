@@ -5,9 +5,9 @@ description: The services that make up a self-hosted Arcade deployment and how t
 
 import Image from "next/image";
 
-A self-hosted Arcade deployment runs the services below on your Kubernetes cluster. The [Helm chart](/operate/deploy/helm) and the [Azure](/operate/deploy/azure) and [AWS](/operate/deploy/aws) marketplace deployments install the same platform.
+A self-hosted Arcade deployment runs the services below on your Kubernetes cluster. The [Helm chart](/en/operate/deploy/helm) and the [Azure](/en/operate/deploy/azure) and [AWS](/en/operate/deploy/aws) marketplace deployments install the same platform.
 
-This page describes what each service does and what it connects to. For installation steps, see [Self-host with Helm](/operate/deploy/helm).
+This page describes what each service does and what it connects to. For installation steps, see [Self-host with Helm](/en/operate/deploy/helm).
 
 ## Reference topology
 
@@ -69,11 +69,11 @@ The Engine is the API that agents call. It:
 - Serves the tool catalog, including each tool's schema
 - Executes tool calls, dispatching each one to the MCP server that owns the tool and returning the result
 - Runs the token vault: it takes each end user through the OAuth flow for a provider such as Google or Slack, stores the resulting token encrypted, refreshes it before it expires, and supplies it to the tool at execution time
-- Serves [MCP gateways](/operate/governance/mcp-gateways), the scoped MCP endpoints that agents and MCP clients connect to
+- Serves [MCP gateways](/en/operate/governance/mcp-gateways), the scoped MCP endpoints that agents and MCP clients connect to
 - Registers MCP servers and reconciles their tool catalogs into its database
-- Stores [auth provider](/references/auth-providers) configuration and per-project tool secrets
-- Records each tool execution, which the dashboard's execution history and [audit logs](/operate/governance/audit-logs) read from
-- Calls [contextual access](/operate/governance/contextual-access) hooks before and after a tool runs, which can allow, deny, or rate-limit the call
+- Stores [auth provider](/en/references/auth-providers) configuration and per-project tool secrets
+- Records each tool execution, which the dashboard's execution history and [audit logs](/en/operate/governance/audit-logs) read from
+- Calls [contextual access](/en/operate/governance/contextual-access) hooks before and after a tool runs, which can allow, deny, or rate-limit the call
 
 The Engine calls the Coordinator to validate API keys and resolve the account, organization, and project behind a request. It calls MCP servers over HTTP to execute tools.
 
@@ -82,7 +82,7 @@ The Engine calls the Coordinator to validate API keys and resolve the account, o
 The Coordinator owns identity and tenancy records:
 
 - Accounts, organizations, projects, project API keys, and member invitations
-- The connection to your OIDC identity provider, and the [User Sources](/operate/identity/user-sources) that authenticate the end users of an MCP gateway
+- The connection to your OIDC identity provider, and the [User Sources](/en/operate/identity/user-sources) that authenticate the end users of an MCP gateway
 - Role assignments, which it evaluates against OpenFGA when you turn on role-based access control
 
 It handles two flows that require a reachable endpoint:
@@ -113,14 +113,14 @@ It runs in the browser and calls only the Experience API.
 
 An MCP server hosts tool implementations and runs them on request. A deployment can draw tools from three sources:
 
-- **The bundled MCP server.** Each deployment includes one, preloaded with Arcade's integration toolkits for services such as Gmail, Slack, Jira, GitHub, and Notion. See [Arcade Worker](/operate/deploy/worker) for how it runs toolkits and the settings you control.
+- **The bundled MCP server.** Each deployment includes one, preloaded with Arcade's integration toolkits for services such as Gmail, Slack, Jira, GitHub, and Notion. See [Arcade Worker](/en/operate/deploy/worker) for how it runs toolkits and the settings you control.
 - **MCP servers you write and deploy.** Each one is a separate deployment, so you can scale or isolate it independently.
-- **[Remote MCP servers](/operate/governance/remote-mcp-servers).** Register an MCP server that Arcade does not host, whether your team runs it or a vendor does, and its tools join the same catalog. This adds nothing to your cluster.
+- **[Remote MCP servers](/en/operate/governance/remote-mcp-servers).** Register an MCP server that Arcade does not host, whether your team runs it or a vendor does, and its tools join the same catalog. This adds nothing to your cluster.
 
 In each case the Engine sends the tool call over HTTP with the end-user credential from the token vault, and the MCP server returns the result. The tool catalog, gateways, auth, and audit trail work the same way regardless of where the server runs.
 
 <Callout type="info">
-MCP servers appear as **workers** in the Helm values and in the Engine's API. The two terms refer to the same thing. Neither is an [MCP gateway](/operate/governance/mcp-gateways), which is a feature of the Engine rather than a deployed service.
+MCP servers appear as **workers** in the Helm values and in the Engine's API. The two terms refer to the same thing. Neither is an [MCP gateway](/en/operate/governance/mcp-gateways), which is a feature of the Engine rather than a deployed service.
 </Callout>
 
 ### OpenFGA
@@ -146,7 +146,7 @@ The platform initiates the remaining connections outbound:
 | Engine | Coordinator | Validating API keys and resolving accounts, organizations, and projects |
 | Engine | MCP servers | Executing tool calls, whether the server runs in your cluster or elsewhere |
 | Engine | OAuth provider token endpoints | Getting and refreshing end-user tokens. Restrict with `engine.ssrfAllowlist`. |
-| Engine | Your [contextual access](/operate/governance/contextual-access) hooks | Policy checks before and after each tool call |
+| Engine | Your [contextual access](/en/operate/governance/contextual-access) hooks | Policy checks before and after each tool call |
 | Coordinator | Your OIDC identity provider | Signing operators in |
 | MCP servers | Third-party APIs | The work each tool does |
 | Engine, Coordinator, MCP servers | Arcade's usage endpoint | Usage information, if you turn it on |
@@ -177,6 +177,6 @@ The Helm chart can deploy PostgreSQL and Redis alongside the platform for evalua
 
 ## Next steps
 
-- [Self-host with Helm](/operate/deploy/helm) to install the platform
-- [Create an MCP gateway](/operate/governance/mcp-gateways) to scope tools and auth for each client
-- [Set up a User Source](/operate/identity/user-sources) to authenticate your end users
+- [Self-host with Helm](/en/operate/deploy/helm) to install the platform
+- [Create an MCP gateway](/en/operate/governance/mcp-gateways) to scope tools and auth for each client
+- [Set up a User Source](/en/operate/identity/user-sources) to authenticate your end users

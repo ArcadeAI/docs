@@ -462,10 +462,152 @@ export function stripSubpageListMetaProp(line: string): string {
   return line.replace(/\s+meta=\{meta\}/, "");
 }
 
+// ---------------------------------------------------------------------------
+// Internal link locale prefix
+// ---------------------------------------------------------------------------
+
+export type LinkPrefixStats = { markdown: number; jsx: number };
+
+const LOCALE_PREFIXES = ["/en", "/es", "/pt-BR"];
+
+/** Root-relative paths that are not docs pages (assets, API routes, generated files). */
+const NON_PAGE_PREFIXES = [
+  "/images/",
+  "/videos/",
+  "/specs/",
+  "/api/",
+  "/llms",
+  "/_markdown",
+  "/favicon",
+  "/robots",
+  "/site.webmanifest",
+  "/sitemap",
+];
+
+/** Whether a root-relative link target is a docs page URL that still lacks the `/en` locale prefix. */
+export function needsLocalePrefix(path: string): boolean {
+  if (!/^\/[A-Za-z]/.test(path) || path.includes("${")) {
+    return false;
+  }
+  for (const locale of LOCALE_PREFIXES) {
+    if (path === locale || (path.startsWith(locale) && /^[/#?]$/.test(path.charAt(locale.length)))) {
+      return false;
+    }
+  }
+  return !NON_PAGE_PREFIXES.some((prefix) => path.startsWith(prefix));
+}
+
+type LineSegment = { text: string; code: boolean };
+
+/**
+ * Split a line into segments outside/inside inline code spans. Follows the
+ * CommonMark rule: a backtick run opens a span closed by the next run of
+ * exactly the same length; an unmatched run is literal text.
+ */
+function splitCodeSpans(line: string): LineSegment[] {
+  const out: LineSegment[] = [];
+  let start = 0;
+  let i = 0;
+  while (i < line.length) {
+    if (line[i] !== "`") {
+      i++;
+      continue;
+    }
+    let runEnd = i;
+    while (runEnd < line.length && line[runEnd] === "`") {
+      runEnd++;
+    }
+    const run = line.slice(i, runEnd);
+    let close = -1;
+    let j = runEnd;
+    while (j < line.length) {
+      const k = line.indexOf(run, j);
+      if (k < 0) {
+        break;
+      }
+      let e = k;
+      while (e < line.length && line[e] === "`") {
+        e++;
+      }
+      if (e - k === run.length) {
+        close = k;
+        break;
+      }
+      j = e;
+    }
+    if (close < 0) {
+      i = runEnd;
+      continue;
+    }
+    if (i > start) {
+      out.push({ text: line.slice(start, i), code: false });
+    }
+    const end = close + run.length;
+    out.push({ text: line.slice(i, end), code: true });
+    start = end;
+    i = end;
+  }
+  if (start < line.length) {
+    out.push({ text: line.slice(start), code: false });
+  }
+  return out;
+}
+
+/** `[text](/path)` and `[text](/path#hash)` (the target runs to whitespace or `)`). */
+const MD_LINK_RE = /\]\((\/[A-Za-z][^\s)]*)/g;
+/** Reference-style definition `[id]: /path` at the start of a line. */
+const REF_DEF_RE = /^(\s*\[[^\]]+\]:\s*)(\/[A-Za-z]\S*)/;
+/** JSX/HTML string props: `href="/p"`, `href='/p'`, `href={"/p"}`; `link=` is ToolCard's URL prop. */
+const ATTR_RE = /\b(href|link)=(\{?)(["'])(\/[A-Za-z][^"']*)\3/g;
+
+/**
+ * Rewrite root-relative internal link targets on one MDX line to `/en/...`
+ * so clicks do not go through the locale redirect in proxy.ts. Idempotent.
+ * Skips inline code spans; callers skip fenced code blocks (`forEachMdxLine`).
+ * Does not touch `src=` (images/videos) or template literals.
+ */
+export function prefixInternalLinks(line: string, stats?: LinkPrefixStats): string {
+  const withRefDef = line.replace(REF_DEF_RE, (match, head: string, path: string) => {
+    if (!needsLocalePrefix(path)) {
+      return match;
+    }
+    if (stats) {
+      stats.markdown++;
+    }
+    return `${head}/en${path}`;
+  });
+  return splitCodeSpans(withRefDef)
+    .map((segment) => {
+      if (segment.code) {
+        return segment.text;
+      }
+      return segment.text
+        .replace(MD_LINK_RE, (match, path: string) => {
+          if (!needsLocalePrefix(path)) {
+            return match;
+          }
+          if (stats) {
+            stats.markdown++;
+          }
+          return `](/en${path}`;
+        })
+        .replace(ATTR_RE, (match, attr: string, brace: string, quote: string, path: string) => {
+          if (!needsLocalePrefix(path)) {
+            return match;
+          }
+          if (stats) {
+            stats.jsx++;
+          }
+          return `${attr}=${brace}${quote}/en${path}${quote}`;
+        });
+    })
+    .join("");
+}
+
 /**
  * Normalize an MDX document to the comparable body form used by verify:
- * no frontmatter, no MDX-level imports, fence meta rewritten, leading H1
- * removed, blank-line runs collapsed, outer blank lines trimmed.
+ * no frontmatter, no MDX-level imports, fence meta rewritten, internal links
+ * prefixed with `/en`, leading H1 removed, blank-line runs collapsed, outer blank lines trimmed.
  */
 export function normalizeBody(source: string): { body: string; leadingH1: string | null } {
   const lines = source.split("\n");
@@ -483,7 +625,7 @@ export function normalizeBody(source: string): { body: string; leadingH1: string
     if (state.fence === "open") {
       l = rewriteFenceMeta(l);
     } else if (!state.inFence) {
-      l = stripSubpageListMetaProp(l);
+      l = prefixInternalLinks(stripSubpageListMetaProp(l));
     }
     rewritten.push(l);
   });

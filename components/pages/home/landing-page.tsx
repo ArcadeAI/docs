@@ -145,7 +145,7 @@ const FRAMEWORKS = [
     name: "AG2",
   },
   {
-    href: "/get-started/agent-frameworks/langchain/use-arcade-tools",
+    href: "/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
     icon: "/images/icons/langchain.svg",
     invertInDark: true,
     name: "LangChain",
@@ -172,7 +172,7 @@ const FRAMEWORKS = [
     name: "Google ADK",
   },
   {
-    href: "/get-started/agent-frameworks/mastra/use-arcade-tools",
+    href: "/get-started/agent-frameworks/mastra",
     icon: "/images/icons/mastra.svg",
     invertInDark: true,
     name: "Mastra",

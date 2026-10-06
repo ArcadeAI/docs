@@ -56,7 +56,7 @@ export function MCPClientGrid() {
 
         return (
           <Link
-            href={`/guides/tool-calling/mcp-clients/${client.key}`}
+            href={`/en/get-started/mcp-clients/${client.key}`}
             key={client.key}
           >
             <div className="flex h-full flex-col gap-1.5 rounded-xl border border-blue-600/20 bg-blue-600/[0.02] py-3 text-card-foreground shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-blue-600/[0.03] hover:shadow-lg dark:bg-gray-900/80">

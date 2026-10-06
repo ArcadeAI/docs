@@ -140,7 +140,7 @@ function NotFoundContent() {
                     buttonVariants({ size: "sm", variant: "ghost" }),
                     "h-8"
                   )}
-                  href={`/${currentLocale}/home/quickstart`}
+                  href={`/${currentLocale}/get-started/quickstarts/call-tool-agent`}
                 >
                   {dict.quickstart}
                 </Link>
@@ -158,7 +158,7 @@ function NotFoundContent() {
                     buttonVariants({ size: "sm", variant: "ghost" }),
                     "h-8"
                   )}
-                  href={`/${currentLocale}/home/build-tools/create-a-mcp-server`}
+                  href={`/${currentLocale}/build/create-tools/tool-basics/build-mcp-server`}
                 >
                   {dict.createMcpServer}
                 </Link>

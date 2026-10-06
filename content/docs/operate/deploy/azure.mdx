@@ -8,7 +8,7 @@ description: Deploy Arcade into your own Azure subscription from the Azure Marke
 Arcade is available on the Azure Marketplace as a managed application. You deploy it into **your own Azure subscription**, where it's managed by Arcade: your data and the services that run Arcade stay in your subscription, while Arcade handles upgrades and day-to-day operations.
 
 <Callout type="info">
-The Azure Marketplace deployment is a **full platform deployment** — it stands up the complete Arcade platform in your cloud. If you'd rather manage the platform yourself on an existing Kubernetes cluster, see [Self-host with Helm](/operate/deploy/helm).
+The Azure Marketplace deployment is a **full platform deployment** — it stands up the complete Arcade platform in your cloud. If you'd rather manage the platform yourself on an existing Kubernetes cluster, see [Self-host with Helm](/en/operate/deploy/helm).
 </Callout>
 
 <GuideOverview>
@@ -22,7 +22,7 @@ A production Arcade platform running in your own Azure subscription, deployed fr
 
 - An Azure subscription with the **Owner** role
 - A Microsoft Entra tenant (personal Microsoft accounts aren't supported)
-- An [OIDC identity provider](/references/auth-providers)
+- An [OIDC identity provider](/en/references/auth-providers)
 
 </GuideOverview.Prerequisites>
 
@@ -41,7 +41,7 @@ The managed application provisions everything Arcade needs inside a managed reso
 
 | Azure service | Role |
 | --- | --- |
-| **Azure Kubernetes Service (AKS)** | Private cluster that runs the [Arcade services](/operate/deploy/architecture) |
+| **Azure Kubernetes Service (AKS)** | Private cluster that runs the [Arcade services](/en/operate/deploy/architecture) |
 | **Azure Key Vault** | Stores database, cache, identity-provider, and encryption secrets |
 | **Azure Database for PostgreSQL Flexible Server** | Primary datastore |
 | **Azure Managed Redis** | Cache and streams |
@@ -52,15 +52,15 @@ The managed application provisions everything Arcade needs inside a managed reso
 
 - **Subscription and role.** Deploy into a subscription where you hold the **Owner** role, with the spending limit turned off.
 - **Microsoft Entra tenant.** The deployment federates sign-in to your Entra tenant. Personal Microsoft accounts aren't supported.
-- **Region and quota.** Confirm the offer is available in your target region and that the subscription has enough vCPU quota to run an AKS cluster. If you're unsure, [contact us](/resources/contact-us).
+- **Region and quota.** Confirm the offer is available in your target region and that the subscription has enough vCPU quota to run an AKS cluster. If you're unsure, [contact us](/en/resources/contact-us).
 - **DNS.** Arcade assigns a managed hostname at deploy time, in the form `<id>.az.myarcade.dev`.
-- **Identity provider.** Have an [OIDC identity provider](/references/auth-providers) ready — see the next section.
+- **Identity provider.** Have an [OIDC identity provider](/en/references/auth-providers) ready — see the next section.
 
 ## Set up your identity provider
 
 Arcade signs users in through your OpenID Connect (OIDC) identity provider. The provider authenticates dashboard users and backs the tokens that MCP gateways validate, so set it up before you deploy.
 
-1. Register an application with your identity provider. Arcade works with [Microsoft Entra ID, Okta, Auth0, or Keycloak](/references/auth-providers), or any standards-compliant OIDC provider.
+1. Register an application with your identity provider. Arcade works with [Microsoft Entra ID, Okta, Auth0, or Keycloak](/en/references/auth-providers), or any standards-compliant OIDC provider.
 2. Copy the application's client ID, generate a client secret, and note the issuer URL. For Microsoft Entra ID, use the v2.0 issuer `https://login.microsoftonline.com/<tenant-id>/v2.0`.
 3. Provide the client ID, client secret, and issuer in the create form.
 4. After you deploy, register the redirect URIs shown in the deployment outputs on the application, then sign in to the dashboard.
@@ -97,6 +97,6 @@ Open the dashboard URL from the deployment output and sign in with your identity
 
 ## Next steps
 
-- [Create an MCP Gateway](/operate/governance/mcp-gateways) to scope tools and auth for each client
-- [Connect an MCP client](/get-started/mcp-clients) to a gateway URL
-- [Set up a User Source](/operate/identity/user-sources) to authenticate end users with your own identity provider
+- [Create an MCP Gateway](/en/operate/governance/mcp-gateways) to scope tools and auth for each client
+- [Connect an MCP client](/en/get-started/mcp-clients) to a gateway URL
+- [Set up a User Source](/en/operate/identity/user-sources) to authenticate end users with your own identity provider
