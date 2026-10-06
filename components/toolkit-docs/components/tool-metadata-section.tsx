@@ -19,6 +19,14 @@ const BEHAVIOR_LABELS: Record<BehaviorFlagKey, string> = {
   readOnly: "Read only",
 };
 
+/** Display order of behavior flags (object keys above are linter-sorted). */
+const BEHAVIOR_KEYS: readonly BehaviorFlagKey[] = [
+  "readOnly",
+  "destructive",
+  "idempotent",
+  "openWorld",
+];
+
 const BEHAVIOR_DESCRIPTIONS: Record<BehaviorFlagKey, string> = {
   destructive: "May permanently delete or overwrite data in the target system.",
   idempotent:
@@ -54,7 +62,7 @@ export interface BehaviorRow {
 export function buildBehaviorRows(
   behavior: ToolMetadataBehavior
 ): readonly BehaviorRow[] {
-  return (Object.keys(BEHAVIOR_LABELS) as BehaviorFlagKey[]).map((key) => ({
+  return BEHAVIOR_KEYS.map((key) => ({
     key,
     label: BEHAVIOR_LABELS[key],
     value: behavior[key] ?? null,

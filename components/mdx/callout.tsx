@@ -48,6 +48,7 @@ export function Callout({
   const resolvedIcon = icon ?? emoji;
   return (
     <FumadocsCallout
+      data-callout-type={resolvedType}
       type={resolvedType}
       {...(resolvedIcon === undefined ? {} : { icon: resolvedIcon })}
       {...props}

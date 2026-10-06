@@ -33,6 +33,22 @@ export const TYPE_CONFIG: Record<
   },
 };
 
+/**
+ * Display order of toolkit types in the catalog header and filters. Object
+ * keys above are sorted alphabetically by the linter, so the order lives here.
+ */
+export const TYPE_ORDER: readonly ToolkitType[] = [
+  "arcade",
+  "arcade_starter",
+  "verified",
+  "community",
+  "auth",
+];
+
+export const TYPE_CONFIG_ENTRIES = TYPE_ORDER.map(
+  (type) => [type, TYPE_CONFIG[type]] as const
+);
+
 export const TOOL_CARD_TYPE_CONFIG: Record<
   ToolkitType,
   { className: string; label: string; icon: React.ElementType; color: string }

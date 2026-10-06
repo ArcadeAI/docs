@@ -1,19 +1,26 @@
-import { DocsLayout } from "fumadocs-ui/layouts/docs";
+import { DocsLayout } from "fumadocs-ui/layouts/notebook";
 import type { ReactNode } from "react";
 import { Footer } from "@/components/footer";
 import { baseOptions } from "@/lib/layout.shared";
 import { source } from "@/lib/source";
 
+/**
+ * Notebook layout = top navbar (logo, search, links) + sidebar, the same
+ * structure as the Nextra docs theme this site migrated from.
+ */
 export default function Layout({ children }: { children: ReactNode }) {
+  const base = baseOptions();
   return (
     <>
       <DocsLayout
-        {...baseOptions()}
+        {...base}
+        nav={{ ...base.nav, mode: "top" }}
         sidebar={{
           collapsible: true,
-          defaultOpenLevel: 0,
+          defaultOpenLevel: 1,
           prefetch: false,
         }}
+        tabMode="sidebar"
         themeSwitch={{ enabled: true, mode: "light-dark-system" }}
         tree={source.getPageTree()}
       >

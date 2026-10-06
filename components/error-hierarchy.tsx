@@ -1,7 +1,7 @@
 export function ErrorHierarchy({ description }: { description: string }) {
   return (
     <div className="my-6">
-      <h2 className="mb-4 font-bold text-2xl">Error hierarchy</h2>
+      <h2 className="mt-0 mb-4 font-bold text-2xl">Error hierarchy</h2>
       <p className="mb-4">{description}</p>
       <pre className="overflow-x-auto rounded-lg bg-gray-50 p-4 text-sm dark:bg-gray-900">
         <code>{`

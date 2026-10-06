@@ -1,11 +1,10 @@
 import {
   DocsBody,
-  DocsDescription,
   DocsPage,
   DocsTitle,
   EditOnGitHub,
   PageLastUpdate,
-} from "fumadocs-ui/layouts/docs/page";
+} from "fumadocs-ui/layouts/notebook/page";
 import { createRelativeLink } from "fumadocs-ui/mdx";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -92,22 +91,24 @@ export default async function Page(props: Props) {
       breadcrumb={{ enabled: breadcrumb !== false, includeRoot: false }}
       footer={{ enabled: true }}
       full={full}
-      tableOfContent={{ enabled: toc !== false, style: "clerk" }}
+      tableOfContent={{
+        enabled: toc !== false,
+        footer: <EditOnGitHub href={editUrl} />,
+        style: "clerk",
+      }}
       tableOfContentPopover={{ enabled: toc !== false }}
       toc={toc === false ? [] : page.data.toc}
     >
       <DocsTitle>{page.data.title}</DocsTitle>
-      <DocsDescription className="mb-0">
-        {page.data.description}
-      </DocsDescription>
       <PageActions githubUrl={editUrl} markdownUrl={markdownUrl(params.slug)} />
       <DocsBody>
         <MDX components={mdxComponents} />
       </DocsBody>
-      <div className="flex flex-row flex-wrap items-center justify-between gap-4 pt-4 text-fd-muted-foreground text-sm">
-        <EditOnGitHub href={editUrl} />
-        {lastModified ? <PageLastUpdate date={lastModified} /> : null}
-      </div>
+      {lastModified ? (
+        <div className="flex flex-row flex-wrap items-center justify-end gap-4 pt-4 text-fd-muted-foreground text-sm">
+          <PageLastUpdate date={lastModified} />
+        </div>
+      ) : null}
     </DocsPage>
   );
 }

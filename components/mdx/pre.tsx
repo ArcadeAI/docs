@@ -74,9 +74,9 @@ function TerminalTitle() {
         <span className="font-medium">Terminal</span>
       </span>
       <span className="flex gap-2 pe-2">
-        <span className="size-3 rounded-full bg-red-500" />
-        <span className="size-3 rounded-full bg-yellow-500" />
-        <span className="size-3 rounded-full bg-green-500" />
+        <span className="size-3 rounded-full bg-red-500!" />
+        <span className="size-3 rounded-full bg-yellow-500!" />
+        <span className="size-3 rounded-full bg-green-500!" />
       </span>
     </span>
   );

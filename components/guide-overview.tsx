@@ -39,7 +39,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
         <div className="grid gap-6 md:grid-cols-2">
           {/* Outcomes column */}
           <div>
-            <h2 className="mb-3 font-semibold text-card-foreground text-xl">
+            <h2 className="mt-0 mb-3 font-semibold text-card-foreground text-xl">
               Outcomes
             </h2>
             <div className="text-muted-foreground">
@@ -50,7 +50,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
 
           {/* Prerequisites column */}
           <div>
-            <h3 className="mb-3 font-medium text-card-foreground text-lg">
+            <h3 className="mt-0 mb-3 font-medium text-card-foreground text-lg">
               Prerequisites
             </h3>
             <div className="space-y-2 text-muted-foreground text-sm">
@@ -67,7 +67,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
           {/* Outcomes section (full width) */}
           {outcomes && (
             <div className="mb-6">
-              <h2 className="mb-3 font-semibold text-card-foreground text-xl">
+              <h2 className="mt-0 mb-3 font-semibold text-card-foreground text-xl">
                 Outcomes
               </h2>
               <div className="text-muted-foreground">
@@ -81,7 +81,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
           <div className="grid gap-6 md:grid-cols-3">
             {/* You will Learn column - takes 2/3 of width */}
             <div className="md:col-span-2">
-              <h3 className="mb-3 font-medium text-card-foreground text-lg">
+              <h3 className="mt-0 mb-3 font-medium text-card-foreground text-lg">
                 You will Learn
               </h3>
               <div className="space-y-2 text-muted-foreground text-sm">
@@ -94,7 +94,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
             {/* Prerequisites column - takes 1/3 of width */}
             {prerequisites && (
               <div className="md:col-span-1">
-                <h3 className="mb-3 font-medium text-card-foreground text-lg">
+                <h3 className="mt-0 mb-3 font-medium text-card-foreground text-lg">
                   Prerequisites
                 </h3>
                 <div className="space-y-2 text-muted-foreground text-sm">
@@ -111,7 +111,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
       {/* Fallback for edge cases - only outcomes, only prerequisites, etc. */}
       {outcomes && !prerequisites && !youWillLearn && (
         <div>
-          <h2 className="mb-3 font-semibold text-card-foreground text-xl">
+          <h2 className="mt-0 mb-3 font-semibold text-card-foreground text-xl">
             Outcomes
           </h2>
           <div className="text-muted-foreground">
@@ -123,7 +123,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
 
       {!outcomes && prerequisites && !youWillLearn && (
         <div>
-          <h3 className="mb-3 font-medium text-card-foreground text-lg">
+          <h3 className="mt-0 mb-3 font-medium text-card-foreground text-lg">
             Prerequisites
           </h3>
           <div className="space-y-2 text-muted-foreground text-sm">

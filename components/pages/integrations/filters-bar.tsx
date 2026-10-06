@@ -17,7 +17,7 @@ import {
 import { Check, Filter, FolderOpen, Layers, Search, X } from "lucide-react";
 import type React from "react";
 import { useCallback } from "react";
-import { TYPE_CONFIG } from "./type-config";
+import { TYPE_CONFIG, TYPE_CONFIG_ENTRIES } from "./type-config";
 import { useFilters } from "./use-filters";
 
 interface FiltersBarProps {
@@ -253,18 +253,16 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
                   )}
                   All Types
                 </DropdownMenuItem>
-                {Object.entries(TYPE_CONFIG).map(
-                  ([key, { label, icon: Icon }]) => (
-                    <TypeMenuItem
-                      icon={Icon}
-                      isSelected={selectedType === key}
-                      key={key}
-                      label={label}
-                      onSelect={setSelectedType}
-                      typeKey={key as ToolkitType}
-                    />
-                  )
-                )}
+                {TYPE_CONFIG_ENTRIES.map(([key, { label, icon: Icon }]) => (
+                  <TypeMenuItem
+                    icon={Icon}
+                    isSelected={selectedType === key}
+                    key={key}
+                    label={label}
+                    onSelect={setSelectedType}
+                    typeKey={key as ToolkitType}
+                  />
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 

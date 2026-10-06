@@ -188,6 +188,13 @@ export type EvaluatedMeta = {
 
 const JSX_MARKER = "\u0000icon=";
 
+/** lucide-react 1.x dropped some legacy icon names used by the Nextra _meta files. */
+const LUCIDE_RENAMES: Record<string, string> = { Home: "House" };
+
+function renameLucideIcon(name: string): string {
+  return LUCIDE_RENAMES[name] ?? name;
+}
+
 /**
  * Evaluate a Nextra `_meta.tsx` module with bun. JSX titles
  * (`<TitleWithIcon icon={X}>Text</TitleWithIcon>`) are turned into marker
@@ -237,7 +244,7 @@ function toMetaEntry(key: string, value: unknown): MetaEntry {
     const idx = t.indexOf(JSX_MARKER);
     if (idx >= 0) {
       entry.title = t.slice(0, idx);
-      entry.icon = t.slice(idx + JSX_MARKER.length);
+      entry.icon = renameLucideIcon(t.slice(idx + JSX_MARKER.length));
     } else {
       entry.title = t;
     }

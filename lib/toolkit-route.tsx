@@ -12,7 +12,7 @@
  * Nextra `[toolkitId]` route used to emit (title, description, canonical, and
  * `noindex` for hidden toolkits).
  */
-import { DocsPage } from "fumadocs-ui/layouts/docs/page";
+import { DocsPage } from "fumadocs-ui/layouts/notebook/page";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { PageActions } from "@/components/page-actions";
@@ -134,7 +134,8 @@ export async function ToolkitRoutePage(props: {
   // the initial Flight payload — detail is fetched on expand. See MARTECH-17.
   return (
     <DocsPage
-      breadcrumb={{ enabled: true }}
+      // ToolkitPage renders its own breadcrumb and table of contents.
+      breadcrumb={{ enabled: false }}
       full
       tableOfContent={{ enabled: false }}
       toc={[]}
@@ -142,7 +143,10 @@ export async function ToolkitRoutePage(props: {
       <PageActions
         markdownUrl={`/api/toolkit-data/${encodeURIComponent(data.id)}?format=markdown`}
       />
-      <ToolkitPage data={toToolkitSummary(data)} />
+      {/* The toolkit TOC is a fixed 20rem panel on xl+; keep content clear of it. */}
+      <div className="xl:pe-80">
+        <ToolkitPage data={toToolkitSummary(data)} />
+      </div>
     </DocsPage>
   );
 }
