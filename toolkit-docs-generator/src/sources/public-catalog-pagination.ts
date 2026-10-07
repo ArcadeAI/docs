@@ -1,3 +1,5 @@
+const ERROR_BODY_SNIPPET_LENGTH = 500;
+
 /**
  * Paginated reads for Engine public catalog endpoints.
  *
@@ -19,8 +21,12 @@ export const fetchAllPages = async <T>(
     const response = await fetchFn(paged);
 
     if (!response.ok) {
+      const text = await response.text().catch(() => "");
+      const detail = text
+        ? `: ${text.slice(0, ERROR_BODY_SNIPPET_LENGTH)}`
+        : "";
       throw new Error(
-        `Public catalog API error ${response.status} from ${paged}`
+        `Public catalog API error ${response.status} from ${paged}${detail}`
       );
     }
 

@@ -162,6 +162,33 @@ describe("fetchAllPages", () => {
       fetchAllPages("https://api.example/v1/public/tools", fetchFn)
     ).rejects.toThrow(/read 1 of 5/);
   });
+
+  it("includes the response body when the API rejects a page", async () => {
+    const message = "invalid limit parameter, must be between 1 and 1000";
+    const fetchFn = (async () =>
+      new Response(JSON.stringify({ message }), {
+        status: 400,
+      })) as typeof fetch;
+
+    await expect(
+      fetchAllPages("https://api.example/v1/public/tools", fetchFn, 25_000)
+    ).rejects.toThrow(
+      `Public catalog API error 400 from https://api.example/v1/public/tools?limit=25000&offset=0: {"message":"${message}"}`
+    );
+  });
+
+  it("truncates a long error body", async () => {
+    const fetchFn = (async () =>
+      new Response("x".repeat(2000), { status: 502 })) as typeof fetch;
+
+    const error = await fetchAllPages(
+      "https://api.example/v1/public/tools",
+      fetchFn
+    ).catch((caught: Error) => caught);
+
+    expect(error).toBeInstanceOf(Error);
+    expect((error as Error).message).toMatch(/: x{500}$/);
+  });
 });
 
 type PublicToolRequirements = Parameters<
@@ -260,6 +287,46 @@ describe("groupToolsByToolkit", () => {
 });
 
 describe("PublicCatalogApiSource", () => {
+  it("requests pages within the public catalog's 1,000 limit cap", async () => {
+    const limits: number[] = [];
+    const tools = Array.from({ length: 1500 }, (_, index) => ({
+      ...githubTool,
+      fully_qualified_name: `Github.Tool${index}@4.1.1`,
+      qualified_name: `Github.Tool${index}`,
+      name: `Tool${index}`,
+    }));
+
+    const fetchFn = (async (input: string | URL | Request) => {
+      const url = new URL(input.toString());
+      const limit = Number(url.searchParams.get("limit"));
+      const offset = Number(url.searchParams.get("offset"));
+      limits.push(limit);
+
+      if (limit < 1 || limit > 1000) {
+        return new Response("invalid limit parameter", { status: 400 });
+      }
+
+      const items = url.pathname.endsWith("/public/tool_catalog")
+        ? [githubCatalogEntry]
+        : tools;
+      return new Response(
+        JSON.stringify({
+          items: items.slice(offset, offset + limit),
+          total_count: items.length,
+        }),
+        { status: 200 }
+      );
+    }) as typeof fetch;
+
+    const source = new PublicCatalogApiSource({
+      baseUrl: "https://api.example",
+      fetchFn,
+    });
+
+    expect(await source.fetchToolsByToolkit("Github")).toHaveLength(1500);
+    expect(Math.max(...limits)).toBeLessThanOrEqual(1000);
+  });
+
   it("loads catalog and tools once, then filters by toolkit", async () => {
     let catalogCalls = 0;
     let toolsCalls = 0;
