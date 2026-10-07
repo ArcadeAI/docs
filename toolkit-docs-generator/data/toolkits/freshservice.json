@@ -1,7 +1,7 @@
 {
   "id": "Freshservice",
   "label": "Freshservice",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Arcade.dev LLM tools for Freshservice IT service management",
   "metadata": {
     "category": "customer-support",
@@ -32,7 +32,7 @@
     {
       "name": "FindKnownCause",
       "qualifiedName": "Freshservice.FindKnownCause",
-      "fullyQualifiedName": "Freshservice.FindKnownCause@1.0.0",
+      "fullyQualifiedName": "Freshservice.FindKnownCause@1.0.1",
       "description": "Find the change or known problem that already explains a wave of tickets about one system.\n\nSearches recent changes and tracked problems together and ranks them as one\nmost-recent-first list, so a caller asking \"what explains this\" makes one\ncall instead of two and does not have to merge the answers itself. Changes\nand problems stay in their own fields of the response, since a change that\nwent out and a problem being tracked call for different next steps.\n\nGive change_id or problem_id on its own to fetch that one record with its\nfull description; combining either with the other, or with any filter, is\nrejected rather than silently resolved one way or the other.\n\nA filtered search covers a bounded, most-recent working set rather than the\nentire history, so an empty result is not proof that no such change or\nproblem exists; the response states how far the scan actually reached.",
       "parameters": [
         {
@@ -179,7 +179,7 @@
     {
       "name": "FindRequester",
       "qualifiedName": "Freshservice.FindRequester",
-      "fullyQualifiedName": "Freshservice.FindRequester@1.0.0",
+      "fullyQualifiedName": "Freshservice.FindRequester@1.0.1",
       "description": "Find a Freshservice requester by internal id, exact email, or name.\n\nExactly one of requester_id, email, or name must be given; supplying none\nor more than one is rejected.\n\nAn email lookup matches character-for-character, so a guessed or\nslightly-off address returns nothing even when the person is in the\ndirectory. Retry by name when an email guess comes back empty.",
       "parameters": [
         {
@@ -299,7 +299,7 @@
     {
       "name": "GetTicket",
       "qualifiedName": "Freshservice.GetTicket",
-      "fullyQualifiedName": "Freshservice.GetTicket@1.0.0",
+      "fullyQualifiedName": "Freshservice.GetTicket@1.0.1",
       "description": "Read one ticket's whole story: fields, conversation, tasks, and any linked change or problem.\n\nWith every embed disabled this makes exactly one upstream request and sends\nno include parameter at all; leaving any one embed enabled also resolves\nthe ticket's formal change and problem linkage.\n\nOnly a change or problem Freshservice itself formally linked to the ticket\nis reported as linked. One merely named in the conversation text is not a\nlink, and has to be found by searching changes or problems for the affected\nsystem's name instead.\n\nThe conversation returned is the most recent history rather than a\nguaranteed-complete thread: a very long thread is reported as shortened, not\nsilently cut.",
       "parameters": [
         {
@@ -411,7 +411,7 @@
     {
       "name": "ListTickets",
       "qualifiedName": "Freshservice.ListTickets",
-      "fullyQualifiedName": "Freshservice.ListTickets@1.0.0",
+      "fullyQualifiedName": "Freshservice.ListTickets@1.0.1",
       "description": "Narrow the Freshservice ticket queue to what is actionable.\n\nNEW_AND_MINE lives on a predefined-view endpoint that rejects status and\npriority filters, so combining them is rejected rather than silently\nresolved; use ALL, UNASSIGNED, or BREACHING with a status/priority filter\ninstead. UNASSIGNED and BREACHING compose with status and priority.\nBREACHING excludes tickets already resolved or closed unless a status is\nexplicitly given, since a past-due ticket that is already resolved or\nclosed no longer needs anyone's attention.",
       "parameters": [
         {
@@ -580,7 +580,7 @@
     {
       "name": "SearchServiceItems",
       "qualifiedName": "Freshservice.SearchServiceItems",
-      "fullyQualifiedName": "Freshservice.SearchServiceItems@1.0.0",
+      "fullyQualifiedName": "Freshservice.SearchServiceItems@1.0.1",
       "description": "Search the Freshservice service catalog for an item that covers an ask.\n\nThe catalog can be searched by term only and cannot be listed or browsed\nin full under this grant: Freshservice gates the catalog's list and detail\nendpoints behind a write scope this toolkit refuses to declare.",
       "parameters": [
         {
@@ -673,7 +673,7 @@
     {
       "name": "SearchSolutions",
       "qualifiedName": "Freshservice.SearchSolutions",
-      "fullyQualifiedName": "Freshservice.SearchSolutions@1.0.0",
+      "fullyQualifiedName": "Freshservice.SearchSolutions@1.0.1",
       "description": "Search the Freshservice knowledge base, or fetch one article in full by id.\n\nExactly one of search_term or article_id must be given; supplying both or\nneither is rejected. Articles come back with their body text, not just a\ntitle, so a single call is normally enough to answer the question.",
       "parameters": [
         {
@@ -781,6 +781,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-09-24T21:01:57.852Z",
+  "generatedAt": "2026-10-07T21:25:08.713Z",
   "summary": "Freshservice is an IT service management platform by Freshworks. This toolkit lets LLM agents interact with Freshservice to triage tickets, search the knowledge base and service catalog, look up requesters, and correlate incidents with known causes.\n\n## Capabilities\n\n- **Ticket management**: Retrieve full ticket details (fields, conversation, tasks, linked changes/problems) and filter the ticket queue by actionable views, status, and priority.\n- **Root cause correlation**: Search recent changes and tracked problems together in a single ranked call to explain a wave of related tickets.\n- **Knowledge base access**: Search solution articles or fetch a full article by ID — body text included — in one call.\n- **Service catalog search**: Find catalog items by search term (browsing the full catalog is blocked by scope constraints).\n- **Requester lookup**: Resolve a Freshservice user by internal ID, exact email, or name.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Freshservice** provider. Arcade manages the OAuth flow; no manual token handling is required.\n\n## Secrets\n\n- **`FRESHSERVICE_SUBDOMAIN`**: Your Freshservice account subdomain — the prefix in your instance URL (e.g., `acme` from `acme.freshservice.com`). Find it by logging into your Freshservice instance and reading the subdomain from the browser address bar. This value identifies which Freshservice tenant API requests are routed to and is required for the toolkit to construct correct API endpoints.\n\nConfigure secrets in the Arcade dashboard or via the API: https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets — secrets can also be managed at https://api.arcade.dev/dashboard/auth/secrets."
 }

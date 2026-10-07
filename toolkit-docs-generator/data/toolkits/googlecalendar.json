@@ -1,7 +1,7 @@
 {
   "id": "GoogleCalendar",
   "label": "Google Calendar",
-  "version": "3.7.1",
+  "version": "4.2.1",
   "description": "Arcade.dev LLM tools for Google Calendar",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "GoogleCalendar.CreateEvent",
-      "fullyQualifiedName": "GoogleCalendar.CreateEvent@3.7.1",
+      "fullyQualifiedName": "GoogleCalendar.CreateEvent@4.2.1",
       "description": "Create a new event/meeting/sync/meetup in the specified calendar.\n\nPass `recurrence` to create a repeating event.",
       "parameters": [
         {
@@ -42,7 +42,7 @@
           "name": "start_datetime",
           "type": "string",
           "required": true,
-          "description": "The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+          "description": "When the event starts. For a timed event, a datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). For an all-day event, a date (YYYY-MM-DD); end_datetime must then be a date too.",
           "enum": null,
           "inferrable": true
         },
@@ -50,7 +50,7 @@
           "name": "end_datetime",
           "type": "string",
           "required": true,
-          "description": "The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+          "description": "When the event ends. For a timed event, a datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). For an all-day event, a date (YYYY-MM-DD) that is exclusive: the day after the event's last day. A date equal to start_datetime creates a single all-day event on that day.",
           "enum": null,
           "inferrable": true
         },
@@ -58,7 +58,7 @@
           "name": "calendar_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the calendar to create the event in, usually 'primary'.",
+          "description": "The ID of the calendar to create the event in. Defaults to 'primary'.",
           "enum": null,
           "inferrable": true
         },
@@ -82,7 +82,7 @@
           "name": "visibility",
           "type": "string",
           "required": false,
-          "description": "The visibility of the event",
+          "description": "The visibility of the event. Defaults to default, which uses the calendar's default visibility.",
           "enum": [
             "default",
             "public",
@@ -106,7 +106,7 @@
           "required": false,
           "description": "Which guests Google emails an invitation to. externalOnly emails only guests who do not use Google Calendar. Defaults to all.",
           "enum": [
-            "none",
+            "nobody",
             "all",
             "externalOnly"
           ],
@@ -125,7 +125,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Recurrence rules for a repeating event, in RFC 5545 format. Each entry is an RRULE/RDATE/EXDATE line; a bare rule is automatically prefixed with 'RRULE:'. Examples: ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for every Mon/Wed/Fri for 10 occurrences, or ['RRULE:FREQ=DAILY;UNTIL=20241231T000000Z'] for daily until 2024-12-31. Omit for a one-time event.",
+          "description": "Recurrence rules for a repeating event, in RFC 5545 format. Each entry is an RRULE/RDATE/EXDATE line; a bare rule is automatically prefixed with 'RRULE:'. Examples: ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for every Mon/Wed/Fri for 10 occurrences, or ['RRULE:FREQ=DAILY;UNTIL=YYYYMMDDTHHMMSSZ'] for daily until a UTC date-time. Omit for a one-time event.",
           "enum": null,
           "inferrable": true
         }
@@ -149,17 +149,17 @@
         "toolName": "GoogleCalendar.CreateEvent",
         "parameters": {
           "summary": {
-            "value": "Team Sprint Planning Meeting",
+            "value": "Team Weekly Sync",
             "type": "string",
             "required": true
           },
           "start_datetime": {
-            "value": "2025-03-15T10:00:00",
+            "value": "2024-03-15T10:00:00",
             "type": "string",
             "required": true
           },
           "end_datetime": {
-            "value": "2025-03-15T11:30:00",
+            "value": "2024-03-15T11:00:00",
             "type": "string",
             "required": true
           },
@@ -169,7 +169,7 @@
             "required": false
           },
           "description": {
-            "value": "Weekly sprint planning session to review backlog, assign tasks, and set goals for the upcoming sprint.",
+            "value": "Weekly sync to discuss project updates, blockers, and upcoming milestones.",
             "type": "string",
             "required": false
           },
@@ -204,7 +204,7 @@
           },
           "recurrence": {
             "value": [
-              "RRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=8"
+              "RRULE:FREQ=WEEKLY;BYDAY=FR;COUNT=12"
             ],
             "type": "array",
             "required": false
@@ -235,7 +235,7 @@
     {
       "name": "DeleteEvent",
       "qualifiedName": "GoogleCalendar.DeleteEvent",
-      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@3.7.1",
+      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@4.2.1",
       "description": "Delete an event from Google Calendar.",
       "parameters": [
         {
@@ -250,7 +250,7 @@
           "name": "calendar_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the calendar containing the event",
+          "description": "The ID of the calendar containing the event. Defaults to 'primary'.",
           "enum": null,
           "inferrable": true
         },
@@ -258,9 +258,9 @@
           "name": "send_updates",
           "type": "string",
           "required": false,
-          "description": "Specifies which attendees to notify about the deletion",
+          "description": "Specifies which attendees to notify about the deletion. Defaults to all.",
           "enum": [
-            "none",
+            "nobody",
             "all",
             "externalOnly"
           ],
@@ -285,12 +285,12 @@
         "toolName": "GoogleCalendar.DeleteEvent",
         "parameters": {
           "event_id": {
-            "value": "event_123abcXYZ",
+            "value": "7q3k2p1m9n8v4r6t5w0y_20240315T140000Z",
             "type": "string",
             "required": true
           },
           "calendar_id": {
-            "value": "primary",
+            "value": "john.doe@gmail.com",
             "type": "string",
             "required": false
           },
@@ -325,8 +325,8 @@
     {
       "name": "FindTimeSlotsWhenEveryoneIsFree",
       "qualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree",
-      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@3.7.1",
-      "description": "Provides time slots when everyone is free within a given date range and time boundaries.",
+      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@4.2.1",
+      "description": "Provide time slots when everyone is free within a given date range and time boundaries.",
       "parameters": [
         {
           "name": "email_addresses",
@@ -439,9 +439,82 @@
       }
     },
     {
+      "name": "GetEvent",
+      "qualifiedName": "GoogleCalendar.GetEvent",
+      "fullyQualifiedName": "GoogleCalendar.GetEvent@4.2.1",
+      "description": "Get one Google Calendar event by its id.\n\nWhen the event is one occurrence of a recurring series, the series' repeat rule and first\nstart are returned too, so read them here before changing or ending a series. The rule\ncounts from series_start, not from this occurrence's start. Use this instead of\nlisting a time window whenever the event id is already known. Deleted events and deleted\noccurrences are still returned, with a cancelled status.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the event. For a recurring event, pass an occurrence's id to read that occurrence along with its series' repeat rule, or the series id to read the series itself.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The identifier of the calendar that holds the event. Defaults to 'primary', the authenticated user's main calendar.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The event's details, and the repeat rule and first start of its series"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.GetEvent",
+        "parameters": {
+          "event_id": {
+            "value": "7a3f9k2m1b8c4d6e5h0j",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "primary",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListCalendars",
       "qualifiedName": "GoogleCalendar.ListCalendars",
-      "fullyQualifiedName": "GoogleCalendar.ListCalendars@3.7.1",
+      "fullyQualifiedName": "GoogleCalendar.ListCalendars@4.2.1",
       "description": "List all calendars accessible by the user.",
       "parameters": [
         {
@@ -541,14 +614,14 @@
     {
       "name": "ListEvents",
       "qualifiedName": "GoogleCalendar.ListEvents",
-      "fullyQualifiedName": "GoogleCalendar.ListEvents@3.7.1",
-      "description": "List events from the specified calendar within the given datetime range.\n\nmin_end_datetime serves as the lower bound (exclusive) for an event's end time.\nmax_start_datetime serves as the upper bound (exclusive) for an event's start time.\n\nFor example:\nIf min_end_datetime is set to 2024-09-15T09:00:00 and max_start_datetime\nis set to 2024-09-16T17:00:00, the function will return events that:\n1. End after 09:00 on September 15, 2024 (exclusive)\n2. Start before 17:00 on September 16, 2024 (exclusive)\nThis means an event starting at 08:00 on September 15 and\nending at 10:00 on September 15 would be included, but an\nevent starting at 17:00 on September 16 would not be included.",
+      "fullyQualifiedName": "GoogleCalendar.ListEvents@4.2.1",
+      "description": "List events from the specified calendar within the given datetime range.\n\nmin_end_datetime serves as the lower bound (exclusive) for an event's end time.\nmax_start_datetime serves as the upper bound (exclusive) for an event's start time.\n\nFor example, with min_end_datetime at 09:00 on one day and max_start_datetime at\n17:00 the next day, the function returns events that:\n1. End after 09:00 on the first day (exclusive)\n2. Start before 17:00 on the second day (exclusive)\nSo an event from 08:00 to 10:00 on the first day is included, but an event\nstarting at 17:00 on the second day is not.",
       "parameters": [
         {
           "name": "min_end_datetime",
           "type": "string",
           "required": true,
-          "description": "Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.",
+          "description": "Filter by events that end on or after this datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).",
           "enum": null,
           "inferrable": true
         },
@@ -556,7 +629,7 @@
           "name": "max_start_datetime",
           "type": "string",
           "required": true,
-          "description": "Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.",
+          "description": "Filter by events that start before this datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS).",
           "enum": null,
           "inferrable": true
         },
@@ -564,7 +637,7 @@
           "name": "calendar_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the calendar to list events from",
+          "description": "The ID of the calendar to list events from. Defaults to 'primary'.",
           "enum": null,
           "inferrable": true
         },
@@ -572,7 +645,7 @@
           "name": "max_results",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of events to return",
+          "description": "The maximum number of events to return. Defaults to 10.",
           "enum": null,
           "inferrable": true
         }
@@ -641,14 +714,14 @@
     {
       "name": "RespondToEvent",
       "qualifiedName": "GoogleCalendar.RespondToEvent",
-      "fullyQualifiedName": "GoogleCalendar.RespondToEvent@3.7.1",
+      "fullyQualifiedName": "GoogleCalendar.RespondToEvent@4.2.1",
       "description": "Accept, decline, or tentatively accept (RSVP to) a meeting invitation on the\nauthenticated user's behalf.\n\nSets the user's responseStatus for an event they were invited to.",
       "parameters": [
         {
           "name": "event_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the event to respond to. Use the event id from list_events to respond to a single occurrence of a recurring event, or its recurringEventId to respond to the whole series.",
+          "description": "The ID of the event to respond to. Use an event's id from an event listing to respond to a single occurrence of a recurring event, or its recurringEventId to respond to the whole series.",
           "enum": null,
           "inferrable": true
         },
@@ -668,7 +741,7 @@
           "name": "calendar_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the calendar containing the event",
+          "description": "The ID of the calendar containing the event. Defaults to 'primary'.",
           "enum": null,
           "inferrable": true
         },
@@ -676,9 +749,9 @@
           "name": "send_updates",
           "type": "string",
           "required": false,
-          "description": "Should attendees be notified of the response? (none, all, external_only)",
+          "description": "Which attendees to notify of the response. Defaults to all.",
           "enum": [
-            "none",
+            "nobody",
             "all",
             "externalOnly"
           ],
@@ -703,7 +776,7 @@
         "toolName": "GoogleCalendar.RespondToEvent",
         "parameters": {
           "event_id": {
-            "value": "7q2kldj3r8s1mno4pqr5stuv6w",
+            "value": "7q2kfj3lmnop4r5s6t7u8v9w",
             "type": "string",
             "required": true
           },
@@ -713,7 +786,7 @@
             "required": true
           },
           "calendar_id": {
-            "value": "user@example.com",
+            "value": "primary",
             "type": "string",
             "required": false
           },
@@ -748,8 +821,8 @@
     {
       "name": "UpdateEvent",
       "qualifiedName": "GoogleCalendar.UpdateEvent",
-      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@3.7.1",
-      "description": "Update an existing event in the specified calendar with the provided details.\nOnly the provided fields will be updated; others will remain unchanged.\n\nAn event's details can only be changed by the event's organizer, or by a guest\nwhen the organizer has enabled guest editing for that event.\n\n`updated_start_datetime` and `updated_end_datetime` are\nindependent and can be provided separately.",
+      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@4.2.1",
+      "description": "Update an existing event in the specified calendar with the provided details.\nOnly the provided fields will be updated; others will remain unchanged.\nPass `updated_calendar_id` to move the event to another calendar.\n\nAn event's details can only be changed by the event's organizer, or by a guest\nwhen the organizer has enabled guest editing for that event.\n\n`updated_start_datetime` and `updated_end_datetime` are\nindependent and can be provided separately, except that all-day\ndates must be provided for both.",
       "parameters": [
         {
           "name": "event_id",
@@ -760,10 +833,18 @@
           "inferrable": true
         },
         {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the calendar containing the event. Defaults to 'primary'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
           "name": "updated_start_datetime",
           "type": "string",
           "required": false,
-          "description": "The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+          "description": "The updated start of the event. For a timed event, a datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). For an all-day event, a date (YYYY-MM-DD); updated_end_datetime must then be a date too.",
           "enum": null,
           "inferrable": true
         },
@@ -771,7 +852,7 @@
           "name": "updated_end_datetime",
           "type": "string",
           "required": false,
-          "description": "The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+          "description": "The updated end of the event. For a timed event, a datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). For an all-day event, a date (YYYY-MM-DD) that is exclusive: the day after the event's last day. A date equal to updated_start_datetime makes it a single all-day event on that day.",
           "enum": null,
           "inferrable": true
         },
@@ -779,7 +860,7 @@
           "name": "updated_calendar_id",
           "type": "string",
           "required": false,
-          "description": "The updated ID of the calendar containing the event.",
+          "description": "The ID of a calendar to move the event to. The event is moved there after the other updates are applied. Omit to keep the event on its current calendar.",
           "enum": null,
           "inferrable": true
         },
@@ -853,7 +934,7 @@
           "required": false,
           "description": "Which guests Google emails about the update. externalOnly emails only guests who do not use Google Calendar. Defaults to all.",
           "enum": [
-            "none",
+            "nobody",
             "all",
             "externalOnly"
           ],
@@ -863,9 +944,8 @@
           "name": "updated_google_meet",
           "type": "string",
           "required": false,
-          "description": "Whether to update the Google Meet link to the event. (none, add, remove)",
+          "description": "Add or remove the event's Google Meet link. Defaults to None, which leaves the link unchanged.",
           "enum": [
-            "none",
             "add",
             "remove"
           ],
@@ -876,6 +956,7 @@
         "providerId": "google",
         "providerType": "oauth2",
         "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly",
           "https://www.googleapis.com/auth/calendar.events"
         ]
       },
@@ -890,32 +971,37 @@
         "toolName": "GoogleCalendar.UpdateEvent",
         "parameters": {
           "event_id": {
-            "value": "abc123xyz789eventid",
+            "value": "7q2kp3m8n1vc4ds6",
             "type": "string",
             "required": true
           },
-          "updated_start_datetime": {
-            "value": "2024-12-31T15:30:00",
-            "type": "string",
-            "required": false
-          },
-          "updated_end_datetime": {
-            "value": "2024-12-31T17:30:00",
-            "type": "string",
-            "required": false
-          },
-          "updated_calendar_id": {
+          "calendar_id": {
             "value": "primary",
             "type": "string",
             "required": false
           },
+          "updated_start_datetime": {
+            "value": "2024-09-15T10:00:00",
+            "type": "string",
+            "required": false
+          },
+          "updated_end_datetime": {
+            "value": "2024-09-15T11:30:00",
+            "type": "string",
+            "required": false
+          },
+          "updated_calendar_id": {
+            "value": "team@example.com",
+            "type": "string",
+            "required": false
+          },
           "updated_summary": {
-            "value": "Team Year-End Review Meeting",
+            "value": "Q3 Strategy Review Meeting",
             "type": "string",
             "required": false
           },
           "updated_description": {
-            "value": "Annual review of team goals, achievements, and plans for the upcoming year.",
+            "value": "Quarterly review of strategy and OKRs for all team leads. Please come prepared with your department updates.",
             "type": "string",
             "required": false
           },
@@ -939,14 +1025,14 @@
           "attendee_emails_to_add": {
             "value": [
               "alice@example.com",
-              "bob@company.org"
+              "bob@example.com"
             ],
             "type": "array",
             "required": false
           },
           "attendee_emails_to_remove": {
             "value": [
-              "charlie@oldcompany.com"
+              "charlie@example.com"
             ],
             "type": "array",
             "required": false
@@ -987,7 +1073,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleCalendar.WhoAmI",
-      "fullyQualifiedName": "GoogleCalendar.WhoAmI@3.7.1",
+      "fullyQualifiedName": "GoogleCalendar.WhoAmI@4.2.1",
       "description": "Get comprehensive user profile and Google Calendar environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Calendar access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -1053,6 +1139,6 @@
   ],
   "subPages": [],
   "curationSourceHash": "cd977f2e66058d686da277f9a3c43e903d6caba18a9124ec18a51996ad31882d",
-  "generatedAt": "2026-09-24T21:01:57.693Z",
-  "summary": "## Google Calendar Toolkit\n\nThe GoogleCalendar toolkit connects Arcade to Google Calendar, enabling LLMs to read, create, update, and manage calendar events and availability on behalf of authenticated users.\n\n## Capabilities\n\n- **Calendar discovery & user context:** List all accessible calendars and retrieve the authenticated user's profile, email, permissions, and environment details.\n- **Event querying:** List events within a datetime range using exclusive lower/upper bounds on end and start times respectively, supporting precise window-based filtering.\n- **Event creation & recurrence:** Create one-time or repeating events (via `recurrence`) with full meeting details across any accessible calendar.\n- **Event modification & deletion:** Update any subset of event fields independently (start/end times are decoupled) and delete events; edits respect organizer and guest-edit permissions.\n- **RSVP management:** Accept, decline, or tentatively accept meeting invitations on the user's behalf by setting `responseStatus`.\n- **Availability analysis:** Find time slots when all specified participants are free within a date range and time boundaries.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup instructions."
+  "generatedAt": "2026-10-07T21:25:15.717Z",
+  "summary": "## Google Calendar Toolkit\n\nThe Google Calendar toolkit connects Arcade to Google Calendar, enabling LLMs to read, create, update, and manage calendar events and availability on behalf of authenticated users.\n\n## Capabilities\n\n- **Event CRUD**: Create events (including recurring series via `recurrence`), retrieve a single event by ID (including cancelled/deleted occurrences and series recurrence rules), list events within a datetime window with precise boundary semantics, update any subset of event fields or move an event to another calendar, and delete events.\n- **Availability & scheduling**: Find time slots when all specified participants are free within a given date range and time boundaries.\n- **RSVP / response management**: Accept, decline, or tentatively accept meeting invitations on the authenticated user's behalf.\n- **Calendar discovery**: List all calendars accessible to the authenticated user.\n- **User identity**: Retrieve the authenticated user's profile, email, and Google Calendar access permissions.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup and configuration details."
 }
