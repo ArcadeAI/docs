@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookCalendar",
   "label": "Microsoft Outlook Calendar",
-  "version": "3.2.0",
+  "version": "5.0.0",
   "description": "Arcade.dev LLM tools for Outlook Calendar",
   "metadata": {
     "category": "productivity",
@@ -18,6 +18,7 @@
     "providerId": "microsoft",
     "allScopes": [
       "Calendars.Read",
+      "Calendars.Read.Shared",
       "Calendars.ReadBasic",
       "Calendars.ReadWrite",
       "MailboxSettings.Read",
@@ -28,8 +29,8 @@
     {
       "name": "CancelEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CancelEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CancelEvent@3.2.0",
-      "description": "Cancel a meeting you organize and email a cancellation to every invitee.\n\nIrreversible. Invitees keep a cancelled copy. Refused when nobody else is\ninvited. this_and_future ends the series the day before the given date, so\ninvitees get an updated invitation instead, with no note.\n\nUse is_organizer, attendees, event_type and series_master_id from an earlier\nread to choose this tool and scope. Only events in your own mailbox, not\nshared or delegated calendars.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CancelEvent@5.0.0",
+      "description": "Cancel a meeting you organize and email a cancellation to every invitee.\n\nIrreversible. Invitees keep a cancelled copy. Refused when nobody else is\ninvited. A date already called off is reported as already cancelled, and nothing\nis sent for that date. this_and_future ends the series the day before the given\ndate, so invitees get an updated invitation instead, with no note.\n\nUse is_organizer, attendees, event_type and series_master_id from an earlier\nread to choose this tool and scope. Only events in your own mailbox, not\nshared or delegated calendars.",
       "parameters": [
         {
           "name": "event_id",
@@ -120,8 +121,8 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CreateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@3.2.0",
-      "description": "Create an event in the authenticated user's default calendar.\n\nbody is stored as plain text unless body_format says html, in which case it is\nstored as markup and rendered rather than shown literally.\n\nCopying a description from an event that was read means passing that event's\nbody_html as body with body_format html. Its body field is the same description\nwith the markup stripped, so an agenda copied from there arrives with its links,\nlists and emphasis gone.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@5.0.0",
+      "description": "Create an event in the user's default calendar, or in another calendar they can edit\nwhen calendar_id is given.\n\nPass calendar_id only when the user names a calendar, never matched from the subject;\notherwise the event goes on the default calendar. With calendar_id, the result echoes it.\nOn a calendar someone else owns, organizer_note names that person as organizer.\n\nSet recurrence for a repeating series: start and end are the first date's, and it\nneeds exactly one of recurrence.end_date, recurrence.occurrence_count or\nrecurrence.never_ends. When the request names no end, ask the user before creating\nanything. If start_date_time is not a day the pattern produces, the series starts on the\nfirst day it does, and first_date_note says so. Every weekday is weekly on monday to\nfriday. A step in working days, such as every third business day, cannot be expressed:\ntell the user instead of creating a nearby pattern.\n\nBook only at a time the user gave or picked, never one you chose. If no time was given,\npropose times and let the user pick first.\n\nbody is stored as plain text unless body_format says html, in which case it is\nstored as markup and rendered rather than shown literally.\n\nCopying a description from an event that was read means passing that event's\nbody_html as body with body_format html. Its body field is the same description\nwith the markup stripped, so an agenda copied from there arrives with its links,\nlists and emphasis gone.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
       "parameters": [
         {
           "name": "subject",
@@ -143,7 +144,7 @@
           "name": "start_date_time",
           "type": "string",
           "required": true,
-          "description": "The datetime of the event's start, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-25T13:00:00",
+          "description": "The datetime of the event's start, represented in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Timezone offset is ignored.",
           "enum": null,
           "inferrable": true
         },
@@ -151,7 +152,15 @@
           "name": "end_date_time",
           "type": "string",
           "required": true,
-          "description": "The datetime of the event's end, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-25T13:30:00",
+          "description": "The datetime of the event's end, represented in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Timezone offset is ignored. For a repeating series, the first date's end; the last date goes in recurrence.end_date.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "Calendar ID from a calendar listing, including a shared one you can edit. Only for a calendar the user named; never inferred from the subject. Omit for the default.",
           "enum": null,
           "inferrable": true
         },
@@ -184,7 +193,7 @@
           "name": "custom_meeting_url",
           "type": "string",
           "required": false,
-          "description": "A join link to use instead of one Outlook generates. It is appended to body rather than stored as an Outlook meeting, so the created event comes back with is_online_meeting False and an empty online_meeting_join_url -- the link is in the description: in body when body_format is plain_text, and in body_html when it is html. Leave unset and set is_online_meeting to True to have Outlook generate one",
+          "description": "A join link to use instead of one Outlook generates. It is appended to body rather than stored as an Outlook meeting, so the created event comes back with is_online_meeting False and an empty online_meeting_join_url. The link is in the description: in body when body_format is plain_text, and in body_html when it is html. Leave unset and set is_online_meeting to True to have Outlook generate one",
           "enum": null,
           "inferrable": true
         },
@@ -192,11 +201,19 @@
           "name": "body_format",
           "type": "string",
           "required": false,
-          "description": "The form the body argument is written in. Set html only when the body you are passing actually carries HTML tags, as the body_html of an event that was read does -- declaring html over plain words stores them marked as markup and they render wrong. plain_text stores the body as written, escaping anything that looks like markup. Defaults to plain_text.",
+          "description": "The form the body argument is written in. Set html only when the body you are passing actually carries HTML tags, as the body_html of an event that was read does. Declaring html over plain words stores them marked as markup and they render wrong. plain_text stores the body as written, escaping anything that looks like markup. Defaults to plain_text.",
           "enum": [
             "plain_text",
             "html"
           ],
+          "inferrable": true
+        },
+        {
+          "name": "recurrence",
+          "type": "json",
+          "required": false,
+          "description": "How the event repeats; leave unset for a one-off. Only the pattern asked for, never a close substitute. Leave out the fields a frequency does not use.",
+          "enum": null,
           "inferrable": true
         }
       ],
@@ -212,7 +229,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The created event, carrying the same fields a single-event read returns."
+        "description": "The created event under event, and for a series the date it first takes place."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -224,30 +241,35 @@
             "required": true
           },
           "body": {
-            "value": "<h2>Agenda</h2><ul><li>Review Q3 OKRs</li><li>Budget discussion</li><li>Team updates</li></ul>",
+            "value": "Please review the attached agenda before joining. We will cover budget forecasts, OKR progress, and roadmap planning for the next quarter.",
             "type": "string",
             "required": true
           },
           "start_date_time": {
-            "value": "2025-07-15T10:00:00",
+            "value": "2025-09-15T10:00:00",
             "type": "string",
             "required": true
           },
           "end_date_time": {
-            "value": "2025-07-15T11:30:00",
+            "value": "2025-09-15T11:30:00",
             "type": "string",
             "required": true
           },
+          "calendar_id": {
+            "value": "AQMkADAwATM0MDAAMS1hYmNk",
+            "type": "string",
+            "required": false
+          },
           "location": {
-            "value": "Conference Room B, 3rd Floor",
+            "value": "Conference Room B, 4th Floor",
             "type": "string",
             "required": false
           },
           "attendee_emails": {
             "value": [
-              "alice.johnson@company.com",
-              "bob.smith@company.com",
-              "carol.white@partner.org"
+              "alice.johnson@example.com",
+              "bob.smith@example.com",
+              "carol.white@example.com"
             ],
             "type": "array",
             "required": false
@@ -258,12 +280,24 @@
             "required": false
           },
           "custom_meeting_url": {
-            "value": "https://zoom.us/j/98765432100?pwd=examplepassword123",
+            "value": "https://zoom.us/j/98765432100?pwd=abc123xyz",
             "type": "string",
             "required": false
           },
           "body_format": {
-            "value": "html",
+            "value": "plain_text",
+            "type": "string",
+            "required": false
+          },
+          "recurrence": {
+            "value": {
+              "pattern": "weekly",
+              "interval": 1,
+              "days_of_week": [
+                "Monday"
+              ],
+              "end_date": "2025-12-15"
+            },
             "type": "string",
             "required": false
           }
@@ -291,10 +325,288 @@
       }
     },
     {
+      "name": "FindMeetingTimes",
+      "qualifiedName": "MicrosoftOutlookCalendar.FindMeetingTimes",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.FindMeetingTimes@5.0.0",
+      "description": "Propose times when a group could meet. Books nothing. Use it to find a time, and to set up\nor schedule a meeting when no time is given: offer the slots and let the user pick one.\n\nReturns up to max_candidates slots, best first. Each slot counts how many attendees are free\nand names those whose availability is unknown, so it answers per-slot who can make it.\n\nTimes are in time_zone, the user's mailbox zone. On time_zone_source \"mailbox_utc\" or\n\"fallback\", confirm the zone before stating times.\n\nA slot can include busy or out-of-office attendees; say a time works for everyone only when\navailability_count shows all free. Working elsewhere counts as free.\n\nNo suggestions is not an error; empty_reason and note explain it.",
+      "parameters": [
+        {
+          "name": "attendee_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Email addresses of the people to meet, excluding yourself. Up to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The start of the search window in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Timezone offset is ignored; the user's calendar timezone is used.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The end of the search window in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Timezone offset is ignored; the user's calendar timezone is used. The window must be less than 62 days.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "meeting_duration_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "Length of the meeting in minutes. Defaults to 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_candidates",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of suggestions to return, 1-20. Defaults to 5.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "require_my_attendance",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether you must be free for a slot to be suggested. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "hours",
+          "type": "string",
+          "required": false,
+          "description": "working: your working hours (default Mon-Fri 8am-5pm); personal: working hours plus weekends; all_hours: any time. Defaults to working.",
+          "enum": [
+            "working",
+            "personal",
+            "all_hours"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.Read.Shared"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.FindMeetingTimes",
+        "parameters": {
+          "attendee_emails": {
+            "value": [
+              "alice.johnson@example.com",
+              "bob.smith@example.com",
+              "carol.white@example.com"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "start_date_time": {
+            "value": "2025-03-10T09:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_date_time": {
+            "value": "2025-03-14T17:00:00",
+            "type": "string",
+            "required": true
+          },
+          "meeting_duration_minutes": {
+            "value": 60,
+            "type": "integer",
+            "required": false
+          },
+          "max_candidates": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "require_my_attendance": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "hours": {
+            "value": "working",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ForwardEvent",
+      "qualifiedName": "MicrosoftOutlookCalendar.ForwardEvent",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ForwardEvent@5.0.0",
+      "description": "Send a meeting invitation to someone who is not invited yet; they join the attendee list and the organizer is told.\n\nWorks on a meeting you organize or one you were invited to. The attendee list can be edited\nonly on a meeting you organize, so for someone else's meeting this is the way to bring another\nperson in. Any bounce goes to the organizer. Refused for a cancelled meeting, the whole series\nof a repeating meeting (forward one date by its own event_id), and an event nobody else is\ninvited to.\n\nName the meeting by event_id or by event_subject. Only events in your own mailbox, and a\nsubject is looked up in your default calendar only.",
+      "parameters": [
+        {
+          "name": "recipient_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Email addresses to send the invitation to, as plain addresses such as name@example.com. Each one not already invited joins the meeting's attendee list. At least one.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": false,
+          "description": "Identifier of the meeting to forward, exactly as an earlier read returned it. Give this or event_subject, not both. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "event_subject",
+          "type": "string",
+          "required": false,
+          "description": "Text from the subject of the meeting to forward, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Nothing is sent unless exactly one event matches. Give this or event_id, not both. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_start_date_time",
+          "type": "string",
+          "required": false,
+          "description": "Start of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Ignored when event_id is given. Defaults to None (7 days ago).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_end_date_time",
+          "type": "string",
+          "required": false,
+          "description": "End of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. The window may not exceed 90 days. Ignored when event_id is given. Defaults to None (30 days from now).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "required": false,
+          "description": "Text included verbatim in the forwarded invitation. Blank means no note. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The meeting as read before forwarding, who it was sent to, who was already invited, and how the meeting was found."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.ForwardEvent",
+        "parameters": {
+          "recipient_emails": {
+            "value": [
+              "alice@example.com",
+              "bob@contoso.com"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "event_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "event_subject": {
+            "value": "Q3 Budget Review",
+            "type": "string",
+            "required": false
+          },
+          "search_start_date_time": {
+            "value": "2024-06-01T00:00:00",
+            "type": "string",
+            "required": false
+          },
+          "search_end_date_time": {
+            "value": "2024-07-01T23:59:59",
+            "type": "string",
+            "required": false
+          },
+          "note": {
+            "value": "Hi Alice and Bob, please join us for this important budget review meeting. Looking forward to your input!",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.GetEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@3.2.0",
-      "description": "Get one event from the user's calendar, with everything known about it.\n\nReturns an EventDetail: the event's subject, full body, times, location,\norganizer and attendees, plus change_key (the token identifying which version\nof the event this is), event_type and series_master_id (which together say\nwhether this is a one-off event, one date of a recurring series, or the series\nitself), and online_meeting_join_url (the link that joins the online meeting,\ndistinct from web_link, which opens the event in Outlook).\n\nBoth forms of the description come back: body is the plain text with markup\nstripped, and body_html is the stored markup, whole, which a listing row does not\ncarry at all. Take body_html when the formatting, links or lists matter, and\nsupply it as the body of a new event with body_format set to html, or it is\nstored as literal text. An event with no description still returns a non-empty\nbody_html, because Outlook stores an empty scaffold; body being empty is what says\nthere is no agenda.\n\nUse this to read an event in full, or after a listing to see a body the\nlisting only summarised.\n\nstart, end, organizer and response_status always come back, with their own\nfields empty when Microsoft Graph returned no underlying object. An empty\nstart is a value the event is missing, not an event that is missing.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@5.0.0",
+      "description": "Get one event from any of the user's calendars, with the calendar it is on.\n\nevent carries the subject, full body, times, location, organizer and attendees,\nplus change_key (the token identifying which version\nof the event this is), event_type and series_master_id (which together say\nwhether this is a one-off event, one date of a recurring series, or the series\nitself), and online_meeting_join_url (the link that joins the online meeting,\ndistinct from web_link, which opens the event in Outlook).\n\nBoth forms of the description come back: body is the plain text with markup\nstripped, and body_html is the stored markup, whole, which a listing row does not\ncarry at all. Take body_html when the formatting, links or lists matter, and\nsupply it as the body of a new event with body_format set to html, or it is\nstored as literal text. An event with no description still returns a non-empty\nbody_html, because Outlook stores an empty scaffold; body being empty is what says\nthere is no agenda.\n\nUse this to read an event in full, or after a listing to see a body the\nlisting only summarised.\n\nstart, end, organizer and response_status always come back, with their own\nfields empty when Microsoft Graph returned no underlying object. An empty\nstart is a value the event is missing, not an event that is missing.",
       "parameters": [
         {
           "name": "event_id",
@@ -317,7 +629,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The event with its full body."
+        "description": "The event with its full body, and the calendar it is on."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -354,8 +666,8 @@
     {
       "name": "GetSchedule",
       "qualifiedName": "MicrosoftOutlookCalendar.GetSchedule",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@3.2.0",
-      "description": "Get the free/busy availability of one or more people over a time range.\n\nTimezone offsets in start_date_time and end_date_time are ignored. The window is anchored\nin the returned time_zone, which is the authenticated user's mailbox timezone, and may be a\nWindows name such as \"Eastern Standard Time\" rather than an IANA identifier - that names a\nzone observing daylight saving, not a fixed offset. time_zone_source says how far to trust\nthat zone: \"mailbox\" means the mailbox names it and the times can be stated as the user's\nown; \"mailbox_utc\" means the mailbox reads UTC, which a mailbox nobody ever configured also\nreads, so it may not be where the user is; \"fallback\" means the mailbox names no zone or its\nsettings could not be read and UTC was applied by default. On \"mailbox_utc\" and \"fallback\"\ntreat every time in the response as unconfirmed and check the intended zone before acting.\n\nEach person's availability_view has one digit per interval, beginning at start_date_time in\nthat time_zone: 0 = free (or working elsewhere), 1 = tentative, 2 = busy, 3 = out of\noffice. For the specific times a person is busy, prefer schedule_items, which lists each\nblock with absolute start and end times; each item's status is one of free, tentative,\nbusy, oof, workingElsewhere, or unknown.\n\nWhen Graph provides it, working_hours gives the days and hours a person works. These are on\nthat person's own clock - named by working_hours.time_zone when Graph resolves it - and are\nnot converted to the window's time_zone, so do not compare them directly against\navailability_view without accounting for the difference.\n\nResults cover only each person's primary calendar. Events that live solely on a secondary\ncalendar do not mark them busy, so free/busy can read clear while such an event exists.\n\nVisibility depends on your access to each person's calendar. Colleagues, rooms, and\nresources whose free/busy is shared with you return busy/free times; an event's subject,\nlocation, and is_private flag appear only when its details are shared with you. A calendar\nyou cannot see is returned all-free with no error, which is indistinguishable from\ngenuinely free, so every all-free result carries a \"note\" marking it unconfirmed. An\naddress Graph could not resolve or read carries an \"error\" instead, and is still listed so\nthat no requested address is silently dropped. One address failing does not affect the rest,\nand an error naming too many calendar entries is worth retrying for that address alone over\na shorter range.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@5.0.0",
+      "description": "Get free/busy and calendar items in a time window for one or more people. Use it to check\na specific time. It does not propose or rank slots across a range, nor count who is free per\nslot.\n\nTimes are in time_zone, the user's mailbox zone, which may be a Windows name such as \"Eastern\nStandard Time\". On time_zone_source \"mailbox_utc\" or \"fallback\", treat times as unconfirmed\nand check the intended zone before acting.\n\navailability_view has one digit per interval from start_date_time: 0 = free or working\nelsewhere, 1 = tentative, 2 = busy, 3 = out of office. schedule_items can extend past the\nwindow. working_hours are on each person's own clock.\n\nvisibility is \"readable\" (an item overlaps the window), \"free_on_primary_calendar\" (no events\non the primary calendar; secondary calendars are not visible, so not proof of free), \"denied\"\n(no permission), or \"error\" (see the row's error). Subject, location and is_private appear\nonly when shared with you.",
       "parameters": [
         {
           "name": "email_addresses",
@@ -459,8 +771,8 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "MicrosoftOutlookCalendar.ListCalendars",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@3.2.0",
-      "description": "List all calendars the user has access to.\n\nReturns the user's own calendars plus any shared or delegated calendars.\nEach calendar includes its ID, name, owner, and permissions.\n\nUse a calendar_id from the results to target a specific calendar\nin other calendar tools.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@5.0.0",
+      "description": "List all calendars the user has access to.\n\nReturns the user's own calendars plus any shared or delegated calendars.\n\nUse a calendar_id from the results to target a specific calendar\nin other calendar tools. To find which calendar an event is on, read the event instead.",
       "parameters": [
         {
           "name": "limit",
@@ -532,22 +844,14 @@
     {
       "name": "ListEventAttachments",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@3.2.0",
-      "description": "List attachment metadata for a calendar event.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to a calendar event\nor meeting.\n\nPass a calendar_id to list attachments on events in shared or delegated calendars.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@5.0.0",
+      "description": "List attachment metadata for a calendar event.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to a calendar event\nor meeting.\n\nWorks for an event on any of the user's calendars, including shared ones.",
       "parameters": [
         {
           "name": "event_id",
           "type": "string",
           "required": true,
           "description": "The ID of the calendar event to list attachments for.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "calendar_id",
-          "type": "string",
-          "required": false,
-          "description": "ID of a specific calendar containing the event, including shared and delegated ones. When omitted, searches the user's default calendar.",
           "enum": null,
           "inferrable": true
         },
@@ -580,7 +884,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Attachment metadata without the file bytes. calendar_id is echoed back only when the lookup named a calendar."
+        "description": "Attachment metadata without the file bytes."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -591,10 +895,118 @@
             "type": "string",
             "required": true
           },
-          "calendar_id": {
-            "value": "AQMkADAwATM0MDAAMS1iNTQ5LTBhZjQtMDACLTAwCgBGAAADyW3X",
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJza2lwVG9rZW4iOiIlMjUzZFJUNSUyNTNkMCUyNTI2bWJveElkJTI1M0RMQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQSUyNTI2bm9kZUlkJTI1M0RsZXRERFJBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQT0ifQ==",
             "type": "string",
             "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEventInstances",
+      "qualifiedName": "MicrosoftOutlookCalendar.ListEventInstances",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventInstances@5.0.0",
+      "description": "List the dates one recurring series falls on between two times.\n\nDates come back earliest first, a date moved on its own at its new time. To see\neverything on the calendar over a stretch of time, list the calendar for that window\ninstead. An event that does not repeat is refused.\n\nCancelled dates are left out, and a date moved outside the window is not in it, so a\nmissing date may be either. Read an empty list against series: the window may fall\nbefore the series starts, after it ends, or between two dates.\n\nA non-empty pagination_token means more dates remain in the window; pass it back to\nread them.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "event_id of the series or of any one of its dates.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date_time",
+          "type": "string",
+          "required": true,
+          "description": "Window start, YYYY-MM-DDTHH:MM:SS in the mailbox's time zone; any offset is ignored, and a date alone means midnight.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_time",
+          "type": "string",
+          "required": true,
+          "description": "Window end, same format, at most 5 years after start_date_time. A date alone means midnight, so end at the next day's midnight to include a whole day.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Dates per page, 1 to 100. Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "pagination_token from an earlier call, to read that window's next page. When given, the other arguments are not used.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadBasic"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "One page of the series' dates inside the window."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.ListEventInstances",
+        "parameters": {
+          "event_id": {
+            "value": "AAMkADVhMzBjNzM1LWE3NTUtNGI2My1hOGQwLTk5ZjQ4YjFkZTkzMQBGAAAAAADzXp3VqH3tRJvBQu9AXKOPBQBQ2mF7dGkdR6VpXxNZoY8uAAAAAAENAABQ2mF7dGkdR6VpXxNZoY8uAADzXq47AAA=",
+            "type": "string",
+            "required": true
+          },
+          "start_date_time": {
+            "value": "2024-06-01T09:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_date_time": {
+            "value": "2024-09-01T00:00:00",
+            "type": "string",
+            "required": true
           },
           "limit": {
             "value": 10,
@@ -602,7 +1014,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIxMjM0NTY3ODkwIn0=",
+            "value": "",
             "type": "string",
             "required": false
           }
@@ -632,14 +1044,14 @@
     {
       "name": "ListEventsInTimeRange",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@3.2.0",
-      "description": "List everything on the user's calendar between two times.\n\nUse this when the request is about a stretch of the calendar -- what is on\ntoday, this week, between two clock times -- rather than about a property of\none particular event, which a filtered search answers better.\n\nReturns a ListEventsResult: an events list of EventListItem rows, a num_events\ncount and truncated_by. Each row carries a short plain-text summary of the event\nas its body, not the full description -- read the event by its event_id to get the\nbody in full. body_has_formatting says whether the description holds links, lists\nor styling that the stripped text cannot carry; a row never carries the markup\nitself, so read the event by its event_id when that formatting matters. Each row\nalso carries the event_type and series_master_id that say whether it is a one-off\nevent, one date of a recurring series, or the series itself.\n\ntruncated_by is limit when Microsoft Graph offered another page, which usually\nbut not always means more events remain, and empty when it offered none and the\nlist is the whole window. No continuation cursor is issued, so narrow the window\nto reach the rest, or raise limit while it is below its maximum. An empty list\nwith an empty truncated_by means nothing is scheduled in this window.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@5.0.0",
+      "description": "List everything on the user's calendars between two times.\n\nUse this when the request is about a stretch of the calendar -- what is on\ntoday, this week, between two clock times -- rather than about a property of\none particular event, which a filtered search answers better.\n\nReads the default calendar unless calendar_scope is all (every calendar in the list,\nshared ones included) or listed. The same meeting can appear once per calendar it\nsits on.\n\nA pagination_token means more of the window remains; pass it for the next page.\nWith none, the window was read in full on searched_calendars, and an empty list means\nnothing is scheduled there, not on calendars left out: check skipped_calendars or use\ncalendar_scope all before saying the user is free. An empty page reached through a\ntoken means the earlier pages held every event.\n\nTimes are read in the mailbox time zone, or UTC when none is set.",
       "parameters": [
         {
           "name": "start_date_time",
           "type": "string",
           "required": true,
-          "description": "The start date and time of the time range, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-24T19:00:00",
+          "description": "The start date and time of the time range, represented in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Timezone offset is ignored.",
           "enum": null,
           "inferrable": true
         },
@@ -647,7 +1059,36 @@
           "name": "end_date_time",
           "type": "string",
           "required": true,
-          "description": "The end date and time of the time range, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-24T19:30:00",
+          "description": "The end date and time of the time range, represented in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Timezone offset is ignored.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_scope",
+          "type": "string",
+          "required": false,
+          "description": "Calendars to read: default (the default calendar), all (every calendar in the calendar list, max 20) or listed (the ids in calendars).",
+          "enum": [
+            "default",
+            "all",
+            "listed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "calendars",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Calendar ids from the calendar list, max 20; only with calendar_scope listed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_cancelled",
+          "type": "boolean",
+          "required": false,
+          "description": "Include cancelled events. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -655,7 +1096,15 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of events to return. Max 1000. Defaults to 10",
+          "description": "Max events to return, 1-200. Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "pagination_token from a previous result, for its next page; pass the same dates, calendars and include_cancelled.",
           "enum": null,
           "inferrable": true
         }
@@ -665,32 +1114,55 @@
         "providerType": "oauth2",
         "scopes": [
           "MailboxSettings.Read",
-          "Calendars.ReadBasic"
+          "Calendars.Read.Shared"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Events overlapping the requested window, each body a short summary rather than the full description. truncated_by says whether the window holds more than came back."
+        "description": "One page of the events in the window."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookCalendar.ListEventsInTimeRange",
         "parameters": {
           "start_date_time": {
-            "value": "2025-06-01T08:00:00",
+            "value": "2024-03-11T08:00:00",
             "type": "string",
             "required": true
           },
           "end_date_time": {
-            "value": "2025-06-07T23:59:59",
+            "value": "2024-03-15T18:00:00",
             "type": "string",
             "required": true
           },
+          "calendar_scope": {
+            "value": "listed",
+            "type": "string",
+            "required": false
+          },
+          "calendars": {
+            "value": [
+              "AQMkADAwATM0MDAAMS1hYzgyLTYxMjctMDACLTAwCgBGAAAD",
+              "AQMkADAwATM0MDAAMS1hYzgyLTYxMjctMDACLTAwCgBHAAAE"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "include_cancelled": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
           "limit": {
-            "value": 25,
+            "value": 50,
             "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJza2lwVG9rZW4iOiIlMjRza2lwPTI1IiwiY2FsZW5kYXJJZHMiOlsiY2FsMSIsImNhbDIiXX0=",
+            "type": "string",
             "required": false
           }
         },
@@ -719,7 +1191,7 @@
     {
       "name": "RemoveEventFromMyCalendar",
       "qualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromMyCalendar",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromMyCalendar@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromMyCalendar@5.0.0",
       "description": "Take an event off your calendar without emailing anyone.\n\nFor a meeting someone else organizes, or your own appointment with no\ninvitees. Other attendees keep their copies. An organizer in your organization\nsees you declined; one outside it is not told. Refused for a meeting you\norganize with invitees. Irreversible.\n\nUse is_organizer, attendees, event_type and series_master_id from an earlier\nread to choose this tool and scope. A cancelled meeting stays on your calendar\nwith is_cancelled true, and listings hide it unless asked. Only events in your\nown mailbox, not shared or delegated calendars.",
       "parameters": [
         {
@@ -795,10 +1267,179 @@
       }
     },
     {
+      "name": "RespondToEvent",
+      "qualifiedName": "MicrosoftOutlookCalendar.RespondToEvent",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.RespondToEvent@5.0.0",
+      "description": "Accept, decline or tentatively accept a meeting someone else invited you to, and tell the organizer.\n\nDeclining takes the meeting off your calendar unless Show declined events is turned on in\nOutlook, and once it is gone it cannot be answered again from here. Refused for a meeting\nyou organize, a cancelled meeting, and the whole series of a repeating meeting: answer one\ndate by its own event_id.\n\nName the meeting by event_id or by event_subject. Only events in your own mailbox, and a\nsubject is looked up in your default calendar only.",
+      "parameters": [
+        {
+          "name": "response",
+          "type": "string",
+          "required": true,
+          "description": "Your answer: accepted, declined or tentative.",
+          "enum": [
+            "accepted",
+            "declined",
+            "tentative"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": false,
+          "description": "Identifier of the meeting to answer, exactly as an earlier read returned it. Give this or event_subject, not both. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "event_subject",
+          "type": "string",
+          "required": false,
+          "description": "Text from the subject of the meeting to answer, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Nothing is sent unless exactly one event matches. Give this or event_id, not both. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_start_date_time",
+          "type": "string",
+          "required": false,
+          "description": "Start of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Ignored when event_id is given. Defaults to None (7 days ago).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_end_date_time",
+          "type": "string",
+          "required": false,
+          "description": "End of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. The window may not exceed 90 days. Ignored when event_id is given. Defaults to None (30 days from now).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "note",
+          "type": "string",
+          "required": false,
+          "description": "Text sent to the organizer with your reply, verbatim. Blank means no note. Needs notify_organizer true. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "notify_organizer",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the organizer is emailed your reply. A note or a proposed time is only delivered when this is true. Set false to record your answer on your own calendar only; the organizer's tracking then keeps showing no reply. Required when the organizer did not ask for replies. Defaults to True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "proposed_start_date_time",
+          "type": "string",
+          "required": false,
+          "description": "A different start to suggest to the organizer, as a full ISO 8601 date and time (YYYY-MM-DDTHH:MM:SS). Take the date from the meeting as read; do not assume today. Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Only with declined or tentative, only when the organizer allows new times, and only with notify_organizer true. Defaults to None (no new time proposed).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "proposed_end_date_time",
+          "type": "string",
+          "required": false,
+          "description": "End of the suggested time, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS), read the same way. Needs proposed_start_date_time. Defaults to None (keeps the meeting's current length).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The meeting after your answer, whether the answer was confirmed, and how the meeting was found."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftOutlookCalendar.RespondToEvent",
+        "parameters": {
+          "response": {
+            "value": "tentative",
+            "type": "string",
+            "required": true
+          },
+          "event_id": {
+            "value": "AAMkADFhZWQwNjZiLTQ3ZGUtNGE4Ni1iZWIxLTExYjVlNjA5ZDcyYgBGAAAAAAB5V9GpHqBcSqNhFVMnOwedBwCk2Qz1J0mRTpKFyU8zVgYdAAAAAAENAACk2Qz1J0mRTpKFyU8zVgYdAABqR3pmAAA=",
+            "type": "string",
+            "required": false
+          },
+          "event_subject": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "search_start_date_time": {
+            "value": "2025-06-01T08:00:00",
+            "type": "string",
+            "required": false
+          },
+          "search_end_date_time": {
+            "value": "2025-07-15T23:59:59",
+            "type": "string",
+            "required": false
+          },
+          "note": {
+            "value": "I may be a few minutes late, but I plan to join.",
+            "type": "string",
+            "required": false
+          },
+          "notify_organizer": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "proposed_start_date_time": {
+            "value": "2025-06-20T15:00:00",
+            "type": "string",
+            "required": false
+          },
+          "proposed_end_date_time": {
+            "value": "2025-06-20T16:00:00",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "SearchEvents",
       "qualifiedName": "MicrosoftOutlookCalendar.SearchEvents",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@3.2.0",
-      "description": "Find calendar events by what is true about them: subject text, who attends,\nwho organised them, importance, or whether they are online.\n\nUse this when the request names a property of the event. When the request is\nabout a stretch of the calendar instead -- what is on Tuesday, this week's\nmeetings -- reading the whole time range fits better, because this search\ncovers only a 90-day window either side of today unless dates are given.\n\nReturns a SearchEventsResult: an events list of SearchEventItem rows plus\nnum_events, searched_window, truncated_by, and the filter_expression /\nclient_side_filters that say where each filter was applied.\n\nResults are in chronological order. Each row carries a short plain-text\nsummary of the event as its body, not the full description. Read one event\nby its event_id to get the body in full.\n\nAn empty events list means nothing matched inside searched_window; it does not\nmean no such event exists. Widen the range or drop a filter before reporting\nthat there is none. On truncated_by scan_cap the scan stopped early and no\ncontinuation token is issued, so narrow the window or the filters instead of\npaging -- an empty list there says even less.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@5.0.0",
+      "description": "Find calendar events by what is true about them: subject text, who attends,\nwho organised them, importance, or whether they are online.\n\nUse this when the request names a property of the event, even within a single day.\nFor a stretch of the calendar with no such property, such as Tuesday or this week,\nread the time range instead.\n\nSearches the default calendar, 90 days either side of today unless dates are given;\ncalendar_scope all covers every calendar in the list, shared ones included. The same\nmeeting can appear once per calendar it sits on. Results are in chronological order,\neach body a short summary.\n\nA pagination_token means more of the window remains: pass it for the next page, even\nafter an empty page, before reporting that nothing matched. With none, searched_window\nwas read in full on searched_calendars, and an empty result means nothing matched\nthere: check skipped_calendars, widen the range or search more calendars before\nreporting there is none. An empty page reached through a token means the earlier\npages held every match.",
       "parameters": [
         {
           "name": "subject",
@@ -829,7 +1470,7 @@
           "name": "organized_by_me",
           "type": "boolean",
           "required": false,
-          "description": "Filter for events the current authenticated user organized (True) vs. events the current user was invited to but did not organize (False). Defaults to None (no filter). Prefer this over organizer_name when the user asks about their own events — it does not require knowing the user's display name in the tenant's format.",
+          "description": "True for the user's own events, False for others', including the owner's on a shared calendar; prefer over organizer_name for the user's own events.",
           "enum": null,
           "inferrable": true
         },
@@ -849,7 +1490,7 @@
           "name": "is_online_meeting",
           "type": "boolean",
           "required": false,
-          "description": "Filter on Outlook's own online-meeting flag: True keeps events Outlook hosts a meeting for, False keeps the rest. False is not the same as in person -- an event run on a link pasted into its body is flagged False. Defaults to None (no filter).",
+          "description": "Filter on Outlook's own online-meeting flag: True keeps events Outlook hosts a meeting for, False keeps the rest. False is not the same as in person: an event run on a link pasted into its body is flagged False. Defaults to None (no filter).",
           "enum": null,
           "inferrable": true
         },
@@ -857,7 +1498,7 @@
           "name": "start_date_time",
           "type": "string",
           "required": false,
-          "description": "The start of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Defaults to None (90 days before today).",
+          "description": "The start of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Required with calendar_scope all or listed; otherwise 90 days before today.",
           "enum": null,
           "inferrable": true
         },
@@ -865,15 +1506,28 @@
           "name": "end_date_time",
           "type": "string",
           "required": false,
-          "description": "The end of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Defaults to None (90 days after today).",
+          "description": "The end of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Required with calendar_scope all or listed; otherwise 90 days after today.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "calendar_id",
+          "name": "calendar_scope",
           "type": "string",
           "required": false,
-          "description": "ID of a specific calendar to search, including shared and delegated ones. When omitted, searches the user's default calendar.",
+          "description": "Calendars to search: default (the default calendar), all (every calendar in the calendar list, max 20) or listed (the ids in calendars).",
+          "enum": [
+            "default",
+            "all",
+            "listed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "calendars",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Calendar ids from the calendar list, max 20; only with calendar_scope listed.",
           "enum": null,
           "inferrable": true
         },
@@ -889,7 +1543,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of matching events to return. Max is 200. Defaults to 25. When client-side filters are active, the tool may scan multiple pages to accumulate matches.",
+          "description": "Max events per page, up to 200; defaults to 25, or to the token's page size when continuing.",
           "enum": null,
           "inferrable": true
         },
@@ -897,7 +1551,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "Encoded pagination token to continue a previous request. Preserves client-side filter state (attendee_emails, organizer_name, organized_by_me, is_online_meeting) across continuation calls.",
+          "description": "pagination_token from a previous result, for its next page; pass it alone or with the same filters and calendars.",
           "enum": null,
           "inferrable": true
         }
@@ -907,21 +1561,21 @@
         "providerType": "oauth2",
         "scopes": [
           "MailboxSettings.Read",
-          "Calendars.Read"
+          "Calendars.Read.Shared"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "One page of matches, each body a short summary rather than the full description. searched_window is the range this search asked Graph for. truncated_by says why the list ended, and on scan_cap no continuation token is issued -- narrow the window rather than paging. filter_expression and client_side_filters say where each filter ran."
+        "description": "One page of matches, with a pagination_token while more of the window remains."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "MicrosoftOutlookCalendar.SearchEvents",
         "parameters": {
           "subject": {
-            "value": "quarterly review",
+            "value": "Quarterly Review",
             "type": "string",
             "required": false
           },
@@ -954,18 +1608,26 @@
             "required": false
           },
           "start_date_time": {
-            "value": "2024-06-01T08:00:00",
+            "value": "2025-01-01T00:00:00",
             "type": "string",
             "required": false
           },
           "end_date_time": {
-            "value": "2024-09-01T18:00:00",
+            "value": "2025-03-31T23:59:59",
             "type": "string",
             "required": false
           },
-          "calendar_id": {
-            "value": "AQMkADAwATM0MDAAMS1hYjcd==",
+          "calendar_scope": {
+            "value": "listed",
             "type": "string",
+            "required": false
+          },
+          "calendars": {
+            "value": [
+              "AAMkADExampleCalendarId1==",
+              "AAMkADExampleCalendarId2=="
+            ],
+            "type": "array",
             "required": false
           },
           "include_cancelled": {
@@ -979,7 +1641,7 @@
             "required": false
           },
           "pagination_token": {
-            "value": "eyJza2lwVG9rZW4iOiIlMjRza2lwdG9rZW49MTAifQ==",
+            "value": "eyJwYWdlIjoyLCJza2lwIjo1MH0=",
             "type": "string",
             "required": false
           }
@@ -1009,8 +1671,8 @@
     {
       "name": "UpdateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.UpdateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.UpdateEvent@3.2.0",
-      "description": "Change one event in the user's calendar, in place.\n\nReturns an UpdateEventResult: the updated event in full, plus changed and\nfields_changed (what was actually written, which is nothing when the event\nalready said what was asked for), change_key, concurrency_checked,\napplied_scope, online_meeting_preserved, attendees_not_found, and the record\nof how the event was resolved.\n\nEveryone invited is mailed an updated invitation for any change this writes,\nso an edit to a meeting with guests is not a quiet one.\n\nEvery input left out leaves that part of the event alone, so this changes\nonly what is named and never cancels, deletes or re-creates the event.\nAdding or dropping a guest is merged over the people already invited rather\nthan replacing them; set_attendee_emails states the whole invitation list and\nreplaces it. An event that turns out to be a recurring series itself is\nrefused: edit one of its dates instead.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.UpdateEvent@5.0.0",
+      "description": "Change one event in the user's calendar, in place.\n\nReturns an UpdateEventResult: the updated event in full, plus changed and\nfields_changed (what was actually written, which is nothing when the event\nalready said what was asked for), change_key, concurrency_checked,\napplied_scope, online_meeting_preserved, attendees_not_found, and the record\nof how the event was resolved.\n\nEveryone invited is mailed an updated invitation for any change this writes,\nso an edit to a meeting with guests is not a quiet one.\n\nEvery input left out leaves that part of the event alone, so this changes\nonly what is named and never cancels, deletes or re-creates the event.\nAdding or dropping a guest is merged over the people already invited rather\nthan replacing them; set_attendee_emails states the whole invitation list and\nreplaces it.\n\nFor a repeating meeting, scope is required; series takes series_master_id. There\nis no scope for this date and later. Changing a series' time, time zone, all-day\nsetting or how often it repeats resets every date changed on its own and brings\nback its cancelled dates, so it is refused while an upcoming date is cancelled;\nchanging only when it ends keeps those dates. recurrence changes only the parts of\nthe repeat rule it names. A meeting that does not repeat takes no scope; there\nrecurrence makes it repeat, keeping its event_id, and needs recurrence.frequency\nand an end.",
       "parameters": [
         {
           "name": "event_id",
@@ -1026,6 +1688,17 @@
           "required": false,
           "description": "Text from the subject of the event to change, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Use this when the event is known by what it is called rather than by an identifier. Nothing is changed unless exactly one event matches. Give this or event_id, not both. Defaults to None.",
           "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "required": false,
+          "description": "Required for a repeating meeting and refused for one that does not repeat: instance changes the given date, series changes every date including past ones and takes the series' own id.",
+          "enum": [
+            "instance",
+            "series"
+          ],
           "inferrable": true
         },
         {
@@ -1064,7 +1737,7 @@
           "name": "start_date_time",
           "type": "string",
           "required": false,
-          "description": "New start for the event, in ISO 8601 format, for example 2026-04-25T13:00:00. Any timezone offset is ignored: the wall clock given is the wall clock the event lands on, read in time_zone or the mailbox's own timezone. Naming only this keeps the existing end. Defaults to None (the start is left unchanged).",
+          "description": "New start for the event, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored: the wall clock given is the wall clock the event lands on, read in time_zone or the mailbox's own timezone. Naming only this keeps the existing end. When event_id is a series itself, only the clock time is used; the series keeps its own first date. Defaults to None (the start is left unchanged).",
           "enum": null,
           "inferrable": true
         },
@@ -1072,7 +1745,7 @@
           "name": "end_date_time",
           "type": "string",
           "required": false,
-          "description": "New end for the event, in ISO 8601 format. Any timezone offset is ignored. Naming only this keeps the existing start, which is how a meeting is shortened or extended. Defaults to None (the end is left unchanged).",
+          "description": "New end for the event, in ISO 8601 format. Any timezone offset is ignored. Naming only this keeps the existing start, which is how a meeting is shortened or extended. When event_id is a series itself, only the clock time is used; the series keeps its own first date. Defaults to None (the end is left unchanged).",
           "enum": null,
           "inferrable": true
         },
@@ -1179,6 +1852,14 @@
             "html"
           ],
           "inferrable": true
+        },
+        {
+          "name": "recurrence",
+          "type": "json",
+          "required": false,
+          "description": "The parts of the repeat rule to replace; each field left out keeps its current value.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
@@ -1200,12 +1881,17 @@
         "toolName": "MicrosoftOutlookCalendar.UpdateEvent",
         "parameters": {
           "event_id": {
-            "value": "AAMkADQ3YjIwYTZlLTVmNjktNGE4Yy1iNGU4LTI5NzRlNTg3ZGU5NABGAAAAAAB9wF4oRyleS6CrHb7pFwK5BwDVQZ0kWv2dTZlMuB_1rMhTAAAAAAENAADVQZ0kWv2dTZlMuB_1rMhTAAFXq8KOAAA=",
+            "value": "AAMkAGE1M2IyNGNmLTI5MTktNDUwNi1iNDczLTEwYmU5ZGJhYzIwZgBGAAAAAAAHFpWtGQK9SbbqON0M8WJGBQA5m9YZiB3QS6mCq7EwXH43AAAAAAENAAAyH7nBx5kFSbE9z7Yj1HGHAAB8i9cNAAA=",
             "type": "string",
             "required": false
           },
           "event_subject": {
-            "value": "Q3 Planning Kickoff",
+            "value": "Weekly Team Standup",
+            "type": "string",
+            "required": false
+          },
+          "scope": {
+            "value": "instance",
             "type": "string",
             "required": false
           },
@@ -1215,27 +1901,27 @@
             "required": false
           },
           "search_end_date_time": {
-            "value": "2025-08-15T00:00:00",
+            "value": "2025-07-31T23:59:59",
             "type": "string",
             "required": false
           },
           "subject": {
-            "value": "Q3 Planning Kickoff – Updated Agenda",
+            "value": "Q3 Planning Meeting",
             "type": "string",
             "required": false
           },
           "body": {
-            "value": "Please review the updated agenda before joining. Dial-in details remain the same.",
+            "value": "Please come prepared with your quarterly updates and blockers.",
             "type": "string",
             "required": false
           },
           "start_date_time": {
-            "value": "2025-07-22T14:00:00",
+            "value": "2025-07-15T10:00:00",
             "type": "string",
             "required": false
           },
           "end_date_time": {
-            "value": "2025-07-22T15:30:00",
+            "value": "2025-07-15T11:30:00",
             "type": "string",
             "required": false
           },
@@ -1245,7 +1931,7 @@
             "required": false
           },
           "location": {
-            "value": "Conference Room B, Floor 4",
+            "value": "Conference Room B, Floor 3",
             "type": "string",
             "required": false
           },
@@ -1271,36 +1957,49 @@
           },
           "attendee_emails_to_add": {
             "value": [
-              "alice.johnson@example.com",
-              "bob.smith@example.com"
+              "alice@example.com",
+              "bob@example.com"
             ],
             "type": "array",
             "required": false
           },
           "attendees_to_remove": {
             "value": [
-              "carol.white@example.com",
-              "Dave Morgan"
+              "carol@example.com",
+              "Dave Smith"
             ],
             "type": "array",
             "required": false
           },
           "set_attendee_emails": {
             "value": [
-              "alice.johnson@example.com",
-              "bob.smith@example.com",
-              "eve.davis@example.com"
+              "alice@example.com",
+              "bob@example.com",
+              "manager@example.com"
             ],
             "type": "array",
             "required": false
           },
           "expected_change_key": {
-            "value": "DAAAABAAADVQZ0kWv2dTZlMuB_1rMhTAAFXq8L+",
+            "value": "YmFkZGVhZGJlZWYxMjM0NTY3ODkwYWJjZGVmMDEyMw==",
             "type": "string",
             "required": false
           },
           "body_format": {
             "value": "plain_text",
+            "type": "string",
+            "required": false
+          },
+          "recurrence": {
+            "value": {
+              "frequency": "weekly",
+              "interval": 1,
+              "days_of_week": [
+                "Monday",
+                "Wednesday"
+              ],
+              "end_date": "2025-12-31"
+            },
             "type": "string",
             "required": false
           }
@@ -1330,7 +2029,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookCalendar.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@3.2.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@5.0.0",
       "description": "Get information about the current user and their Outlook Calendar environment.\n\nmailbox_timezone is the time zone this mailbox's dates are expressed in. It may be a\nWindows name such as \"Eastern Standard Time\" rather than an IANA identifier - that\nnames a zone observing daylight saving, not a fixed offset. mailbox_timezone_source\nsays where it came from: \"mailbox\" and \"mailbox_utc\" mean the mailbox itself names\nthe zone, whereas \"default_not_configured\" (the mailbox names none) and\n\"default_unreadable\" (the setting could not be read) mean UTC is a fallback this\ntoolkit applied, not a zone the mailbox is set to. On either fallback, do not tell\nthe user their mailbox is configured for that zone.",
       "parameters": [],
       "auth": {
@@ -1386,6 +2085,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "b7d44fd15d5bc867db3809cdfc3c4bd55fc6c82a4884bfa8d6c79206065bda7f",
-  "generatedAt": "2026-09-26T11:13:12.769Z",
-  "summary": "The Microsoft Outlook Calendar toolkit connects Arcade-powered LLM agents to a user's Outlook Calendar via the Microsoft Graph API. It enables reading, searching, creating, updating, and cancelling calendar events, checking free/busy schedules, and inspecting attachments.\n\n## Capabilities\n\n- **Event lifecycle**: Create, read (single or listed), update, cancel (with attendee notification), and remove events from a calendar — with precise scope controls distinguishing organizer vs. attendee actions, one-off vs. recurring series instances, and silent vs. notifying operations.\n- **Search and listing**: List events over an arbitrary time range or search by property (subject, attendees, organizer, importance, online status) within a configurable window; both surfaces return summarised rows with pointers to fetch full bodies.\n- **Free/busy and scheduling**: Retrieve availability for one or more people over a time window, with per-interval status digits, named busy blocks, working-hours data, and explicit trust signals (mailbox / mailbox_utc / fallback) on the returned timezone.\n- **Calendar and attachment discovery**: Enumerate all calendars the user owns or has delegated access to; list attachment metadata on any event across owned or shared calendars.\n- **Timezone and identity awareness**: Resolve the authenticated user's mailbox timezone and its source (configured vs. UTC fallback) to avoid misrepresenting calendar context to users.\n- **Rich body handling**: Distinguish plain-text and HTML bodies throughout — preserving formatting, links, and lists when copying or creating events by routing `body_html` with `body_format: html`.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup instructions."
+  "generatedAt": "2026-10-07T21:25:44.905Z",
+  "summary": "## Microsoft Outlook Calendar Toolkit\n\nThe Microsoft Outlook Calendar toolkit connects Arcade to Outlook Calendar via Microsoft Graph, enabling LLMs to read, create, update, and manage calendar events and scheduling on behalf of a user.\n\n## Capabilities\n\n- **Event read & search:** Fetch a single event in full (including raw HTML body, attendees, recurrence metadata, and join URLs), list events over a time range, search by subject or properties, and list instances of a recurring series.\n- **Event write & lifecycle:** Create one-off or recurring events (with rich body formatting and organizer delegation), update individual fields or series scope in place, cancel organized meetings with attendee notification, and remove or respond to events you were invited to.\n- **Scheduling & availability:** Find optimal meeting slots across a group (`FindMeetingTimes`) or inspect free/busy detail for specific times (`GetSchedule`), both timezone-aware.\n- **Attendees & forwarding:** Forward meetings to new attendees, respond to invitations (accept/tentative/decline), and manage attendee lists incrementally or wholesale.\n- **Calendar & attachment metadata:** List all accessible calendars (own, shared, delegated), retrieve attachment metadata for events, and resolve the user's mailbox identity and timezone configuration.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
 }
