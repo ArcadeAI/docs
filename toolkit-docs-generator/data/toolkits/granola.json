@@ -1,7 +1,7 @@
 {
   "id": "Granola",
   "label": "Granola",
-  "version": "2.0.0",
+  "version": "2.1.1",
   "description": "Arcade tools for Granola meeting intelligence (public Enterprise API)",
   "metadata": {
     "category": "productivity",
@@ -18,8 +18,8 @@
     {
       "name": "GetMeeting",
       "qualifiedName": "Granola.GetMeeting",
-      "fullyQualifiedName": "Granola.GetMeeting@2.0.0",
-      "description": "Get full metadata for one Granola meeting by its note ID.\n\nDoes not return notes or transcript content. Use get_meeting_transcript for the transcript.",
+      "fullyQualifiedName": "Granola.GetMeeting@2.1.1",
+      "description": "Get full metadata for one Granola meeting by its note ID.\n\nDoes not return notes or transcript content. Fetch the transcript separately with the same\nmeeting ID.",
       "parameters": [
         {
           "name": "meeting_id",
@@ -34,12 +34,29 @@
       "secrets": [
         "GRANOLA_API_KEY"
       ],
-      "secretsInfo": [],
+      "secretsInfo": [
+        {
+          "name": "GRANOLA_API_KEY",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "Full meeting metadata including attendees and calendar event."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Granola.GetMeeting",
+        "parameters": {
+          "meeting_id": {
+            "value": "not_aB3xY7mNqR2kLp",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -61,7 +78,7 @@
     {
       "name": "GetMeetingTranscript",
       "qualifiedName": "Granola.GetMeetingTranscript",
-      "fullyQualifiedName": "Granola.GetMeetingTranscript@2.0.0",
+      "fullyQualifiedName": "Granola.GetMeetingTranscript@2.1.1",
       "description": "Get the verbatim transcript for a Granola meeting, with speaker labels and timestamps.\n\nReturns all segments by default. Use speaker_filter to narrow to a single speaker.\nNote: transcripts can be large for long meetings.",
       "parameters": [
         {
@@ -76,7 +93,7 @@
           "name": "speaker_filter",
           "type": "string",
           "required": false,
-          "description": "Filter by speaker name (case-insensitive match). Leave empty to return all speakers.",
+          "description": "Filter by speaker name (case-insensitive match). Defaults to an empty string, which returns all speakers.",
           "enum": null,
           "inferrable": true
         }
@@ -85,12 +102,34 @@
       "secrets": [
         "GRANOLA_API_KEY"
       ],
-      "secretsInfo": [],
+      "secretsInfo": [
+        {
+          "name": "GRANOLA_API_KEY",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "Transcript segments with speaker labels and timestamps."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Granola.GetMeetingTranscript",
+        "parameters": {
+          "meeting_id": {
+            "value": "not_A1B2C3D4E5F6G7",
+            "type": "string",
+            "required": true
+          },
+          "speaker_filter": {
+            "value": "John Smith",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -112,14 +151,14 @@
     {
       "name": "ListMeetings",
       "qualifiedName": "Granola.ListMeetings",
-      "fullyQualifiedName": "Granola.ListMeetings@2.0.0",
+      "fullyQualifiedName": "Granola.ListMeetings@2.1.1",
       "description": "List Granola meetings, optionally filtered by date range, with cursor pagination.\n\nReturns metadata only — no notes or transcript content. Results are newest first.",
       "parameters": [
         {
           "name": "created_after",
           "type": "string",
           "required": false,
-          "description": "Only return meetings created on or after this date (YYYY-MM-DD). Leave empty for no lower bound.",
+          "description": "Only return meetings created on or after this date (YYYY-MM-DD). Defaults to an empty string, which applies no lower bound.",
           "enum": null,
           "inferrable": true
         },
@@ -127,7 +166,7 @@
           "name": "created_before",
           "type": "string",
           "required": false,
-          "description": "Only return meetings created before this date (YYYY-MM-DD). Leave empty for no upper bound.",
+          "description": "Only return meetings created before this date (YYYY-MM-DD). Defaults to an empty string, which applies no upper bound.",
           "enum": null,
           "inferrable": true
         },
@@ -143,7 +182,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Opaque pagination cursor returned by a previous list_meetings call. Leave empty for the first page.",
+          "description": "Opaque pagination cursor returned by a previous list_meetings call. Defaults to an empty string, which returns the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -152,12 +191,44 @@
       "secrets": [
         "GRANOLA_API_KEY"
       ],
-      "secretsInfo": [],
+      "secretsInfo": [
+        {
+          "name": "GRANOLA_API_KEY",
+          "type": "api_key"
+        }
+      ],
       "output": {
         "type": "json",
         "description": "List of meetings with metadata and pagination cursor."
       },
       "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Granola.ListMeetings",
+        "parameters": {
+          "created_after": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "created_before": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "page_size": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJsYXN0X2lkIjoiYWJjMTIzIiwib2Zmc2V0IjoxNX0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
       "metadata": {
         "classification": {
           "serviceDomains": [
@@ -180,6 +251,7 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-04-02T11:25:02.794Z",
-  "summary": "Granola is a meeting intelligence platform that captures notes and transcripts from calls. The Arcade Granola toolkit gives agents read access to Granola's public Enterprise API for working with meeting metadata and transcripts.\n\n**Capabilities**\n\n- List meetings with optional date-range filters and cursor pagination.\n- Fetch full metadata for a meeting, including attendees and linked calendar event.\n- Retrieve verbatim transcripts with speaker labels and timestamps, optionally filtered by speaker.\n\n**OAuth**\n\nNo OAuth — the toolkit authenticates via a Granola Enterprise API key passed as a secret.\n\n**Secrets**\n\n- `GRANOLA_API_KEY` — Enterprise API key provisioned from Granola. Configure it in the [Arcade Dashboard](https://api.arcade.dev/dashboard/auth/secrets) per the [Arcade secret setup guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-10-07T21:25:27.362Z",
+  "summary": "## Granola Toolkit\n\nArcade toolkit for the [Granola](https://granola.ai) meeting intelligence platform, enabling retrieval of meeting metadata, transcripts, and paginated meeting lists via the public Enterprise API.\n\n## Capabilities\n\n- **Meeting lookup & listing**: Fetch full metadata for a single meeting by ID, or list meetings (newest-first) filtered by date range with cursor-based pagination. Both return metadata only — notes and transcript content are excluded.\n- **Transcript retrieval**: Fetch verbatim transcripts with speaker labels and timestamps; optionally filter to a single speaker. Be aware transcripts can be large for long meetings.\n\n## Secrets\n\n`GRANOLA_API_KEY` — An API key that authenticates requests to the Granola Enterprise API. Granola's Enterprise API is not publicly self-serve; you must be on an Enterprise plan. Contact Granola to get API access, after which your API key will be provisioned and made available through your Granola account or shared directly by the Granola team. Refer to [Granola's API documentation](https://docs.granola.ai) for details on key issuance and management.\n\nStore this secret in Arcade using the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or via the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
 }
