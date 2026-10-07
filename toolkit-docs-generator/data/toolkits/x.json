@@ -1,7 +1,7 @@
 {
   "id": "X",
   "label": "X",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Arcade.dev LLM tools for X (Twitter).",
   "metadata": {
     "category": "social",
@@ -31,8 +31,8 @@
     {
       "name": "AddListMember",
       "qualifiedName": "X.AddListMember",
-      "fullyQualifiedName": "X.AddListMember@2.0.0",
-      "description": "Add one or more users to an X List owned by the authenticated user.\n\nProvide ``user_ids``, ``usernames``, or both. Adding a user who is already\na member is treated as success.\n\nOn a mid-loop rate-limit, the run short-circuits and remaining targets\nare marked as not attempted. On retry, drop the targets that already\nsucceeded; otherwise polling re-arms X's bucket and extends the lockout.\n\nX is eventually consistent on list membership: a success status here\ndoes not mean a subsequent ``GetListMembers`` will immediately return\nthe new member. Allow a few seconds before relying on the read endpoint\nto reflect the mutation.\n\nSerialize dependent list mutations: do not fire ``AddListMember`` in\nparallel with ``DeleteList``, ``RemoveListMember``, or ``UpdateList``\nagainst the same ``list_id``. Concurrent dependent mutations race and\nsurface spurious ``not_found`` errors when the member call lands after\nthe list is gone. Await each mutation before issuing the next one on\nthe same list.",
+      "fullyQualifiedName": "X.AddListMember@2.0.2",
+      "description": "Add one or more users to an X List owned by the authenticated user.\n\nProvide ``user_ids``, ``usernames``, or both. Adding a user who is already\na member is treated as success.\n\nOn a mid-loop rate-limit, the run short-circuits and remaining targets\nare marked as not attempted. On retry, drop the targets that already\nsucceeded; otherwise polling re-arms X's bucket and extends the lockout.\n\nX is eventually consistent on list membership: a success status here\ndoes not mean a subsequent read of the list's members will immediately\nreturn the new member. Allow a few seconds before relying on the read\nendpoint to reflect the mutation.\n\nSerialize dependent list mutations: do not add members in parallel with\ndeleting the list, removing its members, or updating it against the\nsame ``list_id``. Concurrent dependent mutations race and surface\nspurious ``not_found`` errors when the member call lands after the list\nis gone. Await each mutation before issuing the next one on the same\nlist.",
       "parameters": [
         {
           "name": "list_id",
@@ -130,7 +130,7 @@
     {
       "name": "CreateList",
       "qualifiedName": "X.CreateList",
-      "fullyQualifiedName": "X.CreateList@2.0.0",
+      "fullyQualifiedName": "X.CreateList@2.0.2",
       "description": "Create a new X List owned by the authenticated user.",
       "parameters": [
         {
@@ -219,8 +219,8 @@
     {
       "name": "DeleteList",
       "qualifiedName": "X.DeleteList",
-      "fullyQualifiedName": "X.DeleteList@2.0.0",
-      "description": "Delete an X List owned by the authenticated user.\n\nThe list and its memberships are removed. The tool distinguishes \"I just\ndeleted it\" from \"it was already gone\" rather than collapsing both into\nthe same idempotent-success envelope.\n\nSerialize dependent list mutations: do not fire ``DeleteList`` in\nparallel with ``AddListMember`` / ``RemoveListMember`` / ``UpdateList``\n/ ``PinList`` against the same ``list_id``. The list-membership endpoints\nwill race against the delete and surface a spurious ``not_found`` when\nthe member call lands after the list is gone. Await each mutation before\nissuing the next one on the same list.",
+      "fullyQualifiedName": "X.DeleteList@2.0.2",
+      "description": "Delete an X List owned by the authenticated user.\n\nThe list and its memberships are removed. The tool distinguishes \"I just\ndeleted it\" from \"it was already gone\" rather than collapsing both into\nthe same idempotent-success envelope.\n\nSerialize dependent list mutations: do not delete a list in parallel\nwith adding or removing its members, updating it, or pinning it. The\nlist-membership endpoints will race against the delete and surface a\nspurious ``not_found`` when the member call lands after the list is\ngone. Await each mutation before issuing the next one on the same list.",
       "parameters": [
         {
           "name": "list_id",
@@ -282,7 +282,7 @@
     {
       "name": "DeleteTweetById",
       "qualifiedName": "X.DeleteTweetById",
-      "fullyQualifiedName": "X.DeleteTweetById@2.0.0",
+      "fullyQualifiedName": "X.DeleteTweetById@2.0.2",
       "description": "Delete one of the authenticated user's tweets.\n\nThe tool distinguishes \"I just deleted it\" from \"it was already gone\"\nrather than collapsing both into the same idempotent-success envelope.",
       "parameters": [
         {
@@ -344,7 +344,7 @@
     {
       "name": "GetConversation",
       "qualifiedName": "X.GetConversation",
-      "fullyQualifiedName": "X.GetConversation@2.0.0",
+      "fullyQualifiedName": "X.GetConversation@2.0.2",
       "description": "Fetch the conversation thread containing ``tweet_id``.\n\nReturns every tweet that shares the same ``conversation_id`` as the\ngiven tweet, ordered oldest-first so a caller can render the thread top\nto bottom. The conversation root sits at position 0 whenever accessible.\n\nReplies are pulled from the recent-search index (~7-day window) which\ncan lag real time by several minutes. To verify a specific reply, look\nit up by id instead.",
       "parameters": [
         {
@@ -431,7 +431,7 @@
     {
       "name": "GetHomeTimeline",
       "qualifiedName": "X.GetHomeTimeline",
-      "fullyQualifiedName": "X.GetHomeTimeline@2.0.0",
+      "fullyQualifiedName": "X.GetHomeTimeline@2.0.2",
       "description": "Fetch the authenticated user's reverse-chronological home timeline.\n\nReturns recent tweets from accounts the user follows.",
       "parameters": [
         {
@@ -505,8 +505,8 @@
     {
       "name": "GetListMembers",
       "qualifiedName": "X.GetListMembers",
-      "fullyQualifiedName": "X.GetListMembers@2.0.0",
-      "description": "List members of an X List.\n\nThe members endpoint is eventually consistent: after ``AddListMember`` or\n``RemoveListMember`` returns success, the membership read endpoints\n(``GetListMembers``, ``GetListMembershipsForUser``) can take several\nseconds to surface the change. The list-tweets endpoint\n(``GetListTweets``) is typically refreshed faster than the members\nendpoint, so an empty page immediately after an add is more likely a\nconsistency window than a genuine empty list. Re-query after a brief\nwait when verifying a just-applied mutation.",
+      "fullyQualifiedName": "X.GetListMembers@2.0.2",
+      "description": "List members of an X List.\n\nThe members endpoint is eventually consistent: after members are added\nto or removed from a list, the membership read endpoints (this list's\nmembers and a user's list memberships) can take several seconds to\nsurface the change. The list-tweets endpoint is typically refreshed\nfaster than the members endpoint, so an empty page immediately after an\nadd is more likely a consistency window than a genuine empty list.\nRe-query after a brief wait when verifying a just-applied mutation.",
       "parameters": [
         {
           "name": "list_id",
@@ -593,7 +593,7 @@
     {
       "name": "GetListMembershipsForUser",
       "qualifiedName": "X.GetListMembershipsForUser",
-      "fullyQualifiedName": "X.GetListMembershipsForUser@2.0.0",
+      "fullyQualifiedName": "X.GetListMembershipsForUser@2.0.2",
       "description": "List the X Lists the target user is a member of.\n\nPass ``user_id`` or ``username`` (exactly one). With ``username``, the\nhandle is resolved to a numeric id first; passing ``user_id`` skips\nthat hop.",
       "parameters": [
         {
@@ -694,7 +694,7 @@
     {
       "name": "GetListTweets",
       "qualifiedName": "X.GetListTweets",
-      "fullyQualifiedName": "X.GetListTweets@2.0.0",
+      "fullyQualifiedName": "X.GetListTweets@2.0.2",
       "description": "List recent tweets from members of an X List, newest first.",
       "parameters": [
         {
@@ -782,7 +782,7 @@
     {
       "name": "GetMyMentions",
       "qualifiedName": "X.GetMyMentions",
-      "fullyQualifiedName": "X.GetMyMentions@2.0.0",
+      "fullyQualifiedName": "X.GetMyMentions@2.0.2",
       "description": "Fetch recent @-mentions of the authenticated user, newest first.",
       "parameters": [
         {
@@ -856,7 +856,7 @@
     {
       "name": "GetOwnedLists",
       "qualifiedName": "X.GetOwnedLists",
-      "fullyQualifiedName": "X.GetOwnedLists@2.0.0",
+      "fullyQualifiedName": "X.GetOwnedLists@2.0.2",
       "description": "List the X Lists a user owns.\n\nOmitting both ``user_id`` and ``username`` defaults to the authenticated\nuser (the common \"show me my lists\" workflow after creating a list).\nEach list record carries ``id``, ``name``, ``private``, ``description``,\n``member_count``, ``follower_count``, ``owner_id``, and ``created_at``.",
       "parameters": [
         {
@@ -957,7 +957,7 @@
     {
       "name": "GetQuoteTweets",
       "qualifiedName": "X.GetQuoteTweets",
-      "fullyQualifiedName": "X.GetQuoteTweets@2.0.0",
+      "fullyQualifiedName": "X.GetQuoteTweets@2.0.2",
       "description": "Fetch public quote tweets of the given tweet.",
       "parameters": [
         {
@@ -1044,7 +1044,7 @@
     {
       "name": "GetRepliesToTweet",
       "qualifiedName": "X.GetRepliesToTweet",
-      "fullyQualifiedName": "X.GetRepliesToTweet@2.0.0",
+      "fullyQualifiedName": "X.GetRepliesToTweet@2.0.2",
       "description": "Fetch public DIRECT replies to a given tweet (last ~7 days).\n\nReturns only tweets whose ``referenced_tweets`` carry a ``replied_to``\nedge pointing at ``tweet_id`` -- not the whole conversation thread.\nSibling replies and nested replies further down the tree are filtered\nout so the result reflects what a reader would see when expanding\n\"replies to this tweet\" in the X UI. Use the conversation tool to get\nthe full thread surrounding a tweet instead.\n\nThe recent-search index can lag real time by several minutes, so a\njust-posted reply may not appear yet. To verify a reply you just\nposted, look it up by id instead.\n\nPagination note: each page is fetched as ``max_results`` from X's\nrecent-search index, then locally filtered down to direct replies.\nPages where every tweet is an indirect reply (sibling or nested) come\nback with ``data=[]`` plus a ``next_token`` -- continue paginating to\nsurface the direct replies further into the conversation.",
       "parameters": [
         {
@@ -1131,7 +1131,7 @@
     {
       "name": "GetSpacesByCreator",
       "qualifiedName": "X.GetSpacesByCreator",
-      "fullyQualifiedName": "X.GetSpacesByCreator@2.0.0",
+      "fullyQualifiedName": "X.GetSpacesByCreator@2.0.2",
       "description": "List the live or scheduled X Spaces created by a set of users.\n\nUseful for monitoring whether a set of accounts has any Space currently\nairing or queued. Ended Spaces are not returned.",
       "parameters": [
         {
@@ -1200,7 +1200,7 @@
     {
       "name": "GetUserLikedTweets",
       "qualifiedName": "X.GetUserLikedTweets",
-      "fullyQualifiedName": "X.GetUserLikedTweets@2.0.0",
+      "fullyQualifiedName": "X.GetUserLikedTweets@2.0.2",
       "description": "List tweets a user has liked, newest-liked first.\n\nOmitting both ``user_id`` and ``username`` defaults to the authenticated\nuser. Each tweet carries ``tweet_url``, ``author_username``,\n``author_name``, and any media or poll enrichment.\n\nWhen the target user's likes are private, the response is an empty page\nindistinguishable from \"no liked tweets.\"",
       "parameters": [
         {
@@ -1301,7 +1301,7 @@
     {
       "name": "GetUserTweets",
       "qualifiedName": "X.GetUserTweets",
-      "fullyQualifiedName": "X.GetUserTweets@2.0.0",
+      "fullyQualifiedName": "X.GetUserTweets@2.0.2",
       "description": "Fetch tweets authored by a specific X user, newest first.\n\nPaginates through the author's full tweet history (no 7-day window).\nResults include original tweets, replies (unless ``exclude_replies=True``),\nretweets (unless ``exclude_retweets=True``), and quote tweets. Author\nhandle, name, and media or poll details are flattened onto each tweet.",
       "parameters": [
         {
@@ -1453,7 +1453,7 @@
     {
       "name": "LikeTweet",
       "qualifiedName": "X.LikeTweet",
-      "fullyQualifiedName": "X.LikeTweet@2.0.0",
+      "fullyQualifiedName": "X.LikeTweet@2.0.2",
       "description": "Like a tweet as the authenticated user.\n\nIdempotent: liking an already-liked tweet succeeds.",
       "parameters": [
         {
@@ -1515,7 +1515,7 @@
     {
       "name": "LookupSpaceById",
       "qualifiedName": "X.LookupSpaceById",
-      "fullyQualifiedName": "X.LookupSpaceById@2.0.0",
+      "fullyQualifiedName": "X.LookupSpaceById@2.0.2",
       "description": "Look up a single X Space by its id.\n\nReturns the Space's lifecycle state, title, creator, host and speaker\nids, language, and participant and subscriber counts.\n\nX gates several Space metadata fields behind ownership: most non-host\ncallers cannot read a Space's full metadata, even when the Space surfaces\nin a search or by-creator listing.",
       "parameters": [
         {
@@ -1577,7 +1577,7 @@
     {
       "name": "LookupTweetEngagers",
       "qualifiedName": "X.LookupTweetEngagers",
-      "fullyQualifiedName": "X.LookupTweetEngagers@2.0.0",
+      "fullyQualifiedName": "X.LookupTweetEngagers@2.0.2",
       "description": "List the users who liked or retweeted a tweet.\n\nEach user record carries the standard handle, name, and profile metadata so\ncallers can render an engager row without a follow-up lookup.\n\nWhen the tweet shows non-zero engagement in ``public_metrics`` but X's\nengagers endpoint returns zero users on the first page, the call returns\nan ``errors[0].type = \"data_unavailable\"`` envelope. This signals that\nthe account's X access tier does not expose engager lists for this\ntweet; treat ``public_metrics.like_count`` / ``retweet_count`` from\n``LookupTweetById`` as the authoritative engagement total in that case.",
       "parameters": [
         {
@@ -1681,7 +1681,7 @@
     {
       "name": "LookupTweets",
       "qualifiedName": "X.LookupTweets",
-      "fullyQualifiedName": "X.LookupTweets@2.0.0",
+      "fullyQualifiedName": "X.LookupTweets@2.0.2",
       "description": "Look up tweets by id (single or batched) on X.\n\nPass one id or up to 100 ids; the response is always a list. Each entry\ncarries ``referenced_tweets`` (``type`` of ``replied_to``, ``quoted``, or\n``retweeted`` plus the parent ``id``), ``conversation_id``, and the\nconvenience fields ``tweet_url`` / ``author_username`` / ``author_name``.\n\nSet ``include_author_only_metrics=True`` to retrieve ``non_public_metrics``\n(impressions, user_profile_clicks, url_link_clicks) and ``organic_metrics``\nfor tweets the authenticated caller authored. X drops third-party tweets\nfrom ``data`` when those fields are requested, so leave the flag false\nunless every id in the batch is known to be authored by the caller.",
       "parameters": [
         {
@@ -1760,7 +1760,7 @@
     {
       "name": "LookupUsers",
       "qualifiedName": "X.LookupUsers",
-      "fullyQualifiedName": "X.LookupUsers@2.0.0",
+      "fullyQualifiedName": "X.LookupUsers@2.0.2",
       "description": "Look up X (Twitter) users by handle and/or numeric user id.\n\nProvide ``usernames``, ``user_ids``, or both. Up to 100 of each per call.",
       "parameters": [
         {
@@ -1848,7 +1848,7 @@
     {
       "name": "PinList",
       "qualifiedName": "X.PinList",
-      "fullyQualifiedName": "X.PinList@2.0.0",
+      "fullyQualifiedName": "X.PinList@2.0.2",
       "description": "Pin an X List to the authenticated user's profile.\n\nIdempotent: pinning an already-pinned list succeeds.",
       "parameters": [
         {
@@ -1910,7 +1910,7 @@
     {
       "name": "PostThread",
       "qualifiedName": "X.PostThread",
-      "fullyQualifiedName": "X.PostThread@2.0.0",
+      "fullyQualifiedName": "X.PostThread@2.0.2",
       "description": "Post a multi-tweet thread as the authenticated user.\n\nPosts the first tweet, then chains every subsequent entry as a reply to\nthe prior tweet's id. ``tweets`` must contain 2-25 entries when posting a\nnew thread, or 1-25 entries when resuming an existing thread via\n``parent_tweet_id`` (the 1-entry case lets a caller append one more reply\nto the tail of a prior thread).\n``poll_options`` / ``poll_duration_minutes`` / ``quote_tweet_id`` /\n``reply_settings`` apply to the head tweet only.\n\nPre-flight validation runs on every entry before any post is created. If\nany entry fails validation, the call posts nothing.\n\nOn a mid-thread interruption, ``posted`` carries the rows that landed\nand ``next_position`` is the 1-based index of the first non-posted\nentry (0 when every entry posted). Resume the chain with::\n\n    tweets = (tweets[next_position - 1 :],)\n    parent_tweet_id = posted[-1][\"tweet_id\"]  # from the prior call\n\nWithout ``parent_tweet_id``, a resume call would re-create a fresh head\ntweet and silently split the thread into two disconnected chains.\n\nX also rejects mid-thread entries with ``status='invalid_input'`` when\nthe text passes local validation but contains codepoints that X counts\nas multiple weighted characters (emoji, many CJK glyphs) pushing the\nweighted total above 280, or when the text contains control characters\nX disallows. Simplify the entry at ``tweets[next_position - 1]`` (plain\nASCII is the safest reset) and resume.",
       "parameters": [
         {
@@ -2062,7 +2062,7 @@
     {
       "name": "PostTweet",
       "qualifiedName": "X.PostTweet",
-      "fullyQualifiedName": "X.PostTweet@2.0.0",
+      "fullyQualifiedName": "X.PostTweet@2.0.2",
       "description": "Post a new tweet as the authenticated user.\n\nThe same tool covers top-level posts, replies, and quote tweets. Supply\n``reply_to_tweet_id`` to post the new tweet as a reply; supply\n``quote_tweet_id`` to quote another tweet; supply both to post a reply\nthat also quotes a tweet. Pass ``reply_settings`` to restrict who can\nreply. Pass ``poll_options`` plus ``poll_duration_minutes`` to attach a\npoll (polls cannot be combined with ``quote_tweet_id``).\n\nFor multi-tweet threads, use the post-thread tool.",
       "parameters": [
         {
@@ -2200,8 +2200,8 @@
     {
       "name": "RemoveListMember",
       "qualifiedName": "X.RemoveListMember",
-      "fullyQualifiedName": "X.RemoveListMember@2.0.0",
-      "description": "Remove one or more users from an X List owned by the authenticated user.\n\nProvide ``user_ids``, ``usernames``, or both. Removing a user who is not\na member is treated as success.\n\nOn a mid-loop rate-limit, the run short-circuits and remaining targets\nare marked as not attempted. On retry, drop the targets that already\nsucceeded; otherwise polling re-arms X's bucket and extends the lockout.\n\nX is eventually consistent on list membership: a success status here\ndoes not mean a subsequent ``GetListMembers`` will immediately stop\nreturning the removed member. Allow a few seconds before relying on the\nread endpoint to reflect the mutation.\n\nSerialize dependent list mutations: do not fire ``RemoveListMember`` in\nparallel with ``DeleteList`` on the same ``list_id`` (a known race that\nproduces spurious ``not_found`` when the remove lands after the delete).\nAwait each mutation before issuing the next one on the same list.",
+      "fullyQualifiedName": "X.RemoveListMember@2.0.2",
+      "description": "Remove one or more users from an X List owned by the authenticated user.\n\nProvide ``user_ids``, ``usernames``, or both. Removing a user who is not\na member is treated as success.\n\nOn a mid-loop rate-limit, the run short-circuits and remaining targets\nare marked as not attempted. On retry, drop the targets that already\nsucceeded; otherwise polling re-arms X's bucket and extends the lockout.\n\nX is eventually consistent on list membership: a success status here\ndoes not mean a subsequent read of the list's members will immediately\nstop returning the removed member. Allow a few seconds before relying\non the read endpoint to reflect the mutation.\n\nSerialize dependent list mutations: do not remove members in parallel\nwith deleting the same ``list_id`` (a known race that produces spurious\n``not_found`` when the remove lands after the delete). Await each\nmutation before issuing the next one on the same list.",
       "parameters": [
         {
           "name": "list_id",
@@ -2299,7 +2299,7 @@
     {
       "name": "Retweet",
       "qualifiedName": "X.Retweet",
-      "fullyQualifiedName": "X.Retweet@2.0.0",
+      "fullyQualifiedName": "X.Retweet@2.0.2",
       "description": "Retweet a tweet as the authenticated user.\n\nIdempotent: retweeting an already-retweeted tweet succeeds.",
       "parameters": [
         {
@@ -2361,7 +2361,7 @@
     {
       "name": "SearchSpaces",
       "qualifiedName": "X.SearchSpaces",
-      "fullyQualifiedName": "X.SearchSpaces@2.0.0",
+      "fullyQualifiedName": "X.SearchSpaces@2.0.2",
       "description": "Search live and scheduled X Spaces by title.\n\nMatches the query against Space titles only (not transcripts). Filter\n``state`` controls whether to return live, scheduled, or both.\n\nThis endpoint does not paginate; ``max_results`` is the maximum page\nsize.",
       "parameters": [
         {
@@ -2453,7 +2453,7 @@
     {
       "name": "SearchTweetsByKeywords",
       "qualifiedName": "X.SearchTweetsByKeywords",
-      "fullyQualifiedName": "X.SearchTweetsByKeywords@2.0.0",
+      "fullyQualifiedName": "X.SearchTweetsByKeywords@2.0.2",
       "description": "Search tweets on X by structured filters across X's recent ~7-day index.\n\nSearches the last ~7 days of public tweets. For deeper historical\nwindows, X gates the full-archive search endpoint behind a paid plan;\nthis toolkit only offers the recent variant.\n\nAll supplied filters are ANDed together. At least one positive filter\nis required: a non-empty keyword or phrase, a non-empty\n``from_username`` / ``to_username``, or a ``has_*`` / ``is_*`` flag set\nto True. ``lang``, ``exclude_replies``, ``sort_order``, ``start_time`` /\n``end_time``, and False-valued flags are qualifiers, not positive filters.\n\nPagination: X's cursor is inclusive at the boundary, so consecutive\npages may overlap by one tweet. De-duplicate by tweet id when merging\npages. X's sharded search backend sometimes returns ``data=[]`` with a\nnon-null ``next_token`` when the slice it scanned produced no hits;\n``auto_follow_empty_pages`` controls how many such empty pages the tool\nfollows internally before returning, and ``pages_scanned`` in the\nresponse reports how far it scanned.",
       "parameters": [
         {
@@ -2785,7 +2785,7 @@
     {
       "name": "UndoRetweet",
       "qualifiedName": "X.UndoRetweet",
-      "fullyQualifiedName": "X.UndoRetweet@2.0.0",
+      "fullyQualifiedName": "X.UndoRetweet@2.0.2",
       "description": "Undo a previous retweet by the authenticated user.\n\nIdempotent: undoing a retweet that doesn't exist succeeds.",
       "parameters": [
         {
@@ -2847,7 +2847,7 @@
     {
       "name": "UnlikeTweet",
       "qualifiedName": "X.UnlikeTweet",
-      "fullyQualifiedName": "X.UnlikeTweet@2.0.0",
+      "fullyQualifiedName": "X.UnlikeTweet@2.0.2",
       "description": "Remove the authenticated user's like from a tweet.\n\nThe tweet itself is unaffected; only the like relationship is removed.\nIdempotent: unliking a tweet that isn't liked succeeds.",
       "parameters": [
         {
@@ -2909,7 +2909,7 @@
     {
       "name": "UnpinList",
       "qualifiedName": "X.UnpinList",
-      "fullyQualifiedName": "X.UnpinList@2.0.0",
+      "fullyQualifiedName": "X.UnpinList@2.0.2",
       "description": "Unpin an X List from the authenticated user's profile.\n\nIdempotent: unpinning a list that isn't pinned succeeds.",
       "parameters": [
         {
@@ -2972,8 +2972,8 @@
     {
       "name": "UpdateList",
       "qualifiedName": "X.UpdateList",
-      "fullyQualifiedName": "X.UpdateList@2.0.0",
-      "description": "Rename a list, edit its description, or toggle its visibility.\n\nAt least one of ``name``, ``description``, or ``private`` must be\nprovided. Unchanged fields keep their pre-existing values.\n\nSerialize dependent list mutations: do not fire ``UpdateList`` in\nparallel with ``DeleteList``, ``AddListMember``, ``RemoveListMember``,\nor another ``UpdateList`` against the same ``list_id``. Concurrent\ndependent mutations race against X's distributed state and surface\nspurious ``not_found`` errors. Await each mutation before issuing the\nnext one on the same list.",
+      "fullyQualifiedName": "X.UpdateList@2.0.2",
+      "description": "Rename a list, edit its description, or toggle its visibility.\n\nAt least one of ``name``, ``description``, or ``private`` must be\nprovided. Unchanged fields keep their pre-existing values.\n\nSerialize dependent list mutations: do not update a list in parallel\nwith deleting it, adding or removing its members, or another update to\nthe same ``list_id``. Concurrent dependent mutations race against X's\ndistributed state and surface spurious ``not_found`` errors. Await each\nmutation before issuing the next one on the same list.",
       "parameters": [
         {
           "name": "list_id",
@@ -3074,7 +3074,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "X.WhoAmI",
-      "fullyQualifiedName": "X.WhoAmI@2.0.0",
+      "fullyQualifiedName": "X.WhoAmI@2.0.2",
       "description": "Get the authenticated X (Twitter) user's profile.",
       "parameters": [],
       "auth": {
@@ -3121,6 +3121,7 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-06-19T12:27:59.752Z",
-  "summary": "The X toolkit provides Arcade tools for interacting with the X (Twitter) platform, enabling LLMs to read and write tweets, manage lists, search content, and inspect user and Space metadata on behalf of an authenticated user.\n\n## Capabilities\n\n- **Tweeting & threads:** Post, delete, like, unlike, retweet, undo-retweet, and quote tweets; compose multi-tweet threads with mid-thread resume support; attach polls and control reply permissions.\n- **Timeline & search:** Fetch the home timeline, @-mentions, quote tweets, direct replies, and full conversation threads; search the recent (~7-day) tweet index by structured keyword filters with pagination and empty-page auto-follow.\n- **User & engagement data:** Look up users by handle or numeric ID; retrieve liked tweets, authored tweets (full history), and engager lists (likers/retweeters); fetch the authenticated user's own profile.\n- **List management:** Create, update, delete, pin, and unpin lists; add and remove members (with eventual-consistency and serialization caveats); read list members, list memberships for a user, and recent tweets from a list.\n- **Spaces:** Look up a Space by ID, list live/scheduled Spaces by creator, and search Spaces by title.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with X as the identity provider. See the [Arcade X auth provider docs](https://docs.arcade.dev/en/references/auth-providers/x) for setup details."
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-10-07T21:26:06.954Z",
+  "summary": "## X (Twitter) Toolkit\n\nArcade's X toolkit provides LLM-callable tools for interacting with the X (Twitter) API on behalf of an authenticated user, covering tweets, timelines, lists, likes, retweets, spaces, and user lookups.\n\n## Capabilities\n\n- **Tweet lifecycle** — post top-level tweets, replies, quote tweets, and polls; post multi-tweet threads (including mid-thread resume); delete tweets; like/unlike and retweet/undo-retweet.\n- **Reading & searching tweets** — fetch home timeline, mentions, user tweet history, conversations, direct replies, quote tweets, recent keyword search (~7-day index), and batch tweet lookups (up to 100 ids); retrieve engagement lists (likers, retweeters).\n- **X Lists** — create, update, delete, pin, unpin, and read owned lists; add/remove members with eventual-consistency and serialization guidance; fetch list tweets and member roster.\n- **Users & profiles** — look up users by handle or numeric id (batch up to 100); get the authenticated user's own profile; retrieve a user's list memberships and liked tweets.\n- **Spaces** — look up a Space by id, list live/scheduled Spaces by creator, and search Spaces by title.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **X** provider. See the [Arcade X auth provider docs](https://docs.arcade.dev/en/references/auth-providers/x) for setup details."
 }
