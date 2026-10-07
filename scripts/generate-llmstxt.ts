@@ -52,6 +52,7 @@ const LINK_REGEX = /- \[([^\]]+)\]\(([^)]+)\):\s*(.+)$/gm;
 const MAX_CONTENT_LENGTH = 4000;
 const BATCH_DELAY_MS = 1000;
 const SHA_SHORT_LENGTH = 7;
+const PLACEHOLDER_DESCRIPTION = "Documentation page";
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -378,14 +379,14 @@ async function summarizePage(
     });
 
     const description =
-      response.choices[0]?.message?.content?.trim() || "Documentation page";
+      response.choices[0]?.message?.content?.trim() || PLACEHOLDER_DESCRIPTION;
 
     return { title, description };
   } catch (error) {
     console.error(chalk.red(`✗ Error summarizing ${page.path}:`), error);
     return {
       title: extractPageTitle(page.content, page.path),
-      description: "Documentation page",
+      description: PLACEHOLDER_DESCRIPTION,
     };
   }
 }
@@ -635,7 +636,11 @@ function determinePagesToSummarize(
       // Check if this page's file was changed
       const isChanged = changedFiles.has(page.path);
 
-      if (isChanged || !existingSummary) {
+      if (
+        isChanged ||
+        !existingSummary ||
+        existingSummary.description === PLACEHOLDER_DESCRIPTION
+      ) {
         // Need to summarize this page
         pagesToSummarize.push(page);
         hasChanges = true;
@@ -734,6 +739,14 @@ async function summarizePagesInBatches(
   }
 
   console.log(chalk.green(`✓ Summarized ${pagesToSummarize.length} pages`));
+  const fallbacks = summarizedPages
+    .slice(pagesToKeep.length)
+    .filter((page) => page.description === PLACEHOLDER_DESCRIPTION).length;
+  if (fallbacks > 0) {
+    console.log(
+      `::warning::${fallbacks} of ${pagesToSummarize.length} page summaries fell back to "${PLACEHOLDER_DESCRIPTION}"; check the OpenAI summary errors above`
+    );
+  }
   return summarizedPages;
 }
 
