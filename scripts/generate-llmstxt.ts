@@ -584,6 +584,13 @@ function generateLlmsTxt(
 }
 
 /**
+ * True when two llms.txt contents differ at most in their git-sha/date header
+ */
+function hasSameBody(a: string, b: string): boolean {
+  return a.replace(METADATA_REGEX, "") === b.replace(METADATA_REGEX, "");
+}
+
+/**
  * Determines which pages need summarization based on changes
  */
 function determinePagesToSummarize(
@@ -836,9 +843,13 @@ async function main() {
         };
     const content = generateLlmsTxt(sections, metadata);
 
-    // Step 6: Write to file
-    await fs.writeFile(OUTPUT_PATH, content, "utf-8");
-    if (hasChanges) {
+    // Step 6: Write to file, unless only the header would change (e.g. every
+    // placeholder retry failed again and nothing else moved)
+    const existingContent = await fs
+      .readFile(OUTPUT_PATH, "utf-8")
+      .catch(() => null);
+    if (existingContent === null || !hasSameBody(existingContent, content)) {
+      await fs.writeFile(OUTPUT_PATH, content, "utf-8");
       console.log(chalk.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
     } else {
       console.log(
@@ -860,4 +871,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export { main as generateLlmsTxt };
+export { hasSameBody, main as generateLlmsTxt, summarizePagesInBatches };
