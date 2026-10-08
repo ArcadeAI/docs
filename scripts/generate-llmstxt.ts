@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import chalk from "chalk";
 import glob from "fast-glob";
-import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { getToolkitCanonicalPath } from "../app/_lib/toolkit-static-params";
 import { resolveToolkitDataDir } from "../toolkit-docs-generator/src/shared/toolkit-data-dir";
 import type {
@@ -53,9 +53,9 @@ const MAX_CONTENT_LENGTH = 4000;
 const BATCH_DELAY_MS = 1000;
 const SHA_SHORT_LENGTH = 7;
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// Initialize Anthropic client
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 /**
@@ -233,7 +233,7 @@ type ToolkitData = Partial<
 
 /**
  * Builds a concise, deterministic description for a toolkit from its own
- * metadata (no OpenAI): its summary/description with markdown stripped, or a
+ * metadata (no Claude): its summary/description with markdown stripped, or a
  * label + tool-count fallback.
  */
 function buildToolkitDescription(data: ToolkitData): string {
@@ -265,7 +265,7 @@ function buildToolkitDescription(data: ToolkitData): string {
  * Discovers toolkit (integration) pages from generated toolkit data. These are
  * dynamic routes, so the MDX glob can't find them; build them straight from the
  * toolkit JSON, reusing the app's canonical path logic so URLs match the real
- * pages. Descriptions are templated (no OpenAI call).
+ * pages. Descriptions are templated (no Claude call).
  */
 async function discoverToolkitPages(): Promise<
   Array<PageMetadata & { title: string; description: string }>
@@ -340,7 +340,7 @@ async function discoverToolkitPages(): Promise<
 }
 
 /**
- * Summarizes a page using OpenAI
+ * Summarizes a page using Claude
  */
 async function summarizePage(
   page: PageMetadata
@@ -360,14 +360,11 @@ async function summarizePage(
 
     contentForSummary = contentForSummary.slice(0, MAX_CONTENT_LENGTH);
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const response = await anthropic.messages.create({
+      model: "claude-haiku-4-5-20251001",
+      system:
+        "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn.",
       messages: [
-        {
-          role: "system",
-          content:
-            "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn.",
-        },
         {
           role: "user",
           content: `Summarize this documentation page:\n\nTitle: ${title}\n\nContent:\n${contentForSummary}`,
@@ -377,8 +374,11 @@ async function summarizePage(
       max_tokens: 50,
     });
 
-    const description =
-      response.choices[0]?.message?.content?.trim() || "Documentation page";
+    const text = response.content
+      .filter((block) => block.type === "text")
+      .map((block) => block.text)
+      .join("");
+    const description = text.trim() || "Documentation page";
 
     return { title, description };
   } catch (error) {
@@ -657,7 +657,7 @@ function determinePagesToSummarize(
       }
     }
 
-    // Toolkit pages are rebuilt every run (no OpenAI). Flag a change if any is
+    // Toolkit pages are rebuilt every run (no Claude). Flag a change if any is
     // new or its title/description differs from the previous output. Skip URLs
     // already covered by MDX pages — those win at merge and their summaries
     // are tracked in the MDX loop above.
@@ -707,7 +707,7 @@ async function summarizePagesInBatches(
     return summarizedPages;
   }
 
-  console.log(chalk.blue("\n📝 Summarizing pages with OpenAI..."));
+  console.log(chalk.blue("\n📝 Summarizing pages with Claude..."));
   // Process in batches to avoid rate limits
   const batchSize = 5;
   for (let i = 0; i < pagesToSummarize.length; i += batchSize) {
@@ -743,9 +743,11 @@ async function summarizePagesInBatches(
 async function main() {
   console.log(chalk.bold(chalk.blue("\n🚀 Generating llms.txt file...\n")));
 
-  // Check for OpenAI API key
-  if (!process.env.OPENAI_API_KEY) {
-    console.error(chalk.red("✗ OPENAI_API_KEY environment variable is required"));
+  // Check for Anthropic API key
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.error(
+      chalk.red("✗ ANTHROPIC_API_KEY environment variable is required")
+    );
     process.exit(1);
   }
 
@@ -777,13 +779,13 @@ async function main() {
         toolkitPages
       );
 
-    // Step 3: Summarize changed/new pages using OpenAI
+    // Step 3: Summarize changed/new pages using Claude
     const summarizedPages = await summarizePagesInBatches(
       pagesToSummarize,
       pagesToKeep
     );
 
-    // Toolkit pages already have templated title/description (no OpenAI).
+    // Toolkit pages already have templated title/description (no Claude).
     // Deduplicate by URL: MDX-authored pages take precedence over toolkit JSON
     // pages so a static page (e.g. resources/integrations/search/tavily) that
     // appears in both sets doesn't emit two entries in llms.txt.
