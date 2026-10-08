@@ -49,7 +49,7 @@ jobs:
             echo "::error::Invalid version input: $VERSION"
             exit 1
           fi
-          for attempt in $(seq 1 40); do
+          for attempt in $(seq 1 20); do
             if [ "$(npm view "@arcadeai/design-system@$VERSION" version --prefer-online 2>/dev/null)" = "$VERSION" ]; then
               echo "@arcadeai/design-system@$VERSION is available on npm"
               exit 0
@@ -57,7 +57,7 @@ jobs:
             echo "Attempt $attempt: $VERSION not on npm yet, retrying in 30s"
             sleep 30
           done
-          echo "::error::@arcadeai/design-system@$VERSION did not appear on npm within 20 minutes"
+          echo "::error::@arcadeai/design-system@$VERSION did not appear on npm within 10 minutes"
           exit 1
 
       - name: Update @arcadeai/design-system
