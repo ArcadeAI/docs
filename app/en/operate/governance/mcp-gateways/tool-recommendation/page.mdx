@@ -17,7 +17,7 @@ With Tool Recommendation on, the gateway lists a small, fixed set of Arcade tool
 
 ## What an MCP client gets
 
-When Tool Recommendation is on for a gateway, the gateway's tool list starts with these Arcade tools:
+When Tool Recommendation is on for a gateway, the gateway's tool list contains only these Arcade tools:
 
 | Tool | What it does |
 | --- | --- |
@@ -29,7 +29,7 @@ The MCP tool list spells these names with an underscore separator, for example `
 
 The gateway also serves `Arcade.SearchTools`, a keyword search over the same tools. It does not appear in the tool list, but an agent can call it by name. See [Selection and search](#selection-and-search).
 
-As the agent discovers tools through `Arcade.SelectTools`, the gateway adds those tools to that user's tool list. When an MCP client lists tools again later, the list includes them alongside the Arcade tools, and the agent can call them directly.
+The tool list doesn't grow as the agent works. Tools that `Arcade.SelectTools` returns are not added to it, so listing tools again later returns the same Arcade tools. The agent gets each recommended tool's input schema in the `Arcade.SelectTools` response and runs the tool through `Arcade.UseTool`.
 
 ## How an agent finds and calls a tool
 
@@ -45,6 +45,11 @@ First, it calls `Arcade.SelectTools` with the tasks it wants to complete. Each e
 ```
 
 Arcade returns up to five tools per task, ranked by how well they match. Each result includes the tool's name, description, and input schema, plus a `query_id` for the whole request.
+
+When a task gets no tools, its result includes an `empty_reason`. The agent uses it to decide whether to retry:
+
+- `no_match`: Arcade finished the lookup and found no tool the agent may use for that task. Retrying the same task returns the same answer.
+- `unavailable`: The lookup for that task didn't complete. Retrying may succeed.
 
 Second, the agent calls `Arcade.UseTool` with the tool it picked and that tool's own arguments nested inside `inputs`:
 
@@ -81,9 +86,9 @@ Semantic selection finds a tool even when the task shares no words with the tool
 
 Tool Recommendation only works within the tools the gateway already allows. `Arcade.SelectTools` and `Arcade.SearchTools` return only tools that are in the gateway's **Allowed Tools** list, and `Arcade.UseTool` runs only those tools. Turning on Tool Recommendation never gives an agent access to a tool the gateway does not allow.
 
-If a tool is on the allowed list, an agent can run it through `Arcade.UseTool` even if `Arcade.SelectTools` has not returned it yet.
+`Arcade.UseTool` decides whether to run a tool from the gateway's allowed list and your governance rules, not from what `Arcade.SelectTools` returned earlier. If a tool is on the allowed list, an agent can run it through `Arcade.UseTool` even if `Arcade.SelectTools` never returned it.
 
-[Contextual Access](/operate/governance/contextual-access) rules still apply. A tool that your access rules hide from a user is not recommended to that user.
+[Contextual Access](/operate/governance/contextual-access) rules still apply. A tool that your access rules hide from a user is not recommended to that user, and your access rules still govern every call through `Arcade.UseTool`.
 
 ## How it works with MCP clients
 
