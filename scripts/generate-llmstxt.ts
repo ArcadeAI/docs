@@ -47,6 +47,8 @@ const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const METADATA_REGEX =
   /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
 const LINK_REGEX = /- \[([^\]]+)\]\(([^)]+)\):\s*(.+)$/gm;
+const LEADING_HEADING_LINE_REGEX = /^\s*#+[^\n]*(\n|$)/;
+const WHITESPACE_RUN_REGEX = /\s+/g;
 
 // Constants for content processing
 const MAX_CONTENT_LENGTH = 4000;
@@ -364,7 +366,7 @@ async function summarizePage(
     const response = await anthropic.messages.create({
       model: "claude-haiku-4-5-20251001",
       system:
-        "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn.",
+        "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn. Reply with one or two plain sentences only: no headings, no markdown, no line breaks.",
       messages: [
         {
           role: "user",
@@ -372,14 +374,18 @@ async function summarizePage(
         },
       ],
       temperature: 0.3,
-      max_tokens: 50,
+      max_tokens: 200,
     });
 
     const text = response.content
       .filter((block) => block.type === "text")
       .map((block) => block.text)
       .join("");
-    const description = text.trim() || PLACEHOLDER_DESCRIPTION;
+    const description =
+      text
+        .replace(LEADING_HEADING_LINE_REGEX, "")
+        .replace(WHITESPACE_RUN_REGEX, " ")
+        .trim() || PLACEHOLDER_DESCRIPTION;
 
     return { title, description };
   } catch (error) {
