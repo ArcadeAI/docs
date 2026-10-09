@@ -22,6 +22,9 @@ const meta: MetaRecord = {
   helm: {
     title: "Self-host with Helm",
   },
+  "helm-arcade-deploy": {
+    title: "Arcade Deploy on your own cluster (Helm)",
+  },
   worker: {
     title: "Arcade Worker",
   },
