@@ -113,7 +113,7 @@ A signing failure doesn't fail the deploy.
 | Value | Default | Description |
 | --- | --- | --- |
 | `deployments.image.repository` | `arcadedev/runner` | Runner image that deployed servers run in. |
-| `deployments.image.tag` | `""` | Runner image tag. Empty uses the chart's `appVersion`, so the runner moves with chart upgrades. |
+| `deployments.image.tag` | `""` | Runner image tag. Empty uses the chart's `appVersion`. |
 | `deployments.registry.server` | `""` | Registry host to pull the runner image from. When set, it's prefixed to `deployments.image.repository`. |
 | `deployments.registry.imagePullSecrets` | `[]` | Names of image pull Secrets for deployed servers' pods. When `dockerRegistry.enabled` is `true` and the chart creates that Secret, the chart adds it to this list. |
 
@@ -261,7 +261,7 @@ kubectl -n arcade-workers get resourcequota
 
 Upgrade the chart with `helm upgrade` as described in [Self-host with Helm](/operate/deploy/helm#upgrade-and-roll-back). Keep these points in mind:
 
-- **Runner image.** With `deployments.image.tag` empty, the runner tag follows the chart's `appVersion`. Pin `deployments.image.tag` to control when the runner changes.
+- **Runner image.** With `deployments.image.tag` empty, the runner tag follows the chart's `appVersion`. Pin `deployments.image.tag` to control which runner tag the Arcade Engine configures.
 - **Private registry.** Mirror the new runner tag into your registry before you upgrade.
 - **Namespace.** With `deployments.createNamespace: true`, Helm keeps the workers namespace and its default-deny NetworkPolicy on uninstall, so deployed servers' objects aren't deleted with the release.
 
