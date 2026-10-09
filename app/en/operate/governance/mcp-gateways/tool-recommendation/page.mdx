@@ -1,0 +1,99 @@
+---
+title: "Tool Recommendation"
+description: "Give agents your gateway's full tool catalog by letting them request the tools each task needs"
+---
+
+import { Callout, Steps } from "nextra/components";
+
+# Tool Recommendation
+
+Tool Recommendation lets an agent reach every tool on an MCP Gateway without loading all of them up front. Instead of listing each tool definition, the gateway gives the agent a small, fixed set of tools. The agent describes what it needs to do, Arcade returns the tools that fit, and the agent runs them under the end user's own authorization.
+
+This page is for platform operators who configure MCP Gateways, and for agent developers who want to understand what their agent sees when Tool Recommendation is on.
+
+## Why use Tool Recommendation
+
+An agent can only call the tools whose definitions it has. With a static tool list, the MCP client sends every definition on every request, so each tool you add makes every request larger. That forces a trade-off:
+
+- **A short list** keeps requests small but limits the agent to the tasks you anticipated. Every new need becomes a configuration change.
+- **A long list** widens what the agent can do, but raises the cost of every request, and models pick the wrong tool more often as the list grows.
+
+Arcade's catalog has over 8,000 tools, far more than fits in any model's context window. Tool Recommendation removes the trade-off: the agent can reach every tool the gateway allows, and the definitions it carries stay small no matter how large the catalog grows.
+
+## How it works
+
+When Tool Recommendation is on, a gateway lists these tools instead of its allowed tools:
+
+| Tool | What it does |
+| --- | --- |
+| `Arcade_SelectTools` | Takes one or more task descriptions in plain language and returns, for each one, a ranked list of matching tools with their full input schemas. |
+| `Arcade_UseTool` | Runs a tool returned by `Arcade_SelectTools`, with the inputs the agent supplies. |
+| `Arcade_ListApps` | Reports which apps sit behind the gateway and whether the end user has connected each one. |
+
+A typical turn looks like this:
+
+<Steps>
+
+### The agent describes the task
+
+The agent calls `Arcade_SelectTools` with a description such as `find the open Linear issue assigned to me`. It can pass several unrelated tasks in one call.
+
+### Arcade recommends tools
+
+Arcade ranks the tools the gateway allows for that end user and returns the best matches, each with its description and input schema. Ranking runs in two stages: a first stage retrieves candidate tools, and a second stage orders them by reading the task and each tool together.
+
+### The agent runs a tool
+
+The agent calls `Arcade_UseTool` with a returned tool's name and inputs, and passes along the `query_id` from the `Arcade_SelectTools` response. Arcade runs the tool and returns the result.
+
+</Steps>
+
+Tool Recommendation doesn't require training on your tools. Arcade indexes tools as they're added, updated, or removed, so new tools, including tools your organization registers, become recommendable without any redeploy.
+
+## Governance still applies
+
+Tool Recommendation runs inside Arcade's runtime, so it never widens what an agent can do:
+
+- **Allowlist.** `Arcade_SelectTools` only ranks tools on the gateway's allowlist. A tool you remove from the allowlist stops appearing in later results.
+- **Access hooks.** A [Contextual Access](/operate/governance/contextual-access) access hook that hides a tool from an end user also hides it from that user's recommendations.
+- **Execution hooks.** A pre-execution hook that blocks a tool call blocks it the same way when the call comes through `Arcade_UseTool`.
+- **End-user authorization.** `Arcade_UseTool` runs each tool as the end user. Provider credentials stay with Arcade and never enter the agent's context. If a tool needs consent the user hasn't given, the agent receives an authorization link instead of a result, and can repeat the call once the user approves.
+
+## Turn Tool Recommendation on or off
+
+**Per gateway.** The gateway form in the [MCP Gateways dashboard](https://api.arcade.dev/dashboard/mcp-gateways) has a **Tool Recommendations** checkbox. Through the API, this is the gateway's `tool_filter.discovery.enabled` field. The setting applies only to that gateway.
+
+- **New gateways** have Tool Recommendations checked by default.
+- **Existing gateways** created before Tool Recommendation was available keep listing their tools as before. Open the gateway, check **Tool Recommendations**, and save to turn it on.
+
+<Callout type="info">
+  The **Tool Recommendations** checkbox appears only when Tool Recommendation is
+  available to your organization.
+</Callout>
+
+**Per connection.** Add a query parameter to the gateway URL in an MCP client's configuration to turn Tool Recommendation off for that connection only. The client then receives the gateway's full tool list. The gateway setting doesn't change.
+
+```text
+https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}?tool_recommendation=false
+```
+
+## When to use it
+
+Tool Recommendation pays off as the number of tools grows and when agents carry out multi-step work. Each `Arcade_SelectTools` call adds a round trip, so cost and latency depend on how often the agent searches:
+
+- **Use Tool Recommendation** when a gateway has many tools, when you don't know in advance which tools users will need, or when agents chain several tool calls to finish a task.
+- **Use a static list** for a small, stable set of tools, especially when most tasks need only one tool. With only a handful of tools, listing them directly sends less than a search would.
+
+Cost also depends on the MCP client. Recommended tools join the session's tool list as the agent requests them, and clients differ in how they handle a tool list that grows during a session. Clients that defer loading tool definitions, such as Claude Code with tool search enabled, handle this efficiently.
+
+## Related tools and pages
+
+- The gateway's [Private Registry](/operate/governance/private-registry) lists every tool the gateway allows, whether or not Tool Recommendation is on.
+- `Arcade_ListApps` and the [Registry tools](/operate/governance/private-registry#capability-requests) stay available whether Tool Recommendation is on or off.
+- To hide all of Arcade's agent tools from one connection, add `arcade_tools=false` to the gateway URL.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard)
+- [Call a tool in your IDE or MCP client](/get-started/quickstarts/call-tool-client)
+- [Connect a gateway to your MCP client](/get-started/mcp-clients)
