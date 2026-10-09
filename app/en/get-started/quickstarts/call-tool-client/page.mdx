@@ -24,7 +24,7 @@ export const MCP_GATEWAY_URL_LIGHT_HEIGHT = 498;
 
 # Call a tool in your IDE/MCP Client
 
-Tools enable your AI agents to perform actions on your behalf. For specific workflows and use cases, this may involve calling tools from multiple MCP servers. Arcade facilitates this by allowing you to create MCP Gateways to federate the tools from multiple MCP servers into a single collection for convenient management, control, and access. For example, if your agent specializes in solving specific tickets in Linear, you may want to use tools from the GitHub, Slack and Linear servers in your agent. These add up to 88 tools, which could be overwhelming for an LLM to use effectively. What you want is to get from these servers only the tools that matter for your agent. An MCP Gateway allows you to do just that: pick only the tools required for this workflow, and you can connect it to any MCP client, making it possible to port your agent to multiple platforms and IDEs, and even share it with other users.
+Tools enable your AI agents to perform actions on your behalf. For specific workflows and use cases, this may involve calling tools from multiple MCP servers. Arcade facilitates this by allowing you to create MCP Gateways to federate the tools from multiple MCP servers into a single collection for convenient management, control, and access. For example, if your agent specializes in solving specific tickets in Linear, you may want to use tools from the GitHub, Slack and Linear servers in your agent. These add up to 88 tools, which could be overwhelming for an LLM to use effectively. An MCP Gateway lets you pick the tools for this workflow, and with [Tool Recommendation](/operate/governance/mcp-gateways/tool-recommendation) on, your agent requests only the tools each task needs instead of loading all of them up front. You can connect the gateway to any MCP client, making it possible to port your agent to multiple platforms and IDEs, and even share it with other users.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -41,7 +41,7 @@ Create a coding agent using an MCP Gateway to call tools from multiple MCP serve
 
 <GuideOverview.YouWillLearn>
 
-- Create an MCP Gateway
+- Create an MCP Gateway with Tool Recommendation
 - Connect the MCP Gateway to Cursor or VS Code
 - Call tools from the MCP Gateway in your agent
 
@@ -102,10 +102,20 @@ Feel free to select any tools you want to include in your specific use case.
   height={TOOL_PICKER_DARK_HEIGHT / IMAGE_SCALE_FACTOR}
 />
 
-Once you've selected the tools you want to include in the gateway, click the "Use N tools" button in the tool picker, and then click the "Create MCP Gateway" button to create the gateway.
+Once you've selected the tools you want to include in the gateway, click the "Use N tools" button in the tool picker.
+
+### Keep Tool Recommendations on
+
+**Leave the "Tool Recommendations" checkbox checked.** It's on by default for new gateways. With Tool Recommendations on, the gateway doesn't send every tool definition to your agent. Instead, the agent describes each task and Arcade returns only the tools that task needs, so a large tool set doesn't fill the model's context window. See [Tool Recommendation](/operate/governance/mcp-gateways/tool-recommendation) for how it works.
+
+Click the "Create MCP Gateway" button to create the gateway.
 
 <Callout type="info">
-  You can select as many tools for your MCP Gateway as you want, but be mindful of how the MCP clients will handle the large number of tools. Some clients may not handle a large number of tools well, and may consume a significant portion of the LLM's context window. We recommend keeping the number of tools in a single MCP Gateway below 80.```
+  If you turn Tool Recommendations off, the gateway lists every selected tool to
+  your agent on every request. Some clients don't handle a large number of tools
+  well, and the definitions can consume a significant portion of the LLM's
+  context window. With Tool Recommendations off, keep the number of tools in a
+  single MCP Gateway below 80.
 </Callout>
 
 ### Connect the MCP Gateway to an MCP client
@@ -141,13 +151,14 @@ Select the MCP client you want to use to read the instructions to connect to the
 1. Open your IDE's chat pane.
 1. Ask the agent to do something! For example, "Check the latest linear issue assigned to me. Then, create a new GitHub branch, implement the fix, and add tests. If all the tests pass, create a pull request and assign it to me."
 
-As you interact with the agent, it will call the tools from the MCP Gateway. Your agent should prompt you to visit links to authorize access to Linear and GitHub. After this, it will start using tools to carry out the task! Subsequent calls will not require authorization.
+As you interact with the agent, it will call the tools from the MCP Gateway. With Tool Recommendations on, you'll see the agent call `Arcade_SelectTools` to find the Linear and GitHub tools it needs, then `Arcade_UseTool` to run them. Your agent should prompt you to visit links to authorize access to Linear and GitHub. After this, it will start using tools to carry out the task! Subsequent calls will not require authorization.
 
 </Steps>
 
 ## Next Steps
 
 - Learn more about [MCP Gateways](/operate/governance/mcp-gateways).
+- Learn how [Tool Recommendation](/operate/governance/mcp-gateways/tool-recommendation) works and when to turn it off.
 - Learn how to use MCP Gateways with:
   - [Cursor](/get-started/mcp-clients/cursor)
   - [Visual Studio Code](/get-started/mcp-clients/visual-studio-code)
