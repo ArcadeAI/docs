@@ -1,7 +1,7 @@
 {
   "id": "Freshdesk",
   "label": "Freshdesk",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Arcade.dev LLM tools for Freshdesk customer support",
   "metadata": {
     "category": "customer-support",
@@ -18,7 +18,7 @@
     {
       "name": "AddPrivateNote",
       "qualifiedName": "Freshdesk.AddPrivateNote",
-      "fullyQualifiedName": "Freshdesk.AddPrivateNote@1.0.1",
+      "fullyQualifiedName": "Freshdesk.AddPrivateNote@1.0.2",
       "description": "Add an internal private note to a ticket that the requester cannot see.",
       "parameters": [
         {
@@ -113,14 +113,14 @@
     {
       "name": "CreateOrUpdateCompany",
       "qualifiedName": "Freshdesk.CreateOrUpdateCompany",
-      "fullyQualifiedName": "Freshdesk.CreateOrUpdateCompany@1.0.1",
+      "fullyQualifiedName": "Freshdesk.CreateOrUpdateCompany@1.0.2",
       "description": "Create a new company account or update an existing one. To create, omit company_id and\nprovide a name; link a contact to the result by passing its id as a contact's company.",
       "parameters": [
         {
           "name": "company_id",
           "type": "integer",
           "required": false,
-          "description": "Id of the company to update. Omit to create a new company instead.",
+          "description": "Id of the company to update. Defaults to creating a new company.",
           "enum": null,
           "inferrable": true
         },
@@ -128,7 +128,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "Company name. When creating, this is required and must be unique. When updating, providing it renames the company and omitting it leaves the name unchanged.",
+          "description": "Company name. When creating, this is required and must be unique. When updating, providing it renames the company. Defaults to leaving the name unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -137,7 +137,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Email domains owned by the company, used to auto-associate new contacts. Providing this replaces the existing list; omitting it leaves the domains unchanged.",
+          "description": "Email domains owned by the company, used to auto-associate new contacts. Providing this replaces the existing list. Defaults to leaving the domains unset or unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -145,7 +145,7 @@
           "name": "note",
           "type": "string",
           "required": false,
-          "description": "Free-text account note. Providing it sets the note; omitting it leaves it unchanged.",
+          "description": "Free-text account note. Defaults to leaving the note unset or unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -222,14 +222,14 @@
     {
       "name": "CreateOrUpdateContact",
       "qualifiedName": "Freshdesk.CreateOrUpdateContact",
-      "fullyQualifiedName": "Freshdesk.CreateOrUpdateContact@1.0.1",
+      "fullyQualifiedName": "Freshdesk.CreateOrUpdateContact@1.0.2",
       "description": "Create a new contact or update an existing one. To create, omit contact_id and\nprovide a name plus at least one of email, phone, or mobile.",
       "parameters": [
         {
           "name": "contact_id",
           "type": "integer",
           "required": false,
-          "description": "Id of the contact to update. Omit to create a new contact instead.",
+          "description": "Id of the contact to update. Defaults to creating a new contact.",
           "enum": null,
           "inferrable": true
         },
@@ -237,7 +237,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "Contact name. When creating, this is required. When updating, providing it changes the name and omitting it leaves the name unchanged.",
+          "description": "Contact name. When creating, this is required. When updating, providing it changes the name. Defaults to leaving the name unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -245,7 +245,7 @@
           "name": "email",
           "type": "string",
           "required": false,
-          "description": "Contact email. Providing it sets the email; omitting it leaves it unchanged.",
+          "description": "Contact email. Defaults to leaving the email unset or unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -253,7 +253,7 @@
           "name": "phone",
           "type": "string",
           "required": false,
-          "description": "Contact phone. Providing it sets the phone; omitting it leaves it unchanged.",
+          "description": "Contact phone. Defaults to leaving the phone unset or unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -261,7 +261,7 @@
           "name": "mobile",
           "type": "string",
           "required": false,
-          "description": "Contact mobile. Providing it sets the mobile; omitting it leaves it unchanged.",
+          "description": "Contact mobile. Defaults to leaving the mobile unset or unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -269,7 +269,7 @@
           "name": "company_id",
           "type": "integer",
           "required": false,
-          "description": "Company to associate the contact with. Omitting it leaves it unchanged.",
+          "description": "Company to associate the contact with. Defaults to leaving the company unset or unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -277,7 +277,7 @@
           "name": "job_title",
           "type": "string",
           "required": false,
-          "description": "Contact job title. Providing it sets the title; omitting it leaves it unchanged.",
+          "description": "Contact job title. Defaults to leaving the title unset or unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -366,7 +366,7 @@
     {
       "name": "CreateTicket",
       "qualifiedName": "Freshdesk.CreateTicket",
-      "fullyQualifiedName": "Freshdesk.CreateTicket@1.0.1",
+      "fullyQualifiedName": "Freshdesk.CreateTicket@1.0.2",
       "description": "Open a ticket on a customer's behalf. Requires a subject, a description, and a\nrequester identified by email or id.",
       "parameters": [
         {
@@ -397,7 +397,7 @@
           "name": "requester_id",
           "type": "integer",
           "required": false,
-          "description": "Id of an existing contact the ticket is for. Provide this or requester_email.",
+          "description": "Id of an existing contact the ticket is for. Provide this or requester_email. Defaults to using requester_email.",
           "enum": null,
           "inferrable": true
         },
@@ -532,7 +532,7 @@
     {
       "name": "GetArticle",
       "qualifiedName": "Freshdesk.GetArticle",
-      "fullyQualifiedName": "Freshdesk.GetArticle@1.0.1",
+      "fullyQualifiedName": "Freshdesk.GetArticle@1.0.2",
       "description": "Read a single knowledge base article's full content by id.\n\nA missing id returns a not-found envelope (``found`` false) rather than raising, so a\nstale or guessed id can be recovered from within the same turn.",
       "parameters": [
         {
@@ -597,7 +597,7 @@
     {
       "name": "GetCompany",
       "qualifiedName": "Freshdesk.GetCompany",
-      "fullyQualifiedName": "Freshdesk.GetCompany@1.0.1",
+      "fullyQualifiedName": "Freshdesk.GetCompany@1.0.2",
       "description": "Read a single company's details by id.\n\nA missing id returns a not-found envelope (``found`` false) rather than raising, so a\nstale or guessed id can be recovered from within the same turn.",
       "parameters": [
         {
@@ -662,7 +662,7 @@
     {
       "name": "GetContact",
       "qualifiedName": "Freshdesk.GetContact",
-      "fullyQualifiedName": "Freshdesk.GetContact@1.0.1",
+      "fullyQualifiedName": "Freshdesk.GetContact@1.0.2",
       "description": "Read a single contact's details by id.\n\nA missing id returns a not-found envelope (``found`` false) rather than raising, so a\nstale or guessed id can be recovered from within the same turn.",
       "parameters": [
         {
@@ -727,14 +727,14 @@
     {
       "name": "GetCustomerOverview",
       "qualifiedName": "Freshdesk.GetCustomerOverview",
-      "fullyQualifiedName": "Freshdesk.GetCustomerOverview@1.0.1",
+      "fullyQualifiedName": "Freshdesk.GetCustomerOverview@1.0.2",
       "description": "Assemble one requester's full context — their contact record, their company, and their\ntickets — in a single call instead of three separate lookups.\n\nIdentify the requester by contact_id or email; a missing requester returns a not-found\nenvelope rather than raising, so a stale id or wrong email can be recovered in the same turn.",
       "parameters": [
         {
           "name": "contact_id",
           "type": "integer",
           "required": false,
-          "description": "Id of the requester to profile. Takes precedence over email. Omit to look up by email.",
+          "description": "Id of the requester to profile. Takes precedence over email. Defaults to looking up by email.",
           "enum": null,
           "inferrable": true
         },
@@ -831,7 +831,7 @@
     {
       "name": "GetTicket",
       "qualifiedName": "Freshdesk.GetTicket",
-      "fullyQualifiedName": "Freshdesk.GetTicket@1.0.1",
+      "fullyQualifiedName": "Freshdesk.GetTicket@1.0.2",
       "description": "Read a ticket together with its full public-reply and private-note history.\n\nA missing id returns a not-found envelope (``found`` false) rather than raising, so a\nstale or guessed id can be recovered from within the same turn.",
       "parameters": [
         {
@@ -896,7 +896,7 @@
     {
       "name": "ListAgents",
       "qualifiedName": "Freshdesk.ListAgents",
-      "fullyQualifiedName": "Freshdesk.ListAgents@1.0.1",
+      "fullyQualifiedName": "Freshdesk.ListAgents@1.0.2",
       "description": "List the helpdesk's agents, optionally filtered to one email, for routing tickets.",
       "parameters": [
         {
@@ -987,7 +987,7 @@
     {
       "name": "ListGroups",
       "qualifiedName": "Freshdesk.ListGroups",
-      "fullyQualifiedName": "Freshdesk.ListGroups@1.0.1",
+      "fullyQualifiedName": "Freshdesk.ListGroups@1.0.2",
       "description": "List the helpdesk's groups for routing tickets to a team.",
       "parameters": [
         {
@@ -1065,7 +1065,7 @@
     {
       "name": "MergeTickets",
       "qualifiedName": "Freshdesk.MergeTickets",
-      "fullyQualifiedName": "Freshdesk.MergeTickets@1.0.1",
+      "fullyQualifiedName": "Freshdesk.MergeTickets@1.0.2",
       "description": "Merge duplicate tickets into one. Use this to consolidate related tickets from the same\nrequester so the conversation lives in a single place; the secondary tickets are closed.",
       "parameters": [
         {
@@ -1161,7 +1161,7 @@
     {
       "name": "ReplyToTicket",
       "qualifiedName": "Freshdesk.ReplyToTicket",
-      "fullyQualifiedName": "Freshdesk.ReplyToTicket@1.0.1",
+      "fullyQualifiedName": "Freshdesk.ReplyToTicket@1.0.2",
       "description": "Post a public reply on a ticket that the requester can see.",
       "parameters": [
         {
@@ -1239,7 +1239,7 @@
     {
       "name": "SearchArticles",
       "qualifiedName": "Freshdesk.SearchArticles",
-      "fullyQualifiedName": "Freshdesk.SearchArticles@1.0.1",
+      "fullyQualifiedName": "Freshdesk.SearchArticles@1.0.2",
       "description": "Search the knowledge base for published solution articles matching a term.",
       "parameters": [
         {
@@ -1330,7 +1330,7 @@
     {
       "name": "SearchCompanies",
       "qualifiedName": "Freshdesk.SearchCompanies",
-      "fullyQualifiedName": "Freshdesk.SearchCompanies@1.0.1",
+      "fullyQualifiedName": "Freshdesk.SearchCompanies@1.0.2",
       "description": "Find companies by name. Match is by name prefix; use the full name for an exact hit.\n\nReturns lightweight summaries without the company note; read a single company by id for\nits full detail.",
       "parameters": [
         {
@@ -1421,14 +1421,14 @@
     {
       "name": "SearchContacts",
       "qualifiedName": "Freshdesk.SearchContacts",
-      "fullyQualifiedName": "Freshdesk.SearchContacts@1.0.1",
+      "fullyQualifiedName": "Freshdesk.SearchContacts@1.0.2",
       "description": "Find contacts by name, exact email, or company. With no filters, returns recent\ncontacts.\n\nCombining a name with a company scans up to the company's first 1000 contacts and matches the\nname among them; at a company with more contacts than that, a name match recorded beyond the\nscan may not appear.",
       "parameters": [
         {
           "name": "query",
           "type": "string",
           "required": false,
-          "description": "Name or name prefix to match contacts by. Defaults to an empty string, which does not filter by name. The name autocomplete requires at least 2 characters; a single-character query returns no matches rather than an error.",
+          "description": "Name or name prefix to match contacts by. The name autocomplete requires at least 2 characters; a single-character query returns no matches rather than an error. Defaults to an empty string, which does not filter by name.",
           "enum": null,
           "inferrable": true
         },
@@ -1538,7 +1538,7 @@
     {
       "name": "SearchTickets",
       "qualifiedName": "Freshdesk.SearchTickets",
-      "fullyQualifiedName": "Freshdesk.SearchTickets@1.0.1",
+      "fullyQualifiedName": "Freshdesk.SearchTickets@1.0.2",
       "description": "Find tickets in the queue by status, priority, requester, agent, group, tag,\ntype, or recency. With no filters, returns the most recently updated tickets.\n\nPass requester_id (or requester_email) to pull one customer's full ticket history;\nother filters then refine that requester's tickets. A just-created ticket may take a\nmoment to appear here while Freshdesk indexes it.",
       "parameters": [
         {
@@ -1571,7 +1571,7 @@
           "name": "requester_email",
           "type": "string",
           "required": false,
-          "description": "Only include tickets opened by the contact with this email. Defaults to an empty string, which applies no filter. Ignored when requester_id is given.",
+          "description": "Only include tickets opened by the contact with this email. Ignored when requester_id is given. Defaults to an empty string, which applies no filter.",
           "enum": null,
           "inferrable": true
         },
@@ -1743,7 +1743,7 @@
     {
       "name": "UpdateTicket",
       "qualifiedName": "Freshdesk.UpdateTicket",
-      "fullyQualifiedName": "Freshdesk.UpdateTicket@1.0.1",
+      "fullyQualifiedName": "Freshdesk.UpdateTicket@1.0.2",
       "description": "Change a ticket's status, priority, assignee, or group. Fields left unset are\nunchanged; at least one field must be provided.",
       "parameters": [
         {
@@ -1758,7 +1758,7 @@
           "name": "status",
           "type": "string",
           "required": false,
-          "description": "New status. Omit to leave the status unchanged.",
+          "description": "New status. Defaults to leaving the status unchanged.",
           "enum": [
             "open",
             "pending",
@@ -1771,7 +1771,7 @@
           "name": "priority",
           "type": "string",
           "required": false,
-          "description": "New priority. Omit to leave the priority unchanged.",
+          "description": "New priority. Defaults to leaving the priority unchanged.",
           "enum": [
             "low",
             "medium",
@@ -1784,7 +1784,7 @@
           "name": "agent_id",
           "type": "integer",
           "required": false,
-          "description": "Agent to assign as owner. Omit to leave the assignee unchanged.",
+          "description": "Agent to assign as owner. Defaults to leaving the assignee unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1792,7 +1792,7 @@
           "name": "group_id",
           "type": "integer",
           "required": false,
-          "description": "Group to move the ticket to. Omit to leave the group unchanged.",
+          "description": "Group to move the ticket to. Defaults to leaving the group unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -1870,7 +1870,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Freshdesk.WhoAmI",
-      "fullyQualifiedName": "Freshdesk.WhoAmI@1.0.1",
+      "fullyQualifiedName": "Freshdesk.WhoAmI@1.0.2",
       "description": "Return the authenticated Freshdesk agent's profile.\n\nUse this to verify the configured API key and confirm which Freshdesk account\n(domain) the tools are connected to; it is not a required preamble to the other tools.",
       "parameters": [],
       "auth": null,
@@ -1922,6 +1922,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:25:05.985Z",
-  "summary": "Freshdesk toolkit for Arcade lets agents and LLMs interact with a Freshdesk helpdesk — reading and managing tickets, contacts, companies, and knowledge base articles via the Freshdesk REST API.\n\n## Capabilities\n\n- **Ticket lifecycle** — open tickets, post public replies, add private notes, update status/priority/assignee/group, merge duplicates, and retrieve full conversation history including notes\n- **Contact & company management** — create or update contacts and companies, look up records by id, and search by name, email, or company affiliation\n- **Unified customer context** — fetch a requester's contact record, company, and full ticket history in a single call\n- **Knowledge base access** — search published solution articles by keyword and retrieve full article content by id\n- **Routing & discovery** — list agents (filterable by email) and groups to support ticket assignment logic\n- **Account verification** — confirm the connected Freshdesk domain and validate the API key identity via a `WhoAmI` call\n\n## Secrets\n\n`FRESHDESK_API_KEY`\nThe API key for the Freshdesk account the tools will act as. Retrieve it from your Freshdesk portal: go to **Profile Settings** (avatar → Profile Settings) and copy the key shown under **Your API Key** in the right-hand panel. The key carries the permissions of the agent whose profile it belongs to; use an admin-level agent if your workflows require full access. See [Freshdesk API key docs](https://support.freshdesk.com/en/support/solutions/articles/215517-how-to-find-your-api-key).\n\n`FRESHDESK_DOMAIN`\nYour Freshdesk subdomain — the `<subdomain>` portion of `https://<subdomain>.freshdesk.com`. This is set when the account is created and is visible in the browser address bar on any Freshdesk page. Pass the bare subdomain string (e.g., `acme`), not the full URL.\n\nStore both secrets in Arcade using the [secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-10T11:14:14.601Z",
+  "summary": "Freshdesk toolkit for Arcade connects LLM agents to a Freshdesk helpdesk instance, enabling automated ticket management, contact/company administration, knowledge base search, and agent routing.\n\n## Capabilities\n\n- **Ticket lifecycle**: Create, read, update, merge, reply to, and add private notes to tickets; search the queue by status, priority, requester, agent, group, tag, type, or recency.\n- **Contact & company management**: Create or update contacts and companies; search by name, email, or company; retrieve full records by ID with safe not-found envelopes instead of exceptions.\n- **Customer context assembly**: Retrieve a requester's contact record, company, and full ticket history in a single call via `GetCustomerOverview`.\n- **Knowledge base**: Search published solution articles by keyword and read full article content by ID.\n- **Agent & group routing**: List agents (filterable by email) and groups to route or assign tickets programmatically.\n- **Auth verification**: `WhoAmI` confirms the configured API key and connected domain without requiring it as a preamble to other calls.\n\n## Secrets\n\n`FRESHDESK_API_KEY` — A Freshdesk API key scoped to the agent account the toolkit will act as. Obtain it by logging into your Freshdesk account, clicking your avatar (top-right), selecting **Profile Settings**, and copying the key shown in the **Your API Key** panel on the right side. The agent's permissions determine what the toolkit can read and write. See [Freshdesk API authentication docs](https://developers.freshdesk.com/api/#authentication) for details.\n\n`FRESHDESK_DOMAIN` — Your Freshdesk subdomain, i.e. the `<subdomain>` portion of `https://<subdomain>.freshdesk.com`. This is set when you create your Freshdesk account and is visible in your browser's address bar when logged in. No special permissions are required to find it.\n\nStore both secrets in Arcade at https://api.arcade.dev/dashboard/auth/secrets. For general guidance on using secrets in Arcade tools, see https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets."
 }

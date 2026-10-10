@@ -1,7 +1,7 @@
 {
   "id": "Apollo",
   "label": "Apollo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Arcade tools designed for LLMs to interact with Apollo.io sales intelligence",
   "metadata": {
     "category": "sales",
@@ -18,7 +18,7 @@
     {
       "name": "EnrichOrganization",
       "qualifiedName": "Apollo.EnrichOrganization",
-      "fullyQualifiedName": "Apollo.EnrichOrganization@1.0.2",
+      "fullyQualifiedName": "Apollo.EnrichOrganization@1.0.3",
       "description": "Turn a company domain into firmographics (industry, size, revenue, funding,\nlocation) so a rep can qualify and size an account. Consumes one enrichment\ncredit on a match; when the plan is out of credits the result reports\nstatus=insufficient_credits rather than failing.",
       "parameters": [
         {
@@ -78,14 +78,14 @@
     {
       "name": "EnrichPerson",
       "qualifiedName": "Apollo.EnrichPerson",
-      "fullyQualifiedName": "Apollo.EnrichPerson@1.0.2",
+      "fullyQualifiedName": "Apollo.EnrichPerson@1.0.3",
       "description": "Turn a known person into a verified profile with their current role and,\non request, contact details. Provide at least one identifier: an Apollo person\nID, a name (or first and last name), an email, or a LinkedIn URL; an employer\nname or domain alone is not enough to identify someone. Consumes one enrichment\ncredit on a match; when the plan is out of credits the result reports\nstatus=insufficient_credits rather than failing.",
       "parameters": [
         {
           "name": "person_id",
           "type": "string",
           "required": false,
-          "description": "Apollo person ID, such as the id from a people search result. The most reliable identifier when available. Default is None.",
+          "description": "Apollo person ID, such as the id from a people search result. The most reliable identifier when available. Defaults to matching on the other identifiers.",
           "enum": null,
           "inferrable": true
         },
@@ -93,7 +93,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "Full name of the person. Default is None.",
+          "description": "Full name of the person. Defaults to matching on the other identifiers.",
           "enum": null,
           "inferrable": true
         },
@@ -101,7 +101,7 @@
           "name": "first_name",
           "type": "string",
           "required": false,
-          "description": "First name, paired with last_name. Default is None.",
+          "description": "First name, paired with last_name. Defaults to matching on the other identifiers.",
           "enum": null,
           "inferrable": true
         },
@@ -109,7 +109,7 @@
           "name": "last_name",
           "type": "string",
           "required": false,
-          "description": "Last name, paired with first_name. Default is None.",
+          "description": "Last name, paired with first_name. Defaults to matching on the other identifiers.",
           "enum": null,
           "inferrable": true
         },
@@ -117,7 +117,7 @@
           "name": "email",
           "type": "string",
           "required": false,
-          "description": "Known email address of the person. Default is None.",
+          "description": "Known email address of the person. Defaults to matching on the other identifiers.",
           "enum": null,
           "inferrable": true
         },
@@ -125,7 +125,7 @@
           "name": "organization_name",
           "type": "string",
           "required": false,
-          "description": "Employer name to disambiguate a name match. Default is None.",
+          "description": "Employer name to disambiguate a name match. Defaults to no employer name.",
           "enum": null,
           "inferrable": true
         },
@@ -133,7 +133,7 @@
           "name": "domain",
           "type": "string",
           "required": false,
-          "description": "Employer domain to disambiguate a name match. Default is None.",
+          "description": "Employer domain to disambiguate a name match. Defaults to no employer domain.",
           "enum": null,
           "inferrable": true
         },
@@ -141,7 +141,7 @@
           "name": "linkedin_url",
           "type": "string",
           "required": false,
-          "description": "LinkedIn profile URL of the person. Default is None.",
+          "description": "LinkedIn profile URL of the person. Defaults to matching on the other identifiers.",
           "enum": null,
           "inferrable": true
         },
@@ -149,7 +149,7 @@
           "name": "reveal_work_email",
           "type": "boolean",
           "required": false,
-          "description": "When True, include the matched person's work email in the result. A successful match consumes an enrichment credit whether or not this is set, so the flag controls only whether the email value is surfaced. Default is False.",
+          "description": "When True, include the matched person's work email in the result. A successful match consumes an enrichment credit whether or not this is set, so the flag controls only whether the email value is surfaced. Defaults to False.",
           "enum": null,
           "inferrable": true
         }
@@ -242,7 +242,7 @@
     {
       "name": "GetApiUsage",
       "qualifiedName": "Apollo.GetApiUsage",
-      "fullyQualifiedName": "Apollo.GetApiUsage@1.0.2",
+      "fullyQualifiedName": "Apollo.GetApiUsage@1.0.3",
       "description": "Report per-endpoint rate limits and how many requests remain, so the agent\ncan pace a batch of lookups and avoid being throttled. Requires an Apollo\nmaster API key.",
       "parameters": [],
       "auth": null,
@@ -287,7 +287,7 @@
     {
       "name": "SearchOrganizations",
       "qualifiedName": "Apollo.SearchOrganizations",
-      "fullyQualifiedName": "Apollo.SearchOrganizations@1.0.2",
+      "fullyQualifiedName": "Apollo.SearchOrganizations@1.0.3",
       "description": "Find companies in Apollo's database that match a firmographic profile so a\nrep can prioritize the accounts worth working. Results include firmographics\ninline unless include_firmographics is disabled. Company search consumes plan\ncredits; when the plan is out of credits the result reports\nstatus=insufficient_credits with an empty list rather than failing.",
       "parameters": [
         {
@@ -295,7 +295,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Industry or keyword tags to match, such as fintech or cybersecurity. Default is None.",
+          "description": "Industry or keyword tags to match, such as fintech or cybersecurity. Defaults to any tags.",
           "enum": null,
           "inferrable": true
         },
@@ -304,7 +304,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Headquarters locations, such as a city, state, or country. Default is None.",
+          "description": "Headquarters locations, such as a city, state, or country. Defaults to any location.",
           "enum": null,
           "inferrable": true
         },
@@ -313,7 +313,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Headcount ranges, each formatted as min,max (for example 51,200). Default is None.",
+          "description": "Headcount ranges, each formatted as min,max (for example 51,200). Defaults to any headcount.",
           "enum": null,
           "inferrable": true
         },
@@ -321,7 +321,7 @@
           "name": "revenue_min",
           "type": "integer",
           "required": false,
-          "description": "Minimum annual revenue in whole dollars. Default is None.",
+          "description": "Minimum annual revenue in whole dollars. Defaults to no minimum.",
           "enum": null,
           "inferrable": true
         },
@@ -329,7 +329,7 @@
           "name": "revenue_max",
           "type": "integer",
           "required": false,
-          "description": "Maximum annual revenue in whole dollars. Default is None.",
+          "description": "Maximum annual revenue in whole dollars. Defaults to no maximum.",
           "enum": null,
           "inferrable": true
         },
@@ -338,7 +338,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Apollo technology UIDs the company must use. Default is None.",
+          "description": "Apollo technology UIDs the company must use. Defaults to any technology.",
           "enum": null,
           "inferrable": true
         },
@@ -346,7 +346,7 @@
           "name": "include_firmographics",
           "type": "boolean",
           "required": false,
-          "description": "When True, backfill each result with firmographics (industry, headcount, location, revenue, founded year) via enrichment so accounts can be ranked without a separate lookup; set False for a faster, lighter name/domain-only list. Default is True.",
+          "description": "When True, backfill each result with firmographics (industry, headcount, location, revenue, founded year) via enrichment so accounts can be ranked without a separate lookup; set False for a faster, lighter name/domain-only list. Defaults to True.",
           "enum": null,
           "inferrable": true
         },
@@ -354,7 +354,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum companies to return, 1 to 100. Default is 25.",
+          "description": "Maximum companies to return, 1 to 100. Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -362,7 +362,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "0-indexed starting position into the matches. Default is 0 (first result).",
+          "description": "0-indexed starting position into the matches. Defaults to 0 (first result).",
           "enum": null,
           "inferrable": true
         }
@@ -470,7 +470,7 @@
     {
       "name": "SearchPeople",
       "qualifiedName": "Apollo.SearchPeople",
-      "fullyQualifiedName": "Apollo.SearchPeople@1.0.2",
+      "fullyQualifiedName": "Apollo.SearchPeople@1.0.3",
       "description": "Find people in Apollo's database by role and the firmographics of their\nemployer. Returns lightweight records without email or phone; use person\nenrichment to reveal verified contact details.",
       "parameters": [
         {
@@ -478,7 +478,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Job titles to match, such as VP of Sales. Matched loosely unless include_similar_titles is disabled. Default is None.",
+          "description": "Job titles to match, such as VP of Sales. Matched loosely unless include_similar_titles is disabled. Defaults to any title.",
           "enum": null,
           "inferrable": true
         },
@@ -487,7 +487,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Seniority levels of the person's current role. Default is None.",
+          "description": "Seniority levels of the person's current role. Defaults to any seniority.",
           "enum": [
             "owner",
             "founder",
@@ -508,7 +508,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Locations of the person, such as a city, state, or country. Default is None.",
+          "description": "Locations of the person, such as a city, state, or country. Defaults to any location.",
           "enum": null,
           "inferrable": true
         },
@@ -517,7 +517,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Locations of the person's employer headquarters. Default is None.",
+          "description": "Locations of the person's employer headquarters. Defaults to any location.",
           "enum": null,
           "inferrable": true
         },
@@ -526,7 +526,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Employer headcount ranges, each formatted as min,max (for example 51,200). Default is None.",
+          "description": "Employer headcount ranges, each formatted as min,max (for example 51,200). Defaults to any headcount.",
           "enum": null,
           "inferrable": true
         },
@@ -535,7 +535,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Company domains the person must work at. Default is None.",
+          "description": "Company domains the person must work at. Defaults to any company.",
           "enum": null,
           "inferrable": true
         },
@@ -543,7 +543,7 @@
           "name": "keywords",
           "type": "string",
           "required": false,
-          "description": "Free-text keywords matched across the person's profile. Default is None.",
+          "description": "Free-text keywords matched across the person's profile. Defaults to no keywords.",
           "enum": null,
           "inferrable": true
         },
@@ -551,7 +551,7 @@
           "name": "include_similar_titles",
           "type": "boolean",
           "required": false,
-          "description": "When True, titles match loosely (similar titles included). Set False to keep only people whose title exactly matches one of person_titles. Default is True.",
+          "description": "When True, titles match loosely (similar titles included). Set False to keep only people whose title exactly matches one of person_titles. Defaults to True.",
           "enum": null,
           "inferrable": true
         },
@@ -559,7 +559,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum people to return, 1 to 100. Default is 25.",
+          "description": "Maximum people to return, 1 to 100. Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -567,7 +567,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "0-indexed starting position into the matches. Default is 0 (first result).",
+          "description": "0-indexed starting position into the matches. Defaults to 0 (first result).",
           "enum": null,
           "inferrable": true
         }
@@ -688,6 +688,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:24:45.437Z",
-  "summary": "# Apollo Toolkit\n\nThe Apollo toolkit lets LLMs interact with [Apollo.io](https://www.apollo.io/) sales intelligence, enabling account research, lead discovery, and contact enrichment workflows via the Apollo API.\n\n## Capabilities\n\n- **Company intelligence**: Search Apollo's database by firmographic filters and enrich a company domain into detailed account data (industry, size, revenue, funding, location).\n- **People discovery & enrichment**: Search for people by role and employer profile, then enrich individual records with verified contact details using any available identifier (Apollo ID, name, email, or LinkedIn URL).\n- **Credit-aware results**: Enrichment and search operations report `status=insufficient_credits` with graceful degradation rather than hard failures when plan credits are exhausted.\n- **Rate-limit introspection**: Retrieve per-endpoint rate limits and remaining request counts to let agents pace batch workloads and avoid throttling.\n\n## Secrets\n\n`APOLLO_API_KEY` — A master API key issued by Apollo.io, required for all toolkit calls. The `Apollo.GetApiUsage` tool specifically requires the **master** API key (not a scoped or restricted key). Obtain it from the [Apollo.io API Keys settings page](https://app.apollo.io/#/settings/integrations/api) (Settings → Integrations → API Keys → Create new key). Ensure the key has the permissions your plan supports; enrichment and search calls consume plan credits tied to the key's account.\n\nSee the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for how to configure secrets in Arcade, or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-10T11:13:54.270Z",
+  "summary": "## Apollo Toolkit\n\nArcade toolkit for interacting with [Apollo.io](https://apollo.io), enabling LLMs to search Apollo's sales intelligence database and enrich company and contact records.\n\n## Capabilities\n\n- **Company intelligence:** Search Apollo's database by firmographic filters and enrich a domain into detailed account data (industry, size, revenue, funding, location) for account qualification and sizing.\n- **People intelligence:** Search for contacts by role and employer firmographics, then enrich individual profiles with current role and verified contact details using an Apollo ID, name, email, or LinkedIn URL.\n- **Credit and rate-limit awareness:** Retrieve per-endpoint rate limits and remaining request counts so agents can pace batch lookups; enrichment and search operations report `status=insufficient_credits` gracefully when plan credits are exhausted rather than throwing errors.\n- **API usage monitoring:** Inspect live API quota state using a master Apollo API key to avoid throttling during high-volume workflows.\n\n## Secrets\n\n`APOLLO_API_KEY` — An Apollo.io API key used to authenticate all requests. Obtain it from your Apollo account under **Settings → Integrations → API** (requires an Apollo account; paid plans unlock higher credit limits and enrichment features). Apollo's API documentation and key management page can be found at [https://apolloio.github.io/apollo-api-docs/](https://apolloio.github.io/apollo-api-docs/). Note that `Apollo.GetApiUsage` specifically requires a **master** API key, not a restricted one.\n\nFor guidance on configuring secrets in Arcade, see [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets via the Arcade dashboard at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

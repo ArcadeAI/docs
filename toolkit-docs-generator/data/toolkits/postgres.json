@@ -1,7 +1,7 @@
 {
   "id": "Postgres",
   "label": "Postgres",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Tools to query and explore a postgres database",
   "metadata": {
     "category": "databases",
@@ -18,7 +18,7 @@
     {
       "name": "DiscoverSchemas",
       "qualifiedName": "Postgres.DiscoverSchemas",
-      "fullyQualifiedName": "Postgres.DiscoverSchemas@1.0.1",
+      "fullyQualifiedName": "Postgres.DiscoverSchemas@1.0.2",
       "description": "Discover all the schemas in the postgres database.",
       "parameters": [],
       "auth": null,
@@ -61,14 +61,14 @@
     {
       "name": "DiscoverTables",
       "qualifiedName": "Postgres.DiscoverTables",
-      "fullyQualifiedName": "Postgres.DiscoverTables@1.0.1",
+      "fullyQualifiedName": "Postgres.DiscoverTables@1.0.2",
       "description": "Discover all the tables in the postgres database when the list of tables is not known.\n\nALWAYS use this tool before any other tool that requires a table name.",
       "parameters": [
         {
           "name": "schema_name",
           "type": "string",
           "required": false,
-          "description": "The database schema to discover tables in (default value: 'public')",
+          "description": "The database schema to discover tables in. Defaults to public.",
           "enum": null,
           "inferrable": true
         }
@@ -119,7 +119,7 @@
     {
       "name": "ExecuteSelectQuery",
       "qualifiedName": "Postgres.ExecuteSelectQuery",
-      "fullyQualifiedName": "Postgres.ExecuteSelectQuery@1.0.1",
+      "fullyQualifiedName": "Postgres.ExecuteSelectQuery@1.0.2",
       "description": "You have a connection to a postgres database.\nExecute a SELECT query and return the results against the postgres database.\nNo other queries (INSERT, UPDATE, DELETE, etc.) are allowed.\n\nONLY use this tool if you have already loaded the schema of the tables you need to query.\n\nThe final query will be constructed as follows:\nSELECT {select_query_part} FROM {from_clause} JOIN {join_clause}\nWHERE {where_clause} HAVING {having_clause}\nORDER BY {order_by_clause} LIMIT {limit} OFFSET {offset}\n\nWhen running queries, follow these rules which will help avoid errors:\n* Never \"select *\" from a table. Always select the columns you need.\n* Always order your results. Use the most important columns or the primary key if you're unsure.\n* Always use case-insensitive queries to match strings in the query.\n* Always trim strings in the query.\n* Prefer LIKE queries over direct string matches or regex queries.\n* Only join on columns that are indexed or the primary key. Do not join on arbitrary columns.",
       "parameters": [
         {
@@ -142,7 +142,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of rows to return. This is the LIMIT clause of the query. Default: 100.",
+          "description": "The maximum number of rows to return. This is the LIMIT clause of the query. Defaults to 100.",
           "enum": null,
           "inferrable": true
         },
@@ -150,7 +150,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The number of rows to skip. This is the OFFSET clause of the query. Default: 0.",
+          "description": "The number of rows to skip. This is the OFFSET clause of the query. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -158,7 +158,7 @@
           "name": "join_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the JOIN keyword. Do not include the JOIN keyword. If no join is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the JOIN keyword. Do not include the JOIN keyword. Defaults to no JOIN clause.",
           "enum": null,
           "inferrable": true
         },
@@ -166,7 +166,7 @@
           "name": "where_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the WHERE keyword. Do not include the WHERE keyword. If no where clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the WHERE keyword. Do not include the WHERE keyword. Defaults to no WHERE clause.",
           "enum": null,
           "inferrable": true
         },
@@ -174,7 +174,7 @@
           "name": "having_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the HAVING keyword. Do not include the HAVING keyword. If no having clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the HAVING keyword. Do not include the HAVING keyword. Defaults to no HAVING clause.",
           "enum": null,
           "inferrable": true
         },
@@ -182,7 +182,7 @@
           "name": "group_by_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the GROUP BY keyword. Do not include the GROUP BY keyword. If no group by clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the GROUP BY keyword. Do not include the GROUP BY keyword. Defaults to no GROUP BY clause.",
           "enum": null,
           "inferrable": true
         },
@@ -190,7 +190,7 @@
           "name": "order_by_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the ORDER BY keyword. Do not include the ORDER BY keyword. If no order by clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the ORDER BY keyword. Do not include the ORDER BY keyword. Defaults to no ORDER BY clause.",
           "enum": null,
           "inferrable": true
         },
@@ -198,7 +198,7 @@
           "name": "with_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the WITH keyword when basing the query on a virtual table. If no WITH clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the WITH keyword when basing the query on a virtual table. Defaults to no WITH clause.",
           "enum": null,
           "inferrable": true
         }
@@ -294,7 +294,7 @@
     {
       "name": "GetTableSchema",
       "qualifiedName": "Postgres.GetTableSchema",
-      "fullyQualifiedName": "Postgres.GetTableSchema@1.0.1",
+      "fullyQualifiedName": "Postgres.GetTableSchema@1.0.2",
       "description": "Get the schema/structure of a postgres table in the postgres database\nwhen the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.\nAll tables in the query must be discovered first,\nso that their exact names are known.",
       "parameters": [
         {
@@ -367,6 +367,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:25:49.678Z",
-  "summary": "Arcade's Postgres toolkit connects agents to a PostgreSQL database, enabling schema discovery and read-only querying without any OAuth or API key flow.\n\n## Capabilities\n\n- **Schema & table discovery** — enumerate all schemas and list all tables in the database before constructing any query.\n- **Table introspection** — retrieve the full column structure of a specific table to ensure correct field names and types prior to querying.\n- **Read-only SQL execution** — run `SELECT` queries with full support for joins, filters, aggregation, ordering, pagination (`LIMIT`/`OFFSET`), and `HAVING` clauses; `INSERT`, `UPDATE`, `DELETE`, and DDL are blocked.\n- **Guided query workflow** — tools are designed to be called in a strict order (discover → inspect schema → query) to minimize runtime errors.\n\n## Secrets\n\n`POSTGRES_DATABASE_CONNECTION_STRING` — A PostgreSQL connection string that encodes the host, port, database name, username, and password needed to reach your database instance. The standard format is `postgresql://username:password@host:port/dbname` (or `postgres://...`). Obtain the individual components from wherever your database is hosted — for example, the **Connection** or **Database** settings page of your cloud provider (e.g., AWS RDS, Supabase, Neon, Railway, Render, or a self-hosted server). Ensure the credentials belong to a database role with at least `CONNECT` and `SELECT` privileges on the target schemas and tables; granting write permissions is unnecessary and inadvisable. If your host requires SSL, append `?sslmode=require` (or the appropriate `sslmode` value) to the connection string. See [PostgreSQL connection URI documentation](https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING) for full syntax details.\n\nStore the secret in Arcade at https://api.arcade.dev/dashboard/auth/secrets and reference it in your tool configuration — see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for setup instructions."
+  "generatedAt": "2026-10-10T11:14:55.662Z",
+  "summary": "Arcade's Postgres toolkit connects agents to a PostgreSQL database, enabling schema discovery and read-only querying without requiring OAuth or API keys.\n\n## Capabilities\n\n- **Schema & table discovery** — enumerate all schemas and tables in the database before querying, ensuring exact identifiers are known.\n- **Table introspection** — retrieve full column structure and metadata for any named table prior to query construction.\n- **Read-only SELECT execution** — run parameterized SELECT queries with full support for JOINs, WHERE/HAVING filters, ORDER BY, LIMIT, and OFFSET; INSERT, UPDATE, and DELETE are blocked.\n\n## Secrets\n\n`POSTGRES_DATABASE_CONNECTION_STRING` — a full PostgreSQL connection string (DSN) that encodes the host, port, database name, username, and password needed to reach your Postgres instance. The standard format is `postgresql://user:password@host:port/dbname` (or `postgres://...`). Obtain the values from wherever your Postgres server is hosted: for managed services like AWS RDS, Azure Database for PostgreSQL, Google Cloud SQL, Supabase, or Neon, the connection string is displayed in the service's console under the database connection details or \"Connect\" panel. For self-hosted instances, assemble the string from your `postgresql.conf`/`pg_hba.conf` settings and the credentials of the role you want the toolkit to use. Use a role with the minimum necessary privileges — typically `SELECT` on the relevant schemas/tables — since the toolkit enforces read-only queries at the application layer but a least-privilege DB role adds a second line of defence.\n\nStore the secret and reference it in your Arcade config by following the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly in the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
 }

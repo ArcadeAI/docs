@@ -1,7 +1,7 @@
 {
   "id": "Dropbox",
   "label": "Dropbox",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Arcade tools designed for LLMs to interact with Dropbox",
   "metadata": {
     "category": "productivity",
@@ -25,14 +25,14 @@
     {
       "name": "DownloadFile",
       "qualifiedName": "Dropbox.DownloadFile",
-      "fullyQualifiedName": "Dropbox.DownloadFile@1.2.1",
+      "fullyQualifiedName": "Dropbox.DownloadFile@1.2.2",
       "description": "Download the specified file.\n\nNote: either one of `file_path` or `file_id` must be provided.",
       "parameters": [
         {
           "name": "file_path",
           "type": "string",
           "required": false,
-          "description": "The path of the file to download. E.g. '/AcmeInc/Reports/Q1_2025.txt'. Defaults to None.",
+          "description": "The path of the file to download. E.g. '/AcmeInc/Reports/Q1_2025.txt'. Defaults to finding the file by file_id.",
           "enum": null,
           "inferrable": true
         },
@@ -40,7 +40,7 @@
           "name": "file_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the file to download. E.g. 'id:a4ayc_80_OEAAAAAAAAAYa'. Defaults to None.",
+          "description": "The ID of the file to download. E.g. 'id:a4ayc_80_OEAAAAAAAAAYa'. Defaults to finding the file by file_path.",
           "enum": null,
           "inferrable": true
         }
@@ -98,7 +98,7 @@
     {
       "name": "ListItemsInFolder",
       "qualifiedName": "Dropbox.ListItemsInFolder",
-      "fullyQualifiedName": "Dropbox.ListItemsInFolder@1.2.1",
+      "fullyQualifiedName": "Dropbox.ListItemsInFolder@1.2.2",
       "description": "Provide a dictionary containing the list of items in the specified folder path.\n\nNote 1: when paginating, it is not necessary to provide any other argument besides the cursor.\nNote 2: when paginating, any given item (file or folder) may be returned in multiple pages.",
       "parameters": [
         {
@@ -113,7 +113,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of items to return. Defaults to 100. Maximum allowed is 2000.",
+          "description": "The maximum number of items to return, up to 2000. Defaults to 100.",
           "enum": null,
           "inferrable": true
         },
@@ -121,7 +121,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The cursor token for the next page of results. Defaults to None (returns the first page of results).",
+          "description": "The cursor token for the next page of results. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -184,7 +184,7 @@
     {
       "name": "SearchFilesAndFolders",
       "qualifiedName": "Dropbox.SearchFilesAndFolders",
-      "fullyQualifiedName": "Dropbox.SearchFilesAndFolders@1.2.1",
+      "fullyQualifiedName": "Dropbox.SearchFilesAndFolders@1.2.2",
       "description": "Return a list of items in the specified folder path matching the search criteria.\n\nNote 1: the Dropbox API will return up to 10,000 (ten thousand) items cumulatively across\nmultiple pagination requests using the cursor token.\nNote 2: when paginating, it is not necessary to provide any other argument besides the cursor.\nNote 3: when paginating, any given item (file or folder) may be returned in multiple pages.",
       "parameters": [
         {
@@ -199,7 +199,7 @@
           "name": "search_in_folder_path",
           "type": "string",
           "required": false,
-          "description": "Restricts the search to the specified folder path. E.g. '/AcmeInc/Reports'. Defaults to None (search in the entire Dropbox).",
+          "description": "Restricts the search to the specified folder path. E.g. '/AcmeInc/Reports'. Defaults to the entire Dropbox.",
           "enum": null,
           "inferrable": true
         },
@@ -208,7 +208,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Restricts the search to the specified category(ies) of items. Provide None, one or multiple, if needed. Defaults to None (returns all categories).",
+          "description": "Restricts the search to the specified category(ies) of items. Defaults to all categories.",
           "enum": [
             "image",
             "document",
@@ -226,7 +226,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of items to return. Defaults to 100. Maximum allowed is 1000.",
+          "description": "The maximum number of items to return, up to 1000. Defaults to 100.",
           "enum": null,
           "inferrable": true
         },
@@ -234,7 +234,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The cursor token for the next page of results. Defaults to None (first page of results).",
+          "description": "The cursor token for the next page of results. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -319,6 +319,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "90c83a30a719e4eadff9d64994f44ea6c82e5e66aaee4460e54fc1f49718096d",
-  "generatedAt": "2026-10-07T21:24:54.646Z",
-  "summary": "Arcade's Dropbox toolkit lets LLMs interact with a user's Dropbox account via OAuth 2.0. It covers file download, folder listing, and search across the Dropbox file system.\n\n## Capabilities\n\n- **File access:** Download files by path or ID (`file_path` or `file_id`; one is required).\n- **Folder browsing:** List all items (files and folders) inside a specified folder path with cursor-based pagination.\n- **Search:** Query files and folders matching search criteria within a path; supports cursor-based pagination across up to 10,000 cumulative results.\n- **Pagination behavior (all tools):** When paginating, only the cursor is needed — other arguments are ignored. Note that individual items may appear across multiple pages.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Dropbox** provider. See the [Arcade Dropbox auth provider docs](https://docs.arcade.dev/en/references/auth-providers/dropbox) for setup details."
+  "generatedAt": "2026-10-10T11:14:05.315Z",
+  "summary": "Arcade's Dropbox toolkit lets LLMs interact with a user's Dropbox account via OAuth 2.0. It covers file download and folder/search operations through three focused tools.\n\n## Capabilities\n\n- **File access**: Download files by path or ID (`file_path` / `file_id` are interchangeable; one must be provided).\n- **Folder listing**: Enumerate files and folders at any path with cursor-based pagination; duplicate items may appear across pages.\n- **Search**: Query files and folders by keyword within a path; Dropbox caps cumulative results at 10,000 items across paginated requests; cursor-only pagination applies after the first request.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with Dropbox as the provider. See the [Arcade Dropbox auth provider docs](https://docs.arcade.dev/en/references/auth-providers/dropbox) for setup details."
 }

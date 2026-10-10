@@ -1,7 +1,7 @@
 {
   "id": "Forkable",
   "label": "Forkable",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Arcade tools for Forkable — list this week's meals, browse menus, and pick what you want delivered",
   "metadata": {
     "category": "productivity",
@@ -18,7 +18,7 @@
     {
       "name": "CheckMealRestrictions",
       "qualifiedName": "Forkable.CheckMealRestrictions",
-      "fullyQualifiedName": "Forkable.CheckMealRestrictions@1.0.2",
+      "fullyQualifiedName": "Forkable.CheckMealRestrictions@1.0.3",
       "description": "Check whether picking this item (with the given modifier selections) would\nconflict with the signed-in user's dietary restrictions.\n\nReturns the list of conflict tags (e.g. `[\"dairy_free\"]`) — empty if the\nitem is safe. Call this before picking the item as a meal to warn the user, or\nto let the agent pick a different item.",
       "parameters": [
         {
@@ -41,7 +41,7 @@
           "name": "selections",
           "type": "json",
           "required": false,
-          "description": "Modifier picks as { modifier_id: [option_id, ...] }. Omit if the item has no modifiers.",
+          "description": "Modifier picks as { modifier_id: [option_id, ...] }. Omit if the item has no modifiers. Defaults to no modifier picks.",
           "enum": null,
           "inferrable": true
         }
@@ -107,7 +107,7 @@
     {
       "name": "ListMenuItems",
       "qualifiedName": "Forkable.ListMenuItems",
-      "fullyQualifiedName": "Forkable.ListMenuItems@1.0.2",
+      "fullyQualifiedName": "Forkable.ListMenuItems@1.0.3",
       "description": "Fetch the full menu (sections, items, prices, modifiers) for one or more menu IDs.\n\nEach item ships with the `item_id` and `menu_id` you'll need to pick it as your meal.",
       "parameters": [
         {
@@ -188,7 +188,7 @@
     {
       "name": "ListMyMealsThisWeek",
       "qualifiedName": "Forkable.ListMyMealsThisWeek",
-      "fullyQualifiedName": "Forkable.ListMyMealsThisWeek@1.0.2",
+      "fullyQualifiedName": "Forkable.ListMyMealsThisWeek@1.0.3",
       "description": "List your upcoming Forkable delivery days and what's currently picked for each.\n\nEach entry shows the delivery date, current state (open / locked / delivered),\nthe meal currently assigned to you (`my_pick`), and the menu IDs whose items you\ncan swap your pick to. Results are sorted by delivery date.\n\nAn entry whose `my_pick.piece_id` is empty has no meal allocated to you yet, so\nthere is no pick to swap on it; picking a meal only replaces an existing pick.",
       "parameters": [
         {
@@ -264,7 +264,7 @@
     {
       "name": "PickMeal",
       "qualifiedName": "Forkable.PickMeal",
-      "fullyQualifiedName": "Forkable.PickMeal@1.0.2",
+      "fullyQualifiedName": "Forkable.PickMeal@1.0.3",
       "description": "Replace your assigned meal on one delivery with a different menu item.\n\nOnly works on deliveries that already have a meal allocated to you (a\nnon-empty `my_pick.piece_id`). Forkable's `replacePiece` mutation swaps an\nexisting pick; it can't create one from nothing — initial allocation\nhappens on the Forkable side.\n\nThe mutation returns the refreshed delivery; this tool surfaces the new pick\nand the updated amount due.",
       "parameters": [
         {
@@ -311,7 +311,7 @@
           "name": "selections",
           "type": "json",
           "required": false,
-          "description": "Modifier picks as { modifier_id: [option_id, ...] }. Omit if the item has no modifiers.",
+          "description": "Modifier picks as { modifier_id: [option_id, ...] }. Omit if the item has no modifiers. Defaults to no modifier picks.",
           "enum": null,
           "inferrable": true
         }
@@ -392,7 +392,7 @@
     {
       "name": "SkipMeal",
       "qualifiedName": "Forkable.SkipMeal",
-      "fullyQualifiedName": "Forkable.SkipMeal@1.0.2",
+      "fullyQualifiedName": "Forkable.SkipMeal@1.0.3",
       "description": "Skip a day — removes your assigned meal from a Forkable order.\n\nUse only when the delivery is still open for changes (`locked: false`\nand not `past_late_order_deadline`).",
       "parameters": [
         {
@@ -470,6 +470,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:25:03.175Z",
-  "summary": "## Forkable Toolkit\n\nForkable is a workplace meal delivery service. This Arcade toolkit lets agents browse weekly menus, check dietary restrictions, and manage meal picks on behalf of a user.\n\n## Capabilities\n\n- **Weekly schedule & status** — retrieve upcoming delivery days, current picks, open/locked state, and available menu IDs for each day\n- **Menu browsing** — fetch full menu data (sections, items, prices, modifiers, item and menu IDs) for one or more menus\n- **Dietary safety checks** — validate a specific item + modifier combination against the user's dietary restrictions before committing to a pick\n- **Meal management** — swap an existing meal pick for a different item, or skip an open delivery day entirely\n\n## Secrets\n\nAuthentication is handled via credentials passed as secrets — no OAuth flow is involved.\n\n- **`FORKABLE_EMAIL`** — The email address associated with the user's Forkable account. This is the same email used to log in to the Forkable web app. Obtain it directly from the account holder or from the Forkable account settings page.\n\n- **`FORKABLE_PASSWORD`** — The password for the Forkable account. This is the account's login password. Obtain it from the account holder. Store it only as a secret and never in plaintext.\n\nConfigure these secrets in Arcade at [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or via the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-10T11:14:10.639Z",
+  "summary": "Forkable is a workplace meal delivery service. This toolkit lets an Arcade agent browse this week's meal schedule, explore menus, check dietary compatibility, and swap or skip picks on open deliveries.\n\n## Capabilities\n\n- **Meal schedule visibility** — retrieve upcoming delivery days, current pick state (open / locked / delivered), and available menu IDs per day\n- **Menu browsing** — fetch full menus including sections, items, prices, and modifier options for one or more menu IDs\n- **Dietary safety checks** — validate whether a specific item + modifier combination conflicts with the signed-in user's dietary restrictions before committing a pick\n- **Meal management** — swap an existing assigned meal for a different item, or skip a delivery day entirely (only while the order window is still open)\n\n## Secrets\n\nThis toolkit authenticates directly with Forkable using your account credentials. Both secrets are required.\n\n- `FORKABLE_EMAIL` — The email address associated with your Forkable account. This is the same address you use to log in to the Forkable web app.\n\n- `FORKABLE_PASSWORD` — The password for your Forkable account. This is your standard login password from the Forkable web app. Because this credential grants full account access, treat it with the same care as any primary password and consider using a dedicated or rotated credential if your organization's Forkable plan supports it.\n\nStore both values as Arcade secrets. See the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for setup instructions, or add them directly at https://api.arcade.dev/dashboard/auth/secrets."
 }

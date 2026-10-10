@@ -1,7 +1,7 @@
 {
   "id": "Clickup",
   "label": "ClickUp",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Arcade.dev LLM tools for interacting with ClickUp",
   "metadata": {
     "category": "productivity",
@@ -22,7 +22,7 @@
     {
       "name": "CreateTask",
       "qualifiedName": "Clickup.CreateTask",
-      "fullyQualifiedName": "Clickup.CreateTask@1.2.5",
+      "fullyQualifiedName": "Clickup.CreateTask@1.2.6",
       "description": "Create a new task in a ClickUp list with optional planning metadata.\n\nUse this tool when you want to add a task to a specific list and optionally set\nits initial status, priority, scheduling information, and hierarchy.",
       "parameters": [
         {
@@ -53,7 +53,7 @@
           "name": "priority",
           "type": "string",
           "required": false,
-          "description": "Task priority",
+          "description": "Task priority. Defaults to no priority.",
           "enum": [
             "URGENT",
             "HIGH",
@@ -66,7 +66,7 @@
           "name": "status",
           "type": "string",
           "required": false,
-          "description": "Task status label (string)",
+          "description": "Task status label (string). Defaults to the list's default status.",
           "enum": null,
           "inferrable": true
         },
@@ -74,7 +74,7 @@
           "name": "parent_task_id",
           "type": "string",
           "required": false,
-          "description": "The parent task ID if this is a subtask",
+          "description": "The parent task ID if this is a subtask. Defaults to a top-level task.",
           "enum": null,
           "inferrable": true
         },
@@ -82,7 +82,7 @@
           "name": "start_date",
           "type": "string",
           "required": false,
-          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported",
+          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported. Defaults to no start date.",
           "enum": null,
           "inferrable": true
         },
@@ -90,7 +90,7 @@
           "name": "due_date",
           "type": "string",
           "required": false,
-          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported",
+          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported. Defaults to no due date.",
           "enum": null,
           "inferrable": true
         },
@@ -98,7 +98,7 @@
           "name": "sprint_points",
           "type": "integer",
           "required": false,
-          "description": "The sprint points for the task",
+          "description": "The sprint points for the task. Defaults to no sprint points.",
           "enum": null,
           "inferrable": true
         }
@@ -189,7 +189,7 @@
     {
       "name": "CreateTaskComment",
       "qualifiedName": "Clickup.CreateTaskComment",
-      "fullyQualifiedName": "Clickup.CreateTaskComment@1.2.5",
+      "fullyQualifiedName": "Clickup.CreateTaskComment@1.2.6",
       "description": "Create a new comment on a ClickUp task with optional assignment.\n\nUse this tool to add text comments to tasks. You can optionally assign\nthe comment to a specific user for follow-up.",
       "parameters": [
         {
@@ -212,7 +212,7 @@
           "name": "assignee_id",
           "type": "integer",
           "required": false,
-          "description": "User ID to assign the comment to (optional)",
+          "description": "User ID to assign the comment to. Defaults to no assignee.",
           "enum": null,
           "inferrable": true
         }
@@ -273,7 +273,7 @@
     {
       "name": "CreateTaskCommentReply",
       "qualifiedName": "Clickup.CreateTaskCommentReply",
-      "fullyQualifiedName": "Clickup.CreateTaskCommentReply@1.2.5",
+      "fullyQualifiedName": "Clickup.CreateTaskCommentReply@1.2.6",
       "description": "Create a new threaded reply to an existing ClickUp comment.\n\nUse this tool to add threaded replies to comments, creating conversation threads.\nYou can optionally assign the reply to a specific user for follow-up.",
       "parameters": [
         {
@@ -296,7 +296,7 @@
           "name": "assignee_id",
           "type": "integer",
           "required": false,
-          "description": "User ID to assign the reply to",
+          "description": "User ID to assign the reply to. Defaults to no assignee.",
           "enum": null,
           "inferrable": true
         }
@@ -357,7 +357,7 @@
     {
       "name": "FuzzySearchFoldersByName",
       "qualifiedName": "Clickup.FuzzySearchFoldersByName",
-      "fullyQualifiedName": "Clickup.FuzzySearchFoldersByName@1.2.5",
+      "fullyQualifiedName": "Clickup.FuzzySearchFoldersByName@1.2.6",
       "description": "Search for folders using fuzzy matching on folder names.\n\nThis tool should ONLY be used when you cannot find the desired folder through normal context\nor direct searches. It performs fuzzy matching against folder names and returns simplified\nfolder information. Use other ClickUp tools to get full folder details or work with the folders.\n\nThis tool is also useful to avoid navigating through the ClickUp hierarchy tree\nwhen you know approximately what folder/project you're looking for\nbut don't know its exact location in the hierarchy.\n\nIn ClickUp, folders are also known as projects and serve as organizational containers for lists.\nReturns folders that match the name_to_search with match scores indicating relevance\n(1.0 = perfect match, lower scores = less relevant matches).",
       "parameters": [
         {
@@ -380,7 +380,7 @@
           "name": "scan_size",
           "type": "integer",
           "required": false,
-          "description": "Number of folders to scan (in increments of 100, max 500 default: 500)",
+          "description": "Number of folders to scan (in increments of 100, max 500). Defaults to 500.",
           "enum": null,
           "inferrable": true
         },
@@ -389,7 +389,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams",
+          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams. Defaults to all spaces.",
           "enum": null,
           "inferrable": true
         },
@@ -397,7 +397,7 @@
           "name": "should_include_archived",
           "type": "boolean",
           "required": false,
-          "description": "Include archived folders (default: false)",
+          "description": "Include archived folders. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -405,7 +405,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of matches to return (max: 50, default: 10)",
+          "description": "Maximum number of matches to return (max: 50). Defaults to 10.",
           "enum": null,
           "inferrable": true
         }
@@ -484,7 +484,7 @@
     {
       "name": "FuzzySearchListsByName",
       "qualifiedName": "Clickup.FuzzySearchListsByName",
-      "fullyQualifiedName": "Clickup.FuzzySearchListsByName@1.2.5",
+      "fullyQualifiedName": "Clickup.FuzzySearchListsByName@1.2.6",
       "description": "Search for lists using fuzzy matching on list names.\n\nThis tool should ONLY be used when you cannot find the desired list through normal context\nor direct searches. It performs fuzzy matching against list names and returns simplified\nlist information. Use other ClickUp tools to get full list details or work with the lists.\n\nThis tool is also useful to avoid navigating through the ClickUp hierarchy tree\nwhen you know approximately what list you're looking for\nbut don't know its exact location in the hierarchy.\n\nReturns lists that match the name_to_search with match scores indicating relevance\n(1.0 = perfect match, lower scores = less relevant matches).",
       "parameters": [
         {
@@ -507,7 +507,7 @@
           "name": "scan_size",
           "type": "integer",
           "required": false,
-          "description": "Number of lists to scan (in increments of 100, max 500 default: 500)",
+          "description": "Number of lists to scan (in increments of 100, max 500). Defaults to 500.",
           "enum": null,
           "inferrable": true
         },
@@ -516,7 +516,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams",
+          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams. Defaults to all spaces.",
           "enum": null,
           "inferrable": true
         },
@@ -525,7 +525,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter by ClickUp folder IDs - limit search to specific folders/projects",
+          "description": "Filter by ClickUp folder IDs - limit search to specific folders/projects. Defaults to all folders.",
           "enum": null,
           "inferrable": true
         },
@@ -533,7 +533,7 @@
           "name": "should_include_archived",
           "type": "boolean",
           "required": false,
-          "description": "Include archived lists (default: false)",
+          "description": "Include archived lists. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -541,7 +541,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of matches to return (max: 50, default: 10)",
+          "description": "Maximum number of matches to return (max: 50). Defaults to 10.",
           "enum": null,
           "inferrable": true
         }
@@ -627,7 +627,7 @@
     {
       "name": "FuzzySearchMembersByName",
       "qualifiedName": "Clickup.FuzzySearchMembersByName",
-      "fullyQualifiedName": "Clickup.FuzzySearchMembersByName@1.2.5",
+      "fullyQualifiedName": "Clickup.FuzzySearchMembersByName@1.2.6",
       "description": "Search for workspace members using fuzzy matching on member names.\n\nThis tool should ONLY be used when you cannot find the desired team member through\nnormal context\nIt performs fuzzy matching against member names and returns\nsimplified member information including ID, name, and email.\n\nReturns team members that match the name_to_search with match scores indicating\nrelevance (1.0 = perfect match, lower scores = less relevant matches).",
       "parameters": [
         {
@@ -650,7 +650,7 @@
           "name": "scan_size",
           "type": "integer",
           "required": false,
-          "description": "Number of members to scan (in increments of 100, max 500 default: 500)",
+          "description": "Number of members to scan (in increments of 100, max 500). Defaults to 500.",
           "enum": null,
           "inferrable": true
         },
@@ -658,7 +658,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of matches to return (max: 50, default: 10)",
+          "description": "Maximum number of matches to return (max: 50). Defaults to 10.",
           "enum": null,
           "inferrable": true
         }
@@ -724,7 +724,7 @@
     {
       "name": "FuzzySearchTasksByName",
       "qualifiedName": "Clickup.FuzzySearchTasksByName",
-      "fullyQualifiedName": "Clickup.FuzzySearchTasksByName@1.2.5",
+      "fullyQualifiedName": "Clickup.FuzzySearchTasksByName@1.2.6",
       "description": "Search for tasks using fuzzy matching on task names.\n\nThis tool should ONLY be used when you cannot find the desired task through normal context\nor direct searches. It performs fuzzy matching against task names and returns simplified\ntask information. Use the returned task IDs to retrieve full task details.\n\nThis tool is also useful to avoid navigating through the ClickUp hierarchy tree\nwhen you know approximately what task you're looking for\nbut don't know its exact location in the hierarchy.\n\nReturns the most recently updated tasks that match the name_to_search with match scores\nindicating relevance (1.0 = perfect match, lower scores = less relevant matches).",
       "parameters": [
         {
@@ -747,7 +747,7 @@
           "name": "scan_size",
           "type": "integer",
           "required": false,
-          "description": "Number of recent tasks to scan (max 500 default: 500)",
+          "description": "Number of recent tasks to scan (max 500). Defaults to 500.",
           "enum": null,
           "inferrable": true
         },
@@ -755,7 +755,7 @@
           "name": "include_closed",
           "type": "boolean",
           "required": false,
-          "description": "Include closed/completed tasks (default: false)",
+          "description": "Include closed/completed tasks. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -764,7 +764,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter by specific ClickUp status names. Each list has its own statuses set.",
+          "description": "Filter by specific ClickUp status names. Each list has its own statuses set. Defaults to all statuses.",
           "enum": null,
           "inferrable": true
         },
@@ -773,7 +773,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter by assignee user IDs",
+          "description": "Filter by assignee user IDs. Defaults to any assignee.",
           "enum": null,
           "inferrable": true
         },
@@ -782,7 +782,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams",
+          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams. Defaults to all spaces.",
           "enum": null,
           "inferrable": true
         },
@@ -791,7 +791,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter by ClickUp folder IDs - limit search to specific folders/projects",
+          "description": "Filter by ClickUp folder IDs - limit search to specific folders/projects. Defaults to all folders.",
           "enum": null,
           "inferrable": true
         },
@@ -800,7 +800,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter by ClickUp list IDs - limit search to specific lists",
+          "description": "Filter by ClickUp list IDs - limit search to specific lists. Defaults to all lists.",
           "enum": null,
           "inferrable": true
         },
@@ -808,7 +808,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of matches to return (max: 50, default: 10)",
+          "description": "Maximum number of matches to return (max: 50). Defaults to 10.",
           "enum": null,
           "inferrable": true
         }
@@ -916,7 +916,7 @@
     {
       "name": "GetFoldersForSpace",
       "qualifiedName": "Clickup.GetFoldersForSpace",
-      "fullyQualifiedName": "Clickup.GetFoldersForSpace@1.2.5",
+      "fullyQualifiedName": "Clickup.GetFoldersForSpace@1.2.6",
       "description": "Retrieve folders (also called directories, project categories, or project areas) from a\nClickUp space.\n\nOnly use this tool when you already have the space ID and want to see the folders within\nthat specific space.\n\nImportant: When users mention a space(or area),\nalways use this tool to get the folders within that space.\n\nThis tool fetches folders from the specified space with support for offset-based retrieval\nand archived folder filtering. Results are sorted alphabetically by name.",
       "parameters": [
         {
@@ -939,7 +939,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Starting position for offset-based retrieval (default: 0)",
+          "description": "Starting position for offset-based retrieval. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -947,7 +947,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of folders to return (max: 50, default: 50)",
+          "description": "Maximum number of folders to return (max: 50). Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
@@ -955,7 +955,7 @@
           "name": "include_archived",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include archived, inactive, or deleted folders (default: False)",
+          "description": "Whether to include archived, inactive, or deleted folders. Defaults to False.",
           "enum": null,
           "inferrable": true
         }
@@ -1026,7 +1026,7 @@
     {
       "name": "GetListsForFolder",
       "qualifiedName": "Clickup.GetListsForFolder",
-      "fullyQualifiedName": "Clickup.GetListsForFolder@1.2.5",
+      "fullyQualifiedName": "Clickup.GetListsForFolder@1.2.6",
       "description": "Retrieve task lists from a ClickUp folder (when users refer to a folder as a \"directory\",\nthey mean the same thing).\n\nOnly use this tool when you already have the folder ID and want to see the lists within\nthat specific folder.\n\nImportant: When users mention a specific folder(or directory), always use this tool to get\nthe lists within that folder.\n\nThis tool fetches lists from the specified folder with support for offset-based retrieval\nand archived list filtering. Results are sorted alphabetically by name.",
       "parameters": [
         {
@@ -1049,7 +1049,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Starting position for offset-based retrieval (default: 0)",
+          "description": "Starting position for offset-based retrieval. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -1057,7 +1057,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of lists to return (max: 50, default: 50)",
+          "description": "Maximum number of lists to return (max: 50). Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
@@ -1065,7 +1065,7 @@
           "name": "include_archived",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include archived, inactive, or completed lists (default: False)",
+          "description": "Whether to include archived, inactive, or completed lists. Defaults to False.",
           "enum": null,
           "inferrable": true
         }
@@ -1136,7 +1136,7 @@
     {
       "name": "GetListsForSpace",
       "qualifiedName": "Clickup.GetListsForSpace",
-      "fullyQualifiedName": "Clickup.GetListsForSpace@1.2.5",
+      "fullyQualifiedName": "Clickup.GetListsForSpace@1.2.6",
       "description": "Retrieve all task lists from a ClickUp space by collecting lists from all folders within the\nspace.\n\nOnly use this tool when you have a space ID and want to see all lists across all folders\nwithin that space.\n\nThis tool provides a comprehensive view of all lists in a space with support for offset-based\nretrieval and archived list filtering. Results are sorted alphabetically by name.",
       "parameters": [
         {
@@ -1159,7 +1159,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Starting position for offset-based retrieval (default: 0)",
+          "description": "Starting position for offset-based retrieval. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -1167,7 +1167,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of lists to return (max: 50, default: 50)",
+          "description": "Maximum number of lists to return (max: 50). Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
@@ -1175,7 +1175,7 @@
           "name": "include_archived",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include archived, inactive, or completed lists (default: False)",
+          "description": "Whether to include archived, inactive, or completed lists. Defaults to False.",
           "enum": null,
           "inferrable": true
         }
@@ -1246,7 +1246,7 @@
     {
       "name": "GetMembersForWorkspace",
       "qualifiedName": "Clickup.GetMembersForWorkspace",
-      "fullyQualifiedName": "Clickup.GetMembersForWorkspace@1.2.5",
+      "fullyQualifiedName": "Clickup.GetMembersForWorkspace@1.2.6",
       "description": "Retrieve all team members from a specific ClickUp workspace.\n\nOnly use this tool when you already have the workspace ID and need to see the members\nwithin that specific workspace.\n\nThis tool fetches detailed information about all members of a ClickUp workspace,\nincluding their basic profile information and role within the workspace.\nResults are sorted and support offset-based retrieval.",
       "parameters": [
         {
@@ -1261,7 +1261,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Starting position for offset-based retrieval (default: 0)",
+          "description": "Starting position for offset-based retrieval. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -1269,7 +1269,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of members to return (max: 50, default: 50)",
+          "description": "Maximum number of members to return (max: 50). Defaults to 50.",
           "enum": null,
           "inferrable": true
         }
@@ -1330,7 +1330,7 @@
     {
       "name": "GetSpaces",
       "qualifiedName": "Clickup.GetSpaces",
-      "fullyQualifiedName": "Clickup.GetSpaces@1.2.5",
+      "fullyQualifiedName": "Clickup.GetSpaces@1.2.6",
       "description": "Retrieve spaces from a ClickUp workspace.\n\nUse this tool when users ask for:\n- Spaces within a workspace (not folders or lists)\n- Available spaces to choose from before getting folders\n- Space discovery when you need to identify space IDs or names\n- High-level workspace organization structure\n\nNote: This is for spaces (top-level containers), not folders (which contain lists) nor lists.\nThis tool fetches spaces from the specified workspace with support for offset-based retrieval\nand archived space filtering. Results are sorted alphabetically by name.",
       "parameters": [
         {
@@ -1345,7 +1345,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Starting position for offset-based retrieval (default: 0)",
+          "description": "Starting position for offset-based retrieval. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -1353,7 +1353,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of spaces to return (max: 50, default: 50)",
+          "description": "Maximum number of spaces to return (max: 50). Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
@@ -1361,7 +1361,7 @@
           "name": "include_archived",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include archived spaces (default: False)",
+          "description": "Whether to include archived spaces. Defaults to False.",
           "enum": null,
           "inferrable": true
         }
@@ -1427,7 +1427,7 @@
     {
       "name": "GetStatusesForList",
       "qualifiedName": "Clickup.GetStatusesForList",
-      "fullyQualifiedName": "Clickup.GetStatusesForList@1.2.5",
+      "fullyQualifiedName": "Clickup.GetStatusesForList@1.2.6",
       "description": "Retrieve the possible task statuses for a specific ClickUp list.\n\nOnly use this tool when you already have the list ID and need to discover the valid\nstatuses for that specific list.\n\nUse this tool to discover valid status labels and their ordering/type for a list\nbefore creating or updating tasks, since statuses can be customized per list.",
       "parameters": [
         {
@@ -1485,7 +1485,7 @@
     {
       "name": "GetSystemGuidance",
       "qualifiedName": "Clickup.GetSystemGuidance",
-      "fullyQualifiedName": "Clickup.GetSystemGuidance@1.2.5",
+      "fullyQualifiedName": "Clickup.GetSystemGuidance@1.2.6",
       "description": "Return static guidance intended solely to help agents make informed decisions.\n\nImportant: The guidance content is for internal agent use only and should not be\ndisplayed to end users.",
       "parameters": [],
       "auth": null,
@@ -1521,7 +1521,7 @@
     {
       "name": "GetTaskById",
       "qualifiedName": "Clickup.GetTaskById",
-      "fullyQualifiedName": "Clickup.GetTaskById@1.2.5",
+      "fullyQualifiedName": "Clickup.GetTaskById@1.2.6",
       "description": "Get detailed information about a specific task by its ID. Also supports custom task IDs\nwhen workspace_id_for_custom_id is provided.\n\nUse when need more information about a task than if it id or custom id is already known.",
       "parameters": [
         {
@@ -1536,7 +1536,7 @@
           "name": "include_subtasks",
           "type": "boolean",
           "required": false,
-          "description": "Include subtask information (default: false )",
+          "description": "Include subtask information. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -1544,7 +1544,7 @@
           "name": "workspace_id_for_custom_id",
           "type": "string",
           "required": false,
-          "description": "The ClickUp workspace ID (provide this to use custom task IDs)",
+          "description": "The ClickUp workspace ID (provide this to use custom task IDs). Defaults to treating task_id as a regular task ID.",
           "enum": null,
           "inferrable": true
         }
@@ -1605,7 +1605,7 @@
     {
       "name": "GetTaskCommentReplies",
       "qualifiedName": "Clickup.GetTaskCommentReplies",
-      "fullyQualifiedName": "Clickup.GetTaskCommentReplies@1.2.5",
+      "fullyQualifiedName": "Clickup.GetTaskCommentReplies@1.2.6",
       "description": "Get threaded replies for a specific ClickUp comment with pagination support.\n\nThis tool retrieves replies to a parent comment using ClickUp's threaded\ncomment system with offset-based pagination. The parent comment itself\nis not included in the results, only the threaded replies.",
       "parameters": [
         {
@@ -1620,7 +1620,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Starting position for offset-based retrieval (default: 0)",
+          "description": "Starting position for offset-based retrieval. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -1628,7 +1628,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of replies to return (max: 50, default: 20)",
+          "description": "Maximum number of replies to return (max: 50). Defaults to 20.",
           "enum": null,
           "inferrable": true
         }
@@ -1689,7 +1689,7 @@
     {
       "name": "GetTaskComments",
       "qualifiedName": "Clickup.GetTaskComments",
-      "fullyQualifiedName": "Clickup.GetTaskComments@1.2.5",
+      "fullyQualifiedName": "Clickup.GetTaskComments@1.2.6",
       "description": "Get comments for a specific ClickUp task with pagination support.\n\nThis tool retrieves comments from a task using ClickUp's specific pagination method.\nFor the first call, omit oldest_comment_id. For subsequent calls, use the\noldest_comment_id from the previous response to get the next set of comments.",
       "parameters": [
         {
@@ -1704,7 +1704,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Number of comments to retrieve (max 25, default: 5)",
+          "description": "Number of comments to retrieve (max 25). Defaults to 5.",
           "enum": null,
           "inferrable": true
         },
@@ -1712,7 +1712,7 @@
           "name": "oldest_comment_id",
           "type": "string",
           "required": false,
-          "description": "ID of the oldest comment from previous call for pagination",
+          "description": "ID of the oldest comment from previous call for pagination. Defaults to the most recent comments.",
           "enum": null,
           "inferrable": true
         }
@@ -1773,7 +1773,7 @@
     {
       "name": "GetTasksByAssignees",
       "qualifiedName": "Clickup.GetTasksByAssignees",
-      "fullyQualifiedName": "Clickup.GetTasksByAssignees@1.2.5",
+      "fullyQualifiedName": "Clickup.GetTasksByAssignees@1.2.6",
       "description": "Get filtered tasks assigned to specific team members with advanced filtering options.\n\nThis tool filters tasks by assignee(s) across the entire workspace.\nProvides comprehensive filtering capabilities including status and date range filtering.\n\nImportant: Use this tool when not interested in a specific task but a set of tasks from\na specific assignee\nor filtering criteria that does not include the task title(name).",
       "parameters": [
         {
@@ -1797,7 +1797,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Starting position for offset-based retrieval (default: 0)",
+          "description": "Starting position for offset-based retrieval. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -1805,7 +1805,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of tasks to return (max: 50, default: 20)",
+          "description": "Maximum number of tasks to return (max: 50). Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -1813,7 +1813,7 @@
           "name": "order_by",
           "type": "string",
           "required": false,
-          "description": "Field to sort tasks by",
+          "description": "Field to sort tasks by. Defaults to ClickUp's default order.",
           "enum": [
             "created",
             "updated",
@@ -1825,7 +1825,7 @@
           "name": "should_sort_by_reverse",
           "type": "boolean",
           "required": false,
-          "description": "Whether to sort in descending order (default: False)",
+          "description": "Whether to sort in descending order. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -1834,7 +1834,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "List of status strings to filter by",
+          "description": "List of status strings to filter by. Defaults to all statuses.",
           "enum": null,
           "inferrable": true
         },
@@ -1842,7 +1842,7 @@
           "name": "include_closed",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include closed tasks (default: False)",
+          "description": "Whether to include closed tasks. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -1850,7 +1850,7 @@
           "name": "due_date_gt",
           "type": "string",
           "required": false,
-          "description": "Due date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "description": "Due date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]). Defaults to no lower due date limit.",
           "enum": null,
           "inferrable": true
         },
@@ -1858,7 +1858,7 @@
           "name": "due_date_lt",
           "type": "string",
           "required": false,
-          "description": "Due date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "description": "Due date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]). Defaults to no upper due date limit.",
           "enum": null,
           "inferrable": true
         },
@@ -1866,7 +1866,7 @@
           "name": "date_created_gt",
           "type": "string",
           "required": false,
-          "description": "Created date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "description": "Created date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]). Defaults to no lower creation date limit.",
           "enum": null,
           "inferrable": true
         },
@@ -1874,7 +1874,7 @@
           "name": "date_created_lt",
           "type": "string",
           "required": false,
-          "description": "Created date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "description": "Created date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]). Defaults to no upper creation date limit.",
           "enum": null,
           "inferrable": true
         }
@@ -1987,7 +1987,7 @@
     {
       "name": "GetTasksByScope",
       "qualifiedName": "Clickup.GetTasksByScope",
-      "fullyQualifiedName": "Clickup.GetTasksByScope@1.2.5",
+      "fullyQualifiedName": "Clickup.GetTasksByScope@1.2.6",
       "description": "Get filtered tasks from ClickUp with advanced filtering options.\n\nThis unified tool filters tasks at different organizational levels:\n\nImportant: Use this tool when not interested in a specific task but a set of tasks from a\nspecific scope\nor filtering criteria that does not include the task title(name).",
       "parameters": [
         {
@@ -2016,7 +2016,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "List of IDs to get tasks from (required for spaces/folders/lists, ignored for 'all')",
+          "description": "List of IDs to get tasks from (required for spaces/folders/lists, ignored for 'all'). Defaults to no IDs, which only the 'all' scope accepts.",
           "enum": null,
           "inferrable": true
         },
@@ -2024,7 +2024,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Starting position for offset-based retrieval (default: 0)",
+          "description": "Starting position for offset-based retrieval. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -2032,7 +2032,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum number of tasks to return (max: 50, default: 20)",
+          "description": "Maximum number of tasks to return (max: 50). Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -2040,7 +2040,7 @@
           "name": "order_by",
           "type": "string",
           "required": false,
-          "description": "Field to sort tasks by",
+          "description": "Field to sort tasks by. Defaults to ClickUp's default order.",
           "enum": [
             "created",
             "updated",
@@ -2052,7 +2052,7 @@
           "name": "should_sort_by_reverse",
           "type": "boolean",
           "required": false,
-          "description": "Whether to sort in descending order (default: False)",
+          "description": "Whether to sort in descending order. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -2061,7 +2061,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "List of status strings to filter by",
+          "description": "List of status strings to filter by. Defaults to all statuses.",
           "enum": null,
           "inferrable": true
         },
@@ -2069,7 +2069,7 @@
           "name": "include_closed",
           "type": "boolean",
           "required": false,
-          "description": "Whether to include closed tasks (default: False)",
+          "description": "Whether to include closed tasks. Defaults to False.",
           "enum": null,
           "inferrable": true
         },
@@ -2077,7 +2077,7 @@
           "name": "due_date_gt",
           "type": "string",
           "required": false,
-          "description": "Due date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "description": "Due date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]). Defaults to no lower due date limit.",
           "enum": null,
           "inferrable": true
         },
@@ -2085,7 +2085,7 @@
           "name": "due_date_lt",
           "type": "string",
           "required": false,
-          "description": "Due date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "description": "Due date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]). Defaults to no upper due date limit.",
           "enum": null,
           "inferrable": true
         },
@@ -2093,7 +2093,7 @@
           "name": "date_created_gt",
           "type": "string",
           "required": false,
-          "description": "Created date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "description": "Created date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]). Defaults to no lower creation date limit.",
           "enum": null,
           "inferrable": true
         },
@@ -2101,7 +2101,7 @@
           "name": "date_created_lt",
           "type": "string",
           "required": false,
-          "description": "Created date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "description": "Created date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]). Defaults to no upper creation date limit.",
           "enum": null,
           "inferrable": true
         }
@@ -2218,7 +2218,7 @@
     {
       "name": "GetWorkspaceInsights",
       "qualifiedName": "Clickup.GetWorkspaceInsights",
-      "fullyQualifiedName": "Clickup.GetWorkspaceInsights@1.2.5",
+      "fullyQualifiedName": "Clickup.GetWorkspaceInsights@1.2.6",
       "description": "Return a brief overview for a workspace using the latest updated tasks to inform the user.\n\nIncludes task summary, team insights, and container(space, folder, list) insights.",
       "parameters": [
         {
@@ -2276,7 +2276,7 @@
     {
       "name": "UpdateTask",
       "qualifiedName": "Clickup.UpdateTask",
-      "fullyQualifiedName": "Clickup.UpdateTask@1.2.5",
+      "fullyQualifiedName": "Clickup.UpdateTask@1.2.6",
       "description": "Update one or more fields of an existing ClickUp task.\n\nUse this tool to change a task's title, description, status, priority, dates,\nhierarchy (by setting a new parent), or sprint points. You can pass only the\nfields you want to modify—everything else remains unchanged.",
       "parameters": [
         {
@@ -2291,7 +2291,7 @@
           "name": "task_title",
           "type": "string",
           "required": false,
-          "description": "The new name/title of the task",
+          "description": "The new name/title of the task. Defaults to leaving the title unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2299,7 +2299,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "The new description/content of the task",
+          "description": "The new description/content of the task. Defaults to leaving the description unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2307,7 +2307,7 @@
           "name": "priority",
           "type": "string",
           "required": false,
-          "description": "Task priority",
+          "description": "Task priority. Defaults to leaving the priority unchanged.",
           "enum": [
             "URGENT",
             "HIGH",
@@ -2320,7 +2320,7 @@
           "name": "status",
           "type": "string",
           "required": false,
-          "description": "Task status label (string)",
+          "description": "Task status label (string). Defaults to leaving the status unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2328,7 +2328,7 @@
           "name": "parent_task_id",
           "type": "string",
           "required": false,
-          "description": "The new parent task ID",
+          "description": "The new parent task ID. Defaults to leaving the parent unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2336,7 +2336,7 @@
           "name": "start_date",
           "type": "string",
           "required": false,
-          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported",
+          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported. Defaults to leaving the start date unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2344,7 +2344,7 @@
           "name": "due_date",
           "type": "string",
           "required": false,
-          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported",
+          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported. Defaults to leaving the due date unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2352,7 +2352,7 @@
           "name": "sprint_points",
           "type": "integer",
           "required": false,
-          "description": "The new sprint points for the task",
+          "description": "The new sprint points for the task. Defaults to leaving the sprint points unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -2443,7 +2443,7 @@
     {
       "name": "UpdateTaskAssignees",
       "qualifiedName": "Clickup.UpdateTaskAssignees",
-      "fullyQualifiedName": "Clickup.UpdateTaskAssignees@1.2.5",
+      "fullyQualifiedName": "Clickup.UpdateTaskAssignees@1.2.6",
       "description": "Update task assignees by adding and/or removing specific users.\n\nUse this tool to manage task assignments by specifying which users to add or remove.\nYou can add assignees, remove assignees, or do both in a single operation.\nAt least one of the parameters (assignee_ids_to_add or assignee_ids_to_remove) must be provided.",
       "parameters": [
         {
@@ -2459,7 +2459,7 @@
           "type": "array",
           "innerType": "integer",
           "required": false,
-          "description": "List of user IDs to add as assignees",
+          "description": "List of user IDs to add as assignees. Defaults to adding no one.",
           "enum": null,
           "inferrable": true
         },
@@ -2468,7 +2468,7 @@
           "type": "array",
           "innerType": "integer",
           "required": false,
-          "description": "List of user IDs to remove from assignees",
+          "description": "List of user IDs to remove from assignees. Defaults to removing no one.",
           "enum": null,
           "inferrable": true
         }
@@ -2534,7 +2534,7 @@
     {
       "name": "UpdateTaskComment",
       "qualifiedName": "Clickup.UpdateTaskComment",
-      "fullyQualifiedName": "Clickup.UpdateTaskComment@1.2.5",
+      "fullyQualifiedName": "Clickup.UpdateTaskComment@1.2.6",
       "description": "Update an existing comment on a ClickUp task.\n\nThis tool is for updating top-level comments only, not threaded comment replies.\nUse this tool to modify comment text, change assignment, or set resolution status.\nAt least one parameter (comment_text, assignee_id, or resolution) must be provided.",
       "parameters": [
         {
@@ -2557,7 +2557,7 @@
           "name": "comment_text",
           "type": "string",
           "required": false,
-          "description": "New text content for the comment (optional)",
+          "description": "New text content for the comment. Defaults to leaving the text unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2565,7 +2565,7 @@
           "name": "assignee_id",
           "type": "integer",
           "required": false,
-          "description": "User ID to assign the comment to (optional)",
+          "description": "User ID to assign the comment to. Defaults to leaving the assignee unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2573,7 +2573,7 @@
           "name": "resolution",
           "type": "string",
           "required": false,
-          "description": "Set comment resolution status (optional)",
+          "description": "Set comment resolution status. Defaults to leaving the resolution unchanged.",
           "enum": [
             "resolved",
             "unresolved"
@@ -2647,7 +2647,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Clickup.WhoAmI",
-      "fullyQualifiedName": "Clickup.WhoAmI@1.2.5",
+      "fullyQualifiedName": "Clickup.WhoAmI@1.2.6",
       "description": "Return current user profile and accessible workspaces (teams).\n\nThis should be the FIRST tool called when starting any ClickUp interaction.\n\nEach workspace represents\na separate team or organization with its own members, projects, and settings.",
       "parameters": [],
       "auth": {
@@ -2714,6 +2714,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "2f95bc08af2a82fdb173f15020f4debcb7814cbf5746eccbbaaf2887b1d2742f",
-  "generatedAt": "2026-10-07T21:24:45.454Z",
-  "summary": "## ClickUp Toolkit\n\nThe ClickUp toolkit connects LLM agents to ClickUp via Arcade, enabling full read/write interaction with workspaces, spaces, folders, lists, tasks, comments, and team members.\n\n## Capabilities\n\n- **Workspace & hierarchy navigation** — Retrieve workspaces, spaces, folders, and lists; get workspace members and high-level insights; resolve the authenticated user's identity and available workspaces as a first step.\n- **Task lifecycle management** — Create tasks with status, priority, scheduling, and hierarchy metadata; update any combination of task fields (title, description, status, priority, dates, parent, sprint points); manage assignees with add/remove operations.\n- **Filtered task retrieval** — Query tasks by scope (space, folder, or list), by assignee(s), or by task ID (including custom IDs), with date-range and status filtering.\n- **Comments & threads** — Create, read, and update top-level task comments; create and read threaded replies; optionally assign comments or replies for follow-up; paginate both comment and reply sets.\n- **Fuzzy search** — Locate tasks, lists, folders, and workspace members by approximate name when exact IDs or locations are unknown; results include relevance scores (1.0 = exact match).\n- **Agent guidance** — Internal static guidance tool (`GetSystemGuidance`) helps agents make context-aware decisions without surfacing content to end users.\n\n## OAuth\n\nThis toolkit authenticates via **OAuth 2.0** with ClickUp as the provider. See the [Arcade ClickUp auth provider docs](https://docs.arcade.dev/en/references/auth-providers/clickup) for configuration details."
+  "generatedAt": "2026-10-10T11:13:54.275Z",
+  "summary": "## ClickUp Toolkit\n\nThe ClickUp toolkit connects LLM agents to ClickUp via Arcade, enabling programmatic management of workspaces, spaces, folders, lists, tasks, comments, and team members.\n\n## Capabilities\n\n- **Workspace & hierarchy navigation** — retrieve the authenticated user's profile and workspaces, list spaces, folders, and lists with offset-based pagination, and filter archived items at every level.\n- **Fuzzy search across entities** — locate tasks, lists, folders, and workspace members by approximate name when exact IDs or locations are unknown, with ranked relevance scores.\n- **Task lifecycle management** — create tasks with status, priority, scheduling, and parent hierarchy; update any subset of fields (title, description, status, priority, dates, sprint points, parent); manage assignees with add/remove operations in a single call.\n- **Comments and threads** — create, retrieve, and update top-level task comments; create and retrieve threaded replies to individual comments; optionally assign comments or replies to specific users.\n- **Workspace intelligence** — retrieve valid statuses per list before creating/updating tasks, get full team member rosters for a workspace, and generate workspace-level insights from recently updated tasks.\n- **Agent guidance & context** — a dedicated system guidance tool surfaces internal decision-making hints (e.g., when to prefer fuzzy search vs. hierarchy traversal), and `WhoAmI` is designed to be the first call in any session.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with **ClickUp** as the identity provider. See the [Arcade ClickUp auth provider docs](https://docs.arcade.dev/en/references/auth-providers/clickup) for setup instructions."
 }

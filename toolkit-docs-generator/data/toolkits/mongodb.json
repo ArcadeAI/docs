@@ -1,7 +1,7 @@
 {
   "id": "Mongodb",
   "label": "MongoDB",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Tools to query and explore a MongoDB database",
   "metadata": {
     "category": "databases",
@@ -18,7 +18,7 @@
     {
       "name": "AggregateDocuments",
       "qualifiedName": "Mongodb.AggregateDocuments",
-      "fullyQualifiedName": "Mongodb.AggregateDocuments@1.1.1",
+      "fullyQualifiedName": "Mongodb.AggregateDocuments@1.1.2",
       "description": "Execute a MongoDB aggregation pipeline on a collection.\n\nONLY use this tool if you have already loaded the schema of the collection you need to query.\nLoad the collection's schema first if it is not already known.\n\nReturns a list of JSON strings, where each string represents a\nresult document from the aggregation\n(tools cannot return complex types).\n\nAggregation pipelines allow for complex data processing including:\n* $match - filter documents\n* $group - group documents and perform calculations\n* $project - reshape documents\n* $sort - sort documents\n* $limit - limit results\n* $lookup - join with other collections\n* And many more stages",
       "parameters": [
         {
@@ -50,7 +50,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of results to return from the aggregation. Default: 1000.",
+          "description": "The maximum number of results to return from the aggregation. Defaults to 1000.",
           "enum": null,
           "inferrable": true
         }
@@ -122,7 +122,7 @@
     {
       "name": "CountDocuments",
       "qualifiedName": "Mongodb.CountDocuments",
-      "fullyQualifiedName": "Mongodb.CountDocuments@1.1.1",
+      "fullyQualifiedName": "Mongodb.CountDocuments@1.1.2",
       "description": "Count documents in a MongoDB collection matching the given filter.",
       "parameters": [
         {
@@ -145,7 +145,7 @@
           "name": "filter_dict",
           "type": "string",
           "required": false,
-          "description": "MongoDB filter/query as JSON string. Leave None for no filter (count all documents). Example: '{\"status\": \"active\"}'",
+          "description": "MongoDB filter/query as JSON string. Example: '{\"status\": \"active\"}'. Defaults to no filter, which counts all documents.",
           "enum": null,
           "inferrable": true
         }
@@ -206,7 +206,7 @@
     {
       "name": "DiscoverCollections",
       "qualifiedName": "Mongodb.DiscoverCollections",
-      "fullyQualifiedName": "Mongodb.DiscoverCollections@1.1.1",
+      "fullyQualifiedName": "Mongodb.DiscoverCollections@1.1.2",
       "description": "Discover all the collections in the MongoDB database.\n\nUse when the list of collections is not known.\nALWAYS use this tool before any other tool that requires a collection name.",
       "parameters": [
         {
@@ -264,7 +264,7 @@
     {
       "name": "DiscoverDatabases",
       "qualifiedName": "Mongodb.DiscoverDatabases",
-      "fullyQualifiedName": "Mongodb.DiscoverDatabases@1.1.1",
+      "fullyQualifiedName": "Mongodb.DiscoverDatabases@1.1.2",
       "description": "Discover all the databases in the MongoDB instance.",
       "parameters": [],
       "auth": null,
@@ -307,7 +307,7 @@
     {
       "name": "FindDocuments",
       "qualifiedName": "Mongodb.FindDocuments",
-      "fullyQualifiedName": "Mongodb.FindDocuments@1.1.1",
+      "fullyQualifiedName": "Mongodb.FindDocuments@1.1.2",
       "description": "Find documents in a MongoDB collection.\n\nONLY use this tool if you have already loaded the schema of the collection you need to query.\nLoad the collection's schema first if it is not already known.\n\nReturns a list of JSON strings, where each string represents a\ndocument from the collection (tools cannot return complex types).\n\nWhen running queries, follow these rules which will help avoid errors:\n* Always specify projection to limit fields returned if you don't need all data.\n* Always sort your results by the most relevant fields first. Use '_id' if you're unsure.\n* Use appropriate MongoDB query operators for complex filtering ($gte, $lte, $in, $regex, etc.).\n* Be mindful of case sensitivity when querying string fields.\n* Use indexes when possible (typically on _id and commonly queried fields).",
       "parameters": [
         {
@@ -330,7 +330,7 @@
           "name": "filter_dict",
           "type": "string",
           "required": false,
-          "description": "MongoDB filter/query as JSON string. Leave None for no filter (find all documents). Example: '{\"status\": \"active\", \"age\": {\"$gte\": 18}}'",
+          "description": "MongoDB filter/query as JSON string. Example: '{\"status\": \"active\", \"age\": {\"$gte\": 18}}'. Defaults to no filter, which finds all documents.",
           "enum": null,
           "inferrable": true
         },
@@ -338,7 +338,7 @@
           "name": "projection",
           "type": "string",
           "required": false,
-          "description": "Fields to include/exclude as JSON string. Use 1 to include, 0 to exclude. Example: '{\"name\": 1, \"email\": 1, \"_id\": 0}'. Leave None to include all fields.",
+          "description": "Fields to include/exclude as JSON string. Use 1 to include, 0 to exclude. Example: '{\"name\": 1, \"email\": 1, \"_id\": 0}'. Defaults to all fields.",
           "enum": null,
           "inferrable": true
         },
@@ -347,7 +347,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Sort criteria as list of JSON strings, each containing 'field' and 'direction' keys. Use 1 for ascending, -1 for descending. Example: ['{\"field\": \"name\", \"direction\": 1}', '{\"field\": \"created_at\", \"direction\": -1}']",
+          "description": "Sort criteria as list of JSON strings, each containing 'field' and 'direction' keys. Use 1 for ascending, -1 for descending. Example: ['{\"field\": \"name\", \"direction\": 1}', '{\"field\": \"created_at\", \"direction\": -1}']. Defaults to no sort.",
           "enum": null,
           "inferrable": true
         },
@@ -355,7 +355,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of documents to return. Default: 1000.",
+          "description": "The maximum number of documents to return. Defaults to 1000.",
           "enum": null,
           "inferrable": true
         },
@@ -363,7 +363,7 @@
           "name": "skip",
           "type": "integer",
           "required": false,
-          "description": "The number of documents to skip. Default: 0.",
+          "description": "The number of documents to skip. Defaults to 0.",
           "enum": null,
           "inferrable": true
         }
@@ -447,7 +447,7 @@
     {
       "name": "GetCollectionSchema",
       "qualifiedName": "Mongodb.GetCollectionSchema",
-      "fullyQualifiedName": "Mongodb.GetCollectionSchema@1.1.1",
+      "fullyQualifiedName": "Mongodb.GetCollectionSchema@1.1.2",
       "description": "Get the schema/structure of a MongoDB collection by sampling documents.\n\nSince MongoDB is schema-less, this tool samples a configurable number of documents\nto infer the schema structure and data types.\n\nThis tool should ALWAYS be used before executing any query.\nAll collections in the query must be discovered first by listing the database's collections.",
       "parameters": [
         {
@@ -470,7 +470,7 @@
           "name": "sample_size",
           "type": "integer",
           "required": false,
-          "description": "The number of documents to sample for schema discovery (default: 1000)",
+          "description": "The number of documents to sample for schema discovery. Defaults to 1000.",
           "enum": null,
           "inferrable": true
         }
@@ -533,6 +533,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:25:45.899Z",
-  "summary": "## MongoDB Toolkit\n\nProvides tools for querying and exploring a MongoDB instance — discovering databases, collections, and schemas, then running reads and aggregations against live data.\n\n## Capabilities\n\n- **Discovery**: Enumerate all databases in a MongoDB instance and all collections within a database before issuing any queries.\n- **Schema inference**: Sample documents from any collection to infer field names and data types, required before executing queries against schema-less collections.\n- **Document retrieval**: Find documents with filtering, projection, sorting, and MongoDB query operators (`$gte`, `$lte`, `$in`, `$regex`, etc.).\n- **Aggregation pipelines**: Execute multi-stage pipelines (`$match`, `$group`, `$project`, `$sort`, `$limit`, `$lookup`, and more) for complex data processing and cross-collection joins.\n- **Document counting**: Count documents matching an arbitrary filter without fetching full documents.\n\n## Secrets\n\n`MONGODB_CONNECTION_STRING` — The full MongoDB connection URI used to authenticate and connect to your MongoDB instance. It follows the format `mongodb://[username:password@]host[:port][/database]` for standard connections, or `mongodb+srv://...` for Atlas SRV-based connections. Include credentials, host, port, and any required options (e.g., `authSource`, `tls`) directly in the URI string.\n\n- **MongoDB Atlas**: Generate a connection string from the [Atlas console](https://cloud.mongodb.com) under **Database → Connect → Drivers**. Create a database user with appropriate read permissions under **Database Access**, whitelist your IP under **Network Access**, then copy the generated URI and substitute the placeholder password.\n- **Self-hosted MongoDB**: Construct the URI manually using your host, port, and credentials configured in `mongod.conf` or via `db.createUser()`.\n\nStore this secret in Arcade as described in the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-10T11:14:51.921Z",
+  "summary": "## MongoDB Toolkit\n\nThe Arcade MongoDB toolkit connects agents to a MongoDB instance, enabling programmatic discovery, querying, and aggregation of databases and collections.\n\n## Capabilities\n\n- **Database & collection discovery** — Enumerate all databases in a MongoDB instance and all collections within a database before issuing any queries.\n- **Schema inference** — Sample documents from any collection to infer field names and data types, since MongoDB is schema-less; required before querying.\n- **Document retrieval & counting** — Find documents with filtering, projection, and sorting using standard MongoDB query operators; count documents matching a filter without fetching them.\n- **Aggregation pipelines** — Execute multi-stage pipelines (`$match`, `$group`, `$project`, `$sort`, `$limit`, `$lookup`, and more) for complex data processing and cross-collection joins.\n\n## Secrets\n\n`MONGODB_CONNECTION_STRING` — The full MongoDB connection URI used to authenticate and connect to your MongoDB instance (e.g., `mongodb+srv://user:password@cluster.mongodb.net/dbname`). It encodes the host, port, credentials, and any connection options. Obtain it from your MongoDB deployment:\n\n- **MongoDB Atlas**: In the Atlas UI, go to your cluster → **Connect** → **Drivers**, select your driver version, and copy the connection string. Replace `<password>` with your database user's password. See the [Atlas connection string docs](https://www.mongodb.com/docs/atlas/driver-connection/) for details.\n- **Self-hosted MongoDB**: Construct the URI from your host, port, username, and password (e.g., `mongodb://user:password@host:27017/dbname`). See the [MongoDB connection string reference](https://www.mongodb.com/docs/manual/reference/connection-string/).\n\nStore this secret in Arcade using the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

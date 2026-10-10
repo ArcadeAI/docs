@@ -1,7 +1,7 @@
 {
   "id": "GoogleCalendar",
   "label": "Google Calendar",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "Arcade.dev LLM tools for Google Calendar",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "GoogleCalendar.CreateEvent",
-      "fullyQualifiedName": "GoogleCalendar.CreateEvent@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.CreateEvent@4.2.2",
       "description": "Create a new event/meeting/sync/meetup in the specified calendar.\n\nPass `recurrence` to create a repeating event.",
       "parameters": [
         {
@@ -66,7 +66,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "The description of the event",
+          "description": "The description of the event. Defaults to no description.",
           "enum": null,
           "inferrable": true
         },
@@ -74,7 +74,7 @@
           "name": "location",
           "type": "string",
           "required": false,
-          "description": "The location of the event",
+          "description": "The location of the event. Defaults to no location.",
           "enum": null,
           "inferrable": true
         },
@@ -96,7 +96,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com.",
+          "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com. Defaults to no attendees.",
           "enum": null,
           "inferrable": true
         },
@@ -125,7 +125,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Recurrence rules for a repeating event, in RFC 5545 format. Each entry is an RRULE/RDATE/EXDATE line; a bare rule is automatically prefixed with 'RRULE:'. Examples: ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for every Mon/Wed/Fri for 10 occurrences, or ['RRULE:FREQ=DAILY;UNTIL=YYYYMMDDTHHMMSSZ'] for daily until a UTC date-time. Omit for a one-time event.",
+          "description": "Recurrence rules for a repeating event, in RFC 5545 format. Each entry is an RRULE/RDATE/EXDATE line; a bare rule is automatically prefixed with 'RRULE:'. Examples: ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for every Mon/Wed/Fri for 10 occurrences, or ['RRULE:FREQ=DAILY;UNTIL=YYYYMMDDTHHMMSSZ'] for daily until a UTC date-time. Defaults to a one-time event.",
           "enum": null,
           "inferrable": true
         }
@@ -235,7 +235,7 @@
     {
       "name": "DeleteEvent",
       "qualifiedName": "GoogleCalendar.DeleteEvent",
-      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@4.2.2",
       "description": "Delete an event from Google Calendar.",
       "parameters": [
         {
@@ -325,7 +325,7 @@
     {
       "name": "FindTimeSlotsWhenEveryoneIsFree",
       "qualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree",
-      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@4.2.2",
       "description": "Provide time slots when everyone is free within a given date range and time boundaries.",
       "parameters": [
         {
@@ -333,7 +333,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "The list of email addresses from people in the same organization domain (apart from the currently logged in user) to search for free time slots. Defaults to None, which will return free time slots for the current user only.",
+          "description": "The list of email addresses from people in the same organization domain (apart from the currently logged in user) to search for free time slots. Defaults to the current user only.",
           "enum": null,
           "inferrable": true
         },
@@ -341,7 +341,7 @@
           "name": "start_date",
           "type": "string",
           "required": false,
-          "description": "The start date to search for time slots in the format 'YYYY-MM-DD'. Defaults to today's date. It will search starting from this date at the time 00:00:00.",
+          "description": "The start date to search for time slots in the format 'YYYY-MM-DD'. It will search starting from this date at the time 00:00:00. Defaults to today's date.",
           "enum": null,
           "inferrable": true
         },
@@ -349,7 +349,7 @@
           "name": "end_date",
           "type": "string",
           "required": false,
-          "description": "The end date to search for time slots in the format 'YYYY-MM-DD'. Defaults to seven days from the start date. It will search until this date at the time 23:59:59.",
+          "description": "The end date to search for time slots in the format 'YYYY-MM-DD'. It will search until this date at the time 23:59:59. Defaults to 7 days from today.",
           "enum": null,
           "inferrable": true
         },
@@ -441,7 +441,7 @@
     {
       "name": "GetEvent",
       "qualifiedName": "GoogleCalendar.GetEvent",
-      "fullyQualifiedName": "GoogleCalendar.GetEvent@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.GetEvent@4.2.2",
       "description": "Get one Google Calendar event by its id.\n\nWhen the event is one occurrence of a recurring series, the series' repeat rule and first\nstart are returned too, so read them here before changing or ending a series. The rule\ncounts from series_start, not from this occurrence's start. Use this instead of\nlisting a time window whenever the event id is already known. Deleted events and deleted\noccurrences are still returned, with a cancelled status.",
       "parameters": [
         {
@@ -514,14 +514,14 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "GoogleCalendar.ListCalendars",
-      "fullyQualifiedName": "GoogleCalendar.ListCalendars@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.ListCalendars@4.2.2",
       "description": "List all calendars accessible by the user.",
       "parameters": [
         {
           "name": "max_results",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of calendars to return. Up to 250 calendars, defaults to 10.",
+          "description": "The maximum number of calendars to return. Up to 250 calendars. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
@@ -545,7 +545,7 @@
           "name": "next_page_token",
           "type": "string",
           "required": false,
-          "description": "The token to retrieve the next page of calendars. Optional.",
+          "description": "The token to retrieve the next page of calendars. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -614,7 +614,7 @@
     {
       "name": "ListEvents",
       "qualifiedName": "GoogleCalendar.ListEvents",
-      "fullyQualifiedName": "GoogleCalendar.ListEvents@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.ListEvents@4.2.2",
       "description": "List events from the specified calendar within the given datetime range.\n\nmin_end_datetime serves as the lower bound (exclusive) for an event's end time.\nmax_start_datetime serves as the upper bound (exclusive) for an event's start time.\n\nFor example, with min_end_datetime at 09:00 on one day and max_start_datetime at\n17:00 the next day, the function returns events that:\n1. End after 09:00 on the first day (exclusive)\n2. Start before 17:00 on the second day (exclusive)\nSo an event from 08:00 to 10:00 on the first day is included, but an event\nstarting at 17:00 on the second day is not.",
       "parameters": [
         {
@@ -714,7 +714,7 @@
     {
       "name": "RespondToEvent",
       "qualifiedName": "GoogleCalendar.RespondToEvent",
-      "fullyQualifiedName": "GoogleCalendar.RespondToEvent@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.RespondToEvent@4.2.2",
       "description": "Accept, decline, or tentatively accept (RSVP to) a meeting invitation on the\nauthenticated user's behalf.\n\nSets the user's responseStatus for an event they were invited to.",
       "parameters": [
         {
@@ -821,7 +821,7 @@
     {
       "name": "UpdateEvent",
       "qualifiedName": "GoogleCalendar.UpdateEvent",
-      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@4.2.2",
       "description": "Update an existing event in the specified calendar with the provided details.\nOnly the provided fields will be updated; others will remain unchanged.\nPass `updated_calendar_id` to move the event to another calendar.\n\nAn event's details can only be changed by the event's organizer, or by a guest\nwhen the organizer has enabled guest editing for that event.\n\n`updated_start_datetime` and `updated_end_datetime` are\nindependent and can be provided separately, except that all-day\ndates must be provided for both.",
       "parameters": [
         {
@@ -844,7 +844,7 @@
           "name": "updated_start_datetime",
           "type": "string",
           "required": false,
-          "description": "The updated start of the event. For a timed event, a datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). For an all-day event, a date (YYYY-MM-DD); updated_end_datetime must then be a date too.",
+          "description": "The updated start of the event. For a timed event, a datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). For an all-day event, a date (YYYY-MM-DD); updated_end_datetime must then be a date too. Defaults to leaving the start unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -852,7 +852,7 @@
           "name": "updated_end_datetime",
           "type": "string",
           "required": false,
-          "description": "The updated end of the event. For a timed event, a datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). For an all-day event, a date (YYYY-MM-DD) that is exclusive: the day after the event's last day. A date equal to updated_start_datetime makes it a single all-day event on that day.",
+          "description": "The updated end of the event. For a timed event, a datetime in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). For an all-day event, a date (YYYY-MM-DD) that is exclusive: the day after the event's last day. A date equal to updated_start_datetime makes it a single all-day event on that day. Defaults to leaving the end unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -860,7 +860,7 @@
           "name": "updated_calendar_id",
           "type": "string",
           "required": false,
-          "description": "The ID of a calendar to move the event to. The event is moved there after the other updates are applied. Omit to keep the event on its current calendar.",
+          "description": "The ID of a calendar to move the event to. The event is moved there after the other updates are applied. Defaults to keeping the event on its current calendar.",
           "enum": null,
           "inferrable": true
         },
@@ -868,7 +868,7 @@
           "name": "updated_summary",
           "type": "string",
           "required": false,
-          "description": "The updated title of the event",
+          "description": "The updated title of the event. Defaults to leaving the title unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -876,7 +876,7 @@
           "name": "updated_description",
           "type": "string",
           "required": false,
-          "description": "The updated description of the event",
+          "description": "The updated description of the event. Defaults to leaving the description unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -884,7 +884,7 @@
           "name": "updated_location",
           "type": "string",
           "required": false,
-          "description": "The updated location of the event",
+          "description": "The updated location of the event. Defaults to leaving the location unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -892,7 +892,7 @@
           "name": "updated_visibility",
           "type": "string",
           "required": false,
-          "description": "The visibility of the event",
+          "description": "The visibility of the event. Defaults to leaving the visibility unchanged.",
           "enum": [
             "default",
             "public",
@@ -906,7 +906,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Updated recurrence rules for a repeating event, in RFC 5545 format. Each entry is an RRULE/RDATE/EXDATE line; a bare rule is automatically prefixed with 'RRULE:'. Provide the full set of rules to replace the event's existing recurrence, e.g. ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for every Mon/Wed/Fri for 10 occurrences. Pass an empty list ([]) to REMOVE recurrence and make the event a one-time event. Omit (leave unset) to leave recurrence unchanged.",
+          "description": "Updated recurrence rules for a repeating event, in RFC 5545 format. Each entry is an RRULE/RDATE/EXDATE line; a bare rule is automatically prefixed with 'RRULE:'. Provide the full set of rules to replace the event's existing recurrence, e.g. ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR;COUNT=10'] for every Mon/Wed/Fri for 10 occurrences. Pass an empty list ([]) to REMOVE recurrence and make the event a one-time event. Defaults to leaving recurrence unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -915,7 +915,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.",
+          "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com. Defaults to adding no attendees.",
           "enum": null,
           "inferrable": true
         },
@@ -924,7 +924,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.",
+          "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com. Defaults to removing no attendees.",
           "enum": null,
           "inferrable": true
         },
@@ -944,7 +944,7 @@
           "name": "updated_google_meet",
           "type": "string",
           "required": false,
-          "description": "Add or remove the event's Google Meet link. Defaults to None, which leaves the link unchanged.",
+          "description": "Add or remove the event's Google Meet link. Defaults to leaving the link unchanged.",
           "enum": [
             "add",
             "remove"
@@ -1073,7 +1073,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleCalendar.WhoAmI",
-      "fullyQualifiedName": "GoogleCalendar.WhoAmI@4.2.1",
+      "fullyQualifiedName": "GoogleCalendar.WhoAmI@4.2.2",
       "description": "Get comprehensive user profile and Google Calendar environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Calendar access permissions, and other\nimportant profile details from Google services.",
       "parameters": [],
       "auth": {
@@ -1139,6 +1139,6 @@
   ],
   "subPages": [],
   "curationSourceHash": "cd977f2e66058d686da277f9a3c43e903d6caba18a9124ec18a51996ad31882d",
-  "generatedAt": "2026-10-07T21:25:15.717Z",
-  "summary": "## Google Calendar Toolkit\n\nThe Google Calendar toolkit connects Arcade to Google Calendar, enabling LLMs to read, create, update, and manage calendar events and availability on behalf of authenticated users.\n\n## Capabilities\n\n- **Event CRUD**: Create events (including recurring series via `recurrence`), retrieve a single event by ID (including cancelled/deleted occurrences and series recurrence rules), list events within a datetime window with precise boundary semantics, update any subset of event fields or move an event to another calendar, and delete events.\n- **Availability & scheduling**: Find time slots when all specified participants are free within a given date range and time boundaries.\n- **RSVP / response management**: Accept, decline, or tentatively accept meeting invitations on the authenticated user's behalf.\n- **Calendar discovery**: List all calendars accessible to the authenticated user.\n- **User identity**: Retrieve the authenticated user's profile, email, and Google Calendar access permissions.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Google** provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup and configuration details."
+  "generatedAt": "2026-10-10T11:14:17.288Z",
+  "summary": "## Google Calendar Toolkit\n\nThe Google Calendar toolkit lets Arcade-powered LLM agents read, create, and manage Google Calendar data on behalf of authenticated users.\n\n## Capabilities\n\n- **Calendar discovery & user context** — list all calendars the user can access and retrieve full profile/permission details for the authenticated account.\n- **Event retrieval** — fetch a single event by ID (including recurrence rules and cancelled/deleted occurrences) or list events across a flexible datetime window with precise boundary semantics.\n- **Event creation & recurrence** — create one-off or repeating events with full recurrence rule support.\n- **Event editing & moving** — update any subset of event fields on an existing event, or move it to a different calendar; respects organizer and guest-editing permissions.\n- **RSVP & deletion** — accept, tentatively accept, or decline meeting invitations on the user's behalf, and delete events from a calendar.\n- **Scheduling assistance** — find free time slots across multiple attendees within a given date range and daily time boundaries.\n\n## OAuth\n\nThis toolkit authenticates via **OAuth 2.0** through the Google provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup instructions."
 }

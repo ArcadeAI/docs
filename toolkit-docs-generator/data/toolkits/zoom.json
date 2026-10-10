@@ -1,7 +1,7 @@
 {
   "id": "Zoom",
   "label": "Zoom",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "description": "Arcade.dev LLM tools for Zoom",
   "metadata": {
     "category": "social",
@@ -33,7 +33,7 @@
     {
       "name": "FindMeetings",
       "qualifiedName": "Zoom.FindMeetings",
-      "fullyQualifiedName": "Zoom.FindMeetings@2.1.4",
+      "fullyQualifiedName": "Zoom.FindMeetings@2.1.5",
       "description": "Find the Zoom meeting a user means, from a phrase, a period, or a meeting id.\n\nUse this single call for every \"which meeting\" question rather than listing\nhistory and matching topics yourself. It reads all three of the records Zoom\nsplits a meeting across -- meetings scheduled ahead of time, meetings it knows\nonly through their cloud recording, and the runs of meetings that recur with no\nfixed time -- so a standing 1:1 is as findable as a scheduled one. A call started\nad hoc or from a personal meeting room is listed only when it was cloud-recorded,\nbecause Zoom keeps no listing of the others; for one of those, ask the user for\nthe meeting id or join link, which the transcript and summary tools take\ndirectly. A row's has_transcript speaks for its cloud recording alone: a meeting\nwith no recording, or a recording with no transcript file, can still have an AI\nCompanion transcript, so a transcript request keeps only_recorded false and asks\nthe transcript tool rather than that flag.\nEvery candidate strong enough to act on is reported rather than one being picked\nsilently, so an ambiguous or weak phrase can be taken back to the user, and a\nperiod in which nothing ran is an empty listing rather than a failure.\n\nGive a phrase to rank the account's meetings against it, a meeting_id to list one\nmeeting's past runs, or neither to list the whole period. Results are paginated:\nwhile next_cursor is non-empty it is passed back verbatim to reach the rest. A\nperiod too wide for one call is covered from its newest end, and next_to_date is\nthen the to_date to call again with to reach the older part.",
       "parameters": [
         {
@@ -48,7 +48,7 @@
           "name": "meeting_id",
           "type": "string",
           "required": false,
-          "description": "A meeting to list the past runs of, as its numeric id or the uuid a listing reported; a pasted Zoom join link or a meeting number written with spaces is accepted and reduced to that id. Defaults to an empty string, which lists or searches a period instead. An identifier matching no meeting raises rather than reporting a meeting that has never met.",
+          "description": "A meeting to list the past runs of, as its numeric id or the uuid a listing reported; a pasted Zoom join link or a meeting number written with spaces is accepted and reduced to that id. An identifier matching no meeting raises rather than reporting a meeting that has never met. Defaults to an empty string, which lists or searches a period instead.",
           "enum": null,
           "inferrable": true
         },
@@ -193,7 +193,7 @@
     {
       "name": "GetMeetingInvitation",
       "qualifiedName": "Zoom.GetMeetingInvitation",
-      "fullyQualifiedName": "Zoom.GetMeetingInvitation@2.1.4",
+      "fullyQualifiedName": "Zoom.GetMeetingInvitation@2.1.5",
       "description": "Retrieve the invitation note for a specific Zoom meeting.\n\nThe note is Zoom's own wording and is ready to paste into a message. A meeting\nZoom holds no invitation for -- one started instantly or ad hoc, which is\ntypically the meeting that just ended -- is reported as a normal result\ncarrying the reason, so it is not mistaken for a meeting that never happened.\nAn identifier matching no meeting at all still raises.",
       "parameters": [
         {
@@ -258,7 +258,7 @@
     {
       "name": "GetMeetingRecording",
       "qualifiedName": "Zoom.GetMeetingRecording",
-      "fullyQualifiedName": "Zoom.GetMeetingRecording@2.1.4",
+      "fullyQualifiedName": "Zoom.GetMeetingRecording@2.1.5",
       "description": "Get a past Zoom meeting's cloud recording as links that can be forwarded.\n\nUse this when someone missed a meeting and wants to watch it, rather than\nreading its transcript: it returns the share link and passcode to send them,\nalongside the per-file play and download urls. A meeting with no recording is\nreported as a normal result carrying the reason, while an identifier matching no\nmeeting raises. An occurrence uuid is answered about that occurrence and no\nother, so an identifier that leaves the occurrence open is refused rather than\nanswered with whichever run happened most recently.",
       "parameters": [
         {
@@ -323,7 +323,7 @@
     {
       "name": "GetMeetingSummary",
       "qualifiedName": "Zoom.GetMeetingSummary",
-      "fullyQualifiedName": "Zoom.GetMeetingSummary@2.1.4",
+      "fullyQualifiedName": "Zoom.GetMeetingSummary@2.1.5",
       "description": "Read the AI Companion meeting summary of a past Zoom meeting.\n\nA meeting with no summary is reported as a normal result carrying the reason,\nso the caller can say so plainly, or reach for the meeting's transcript or its\nattendance, instead of treating it as a failure. An identifier matching no\nmeeting raises instead, so \"no summary\" is never claimed about a meeting that\ndoes not exist. An occurrence uuid is answered about that occurrence and no\nother, so an identifier that leaves the occurrence open is refused rather than\nanswered with whichever run happened most recently.",
       "parameters": [
         {
@@ -388,7 +388,7 @@
     {
       "name": "GetMeetingTranscript",
       "qualifiedName": "Zoom.GetMeetingTranscript",
-      "fullyQualifiedName": "Zoom.GetMeetingTranscript@2.1.4",
+      "fullyQualifiedName": "Zoom.GetMeetingTranscript@2.1.5",
       "description": "Read the transcript of a past Zoom meeting.\n\nThe transcript comes from the meeting's cloud recording when one exists, and\notherwise from the AI Companion transcript Zoom keeps when the account's meeting\ntranscript setting is on, with or without a meeting summary, so a meeting that\nwas never cloud-recorded is still readable; source says which was read. That\nmakes it worth calling for any past meeting the user asks about, whether or not a\nlisting showed a recording for it. A meeting with no transcript to read is\nreported as a normal result carrying the reason, so the caller can say so\nplainly, or reach for the meeting's summary or its attendance, instead of\ntreating it as a failure. An identifier matching no meeting raises instead, so\n\"never recorded\" is never claimed about a meeting that does not exist. An\noccurrence uuid is answered about that occurrence and no other, so an identifier\nthat leaves the occurrence open is refused rather than answered with whichever\nrun happened most recently.",
       "parameters": [
         {
@@ -403,7 +403,7 @@
           "name": "max_transcript_chars",
           "type": "integer",
           "required": false,
-          "description": "Maximum characters of transcript text to return (1000-500000). Defaults to 60000, which fits a typical one-hour meeting. A longer transcript is cut at a cue boundary and transcript_truncated is then true; raise this limit to read more of a long meeting when the extra context is affordable.",
+          "description": "Maximum characters of transcript text to return (1000-500000). The default fits a typical one-hour meeting. A longer transcript is cut at a cue boundary and transcript_truncated is then true; raise this limit to read more of a long meeting when the extra context is affordable. Defaults to 60000.",
           "enum": null,
           "inferrable": true
         }
@@ -467,14 +467,14 @@
     {
       "name": "ListUpcomingMeetings",
       "qualifiedName": "Zoom.ListUpcomingMeetings",
-      "fullyQualifiedName": "Zoom.ListUpcomingMeetings@2.1.4",
+      "fullyQualifiedName": "Zoom.ListUpcomingMeetings@2.1.5",
       "description": "List the Zoom meetings a user is scheduled to join, soonest first.\n\nCovers the next 24 hours by default and any window up to 90 days ahead when\ndates are given. Within the next 24 hours the listing includes meetings the\nuser merely joins; beyond that Zoom exposes only the meetings they host, and\ninvited_coverage_end marks where that boundary falls inside the window -- an\nempty stretch past it means no hosted meetings, not a confirmed free calendar.\nA fixed-time recurring series is listed at the one start Zoom reports for it\nrather than once per run, and recurring_series names each such series so a\nwindow holding a daily standup cannot read as clear; a meeting recurring with\nno fixed time -- which belongs to no window at all -- is named alongside the\nwindow instead, so a standing 1:1 can still be found by topic. A clear\ncalendar is reported as an empty listing that names the account whose calendar\nwas read and the window that was searched, not as a failure.",
       "parameters": [
         {
           "name": "user_id",
           "type": "string",
           "required": false,
-          "description": "The user ID or email address whose calendar to read. Defaults to the authenticated user, whose own email or Zoom user id also works here. Another user's calendar is not readable through this connection: Zoom denies the request, and re-authorizing cannot change that, so only supply a different address to confirm that denial rather than to read their meetings.",
+          "description": "The user ID or email address whose calendar to read. The authenticated user's own email or Zoom user id also works here. Another user's calendar is not readable through this connection: Zoom denies the request, and re-authorizing cannot change that, so only supply a different address to confirm that denial rather than to read their meetings. Defaults to the authenticated user.",
           "enum": null,
           "inferrable": true
         },
@@ -490,7 +490,7 @@
           "name": "to_date",
           "type": "string",
           "required": false,
-          "description": "Only include meetings starting on or before the end of this date (YYYY-MM-DD). Defaults to an empty string, which means 24 hours after the start of the window. The window may span at most 90 days.",
+          "description": "Only include meetings starting on or before the end of this date (YYYY-MM-DD). The window may span at most 90 days. Defaults to an empty string, which means 24 hours after the start of the window.",
           "enum": null,
           "inferrable": true
         },
@@ -514,7 +514,7 @@
           "name": "timezone",
           "type": "string",
           "required": false,
-          "description": "IANA timezone to read from_date and to_date in, for example America/Los_Angeles. Defaults to an empty string, which uses the calendar owner's Zoom profile timezone. Supply it when the user's timezone is known from the conversation and may differ from the profile, and when Zoom reports no timezone for the calendar -- supplied dates are then refused until one is given.",
+          "description": "IANA timezone to read from_date and to_date in, for example America/Los_Angeles. Supply it when the user's timezone is known from the conversation and may differ from the profile, and when Zoom reports no timezone for the calendar, since supplied dates are then refused until one is given. Defaults to an empty string, which uses the calendar owner's Zoom profile timezone.",
           "enum": null,
           "inferrable": true
         }
@@ -594,7 +594,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Zoom.WhoAmI",
-      "fullyQualifiedName": "Zoom.WhoAmI@2.1.4",
+      "fullyQualifiedName": "Zoom.WhoAmI@2.1.5",
       "description": "Identify the Zoom user the connection is authenticated as.\n\nCall this to ground a possessive reference like \"my meetings\" before acting\non it.",
       "parameters": [],
       "auth": {
@@ -655,6 +655,6 @@
     }
   ],
   "curationSourceHash": "6007dc440877986aa2d1f0f7a108a94354c90a195ee571865830c7eeb1734c7b",
-  "generatedAt": "2026-10-07T21:26:12.956Z",
-  "summary": "Arcade's Zoom toolkit connects LLMs to a user's Zoom account, enabling agents to look up meetings, read transcripts and summaries, retrieve recordings, and inspect scheduling — all through a single authenticated connection.\n\n## Capabilities\n\n- **Meeting discovery & lookup:** Find meetings by phrase, period, or ID across scheduled, recurring (fixed and no-fixed-time), and cloud-recorded-only meetings; supports pagination and wide date ranges.\n- **Upcoming schedule inspection:** List meetings the authenticated user is joining or hosting within a configurable window up to 90 days, with clear handling of the host-only boundary and recurring series.\n- **Post-meeting content retrieval:** Read AI Companion summaries and full transcripts (from cloud recordings or the standalone AI Companion transcript, whichever is available) for any past meeting.\n- **Recording access:** Retrieve share links, passcodes, and per-file play/download URLs for cloud recordings to forward to anyone who missed a meeting.\n- **Invitation text:** Fetch Zoom's ready-to-paste invitation note for any scheduled meeting.\n- **Identity resolution:** Resolve the authenticated user's identity to ground possessive references (\"my meetings\") before acting on them.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Zoom** provider. See the [Arcade Zoom auth provider docs](https://docs.arcade.dev/en/references/auth-providers/zoom) for setup details."
+  "generatedAt": "2026-10-10T11:15:20.555Z",
+  "summary": "## Zoom Toolkit\n\nThe Zoom toolkit provides Arcade tools for interacting with a user's Zoom account via LLM agents, enabling meeting discovery, transcript retrieval, recording access, summaries, and scheduling queries.\n\n## Capabilities\n\n- **Meeting discovery & identity** — Resolve ambiguous meeting references from a phrase, period, or ID across scheduled, recurring, and cloud-recorded meetings; identify the authenticated user to ground possessive references before acting.\n- **Upcoming schedule** — List meetings the user will join or host within a configurable window (up to 90 days), with explicit handling of the boundary where invited-meeting visibility ends and only hosted meetings are exposed.\n- **Recordings & invitations** — Retrieve shareable recording links, passcodes, and per-file play/download URLs for past meetings; fetch Zoom's formatted invitation text ready to paste into a message.\n- **Transcripts** — Read meeting transcripts from cloud recordings or AI Companion transcripts (whichever is available), covering meetings that were never recorded in the cloud, with clear sourcing.\n- **AI Companion summaries** — Read Zoom AI Companion meeting summaries; missing summaries and non-existent meetings are reported distinctly so agents never confuse \"no summary\" with \"no meeting\".\n- **Safe pagination & error handling** — All list results paginate via cursor; empty results, missing content, and unresolvable identifiers are surfaced as structured outcomes rather than failures, keeping agent logic clean.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 to authenticate with Zoom on behalf of the user. See the [Arcade Zoom auth provider docs](https://docs.arcade.dev/en/references/auth-providers/zoom) for configuration details."
 }

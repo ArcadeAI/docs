@@ -1,7 +1,7 @@
 {
   "id": "Attio",
   "label": "Attio",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Arcade tools designed for LLMs to interact with Attio CRM",
   "metadata": {
     "category": "sales",
@@ -32,7 +32,7 @@
     {
       "name": "AddToList",
       "qualifiedName": "Attio.AddToList",
-      "fullyQualifiedName": "Attio.AddToList@1.2.1",
+      "fullyQualifiedName": "Attio.AddToList@1.2.2",
       "description": "Add a record to an Attio list.\n\nOptionally set list-specific attribute values via entry_values parameter.",
       "parameters": [
         {
@@ -55,7 +55,7 @@
           "name": "entry_values",
           "type": "json",
           "required": false,
-          "description": "List-specific attribute values",
+          "description": "List-specific attribute values. Defaults to no values.",
           "enum": null,
           "inferrable": true
         }
@@ -131,7 +131,7 @@
     {
       "name": "AssertRecord",
       "qualifiedName": "Attio.AssertRecord",
-      "fullyQualifiedName": "Attio.AssertRecord@1.2.1",
+      "fullyQualifiedName": "Attio.AssertRecord@1.2.2",
       "description": "Create or update (upsert) a record using Attio's assert endpoint.\n\nThis is idempotent - safe to retry. If a record matching the attribute exists,\nit will be updated. Otherwise, a new record is created.\n\nIMPORTANT: The matching_attribute MUST be a unique attribute on the object.\nCommon unique attributes:\n- people: 'email_addresses'\n- companies: 'domains'\n- deals: 'record_id' (name is NOT unique by default)\n\nTo update a deal by name, first query to get the record_id, then update the record by that ID.",
       "parameters": [
         {
@@ -240,7 +240,7 @@
     {
       "name": "CreateNote",
       "qualifiedName": "Attio.CreateNote",
-      "fullyQualifiedName": "Attio.CreateNote@1.2.1",
+      "fullyQualifiedName": "Attio.CreateNote@1.2.2",
       "description": "Add a note to an Attio record.\n\nNotes are useful for logging activities, meeting notes, and outreach history.",
       "parameters": [
         {
@@ -279,7 +279,7 @@
           "name": "format_type",
           "type": "string",
           "required": false,
-          "description": "Note format (default plaintext)",
+          "description": "Note format. Defaults to plaintext.",
           "enum": [
             "plaintext",
             "markdown"
@@ -363,7 +363,7 @@
     {
       "name": "CreateRecord",
       "qualifiedName": "Attio.CreateRecord",
-      "fullyQualifiedName": "Attio.CreateRecord@1.2.1",
+      "fullyQualifiedName": "Attio.CreateRecord@1.2.2",
       "description": "Create a new record in Attio.\n\nAlways creates a new record — does not check for duplicates.\nFor upsert (create or update) behavior, match on a unique attribute instead.\n\nExample values for a deal:\n{\"name\": \"Acme Corp Deal\", \"stage\": \"Qualified\"}\n\nExample values for a person:\n{\"name\": [{\"first_name\": \"Jane\", \"last_name\": \"Doe\"}],\n \"email_addresses\": [{\"email_address\": \"jane@example.com\"}]}",
       "parameters": [
         {
@@ -452,7 +452,7 @@
     {
       "name": "CreateTask",
       "qualifiedName": "Attio.CreateTask",
-      "fullyQualifiedName": "Attio.CreateTask@1.2.1",
+      "fullyQualifiedName": "Attio.CreateTask@1.2.2",
       "description": "Create a task in Attio.\n\nTasks are useful for follow-ups, reminders, and action items.\nOptionally link to a record by providing both linked_record_id and linked_record_object.",
       "parameters": [
         {
@@ -483,7 +483,7 @@
           "name": "linked_record_id",
           "type": "string",
           "required": false,
-          "description": "Record UUID to link to the task",
+          "description": "Record UUID to link to the task. Defaults to no linked record.",
           "enum": null,
           "inferrable": true
         },
@@ -491,7 +491,7 @@
           "name": "linked_record_object",
           "type": "string",
           "required": false,
-          "description": "The type of object to link to the task. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "description": "The type of object to link to the task. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object. Defaults to no linked record.",
           "enum": null,
           "inferrable": true
         }
@@ -572,7 +572,7 @@
     {
       "name": "GetCallTranscript",
       "qualifiedName": "Attio.GetCallTranscript",
-      "fullyQualifiedName": "Attio.GetCallTranscript@1.2.1",
+      "fullyQualifiedName": "Attio.GetCallTranscript@1.2.2",
       "description": "Get the full transcript from a call recording.\n\nReturns the transcript with speaker labels. Use this after finding a meeting\nthat has a call recording, along with its call_recording_id.\n\nThe transcript includes:\n- Full raw transcript text\n- Segmented transcript with speaker names\n- Call duration and participant info",
       "parameters": [
         {
@@ -595,7 +595,7 @@
           "name": "include_timestamps",
           "type": "boolean",
           "required": false,
-          "description": "Include start/end times for each segment (default false)",
+          "description": "Include start/end times for each segment. Defaults to False.",
           "enum": null,
           "inferrable": true
         }
@@ -666,7 +666,7 @@
     {
       "name": "GetDealTranscript",
       "qualifiedName": "Attio.GetDealTranscript",
-      "fullyQualifiedName": "Attio.GetDealTranscript@1.2.1",
+      "fullyQualifiedName": "Attio.GetDealTranscript@1.2.2",
       "description": "Convenience tool to get a call transcript for a deal in one step.\n\nFinds meetings for the deal, gets the specified meeting's call recording,\nand returns the full transcript. Defaults to the most recent meeting.\n\nThis combines finding the deal's meetings and fetching a call transcript into one call.\nReturns an error if no meetings with recordings are found.",
       "parameters": [
         {
@@ -681,7 +681,7 @@
           "name": "meeting_index",
           "type": "integer",
           "required": false,
-          "description": "Which meeting (0=most recent, 1=second most recent, default 0)",
+          "description": "Which meeting (0=most recent, 1=second most recent). Defaults to 0.",
           "enum": null,
           "inferrable": true
         }
@@ -747,7 +747,7 @@
     {
       "name": "GetListEntries",
       "qualifiedName": "Attio.GetListEntries",
-      "fullyQualifiedName": "Attio.GetListEntries@1.2.1",
+      "fullyQualifiedName": "Attio.GetListEntries@1.2.2",
       "description": "Get entries from an Attio list with pagination.\n\nReturns entries with their record IDs and flattened list-specific values.",
       "parameters": [
         {
@@ -762,7 +762,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Max entries to return (default 25)",
+          "description": "Max entries to return. Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -770,7 +770,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Number of entries to skip (default 0)",
+          "description": "Number of entries to skip. Defaults to 0.",
           "enum": null,
           "inferrable": true
         }
@@ -841,7 +841,7 @@
     {
       "name": "GetMeeting",
       "qualifiedName": "Attio.GetMeeting",
-      "fullyQualifiedName": "Attio.GetMeeting@1.2.1",
+      "fullyQualifiedName": "Attio.GetMeeting@1.2.2",
       "description": "Get details of a specific meeting.\n\nReturns meeting metadata and call recording info if available.\nUse the call_recording_id together with the meeting_id to fetch the call transcript.",
       "parameters": [
         {
@@ -909,7 +909,7 @@
     {
       "name": "GetObjectSchema",
       "qualifiedName": "Attio.GetObjectSchema",
-      "fullyQualifiedName": "Attio.GetObjectSchema@1.2.1",
+      "fullyQualifiedName": "Attio.GetObjectSchema@1.2.2",
       "description": "Get the schema/attributes for an Attio object.\n\nCall this to see an object's attributes before filtering its records. Returns attribute\nnames, types, filter syntax hints, and for select/status fields, the available option\nvalues to use in filters.\n\nIMPORTANT: Location and personal-name fields require NESTED filter syntax.",
       "parameters": [
         {
@@ -977,7 +977,7 @@
     {
       "name": "GetRecord",
       "qualifiedName": "Attio.GetRecord",
-      "fullyQualifiedName": "Attio.GetRecord@1.2.1",
+      "fullyQualifiedName": "Attio.GetRecord@1.2.2",
       "description": "Get a single Attio record by ID.\n\nReturns the record with flattened values and a direct web URL.",
       "parameters": [
         {
@@ -1058,14 +1058,14 @@
     {
       "name": "ListLists",
       "qualifiedName": "Attio.ListLists",
-      "fullyQualifiedName": "Attio.ListLists@1.2.1",
+      "fullyQualifiedName": "Attio.ListLists@1.2.2",
       "description": "Get all lists in the Attio workspace with pagination.\n\nReturns list metadata including ID, name, and parent object type.",
       "parameters": [
         {
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Max lists to return (default 25)",
+          "description": "Max lists to return. Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -1073,7 +1073,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Number of lists to skip (default 0)",
+          "description": "Number of lists to skip. Defaults to 0.",
           "enum": null,
           "inferrable": true
         }
@@ -1139,7 +1139,7 @@
     {
       "name": "ListObjects",
       "qualifiedName": "Attio.ListObjects",
-      "fullyQualifiedName": "Attio.ListObjects@1.2.1",
+      "fullyQualifiedName": "Attio.ListObjects@1.2.2",
       "description": "List all objects (tables) in the Attio workspace.\n\nCALL THIS FIRST to discover what objects exist. Standard objects include\n'people', 'companies', 'deals', 'users'. Custom objects will also appear.\n\nReturns object slugs (API names) and titles (display names).",
       "parameters": [],
       "auth": {
@@ -1192,7 +1192,7 @@
     {
       "name": "ListRecordMeetings",
       "qualifiedName": "Attio.ListRecordMeetings",
-      "fullyQualifiedName": "Attio.ListRecordMeetings@1.2.1",
+      "fullyQualifiedName": "Attio.ListRecordMeetings@1.2.2",
       "description": "List meetings associated with an Attio record.\n\nReturns meetings linked to a deal, company, or person including:\n- Meeting ID and title\n- Meeting type (e.g., 'Discovery', 'Demo')\n- Start/end times\n- Whether the meeting has a call recording\n\nUse this to find meetings before fetching transcripts.",
       "parameters": [
         {
@@ -1215,7 +1215,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Max meetings to return (default 20)",
+          "description": "Max meetings to return. Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -1223,7 +1223,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Number of meetings to skip (default 0)",
+          "description": "Number of meetings to skip. Defaults to 0.",
           "enum": null,
           "inferrable": true
         }
@@ -1299,14 +1299,14 @@
     {
       "name": "ListTasks",
       "qualifiedName": "Attio.ListTasks",
-      "fullyQualifiedName": "Attio.ListTasks@1.2.1",
+      "fullyQualifiedName": "Attio.ListTasks@1.2.2",
       "description": "Get tasks from Attio with optional filtering and pagination.\n\nCan filter by assignee and/or completion status.",
       "parameters": [
         {
           "name": "assignee_id",
           "type": "string",
           "required": false,
-          "description": "Filter by assignee UUID",
+          "description": "Filter by assignee UUID. Defaults to any assignee.",
           "enum": null,
           "inferrable": true
         },
@@ -1314,7 +1314,7 @@
           "name": "is_completed",
           "type": "boolean",
           "required": false,
-          "description": "Filter by completion status",
+          "description": "Filter by completion status. Defaults to any status.",
           "enum": null,
           "inferrable": true
         },
@@ -1322,7 +1322,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Max tasks to return (default 25)",
+          "description": "Max tasks to return. Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -1330,7 +1330,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Number of tasks to skip (default 0)",
+          "description": "Number of tasks to skip. Defaults to 0.",
           "enum": null,
           "inferrable": true
         }
@@ -1406,7 +1406,7 @@
     {
       "name": "ListWorkspaceMembers",
       "qualifiedName": "Attio.ListWorkspaceMembers",
-      "fullyQualifiedName": "Attio.ListWorkspaceMembers@1.2.1",
+      "fullyQualifiedName": "Attio.ListWorkspaceMembers@1.2.2",
       "description": "Get all members in the Attio workspace.\n\nUseful for task assignment and understanding who owns records.",
       "parameters": [],
       "auth": {
@@ -1459,7 +1459,7 @@
     {
       "name": "QueryRecords",
       "qualifiedName": "Attio.QueryRecords",
-      "fullyQualifiedName": "Attio.QueryRecords@1.2.1",
+      "fullyQualifiedName": "Attio.QueryRecords@1.2.2",
       "description": "Query Attio records with filtering and pagination.\n\nWorkflow: find the object type and its attribute API slugs, then query with those slugs\nas fields.",
       "parameters": [
         {
@@ -1483,7 +1483,7 @@
           "name": "filter_json",
           "type": "string",
           "required": false,
-          "description": "JSON filter with operators: $eq, $contains, $gt, $lt",
+          "description": "JSON filter with operators: $eq, $contains, $gt, $lt. Defaults to no filter.",
           "enum": null,
           "inferrable": true
         },
@@ -1491,7 +1491,7 @@
           "name": "sort_by",
           "type": "string",
           "required": false,
-          "description": "Attribute to sort by",
+          "description": "Attribute to sort by. Defaults to no sorting.",
           "enum": null,
           "inferrable": true
         },
@@ -1499,7 +1499,7 @@
           "name": "sort_direction",
           "type": "string",
           "required": false,
-          "description": "Sort direction (default desc)",
+          "description": "Sort direction. Defaults to desc.",
           "enum": [
             "asc",
             "desc"
@@ -1510,7 +1510,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Max records to return (default 25, max 100)",
+          "description": "Max records to return, up to 100. Defaults to 25.",
           "enum": null,
           "inferrable": true
         },
@@ -1518,7 +1518,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "Number of records to skip (default 0)",
+          "description": "Number of records to skip. Defaults to 0.",
           "enum": null,
           "inferrable": true
         }
@@ -1614,7 +1614,7 @@
     {
       "name": "RemoveFromList",
       "qualifiedName": "Attio.RemoveFromList",
-      "fullyQualifiedName": "Attio.RemoveFromList@1.2.1",
+      "fullyQualifiedName": "Attio.RemoveFromList@1.2.2",
       "description": "Remove a record from an Attio list.\n\nNote: Use the entry_id of the record's entry in the list, not the record_id.",
       "parameters": [
         {
@@ -1695,7 +1695,7 @@
     {
       "name": "UpdateRecord",
       "qualifiedName": "Attio.UpdateRecord",
-      "fullyQualifiedName": "Attio.UpdateRecord@1.2.1",
+      "fullyQualifiedName": "Attio.UpdateRecord@1.2.2",
       "description": "Update a record directly by ID.\n\nUse this when you have the record_id and want to update specific fields.\nThis doesn't require a unique matching attribute.\n\nFor status fields like 'stage', pass the status title as a string:\n{\"stage\": \"Closed Won\"}\n\nFor date fields, use ISO format:\n{\"close_date\": \"YYYY-MM-DD\"}",
       "parameters": [
         {
@@ -1797,7 +1797,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Attio.WhoAmI",
-      "fullyQualifiedName": "Attio.WhoAmI@1.2.1",
+      "fullyQualifiedName": "Attio.WhoAmI@1.2.2",
       "description": "Get the authenticated user's profile and workspace context.\n\nCALL THIS FIRST to understand your identity and permissions.\nReturns the current user's name, email, and workspace membership info.",
       "parameters": [],
       "auth": {
@@ -1852,6 +1852,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:24:45.442Z",
-  "summary": "Attio is a CRM platform; this toolkit lets LLMs interact with Attio workspaces to read, write, and reason over CRM data including records, lists, tasks, meetings, and call transcripts.\n\n## Capabilities\n\n- **Workspace discovery & identity** — resolve the authenticated user's profile, enumerate all objects (standard and custom), list workspace members, and inspect object schemas including attribute types and filter syntax.\n- **Record management** — create, update, upsert (assert), and retrieve individual records across any object type (people, companies, deals, custom); query records with filtering and pagination.\n- **List operations** — enumerate all lists, fetch paginated list entries, add records to lists with entry-level attribute values, and remove entries by entry ID.\n- **Tasks & notes** — create tasks with optional record linkage and assignee, list tasks with assignee/completion filters, and add timestamped notes to any record.\n- **Meetings & call transcripts** — list meetings linked to a record, retrieve meeting metadata and recording info, fetch full transcripts with speaker labels and duration, or pull a deal's most recent transcript in a single convenience call.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 with Attio as the provider. See the [Arcade Attio auth provider docs](https://docs.arcade.dev/en/references/auth-providers/attio) for setup details."
+  "generatedAt": "2026-10-10T11:13:54.275Z",
+  "summary": "Attio toolkit for Arcade enables LLMs to interact with an Attio CRM workspace — reading and writing records, lists, tasks, meetings, and call transcripts via the Attio API.\n\n## Capabilities\n\n- **Workspace discovery & identity**: Enumerate objects (tables), lists, and workspace members; retrieve the authenticated user's profile and permissions.\n- **Record management**: Create, update, upsert (assert), and query records across any standard or custom object (people, companies, deals, etc.), with full filtering and pagination support.\n- **List operations**: Fetch list metadata, retrieve paginated list entries, and add or remove records from lists with optional list-specific attribute values.\n- **Tasks & notes**: Create tasks (with optional record linkage and assignee) and add notes to records for activity logging and follow-ups.\n- **Meetings & call transcripts**: List meetings linked to any record, retrieve meeting details, and fetch full call transcripts with speaker labels, duration, and participant info — including a single-step convenience tool for deals.\n- **Schema introspection**: Inspect any object's attributes, types, filter syntax, and select/status option values before constructing queries.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with Attio as the identity provider. See the [Arcade Attio auth provider docs](https://docs.arcade.dev/en/references/auth-providers/attio) for setup instructions."
 }

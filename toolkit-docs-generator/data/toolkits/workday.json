@@ -1,7 +1,7 @@
 {
   "id": "Workday",
   "label": "Workday",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Arcade.dev tools for interacting with Workday",
   "metadata": {
     "category": "productivity",
@@ -25,14 +25,14 @@
     {
       "name": "ListEligibleTimeOffTypes",
       "qualifiedName": "Workday.ListEligibleTimeOffTypes",
-      "fullyQualifiedName": "Workday.ListEligibleTimeOffTypes@1.0.2",
+      "fullyQualifiedName": "Workday.ListEligibleTimeOffTypes@1.0.3",
       "description": "List the time-off types the signed-in worker can request, with their rules.\n\nEach entry includes its display name and time_off_type_id. Retrieve the options here\nand pass the chosen ID to the date check and request tools. Each entry also carries what\nWorkday reports for that type: a default quantity, whether a reason is mandatory\nand which reasons are allowed, whether a position must be named, and whether clock\ntimes are required, determine the quantity, or may cross midnight. `draft_support`\nreports evidence of existing drafts. Requests use draft mode by default; set mode\nto submit only when the worker asks for submission.\n\nEach type's unit is the unit to use for request quantities; do not pass fractions\nof a full day for an hourly type. start_and_end_time_required requires both clock\ntimes. calculate_quantity_based_on_start_and_end_time means Workday determines the\nrecorded quantity from those times. crossing_over_midnight_enabled permits an\nearlier end time on the following date, keeping the span under 24 hours.",
       "parameters": [
         {
           "name": "effective_date",
           "type": "string",
           "required": false,
-          "description": "Return the types the worker is eligible for as of this date (YYYY-MM-DD). Defaults to an empty string, which uses today. Eligibility varies by date, so use the first date being requested off.",
+          "description": "Return the types the worker is eligible for as of this date (YYYY-MM-DD). Eligibility varies by date, so use the first date being requested off. Defaults to an empty string, which uses today.",
           "enum": null,
           "inferrable": true
         },
@@ -121,7 +121,7 @@
     {
       "name": "ListTimeOffBalances",
       "qualifiedName": "Workday.ListTimeOffBalances",
-      "fullyQualifiedName": "Workday.ListTimeOffBalances@1.0.2",
+      "fullyQualifiedName": "Workday.ListTimeOffBalances@1.0.3",
       "description": "Show how much time off the signed-in worker has left, by plan.\n\nBalances come back exactly as Workday calculates them for the as-of date; this\ntool never projects or totals an accrual Workday did not return. It reads the\nsigned-in worker record to address the balances to that worker. Read `coverage`\nbefore relaying an empty list: it says whether no plan is tracked for this worker\nor the read simply did not finish, and a worker whose time off is not\nbalance-tracked can still request time off.",
       "parameters": [
         {
@@ -140,7 +140,7 @@
           "name": "effective_date",
           "type": "string",
           "required": false,
-          "description": "Report balances as of this date (YYYY-MM-DD). Defaults to an empty string, which reports the balance as of today. A future date returns what Workday projects for that date.",
+          "description": "Report balances as of this date (YYYY-MM-DD). A future date returns what Workday projects for that date. Defaults to an empty string, which reports the balance as of today.",
           "enum": null,
           "inferrable": true
         },
@@ -235,7 +235,7 @@
     {
       "name": "ListTimeOffHistory",
       "qualifiedName": "Workday.ListTimeOffHistory",
-      "fullyQualifiedName": "Workday.ListTimeOffHistory@1.0.2",
+      "fullyQualifiedName": "Workday.ListTimeOffHistory@1.0.3",
       "description": "Browse the time off the signed-in worker has already logged.\n\nMatching entries come back in ascending date order, earliest first. Defaults to a\nthree-month window either side of today. These date bounds are sent to Workday\nbefore paging, so a narrow window does not scan the worker's whole history.\nA request with mixed attributes\nappears as separate groups sharing one request_id. All matching groups stay on\none page and count as one request. Dates and quantities cover only matching day\nentries, including only the in-window portion of an overlapping request. A capped\nread marks groups incomplete and omits totals; narrow the window to reduce the\nupstream read. Existing requests must be changed\nor cancelled in Workday; this toolkit cannot modify them.\n\nrequests[].dates are YYYY-MM-DD dates inside the selected window; out-of-window\ndays of the same request are excluded. Each group's unit applies only to that group.\nresult_count, total_count, limit, and offset count distinct request IDs, not groups.\nPage with has_next_page and next_offset. results_truncated means the upstream read\nwas capped; no offset completes that read, so narrow the date bounds or check Workday.\nrequires_workday_ui_action identifies drafts or sent-back groups needing action;\nuse their workday_ui_action, falling back to the response's shared guidance.\nstatus=unknown means Workday's status was missing or unrecognized. Check Workday\nto confirm its state and any required action; requires_workday_ui_action=false\ndoes not establish that no action is needed for an unknown status.",
       "parameters": [
         {
@@ -259,7 +259,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Return only groups currently in these statuses. Defaults to every status Workday reports. Use unknown to select entries whose Workday status was missing or unrecognized.",
+          "description": "Return only groups currently in these statuses. Use unknown to select entries whose Workday status was missing or unrecognized. Defaults to every status Workday reports.",
           "enum": [
             "approved",
             "submitted",
@@ -273,7 +273,7 @@
           "name": "time_off_type_id",
           "type": "string",
           "required": false,
-          "description": "Return only groups of the time-off type with this Workday identifier. Use a time_off_type_id from an earlier status, history, or eligible-type result; display names are not accepted. Defaults to an empty string, which returns every type. Each returned request echoes its own time-off type.",
+          "description": "Return only groups of the time-off type with this Workday identifier. Use a time_off_type_id from an earlier status, history, or eligible-type result; display names are not accepted. Each returned request echoes its own time-off type. Defaults to an empty string, which returns every type.",
           "enum": null,
           "inferrable": true
         },
@@ -380,14 +380,14 @@
     {
       "name": "ListTimeOffStatus",
       "qualifiedName": "Workday.ListTimeOffStatus",
-      "fullyQualifiedName": "Workday.ListTimeOffStatus@1.0.2",
+      "fullyQualifiedName": "Workday.ListTimeOffStatus@1.0.3",
       "description": "Show where the signed-in worker's time-off requests stand right now.\n\nDefaults to no date bound, subject to the read cap. Provide dates to narrow the\nupstream search when results are incomplete. Requests come back in ascending order\nof their earliest matching date. The first page contains the earliest matching\nrequests, which may be years in the past when no lower date bound is supplied.\nFor upcoming or next time off, set from_date to today's date in YYYY-MM-DD;\nthe unbounded first page does not identify the next time off.\n\nA request with different types, units, statuses, positions, reasons, or notes\nappears as separate groups sharing one request_id. All matching groups stay on\none page and count as one request. Dates and quantities describe only matching\nentries within the requested window. Capped reads mark groups incomplete and omit\nquantity totals. Each group reports its own status and action guidance. Existing\nrequests must be changed or cancelled in Workday; this toolkit cannot modify them.\n\nrequests[].dates are YYYY-MM-DD dates inside the selected window; out-of-window\ndays of the same request are excluded. Each group's unit applies only to that group.\nresult_count, total_count, limit, and offset count distinct request IDs, not groups.\nPage with has_next_page and next_offset. results_truncated means the upstream read\nwas capped; no offset completes that read, so narrow the date bounds or check Workday.\nrequires_workday_ui_action identifies drafts or sent-back groups needing action;\nuse their workday_ui_action, falling back to the response's shared guidance.\nstatus=unknown means Workday's status was missing or unrecognized. Check Workday\nto confirm its state and any required action; requires_workday_ui_action=false\ndoes not establish that no action is needed for an unknown status.",
       "parameters": [
         {
           "name": "request_id",
           "type": "string",
           "required": false,
-          "description": "A request_id or entry_id from an earlier result. An entry ID selects only that entry; an event ID selects its matching day entries, subject to other filters. Provide dates to narrow collection searches. Defaults to an empty string, which selects all matching entries. A complete search with no match reports an error; a capped search reports that its results are incomplete.",
+          "description": "A request_id or entry_id from an earlier result. An entry ID selects only that entry; an event ID selects its matching day entries, subject to other filters. Provide dates to narrow collection searches. A complete search with no match reports an error; a capped search reports that its results are incomplete. Defaults to an empty string, which selects all matching entries.",
           "enum": null,
           "inferrable": true
         },
@@ -396,7 +396,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Return only groups currently in these statuses. Defaults to every status Workday reports, including past approved requests as well as outstanding requests. Use unknown to select entries whose Workday status was missing or unrecognized.",
+          "description": "Return only groups currently in these statuses. Use unknown to select entries whose Workday status was missing or unrecognized. Defaults to every status Workday reports, including past approved requests as well as outstanding requests.",
           "enum": [
             "approved",
             "submitted",
@@ -410,7 +410,7 @@
           "name": "time_off_type_id",
           "type": "string",
           "required": false,
-          "description": "Return only groups of the time-off type with this Workday identifier. Use a time_off_type_id from an earlier status, history, or eligible-type result; display names are not accepted. Defaults to an empty string, which returns every type. Each returned request echoes its own time-off type.",
+          "description": "Return only groups of the time-off type with this Workday identifier. Use a time_off_type_id from an earlier status, history, or eligible-type result; display names are not accepted. Each returned request echoes its own time-off type. Defaults to an empty string, which returns every type.",
           "enum": null,
           "inferrable": true
         },
@@ -418,7 +418,7 @@
           "name": "from_date",
           "type": "string",
           "required": false,
-          "description": "Return day entries on or after this date (YYYY-MM-DD). Leave empty for no lower bound, which is the default. For upcoming or next time off, resolve today to YYYY-MM-DD and pass it here.",
+          "description": "Return day entries on or after this date (YYYY-MM-DD). For upcoming or next time off, resolve today to YYYY-MM-DD and pass it here. Defaults to no lower bound.",
           "enum": null,
           "inferrable": true
         },
@@ -426,7 +426,7 @@
           "name": "to_date",
           "type": "string",
           "required": false,
-          "description": "Return day entries on or before this date (YYYY-MM-DD). Leave empty for no upper bound, which is the default.",
+          "description": "Return day entries on or before this date (YYYY-MM-DD). Defaults to no upper bound.",
           "enum": null,
           "inferrable": true
         },
@@ -538,7 +538,7 @@
     {
       "name": "ListValidTimeOffDates",
       "qualifiedName": "Workday.ListValidTimeOffDates",
-      "fullyQualifiedName": "Workday.ListValidTimeOffDates@1.0.2",
+      "fullyQualifiedName": "Workday.ListValidTimeOffDates@1.0.3",
       "description": "Check whether Workday accepts each date for the selected time-off type.\n\nSend the candidate dates together before creating a request. Each result separates\ndate acceptance from the configured default and existing bookings. A default does\nnot establish a maximum, and a missing default says nothing about the worker's\nschedule. Accepted dates therefore have unknown capacity; Workday validates the\nrequested quantity on submission.\n\nBooking totals include only matching known units and position scope. Incompatible\nunits or ambiguous positions leave the total unknown. Worker-based checks include\nbookings regardless of their position reference; position-scoped checks exclude\nbookings against another position. Incomplete booking lookups omit all booked totals\nand disclose that the booking names shown are partial results.\n\ndates[].valid reports date acceptance, not available quantity. valid_count counts\naccepted dates. bookable_spans stays empty because maximum capacity is unknown;\nthis does not mean none of the dates are valid. Read coverage_note for lookup limits.",
       "parameters": [
         {
@@ -562,7 +562,7 @@
           "name": "position_id",
           "type": "string",
           "required": false,
-          "description": "The Workday identifier of the position the time off would be taken against. Defaults to an empty string, which uses the worker's only eligible position and suits types that are not scoped per position. If several positions are eligible, provide one of their identifiers.",
+          "description": "The Workday identifier of the position the time off would be taken against. If several positions are eligible, provide one of their identifiers. Defaults to an empty string, which uses the worker's only eligible position and suits types that are not scoped per position.",
           "enum": null,
           "inferrable": true
         }
@@ -641,7 +641,7 @@
     {
       "name": "RequestTimeOff",
       "qualifiedName": "Workday.RequestTimeOff",
-      "fullyQualifiedName": "Workday.RequestTimeOff@1.0.2",
+      "fullyQualifiedName": "Workday.RequestTimeOff@1.0.3",
       "description": "Request time off for the signed-in worker, asking for a draft by default.\n\nSet mode to submit only when the worker asks for submission. Existing drafts must\nbe submitted in the Workday UI; existing requests must also be changed or cancelled\nthere. The receipt reports the confirmed state, or created_status_unknown when\nread-back cannot confirm it. In that case, look up the request's status using the\nreturned identifiers; do not repeat the create. Recorded amounts appear in days;\nrequested_days preserves the values sent, and missing amounts are unconfirmed. The type's\nrules are resolved from Workday first, so a reason, a position, and an omitted\nquantity are checked against that type before anything is written. Workday owns the\nrest of the validation; its rejections come back as errors describing what to change.\n\nIn the receipt, days[].date matches the requested date and days[].unit labels only\nthat entry's recorded amount. Missing quantity means unconfirmed, never zero.\nrequested_days contains the quantities (including defaults) and clock times sent.\nstatus is draft_saved, submitted, approved, or sent_back when confirmed;\ncreated_status_unknown means the request exists but its state is unknown, and\nblocked_by_warning means nothing was written. requires_workday_ui_action=false\non an unconfirmed receipt means no action was established; read status before advising.",
       "parameters": [
         {
@@ -665,7 +665,7 @@
           "name": "mode",
           "type": "string",
           "required": false,
-          "description": "Whether to submit the request for approval or leave it as an unfinished draft. Defaults to draft. Use submit only when the worker asks to send the request for approval. An existing draft must be submitted in the Workday UI.",
+          "description": "Whether to submit the request for approval or leave it as an unfinished draft. Use submit only when the worker asks to send the request for approval. An existing draft must be submitted in the Workday UI. Defaults to draft.",
           "enum": [
             "draft",
             "submit"
@@ -808,7 +808,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Workday.WhoAmI",
-      "fullyQualifiedName": "Workday.WhoAmI@1.0.2",
+      "fullyQualifiedName": "Workday.WhoAmI@1.0.3",
       "description": "Identify the Workday worker the connection is signed in as, and their jobs.\n\nCall this before acting on the worker's record so the answer is anchored to the\nright person and tenant. Every other tool in this toolkit acts on this same worker\nand cannot be pointed at anyone else.",
       "parameters": [],
       "auth": {
@@ -865,6 +865,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:26:05.715Z",
-  "summary": "## Workday Toolkit\n\nArcade toolkit for interacting with Workday on behalf of a signed-in worker, enabling time-off management — including listing balances, checking valid dates, browsing history, reviewing request status, and submitting or drafting requests — through Workday's APIs.\n\n## Capabilities\n\n- **Worker identity resolution:** Identify the authenticated worker and their job(s) before acting on any record; all tools operate on the same signed-in worker and cannot be redirected to others.\n- **Time-off eligibility and rules:** Retrieve the time-off types a worker can request, including display names, type IDs, quantity defaults, mandatory reasons, position and clock-time requirements, and draft support indicators.\n- **Balance and history lookup:** Check current accrual balances (as Workday calculates them, never projected) and browse historical time-off entries within a configurable date window, with paging support and coverage notes for untracked plans or capped reads.\n- **Date validation and status tracking:** Validate candidate dates against a specific time-off type before submitting, and retrieve real-time request status across grouped entries — with action guidance for drafts, sent-back items, or unknown states.\n- **Request creation (draft and submit modes):** Create time-off requests in draft mode by default or submit them on explicit worker instruction; Workday owns downstream validation, and existing requests must be modified or cancelled in the Workday UI.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0. The OAuth provider is **Workday**. Authentication is performed through Workday's OAuth flow and grants access scoped to the signed-in worker.\n\n## Secrets\n\n- **`WORKDAY_BASE_URL`** — The base URL of your organization's Workday REST API endpoint (e.g., `https://wd2-impl-services1.workday.com`). This is specific to your Workday environment (production or implementation). You can find it in your Workday tenant's API configuration or by consulting your Workday administrator. It is typically visible in the **Workday Studio** or under **View API Client** in the Workday admin interface.\n\n- **`WORKDAY_TENANT_NAME`** — The unique tenant identifier for your Workday instance (e.g., `mycompany` in `mycompany.workday.com`). Your Workday administrator can confirm the exact tenant name. It is also visible in your Workday login URL or in the Workday admin console under tenant settings.\n\nFor instructions on configuring secrets in Arcade, see the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can manage your secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-10T11:15:14.249Z",
+  "summary": "The Workday toolkit connects Arcade to a Workday tenant on behalf of a signed-in worker via OAuth, enabling agents to read and act on time-off data without requiring direct Workday UI access.\n\n## Capabilities\n\n- **Worker identity** — Resolve the authenticated worker's identity and job assignments before operating on any record.\n- **Time-off balances and history** — Retrieve current accrual balances and browse past time-off entries within a configurable date window, with paging support.\n- **Request status and visibility** — List open and historical requests with per-group status, action guidance, and flags for drafts or sent-back items requiring Workday UI action.\n- **Date and type validation** — Check which dates Workday accepts for a chosen time-off type and inspect that type's rules (unit, reason requirements, clock-time requirements, midnight-crossing, quantity calculation mode).\n- **Time-off submission** — Create draft or submitted time-off requests for the signed-in worker; existing requests and drafts must be modified or cancelled directly in Workday.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with **Workday** as the identity provider. Arcade manages the OAuth flow; no scopes need to be configured manually.\n\n## Secrets\n\n`WORKDAY_BASE_URL`\nThe base URL of the Workday REST API endpoint for the target environment. This is typically the root URL of your Workday tenant's API host (e.g., `https://wd2-impl-services1.workday.com`). You can find or confirm this value in your Workday tenant settings or by contacting your Workday system administrator. It must not include a trailing path segment specific to any API family.\n\n`WORKDAY_TENANT_NAME`\nThe unique identifier for your Workday tenant, sometimes called the tenant alias or tenant ID. It appears in your Workday login URL (e.g., `mycompany` in `https://wd2.myworkday.com/mycompany/...`). Obtain it from your Workday administrator or your organization's Workday login URL.\n\nFor configuring secrets in Arcade, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). Secrets can be managed at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

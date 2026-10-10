@@ -1,7 +1,7 @@
 {
   "id": "Clickhouse",
   "label": "Clickhouse",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Tools to query and explore a ClickHouse database",
   "metadata": {
     "category": "databases",
@@ -18,7 +18,7 @@
     {
       "name": "DiscoverDatabases",
       "qualifiedName": "Clickhouse.DiscoverDatabases",
-      "fullyQualifiedName": "Clickhouse.DiscoverDatabases@1.0.1",
+      "fullyQualifiedName": "Clickhouse.DiscoverDatabases@1.0.2",
       "description": "Discover all the databases in the ClickHouse database.",
       "parameters": [],
       "auth": null,
@@ -61,7 +61,7 @@
     {
       "name": "DiscoverSchemas",
       "qualifiedName": "Clickhouse.DiscoverSchemas",
-      "fullyQualifiedName": "Clickhouse.DiscoverSchemas@1.0.1",
+      "fullyQualifiedName": "Clickhouse.DiscoverSchemas@1.0.2",
       "description": "Discover all the schemas in the ClickHouse database.\n\nNote: ClickHouse doesn't have schemas like PostgreSQL, so this returns a default schema name.",
       "parameters": [],
       "auth": null,
@@ -104,7 +104,7 @@
     {
       "name": "DiscoverTables",
       "qualifiedName": "Clickhouse.DiscoverTables",
-      "fullyQualifiedName": "Clickhouse.DiscoverTables@1.0.1",
+      "fullyQualifiedName": "Clickhouse.DiscoverTables@1.0.2",
       "description": "Discover all the tables in the ClickHouse database when the list of tables is not known.\n\nALWAYS use this tool before any other tool that requires a table name.",
       "parameters": [],
       "auth": null,
@@ -147,7 +147,7 @@
     {
       "name": "ExecuteSelectQuery",
       "qualifiedName": "Clickhouse.ExecuteSelectQuery",
-      "fullyQualifiedName": "Clickhouse.ExecuteSelectQuery@1.0.1",
+      "fullyQualifiedName": "Clickhouse.ExecuteSelectQuery@1.0.2",
       "description": "You have a connection to a ClickHouse database.\nExecute a SELECT query and return the results against the ClickHouse database.\nNo other queries (INSERT, UPDATE, DELETE, etc.) are allowed.\n\nONLY use this tool if you have already loaded the schema of the tables you need to query.\n\nThe final query will be constructed as follows:\nSELECT {select_query_part} FROM {from_clause} JOIN {join_clause}\nWHERE {where_clause} HAVING {having_clause}\nORDER BY {order_by_clause} LIMIT {limit} OFFSET {offset}\n\nWhen running queries, follow these rules which will help avoid errors:\n* Never \"select *\" from a table. Always select the columns you need.\n* Always order your results. Use the most important columns or the primary key if you're unsure.\n* Always use case-insensitive queries to match strings in the query.\n* Always trim strings in the query.\n* Prefer LIKE queries over direct string matches or regex queries.\n* Only join on columns that are indexed or the primary key. Do not join on arbitrary columns.\n* ClickHouse is case-sensitive, so be careful with table and column names.",
       "parameters": [
         {
@@ -170,7 +170,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of rows to return. This is the LIMIT clause of the query. Default: 100.",
+          "description": "The maximum number of rows to return. This is the LIMIT clause of the query. Defaults to 100.",
           "enum": null,
           "inferrable": true
         },
@@ -178,7 +178,7 @@
           "name": "offset",
           "type": "integer",
           "required": false,
-          "description": "The number of rows to skip.  This is the OFFSET clause of the query.  Default: 0.",
+          "description": "The number of rows to skip. This is the OFFSET clause of the query. Defaults to 0.",
           "enum": null,
           "inferrable": true
         },
@@ -186,7 +186,7 @@
           "name": "join_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the JOIN keyword. Do not include the JOIN keyword. If no join is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the JOIN keyword. Do not include the JOIN keyword. Defaults to no JOIN clause.",
           "enum": null,
           "inferrable": true
         },
@@ -194,7 +194,7 @@
           "name": "where_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the WHERE keyword. Do not include the WHERE keyword. If no where clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the WHERE keyword. Do not include the WHERE keyword. Defaults to no WHERE clause.",
           "enum": null,
           "inferrable": true
         },
@@ -202,7 +202,7 @@
           "name": "having_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the HAVING keyword. Do not include the HAVING keyword. If no having clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the HAVING keyword. Do not include the HAVING keyword. Defaults to no HAVING clause.",
           "enum": null,
           "inferrable": true
         },
@@ -210,7 +210,7 @@
           "name": "group_by_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the GROUP BY keyword. Do not include the GROUP BY keyword. If no group by clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the GROUP BY keyword. Do not include the GROUP BY keyword. Defaults to no GROUP BY clause.",
           "enum": null,
           "inferrable": true
         },
@@ -218,7 +218,7 @@
           "name": "order_by_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the ORDER BY keyword. Do not include the ORDER BY keyword. If no order by clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the ORDER BY keyword. Do not include the ORDER BY keyword. Defaults to no ORDER BY clause.",
           "enum": null,
           "inferrable": true
         },
@@ -226,7 +226,7 @@
           "name": "with_clause",
           "type": "string",
           "required": false,
-          "description": "This is the part of the SQL query that comes after the WITH keyword when basing the query on a virtual table. If no WITH clause is needed, leave this blank.",
+          "description": "This is the part of the SQL query that comes after the WITH keyword when basing the query on a virtual table. Defaults to no WITH clause.",
           "enum": null,
           "inferrable": true
         }
@@ -322,7 +322,7 @@
     {
       "name": "GetTableSchema",
       "qualifiedName": "Clickhouse.GetTableSchema",
-      "fullyQualifiedName": "Clickhouse.GetTableSchema@1.0.1",
+      "fullyQualifiedName": "Clickhouse.GetTableSchema@1.0.2",
       "description": "Get the schema/structure of a ClickHouse table in the ClickHouse database\nwhen the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.\nAll tables in the query must be discovered first,\nso that their exact names are known.",
       "parameters": [
         {
@@ -395,6 +395,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:24:45.437Z",
-  "summary": "## ClickHouse Toolkit\n\nArcade toolkit for connecting to and querying a ClickHouse database — enabling schema discovery, table exploration, and read-only SQL execution.\n\n## Capabilities\n\n- **Database & schema discovery**: Enumerate all databases and retrieve schema information (returns a default schema name, since ClickHouse does not use PostgreSQL-style schemas).\n- **Table discovery**: List all tables in the database; intended to be run before any query so exact table names are known.\n- **Schema inspection**: Fetch the full structure of a specific table, including column names and types, before constructing queries.\n- **Read-only query execution**: Run `SELECT` statements with full support for joins, filtering, ordering, pagination (`LIMIT`/`OFFSET`), and aggregation (`HAVING`); no write operations (`INSERT`, `UPDATE`, `DELETE`) are permitted.\n\n## Secrets\n\n`CLICKHOUSE_DATABASE_CONNECTION_STRING` — A connection string that encodes all credentials and connection parameters needed to reach your ClickHouse instance. ClickHouse supports multiple connection string formats depending on the client driver; a typical format is `clickhouse://[user]:[password]@[host]:[port]/[database]` or the HTTP-equivalent `http://[user]:[password]@[host]:[port]/[database]`. Obtain the host, port, default database, and credentials from your ClickHouse deployment — for ClickHouse Cloud, find these on the **Connect** page of your service in the [ClickHouse Cloud console](https://clickhouse.cloud); for self-hosted instances, consult your administrator or your server's `config.xml` / `users.xml`. Ensure the user has at minimum `SELECT` privileges on the target database and tables.\n\nFor configuring secrets in Arcade, see [Tool Secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at https://api.arcade.dev/dashboard/auth/secrets."
+  "generatedAt": "2026-10-10T11:13:54.270Z",
+  "summary": "## ClickHouse Toolkit\n\nArcade's ClickHouse toolkit provides tools to connect to and explore a ClickHouse database, enabling schema discovery and read-only SQL query execution.\n\n## Capabilities\n\n- **Database & schema discovery:** List all databases and retrieve default schema information (ClickHouse does not use schemas like PostgreSQL).\n- **Table discovery & schema inspection:** Enumerate tables when they are unknown, and fetch the full structure of a specific table before querying.\n- **Read-only query execution:** Run `SELECT` queries with structured clause composition (joins, filters, ordering, pagination); no write operations are permitted.\n\n## Secrets\n\n`CLICKHOUSE_DATABASE_CONNECTION_STRING` — A connection string (DSN) used to authenticate and connect to the ClickHouse instance. It typically follows the format `clickhouse://[user]:[password]@[host]:[port]/[database]` and encodes the host, port, database name, username, and password in a single string. Obtain or construct this value from your ClickHouse deployment's connection details — for cloud-hosted instances (e.g., ClickHouse Cloud), find the host and credentials in the [ClickHouse Cloud console](https://clickhouse.cloud/) under your service's **Connection details** section. For self-hosted instances, use the host/port you configured during setup along with the user credentials defined in your ClickHouse `users.xml` or via SQL user management.\n\nStore this secret in Arcade as described in the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }
