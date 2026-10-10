@@ -25,12 +25,124 @@ The Arcade Engine's service account gets a namespaced Role in the workers namesp
 
 - A working Arcade installation from the [Helm chart](/operate/deploy/helm), with `gateway.hostname`, `ingress.hostname`, or `deployments.domain` set
 - A bucket in an S3-compatible store, Google Cloud Storage, or Azure Blob Storage for release bundles
-- Credentials for that bucket that the Arcade Engine can pick up from its environment. The Arcade Engine reads them from the ambient cloud credential chain, never from the bucket URL and never from a deploy request.
+- Credentials for that bucket that the Arcade Engine can pick up from its environment. The Arcade Engine reads them from the ambient cloud credential chain, never from the bucket URL and never from a deploy request. See [Bucket credentials](#bucket-credentials).
 - Access from your cluster to the runner image, either `arcadedev/runner` on Docker Hub or a copy in your own registry
 - A CNI plugin that enforces Kubernetes NetworkPolicies, so the per-server isolation takes effect
 
-{/* TODO(DEP-371): Document how to hand bucket credentials to the Arcade Engine through the chart. There's no engine service account annotation value for workload identity (IRSA, GKE Workload Identity, Azure Workload Identity) yet; engine.extraEnv / engine.extraEnvFrom are the likely path for static keys. Confirm with the chart owners before publishing. */}
 metrics-server is optional. The Arcade Engine's Role may read pod metrics, but the Arcade Engine doesn't query them yet, so nothing breaks without it.
+
+## Bucket credentials
+
+The Arcade Engine opens the artifact store with each cloud SDK's default credential lookup. Give credentials to the Arcade Engine's ServiceAccount, `<release>-engine` in the release namespace, or put them in its environment. Pick one method:
+
+| Method | Store | Chart |
+| --- | --- | --- |
+| [EKS Pod Identity](#eks-pod-identity) | S3 | 1.11.1 or later |
+| [Static keys in a Secret](#static-keys) | S3, Azure Blob | 1.11.1 or later |
+| [EKS IRSA](#workload-identity-and-key-files) | S3 | The first chart release after 1.11.1 |
+| [Azure Workload Identity](#workload-identity-and-key-files) | Azure Blob | The first chart release after 1.11.1 |
+| [GKE Workload Identity](#workload-identity-and-key-files) | GCS | The first chart release after 1.11.1 |
+| [GCP service account key file](#workload-identity-and-key-files) | GCS | The first chart release after 1.11.1 |
+
+The identity you give the Arcade Engine needs to read and write objects in the bucket. Deployed servers don't need bucket credentials as long as the Arcade Engine can sign download URLs. See [Artifact store](#artifact-store).
+
+### EKS Pod Identity
+
+EKS Pod Identity needs no chart values. With the [EKS Pod Identity Agent](https://docs.aws.amazon.com/eks/latest/userguide/pod-id-agent-setup.html) installed, create an IAM role that EKS Pod Identity can assume and associate it with the Arcade Engine's ServiceAccount. For a release named `arcade` in the `arcade` namespace:
+
+```bash
+aws eks create-pod-identity-association \
+  --cluster-name my-cluster \
+  --namespace arcade \
+  --service-account arcade-engine \
+  --role-arn arn:aws:iam::111122223333:role/arcade-engine
+```
+
+See [EKS Pod Identity](https://docs.aws.amazon.com/eks/latest/userguide/pod-identities.html) for the role's trust policy.
+
+### Static keys
+
+Put the keys in a Secret in the release namespace and pass it to the Arcade Engine with `engine.extraEnvFrom`:
+
+- S3: `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`
+- Azure Blob: `AZURE_STORAGE_ACCOUNT` and `AZURE_STORAGE_KEY`. A shared key also lets the Arcade Engine sign download URLs.
+
+```bash
+kubectl -n arcade create secret generic arcade-bundle-store \
+  --from-literal=AWS_ACCESS_KEY_ID=... \
+  --from-literal=AWS_SECRET_ACCESS_KEY=...
+```
+
+```yaml filename="values.yaml"
+engine:
+  extraEnvFrom:
+    - secretRef:
+        name: arcade-bundle-store
+```
+
+### Workload identity and key files
+
+<Callout type="warning">
+These methods need the first chart release after 1.11.1. Chart 1.11.1 has no values for ServiceAccount annotations, pod labels, or extra volumes.
+</Callout>
+
+Set up the identity on the cloud side first, following [EKS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), [Azure Workload Identity](https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview), or [GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) for the Arcade Engine's ServiceAccount. Then set the matching values:
+
+| Value | Default | Description |
+| --- | --- | --- |
+| `engine.serviceAccount.annotations` | `{}` | Annotations on the Arcade Engine's ServiceAccount. |
+| `engine.podLabels` | `{}` | Labels on the Arcade Engine's pods. Keys the chart already sets are rejected. |
+| `engine.podAnnotations` | `{}` | Annotations on the Arcade Engine's pods. `checksum/*` keys are rejected. |
+| `engine.extraVolumes` | `[]` | Extra volumes for the Arcade Engine's pods. |
+| `engine.extraVolumeMounts` | `[]` | Extra volume mounts for the Arcade Engine's container. |
+
+The identity applies to the Arcade Engine's Deployment only. The Arcade Engine's Jobs (migration, gateway bootstrap, worker reconcile) use their own ServiceAccounts. Extra volumes and mounts also go into those Jobs.
+
+EKS IRSA:
+
+```yaml filename="values.yaml"
+engine:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/arcade-engine
+```
+
+Azure Workload Identity. Also name the storage account, with `AZURE_STORAGE_ACCOUNT` in `engine.extraEnv` or `storage_account=` in `deployments.artifacts.url`:
+
+```yaml filename="values.yaml"
+engine:
+  serviceAccount:
+    annotations:
+      azure.workload.identity/client-id: 00000000-0000-0000-0000-000000000000
+  podLabels:
+    azure.workload.identity/use: "true"
+```
+
+GKE Workload Identity:
+
+```yaml filename="values.yaml"
+engine:
+  serviceAccount:
+    annotations:
+      iam.gke.io/gcp-service-account: arcade-engine@my-project.iam.gserviceaccount.com
+```
+
+GCP service account key file, mounted from a Secret named `gcp-key` with a `key.json` entry:
+
+```yaml filename="values.yaml"
+engine:
+  extraVolumes:
+    - name: gcp-key
+      secret:
+        secretName: gcp-key
+  extraVolumeMounts:
+    - name: gcp-key
+      mountPath: /var/secrets/gcp
+      readOnly: true
+  extraEnv:
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: /var/secrets/gcp/key.json
+```
 
 ## Enable deployments
 
@@ -94,15 +206,15 @@ All settings live under `deployments.*` in the chart values. Leave a value at it
 | --- | --- | --- |
 | `deployments.artifacts.url` | `""` | Bucket URL for release bundles, for example `s3://bundles?region=us-east-1`, `gs://bundles`, or `azblob://bundles`. Required when deployments are on. |
 
-The deployed server's pod doesn't hold store credentials. The Arcade Engine gives the pod a presigned download URL for its bundle when the store can sign one:
+Deployed servers' pods get no bucket credentials: their ServiceAccount mounts no token, and their NetworkPolicy blocks the cloud metadata endpoint. Instead, the Arcade Engine gives each pod a presigned download URL for its bundle when it can sign one:
 
 | Store | Signs when | Otherwise |
 | --- | --- | --- |
-| S3 | Any credential. With STS session credentials, the URL expires with the session. | The pod reads the store URL directly and needs store credentials. |
-| GCS | The Arcade Engine's service account holds `iam.serviceAccounts.signBlob`. | Federated credentials can't sign, so the pod falls back to the store URL. |
-| Azure Blob | A shared key is configured (`AZURE_STORAGE_KEY`). | Managed identity can't mint SAS URLs, so the pod falls back to the store URL. |
+| S3 | Any credential. With STS session credentials, the URL expires with the session. | The pod falls back to the store URL, which it has no credentials for. |
+| GCS | A key file is configured, or the Arcade Engine's service account holds `iam.serviceAccounts.signBlob`. | The pod falls back to the store URL, which it has no credentials for. |
+| Azure Blob | A shared key is configured (`AZURE_STORAGE_KEY`). | Workload and managed identities can't sign, so the pod falls back to the store URL, which it has no credentials for. |
 
-A signing failure doesn't fail the deploy.
+A signing failure doesn't fail the deploy, but the pod then can't fetch its bundle. With Azure Workload Identity or GKE Workload Identity, make sure signing works as described above.
 
 ### Runner image and registry
 
