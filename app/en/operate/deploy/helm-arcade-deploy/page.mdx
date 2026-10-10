@@ -9,7 +9,7 @@ import { Callout, Steps } from "nextra/components";
 
 This page is for platform operators who run Arcade with the [Helm chart](/operate/deploy/helm) and want developers to ship custom MCP servers into that installation with `arcade deploy`. Once you turn deployments on, the Arcade Engine runs each deployed server as a workload in your own cluster. Bundles go to an object store you own, and runner images come from a registry you choose.
 
-{/* TODO(DEP-371): Add the "nothing leaves your environment" guarantee (spec SEC1.R1) once its scenarios are promoted (DEP-238). */}
+Bundles stay in your environment: the chart requires an artifact store (`deployments.artifacts.url`), and the Arcade Engine publishes bundles only there. Usage-event tracking (`usageTracking.enabled`) is off by default in the chart. Leave it off so your installation sends no usage events to Arcade.
 
 The `deployments.*` values first shipped in chart 1.11.0. Use chart 1.11.1 or later: in 1.11.0 you must set `deployments.image.repository` yourself, or the chart fails to render, and there are no `deployments.runtime.*` values.
 
@@ -18,7 +18,6 @@ The `deployments.*` values first shipped in chart 1.11.0. Use chart 1.11.1 or la
 - A developer runs `arcade deploy` against your installation. The Arcade Engine publishes the server's bundle to your **artifact store** (S3-compatible, GCS, or Azure Blob).
 - The Arcade Engine creates the server in the **workers namespace** (`arcade-workers` by default). Each deployed server runs as a Kubernetes Deployment of the **runner image** (`arcadedev/runner`), one pod by default, and the pod fetches its bundle from the artifact store.
 - Every deployed server gets its own NetworkPolicy. It accepts traffic only from the Arcade Engine. Outbound, it reaches the public internet and cluster DNS, but not private address ranges, link-local addresses (including cloud metadata), or the cluster ranges you list, unless you allowlist a range.
-- The **deployment budget** sizes the workers namespace's quota, which limits how many deployed servers can run at once.
 
 The Arcade Engine's service account gets a namespaced Role in the workers namespace. That Role covers Deployments, Services, Secrets, ServiceAccounts, NetworkPolicies, ResourceQuotas, Leases, read access to pods and pod logs, and read access to pod metrics. Developers never need cluster access.
 
@@ -85,12 +84,9 @@ All settings live under `deployments.*` in the chart values. Leave a value at it
 | `deployments.mutationsAllowed` | `true` | When `false`, the Arcade Engine blocks creating and updating deployments. |
 | `deployments.domain` | `""` | Root domain for deployments, passed to the Arcade Engine. Falls back to `gateway.hostname`, then `ingress.hostname`. The chart refuses to render if none of them is set. In the platform's own cluster, the Arcade Engine reaches deployed servers on their in-cluster Service address. |
 | `deployments.timeout` | `5m` | How long a deploy may take to become healthy before it's marked failed. |
-| `deployments.autoRoll` | `true` | Rendered to the Arcade Engine as `auto_roll`. {/* TODO(DEP-371): Describe what auto_roll does (moving deployed servers onto an upgraded runner image) once DEP-243/DEP-248 land and the behavior is verified. */} |
-| `deployments.reconciler.enabled` | `true` | Runs the deployment reconciler. It keeps the budget quota in step with `deployments.budget.default` and removes NetworkPolicies left behind by removed servers. |
-| `deployments.budget.default` | `5` | Deployment budget. The reconciler sizes the `arcade-deployments-budget` quota from it: `budget + 1` pods, so one rollout can surge. {/* TODO(DEP-237): Document the refusal of a deploy at the budget once its scenario is promoted. */} |
+| `deployments.autoRoll` | `true` | When `true`, the reconciler moves deployed servers onto a new runner image one at a time (see [Upgrades](#upgrades)). When `false`, the move is deferred and deployed servers stay on the runner image they already run. |
+| `deployments.reconciler.enabled` | `true` | Runs the deployment reconciler. It moves deployed servers onto a new runner image and removes NetworkPolicies left behind by removed servers. |
 | `deployments.readinessProbe` | `rollout` | How the Arcade Engine decides a deployed server is ready. `rollout` waits for the Kubernetes rollout to finish, which needs the pod to accept TCP connections on the server's port. Any other value, such as `health`, also waits until the server's `/worker/health` endpoint answers HTTP 200 to the Arcade Engine. |
-
-{/* TODO(DEP-371): The PLE1 spec says the budget counts servers that are Running, Deploying, Degraded, or Disabled, that an unsigned default can't exceed 5, and that a license Secret raises it. The license and the budget display on the Servers page are still pending (DEP-237, DEP-246). Document them once they ship. */}
 
 ### Artifact store
 
@@ -133,7 +129,7 @@ Every deployed server gets the same size.
 
 | Value | Default | Description |
 | --- | --- | --- |
-| `deployments.sizing.instances` | `1` | Instances per deployed server. Keep it at `1`: Arcade Deploy runs one serving instance per server, without high availability or autoscaling. A higher value makes the Arcade Engine run that many pods per server and size the budget quota at `budget × instances + 1` pods. |
+| `deployments.sizing.instances` | `1` | Instances per deployed server. Keep it at `1`: Arcade Deploy runs one serving instance per server, without high availability or autoscaling. A higher value makes the Arcade Engine run that many pods per server. |
 | `deployments.sizing.cpuLimit` | `1.0` | CPU limit per deployed server, in cores. |
 | `deployments.sizing.memoryLimit` | `512` | Memory limit per deployed server, in mebibytes (an integer, not a quantity string). |
 | `deployments.runtime.className` | `""` | RuntimeClass for deployed servers, for example a sandboxed runtime. Empty uses the cluster default. |
@@ -189,8 +185,6 @@ deployments:
 
 To use a namespace you manage yourself, set `deployments.createNamespace: false`. The chart then adds no default-deny NetworkPolicy, unless you also set `deployments.network.defaultDenyExistingNamespace: true`. Only do that when the namespace holds nothing but deployed servers.
 
-The reconciler also maintains its own quota, `arcade-deployments-budget`. It allows `budget + 1` pods (one spare for a rollout), and sizes CPU and memory as that pod count times the per-server limits.
-
 {/* TODO(DEP-371): The runbook says arcade-deployments-budget should be the only quota in the workers namespace, but the chart also renders <release>-workers-quota by default. Confirm the recommended deployments.resourceQuota.enabled setting when the reconciler is on. */}
 
 ### Network
@@ -233,7 +227,15 @@ For non-interactive CI deploys, set `ARCADE_URL` and `ARCADE_API_KEY` (a project
 
 ### Dashboard and CLI
 
-The **Servers** page in the dashboard lists deployed servers and their status. A running server whose instance keeps crashing shows as **Degraded**. A removed server disappears from the list.
+The **Servers** page in the dashboard lists deployed servers. A removed server disappears from the list. The Arcade Engine tracks each deployed server in one of these states, and `arcade deploy` waits for a final one:
+
+| State | Meaning |
+| --- | --- |
+| `pending` | A new server is rolling out. The dashboard shows **Deploying**. |
+| `updating` | A redeploy is rolling out. The Arcade Engine refuses another redeploy of the server until it finishes. The dashboard shows **Updating**. |
+| `running` | The current release is ready and serving. |
+| `degraded` | No instance of the current release is serving, for example because it keeps crashing, or a rollout failed while the previous instance still serves. The status message gives the reason. |
+| `failed` | The release didn't become ready, because it failed to start or `deployments.timeout` ran out, and nothing is serving it. |
 
 From the CLI:
 
@@ -244,8 +246,6 @@ arcade server logs <name> -f
 ```
 
 Logs cover the current release. After a crash, they also include the immediately previous instance. Arcade doesn't keep logs beyond that, so ship pod logs to your own logging stack if you need them longer.
-
-{/* TODO(DEP-371): The spec's status words are Deploying, Running, Degraded, Failed, Disabled, Removed. The listing scenarios are still pending (DEP-239). Confirm which appear in the self-hosted dashboard today. Degraded for an unreachable artifact store is still pending (DEP-243/DEP-248); per-server CPU and memory usage is pending (DEP-235). */}
 
 ### kubectl
 
@@ -265,7 +265,13 @@ Upgrade the chart with `helm upgrade` as described in [Self-host with Helm](/ope
 - **Private registry.** Mirror the new runner tag into your registry before you upgrade.
 - **Namespace.** With `deployments.createNamespace: true`, Helm keeps the workers namespace and its default-deny NetworkPolicy on uninstall, so deployed servers' objects aren't deleted with the release.
 
-{/* TODO(DEP-371): The PLE1 spec says an upgrade preserves each release and moves deployed servers onto the upgraded runtime one at a time, and that an installation can defer that move. These scenarios are still @wip (DEP-243, DEP-248, DEP-251). Document the upgrade flow once they're promoted. */}
+### Moving deployed servers onto a new runner image
+
+When an upgrade changes the runner image tag, the reconciler moves running deployed servers onto it one at a time. This needs `deployments.reconciler.enabled: true`.
+
+- On each pass (every 30 seconds), the reconciler starts at most one move, and only when no other move is still rolling out.
+- If a server can't start on the new runner image, the Arcade Engine rolls it back to the previous one and marks it `degraded` with the message "could not start on the upgraded runtime; the previous runtime is still serving". The move then halts: no other server moves onto that image.
+- Set `deployments.autoRoll: false` to defer the move. Deployed servers then stay on the runner image they already run.
 
 ## Troubleshooting
 
@@ -276,7 +282,7 @@ Upgrade the chart with `helm upgrade` as described in [Self-host with Helm](/ope
 | `helm upgrade` fails with `engine.extraConfig sets deployments:` | The chart owns the `deployments:` block in the Arcade Engine's configuration. Use `deployments.*` chart values instead of `engine.extraConfig`. |
 | The Arcade Engine doesn't start and names an unsupported scheme | Use an `s3://`, `gs://`, or `azblob://` URL in `deployments.artifacts.url`. |
 | A deploy fails because the server never became healthy | The pod started but didn't answer its health check within `deployments.timeout`. Read the server's logs, and check that it binds the port the platform probes. If many servers fail at once, suspect the runner image. If start-up is just slow, raise `deployments.timeout`. |
-| Deploys stop creating pods | A ResourceQuota in the workers namespace is full. Run `kubectl -n arcade-workers get resourcequota`. The tighter of `arcade-deployments-budget` and `<release>-workers-quota` is the one that refuses pods. Raise `deployments.budget.default` or `deployments.resourceQuota.hard`, and make sure your nodes can hold the extra servers. |
+| Deploys stop creating pods | A ResourceQuota in the workers namespace is full. Run `kubectl -n arcade-workers get resourcequota` to see which one. For `<release>-workers-quota`, raise `deployments.resourceQuota.hard`, and make sure your nodes can hold the extra servers. |
 | A deployed server can't reach an internal service | Add the service's CIDR to `deployments.egressAllowlist`. |
 | NetworkPolicies stay behind after you remove servers | With `deployments.reconciler.enabled: false`, nothing removes them. Delete NetworkPolicies labeled `app.kubernetes.io/managed-by=arcade-engine` by hand, or turn the reconciler back on. |
 
