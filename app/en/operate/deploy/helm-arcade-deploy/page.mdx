@@ -11,7 +11,7 @@ This page is for platform operators who run Arcade with the [Helm chart](/operat
 
 {/* TODO(DEP-371): Add the "nothing leaves your environment" guarantee (spec SEC1.R1) once its scenarios are promoted (DEP-238). */}
 
-{/* TODO(DEP-371): The chart's deployments.* block shipped in chart 1.11.1 (appVersion f0ceab0). Confirm the first chart version that shipped it and state it here as a minimum version. */}
+The `deployments.*` values first shipped in chart 1.11.0. Use chart 1.11.1 or later: in 1.11.0 you must set `deployments.image.repository` yourself, or the chart fails to render, and there are no `deployments.runtime.*` values.
 
 ## How it works
 
@@ -31,7 +31,7 @@ The Arcade Engine's service account gets a namespaced Role in the workers namesp
 - A CNI plugin that enforces Kubernetes NetworkPolicies, so the per-server isolation takes effect
 
 {/* TODO(DEP-371): Document how to hand bucket credentials to the Arcade Engine through the chart. There's no engine service account annotation value for workload identity (IRSA, GKE Workload Identity, Azure Workload Identity) yet; engine.extraEnv / engine.extraEnvFrom are the likely path for static keys. Confirm with the chart owners before publishing. */}
-{/* TODO(DEP-371): Confirm whether metrics-server is required. The engine Role reads metrics.k8s.io pods to report CPU and memory usage per server. */}
+metrics-server is optional. The Arcade Engine's Role may read pod metrics, but the Arcade Engine doesn't query them yet, so nothing breaks without it.
 
 ## Enable deployments
 
@@ -51,7 +51,7 @@ deployments:
 
 Use an `s3://`, `gs://`, or `azblob://` URL. The chart refuses to render when `deployments.enabled` is `true` and `deployments.artifacts.url` is empty. The Arcade Engine refuses to start when the URL scheme isn't one it supports, and names the supported schemes.
 
-{/* TODO(DEP-371): The engine's SupportedSchemes also lists mem and file (apparently for tests). Confirm they're not meant for production before saying anything about them. */}
+The Arcade Engine also accepts `mem://` and `file://`, but only its tests use them. They don't work in a cluster, because a deployed server's pod can't read the Arcade Engine's memory or local disk.
 
 ### Upgrade the release
 
@@ -88,7 +88,7 @@ All settings live under `deployments.*` in the chart values. Leave a value at it
 | `deployments.autoRoll` | `true` | Rendered to the Arcade Engine as `auto_roll`. {/* TODO(DEP-371): Describe what auto_roll does (moving deployed servers onto an upgraded runner image) once DEP-243/DEP-248 land and the behavior is verified. */} |
 | `deployments.reconciler.enabled` | `true` | Runs the deployment reconciler. It keeps the budget quota in step with `deployments.budget.default` and removes NetworkPolicies left behind by removed servers. |
 | `deployments.budget.default` | `5` | Deployment budget. The reconciler sizes the `arcade-deployments-budget` quota from it: `budget + 1` pods, so one rollout can surge. {/* TODO(DEP-237): Document the refusal of a deploy at the budget once its scenario is promoted. */} |
-| `deployments.readinessProbe` | `rollout` | How the Arcade Engine decides a deployed server is ready. {/* TODO(DEP-371): Document the values other than `rollout` and what each one checks. */} |
+| `deployments.readinessProbe` | `rollout` | How the Arcade Engine decides a deployed server is ready. `rollout` waits for the Kubernetes rollout to finish, which needs the pod to accept TCP connections on the server's port. Any other value, such as `health`, also waits until the server's `/worker/health` endpoint answers HTTP 200 to the Arcade Engine. |
 
 {/* TODO(DEP-371): The PLE1 spec says the budget counts servers that are Running, Deploying, Degraded, or Disabled, that an unsigned default can't exceed 5, and that a license Secret raises it. The license and the budget display on the Servers page are still pending (DEP-237, DEP-246). Document them once they ship. */}
 
@@ -133,7 +133,7 @@ Every deployed server gets the same size.
 
 | Value | Default | Description |
 | --- | --- | --- |
-| `deployments.sizing.instances` | `1` | Instances per deployed server. {/* TODO(DEP-371): The PLE1 spec lists HA and autoscaling as non-goals (one serving instance per release). Confirm whether values above 1 are supported before documenting them. */} |
+| `deployments.sizing.instances` | `1` | Instances per deployed server. Keep it at `1`: Arcade Deploy runs one serving instance per server, without high availability or autoscaling. A higher value makes the Arcade Engine run that many pods per server and size the budget quota at `budget × instances + 1` pods. |
 | `deployments.sizing.cpuLimit` | `1.0` | CPU limit per deployed server, in cores. |
 | `deployments.sizing.memoryLimit` | `512` | Memory limit per deployed server, in mebibytes (an integer, not a quantity string). |
 | `deployments.runtime.className` | `""` | RuntimeClass for deployed servers, for example a sandboxed runtime. Empty uses the cluster default. |
@@ -222,12 +222,12 @@ arcade deploy -e src/my_server/server.py
 
 - Deploy MCP servers built with the Arcade MCP framework for Python. The Arcade Engine refuses a bundle without a Python project definition or with a missing entrypoint.
 - The Arcade Engine refuses a changed redeploy while the previous one is still rolling out.
-- The Arcade Engine also refuses a bundle over the installation's size limit, and discards a virtual environment that the bundle ships.
+- The Arcade Engine also refuses a bundle over its 16 MiB limit or one that unpacks past 256 MiB, and discards a virtual environment that the bundle ships. The 16 MiB limit caps the upload request, with a little headroom for encoding. Both limits are built into the Arcade Engine; no chart or configuration value changes them.
 - A redeploy that changes the server's code or secrets replaces the release under the same name and gateway URL. A redeploy of a running release that changes nothing is a no-op. Deploying again after a failed release rolls it out again, even if nothing changed.
 
 {/* TODO(DEP-371): Saved-context sign-in and the framework gate in the CLI (spec SVD1.R2, SVD1.R4, SVD1.R6) are still @wip in the monorepo behaviors. Verify `arcade login --url` + `arcade deploy` end to end against a self-hosted install before publishing. */}
-{/* TODO(DEP-371): Document non-interactive CI deploys (installation URL plus a project API key in the environment, per spec SVD1.R2): the exact environment variable names and the minimum CLI version. */}
-{/* TODO(DEP-371): State the bundle size limit and where it's configured. */}
+
+For non-interactive CI deploys, set `ARCADE_URL` and `ARCADE_API_KEY` (a project API key) in the CI environment, then run `arcade deploy`. With both set, the CLI skips the saved context and browser sign-in and uses `ARCADE_URL` directly as the Arcade Engine's URL, without discovery. This needs `arcade-mcp` 1.16.0 or later.
 
 ## Check status and logs
 
