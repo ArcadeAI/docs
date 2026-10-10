@@ -1,7 +1,7 @@
 {
   "id": "Brightdata",
   "label": "Bright Data",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Search, Crawl and Scrape any site, at scale, without getting blocked",
   "metadata": {
     "category": "development",
@@ -18,7 +18,7 @@
     {
       "name": "ScrapeAsMarkdown",
       "qualifiedName": "Brightdata.ScrapeAsMarkdown",
-      "fullyQualifiedName": "Brightdata.ScrapeAsMarkdown@1.0.1",
+      "fullyQualifiedName": "Brightdata.ScrapeAsMarkdown@1.0.2",
       "description": "    Scrape a webpage and return content in Markdown format using Bright Data.\n\n    Examples:\n        scrape_as_markdown(\"https://example.com\") -> \"# Example Page\n\nContent...\"\n        scrape_as_markdown(\"https://news.ycombinator.com\") -> \"# Hacker News\n...\"\n    ",
       "parameters": [
         {
@@ -83,7 +83,7 @@
     {
       "name": "SearchEngine",
       "qualifiedName": "Brightdata.SearchEngine",
-      "fullyQualifiedName": "Brightdata.SearchEngine@1.0.1",
+      "fullyQualifiedName": "Brightdata.SearchEngine@1.0.2",
       "description": "    Search using Google, Bing, or Yandex with advanced parameters using Bright Data.\n\n    Examples:\n        search_engine(\"climate change\") -> \"# Search Results\n\n## Climate Change - Wikipedia\n...\"\n        search_engine(\"Python tutorials\", engine=\"bing\", num_results=5) -> \"# Bing Results\n...\"\n        search_engine(\"cats\", search_type=\"images\", country_code=\"us\") -> \"# Image Results\n...\"\n    ",
       "parameters": [
         {
@@ -110,7 +110,7 @@
           "name": "language",
           "type": "string",
           "required": false,
-          "description": "Two-letter language code",
+          "description": "Two-letter language code. Defaults to no language preference.",
           "enum": null,
           "inferrable": true
         },
@@ -118,7 +118,7 @@
           "name": "country_code",
           "type": "string",
           "required": false,
-          "description": "Two-letter country code",
+          "description": "Two-letter country code. Defaults to no country preference.",
           "enum": null,
           "inferrable": true
         },
@@ -126,7 +126,7 @@
           "name": "search_type",
           "type": "string",
           "required": false,
-          "description": "Type of search",
+          "description": "Type of search. Defaults to a regular web search.",
           "enum": [
             "images",
             "shopping",
@@ -139,7 +139,7 @@
           "name": "start",
           "type": "integer",
           "required": false,
-          "description": "Results pagination offset",
+          "description": "Results pagination offset. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         },
@@ -147,7 +147,7 @@
           "name": "num_results",
           "type": "integer",
           "required": false,
-          "description": "Number of results to return. The default is 10",
+          "description": "Number of results to return. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
@@ -155,7 +155,7 @@
           "name": "location",
           "type": "string",
           "required": false,
-          "description": "Location for search results",
+          "description": "Location for search results. Defaults to no location preference.",
           "enum": null,
           "inferrable": true
         },
@@ -163,7 +163,7 @@
           "name": "device",
           "type": "string",
           "required": false,
-          "description": "Device type",
+          "description": "Device type. Defaults to a desktop device.",
           "enum": [
             "mobile",
             "ios",
@@ -281,7 +281,7 @@
     {
       "name": "WebDataFeed",
       "qualifiedName": "Brightdata.WebDataFeed",
-      "fullyQualifiedName": "Brightdata.WebDataFeed@1.0.1",
+      "fullyQualifiedName": "Brightdata.WebDataFeed@1.0.2",
       "description": "Extract structured data from various websites like LinkedIn, Amazon, Instagram, etc.\nNEVER MAKE UP LINKS. IF LINKS ARE NEEDED, FIND THEM WITH A WEB SEARCH FIRST.\nSupported source types:\n- amazon_product, amazon_product_reviews\n- linkedin_person_profile, linkedin_company_profile\n- zoominfo_company_profile\n- instagram_profiles, instagram_posts, instagram_reels, instagram_comments\n- facebook_posts, facebook_marketplace_listings, facebook_company_reviews\n- x_posts\n- zillow_properties_listing\n- booking_hotel_listings\n- youtube_videos\n\nExamples:\n    web_data_feed(\"amazon_product\", \"https://amazon.com/dp/B08N5WRWNW\")\n        -> \"{\"title\": \"Product Name\", ...}\"\n    web_data_feed(\"linkedin_person_profile\", \"https://linkedin.com/in/johndoe\")\n        -> \"{\"name\": \"John Doe\", ...}\"\n    web_data_feed(\n        \"facebook_company_reviews\", \"https://facebook.com/company\", num_of_reviews=50\n    ) -> \"[{\"review\": \"...\", ...}]\"",
       "parameters": [
         {
@@ -321,7 +321,7 @@
           "name": "num_of_reviews",
           "type": "integer",
           "required": false,
-          "description": "Number of reviews to retrieve. Only applicable for facebook_company_reviews. Default is None",
+          "description": "Number of reviews to retrieve. Only applicable for facebook_company_reviews. Defaults to the Bright Data default number of reviews.",
           "enum": null,
           "inferrable": true
         },
@@ -420,6 +420,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "e6e82b574ca7ab28710647b1a4a14ff532600f472f9c1b9019d8caf61538b941",
-  "generatedAt": "2026-10-07T21:24:45.437Z",
-  "summary": "Bright Data is a web data platform; this toolkit enables Arcade tools to scrape, search, and extract structured data from any public website at scale without getting blocked.\n\n## Capabilities\n\n- **Web scraping**: Fetch any webpage and return its content as clean Markdown, suitable for LLM consumption or downstream processing.\n- **Multi-engine search**: Run queries against Google, Bing, or Yandex with control over result count, search type (web/images), and country targeting.\n- **Structured data extraction**: Pull typed, schema-aligned records from major platforms — Amazon products and reviews, LinkedIn person and company profiles, Instagram profiles/posts/reels/comments, Facebook posts/marketplace/reviews, X posts, Zillow listings, Booking.com hotels, YouTube videos, and ZoomInfo company profiles.\n\n## Secrets\n\nThis toolkit requires no OAuth flow; all authentication is handled via secrets injected at runtime.\n\n- **`BRIGHTDATA_API_KEY`** — Your Bright Data account API key. Obtain it from the [Bright Data control panel](https://brightdata.com/cp/setting) under **Account Settings → API Tokens**. A paid or trial Bright Data account is required; the key authenticates all API requests.\n\n- **`BRIGHTDATA_ZONE`** — The name of the Bright Data proxy/scraping zone to use for requests. Zones are created and managed in the [Bright Data control panel](https://brightdata.com/cp/zones) under **Proxies & Scraping Infrastructure**. Each zone corresponds to a specific product (e.g., Web Unlocker, Scraping Browser, Residential Proxies); select or create the zone appropriate for your use case and copy its exact zone name.\n\nFor instructions on storing secrets in Arcade, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-10T11:13:54.270Z",
+  "summary": "Bright Data is a web data infrastructure provider; this toolkit enables Arcade agents to scrape pages, run search-engine queries, and extract structured data from major platforms at scale without getting blocked.\n\n## Capabilities\n\n- **Web scraping**: Fetch any public webpage and receive clean Markdown output, suitable for LLM consumption or downstream processing.\n- **Search engines**: Query Google, Bing, or Yandex with configurable parameters — result count, country code, search type (web, images, etc.).\n- **Structured data feeds**: Pull pre-parsed, schema'd records from platforms including Amazon, LinkedIn, Instagram, Facebook, X, YouTube, Zillow, Booking.com, and ZoomInfo — no custom parser needed.\n\n## Secrets\n\nNo OAuth flow is used. Access is authenticated via two required secrets passed to the toolkit.\n\n`BRIGHTDATA_API_KEY`\nYour Bright Data account API key. Obtain it from the Bright Data control panel: log in, navigate to **Account Settings → API Tokens**, and generate or copy your token. The key authenticates all API requests made on your behalf.\n\n`BRIGHTDATA_ZONE`\nThe Bright Data [zone](https://docs.brightdata.com/api-reference/proxy/overview) (proxy zone or dataset zone) to route requests through. Zones are created and named in the Bright Data control panel under **Proxies & Scraping Infrastructure**. Use the exact zone name as it appears in your dashboard (e.g., `residential`, `datacenter`, or a custom zone name you have configured). The zone determines the proxy pool, geolocation behavior, and billing ruleset applied to each request.\n\nFor help configuring secrets in Arcade, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

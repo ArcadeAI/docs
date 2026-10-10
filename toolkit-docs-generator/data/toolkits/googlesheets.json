@@ -1,7 +1,7 @@
 {
   "id": "GoogleSheets",
   "label": "Google Sheets",
-  "version": "10.0.3",
+  "version": "10.0.4",
   "description": "Arcade.dev LLM tools for Google Sheets.",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "CheckSpreadsheetAccess",
       "qualifiedName": "GoogleSheets.CheckSpreadsheetAccess",
-      "fullyQualifiedName": "GoogleSheets.CheckSpreadsheetAccess@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.CheckSpreadsheetAccess@10.0.4",
       "description": "Check whether this app can already read each of several spreadsheets, in one\nbatched pre-flight call, before attempting to read them.\n\nUse this when the user references multiple spreadsheets, to learn which are readable up\nfront instead of hitting a separate access error for each one. Where this app reaches\nspreadsheets one grant at a time, the ungranted ones can then be granted together in a\nsingle picker step. Each input may be a bare file id or a full Google Sheets/Drive URL.\n\nReturns ``spreadsheets`` (a per-id list with ``accessible``, the ``title`` and\n``mime_type`` when the file was read, and a ``reason`` when not usable),\n``all_accessible`` (true only when every id is an already-accessible spreadsheet),\n``connected_account_email`` (the connected Google account, empty when unknown), and a\n``grant`` block. ``grant`` lists the ungranted ids (``ungranted_ids``) plus, when the\ninline picker is enabled, a single picker URL covering them all. Where this app already\nreaches every spreadsheet the account can open there is no per-file grant to make, so\n``ungranted_ids`` stays empty and only ``access_hint`` comes back.\n\nA ``reason`` of ``not_accessible_or_not_found`` is a spreadsheet this app cannot read:\none not granted to it yet, one that does not exist, or one the connected account itself\ncannot open — indistinguishable here. For those ids specifically, an empty\n``ungranted_ids`` means no grant step exists, so treat them as not found rather than\nasking the user to grant them. Read that only against ``not_accessible_or_not_found``:\n``ungranted_ids`` is also empty when nothing needs granting at all, and for every reason\nbelow, none of which a grant would resolve.\n``not_a_spreadsheet`` is an accessible file of another type (a Doc, PDF, image, or\nExcel/CSV file); granting cannot change a type, so for an Excel/CSV file ask the user\nto open it in Google Sheets and use File, Save as Google Sheets, then share the\nconverted file. ``invalid_reference`` is an input that is not a Drive id or link at all;\nask the user to re-check it. ``rate_limited`` means Google throttled the check for that\nid, so its reachability is still unknown: wait briefly and call again for those ids, and\ndo not ask the user to grant them. ``error`` is any other failure to complete the check\n(a timeout or a Google server error) and is likewise unknown rather than denied.\n``type_unknown`` is a readable file whose type Google did not report - unlike\n``not_a_spreadsheet`` it is not a statement that the file is something else, so retry it\nrather than telling the user to convert it.\n\n``dropped_selector`` is non-empty when the input was a link naming a specific tab or\nrange (``gid=847362514``) that the file id does not carry. The file is still reported\nnormally, but the other tools reject such a link rather than silently applying to the\nworkbook's first tab - so pass the ``id`` from this result plus that tab named\nexplicitly, and do not forward the original URL.",
       "parameters": [
         {
@@ -99,7 +99,7 @@
     {
       "name": "CommentOnSpreadsheet",
       "qualifiedName": "GoogleSheets.CommentOnSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.CommentOnSpreadsheet@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.CommentOnSpreadsheet@10.0.4",
       "description": "Create a comment on a spreadsheet, edit a comment's body, or resolve/reopen it.\n\nComments are created at the file level: the Drive API cannot anchor a NEW Sheets comment to a\nspecific cell or range. Cell/range-anchored comments made in the Sheets UI can still be read\nby listing the spreadsheet's comments, which returns their anchor. Editing a comment's body\nis allowed only for the comment's author.",
       "parameters": [
         {
@@ -114,7 +114,7 @@
           "name": "comment_id",
           "type": "string",
           "required": false,
-          "description": "Omit to CREATE a new comment. Provide an existing comment id to edit it (pass content) or to resolve/reopen it (pass status).",
+          "description": "Provide an existing comment id to edit it (pass content) or to resolve/reopen it (pass status). Defaults to creating a new comment.",
           "enum": null,
           "inferrable": true
         },
@@ -122,7 +122,7 @@
           "name": "content",
           "type": "string",
           "required": false,
-          "description": "The comment text. Required when creating. When editing an existing comment (comment_id set, no status) this replaces the body (author-only). When a status is set, this is the optional text of the resolving/reopening reply.",
+          "description": "The comment text. Required when creating. When editing an existing comment (comment_id set, no status) this replaces the body (author-only). When a status is set, this is the optional text of the resolving/reopening reply. Defaults to no text.",
           "enum": null,
           "inferrable": true
         },
@@ -130,7 +130,7 @@
           "name": "status",
           "type": "string",
           "required": false,
-          "description": "Resolve or reopen an existing comment (requires comment_id). Implemented as a reply with an action. Omit to create or edit instead.",
+          "description": "Resolve or reopen an existing comment (requires comment_id). Implemented as a reply with an action. Defaults to creating or editing instead.",
           "enum": [
             "resolve",
             "reopen"
@@ -209,7 +209,7 @@
     {
       "name": "CreateOrEditSpreadsheet",
       "qualifiedName": "GoogleSheets.CreateOrEditSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.CreateOrEditSpreadsheet@10.0.4",
       "description": "Create a new spreadsheet or batch-edit an existing one.\n\nOmit `spreadsheet_id` to create; provide it to edit. All writes flow through\n`requests[]` — typed operations like updateCells, addSheet, sortRange,\naddConditionalFormatRule, autoResizeDimensions, and more.\n\nFor updateCells use ExtendedValue with an explicit type field (stringValue,\nnumberValue, boolValue, formulaValue).\n\nBy default, build clean, professional-looking tables with restrained, consistent\nformatting and plain-text tab names/headers (no emojis); only use emojis or\ndecorative styling when the user explicitly asks for it.",
       "parameters": [
         {
@@ -217,7 +217,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "A list of Google Sheets `spreadsheets.batchUpdate` request objects. Each object must have exactly one key naming the operation.\n\nFIELDS MASK: updateCells, repeatCell, updateSheetProperties, and updateDimensionProperties take a `fields` mask listing which sub-fields to write — anything you set but don't name is silently ignored. You can OMIT `fields` and the tool auto-derives it from the data you provide (recommended). Pass an explicit `fields` only for surgical edits, or `fields: \"*\"` to overwrite every sub-field (clearing ones you didn't provide).\n\nupdateCells — write typed values and formatting to a range. Use `range` OR `start` to anchor the write. Values must be wrapped in `userEnteredValue` with an explicit type field (stringValue, numberValue, boolValue, formulaValue). `fields` is auto-derived when omitted.\n\nrepeatCell — apply one CellData to every cell in a range. Good for painting formatting, notes, or validation without enumerating rows.\n\nupdateBorders — set per-edge borders. Each side takes a Border with a style (SOLID, DASHED, DOTTED, NONE, SOLID_MEDIUM, SOLID_THICK, DOUBLE).\n\naddSheet — create a new tab. Omit sheetId to let Google assign one; read the new ID from created_resources in the reply.\n\ndeleteSheet — remove a tab permanently by sheetId.\n\nduplicateSheet — clone a tab. newSheetId is auto-assigned when omitted.\n\nupdateSheetProperties — rename, reorder, freeze rows/columns, or recolor a tab. fields is rooted at properties.\n\nupdateSpreadsheetProperties — rename the whole spreadsheet (file) or change workbook-level properties. Use this (not updateSheetProperties) to change the spreadsheet title.\n\ninsertDimension — add rows or columns. Both startIndex and endIndex are REQUIRED.\n\ndeleteDimension — remove rows or columns. Apply largest-index first within a batch to avoid index shift.\n\nmergeCells — mergeType is MERGE_ALL, MERGE_COLUMNS, or MERGE_ROWS.\n\nunmergeCells — range must not partially span an existing merge.\n\nfindReplace — scope with ONE of range, sheetId, or allSheets.\n\naddNamedRange — create a workbook-scoped named range. Server assigns namedRangeId.\n\naddProtectedRange — lock a range. warningOnly=true gives soft protection.\n\nsetDataValidation — attach a validation rule to a range. Omit rule to clear.\n\naddConditionalFormatRule — insert a conditional-format rule at given index. Use booleanRule for categorical formatting.\n\naddChart — embed a chart. Server assigns chartId in the reply.\n\nsortRange — sort rows in a range by one or more columns. sortSpecs is ordered by priority (first = primary sort key). sortOrder is ASCENDING or DESCENDING.\n\nautoResizeDimensions — resize columns or rows to fit their content. dimension is COLUMNS or ROWS.\nNOTE: the tool automatically runs all autoResizeDimensions requests in a second batchUpdate call after all other requests have been applied. This ensures the resize measures post-write cell contents, including spilling formulas (ARRAYFORMULA, SEQUENCE, MAKEARRAY, QUERY) whose spill values only exist after the first call returns. If the resize call fails (e.g. transient error), writes are unaffected and a warning is returned instead of an error. updateDimensionProperties (pixelSize) sets an explicit pixel width and does not need this treatment — it can stay in the same batch as writes.\n\nupdateDimensionProperties — set explicit pixel size or hide a row/column. fields is a mask rooted at DimensionProperties.\n",
+          "description": "A list of Google Sheets `spreadsheets.batchUpdate` request objects. Each object must have exactly one key naming the operation.\n\nFIELDS MASK: updateCells, repeatCell, updateSheetProperties, and updateDimensionProperties take a `fields` mask listing which sub-fields to write — anything you set but don't name is silently ignored. You can OMIT `fields` and the tool auto-derives it from the data you provide (recommended). Pass an explicit `fields` only for surgical edits, or `fields: \"*\"` to overwrite every sub-field (clearing ones you didn't provide).\n\nupdateCells — write typed values and formatting to a range. Use `range` OR `start` to anchor the write. Values must be wrapped in `userEnteredValue` with an explicit type field (stringValue, numberValue, boolValue, formulaValue). `fields` is auto-derived when omitted.\n\nrepeatCell — apply one CellData to every cell in a range. Good for painting formatting, notes, or validation without enumerating rows.\n\nupdateBorders — set per-edge borders. Each side takes a Border with a style (SOLID, DASHED, DOTTED, NONE, SOLID_MEDIUM, SOLID_THICK, DOUBLE).\n\naddSheet — create a new tab. Omit sheetId to let Google assign one; read the new ID from created_resources in the reply.\n\ndeleteSheet — remove a tab permanently by sheetId.\n\nduplicateSheet — clone a tab. newSheetId is auto-assigned when omitted.\n\nupdateSheetProperties — rename, reorder, freeze rows/columns, or recolor a tab. fields is rooted at properties.\n\nupdateSpreadsheetProperties — rename the whole spreadsheet (file) or change workbook-level properties. Use this (not updateSheetProperties) to change the spreadsheet title.\n\ninsertDimension — add rows or columns. Both startIndex and endIndex are REQUIRED.\n\ndeleteDimension — remove rows or columns. Apply largest-index first within a batch to avoid index shift.\n\nmergeCells — mergeType is MERGE_ALL, MERGE_COLUMNS, or MERGE_ROWS.\n\nunmergeCells — range must not partially span an existing merge.\n\nfindReplace — scope with ONE of range, sheetId, or allSheets.\n\naddNamedRange — create a workbook-scoped named range. Server assigns namedRangeId.\n\naddProtectedRange — lock a range. warningOnly=true gives soft protection.\n\nsetDataValidation — attach a validation rule to a range. Omit rule to clear.\n\naddConditionalFormatRule — insert a conditional-format rule at given index. Use booleanRule for categorical formatting.\n\naddChart — embed a chart. Server assigns chartId in the reply.\n\nsortRange — sort rows in a range by one or more columns. sortSpecs is ordered by priority (first = primary sort key). sortOrder is ASCENDING or DESCENDING.\n\nautoResizeDimensions — resize columns or rows to fit their content. dimension is COLUMNS or ROWS.\nNOTE: the tool automatically runs all autoResizeDimensions requests in a second batchUpdate call after all other requests have been applied. This ensures the resize measures post-write cell contents, including spilling formulas (ARRAYFORMULA, SEQUENCE, MAKEARRAY, QUERY) whose spill values only exist after the first call returns. If the resize call fails (e.g. transient error), writes are unaffected and a warning is returned instead of an error. updateDimensionProperties (pixelSize) sets an explicit pixel width and does not need this treatment — it can stay in the same batch as writes.\n\nupdateDimensionProperties — set explicit pixel size or hide a row/column. fields is a mask rooted at DimensionProperties.\n\nDefaults to no edits.\n",
           "enum": null,
           "inferrable": true
         },
@@ -225,7 +225,7 @@
           "name": "spreadsheet_id",
           "type": "string",
           "required": false,
-          "description": "ID of an existing spreadsheet to edit, as a bare id or a full Google Sheets URL. Omit to create a new spreadsheet.",
+          "description": "ID of an existing spreadsheet to edit, as a bare id or a full Google Sheets URL. Defaults to creating a new spreadsheet.",
           "enum": null,
           "inferrable": true
         },
@@ -660,7 +660,7 @@
     {
       "name": "DeleteComment",
       "qualifiedName": "GoogleSheets.DeleteComment",
-      "fullyQualifiedName": "GoogleSheets.DeleteComment@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.DeleteComment@10.0.4",
       "description": "Delete a comment from a spreadsheet.\n\nOnly the comment's author can delete it (enforced by Google Drive); deleting marks the\nwhole thread (the comment and its replies) as deleted.",
       "parameters": [
         {
@@ -740,7 +740,7 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@10.0.4",
       "description": "Generate a URL where the user can grant this app access to spreadsheets.\n\nCheck `url` first. An empty `url` means this app already reaches every spreadsheet the\nconnected account can open, so there is no per-file grant to request: this tool cannot\nchange any outcome, and a spreadsheet that could not be read is one the account itself\ncannot open. Do not retry it.\n\nOtherwise the URL opens Google's first-party Drive picker, filtered to Google Sheets,\nwhere the user browses and selects which spreadsheets to share with this application —\nit is not a sign-in or credential prompt. Use this when a prior tool reported that a\nfile was not found or access was denied, and the user expects the file to exist. After\nthe user completes the picker flow, retry the prior operation.",
       "parameters": [],
       "auth": {
@@ -783,7 +783,7 @@
     {
       "name": "GetSpreadsheetEditHistory",
       "qualifiedName": "GoogleSheets.GetSpreadsheetEditHistory",
-      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetEditHistory@10.0.4",
       "description": "Report who edited a spreadsheet and when, from Google Drive revisions.\n\nReports the \"who\" and \"when\" only — not which cells changed, and it can't revert.\n\n'summary' (default) answers \"who last edited this and when\" (read from the file's head,\nso always accurate), plus per-window aggregates (revisions read, contributors, first\nedit) and a preview of recent edits — computed over a bounded window of history per call.\nThese aggregates describe the whole history only when `is_incomplete` is false; it is\ntrue when the scan was resumed from a token and/or more history remains. To answer\n\"when was this first edited?\" or \"who contributed?\" reliably, call from the beginning\n(no `pagination_token`) and check `is_incomplete` is false. `pagination_token` is\nreturned when more pages remain so you can resume.\n\n'list' returns one page of individual revisions, oldest first. Drive can't sort\nnewest-first, so the most recent individual revisions are on the final page.",
       "parameters": [
         {
@@ -798,7 +798,7 @@
           "name": "mode",
           "type": "string",
           "required": false,
-          "description": "'summary' (default): the latest edit, plus per-window aggregates (revisions read, contributors, first edit) that cover the whole history only when is_incomplete is false, and a preview of recent edits. 'list': one page of individual revisions.",
+          "description": "'summary': the latest edit, plus per-window aggregates (revisions read, contributors, first edit) that cover the whole history only when is_incomplete is false, and a preview of recent edits. 'list': one page of individual revisions. Defaults to summary.",
           "enum": [
             "summary",
             "list"
@@ -809,7 +809,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Max revisions per page in 'list' mode. Between 1 and 50. Defaults to 20. Ignored in 'summary' mode.",
+          "description": "Max revisions per page in 'list' mode. Between 1 and 50. Ignored in 'summary' mode. Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -817,7 +817,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "Token from a previous response's pagination_token, to continue reading more history. Works in both modes.",
+          "description": "Token from a previous response's pagination_token, to continue reading more history. Works in both modes. Defaults to the start of the history.",
           "enum": null,
           "inferrable": true
         }
@@ -892,7 +892,7 @@
     {
       "name": "InspectSpreadsheet",
       "qualifiedName": "GoogleSheets.InspectSpreadsheet",
-      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.InspectSpreadsheet@10.0.4",
       "description": "Inspect a Google Sheets spreadsheet's structure or read a range of cells.\n\nUse the default 'structure' mode to understand a workbook cheaply before reading.\nSwitch to 'read' mode to pull a range as a grid of rows, optionally with\nper-cell annotations and a rendered markdown/csv/tsv export.\n\nIn 'read' mode the response's per-tab 'sheets' block reports only tab identity and\nthe allocated grid; its scan-derived fields (used_range, populated_cell_count,\nformula_cell_count, first_row, table_regions) are placeholders (0/empty) because read\nmode does not scan the tab — they do NOT mean the tab is empty or that it has no\ntables. The data you read is in the top-level 'range' and 'rows'. Call 'structure'\nmode for those aggregates and for the workbook's charts, merges, protected ranges, and\nconditional formats.\n\nWorkflow for a tab that holds multiple tables, or a table that does not start at A1:\ncall 'structure' first and use that tab's estimated 'table_regions' to choose the\na1_range to read or filter, so you target one table instead of a glued multi-table\nrange.\n\nAlways check the response's top-level 'warnings' list: read mode reports there when a\nresult was capped or trimmed (cell budget, the per-cell annotation cap, or an empty\nfilter scan) and tells you how to recover (page 'next_range', narrow 'a1_range',\n'select_columns', or request fewer annotation kinds).",
       "parameters": [
         {
@@ -907,7 +907,7 @@
           "name": "mode",
           "type": "string",
           "required": false,
-          "description": "What to return. 'structure' (default) gives a cheap workbook overview: every tab's ids, allocated grid, frozen panes, merges, charts, protected ranges, conditional-format counts, real used range, first row, and ESTIMATED table_regions (A1 ranges of distinct data blocks per tab — a heuristic for spotting multiple tables in one tab; scope a1_range to one of these to read or filter a single table; empty for tabs too large to peek). 'read' pulls cell data from one tab.",
+          "description": "What to return. 'structure' gives a cheap workbook overview: every tab's ids, allocated grid, frozen panes, merges, charts, protected ranges, conditional-format counts, real used range, first row, and ESTIMATED table_regions (A1 ranges of distinct data blocks per tab — a heuristic for spotting multiple tables in one tab; scope a1_range to one of these to read or filter a single table; empty for tabs too large to peek). 'read' pulls cell data from one tab. Defaults to structure.",
           "enum": [
             "structure",
             "read"
@@ -934,7 +934,7 @@
           "name": "a1_range",
           "type": "string",
           "required": false,
-          "description": "Read mode only: the range of cells to pull, in A1 notation (e.g. 'A1:F100'), WITHIN the selected tab — the tab is chosen by sheet_id/sheet_title, and any sheet prefix here (e.g. 'Other!A1:B2') is ignored. Defaults to the tab's used range. This is also the paging knob — request the next range to page.",
+          "description": "Read mode only: the range of cells to pull, in A1 notation (e.g. 'A1:F100'), WITHIN the selected tab — the tab is chosen by sheet_id/sheet_title, and any sheet prefix here (e.g. 'Other!A1:B2') is ignored. This is also the paging knob: request the next range to page. Defaults to the tab's used range.",
           "enum": null,
           "inferrable": true
         },
@@ -943,7 +943,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Read mode only: per-cell extras to include — pass only the kinds you need (e.g. ['formulas','notes']); each extra kind adds payload. Omit or leave empty to return values only (cheaper). Returned sparsely — one entry only per cell that carries a requested extra — and capped at the first 500 entries (row-major). Over that cap a warning is returned; rows may extend past the annotated slice, so a missing annotation beyond the cap is NOT authoritative — re-read a narrower a1_range, use select_columns, or request fewer kinds to confirm.",
+          "description": "Read mode only: per-cell extras to include — pass only the kinds you need (e.g. ['formulas','notes']); each extra kind adds payload. An empty list returns values only (cheaper). Returned sparsely, one entry only per cell that carries a requested extra — and capped at the first 500 entries (row-major). Over that cap a warning is returned; rows may extend past the annotated slice, so a missing annotation beyond the cap is NOT authoritative — re-read a narrower a1_range, use select_columns, or request fewer kinds to confirm. Defaults to values only.",
           "enum": [
             "formulas",
             "notes",
@@ -962,7 +962,7 @@
           "name": "export_as",
           "type": "string",
           "required": false,
-          "description": "Read mode only: also render the returned values as text. Omit to return structured values only. csv/tsv are lossless; markdown is display-oriented (in-cell newlines become <br>, pipes are escaped).",
+          "description": "Read mode only: also render the returned values as text. csv/tsv are lossless; markdown is display-oriented (in-cell newlines become <br>, pipes are escaped). Defaults to structured values only.",
           "enum": [
             "markdown",
             "csv",
@@ -974,7 +974,7 @@
           "name": "value_render",
           "type": "string",
           "required": false,
-          "description": "Read mode only: 'formatted' (default) returns display strings like '$1,234.50'; 'unformatted' returns raw values suitable for math.",
+          "description": "Read mode only: 'formatted' returns display strings like '$1,234.50'; 'unformatted' returns raw values suitable for math. Defaults to formatted.",
           "enum": [
             "formatted",
             "unformatted"
@@ -1002,7 +1002,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Read mode only: keep only rows matching these conditions. Each is {column, op, value} where column is the spreadsheet column LETTER (e.g. 'C'), NOT the header name, and must be inside a1_range. Ops: eq/ne (exact string), contains/not_contains (case-insensitive substring), gt/gte/lt/lte (NUMERIC only — text columns match nothing), blank/not_blank (value is ignored — pass ''). Numeric ops parse currency like $1,234.50, but NOT percents (21%) or other formatted text — set value_render='unformatted' and compare against the underlying number (percents are stored as fractions, e.g. 0.21 for 21%). A warning is returned when a numeric filter matches nothing it scanned. Scans within a1_range only — page next_range for completeness, and scope a1_range to a single homogeneous table (use structure mode's table_regions to find each table's range; exclude header/title rows, which would otherwise be filtered as data).",
+          "description": "Read mode only: keep only rows matching these conditions. Each is {column, op, value} where column is the spreadsheet column LETTER (e.g. 'C'), NOT the header name, and must be inside a1_range. Ops: eq/ne (exact string), contains/not_contains (case-insensitive substring), gt/gte/lt/lte (NUMERIC only — text columns match nothing), blank/not_blank (value is ignored — pass ''). Numeric ops parse currency like $1,234.50, but NOT percents (21%) or other formatted text — set value_render='unformatted' and compare against the underlying number (percents are stored as fractions, e.g. 0.21 for 21%). A warning is returned when a numeric filter matches nothing it scanned. Scans within a1_range only — page next_range for completeness, and scope a1_range to a single homogeneous table (use structure mode's table_regions to find each table's range; exclude header/title rows, which would otherwise be filtered as data). Defaults to every row.",
           "enum": null,
           "inferrable": true
         },
@@ -1174,7 +1174,7 @@
     {
       "name": "ListSpreadsheetComments",
       "qualifiedName": "GoogleSheets.ListSpreadsheetComments",
-      "fullyQualifiedName": "GoogleSheets.ListSpreadsheetComments@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.ListSpreadsheetComments@10.0.4",
       "description": "List a spreadsheet's comment threads, or the full replies of a single comment.\n\nIn 'comments' mode each comment includes up to a few trimmed reply previews plus the total reply_count; use 'thread' mode for a comment's complete reply list. Without filters/ordering, pagination walks every comment. Client-side filters (has_replies, resolved) and order_by are applied only within a bounded scan of the first 500 comments, so on larger sheets drop them and page through everything with the native (unbounded) pagination. Each comment's Drive anchor is returned when it was cell/range-anchored in the Sheets UI; comments created via the API are file-level. Filtering, ordering, and offset pagination are best-effort: results can drift if comments are added or removed between paginated calls.",
       "parameters": [
         {
@@ -1189,7 +1189,7 @@
           "name": "mode",
           "type": "string",
           "required": false,
-          "description": "'comments' (default) lists top-level comments, each with a capped reply preview and a reply_count. 'thread' lists the FULL replies of one comment (set comment_id).",
+          "description": "'comments' lists top-level comments, each with a capped reply preview and a reply_count. 'thread' lists the FULL replies of one comment (set comment_id). Defaults to comments.",
           "enum": [
             "comments",
             "thread"
@@ -1200,7 +1200,7 @@
           "name": "comment_id",
           "type": "string",
           "required": false,
-          "description": "Required when mode='thread': the comment whose replies to list.",
+          "description": "Required when mode='thread': the comment whose replies to list. Defaults to no comment, which only comments mode accepts.",
           "enum": null,
           "inferrable": true
         },
@@ -1216,7 +1216,7 @@
           "name": "page_token",
           "type": "string",
           "required": false,
-          "description": "Opaque token from a previous call's page_token to fetch the next page.",
+          "description": "Opaque token from a previous call's page_token to fetch the next page. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         },
@@ -1232,7 +1232,7 @@
           "name": "modified_after",
           "type": "string",
           "required": false,
-          "description": "Server-side filter: only comments modified at/after this RFC3339 time (YYYY-MM-DDTHH:MM:SSZ). Comments mode only.",
+          "description": "Server-side filter: only comments modified at/after this RFC3339 time (YYYY-MM-DDTHH:MM:SSZ). Comments mode only. Defaults to any modified time.",
           "enum": null,
           "inferrable": true
         },
@@ -1240,7 +1240,7 @@
           "name": "has_replies",
           "type": "boolean",
           "required": false,
-          "description": "Client-side filter (comments mode): keep only comments that have (True) or lack (False) replies.",
+          "description": "Client-side filter (comments mode): keep only comments that have (True) or lack (False) replies. Defaults to comments with or without replies.",
           "enum": null,
           "inferrable": true
         },
@@ -1248,7 +1248,7 @@
           "name": "resolved",
           "type": "boolean",
           "required": false,
-          "description": "Client-side filter (comments mode): keep only resolved (True) or unresolved (False) comments.",
+          "description": "Client-side filter (comments mode): keep only resolved (True) or unresolved (False) comments. Defaults to resolved and unresolved comments.",
           "enum": null,
           "inferrable": true
         },
@@ -1257,7 +1257,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Fetch exactly these comments by id (comments mode), instead of paging. Replaces a dedicated get tool. At most 50 ids per call, and not combined with page_token.",
+          "description": "Fetch exactly these comments by id (comments mode), instead of paging. Replaces a dedicated get tool. At most 50 ids per call, and not combined with page_token. Defaults to paging through all comments.",
           "enum": null,
           "inferrable": true
         },
@@ -1397,7 +1397,7 @@
     {
       "name": "ReplyToComment",
       "qualifiedName": "GoogleSheets.ReplyToComment",
-      "fullyQualifiedName": "GoogleSheets.ReplyToComment@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.ReplyToComment@10.0.4",
       "description": "Add a reply to an existing comment on a spreadsheet.\n\nThis only adds a reply. Resolving or reopening the comment is a status change on the\ncomment itself.",
       "parameters": [
         {
@@ -1490,7 +1490,7 @@
     {
       "name": "ScanForDataIssues",
       "qualifiedName": "GoogleSheets.ScanForDataIssues",
-      "fullyQualifiedName": "GoogleSheets.ScanForDataIssues@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.ScanForDataIssues@10.0.4",
       "description": "Deterministically flag 'weird'/bad cells in spreadsheet data.\n\nNo LLM judgement: the same input always returns the same flags. Each cell-level finding\ncarries a coord, a 0-based row_index/column_index (ready for a Sheets GridRange), the rule,\na severity (high -> red, medium/low -> yellow), and a note-ready reason — so the output\ndrops straight into an annotate/format recipe. In the default `mode='grouped'` these are\naggregated per rule+column within each table into `groups` (with A1 `coords`); use\n`mode='list'` to get every flagged cell in `flags` with its 0-based indices.\n\nProvide `spreadsheet_id` to scan a live sheet (scan one tab via sheet_id/sheet_title, or\nevery tab when both are omitted). Set `orientation='rows'` for transposed tables whose\nfields run down a column instead of across a row. Findings come back as flags (cell-level,\nhigh certainty) and alerts (table-level, lower certainty), grouped sheet -> table -> rule.\n\nIn all-sheets mode a tab that cannot be read is collected in `failed_sheets` (and echoed\nas a `warnings` entry) while every other tab still returns; `failed_sheets` is empty for\na single-tab scan and whenever every tab reads cleanly.\n\nCHECK `complete` BEFORE REPORTING. `total_flag_count` counts only the `sheets_scanned`\ntabs out of `sheets_targeted`, so a partial scan that reports zero flags is not a\nstatement that the workbook is clean. When `complete` is false, say which tabs were\ncovered. Rate limiting is the usual cause: all-sheets mode spends one read per tab\nagainst Google's per-minute quota, so a throttle part way through returns the tabs\nalready scanned with `complete: false` and every tab it never reached listed in\n`unscanned_sheet_titles`. Wait about a minute, then scan those - one `sheet_title` per\ncall, or re-run the whole workbook. Every title in that list is still unchecked, so\nstopping after the first one leaves the workbook half-scanned. A throttle before any tab\nwas scanned has nothing to return, so it fails as retryable instead.",
       "parameters": [
         {
@@ -1505,7 +1505,7 @@
           "name": "sheet_id",
           "type": "integer",
           "required": false,
-          "description": "Scan only this tab (by numeric sheetId). Mutually exclusive with sheet_title. Omit both to scan every tab, grouped by sheet.",
+          "description": "Scan only this tab (by numeric sheetId). Mutually exclusive with sheet_title. Defaults to every tab, grouped by sheet, when sheet_title is also omitted.",
           "enum": null,
           "inferrable": true
         },
@@ -1513,7 +1513,7 @@
           "name": "sheet_title",
           "type": "string",
           "required": false,
-          "description": "Scan only this tab (by name). Mutually exclusive with sheet_id. Omit both to scan every tab.",
+          "description": "Scan only this tab (by name). Mutually exclusive with sheet_id. Defaults to every tab when sheet_id is also omitted.",
           "enum": null,
           "inferrable": true
         },
@@ -1537,7 +1537,7 @@
           "name": "mode",
           "type": "string",
           "required": false,
-          "description": "'grouped' (default) aggregates findings per rule+column within each table with counts; 'list' enumerates every flagged cell.",
+          "description": "'grouped' aggregates findings per rule+column within each table with counts; 'list' enumerates every flagged cell. Defaults to grouped.",
           "enum": [
             "list",
             "grouped"
@@ -1549,7 +1549,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Which deterministic checks to run. Omit to run every check. Each is fully reproducible (no LLM judgement).",
+          "description": "Which deterministic checks to run. Each is fully reproducible (no LLM judgement). Defaults to every check.",
           "enum": [
             "error_value",
             "text_sentinel",
@@ -1577,7 +1577,7 @@
           "name": "orientation",
           "type": "string",
           "required": false,
-          "description": "'columns' (default): records are rows, fields are columns. 'rows': the table is transposed — records are columns and fields are rows (row labels down column A). Applies to the whole scan, not per-table (one setting for every table on the tab). Coords are always reported in the sheet's real coordinates.",
+          "description": "'columns': records are rows, fields are columns. 'rows': the table is transposed — records are columns and fields are rows (row labels down column A). Applies to the whole scan, not per-table (one setting for every table on the tab). Coords are always reported in the sheet's real coordinates. Defaults to columns.",
           "enum": [
             "columns",
             "rows"
@@ -1712,7 +1712,7 @@
     {
       "name": "SearchSpreadsheets",
       "qualifiedName": "GoogleSheets.SearchSpreadsheets",
-      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@10.0.4",
       "description": "Search for spreadsheets in the user's Google Drive based on the titles and content and\nreturn the title, ID, and URL for each matching spreadsheet.\n\nDoes not return the content/data of the sheets in the spreadsheets - only the metadata.\nExcludes spreadsheets that are in the trash.\n\n`pagination_token` is present only when more results remain; pass it back to continue.\nAn empty result set carries an `access_hint` explaining that this app only sees\nspreadsheets it has been granted, along with a URL for granting more when available.",
       "parameters": [
         {
@@ -1720,7 +1720,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Keywords or phrases that must be in the spreadsheet title. Provide a list of keywords or phrases if needed.",
+          "description": "Keywords or phrases that must be in the spreadsheet title. Provide a list of keywords or phrases if needed. Defaults to all spreadsheets.",
           "enum": null,
           "inferrable": true
         },
@@ -1729,7 +1729,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Keywords or phrases that must NOT be in the spreadsheet title. Provide a list of keywords or phrases if needed.",
+          "description": "Keywords or phrases that must NOT be in the spreadsheet title. Provide a list of keywords or phrases if needed. Defaults to no exclusions.",
           "enum": null,
           "inferrable": true
         },
@@ -1737,7 +1737,7 @@
           "name": "search_only_in_shared_drive_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return spreadsheets from this drive. Defaults to None, which searches across all drives.",
+          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return spreadsheets from this drive. Defaults to My Drive, plus all shared drives when include_shared_drives is true.",
           "enum": null,
           "inferrable": true
         },
@@ -1762,7 +1762,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Sort order. Defaults to listing the most recently modified spreadsheets first. If spreadsheet_contains or spreadsheet_not_contains is provided, then the order_by will be ignored.",
+          "description": "Sort order. If spreadsheet_contains or spreadsheet_not_contains is provided, then the order_by will be ignored. Defaults to listing the most recently modified spreadsheets first.",
           "enum": [
             "createdTime",
             "createdTime desc",
@@ -1793,7 +1793,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of spreadsheets to list. Defaults to 10. Max is 50",
+          "description": "The maximum number of spreadsheets to list. Max is 50. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
@@ -1801,7 +1801,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "The pagination token to continue a previous request. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1905,7 +1905,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleSheets.WhoAmI",
-      "fullyQualifiedName": "GoogleSheets.WhoAmI@10.0.3",
+      "fullyQualifiedName": "GoogleSheets.WhoAmI@10.0.4",
       "description": "Identify the Google account this app is connected through.\n\nUse this to tell the user which account is in play, or to resolve \"me\" in a request\nthat names a person. Returns the connected account's display name, given and family\nname, formatted name, primary email address, and profile picture URL, read from the\nGoogle People API.\n\nA field is an empty string when Google does not supply it. This reports identity only\nand does not check whether that account can reach any particular spreadsheet.",
       "parameters": [],
       "auth": {
@@ -1955,6 +1955,6 @@
   ],
   "subPages": [],
   "curationSourceHash": "dd8b363d0c5b211c25a2d7aca421340a81cbdc1eebee6d6743d73838563477a4",
-  "generatedAt": "2026-10-07T21:25:23.561Z",
-  "summary": "## Google Sheets Toolkit\n\nArcade's Google Sheets toolkit gives LLMs structured, authenticated access to Google Sheets and Drive, enabling agents to read, write, inspect, search, comment on, and audit spreadsheets via tool calls.\n\n## Capabilities\n\n- **Read & inspect:** Fetch spreadsheet structure (tabs, charts, merges, conditional formats, protected ranges) or read cell ranges as grids with optional annotations and markdown/CSV/TSV export; smart pre-flight access checks batch-verify reachability of multiple spreadsheets before reading.\n- **Write & create:** Create new spreadsheets or batch-edit existing ones using the full Sheets `requests[]` API (cell updates, sheet management, sorting, conditional formatting, auto-resize, and more).\n- **Search & discover:** Search Google Drive for spreadsheets by title/content, returning metadata (title, ID, URL); identify the connected Google account via the People API.\n- **Comments & collaboration:** List comment threads and replies, create file-level comments, edit comment bodies, resolve/reopen threads, add replies, and delete comments.\n- **Data quality:** Deterministically scan one or all tabs for bad/weird cells (no LLM judgment), returning flagged cells with coordinates, severity, and rule — ready to pipe into a format/annotate workflow.\n- **Edit history:** Report revision history (who edited, when) from Drive revisions, with summary or paginated list modes.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for provider configuration details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — Controls whether the toolkit generates an inline Google Drive file-picker URL as part of access-check responses (`CheckSpreadsheetAccess`, `GenerateGoogleFilePickerUrl`). When enabled, the picker URL is embedded directly in the tool response so the user can grant spreadsheet access without a separate redirect step. This is an Arcade-side feature flag, not a credential issued by Google; obtain or configure it through the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets). Refer to the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for setup instructions."
+  "generatedAt": "2026-10-10T11:14:29.766Z",
+  "summary": "## Google Sheets Toolkit\n\nArcade's Google Sheets toolkit gives LLMs structured access to Google Sheets and Drive, enabling agents to read, write, inspect, search, comment on, and audit spreadsheets through a set of typed tools.\n\n## Capabilities\n\n- **Spreadsheet reads and structure inspection**: Read cell ranges with optional annotations and rendered exports (Markdown/CSV/TSV); inspect workbook structure (tabs, charts, merges, conditional formats, table regions) cheaply before committing to a full read; page through large result sets.\n- **Writes and edits**: Create new spreadsheets or batch-edit existing ones using typed Sheets API requests (`updateCells`, `addSheet`, `sortRange`, `addConditionalFormatRule`, `autoResizeDimensions`, and more) with explicit value types (`stringValue`, `numberValue`, `boolValue`, `formulaValue`).\n- **Access control and file discovery**: Check batched pre-flight access across multiple spreadsheets in one call; search Drive by title/content; generate a Google Drive file-picker URL so users can grant per-file access; identify the connected Google account.\n- **Data quality scanning**: Deterministically flag malformed or suspicious cells by rule, severity, and coordinate — no LLM judgment — with output ready to pipe into an annotate/format step; supports single-tab, all-tabs, and transposed-table orientations.\n- **Comments and collaboration**: Create, edit, resolve, reopen, delete, and reply to file-level and cell-anchored comment threads; list comment threads with pagination, filtering, and reply previews.\n- **Edit history**: Retrieve Drive revision history (who edited and when) in summary or paginated list mode; history does not expose which cells changed and cannot revert changes.\n\n## OAuth\n\nThis toolkit authenticates via OAuth 2.0 through Google. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`**: Controls whether the inline Drive picker URL is surfaced directly inside tool responses (e.g., in `CheckSpreadsheetAccess` grant blocks). This is not a credential — it is a feature-flag value you set in the Arcade secrets store. Set it to enable the inline picker experience; omit it or leave it unset to disable it. No external provider dashboard is involved; this secret is configured entirely within Arcade.\n\nManage secrets at the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets) and refer to the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for configuration details."
 }

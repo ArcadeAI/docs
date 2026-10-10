@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookCalendar",
   "label": "Microsoft Outlook Calendar",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Arcade.dev LLM tools for Outlook Calendar",
   "metadata": {
     "category": "productivity",
@@ -29,7 +29,7 @@
     {
       "name": "CancelEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CancelEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CancelEvent@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CancelEvent@5.0.1",
       "description": "Cancel a meeting you organize and email a cancellation to every invitee.\n\nIrreversible. Invitees keep a cancelled copy. Refused when nobody else is\ninvited. A date already called off is reported as already cancelled, and nothing\nis sent for that date. this_and_future ends the series the day before the given\ndate, so invitees get an updated invitation instead, with no note.\n\nUse is_organizer, attendees, event_type and series_master_id from an earlier\nread to choose this tool and scope. Only events in your own mailbox, not\nshared or delegated calendars.",
       "parameters": [
         {
@@ -44,7 +44,7 @@
           "name": "note",
           "type": "string",
           "required": false,
-          "description": "Text included verbatim in the cancellation. Blank sends none.",
+          "description": "Text included verbatim in the cancellation. Defaults to no note.",
           "enum": null,
           "inferrable": true
         },
@@ -52,7 +52,7 @@
           "name": "scope",
           "type": "string",
           "required": false,
-          "description": "For a repeating meeting: instance (this date), series (every date) or this_and_future (this date and later). Required when it repeats; omit otherwise.",
+          "description": "For a repeating meeting: instance (this date), series (every date) or this_and_future (this date and later). Required when it repeats. Defaults to cancelling a meeting that does not repeat.",
           "enum": [
             "instance",
             "series",
@@ -121,7 +121,7 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CreateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@5.0.1",
       "description": "Create an event in the user's default calendar, or in another calendar they can edit\nwhen calendar_id is given.\n\nPass calendar_id only when the user names a calendar, never matched from the subject;\notherwise the event goes on the default calendar. With calendar_id, the result echoes it.\nOn a calendar someone else owns, organizer_note names that person as organizer.\n\nSet recurrence for a repeating series: start and end are the first date's, and it\nneeds exactly one of recurrence.end_date, recurrence.occurrence_count or\nrecurrence.never_ends. When the request names no end, ask the user before creating\nanything. If start_date_time is not a day the pattern produces, the series starts on the\nfirst day it does, and first_date_note says so. Every weekday is weekly on monday to\nfriday. A step in working days, such as every third business day, cannot be expressed:\ntell the user instead of creating a nearby pattern.\n\nBook only at a time the user gave or picked, never one you chose. If no time was given,\npropose times and let the user pick first.\n\nbody is stored as plain text unless body_format says html, in which case it is\nstored as markup and rendered rather than shown literally.\n\nCopying a description from an event that was read means passing that event's\nbody_html as body with body_format html. Its body field is the same description\nwith the markup stripped, so an agenda copied from there arrives with its links,\nlists and emphasis gone.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
       "parameters": [
         {
@@ -160,7 +160,7 @@
           "name": "calendar_id",
           "type": "string",
           "required": false,
-          "description": "Calendar ID from a calendar listing, including a shared one you can edit. Only for a calendar the user named; never inferred from the subject. Omit for the default.",
+          "description": "Calendar ID from a calendar listing, including a shared one you can edit. Only for a calendar the user named; never inferred from the subject. Defaults to the default calendar.",
           "enum": null,
           "inferrable": true
         },
@@ -168,7 +168,7 @@
           "name": "location",
           "type": "string",
           "required": false,
-          "description": "The location of the event",
+          "description": "The location of the event. Defaults to no location.",
           "enum": null,
           "inferrable": true
         },
@@ -177,7 +177,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "The email addresses of the attendees of the event. Must be valid email addresses e.g., username@domain.com.",
+          "description": "The email addresses of the attendees of the event. Must be valid email addresses e.g., username@domain.com. Defaults to no attendees.",
           "enum": null,
           "inferrable": true
         },
@@ -193,7 +193,7 @@
           "name": "custom_meeting_url",
           "type": "string",
           "required": false,
-          "description": "A join link to use instead of one Outlook generates. It is appended to body rather than stored as an Outlook meeting, so the created event comes back with is_online_meeting False and an empty online_meeting_join_url. The link is in the description: in body when body_format is plain_text, and in body_html when it is html. Leave unset and set is_online_meeting to True to have Outlook generate one",
+          "description": "A join link to use instead of one Outlook generates. It is appended to body rather than stored as an Outlook meeting, so the created event comes back with is_online_meeting False and an empty online_meeting_join_url. The link is in the description: in body when body_format is plain_text, and in body_html when it is html. Leave unset and set is_online_meeting to True to have Outlook generate one. Defaults to no custom link.",
           "enum": null,
           "inferrable": true
         },
@@ -212,7 +212,7 @@
           "name": "recurrence",
           "type": "json",
           "required": false,
-          "description": "How the event repeats; leave unset for a one-off. Only the pattern asked for, never a close substitute. Leave out the fields a frequency does not use.",
+          "description": "How the event repeats. Only the pattern asked for, never a close substitute. Leave out the fields a frequency does not use. Defaults to a one-off event.",
           "enum": null,
           "inferrable": true
         }
@@ -327,7 +327,7 @@
     {
       "name": "FindMeetingTimes",
       "qualifiedName": "MicrosoftOutlookCalendar.FindMeetingTimes",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.FindMeetingTimes@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.FindMeetingTimes@5.0.1",
       "description": "Propose times when a group could meet. Books nothing. Use it to find a time, and to set up\nor schedule a meeting when no time is given: offer the slots and let the user pick one.\n\nReturns up to max_candidates slots, best first. Each slot counts how many attendees are free\nand names those whose availability is unknown, so it answers per-slot who can make it.\n\nTimes are in time_zone, the user's mailbox zone. On time_zone_source \"mailbox_utc\" or\n\"fallback\", confirm the zone before stating times.\n\nA slot can include busy or out-of-office attendees; say a time works for everyone only when\navailability_count shows all free. Working elsewhere counts as free.\n\nNo suggestions is not an error; empty_reason and note explain it.",
       "parameters": [
         {
@@ -475,7 +475,7 @@
     {
       "name": "ForwardEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.ForwardEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ForwardEvent@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ForwardEvent@5.0.1",
       "description": "Send a meeting invitation to someone who is not invited yet; they join the attendee list and the organizer is told.\n\nWorks on a meeting you organize or one you were invited to. The attendee list can be edited\nonly on a meeting you organize, so for someone else's meeting this is the way to bring another\nperson in. Any bounce goes to the organizer. Refused for a cancelled meeting, the whole series\nof a repeating meeting (forward one date by its own event_id), and an event nobody else is\ninvited to.\n\nName the meeting by event_id or by event_subject. Only events in your own mailbox, and a\nsubject is looked up in your default calendar only.",
       "parameters": [
         {
@@ -491,7 +491,7 @@
           "name": "event_id",
           "type": "string",
           "required": false,
-          "description": "Identifier of the meeting to forward, exactly as an earlier read returned it. Give this or event_subject, not both. Defaults to None.",
+          "description": "Identifier of the meeting to forward, exactly as an earlier read returned it. Give this or event_subject, not both. Defaults to finding the event by event_subject.",
           "enum": null,
           "inferrable": true
         },
@@ -499,7 +499,7 @@
           "name": "event_subject",
           "type": "string",
           "required": false,
-          "description": "Text from the subject of the meeting to forward, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Nothing is sent unless exactly one event matches. Give this or event_id, not both. Defaults to None.",
+          "description": "Text from the subject of the meeting to forward, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Nothing is sent unless exactly one event matches. Give this or event_id, not both. Defaults to using event_id.",
           "enum": null,
           "inferrable": true
         },
@@ -507,7 +507,7 @@
           "name": "search_start_date_time",
           "type": "string",
           "required": false,
-          "description": "Start of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Ignored when event_id is given. Defaults to None (7 days ago).",
+          "description": "Start of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Ignored when event_id is given. Defaults to 7 days ago.",
           "enum": null,
           "inferrable": true
         },
@@ -515,7 +515,7 @@
           "name": "search_end_date_time",
           "type": "string",
           "required": false,
-          "description": "End of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. The window may not exceed 90 days. Ignored when event_id is given. Defaults to None (30 days from now).",
+          "description": "End of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. The window may not exceed 90 days. Ignored when event_id is given. Defaults to 30 days from now.",
           "enum": null,
           "inferrable": true
         },
@@ -523,7 +523,7 @@
           "name": "note",
           "type": "string",
           "required": false,
-          "description": "Text included verbatim in the forwarded invitation. Blank means no note. Defaults to None.",
+          "description": "Text included verbatim in the forwarded invitation. Defaults to no note.",
           "enum": null,
           "inferrable": true
         }
@@ -605,7 +605,7 @@
     {
       "name": "GetEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.GetEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@5.0.1",
       "description": "Get one event from any of the user's calendars, with the calendar it is on.\n\nevent carries the subject, full body, times, location, organizer and attendees,\nplus change_key (the token identifying which version\nof the event this is), event_type and series_master_id (which together say\nwhether this is a one-off event, one date of a recurring series, or the series\nitself), and online_meeting_join_url (the link that joins the online meeting,\ndistinct from web_link, which opens the event in Outlook).\n\nBoth forms of the description come back: body is the plain text with markup\nstripped, and body_html is the stored markup, whole, which a listing row does not\ncarry at all. Take body_html when the formatting, links or lists matter, and\nsupply it as the body of a new event with body_format set to html, or it is\nstored as literal text. An event with no description still returns a non-empty\nbody_html, because Outlook stores an empty scaffold; body being empty is what says\nthere is no agenda.\n\nUse this to read an event in full, or after a listing to see a body the\nlisting only summarised.\n\nstart, end, organizer and response_status always come back, with their own\nfields empty when Microsoft Graph returned no underlying object. An empty\nstart is a value the event is missing, not an event that is missing.",
       "parameters": [
         {
@@ -666,7 +666,7 @@
     {
       "name": "GetSchedule",
       "qualifiedName": "MicrosoftOutlookCalendar.GetSchedule",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@5.0.1",
       "description": "Get free/busy and calendar items in a time window for one or more people. Use it to check\na specific time. It does not propose or rank slots across a range, nor count who is free per\nslot.\n\nTimes are in time_zone, the user's mailbox zone, which may be a Windows name such as \"Eastern\nStandard Time\". On time_zone_source \"mailbox_utc\" or \"fallback\", treat times as unconfirmed\nand check the intended zone before acting.\n\navailability_view has one digit per interval from start_date_time: 0 = free or working\nelsewhere, 1 = tentative, 2 = busy, 3 = out of office. schedule_items can extend past the\nwindow. working_hours are on each person's own clock.\n\nvisibility is \"readable\" (an item overlaps the window), \"free_on_primary_calendar\" (no events\non the primary calendar; secondary calendars are not visible, so not proof of free), \"denied\"\n(no permission), or \"error\" (see the row's error). Subject, location and is_private appear\nonly when shared with you.",
       "parameters": [
         {
@@ -771,7 +771,7 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "MicrosoftOutlookCalendar.ListCalendars",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@5.0.1",
       "description": "List all calendars the user has access to.\n\nReturns the user's own calendars plus any shared or delegated calendars.\n\nUse a calendar_id from the results to target a specific calendar\nin other calendar tools. To find which calendar an event is on, read the event instead.",
       "parameters": [
         {
@@ -786,7 +786,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request.",
+          "description": "The pagination token to continue a previous request. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -844,7 +844,7 @@
     {
       "name": "ListEventAttachments",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@5.0.1",
       "description": "List attachment metadata for a calendar event.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to a calendar event\nor meeting.\n\nWorks for an event on any of the user's calendars, including shared ones.",
       "parameters": [
         {
@@ -867,7 +867,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request.",
+          "description": "The pagination token to continue a previous request. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -931,7 +931,7 @@
     {
       "name": "ListEventInstances",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventInstances",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventInstances@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventInstances@5.0.1",
       "description": "List the dates one recurring series falls on between two times.\n\nDates come back earliest first, a date moved on its own at its new time. To see\neverything on the calendar over a stretch of time, list the calendar for that window\ninstead. An event that does not repeat is refused.\n\nCancelled dates are left out, and a date moved outside the window is not in it, so a\nmissing date may be either. Read an empty list against series: the window may fall\nbefore the series starts, after it ends, or between two dates.\n\nA non-empty pagination_token means more dates remain in the window; pass it back to\nread them.",
       "parameters": [
         {
@@ -970,7 +970,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "pagination_token from an earlier call, to read that window's next page. When given, the other arguments are not used.",
+          "description": "pagination_token from an earlier call, to read that window's next page. When given, the other arguments are not used. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1044,7 +1044,7 @@
     {
       "name": "ListEventsInTimeRange",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@5.0.1",
       "description": "List everything on the user's calendars between two times.\n\nUse this when the request is about a stretch of the calendar -- what is on\ntoday, this week, between two clock times -- rather than about a property of\none particular event, which a filtered search answers better.\n\nReads the default calendar unless calendar_scope is all (every calendar in the list,\nshared ones included) or listed. The same meeting can appear once per calendar it\nsits on.\n\nA pagination_token means more of the window remains; pass it for the next page.\nWith none, the window was read in full on searched_calendars, and an empty list means\nnothing is scheduled there, not on calendars left out: check skipped_calendars or use\ncalendar_scope all before saying the user is free. An empty page reached through a\ntoken means the earlier pages held every event.\n\nTimes are read in the mailbox time zone, or UTC when none is set.",
       "parameters": [
         {
@@ -1067,7 +1067,7 @@
           "name": "calendar_scope",
           "type": "string",
           "required": false,
-          "description": "Calendars to read: default (the default calendar), all (every calendar in the calendar list, max 20) or listed (the ids in calendars).",
+          "description": "Calendars to read: default (the default calendar), all (every calendar in the calendar list, max 20) or listed (the ids in calendars). Defaults to default.",
           "enum": [
             "default",
             "all",
@@ -1080,7 +1080,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Calendar ids from the calendar list, max 20; only with calendar_scope listed.",
+          "description": "Calendar ids from the calendar list, max 20; only with calendar_scope listed. Defaults to no ids.",
           "enum": null,
           "inferrable": true
         },
@@ -1104,7 +1104,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "pagination_token from a previous result, for its next page; pass the same dates, calendars and include_cancelled.",
+          "description": "pagination_token from a previous result, for its next page; pass the same dates, calendars and include_cancelled. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1191,7 +1191,7 @@
     {
       "name": "RemoveEventFromMyCalendar",
       "qualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromMyCalendar",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromMyCalendar@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromMyCalendar@5.0.1",
       "description": "Take an event off your calendar without emailing anyone.\n\nFor a meeting someone else organizes, or your own appointment with no\ninvitees. Other attendees keep their copies. An organizer in your organization\nsees you declined; one outside it is not told. Refused for a meeting you\norganize with invitees. Irreversible.\n\nUse is_organizer, attendees, event_type and series_master_id from an earlier\nread to choose this tool and scope. A cancelled meeting stays on your calendar\nwith is_cancelled true, and listings hide it unless asked. Only events in your\nown mailbox, not shared or delegated calendars.",
       "parameters": [
         {
@@ -1206,7 +1206,7 @@
           "name": "scope",
           "type": "string",
           "required": false,
-          "description": "For a repeating event: instance (this date) or series (every date). Required when it repeats; omit otherwise.",
+          "description": "For a repeating event: instance (this date) or series (every date). Required when it repeats. Defaults to removing an event that does not repeat.",
           "enum": [
             "instance",
             "series"
@@ -1269,7 +1269,7 @@
     {
       "name": "RespondToEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.RespondToEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.RespondToEvent@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.RespondToEvent@5.0.1",
       "description": "Accept, decline or tentatively accept a meeting someone else invited you to, and tell the organizer.\n\nDeclining takes the meeting off your calendar unless Show declined events is turned on in\nOutlook, and once it is gone it cannot be answered again from here. Refused for a meeting\nyou organize, a cancelled meeting, and the whole series of a repeating meeting: answer one\ndate by its own event_id.\n\nName the meeting by event_id or by event_subject. Only events in your own mailbox, and a\nsubject is looked up in your default calendar only.",
       "parameters": [
         {
@@ -1288,7 +1288,7 @@
           "name": "event_id",
           "type": "string",
           "required": false,
-          "description": "Identifier of the meeting to answer, exactly as an earlier read returned it. Give this or event_subject, not both. Defaults to None.",
+          "description": "Identifier of the meeting to answer, exactly as an earlier read returned it. Give this or event_subject, not both. Defaults to finding the event by event_subject.",
           "enum": null,
           "inferrable": true
         },
@@ -1296,7 +1296,7 @@
           "name": "event_subject",
           "type": "string",
           "required": false,
-          "description": "Text from the subject of the meeting to answer, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Nothing is sent unless exactly one event matches. Give this or event_id, not both. Defaults to None.",
+          "description": "Text from the subject of the meeting to answer, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Nothing is sent unless exactly one event matches. Give this or event_id, not both. Defaults to using event_id.",
           "enum": null,
           "inferrable": true
         },
@@ -1304,7 +1304,7 @@
           "name": "search_start_date_time",
           "type": "string",
           "required": false,
-          "description": "Start of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Ignored when event_id is given. Defaults to None (7 days ago).",
+          "description": "Start of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Ignored when event_id is given. Defaults to 7 days ago.",
           "enum": null,
           "inferrable": true
         },
@@ -1312,7 +1312,7 @@
           "name": "search_end_date_time",
           "type": "string",
           "required": false,
-          "description": "End of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. The window may not exceed 90 days. Ignored when event_id is given. Defaults to None (30 days from now).",
+          "description": "End of the window an event_subject lookup scans, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. The window may not exceed 90 days. Ignored when event_id is given. Defaults to 30 days from now.",
           "enum": null,
           "inferrable": true
         },
@@ -1320,7 +1320,7 @@
           "name": "note",
           "type": "string",
           "required": false,
-          "description": "Text sent to the organizer with your reply, verbatim. Blank means no note. Needs notify_organizer true. Defaults to None.",
+          "description": "Text sent to the organizer with your reply, verbatim. Needs notify_organizer true. Defaults to no note.",
           "enum": null,
           "inferrable": true
         },
@@ -1336,7 +1336,7 @@
           "name": "proposed_start_date_time",
           "type": "string",
           "required": false,
-          "description": "A different start to suggest to the organizer, as a full ISO 8601 date and time (YYYY-MM-DDTHH:MM:SS). Take the date from the meeting as read; do not assume today. Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Only with declined or tentative, only when the organizer allows new times, and only with notify_organizer true. Defaults to None (no new time proposed).",
+          "description": "A different start to suggest to the organizer, as a full ISO 8601 date and time (YYYY-MM-DDTHH:MM:SS). Take the date from the meeting as read; do not assume today. Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Only with declined or tentative, only when the organizer allows new times, and only with notify_organizer true. Defaults to proposing no new time.",
           "enum": null,
           "inferrable": true
         },
@@ -1344,7 +1344,7 @@
           "name": "proposed_end_date_time",
           "type": "string",
           "required": false,
-          "description": "End of the suggested time, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS), read the same way. Needs proposed_start_date_time. Defaults to None (keeps the meeting's current length).",
+          "description": "End of the suggested time, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS), read the same way. Needs proposed_start_date_time. Defaults to keeping the meeting's current length.",
           "enum": null,
           "inferrable": true
         }
@@ -1438,14 +1438,14 @@
     {
       "name": "SearchEvents",
       "qualifiedName": "MicrosoftOutlookCalendar.SearchEvents",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@5.0.1",
       "description": "Find calendar events by what is true about them: subject text, who attends,\nwho organised them, importance, or whether they are online.\n\nUse this when the request names a property of the event, even within a single day.\nFor a stretch of the calendar with no such property, such as Tuesday or this week,\nread the time range instead.\n\nSearches the default calendar, 90 days either side of today unless dates are given;\ncalendar_scope all covers every calendar in the list, shared ones included. The same\nmeeting can appear once per calendar it sits on. Results are in chronological order,\neach body a short summary.\n\nA pagination_token means more of the window remains: pass it for the next page, even\nafter an empty page, before reporting that nothing matched. With none, searched_window\nwas read in full on searched_calendars, and an empty result means nothing matched\nthere: check skipped_calendars, widen the range or search more calendars before\nreporting there is none. An empty page reached through a token means the earlier\npages held every match.",
       "parameters": [
         {
           "name": "subject",
           "type": "string",
           "required": false,
-          "description": "Filter events whose subject contains this text (case-insensitive). Defaults to None (no subject filter).",
+          "description": "Filter events whose subject contains this text (case-insensitive). Defaults to any subject.",
           "enum": null,
           "inferrable": true
         },
@@ -1454,7 +1454,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Filter events that include these attendees by exact email address. Multiple emails are combined with AND (all must be attendees). Defaults to None (no attendee filter).",
+          "description": "Filter events that include these attendees by exact email address. Multiple emails are combined with AND (all must be attendees). Defaults to any attendees.",
           "enum": null,
           "inferrable": true
         },
@@ -1462,7 +1462,7 @@
           "name": "organizer_name",
           "type": "string",
           "required": false,
-          "description": "Filter events organized by another specific person by their display name. Matching is case-insensitive substring against the organizer's display name. Do not use this to filter for events organized by the current authenticated user — use organized_by_me=True instead, which does not depend on knowing your own display name. Defaults to None (no organizer filter).",
+          "description": "Filter events organized by another specific person by their display name. Matching is case-insensitive substring against the organizer's display name. Do not use this to filter for events organized by the current authenticated user — use organized_by_me=True instead, which does not depend on knowing your own display name. Defaults to any organizer.",
           "enum": null,
           "inferrable": true
         },
@@ -1470,7 +1470,7 @@
           "name": "organized_by_me",
           "type": "boolean",
           "required": false,
-          "description": "True for the user's own events, False for others', including the owner's on a shared calendar; prefer over organizer_name for the user's own events.",
+          "description": "True for the user's own events, False for others', including the owner's on a shared calendar; prefer over organizer_name for the user's own events. Defaults to any organizer.",
           "enum": null,
           "inferrable": true
         },
@@ -1478,7 +1478,7 @@
           "name": "importance",
           "type": "string",
           "required": false,
-          "description": "Filter by event importance level. Defaults to None (no filter).",
+          "description": "Filter by event importance level. Defaults to any importance.",
           "enum": [
             "low",
             "normal",
@@ -1490,7 +1490,7 @@
           "name": "is_online_meeting",
           "type": "boolean",
           "required": false,
-          "description": "Filter on Outlook's own online-meeting flag: True keeps events Outlook hosts a meeting for, False keeps the rest. False is not the same as in person: an event run on a link pasted into its body is flagged False. Defaults to None (no filter).",
+          "description": "Filter on Outlook's own online-meeting flag: True keeps events Outlook hosts a meeting for, False keeps the rest. False is not the same as in person: an event run on a link pasted into its body is flagged False. Defaults to no filter.",
           "enum": null,
           "inferrable": true
         },
@@ -1498,7 +1498,7 @@
           "name": "start_date_time",
           "type": "string",
           "required": false,
-          "description": "The start of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Required with calendar_scope all or listed; otherwise 90 days before today.",
+          "description": "The start of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Required with calendar_scope all or listed. Defaults to 90 days before today.",
           "enum": null,
           "inferrable": true
         },
@@ -1506,7 +1506,7 @@
           "name": "end_date_time",
           "type": "string",
           "required": false,
-          "description": "The end of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Required with calendar_scope all or listed; otherwise 90 days after today.",
+          "description": "The end of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Required with calendar_scope all or listed. Defaults to 90 days after today.",
           "enum": null,
           "inferrable": true
         },
@@ -1514,7 +1514,7 @@
           "name": "calendar_scope",
           "type": "string",
           "required": false,
-          "description": "Calendars to search: default (the default calendar), all (every calendar in the calendar list, max 20) or listed (the ids in calendars).",
+          "description": "Calendars to search: default (the default calendar), all (every calendar in the calendar list, max 20) or listed (the ids in calendars). Defaults to default.",
           "enum": [
             "default",
             "all",
@@ -1527,7 +1527,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Calendar ids from the calendar list, max 20; only with calendar_scope listed.",
+          "description": "Calendar ids from the calendar list, max 20; only with calendar_scope listed. Defaults to no ids.",
           "enum": null,
           "inferrable": true
         },
@@ -1543,7 +1543,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Max events per page, up to 200; defaults to 25, or to the token's page size when continuing.",
+          "description": "Max events per page, up to 200. Defaults to 25, or to the token's page size when continuing.",
           "enum": null,
           "inferrable": true
         },
@@ -1551,7 +1551,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "pagination_token from a previous result, for its next page; pass it alone or with the same filters and calendars.",
+          "description": "pagination_token from a previous result, for its next page; pass it alone or with the same filters and calendars. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1671,14 +1671,14 @@
     {
       "name": "UpdateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.UpdateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.UpdateEvent@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.UpdateEvent@5.0.1",
       "description": "Change one event in the user's calendar, in place.\n\nReturns an UpdateEventResult: the updated event in full, plus changed and\nfields_changed (what was actually written, which is nothing when the event\nalready said what was asked for), change_key, concurrency_checked,\napplied_scope, online_meeting_preserved, attendees_not_found, and the record\nof how the event was resolved.\n\nEveryone invited is mailed an updated invitation for any change this writes,\nso an edit to a meeting with guests is not a quiet one.\n\nEvery input left out leaves that part of the event alone, so this changes\nonly what is named and never cancels, deletes or re-creates the event.\nAdding or dropping a guest is merged over the people already invited rather\nthan replacing them; set_attendee_emails states the whole invitation list and\nreplaces it.\n\nFor a repeating meeting, scope is required; series takes series_master_id. There\nis no scope for this date and later. Changing a series' time, time zone, all-day\nsetting or how often it repeats resets every date changed on its own and brings\nback its cancelled dates, so it is refused while an upcoming date is cancelled;\nchanging only when it ends keeps those dates. recurrence changes only the parts of\nthe repeat rule it names. A meeting that does not repeat takes no scope; there\nrecurrence makes it repeat, keeping its event_id, and needs recurrence.frequency\nand an end.",
       "parameters": [
         {
           "name": "event_id",
           "type": "string",
           "required": false,
-          "description": "Identifier of the event to change, exactly as an earlier read returned it. Give this or event_subject, not both. Defaults to None.",
+          "description": "Identifier of the event to change, exactly as an earlier read returned it. Give this or event_subject, not both. Defaults to finding the event by event_subject.",
           "enum": null,
           "inferrable": true
         },
@@ -1686,7 +1686,7 @@
           "name": "event_subject",
           "type": "string",
           "required": false,
-          "description": "Text from the subject of the event to change, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Use this when the event is known by what it is called rather than by an identifier. Nothing is changed unless exactly one event matches. Give this or event_id, not both. Defaults to None.",
+          "description": "Text from the subject of the event to change, matched case-insensitively against events in the search window. Only your default calendar is searched, so an event kept on another one is reachable by event_id but not by subject. Use this when the event is known by what it is called rather than by an identifier. Nothing is changed unless exactly one event matches. Give this or event_id, not both. Defaults to using event_id.",
           "enum": null,
           "inferrable": true
         },
@@ -1694,7 +1694,7 @@
           "name": "scope",
           "type": "string",
           "required": false,
-          "description": "Required for a repeating meeting and refused for one that does not repeat: instance changes the given date, series changes every date including past ones and takes the series' own id.",
+          "description": "Required for a repeating meeting and refused for one that does not repeat: instance changes the given date, series changes every date including past ones and takes the series' own id. Defaults to no scope, which only works for an event that does not repeat.",
           "enum": [
             "instance",
             "series"
@@ -1705,7 +1705,7 @@
           "name": "search_start_date_time",
           "type": "string",
           "required": false,
-          "description": "Start of the window an event_subject lookup scans, in ISO 8601 format. Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Ignored when event_id is given. Defaults to None (7 days ago).",
+          "description": "Start of the window an event_subject lookup scans, in ISO 8601 format. Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. Ignored when event_id is given. Defaults to 7 days ago.",
           "enum": null,
           "inferrable": true
         },
@@ -1713,7 +1713,7 @@
           "name": "search_end_date_time",
           "type": "string",
           "required": false,
-          "description": "End of the window an event_subject lookup scans, in ISO 8601 format. Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. The window may not exceed 90 days. Ignored when event_id is given. Defaults to None (30 days from now).",
+          "description": "End of the window an event_subject lookup scans, in ISO 8601 format. Any timezone offset is ignored and the wall clock is read in the mailbox's timezone. The window may not exceed 90 days. Ignored when event_id is given. Defaults to 30 days from now.",
           "enum": null,
           "inferrable": true
         },
@@ -1721,7 +1721,7 @@
           "name": "subject",
           "type": "string",
           "required": false,
-          "description": "New title for the event. This is what the event is called, not what it says -- the description is body. Pass an empty string to leave the event untitled. Defaults to None (the title is left unchanged).",
+          "description": "New title for the event. This is what the event is called, not what it says -- the description is body. Pass an empty string to leave the event untitled. Defaults to leaving the title unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1729,7 +1729,7 @@
           "name": "body",
           "type": "string",
           "required": false,
-          "description": "New description for the event, replacing the existing one rather than adding to it. To keep the formatting of a description that was read, pass that event's body_html here and set body_format to html: its body field is the same description with every link, list and emphasis stripped out, so passing that instead silently flattens it. Otherwise pass the text to store, with line breaks kept. On a meeting, the block that makes it joinable is carried over and the response says what survived, so an empty string clears the words but leaves that block rather than emptying the description. Defaults to None (the description is left unchanged).",
+          "description": "New description for the event, replacing the existing one rather than adding to it. To keep the formatting of a description that was read, pass that event's body_html here and set body_format to html: its body field is the same description with every link, list and emphasis stripped out, so passing that instead silently flattens it. Otherwise pass the text to store, with line breaks kept. On a meeting, the block that makes it joinable is carried over and the response says what survived, so an empty string clears the words but leaves that block rather than emptying the description. Defaults to leaving the description unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1737,7 +1737,7 @@
           "name": "start_date_time",
           "type": "string",
           "required": false,
-          "description": "New start for the event, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored: the wall clock given is the wall clock the event lands on, read in time_zone or the mailbox's own timezone. Naming only this keeps the existing end. When event_id is a series itself, only the clock time is used; the series keeps its own first date. Defaults to None (the start is left unchanged).",
+          "description": "New start for the event, in ISO 8601 format (YYYY-MM-DDTHH:MM:SS). Any timezone offset is ignored: the wall clock given is the wall clock the event lands on, read in time_zone or the mailbox's own timezone. Naming only this keeps the existing end. When event_id is a series itself, only the clock time is used; the series keeps its own first date. Defaults to leaving the start unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1745,7 +1745,7 @@
           "name": "end_date_time",
           "type": "string",
           "required": false,
-          "description": "New end for the event, in ISO 8601 format. Any timezone offset is ignored. Naming only this keeps the existing start, which is how a meeting is shortened or extended. When event_id is a series itself, only the clock time is used; the series keeps its own first date. Defaults to None (the end is left unchanged).",
+          "description": "New end for the event, in ISO 8601 format. Any timezone offset is ignored. Naming only this keeps the existing start, which is how a meeting is shortened or extended. When event_id is a series itself, only the clock time is used; the series keeps its own first date. Defaults to leaving the end unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1753,7 +1753,7 @@
           "name": "time_zone",
           "type": "string",
           "required": false,
-          "description": "Timezone the new start and end wall clocks should be read in, as a Windows zone name such as Eastern Standard Time or an IANA name such as America/New_York. Needs start_date_time or end_date_time beside it, since a zone on its own reaches neither end of the event; whichever of the two is left out keeps the moment it already runs at. Defaults to None (the mailbox's own timezone).",
+          "description": "Timezone the new start and end wall clocks should be read in, as a Windows zone name such as Eastern Standard Time or an IANA name such as America/New_York. Needs start_date_time or end_date_time beside it, since a zone on its own reaches neither end of the event; whichever of the two is left out keeps the moment it already runs at. Defaults to the mailbox's own timezone.",
           "enum": null,
           "inferrable": true
         },
@@ -1761,7 +1761,7 @@
           "name": "location",
           "type": "string",
           "required": false,
-          "description": "New location for the event, replacing whatever is there. This is where people go, not where an online meeting lives. A room booked through Outlook cannot be written over from here -- Outlook replaces the whole place when a new one is written, which would turn the booking into plain text -- so such a change is refused. Pass an empty string to clear it. Defaults to None (the location is left unchanged).",
+          "description": "New location for the event, replacing whatever is there. This is where people go, not where an online meeting lives. A room booked through Outlook cannot be written over from here -- Outlook replaces the whole place when a new one is written, which would turn the booking into plain text -- so such a change is refused. Pass an empty string to clear it. Defaults to leaving the location unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1769,7 +1769,7 @@
           "name": "is_all_day",
           "type": "boolean",
           "required": false,
-          "description": "Whether the event should occupy whole days rather than a clock time. Changing this needs start_date_time and end_date_time given alongside it, and when true both must fall at midnight, the end being the day after the last day the event covers. Defaults to None (left unchanged).",
+          "description": "Whether the event should occupy whole days rather than a clock time. Changing this needs start_date_time and end_date_time given alongside it, and when true both must fall at midnight, the end being the day after the last day the event covers. Defaults to leaving the all-day setting unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1777,7 +1777,7 @@
           "name": "show_as",
           "type": "string",
           "required": false,
-          "description": "How the event should show to people checking the organizer's availability. Outlook labels this Show As. Defaults to None (left unchanged).",
+          "description": "How the event should show to people checking the organizer's availability. Outlook labels this Show As. Defaults to leaving Show As unchanged.",
           "enum": [
             "free",
             "tentative",
@@ -1791,7 +1791,7 @@
           "name": "importance",
           "type": "string",
           "required": false,
-          "description": "New priority for the event. Defaults to None (left unchanged).",
+          "description": "New priority for the event. Defaults to leaving the priority unchanged.",
           "enum": [
             "low",
             "normal",
@@ -1803,7 +1803,7 @@
           "name": "reminder_minutes_before_start",
           "type": "integer",
           "required": false,
-          "description": "How many minutes before the start the reminder should fire. Outlook keeps the alert and its lead time as two separate settings, so asking for a reminder here turns the alert on as well -- an event carrying this lead time with its alert off is still changed. Defaults to None (left unchanged).",
+          "description": "How many minutes before the start the reminder should fire. Outlook keeps the alert and its lead time as two separate settings, so asking for a reminder here turns the alert on as well -- an event carrying this lead time with its alert off is still changed. Defaults to leaving the reminder unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1812,7 +1812,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Email addresses to invite, added to the people already invited. Everyone else keeps their place and the reply they gave. Defaults to None (nobody is added).",
+          "description": "Email addresses to invite, added to the people already invited. Everyone else keeps their place and the reply they gave. Defaults to adding nobody.",
           "enum": null,
           "inferrable": true
         },
@@ -1821,7 +1821,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "People to uninvite, each given as an email address or as whole words from a person's name -- a first name, a surname, or both, matched against the names the guests are listed under. Part of a word does not match, so Sam does not reach Samantha. A name matching more than one guest is refused rather than guessed, an entry matching nobody is reported back while the rest of the edit still applies, and everyone actually uninvited is named in the response. Defaults to None (nobody is removed).",
+          "description": "People to uninvite, each given as an email address or as whole words from a person's name -- a first name, a surname, or both, matched against the names the guests are listed under. Part of a word does not match, so Sam does not reach Samantha. A name matching more than one guest is refused rather than guessed, an entry matching nobody is reported back while the rest of the edit still applies, and everyone actually uninvited is named in the response. Defaults to removing nobody.",
           "enum": null,
           "inferrable": true
         },
@@ -1830,7 +1830,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "The complete list of email addresses that should be invited, replacing everyone currently on the event. Anyone already invited keeps the kind of invitation they hold, so an optional guest stays optional. Leaving a booked room off the list is refused, since that would release its booking. Pass an empty list to uninvite everyone. Cannot be combined with attendee_emails_to_add or attendees_to_remove. Defaults to None (the invitation list is left unchanged).",
+          "description": "The complete list of email addresses that should be invited, replacing everyone currently on the event. Anyone already invited keeps the kind of invitation they hold, so an optional guest stays optional. Leaving a booked room off the list is refused, since that would release its booking. Pass an empty list to uninvite everyone. Cannot be combined with attendee_emails_to_add or attendees_to_remove. Defaults to leaving the invitation list unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1838,7 +1838,7 @@
           "name": "expected_change_key",
           "type": "string",
           "required": false,
-          "description": "The change_key of the event version being edited, from a read taken immediately beforehand. When given, the edit is refused if the event moved on since that read, and nothing is written. Defaults to None, which writes without a version check -- whatever is there is overwritten.",
+          "description": "The change_key of the event version being edited, from a read taken immediately beforehand. When given, the edit is refused if the event moved on since that read, and nothing is written. Defaults to writing the edit without a version check, over whatever is there.",
           "enum": null,
           "inferrable": true
         },
@@ -1857,7 +1857,7 @@
           "name": "recurrence",
           "type": "json",
           "required": false,
-          "description": "The parts of the repeat rule to replace; each field left out keeps its current value.",
+          "description": "The parts of the repeat rule to replace; each field left out keeps its current value. Defaults to leaving the repeat rule unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -2029,7 +2029,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookCalendar.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@5.0.0",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@5.0.1",
       "description": "Get information about the current user and their Outlook Calendar environment.\n\nmailbox_timezone is the time zone this mailbox's dates are expressed in. It may be a\nWindows name such as \"Eastern Standard Time\" rather than an IANA identifier - that\nnames a zone observing daylight saving, not a fixed offset. mailbox_timezone_source\nsays where it came from: \"mailbox\" and \"mailbox_utc\" mean the mailbox itself names\nthe zone, whereas \"default_not_configured\" (the mailbox names none) and\n\"default_unreadable\" (the setting could not be read) mean UTC is a fallback this\ntoolkit applied, not a zone the mailbox is set to. On either fallback, do not tell\nthe user their mailbox is configured for that zone.",
       "parameters": [],
       "auth": {
@@ -2085,6 +2085,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "b7d44fd15d5bc867db3809cdfc3c4bd55fc6c82a4884bfa8d6c79206065bda7f",
-  "generatedAt": "2026-10-07T21:25:44.905Z",
-  "summary": "## Microsoft Outlook Calendar Toolkit\n\nThe Microsoft Outlook Calendar toolkit connects Arcade to Outlook Calendar via Microsoft Graph, enabling LLMs to read, create, update, and manage calendar events and scheduling on behalf of a user.\n\n## Capabilities\n\n- **Event read & search:** Fetch a single event in full (including raw HTML body, attendees, recurrence metadata, and join URLs), list events over a time range, search by subject or properties, and list instances of a recurring series.\n- **Event write & lifecycle:** Create one-off or recurring events (with rich body formatting and organizer delegation), update individual fields or series scope in place, cancel organized meetings with attendee notification, and remove or respond to events you were invited to.\n- **Scheduling & availability:** Find optimal meeting slots across a group (`FindMeetingTimes`) or inspect free/busy detail for specific times (`GetSchedule`), both timezone-aware.\n- **Attendees & forwarding:** Forward meetings to new attendees, respond to invitations (accept/tentative/decline), and manage attendee lists incrementally or wholesale.\n- **Calendar & attachment metadata:** List all accessible calendars (own, shared, delegated), retrieve attachment metadata for events, and resolve the user's mailbox identity and timezone configuration.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
+  "generatedAt": "2026-10-10T11:14:39.824Z",
+  "summary": "## Microsoft Outlook Calendar Toolkit\n\nArcade's Microsoft Outlook Calendar toolkit gives LLMs structured access to a user's Outlook Calendar via Microsoft Graph, enabling agents to read, create, modify, and manage calendar events and scheduling on behalf of authenticated users.\n\n## Capabilities\n\n- **Event discovery & reading:** List events over a time range, search by property (subject, attendees, organizer, importance, online status), retrieve full event detail including rich-text body and online meeting links, list recurring series instances, and check attachment metadata.\n- **Scheduling & availability:** Find meeting times across a group of attendees with ranked slot suggestions, check free/busy schedules for specific windows, and surface per-attendee availability details.\n- **Event creation & editing:** Create one-off or recurring events on the default or a named calendar, with support for HTML body, recurrence rules, and organizer delegation; update any subset of event fields (including attendees and recurrence) without touching the rest.\n- **RSVP & forwarding:** Accept, decline, or tentatively accept invitations with organizer notification; forward meetings to new attendees.\n- **Cancellation & removal:** Cancel organizer-led meetings with invitee email notification (irreversible), or silently remove non-organized events from your own calendar.\n- **Calendar & identity context:** List all accessible calendars (own, shared, delegated), and retrieve the current user's identity and mailbox timezone configuration.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details."
 }

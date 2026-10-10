@@ -1,7 +1,7 @@
 {
   "id": "X",
   "label": "X",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Arcade.dev LLM tools for X (Twitter).",
   "metadata": {
     "category": "social",
@@ -31,7 +31,7 @@
     {
       "name": "AddListMember",
       "qualifiedName": "X.AddListMember",
-      "fullyQualifiedName": "X.AddListMember@2.0.2",
+      "fullyQualifiedName": "X.AddListMember@2.0.3",
       "description": "Add one or more users to an X List owned by the authenticated user.\n\nProvide ``user_ids``, ``usernames``, or both. Adding a user who is already\na member is treated as success.\n\nOn a mid-loop rate-limit, the run short-circuits and remaining targets\nare marked as not attempted. On retry, drop the targets that already\nsucceeded; otherwise polling re-arms X's bucket and extends the lockout.\n\nX is eventually consistent on list membership: a success status here\ndoes not mean a subsequent read of the list's members will immediately\nreturn the new member. Allow a few seconds before relying on the read\nendpoint to reflect the mutation.\n\nSerialize dependent list mutations: do not add members in parallel with\ndeleting the list, removing its members, or updating it against the\nsame ``list_id``. Concurrent dependent mutations race and surface\nspurious ``not_found`` errors when the member call lands after the list\nis gone. Await each mutation before issuing the next one on the same\nlist.",
       "parameters": [
         {
@@ -47,7 +47,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Numeric X user ids (snowflake ids, 1-19 digits) of the members to add. Up to 100 targets per call (combined with ``usernames``). Prefer this over ``usernames`` when you already have stable ids — the toolkit skips the username-resolution hop, which is rate-limited by X. Defaults to None.",
+          "description": "Numeric X user ids (snowflake ids, 1-19 digits) of the members to add. Up to 100 targets per call (combined with ``usernames``). Prefer this over ``usernames`` when you already have stable ids — the toolkit skips the username-resolution hop, which is rate-limited by X. Defaults to no ids.",
           "enum": null,
           "inferrable": true
         },
@@ -56,7 +56,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Handles of the members to add. Leading '@' is optional and stripped automatically. Up to 100 targets per call (combined with ``user_ids``). Handles are resolved to ids in batched ``/2/users/by`` calls (one round-trip per 100 handles) instead of one resolve-per-target. Defaults to None.",
+          "description": "Handles of the members to add. Leading '@' is optional and stripped automatically. Up to 100 targets per call (combined with ``user_ids``). Handles are resolved to ids in batched ``/2/users/by`` calls (one round-trip per 100 handles) instead of one resolve-per-target. Defaults to no handles.",
           "enum": null,
           "inferrable": true
         }
@@ -130,7 +130,7 @@
     {
       "name": "CreateList",
       "qualifiedName": "X.CreateList",
-      "fullyQualifiedName": "X.CreateList@2.0.2",
+      "fullyQualifiedName": "X.CreateList@2.0.3",
       "description": "Create a new X List owned by the authenticated user.",
       "parameters": [
         {
@@ -219,7 +219,7 @@
     {
       "name": "DeleteList",
       "qualifiedName": "X.DeleteList",
-      "fullyQualifiedName": "X.DeleteList@2.0.2",
+      "fullyQualifiedName": "X.DeleteList@2.0.3",
       "description": "Delete an X List owned by the authenticated user.\n\nThe list and its memberships are removed. The tool distinguishes \"I just\ndeleted it\" from \"it was already gone\" rather than collapsing both into\nthe same idempotent-success envelope.\n\nSerialize dependent list mutations: do not delete a list in parallel\nwith adding or removing its members, updating it, or pinning it. The\nlist-membership endpoints will race against the delete and surface a\nspurious ``not_found`` when the member call lands after the list is\ngone. Await each mutation before issuing the next one on the same list.",
       "parameters": [
         {
@@ -282,7 +282,7 @@
     {
       "name": "DeleteTweetById",
       "qualifiedName": "X.DeleteTweetById",
-      "fullyQualifiedName": "X.DeleteTweetById@2.0.2",
+      "fullyQualifiedName": "X.DeleteTweetById@2.0.3",
       "description": "Delete one of the authenticated user's tweets.\n\nThe tool distinguishes \"I just deleted it\" from \"it was already gone\"\nrather than collapsing both into the same idempotent-success envelope.",
       "parameters": [
         {
@@ -344,7 +344,7 @@
     {
       "name": "GetConversation",
       "qualifiedName": "X.GetConversation",
-      "fullyQualifiedName": "X.GetConversation@2.0.2",
+      "fullyQualifiedName": "X.GetConversation@2.0.3",
       "description": "Fetch the conversation thread containing ``tweet_id``.\n\nReturns every tweet that shares the same ``conversation_id`` as the\ngiven tweet, ordered oldest-first so a caller can render the thread top\nto bottom. The conversation root sits at position 0 whenever accessible.\n\nReplies are pulled from the recent-search index (~7-day window) which\ncan lag real time by several minutes. To verify a specific reply, look\nit up by id instead.",
       "parameters": [
         {
@@ -367,7 +367,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -431,7 +431,7 @@
     {
       "name": "GetHomeTimeline",
       "qualifiedName": "X.GetHomeTimeline",
-      "fullyQualifiedName": "X.GetHomeTimeline@2.0.2",
+      "fullyQualifiedName": "X.GetHomeTimeline@2.0.3",
       "description": "Fetch the authenticated user's reverse-chronological home timeline.\n\nReturns recent tweets from accounts the user follows.",
       "parameters": [
         {
@@ -446,7 +446,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -505,7 +505,7 @@
     {
       "name": "GetListMembers",
       "qualifiedName": "X.GetListMembers",
-      "fullyQualifiedName": "X.GetListMembers@2.0.2",
+      "fullyQualifiedName": "X.GetListMembers@2.0.3",
       "description": "List members of an X List.\n\nThe members endpoint is eventually consistent: after members are added\nto or removed from a list, the membership read endpoints (this list's\nmembers and a user's list memberships) can take several seconds to\nsurface the change. The list-tweets endpoint is typically refreshed\nfaster than the members endpoint, so an empty page immediately after an\nadd is more likely a consistency window than a genuine empty list.\nRe-query after a brief wait when verifying a just-applied mutation.",
       "parameters": [
         {
@@ -528,7 +528,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -593,14 +593,14 @@
     {
       "name": "GetListMembershipsForUser",
       "qualifiedName": "X.GetListMembershipsForUser",
-      "fullyQualifiedName": "X.GetListMembershipsForUser@2.0.2",
+      "fullyQualifiedName": "X.GetListMembershipsForUser@2.0.3",
       "description": "List the X Lists the target user is a member of.\n\nPass ``user_id`` or ``username`` (exactly one). With ``username``, the\nhandle is resolved to a numeric id first; passing ``user_id`` skips\nthat hop.",
       "parameters": [
         {
           "name": "username",
           "type": "string",
           "required": false,
-          "description": "The username (handle) whose list memberships to fetch. Leading '@' is optional and stripped automatically. Provide exactly one of ``user_id`` or ``username``. Defaults to None.",
+          "description": "The username (handle) whose list memberships to fetch. Leading '@' is optional and stripped automatically. Provide exactly one of ``user_id`` or ``username``. Defaults to looking up by ``user_id``.",
           "enum": null,
           "inferrable": true
         },
@@ -608,7 +608,7 @@
           "name": "user_id",
           "type": "string",
           "required": false,
-          "description": "The numeric X user id (snowflake id, 1-19 digits) whose list memberships to fetch. Provide exactly one of ``user_id`` or ``username``. Prefer this when you already have a stable id — it avoids a username-to-id lookup hop, which is rate-limited by X. Defaults to None.",
+          "description": "The numeric X user id (snowflake id, 1-19 digits) whose list memberships to fetch. Provide exactly one of ``user_id`` or ``username``. Prefer this when you already have a stable id — it avoids a username-to-id lookup hop, which is rate-limited by X. Defaults to looking up by ``username``.",
           "enum": null,
           "inferrable": true
         },
@@ -624,7 +624,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -694,7 +694,7 @@
     {
       "name": "GetListTweets",
       "qualifiedName": "X.GetListTweets",
-      "fullyQualifiedName": "X.GetListTweets@2.0.2",
+      "fullyQualifiedName": "X.GetListTweets@2.0.3",
       "description": "List recent tweets from members of an X List, newest first.",
       "parameters": [
         {
@@ -717,7 +717,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -782,7 +782,7 @@
     {
       "name": "GetMyMentions",
       "qualifiedName": "X.GetMyMentions",
-      "fullyQualifiedName": "X.GetMyMentions@2.0.2",
+      "fullyQualifiedName": "X.GetMyMentions@2.0.3",
       "description": "Fetch recent @-mentions of the authenticated user, newest first.",
       "parameters": [
         {
@@ -797,7 +797,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -856,14 +856,14 @@
     {
       "name": "GetOwnedLists",
       "qualifiedName": "X.GetOwnedLists",
-      "fullyQualifiedName": "X.GetOwnedLists@2.0.2",
+      "fullyQualifiedName": "X.GetOwnedLists@2.0.3",
       "description": "List the X Lists a user owns.\n\nOmitting both ``user_id`` and ``username`` defaults to the authenticated\nuser (the common \"show me my lists\" workflow after creating a list).\nEach list record carries ``id``, ``name``, ``private``, ``description``,\n``member_count``, ``follower_count``, ``owner_id``, and ``created_at``.",
       "parameters": [
         {
           "name": "user_id",
           "type": "string",
           "required": false,
-          "description": "Numeric X user id whose owned lists to fetch (snowflake id, 1-19 digits). Provide at most one of ``user_id`` or ``username``; omit both to default to the authenticated user — the common 'show me my lists' workflow. Defaults to None.",
+          "description": "Numeric X user id whose owned lists to fetch (snowflake id, 1-19 digits). Provide at most one of ``user_id`` or ``username``. Defaults to the authenticated user.",
           "enum": null,
           "inferrable": true
         },
@@ -871,7 +871,7 @@
           "name": "username",
           "type": "string",
           "required": false,
-          "description": "Handle whose owned lists to fetch. Leading '@' is optional and stripped automatically. Provide at most one of ``user_id`` or ``username``; omit both to default to the authenticated user. Defaults to None.",
+          "description": "Handle whose owned lists to fetch. Leading '@' is optional and stripped automatically. Provide at most one of ``user_id`` or ``username``. Defaults to the authenticated user.",
           "enum": null,
           "inferrable": true
         },
@@ -887,7 +887,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -957,7 +957,7 @@
     {
       "name": "GetQuoteTweets",
       "qualifiedName": "X.GetQuoteTweets",
-      "fullyQualifiedName": "X.GetQuoteTweets@2.0.2",
+      "fullyQualifiedName": "X.GetQuoteTweets@2.0.3",
       "description": "Fetch public quote tweets of the given tweet.",
       "parameters": [
         {
@@ -980,7 +980,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1044,7 +1044,7 @@
     {
       "name": "GetRepliesToTweet",
       "qualifiedName": "X.GetRepliesToTweet",
-      "fullyQualifiedName": "X.GetRepliesToTweet@2.0.2",
+      "fullyQualifiedName": "X.GetRepliesToTweet@2.0.3",
       "description": "Fetch public DIRECT replies to a given tweet (last ~7 days).\n\nReturns only tweets whose ``referenced_tweets`` carry a ``replied_to``\nedge pointing at ``tweet_id`` -- not the whole conversation thread.\nSibling replies and nested replies further down the tree are filtered\nout so the result reflects what a reader would see when expanding\n\"replies to this tweet\" in the X UI. Use the conversation tool to get\nthe full thread surrounding a tweet instead.\n\nThe recent-search index can lag real time by several minutes, so a\njust-posted reply may not appear yet. To verify a reply you just\nposted, look it up by id instead.\n\nPagination note: each page is fetched as ``max_results`` from X's\nrecent-search index, then locally filtered down to direct replies.\nPages where every tweet is an indirect reply (sibling or nested) come\nback with ``data=[]`` plus a ``next_token`` -- continue paginating to\nsurface the direct replies further into the conversation.",
       "parameters": [
         {
@@ -1067,7 +1067,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1131,7 +1131,7 @@
     {
       "name": "GetSpacesByCreator",
       "qualifiedName": "X.GetSpacesByCreator",
-      "fullyQualifiedName": "X.GetSpacesByCreator@2.0.2",
+      "fullyQualifiedName": "X.GetSpacesByCreator@2.0.3",
       "description": "List the live or scheduled X Spaces created by a set of users.\n\nUseful for monitoring whether a set of accounts has any Space currently\nairing or queued. Ended Spaces are not returned.",
       "parameters": [
         {
@@ -1200,14 +1200,14 @@
     {
       "name": "GetUserLikedTweets",
       "qualifiedName": "X.GetUserLikedTweets",
-      "fullyQualifiedName": "X.GetUserLikedTweets@2.0.2",
+      "fullyQualifiedName": "X.GetUserLikedTweets@2.0.3",
       "description": "List tweets a user has liked, newest-liked first.\n\nOmitting both ``user_id`` and ``username`` defaults to the authenticated\nuser. Each tweet carries ``tweet_url``, ``author_username``,\n``author_name``, and any media or poll enrichment.\n\nWhen the target user's likes are private, the response is an empty page\nindistinguishable from \"no liked tweets.\"",
       "parameters": [
         {
           "name": "user_id",
           "type": "string",
           "required": false,
-          "description": "Numeric X user id whose liked-tweets you want to list (snowflake id, 1-19 digits). Provide at most one of ``user_id`` or ``username``; omit both to default to the authenticated user. Defaults to None.",
+          "description": "Numeric X user id whose liked-tweets you want to list (snowflake id, 1-19 digits). Provide at most one of ``user_id`` or ``username``. Defaults to the authenticated user.",
           "enum": null,
           "inferrable": true
         },
@@ -1215,7 +1215,7 @@
           "name": "username",
           "type": "string",
           "required": false,
-          "description": "Handle of the user whose liked-tweets you want to list. Leading '@' is optional and stripped automatically. Provide at most one of ``user_id`` or ``username``; omit both to default to the authenticated user. Defaults to None.",
+          "description": "Handle of the user whose liked-tweets you want to list. Leading '@' is optional and stripped automatically. Provide at most one of ``user_id`` or ``username``. Defaults to the authenticated user.",
           "enum": null,
           "inferrable": true
         },
@@ -1231,7 +1231,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1301,14 +1301,14 @@
     {
       "name": "GetUserTweets",
       "qualifiedName": "X.GetUserTweets",
-      "fullyQualifiedName": "X.GetUserTweets@2.0.2",
+      "fullyQualifiedName": "X.GetUserTweets@2.0.3",
       "description": "Fetch tweets authored by a specific X user, newest first.\n\nPaginates through the author's full tweet history (no 7-day window).\nResults include original tweets, replies (unless ``exclude_replies=True``),\nretweets (unless ``exclude_retweets=True``), and quote tweets. Author\nhandle, name, and media or poll details are flattened onto each tweet.",
       "parameters": [
         {
           "name": "user_id",
           "type": "string",
           "required": false,
-          "description": "Numeric X user id of the author whose tweets you want to fetch (snowflake id, 1-19 digits). Provide exactly one of ``user_id`` or ``username``. Defaults to None.",
+          "description": "Numeric X user id of the author whose tweets you want to fetch (snowflake id, 1-19 digits). Provide exactly one of ``user_id`` or ``username``. Defaults to looking up by ``username``.",
           "enum": null,
           "inferrable": true
         },
@@ -1316,7 +1316,7 @@
           "name": "username",
           "type": "string",
           "required": false,
-          "description": "Handle of the author whose tweets you want to fetch. Leading '@' is optional and stripped automatically. Provide exactly one of ``user_id`` or ``username``. Defaults to None.",
+          "description": "Handle of the author whose tweets you want to fetch. Leading '@' is optional and stripped automatically. Provide exactly one of ``user_id`` or ``username``. Defaults to looking up by ``user_id``.",
           "enum": null,
           "inferrable": true
         },
@@ -1332,7 +1332,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         },
@@ -1356,7 +1356,7 @@
           "name": "start_time",
           "type": "string",
           "required": false,
-          "description": "Lower bound (inclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Leave None for no lower bound. Defaults to None.",
+          "description": "Lower bound (inclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Defaults to no lower bound.",
           "enum": null,
           "inferrable": true
         },
@@ -1364,7 +1364,7 @@
           "name": "end_time",
           "type": "string",
           "required": false,
-          "description": "Upper bound (exclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Leave None for no upper bound. Defaults to None.",
+          "description": "Upper bound (exclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Defaults to no upper bound.",
           "enum": null,
           "inferrable": true
         }
@@ -1453,7 +1453,7 @@
     {
       "name": "LikeTweet",
       "qualifiedName": "X.LikeTweet",
-      "fullyQualifiedName": "X.LikeTweet@2.0.2",
+      "fullyQualifiedName": "X.LikeTweet@2.0.3",
       "description": "Like a tweet as the authenticated user.\n\nIdempotent: liking an already-liked tweet succeeds.",
       "parameters": [
         {
@@ -1515,7 +1515,7 @@
     {
       "name": "LookupSpaceById",
       "qualifiedName": "X.LookupSpaceById",
-      "fullyQualifiedName": "X.LookupSpaceById@2.0.2",
+      "fullyQualifiedName": "X.LookupSpaceById@2.0.3",
       "description": "Look up a single X Space by its id.\n\nReturns the Space's lifecycle state, title, creator, host and speaker\nids, language, and participant and subscriber counts.\n\nX gates several Space metadata fields behind ownership: most non-host\ncallers cannot read a Space's full metadata, even when the Space surfaces\nin a search or by-creator listing.",
       "parameters": [
         {
@@ -1577,7 +1577,7 @@
     {
       "name": "LookupTweetEngagers",
       "qualifiedName": "X.LookupTweetEngagers",
-      "fullyQualifiedName": "X.LookupTweetEngagers@2.0.2",
+      "fullyQualifiedName": "X.LookupTweetEngagers@2.0.3",
       "description": "List the users who liked or retweeted a tweet.\n\nEach user record carries the standard handle, name, and profile metadata so\ncallers can render an engager row without a follow-up lookup.\n\nWhen the tweet shows non-zero engagement in ``public_metrics`` but X's\nengagers endpoint returns zero users on the first page, the call returns\nan ``errors[0].type = \"data_unavailable\"`` envelope. This signals that\nthe account's X access tier does not expose engager lists for this\ntweet; treat ``public_metrics.like_count`` / ``retweet_count`` from\n``LookupTweetById`` as the authoritative engagement total in that case.",
       "parameters": [
         {
@@ -1611,7 +1611,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1681,7 +1681,7 @@
     {
       "name": "LookupTweets",
       "qualifiedName": "X.LookupTweets",
-      "fullyQualifiedName": "X.LookupTweets@2.0.2",
+      "fullyQualifiedName": "X.LookupTweets@2.0.3",
       "description": "Look up tweets by id (single or batched) on X.\n\nPass one id or up to 100 ids; the response is always a list. Each entry\ncarries ``referenced_tweets`` (``type`` of ``replied_to``, ``quoted``, or\n``retweeted`` plus the parent ``id``), ``conversation_id``, and the\nconvenience fields ``tweet_url`` / ``author_username`` / ``author_name``.\n\nSet ``include_author_only_metrics=True`` to retrieve ``non_public_metrics``\n(impressions, user_profile_clicks, url_link_clicks) and ``organic_metrics``\nfor tweets the authenticated caller authored. X drops third-party tweets\nfrom ``data`` when those fields are requested, so leave the flag false\nunless every id in the batch is known to be authored by the caller.",
       "parameters": [
         {
@@ -1760,7 +1760,7 @@
     {
       "name": "LookupUsers",
       "qualifiedName": "X.LookupUsers",
-      "fullyQualifiedName": "X.LookupUsers@2.0.2",
+      "fullyQualifiedName": "X.LookupUsers@2.0.3",
       "description": "Look up X (Twitter) users by handle and/or numeric user id.\n\nProvide ``usernames``, ``user_ids``, or both. Up to 100 of each per call.",
       "parameters": [
         {
@@ -1768,7 +1768,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "X (Twitter) handles to look up. Leading '@' is optional and stripped automatically. Empty entries are ignored. Handles that don't match X's syntax (1-15 letters, digits, or underscores) are reported per-handle in ``errors`` rather than aborting the call. Up to 100 handles per call (combined with ``user_ids``). Defaults to None.",
+          "description": "X (Twitter) handles to look up. Leading '@' is optional and stripped automatically. Empty entries are ignored. Handles that don't match X's syntax (1-15 letters, digits, or underscores) are reported per-handle in ``errors`` rather than aborting the call. Up to 100 handles per call (combined with ``user_ids``). Defaults to no handles.",
           "enum": null,
           "inferrable": true
         },
@@ -1777,7 +1777,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Numeric X user ids (snowflake ids) to look up. Empty entries are ignored. Ids that don't match X's snowflake format are reported per-id in ``errors`` rather than aborting the call. Up to 100 ids per call (combined with ``usernames``). Defaults to None.",
+          "description": "Numeric X user ids (snowflake ids) to look up. Empty entries are ignored. Ids that don't match X's snowflake format are reported per-id in ``errors`` rather than aborting the call. Up to 100 ids per call (combined with ``usernames``). Defaults to no ids.",
           "enum": null,
           "inferrable": true
         }
@@ -1848,7 +1848,7 @@
     {
       "name": "PinList",
       "qualifiedName": "X.PinList",
-      "fullyQualifiedName": "X.PinList@2.0.2",
+      "fullyQualifiedName": "X.PinList@2.0.3",
       "description": "Pin an X List to the authenticated user's profile.\n\nIdempotent: pinning an already-pinned list succeeds.",
       "parameters": [
         {
@@ -1910,7 +1910,7 @@
     {
       "name": "PostThread",
       "qualifiedName": "X.PostThread",
-      "fullyQualifiedName": "X.PostThread@2.0.2",
+      "fullyQualifiedName": "X.PostThread@2.0.3",
       "description": "Post a multi-tweet thread as the authenticated user.\n\nPosts the first tweet, then chains every subsequent entry as a reply to\nthe prior tweet's id. ``tweets`` must contain 2-25 entries when posting a\nnew thread, or 1-25 entries when resuming an existing thread via\n``parent_tweet_id`` (the 1-entry case lets a caller append one more reply\nto the tail of a prior thread).\n``poll_options`` / ``poll_duration_minutes`` / ``quote_tweet_id`` /\n``reply_settings`` apply to the head tweet only.\n\nPre-flight validation runs on every entry before any post is created. If\nany entry fails validation, the call posts nothing.\n\nOn a mid-thread interruption, ``posted`` carries the rows that landed\nand ``next_position`` is the 1-based index of the first non-posted\nentry (0 when every entry posted). Resume the chain with::\n\n    tweets = (tweets[next_position - 1 :],)\n    parent_tweet_id = posted[-1][\"tweet_id\"]  # from the prior call\n\nWithout ``parent_tweet_id``, a resume call would re-create a fresh head\ntweet and silently split the thread into two disconnected chains.\n\nX also rejects mid-thread entries with ``status='invalid_input'`` when\nthe text passes local validation but contains codepoints that X counts\nas multiple weighted characters (emoji, many CJK glyphs) pushing the\nweighted total above 280, or when the text contains control characters\nX disallows. Simplify the entry at ``tweets[next_position - 1]`` (plain\nASCII is the safest reset) and resume.",
       "parameters": [
         {
@@ -1926,7 +1926,7 @@
           "name": "quote_tweet_id",
           "type": "string",
           "required": false,
-          "description": "Tweet id quoted by the head tweet only (subsequent thread entries cannot quote). Defaults to None.",
+          "description": "Tweet id quoted by the head tweet only (subsequent thread entries cannot quote). Defaults to no quote.",
           "enum": null,
           "inferrable": true
         },
@@ -1934,7 +1934,7 @@
           "name": "reply_settings",
           "type": "string",
           "required": false,
-          "description": "Reply restriction applied to the head tweet only (X applies the head's setting to the entire thread). Leave None for X's default (everyone). Defaults to None.",
+          "description": "Reply restriction applied to the head tweet only (X applies the head's setting to the entire thread). Defaults to no reply restriction.",
           "enum": [
             "everyone",
             "mentionedUsers",
@@ -1948,7 +1948,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Attach a poll to the head tweet only (subsequent thread entries cannot include a poll). When set, must be 2-4 short answer options (each <=25 chars) and ``poll_duration_minutes`` must also be set. Polls are incompatible with ``quote_tweet_id`` (X rejects the combination). Defaults to None.",
+          "description": "Attach a poll to the head tweet only (subsequent thread entries cannot include a poll). When set, must be 2-4 short answer options (each <=25 chars) and ``poll_duration_minutes`` must also be set. Polls are incompatible with ``quote_tweet_id`` (X rejects the combination). Defaults to no poll.",
           "enum": null,
           "inferrable": true
         },
@@ -1956,7 +1956,7 @@
           "name": "poll_duration_minutes",
           "type": "integer",
           "required": false,
-          "description": "How long the head poll stays open, in minutes (5-10080). Required when ``poll_options`` is set; ignored otherwise. Defaults to None.",
+          "description": "How long the head poll stays open, in minutes (5-10080). Required when ``poll_options`` is set; ignored otherwise. Defaults to no poll duration.",
           "enum": null,
           "inferrable": true
         },
@@ -1964,7 +1964,7 @@
           "name": "parent_tweet_id",
           "type": "string",
           "required": false,
-          "description": "Numeric tweet id to chain the first ``tweets`` entry under as a reply (snowflake id, 1-19 digits). Use this to resume an interrupted thread: pass the ``tweet_id`` of the last entry that successfully posted (i.e. ``posted[-1].tweet_id`` from the prior call). When set, every entry chains as a reply (no head tweet is created), so head-only options (``quote_tweet_id``, ``poll_options`` / ``poll_duration_minutes``, ``reply_settings``) cannot be combined with this parameter. Defaults to None.",
+          "description": "Numeric tweet id to chain the first ``tweets`` entry under as a reply (snowflake id, 1-19 digits). Use this to resume an interrupted thread: pass the ``tweet_id`` of the last entry that successfully posted (i.e. ``posted[-1].tweet_id`` from the prior call). When set, every entry chains as a reply (no head tweet is created), so head-only options (``quote_tweet_id``, ``poll_options`` / ``poll_duration_minutes``, ``reply_settings``) cannot be combined with this parameter. Defaults to starting a new thread.",
           "enum": null,
           "inferrable": true
         }
@@ -2062,7 +2062,7 @@
     {
       "name": "PostTweet",
       "qualifiedName": "X.PostTweet",
-      "fullyQualifiedName": "X.PostTweet@2.0.2",
+      "fullyQualifiedName": "X.PostTweet@2.0.3",
       "description": "Post a new tweet as the authenticated user.\n\nThe same tool covers top-level posts, replies, and quote tweets. Supply\n``reply_to_tweet_id`` to post the new tweet as a reply; supply\n``quote_tweet_id`` to quote another tweet; supply both to post a reply\nthat also quotes a tweet. Pass ``reply_settings`` to restrict who can\nreply. Pass ``poll_options`` plus ``poll_duration_minutes`` to attach a\npoll (polls cannot be combined with ``quote_tweet_id``).\n\nFor multi-tweet threads, use the post-thread tool.",
       "parameters": [
         {
@@ -2077,7 +2077,7 @@
           "name": "reply_to_tweet_id",
           "type": "string",
           "required": false,
-          "description": "The id of an existing tweet to reply to. When set, the new tweet is posted as a reply in that conversation. Leave None to post a top-level tweet. Defaults to None.",
+          "description": "The id of an existing tweet to reply to. When set, the new tweet is posted as a reply in that conversation. Defaults to posting a top-level tweet.",
           "enum": null,
           "inferrable": true
         },
@@ -2085,7 +2085,7 @@
           "name": "quote_tweet_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the tweet you want to quote. It must be a valid integer as a string. Default is None.",
+          "description": "The ID of the tweet you want to quote. It must be a valid integer as a string. Defaults to no quote.",
           "enum": null,
           "inferrable": true
         },
@@ -2093,7 +2093,7 @@
           "name": "reply_settings",
           "type": "string",
           "required": false,
-          "description": "Restrict who can reply to the new tweet. Leave None for X's default (everyone). Defaults to None.",
+          "description": "Restrict who can reply to the new tweet. Defaults to no reply restriction.",
           "enum": [
             "everyone",
             "mentionedUsers",
@@ -2107,7 +2107,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Attach a poll to the new tweet. When provided, must be a list of 2-4 short answer options; each option is at most 25 characters (X API limit). When set, ``poll_duration_minutes`` must also be set. Polls are incompatible with ``quote_tweet_id`` (X rejects the combination). Leave None for no poll. Defaults to None.",
+          "description": "Attach a poll to the new tweet. When provided, must be a list of 2-4 short answer options; each option is at most 25 characters (X API limit). When set, ``poll_duration_minutes`` must also be set. Polls are incompatible with ``quote_tweet_id`` (X rejects the combination). Defaults to no poll.",
           "enum": null,
           "inferrable": true
         },
@@ -2115,7 +2115,7 @@
           "name": "poll_duration_minutes",
           "type": "integer",
           "required": false,
-          "description": "How long the poll stays open, in minutes. Required when ``poll_options`` is set; ignored otherwise. Must be between 5 and 10080 (7 days), per X's API limits. Defaults to None.",
+          "description": "How long the poll stays open, in minutes. Required when ``poll_options`` is set; ignored otherwise. Must be between 5 and 10080 (7 days), per X's API limits. Defaults to no poll duration.",
           "enum": null,
           "inferrable": true
         }
@@ -2200,7 +2200,7 @@
     {
       "name": "RemoveListMember",
       "qualifiedName": "X.RemoveListMember",
-      "fullyQualifiedName": "X.RemoveListMember@2.0.2",
+      "fullyQualifiedName": "X.RemoveListMember@2.0.3",
       "description": "Remove one or more users from an X List owned by the authenticated user.\n\nProvide ``user_ids``, ``usernames``, or both. Removing a user who is not\na member is treated as success.\n\nOn a mid-loop rate-limit, the run short-circuits and remaining targets\nare marked as not attempted. On retry, drop the targets that already\nsucceeded; otherwise polling re-arms X's bucket and extends the lockout.\n\nX is eventually consistent on list membership: a success status here\ndoes not mean a subsequent read of the list's members will immediately\nstop returning the removed member. Allow a few seconds before relying\non the read endpoint to reflect the mutation.\n\nSerialize dependent list mutations: do not remove members in parallel\nwith deleting the same ``list_id`` (a known race that produces spurious\n``not_found`` when the remove lands after the delete). Await each\nmutation before issuing the next one on the same list.",
       "parameters": [
         {
@@ -2216,7 +2216,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Numeric X user ids (snowflake ids, 1-19 digits) of the members to remove. Up to 100 targets per call (combined with ``usernames``). Prefer this over ``usernames`` when you already have stable ids — the toolkit skips the username-resolution hop, which is rate-limited by X. Defaults to None.",
+          "description": "Numeric X user ids (snowflake ids, 1-19 digits) of the members to remove. Up to 100 targets per call (combined with ``usernames``). Prefer this over ``usernames`` when you already have stable ids — the toolkit skips the username-resolution hop, which is rate-limited by X. Defaults to no ids.",
           "enum": null,
           "inferrable": true
         },
@@ -2225,7 +2225,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Handles of the members to remove. Leading '@' is optional and stripped automatically. Up to 100 targets per call (combined with ``user_ids``). Handles are resolved to ids in batched ``/2/users/by`` calls (one round-trip per 100 handles) instead of one resolve-per-target. Defaults to None.",
+          "description": "Handles of the members to remove. Leading '@' is optional and stripped automatically. Up to 100 targets per call (combined with ``user_ids``). Handles are resolved to ids in batched ``/2/users/by`` calls (one round-trip per 100 handles) instead of one resolve-per-target. Defaults to no handles.",
           "enum": null,
           "inferrable": true
         }
@@ -2299,7 +2299,7 @@
     {
       "name": "Retweet",
       "qualifiedName": "X.Retweet",
-      "fullyQualifiedName": "X.Retweet@2.0.2",
+      "fullyQualifiedName": "X.Retweet@2.0.3",
       "description": "Retweet a tweet as the authenticated user.\n\nIdempotent: retweeting an already-retweeted tweet succeeds.",
       "parameters": [
         {
@@ -2361,7 +2361,7 @@
     {
       "name": "SearchSpaces",
       "qualifiedName": "X.SearchSpaces",
-      "fullyQualifiedName": "X.SearchSpaces@2.0.2",
+      "fullyQualifiedName": "X.SearchSpaces@2.0.3",
       "description": "Search live and scheduled X Spaces by title.\n\nMatches the query against Space titles only (not transcripts). Filter\n``state`` controls whether to return live, scheduled, or both.\n\nThis endpoint does not paginate; ``max_results`` is the maximum page\nsize.",
       "parameters": [
         {
@@ -2453,7 +2453,7 @@
     {
       "name": "SearchTweetsByKeywords",
       "qualifiedName": "X.SearchTweetsByKeywords",
-      "fullyQualifiedName": "X.SearchTweetsByKeywords@2.0.2",
+      "fullyQualifiedName": "X.SearchTweetsByKeywords@2.0.3",
       "description": "Search tweets on X by structured filters across X's recent ~7-day index.\n\nSearches the last ~7 days of public tweets. For deeper historical\nwindows, X gates the full-archive search endpoint behind a paid plan;\nthis toolkit only offers the recent variant.\n\nAll supplied filters are ANDed together. At least one positive filter\nis required: a non-empty keyword or phrase, a non-empty\n``from_username`` / ``to_username``, or a ``has_*`` / ``is_*`` flag set\nto True. ``lang``, ``exclude_replies``, ``sort_order``, ``start_time`` /\n``end_time``, and False-valued flags are qualifiers, not positive filters.\n\nPagination: X's cursor is inclusive at the boundary, so consecutive\npages may overlap by one tweet. De-duplicate by tweet id when merging\npages. X's sharded search backend sometimes returns ``data=[]`` with a\nnon-null ``next_token`` when the slice it scanned produced no hits;\n``auto_follow_empty_pages`` controls how many such empty pages the tool\nfollows internally before returning, and ``pages_scanned`` in the\nresponse reports how far it scanned.",
       "parameters": [
         {
@@ -2461,7 +2461,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Single keywords that must ALL be present in matching tweets (AND semantics). Example: ['anthropic', 'claude'] matches tweets containing both words. Defaults to None.",
+          "description": "Single keywords that must ALL be present in matching tweets (AND semantics). Example: ['anthropic', 'claude'] matches tweets containing both words. Defaults to no keywords.",
           "enum": null,
           "inferrable": true
         },
@@ -2470,7 +2470,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Multi-word phrases that must ALL be present in matching tweets (AND semantics). Each phrase is matched as a contiguous quoted string. Defaults to None.",
+          "description": "Multi-word phrases that must ALL be present in matching tweets (AND semantics). Each phrase is matched as a contiguous quoted string. Defaults to no phrases.",
           "enum": null,
           "inferrable": true
         },
@@ -2486,7 +2486,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         },
@@ -2502,7 +2502,7 @@
           "name": "lang",
           "type": "string",
           "required": false,
-          "description": "BCP-47 language code (e.g. 'en', 'ja', 'es') to restrict matches to tweets X classified as that language. Leave None for no language filter. Defaults to None.",
+          "description": "BCP-47 language code (e.g. 'en', 'ja', 'es') to restrict matches to tweets X classified as that language. Defaults to any language.",
           "enum": null,
           "inferrable": true
         },
@@ -2518,7 +2518,7 @@
           "name": "from_username",
           "type": "string",
           "required": false,
-          "description": "Restrict to tweets authored by this handle. Leading '@' is optional and stripped automatically. Leave None for no author restriction. Defaults to None.",
+          "description": "Restrict to tweets authored by this handle. Leading '@' is optional and stripped automatically. Defaults to any author.",
           "enum": null,
           "inferrable": true
         },
@@ -2526,7 +2526,7 @@
           "name": "to_username",
           "type": "string",
           "required": false,
-          "description": "Restrict to tweets that reply to this handle. Leading '@' is optional and stripped automatically. Leave None for no recipient restriction. Defaults to None.",
+          "description": "Restrict to tweets that reply to this handle. Leading '@' is optional and stripped automatically. Defaults to any recipient.",
           "enum": null,
           "inferrable": true
         },
@@ -2534,7 +2534,7 @@
           "name": "has_media",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain any media attachment. True requires media; False excludes media; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether tweets contain any media attachment. True requires media; False excludes media. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2542,7 +2542,7 @@
           "name": "has_images",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain image attachments. True requires images; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether tweets contain image attachments. True requires images; False excludes them. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2550,7 +2550,7 @@
           "name": "has_videos",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain native (non-GIF) videos. True requires videos; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether tweets contain native (non-GIF) videos. True requires videos; False excludes them. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2558,7 +2558,7 @@
           "name": "has_links",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain links/URLs. True requires links; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether tweets contain links/URLs. True requires links; False excludes them. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2566,7 +2566,7 @@
           "name": "has_mentions",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets mention at least one user. True requires mentions; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether tweets mention at least one user. True requires mentions; False excludes them. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2574,7 +2574,7 @@
           "name": "has_hashtags",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain at least one hashtag. True requires hashtags; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether tweets contain at least one hashtag. True requires hashtags; False excludes them. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2582,7 +2582,7 @@
           "name": "is_verified",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether the tweet author is verified. True requires verified authors; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether the tweet author is verified. True requires verified authors; False excludes them. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2590,7 +2590,7 @@
           "name": "is_retweet",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether the tweet is a retweet. True requires retweets; False excludes retweets; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether the tweet is a retweet. True requires retweets; False excludes retweets. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2598,7 +2598,7 @@
           "name": "is_quote",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether the tweet is a quote tweet. True requires quote tweets; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Filter on whether the tweet is a quote tweet. True requires quote tweets; False excludes them. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2606,7 +2606,7 @@
           "name": "start_time",
           "type": "string",
           "required": false,
-          "description": "Lower bound (inclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Must fall within X's ~7-day recent index window; values older than 7 days surface as ``invalid_input``. Leave None for no lower bound. Defaults to None.",
+          "description": "Lower bound (inclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Must fall within X's ~7-day recent index window; values older than 7 days surface as ``invalid_input``. Defaults to no lower bound.",
           "enum": null,
           "inferrable": true
         },
@@ -2614,7 +2614,7 @@
           "name": "end_time",
           "type": "string",
           "required": false,
-          "description": "Upper bound (exclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Must fall within X's ~7-day recent index window. Leave None for no upper bound. Defaults to None.",
+          "description": "Upper bound (exclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Must fall within X's ~7-day recent index window. Defaults to no upper bound.",
           "enum": null,
           "inferrable": true
         },
@@ -2785,7 +2785,7 @@
     {
       "name": "UndoRetweet",
       "qualifiedName": "X.UndoRetweet",
-      "fullyQualifiedName": "X.UndoRetweet@2.0.2",
+      "fullyQualifiedName": "X.UndoRetweet@2.0.3",
       "description": "Undo a previous retweet by the authenticated user.\n\nIdempotent: undoing a retweet that doesn't exist succeeds.",
       "parameters": [
         {
@@ -2847,7 +2847,7 @@
     {
       "name": "UnlikeTweet",
       "qualifiedName": "X.UnlikeTweet",
-      "fullyQualifiedName": "X.UnlikeTweet@2.0.2",
+      "fullyQualifiedName": "X.UnlikeTweet@2.0.3",
       "description": "Remove the authenticated user's like from a tweet.\n\nThe tweet itself is unaffected; only the like relationship is removed.\nIdempotent: unliking a tweet that isn't liked succeeds.",
       "parameters": [
         {
@@ -2909,7 +2909,7 @@
     {
       "name": "UnpinList",
       "qualifiedName": "X.UnpinList",
-      "fullyQualifiedName": "X.UnpinList@2.0.2",
+      "fullyQualifiedName": "X.UnpinList@2.0.3",
       "description": "Unpin an X List from the authenticated user's profile.\n\nIdempotent: unpinning a list that isn't pinned succeeds.",
       "parameters": [
         {
@@ -2972,7 +2972,7 @@
     {
       "name": "UpdateList",
       "qualifiedName": "X.UpdateList",
-      "fullyQualifiedName": "X.UpdateList@2.0.2",
+      "fullyQualifiedName": "X.UpdateList@2.0.3",
       "description": "Rename a list, edit its description, or toggle its visibility.\n\nAt least one of ``name``, ``description``, or ``private`` must be\nprovided. Unchanged fields keep their pre-existing values.\n\nSerialize dependent list mutations: do not update a list in parallel\nwith deleting it, adding or removing its members, or another update to\nthe same ``list_id``. Concurrent dependent mutations race against X's\ndistributed state and surface spurious ``not_found`` errors. Await each\nmutation before issuing the next one on the same list.",
       "parameters": [
         {
@@ -2987,7 +2987,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "New display name for the list. Provide a non-empty string of at most 25 characters to rename. Leave None to leave the existing name unchanged. Defaults to None.",
+          "description": "New display name for the list. Provide a non-empty string of at most 25 characters to rename. Defaults to leaving the name unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2995,7 +2995,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "New description for the list. Provide any string (including empty) to overwrite the existing description; an empty string clears it. Leave None to leave the existing description unchanged. Defaults to None.",
+          "description": "New description for the list. Provide any string (including empty) to overwrite the existing description; an empty string clears it. Defaults to leaving the description unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -3003,7 +3003,7 @@
           "name": "private",
           "type": "boolean",
           "required": false,
-          "description": "Visibility flag. True makes the list private (only visible to its owner); False makes it public. Leave None to leave the existing visibility unchanged. Defaults to None.",
+          "description": "Visibility flag. True makes the list private (only visible to its owner); False makes it public. Defaults to leaving the visibility unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -3074,7 +3074,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "X.WhoAmI",
-      "fullyQualifiedName": "X.WhoAmI@2.0.2",
+      "fullyQualifiedName": "X.WhoAmI@2.0.3",
       "description": "Get the authenticated X (Twitter) user's profile.",
       "parameters": [],
       "auth": {
@@ -3122,6 +3122,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:26:06.954Z",
-  "summary": "## X (Twitter) Toolkit\n\nArcade's X toolkit provides LLM-callable tools for interacting with the X (Twitter) API on behalf of an authenticated user, covering tweets, timelines, lists, likes, retweets, spaces, and user lookups.\n\n## Capabilities\n\n- **Tweet lifecycle** — post top-level tweets, replies, quote tweets, and polls; post multi-tweet threads (including mid-thread resume); delete tweets; like/unlike and retweet/undo-retweet.\n- **Reading & searching tweets** — fetch home timeline, mentions, user tweet history, conversations, direct replies, quote tweets, recent keyword search (~7-day index), and batch tweet lookups (up to 100 ids); retrieve engagement lists (likers, retweeters).\n- **X Lists** — create, update, delete, pin, unpin, and read owned lists; add/remove members with eventual-consistency and serialization guidance; fetch list tweets and member roster.\n- **Users & profiles** — look up users by handle or numeric id (batch up to 100); get the authenticated user's own profile; retrieve a user's list memberships and liked tweets.\n- **Spaces** — look up a Space by id, list live/scheduled Spaces by creator, and search Spaces by title.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **X** provider. See the [Arcade X auth provider docs](https://docs.arcade.dev/en/references/auth-providers/x) for setup details."
+  "generatedAt": "2026-10-10T11:15:17.670Z",
+  "summary": "## X (Twitter) Toolkit\n\nArcade's X toolkit provides LLM-accessible tools for interacting with the X (Twitter) API, enabling agents to read and write tweets, manage lists, look up users and Spaces, and track engagement — all as an authenticated X user.\n\n## Capabilities\n\n- **Tweet authoring & management:** Post tweets, replies, quote tweets, and multi-tweet threads (with mid-thread resume support); delete tweets; like/unlike and retweet/undo-retweet.\n- **Timeline & search:** Fetch the home timeline, @-mentions, a user's tweet history, conversations, direct replies, and quote tweets; search the recent ~7-day index by structured filters (keywords, user, media flags, language, time range).\n- **Lists:** Full CRUD on owned lists (create, update, delete, pin/unpin); add/remove members with eventual-consistency and serialization guidance; read list members, list tweets, and a user's list memberships.\n- **User & Space lookup:** Resolve users by handle or numeric ID (batched up to 100); look up Spaces by ID, by creator, or by title search; fetch the authenticated user's own profile.\n- **Engagement data:** Retrieve liked tweets for any user; look up likers and retweeters of a tweet; batch-fetch tweet metadata including non-public metrics for the caller's own tweets.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **X** provider. See the [Arcade X auth provider docs](https://docs.arcade.dev/en/references/auth-providers/x) for configuration details."
 }

@@ -1,7 +1,7 @@
 {
   "id": "Vercel",
   "label": "Vercel",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Arcade.dev tools for interacting with Vercel",
   "metadata": {
     "category": "development",
@@ -18,7 +18,7 @@
     {
       "name": "AddProjectDomain",
       "qualifiedName": "Vercel.AddProjectDomain",
-      "fullyQualifiedName": "Vercel.AddProjectDomain@1.0.2",
+      "fullyQualifiedName": "Vercel.AddProjectDomain@1.0.3",
       "description": "Attach a custom domain to a project; the result reports its verification status.",
       "parameters": [
         {
@@ -41,7 +41,7 @@
           "name": "redirect",
           "type": "string",
           "required": false,
-          "description": "Domain to redirect this domain to. Defaults to None (serve the project directly).",
+          "description": "Domain to redirect this domain to. Defaults to serving the project directly.",
           "enum": null,
           "inferrable": true
         },
@@ -49,7 +49,7 @@
           "name": "git_branch",
           "type": "string",
           "required": false,
-          "description": "Git branch to bind the domain to. Defaults to None (the production branch).",
+          "description": "Git branch to bind the domain to. Defaults to the production branch.",
           "enum": null,
           "inferrable": true
         },
@@ -57,7 +57,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -128,7 +128,7 @@
     {
       "name": "CancelDeployment",
       "qualifiedName": "Vercel.CancelDeployment",
-      "fullyQualifiedName": "Vercel.CancelDeployment@1.0.2",
+      "fullyQualifiedName": "Vercel.CancelDeployment@1.0.3",
       "description": "Cancel an in-progress deployment.\n\nCanceling a deployment that has already finished is not an error: its current (terminal) state\nis returned unchanged rather than reporting a cancellation.",
       "parameters": [
         {
@@ -143,7 +143,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -199,7 +199,7 @@
     {
       "name": "CreateDeployment",
       "qualifiedName": "Vercel.CreateDeployment",
-      "fullyQualifiedName": "Vercel.CreateDeployment@1.0.2",
+      "fullyQualifiedName": "Vercel.CreateDeployment@1.0.3",
       "description": "Trigger a new deployment from inline source files, a git repository, or a prior deployment.\n\nThe target project must already exist (create it first); an unknown project name or id is\nrejected rather than silently auto-created. Exactly one source is required: pass files to\nupload source inline (no Git connection needed, the way to ship a first deployment on an\naccount without a connected repository), git_repo together with git_ref to deploy from a\nconnected repository, or redeploy_of to rebuild a prior deployment's source. Deploying from a\nrepository requires the Vercel account to have a connected Git integration for that provider.",
       "parameters": [
         {
@@ -214,7 +214,7 @@
           "name": "project",
           "type": "string",
           "required": false,
-          "description": "Project id (prj_...) or name to deploy. Defaults to None (inferred from name).",
+          "description": "Project id (prj_...) or name to deploy. Defaults to the project named by name.",
           "enum": null,
           "inferrable": true
         },
@@ -222,7 +222,7 @@
           "name": "target",
           "type": "string",
           "required": false,
-          "description": "Environment to deploy to. Selecting preview, or leaving this as the default None, creates a preview deployment, with one exception: a project's very first deployment is always promoted to production by Vercel regardless of this value, so an omitted target on a project that has no prior deployment still goes live in production.",
+          "description": "Environment to deploy to. A project's very first deployment is always promoted to production by Vercel regardless of this value. Defaults to a preview deployment.",
           "enum": [
             "production",
             "preview"
@@ -234,7 +234,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Source files to deploy inline, without any connected Git repository. Each entry is a file path and its UTF-8 text content. Use this to ship a first deployment for a project that has no Git integration. Defaults to None.",
+          "description": "Source files to deploy inline, without any connected Git repository. Each entry is a file path and its UTF-8 text content. Use this to ship a first deployment for a project that has no Git integration. Defaults to no inline files.",
           "enum": null,
           "inferrable": true
         },
@@ -242,7 +242,7 @@
           "name": "git_repo",
           "type": "string",
           "required": false,
-          "description": "Repository to deploy from, as owner/repo. Defaults to None (use files or redeploy_of instead).",
+          "description": "Repository to deploy from, as owner/repo. Defaults to no repository; use files or redeploy_of instead.",
           "enum": null,
           "inferrable": true
         },
@@ -250,7 +250,7 @@
           "name": "git_ref",
           "type": "string",
           "required": false,
-          "description": "Branch name or commit SHA to deploy from the repository. Required whenever git_repo is set (Vercel does not infer a default branch). Defaults to None.",
+          "description": "Branch name or commit SHA to deploy from the repository. Required whenever git_repo is set (Vercel does not infer a default branch). Defaults to no ref.",
           "enum": null,
           "inferrable": true
         },
@@ -270,7 +270,7 @@
           "name": "redeploy_of",
           "type": "string",
           "required": false,
-          "description": "Deployment id to redeploy. Rebuilds that deployment's source while picking up the project's current environment variables and build settings, so use this to roll out config changes (env vars edited after a deployment do not affect the running build until a rebuild). Defaults to None.",
+          "description": "Deployment id to redeploy. Rebuilds that deployment's source while picking up the project's current environment variables and build settings, so use this to roll out config changes (env vars edited after a deployment do not affect the running build until a rebuild). Defaults to a fresh deployment rather than a redeploy.",
           "enum": null,
           "inferrable": true
         },
@@ -278,7 +278,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -378,7 +378,7 @@
     {
       "name": "CreateProject",
       "qualifiedName": "Vercel.CreateProject",
-      "fullyQualifiedName": "Vercel.CreateProject@1.0.2",
+      "fullyQualifiedName": "Vercel.CreateProject@1.0.3",
       "description": "Create a new project, optionally connecting a git repository to deploy from.",
       "parameters": [
         {
@@ -393,7 +393,7 @@
           "name": "framework",
           "type": "string",
           "required": false,
-          "description": "Framework preset slug (e.g. nextjs, vite, sveltekit). Defaults to None (auto-detect).",
+          "description": "Framework preset slug (e.g. nextjs, vite, sveltekit). Defaults to auto-detecting the framework.",
           "enum": null,
           "inferrable": true
         },
@@ -401,7 +401,7 @@
           "name": "git_repository",
           "type": "string",
           "required": false,
-          "description": "Repository to connect, as owner/repo (e.g. acme/marketing-site). Connecting a repository is what lets you deploy and scope preview variables to a branch. Defaults to None (no repository connected).",
+          "description": "Repository to connect, as owner/repo (e.g. acme/marketing-site). Connecting a repository is what lets you deploy and scope preview variables to a branch. Defaults to no connected repository.",
           "enum": null,
           "inferrable": true
         },
@@ -421,7 +421,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -492,7 +492,7 @@
     {
       "name": "DeleteEnvironmentVariable",
       "qualifiedName": "Vercel.DeleteEnvironmentVariable",
-      "fullyQualifiedName": "Vercel.DeleteEnvironmentVariable@1.0.2",
+      "fullyQualifiedName": "Vercel.DeleteEnvironmentVariable@1.0.3",
       "description": "Delete an environment variable from a project.",
       "parameters": [
         {
@@ -515,7 +515,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -576,7 +576,7 @@
     {
       "name": "DeleteProject",
       "qualifiedName": "Vercel.DeleteProject",
-      "fullyQualifiedName": "Vercel.DeleteProject@1.0.2",
+      "fullyQualifiedName": "Vercel.DeleteProject@1.0.3",
       "description": "Permanently delete a project and all of its deployments.",
       "parameters": [
         {
@@ -591,7 +591,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -647,7 +647,7 @@
     {
       "name": "GetCurrentUser",
       "qualifiedName": "Vercel.GetCurrentUser",
-      "fullyQualifiedName": "Vercel.GetCurrentUser@1.0.2",
+      "fullyQualifiedName": "Vercel.GetCurrentUser@1.0.3",
       "description": "Return the Vercel account the access token authenticates as.\n\nCall this first in a session to confirm which account you are acting on\nbefore making any changes.",
       "parameters": [],
       "auth": null,
@@ -690,7 +690,7 @@
     {
       "name": "GetDeployment",
       "qualifiedName": "Vercel.GetDeployment",
-      "fullyQualifiedName": "Vercel.GetDeployment@1.0.2",
+      "fullyQualifiedName": "Vercel.GetDeployment@1.0.3",
       "description": "Return a single deployment's state and metadata.",
       "parameters": [
         {
@@ -705,7 +705,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -761,7 +761,7 @@
     {
       "name": "GetDeploymentLogs",
       "qualifiedName": "Vercel.GetDeploymentLogs",
-      "fullyQualifiedName": "Vercel.GetDeploymentLogs@1.0.2",
+      "fullyQualifiedName": "Vercel.GetDeploymentLogs@1.0.3",
       "description": "Read a deployment's build and runtime log events to diagnose why it failed.",
       "parameters": [
         {
@@ -795,7 +795,7 @@
           "name": "since",
           "type": "integer",
           "required": false,
-          "description": "Only return events created at or after this epoch-millisecond time. Defaults to None.",
+          "description": "Only return events created at or after this epoch-millisecond time. Defaults to no lower bound.",
           "enum": null,
           "inferrable": true
         },
@@ -803,7 +803,7 @@
           "name": "until",
           "type": "integer",
           "required": false,
-          "description": "Only return events created at or before this epoch-millisecond time. Defaults to None.",
+          "description": "Only return events created at or before this epoch-millisecond time. Defaults to no upper bound.",
           "enum": null,
           "inferrable": true
         },
@@ -811,7 +811,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -887,7 +887,7 @@
     {
       "name": "GetProject",
       "qualifiedName": "Vercel.GetProject",
-      "fullyQualifiedName": "Vercel.GetProject@1.0.2",
+      "fullyQualifiedName": "Vercel.GetProject@1.0.3",
       "description": "Return a single project's settings and latest deployment state.",
       "parameters": [
         {
@@ -902,7 +902,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -958,7 +958,7 @@
     {
       "name": "GetProjectDomain",
       "qualifiedName": "Vercel.GetProjectDomain",
-      "fullyQualifiedName": "Vercel.GetProjectDomain@1.0.2",
+      "fullyQualifiedName": "Vercel.GetProjectDomain@1.0.3",
       "description": "Return a project domain's verification status and DNS-configuration state.",
       "parameters": [
         {
@@ -981,7 +981,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -1042,7 +1042,7 @@
     {
       "name": "GetTeam",
       "qualifiedName": "Vercel.GetTeam",
-      "fullyQualifiedName": "Vercel.GetTeam@1.0.2",
+      "fullyQualifiedName": "Vercel.GetTeam@1.0.3",
       "description": "Return a team's details, including its billing plan.",
       "parameters": [
         {
@@ -1100,14 +1100,14 @@
     {
       "name": "ListDeployments",
       "qualifiedName": "Vercel.ListDeployments",
-      "fullyQualifiedName": "Vercel.ListDeployments@1.0.2",
+      "fullyQualifiedName": "Vercel.ListDeployments@1.0.3",
       "description": "List deployments in the active scope, optionally filtered by project, target, and state.",
       "parameters": [
         {
           "name": "project",
           "type": "string",
           "required": false,
-          "description": "Project id (prj_...) or name to scope to. Defaults to None (all projects in scope).",
+          "description": "Project id (prj_...) or name to scope to. Defaults to all projects in scope.",
           "enum": null,
           "inferrable": true
         },
@@ -1115,7 +1115,7 @@
           "name": "target",
           "type": "string",
           "required": false,
-          "description": "Filter to deployments for this environment. Defaults to None (any environment).",
+          "description": "Filter to deployments for this environment. Defaults to all environments.",
           "enum": [
             "production",
             "preview"
@@ -1126,7 +1126,7 @@
           "name": "state",
           "type": "string",
           "required": false,
-          "description": "Filter to deployments in this state. Defaults to None (any state).",
+          "description": "Filter to deployments in this state. Defaults to all states.",
           "enum": [
             "QUEUED",
             "INITIALIZING",
@@ -1150,7 +1150,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Pagination cursor from a prior call's next_cursor. Defaults to None (first page).",
+          "description": "Pagination cursor from a prior call's next_cursor. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         },
@@ -1158,7 +1158,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -1234,7 +1234,7 @@
     {
       "name": "ListEnvironmentVariables",
       "qualifiedName": "Vercel.ListEnvironmentVariables",
-      "fullyQualifiedName": "Vercel.ListEnvironmentVariables@1.0.2",
+      "fullyQualifiedName": "Vercel.ListEnvironmentVariables@1.0.3",
       "description": "List a project's environment variables across all environments.",
       "parameters": [
         {
@@ -1257,7 +1257,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -1318,7 +1318,7 @@
     {
       "name": "ListProjectDomains",
       "qualifiedName": "Vercel.ListProjectDomains",
-      "fullyQualifiedName": "Vercel.ListProjectDomains@1.0.2",
+      "fullyQualifiedName": "Vercel.ListProjectDomains@1.0.3",
       "description": "List the custom domains attached to a project.",
       "parameters": [
         {
@@ -1341,7 +1341,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Pagination cursor from a prior call's next_cursor. Defaults to None (first page).",
+          "description": "Pagination cursor from a prior call's next_cursor. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         },
@@ -1349,7 +1349,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -1415,14 +1415,14 @@
     {
       "name": "ListProjects",
       "qualifiedName": "Vercel.ListProjects",
-      "fullyQualifiedName": "Vercel.ListProjects@1.0.2",
+      "fullyQualifiedName": "Vercel.ListProjects@1.0.3",
       "description": "List the projects in the active scope, optionally narrowed by a fuzzy name search.",
       "parameters": [
         {
           "name": "search",
           "type": "string",
           "required": false,
-          "description": "Case-insensitive name fragment to filter projects by. Only projects whose name contains this fragment are returned. Defaults to None (no filter).",
+          "description": "Case-insensitive name fragment to filter projects by. Only projects whose name contains this fragment are returned. Defaults to all projects.",
           "enum": null,
           "inferrable": true
         },
@@ -1438,7 +1438,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Pagination cursor from a prior call's next_cursor. Defaults to None (first page).",
+          "description": "Pagination cursor from a prior call's next_cursor. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         },
@@ -1446,7 +1446,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -1512,7 +1512,7 @@
     {
       "name": "ListTeams",
       "qualifiedName": "Vercel.ListTeams",
-      "fullyQualifiedName": "Vercel.ListTeams@1.0.2",
+      "fullyQualifiedName": "Vercel.ListTeams@1.0.3",
       "description": "List the teams the access token can act on, to discover a valid team scope.",
       "parameters": [
         {
@@ -1527,7 +1527,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Pagination cursor from a prior call's next_cursor. Defaults to None (first page).",
+          "description": "Pagination cursor from a prior call's next_cursor. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1583,7 +1583,7 @@
     {
       "name": "PromoteDeployment",
       "qualifiedName": "Vercel.PromoteDeployment",
-      "fullyQualifiedName": "Vercel.PromoteDeployment@1.0.2",
+      "fullyQualifiedName": "Vercel.PromoteDeployment@1.0.3",
       "description": "Make a deployment the project's current production deployment (\"ship this one\").\n\nA deployment that already targeted production (a staged or prior production build) is\npromoted instantly without a rebuild. A preview deployment cannot be aliased to production\ndirectly, because preview and production builds can differ (e.g. environment variables), so\nthis rebuilds the preview's source as a new production deployment — the same complete-rebuild\npath the Vercel dashboard uses to promote a preview. In that case the returned deployment is\nthe new build (still building), not the preview that was passed in.",
       "parameters": [
         {
@@ -1606,7 +1606,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -1667,7 +1667,7 @@
     {
       "name": "RemoveProjectDomain",
       "qualifiedName": "Vercel.RemoveProjectDomain",
-      "fullyQualifiedName": "Vercel.RemoveProjectDomain@1.0.2",
+      "fullyQualifiedName": "Vercel.RemoveProjectDomain@1.0.3",
       "description": "Detach a custom domain from a project.",
       "parameters": [
         {
@@ -1690,7 +1690,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -1751,7 +1751,7 @@
     {
       "name": "RollbackDeployment",
       "qualifiedName": "Vercel.RollbackDeployment",
-      "fullyQualifiedName": "Vercel.RollbackDeployment@1.0.2",
+      "fullyQualifiedName": "Vercel.RollbackDeployment@1.0.3",
       "description": "Roll production back to a prior deployment, making it the current production deployment.",
       "parameters": [
         {
@@ -1774,7 +1774,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -1835,7 +1835,7 @@
     {
       "name": "SaveEnvironmentVariable",
       "qualifiedName": "Vercel.SaveEnvironmentVariable",
-      "fullyQualifiedName": "Vercel.SaveEnvironmentVariable@1.0.2",
+      "fullyQualifiedName": "Vercel.SaveEnvironmentVariable@1.0.3",
       "description": "Create or update a project environment variable.\n\nOmit env_id to create (key, value, and target are required); pass env_id to update an existing\nvariable in place, changing only the fields you supply. Saving a variable does not affect\nalready-built deployments: a new deployment must be triggered for the change to take effect.",
       "parameters": [
         {
@@ -1850,7 +1850,7 @@
           "name": "env_id",
           "type": "string",
           "required": false,
-          "description": "Id of an existing variable to update. Omit to create a new variable.",
+          "description": "Id of an existing variable to update. Defaults to creating a new variable.",
           "enum": null,
           "inferrable": true
         },
@@ -1858,7 +1858,7 @@
           "name": "key",
           "type": "string",
           "required": false,
-          "description": "Variable name. When creating, this is required and sets the name. When updating, it is ignored (the name is fixed). Defaults to None.",
+          "description": "Variable name. When creating, this is required and sets the name. When updating, it is ignored (the name is fixed). Defaults to no name.",
           "enum": null,
           "inferrable": true
         },
@@ -1866,7 +1866,7 @@
           "name": "value",
           "type": "string",
           "required": false,
-          "description": "Variable value. When creating, this is required. When updating, providing it changes the value; omitting it leaves the value unchanged. Defaults to None.",
+          "description": "Variable value. When creating, this is required. When updating, providing it changes the value. Defaults to leaving the value unchanged on update.",
           "enum": null,
           "inferrable": true
         },
@@ -1875,7 +1875,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Environments the variable applies to. When creating, this is required. When updating, providing it replaces the set; omitting it leaves it unchanged. Defaults to None.",
+          "description": "Environments the variable applies to. When creating, this is required. When updating, providing it replaces the set. Defaults to leaving the set unchanged on update.",
           "enum": [
             "production",
             "preview",
@@ -1899,7 +1899,7 @@
           "name": "git_branch",
           "type": "string",
           "required": false,
-          "description": "Git branch to scope a preview variable to (requires a project with a connected repository). When updating, providing it changes the scope. Defaults to None (all branches).",
+          "description": "Git branch to scope a preview variable to (requires a project with a connected repository). When updating, providing it changes the scope. Defaults to all branches on create and to leaving the scope unchanged on update.",
           "enum": null,
           "inferrable": true
         },
@@ -1907,7 +1907,7 @@
           "name": "comment",
           "type": "string",
           "required": false,
-          "description": "Note describing the variable. When updating, providing it changes the note. Defaults to None.",
+          "description": "Note describing the variable. When updating, providing it changes the note. Defaults to no note on create and to leaving the note unchanged on update.",
           "enum": null,
           "inferrable": true
         },
@@ -1923,7 +1923,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -2023,7 +2023,7 @@
     {
       "name": "UpdateProjectSettings",
       "qualifiedName": "Vercel.UpdateProjectSettings",
-      "fullyQualifiedName": "Vercel.UpdateProjectSettings@1.0.2",
+      "fullyQualifiedName": "Vercel.UpdateProjectSettings@1.0.3",
       "description": "Update a project's build and framework settings; unset fields are left unchanged.",
       "parameters": [
         {
@@ -2038,7 +2038,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "New project name. Defaults to None (unchanged).",
+          "description": "New project name. Defaults to leaving the name unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2046,7 +2046,7 @@
           "name": "framework",
           "type": "string",
           "required": false,
-          "description": "New framework preset slug (e.g. nextjs, vite). Pass an empty string to clear the preset so the project type reverts to no framework (Other / static). Defaults to None (unchanged).",
+          "description": "New framework preset slug (e.g. nextjs, vite). Pass an empty string to clear the preset so the project type reverts to no framework (Other / static). Defaults to leaving the preset unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2054,7 +2054,7 @@
           "name": "build_command",
           "type": "string",
           "required": false,
-          "description": "Override the build command. Defaults to None (unchanged).",
+          "description": "Override the build command. Defaults to leaving the build command unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2062,7 +2062,7 @@
           "name": "install_command",
           "type": "string",
           "required": false,
-          "description": "Override the install command. Defaults to None (unchanged).",
+          "description": "Override the install command. Defaults to leaving the install command unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2070,7 +2070,7 @@
           "name": "output_directory",
           "type": "string",
           "required": false,
-          "description": "Override the build output directory. Defaults to None (unchanged).",
+          "description": "Override the build output directory. Defaults to leaving the output directory unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2078,7 +2078,7 @@
           "name": "root_directory",
           "type": "string",
           "required": false,
-          "description": "Override the project root directory. Defaults to None (unchanged).",
+          "description": "Override the project root directory. Defaults to leaving the root directory unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2086,7 +2086,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -2172,7 +2172,7 @@
     {
       "name": "VerifyProjectDomain",
       "qualifiedName": "Vercel.VerifyProjectDomain",
-      "fullyQualifiedName": "Vercel.VerifyProjectDomain@1.0.2",
+      "fullyQualifiedName": "Vercel.VerifyProjectDomain@1.0.3",
       "description": "Trigger verification of a project domain and return its resulting status.\n\nAn unmet DNS challenge is the normal polling path, not an error: this returns the domain's\nstill-unverified status (with the outstanding challenge records) rather than failing.",
       "parameters": [
         {
@@ -2195,7 +2195,7 @@
           "name": "team",
           "type": "string",
           "required": false,
-          "description": "Team id (team_...) or team slug to scope the request to. Defaults to None (the token's own personal scope).",
+          "description": "Team id (team_...) or team slug to scope the request to. Defaults to the token's own personal scope.",
           "enum": null,
           "inferrable": true
         }
@@ -2258,6 +2258,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:26:05.714Z",
-  "summary": "The Vercel toolkit lets you manage Vercel projects, deployments, domains, and environment variables programmatically via Arcade. It covers the full project lifecycle — from creation and configuration through deployment, promotion, rollback, and teardown.\n\n## Capabilities\n\n- **Account & team discovery** — resolve the authenticated account, list accessible teams, and inspect team details (including billing plan) to establish the correct scope before making changes.\n- **Project management** — create, retrieve, list, update settings for, and permanently delete projects; optionally connect a Git repository at creation time.\n- **Deployment lifecycle** — trigger deployments from inline source files, connected Git repositories, or prior deployment sources; cancel in-progress builds; inspect state and build/runtime logs; promote a deployment to production; and roll production back to a prior build.\n- **Custom domain management** — attach and detach custom domains, retrieve verification and DNS-configuration status, list all domains on a project, and trigger re-verification against outstanding DNS challenges.\n- **Environment variable management** — list, create, update, and delete project environment variables across all environments.\n\n## Secrets\n\n`VERCEL_ACCESS_TOKEN` is a Vercel personal access token (or team-scoped OAuth token) used to authenticate every API call. To obtain one:\n\n1. Log in to your Vercel account and open **Account Settings → Tokens** (personal token): [https://vercel.com/account/tokens](https://vercel.com/account/tokens). For a team-scoped token, open the team's **Settings → Tokens**.\n2. Click **Create**, give it a name, choose an expiry, and optionally restrict it to a specific team scope.\n3. Copy the token immediately — Vercel only shows it once.\n4. The token needs sufficient permissions for all operations you intend to use (full-access tokens work for all tools; read-only tokens will fail write operations).\n\nFor details on creating tokens see the [Vercel documentation on access tokens](https://vercel.com/docs/accounts/create-and-manage-access-tokens).\n\nStore this value as an Arcade secret. See [Arcade secret configuration docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) and manage your secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-10T11:15:10.160Z",
+  "summary": "## Vercel Toolkit for Arcade\n\nArcade toolkit for managing Vercel resources programmatically — projects, deployments, domains, environment variables, and account/team context — using a Vercel access token.\n\n## Capabilities\n\n- **Account & team discovery:** Retrieve the authenticated user, list accessible teams, and inspect team billing details to confirm active scope before making changes.\n- **Project lifecycle:** Create, inspect, update settings for, and permanently delete projects, with optional Git repository connections.\n- **Deployment management:** Trigger deployments from inline files, connected Git repositories, or prior deployment sources; cancel in-progress builds; retrieve state, metadata, and build/runtime logs; list and filter across projects.\n- **Production promotion & rollback:** Promote any deployment to production (rebuilding previews when necessary) or roll back to a prior production deployment.\n- **Domain management:** Attach, list, inspect, verify, and detach custom domains; surface DNS challenge records for unmet verification.\n- **Environment variables:** List, create, update, and delete per-project environment variables across environments; changes take effect on the next deployment.\n\n## Secrets\n\n`VERCEL_ACCESS_TOKEN` — A Vercel personal access token (or team-scoped token) that authenticates all API calls. To obtain one, log in to the [Vercel dashboard](https://vercel.com/account/tokens), navigate to **Account Settings → Tokens**, and create a new token. Choose an appropriate expiration and, if operating on a team scope, ensure the token has access to that team. Copy the token immediately — Vercel will not show it again. For team-level operations, you will also pass a team ID alongside the token in the relevant tool calls.\n\nFor details on configuring secrets in Arcade, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

@@ -1,7 +1,7 @@
 {
   "id": "GoogleDocs",
   "label": "Google Docs",
-  "version": "9.1.3",
+  "version": "9.1.4",
   "description": "Arcade.dev LLM tools for Google Docs",
   "metadata": {
     "category": "productivity",
@@ -26,7 +26,7 @@
     {
       "name": "CommentOnDocument",
       "qualifiedName": "GoogleDocs.CommentOnDocument",
-      "fullyQualifiedName": "GoogleDocs.CommentOnDocument@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.CommentOnDocument@9.1.4",
       "description": "Comment on a specific document by its ID.\n\nReaches only documents this app has been granted edit access to — by default,\nthose it created or the user picked.\nThe comment is posted as the connected account and notifies the document's\ncollaborators.\n\nThe comment covers the whole document. No API can anchor a new Google Docs comment to a\npassage, so the Docs UI lists it in the sidebar without highlighting any text. Quote the\npassage inside comment_text when the comment is about one.",
       "parameters": [
         {
@@ -106,7 +106,7 @@
     {
       "name": "CreateBlankDocument",
       "qualifiedName": "GoogleDocs.CreateBlankDocument",
-      "fullyQualifiedName": "GoogleDocs.CreateBlankDocument@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.CreateBlankDocument@9.1.4",
       "description": "Create an empty Google Docs document with the specified title.\n\nThe document is owned by the connected account and lands in its Drive root. Returns\nthe new document's id, which every other tool here takes as its target. To create a\ndocument that already has content, use the tool that takes text rather than creating\nan empty one and appending to it.",
       "parameters": [
         {
@@ -166,7 +166,7 @@
     {
       "name": "CreateDocumentFromText",
       "qualifiedName": "GoogleDocs.CreateDocumentFromText",
-      "fullyQualifiedName": "GoogleDocs.CreateDocumentFromText@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.CreateDocumentFromText@9.1.4",
       "description": "Create a Google Docs document with the specified title and text content.\n\nWhen input_format is MARKDOWN, the text_content is parsed as Markdown and the resulting\ndocument is formatted with headings, bold, italic, bullet lists, and numbered lists.",
       "parameters": [
         {
@@ -255,7 +255,7 @@
     {
       "name": "EditDocument",
       "qualifiedName": "GoogleDocs.EditDocument",
-      "fullyQualifiedName": "GoogleDocs.EditDocument@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.EditDocument@9.1.4",
       "description": "Read or edit a Google Docs document using structured batchUpdate requests.\n\nReaches only documents this app has been granted edit access to — by default,\nthose it created or the user picked.\n\n\nWhen called without requests, returns the document content in DocMD format (block IDs,\ncharacter indices, and text styles). When called with requests, applies the edits and\nreturns the updated DocMD. Use the DocMD indices from the response to construct\nrequests for subsequent calls.",
       "parameters": [
         {
@@ -271,7 +271,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "A list of Google Docs batchUpdate request objects. Each object must have exactly one key (the request type) whose value is the request body. Omit to read the document without applying any edits.\n\nIMPORTANT: When making multiple index-based edits, order requests from highest index to lowest so earlier edits do not shift the indices of later ones. Alternatively, use replaceAllText which does not depend on indices.\n\nThe response always includes the document in DocMD format, which shows each block with its character index range, e.g. [P3 74-104 PARAGRAPH styles=bold:74-86] means paragraph P3 spans indices 74 to 104 with bold from 74 to 86. Use these indices for ranges in subsequent calls.\n\nIMPORTANT: character indices restart at 1 inside every tab, so the same index means a different position in each one. DocMD reports the owning tab on each block as tabId=<id>; carry that id onto the \"tabId\" field of every location, range, endOfSegmentLocation and tableStartLocation built from that block. A location that names no tab is applied to the document's first tab, which is why omitting it on a multi-tab document is rejected rather than guessed.\n\n## Common request examples\n\nreplaceAllText — find and replace all occurrences. Runs in every tab unless tabsCriteria names the ones to scope it to:\n{\"replaceAllText\": {\"containsText\": {\"text\": \"old\", \"matchCase\": true}, \"replaceText\": \"new\", \"tabsCriteria\": {\"tabIds\": [\"t.0\"]}}}\n\ninsertText — insert at an index (inherits adjacent styling):\n{\"insertText\": {\"location\": {\"index\": 50, \"tabId\": \"t.0\"}, \"text\": \"hello\"}}\n\ndeleteContentRange — delete between two indices:\n{\"deleteContentRange\": {\"range\": {\"startIndex\": 10, \"endIndex\": 25, \"tabId\": \"t.0\"}}}\n\nupdateTextStyle — change formatting with a comma-separated \"fields\" mask:\n{\"updateTextStyle\": {\"range\": {\"startIndex\": 10, \"endIndex\": 20}, \"textStyle\": {\"bold\": true}, \"fields\": \"bold\"}}\n\nupdateParagraphStyle — change paragraph alignment, spacing, etc.:\n{\"updateParagraphStyle\": {\"range\": {\"startIndex\": 10, \"endIndex\": 50}, \"paragraphStyle\": {\"alignment\": \"CENTER\"}, \"fields\": \"alignment\"}}\n\ncreateParagraphBullets — apply bullets (presets: BULLET_DISC_CIRCLE_SQUARE, NUMBERED_DECIMAL_ALPHA_ROMAN, BULLET_CHECKBOX, etc.):\n{\"createParagraphBullets\": {\"range\": {\"startIndex\": 100, \"endIndex\": 200}, \"bulletPreset\": \"BULLET_DISC_CIRCLE_SQUARE\"}}\n\ninsertTable:\n{\"insertTable\": {\"location\": {\"index\": 50}, \"rows\": 3, \"columns\": 4}}\n\nTable operations use tableCellLocation with tableStartLocation (the TABLE start index from DocMD), rowIndex, and columnIndex:\n{\"insertTableRow\": {\"tableCellLocation\": {\"tableStartLocation\": {\"index\": 1749}, \"rowIndex\": 1, \"columnIndex\": 0}, \"insertBelow\": true}}\n\ncreateNamedRange — anchor a named range to a span of text:\n{\"createNamedRange\": {\"name\": \"my-range\", \"range\": {\"startIndex\": 10, \"endIndex\": 50}}}\n\ndeleteNamedRange — delete by name or ID:\n{\"deleteNamedRange\": {\"name\": \"my-range\"}}\n\nreplaceNamedRangeContent — replace the text inside a named range:\n{\"replaceNamedRangeContent\": {\"namedRangeName\": \"my-range\", \"text\": \"new content\"}}\n\ninsertInlineImage — insert an image at an index:\n{\"insertInlineImage\": {\"uri\": \"https://example.com/img.png\", \"location\": {\"index\": 50}}}\n\nreplaceImage — swap an existing image for a new one:\n{\"replaceImage\": {\"imageObjectId\": \"kix.abc123\", \"uri\": \"https://example.com/new.png\", \"imageReplaceMethod\": \"CENTER_CROP\"}}\n\ndeletePositionedObject — remove a floating image or drawing:\n{\"deletePositionedObject\": {\"objectId\": \"kix.abc123\"}}\n\ncreateHeader — add a header to the document:\n{\"createHeader\": {\"type\": \"DEFAULT\"}}\n\ncreateFooter — add a footer to the document:\n{\"createFooter\": {\"type\": \"DEFAULT\"}}\n\ndeleteHeader / deleteFooter — remove by ID:\n{\"deleteHeader\": {\"headerId\": \"kix.abc123\"}}\n{\"deleteFooter\": {\"footerId\": \"kix.abc123\"}}\n\ncreateFootnote — insert a footnote reference:\n{\"createFootnote\": {\"location\": {\"index\": 50}}}\n\naddDocumentTab — add a new tab:\n{\"addDocumentTab\": {\"tabProperties\": {\"title\": \"Notes\"}}}\n\ndeleteTab — remove a tab:\n{\"deleteTab\": {\"tabId\": \"t.123\"}}\n\nupdateDocumentTabProperties — rename or reorder a tab:\n{\"updateDocumentTabProperties\": {\"tabProperties\": {\"tabId\": \"t.123\", \"title\": \"Renamed\"}, \"fields\": \"title\"}}\n\ninsertPerson — insert a person smart chip:\n{\"insertPerson\": {\"personProperties\": {\"email\": \"alice@example.com\"}, \"location\": {\"index\": 50}}}\n\ninsertDate — insert a date smart chip:\n{\"insertDate\": {\"dateElementProperties\": {\"timestamp\": \"YYYY-MM-DDTHH:MM:SSZ\"}, \"location\": {\"index\": 50}}}\n\nStyle \"fields\" mask: comma-separated list of properties to update (e.g. \"bold,italic\"). Properties listed in fields but absent from the style object are cleared/reset. Use \"*\" to update all fields.\n",
+          "description": "A list of Google Docs batchUpdate request objects. Each object must have exactly one key (the request type) whose value is the request body. Omit to read the document without applying any edits.\n\nIMPORTANT: When making multiple index-based edits, order requests from highest index to lowest so earlier edits do not shift the indices of later ones. Alternatively, use replaceAllText which does not depend on indices.\n\nThe response always includes the document in DocMD format, which shows each block with its character index range, e.g. [P3 74-104 PARAGRAPH styles=bold:74-86] means paragraph P3 spans indices 74 to 104 with bold from 74 to 86. Use these indices for ranges in subsequent calls.\n\nIMPORTANT: character indices restart at 1 inside every tab, so the same index means a different position in each one. DocMD reports the owning tab on each block as tabId=<id>; carry that id onto the \"tabId\" field of every location, range, endOfSegmentLocation and tableStartLocation built from that block. A location that names no tab is applied to the document's first tab, which is why omitting it on a multi-tab document is rejected rather than guessed.\n\n## Common request examples\n\nreplaceAllText — find and replace all occurrences. Runs in every tab unless tabsCriteria names the ones to scope it to:\n{\"replaceAllText\": {\"containsText\": {\"text\": \"old\", \"matchCase\": true}, \"replaceText\": \"new\", \"tabsCriteria\": {\"tabIds\": [\"t.0\"]}}}\n\ninsertText — insert at an index (inherits adjacent styling):\n{\"insertText\": {\"location\": {\"index\": 50, \"tabId\": \"t.0\"}, \"text\": \"hello\"}}\n\ndeleteContentRange — delete between two indices:\n{\"deleteContentRange\": {\"range\": {\"startIndex\": 10, \"endIndex\": 25, \"tabId\": \"t.0\"}}}\n\nupdateTextStyle — change formatting with a comma-separated \"fields\" mask:\n{\"updateTextStyle\": {\"range\": {\"startIndex\": 10, \"endIndex\": 20}, \"textStyle\": {\"bold\": true}, \"fields\": \"bold\"}}\n\nupdateParagraphStyle — change paragraph alignment, spacing, etc.:\n{\"updateParagraphStyle\": {\"range\": {\"startIndex\": 10, \"endIndex\": 50}, \"paragraphStyle\": {\"alignment\": \"CENTER\"}, \"fields\": \"alignment\"}}\n\ncreateParagraphBullets — apply bullets (presets: BULLET_DISC_CIRCLE_SQUARE, NUMBERED_DECIMAL_ALPHA_ROMAN, BULLET_CHECKBOX, etc.):\n{\"createParagraphBullets\": {\"range\": {\"startIndex\": 100, \"endIndex\": 200}, \"bulletPreset\": \"BULLET_DISC_CIRCLE_SQUARE\"}}\n\ninsertTable:\n{\"insertTable\": {\"location\": {\"index\": 50}, \"rows\": 3, \"columns\": 4}}\n\nTable operations use tableCellLocation with tableStartLocation (the TABLE start index from DocMD), rowIndex, and columnIndex:\n{\"insertTableRow\": {\"tableCellLocation\": {\"tableStartLocation\": {\"index\": 1749}, \"rowIndex\": 1, \"columnIndex\": 0}, \"insertBelow\": true}}\n\ncreateNamedRange — anchor a named range to a span of text:\n{\"createNamedRange\": {\"name\": \"my-range\", \"range\": {\"startIndex\": 10, \"endIndex\": 50}}}\n\ndeleteNamedRange — delete by name or ID:\n{\"deleteNamedRange\": {\"name\": \"my-range\"}}\n\nreplaceNamedRangeContent — replace the text inside a named range:\n{\"replaceNamedRangeContent\": {\"namedRangeName\": \"my-range\", \"text\": \"new content\"}}\n\ninsertInlineImage — insert an image at an index:\n{\"insertInlineImage\": {\"uri\": \"https://example.com/img.png\", \"location\": {\"index\": 50}}}\n\nreplaceImage — swap an existing image for a new one:\n{\"replaceImage\": {\"imageObjectId\": \"kix.abc123\", \"uri\": \"https://example.com/new.png\", \"imageReplaceMethod\": \"CENTER_CROP\"}}\n\ndeletePositionedObject — remove a floating image or drawing:\n{\"deletePositionedObject\": {\"objectId\": \"kix.abc123\"}}\n\ncreateHeader — add a header to the document:\n{\"createHeader\": {\"type\": \"DEFAULT\"}}\n\ncreateFooter — add a footer to the document:\n{\"createFooter\": {\"type\": \"DEFAULT\"}}\n\ndeleteHeader / deleteFooter — remove by ID:\n{\"deleteHeader\": {\"headerId\": \"kix.abc123\"}}\n{\"deleteFooter\": {\"footerId\": \"kix.abc123\"}}\n\ncreateFootnote — insert a footnote reference:\n{\"createFootnote\": {\"location\": {\"index\": 50}}}\n\naddDocumentTab — add a new tab:\n{\"addDocumentTab\": {\"tabProperties\": {\"title\": \"Notes\"}}}\n\ndeleteTab — remove a tab:\n{\"deleteTab\": {\"tabId\": \"t.123\"}}\n\nupdateDocumentTabProperties — rename or reorder a tab:\n{\"updateDocumentTabProperties\": {\"tabProperties\": {\"tabId\": \"t.123\", \"title\": \"Renamed\"}, \"fields\": \"title\"}}\n\ninsertPerson — insert a person smart chip:\n{\"insertPerson\": {\"personProperties\": {\"email\": \"alice@example.com\"}, \"location\": {\"index\": 50}}}\n\ninsertDate — insert a date smart chip:\n{\"insertDate\": {\"dateElementProperties\": {\"timestamp\": \"YYYY-MM-DDTHH:MM:SSZ\"}, \"location\": {\"index\": 50}}}\n\nStyle \"fields\" mask: comma-separated list of properties to update (e.g. \"bold,italic\"). Properties listed in fields but absent from the style object are cleared/reset. Use \"*\" to update all fields.\n\nDefaults to no edits, which returns the document content.\n",
           "enum": null,
           "inferrable": true
         },
@@ -279,7 +279,7 @@
           "name": "revision_id",
           "type": "string",
           "required": false,
-          "description": "The document revision the character indices in `requests` were read from, as the `@revision_id` line of the DocMD they came from. When set, the edits are rejected rather than applied if the document changed in the meantime. Leave unset only when the requests name no character indices.",
+          "description": "The document revision the character indices in `requests` were read from, as the `@revision_id` line of the DocMD they came from. When set, the edits are rejected rather than applied if the document changed in the meantime. Leave unset only when the requests name no character indices. Defaults to applying the edits without a revision check.",
           "enum": null,
           "inferrable": true
         }
@@ -388,7 +388,7 @@
     {
       "name": "GenerateGoogleFilePickerUrl",
       "qualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl",
-      "fullyQualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl@9.1.4",
       "description": "Generate a URL where the user can grant this app access to specific Drive files.\n\nCheck `url` first. An empty `url` with a `reason` means this app already reaches every\ndocument the connected account can open, so there is no per-file grant to request: this\ntool cannot change any outcome, and a document that could not be read is one the\naccount itself cannot open. Do not retry it.\n\nOtherwise the URL opens Google's first-party Drive picker, where the user selects which\nfiles to share with this application — it is not a sign-in or credential prompt. Use\nthis when a prior tool reported that a file was not found or access was denied, and the\nuser expects the file to exist. After the user completes the picker flow, retry the\nprior tool.",
       "parameters": [],
       "auth": {
@@ -431,7 +431,7 @@
     {
       "name": "GetDocumentAsDocmd",
       "qualifiedName": "GoogleDocs.GetDocumentAsDocmd",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentAsDocmd@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentAsDocmd@9.1.4",
       "description": "Get the latest version of the specified Google Docs document as DocMD.\n\nReaches only documents this app has been granted access to — by default, those it\ncreated or the user picked.\n\nThe DocMD output will include tags that can be used to annotate the document with location\ninformation, the type of block, block IDs, and other metadata. If the document has tabs,\nall tabs are included in sequential order unless a specific tab_id is provided.",
       "parameters": [
         {
@@ -446,7 +446,7 @@
           "name": "tab_id",
           "type": "string",
           "required": false,
-          "description": "The ID of a specific tab to retrieve. If provided, returns only content from that tab. If omitted, returns all tabs in sequential depth-first order.",
+          "description": "The ID of a specific tab to retrieve. If provided, returns only content from that tab. Defaults to all tabs in sequential depth-first order.",
           "enum": null,
           "inferrable": true
         }
@@ -511,7 +511,7 @@
     {
       "name": "GetDocumentById",
       "qualifiedName": "GoogleDocs.GetDocumentById",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentById@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentById@9.1.4",
       "description": "Get a Google Docs document as the raw Google Docs API document resource.\n\nReturns the API's own structure, including every tab's content. Reaches only\ndocuments this app has been granted access to — by default, those it created or the\nuser picked. Use this when the document's exact structure matters, such as reading\nstyle runs, named ranges or inline object properties. For reading or summarizing the\ntext, prefer the DocMD form, which is far smaller and carries the character indices\nedits are built from.",
       "parameters": [
         {
@@ -578,7 +578,7 @@
     {
       "name": "GetDocumentMetadata",
       "qualifiedName": "GoogleDocs.GetDocumentMetadata",
-      "fullyQualifiedName": "GoogleDocs.GetDocumentMetadata@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentMetadata@9.1.4",
       "description": "Get metadata for a Google Docs document including hierarchical tab structure.\n\nReaches only documents this app has been granted access to — by default, those it\ncreated or the user picked.\n\nReturns document title, ID, URL, total character count, and nested tab information\nwith character counts for each tab.",
       "parameters": [
         {
@@ -645,7 +645,7 @@
     {
       "name": "InsertTextAtEndOfDocument",
       "qualifiedName": "GoogleDocs.InsertTextAtEndOfDocument",
-      "fullyQualifiedName": "GoogleDocs.InsertTextAtEndOfDocument@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.InsertTextAtEndOfDocument@9.1.4",
       "description": "Append text to the end of a Google Docs document.\n\nReaches only documents this app has been granted edit access to — by default,\nthose it created or the user picked.\n\n\nEach tab keeps its own content and its own character indices, so the text lands at the\nend of one tab rather than the end of the file.",
       "parameters": [
         {
@@ -668,7 +668,7 @@
           "name": "tab_id",
           "type": "string",
           "required": false,
-          "description": "Which tab to append to, as reported by DocMD's tabId. Required when the document has more than one tab. Defaults to None, which appends to the only tab.",
+          "description": "Which tab to append to, as reported by DocMD's tabId. Required when the document has more than one tab. Defaults to the only tab.",
           "enum": null,
           "inferrable": true
         }
@@ -738,7 +738,7 @@
     {
       "name": "ListDocumentComments",
       "qualifiedName": "GoogleDocs.ListDocumentComments",
-      "fullyQualifiedName": "GoogleDocs.ListDocumentComments@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.ListDocumentComments@9.1.4",
       "description": "List comments on the specified Google Docs document.\n\nReaches only documents this app has been granted access to — by default, those it\ncreated or the user picked.\nReturns each comment's text, its replies, and the display name of whoever wrote it.\nDrive does not document an order for comments, so do not read the first one as the\nmost recent; compare createdTime when recency matters. A long-running document can\ncarry thousands of comments, so results are paged rather than returned whole, and the\ncounts describe the page in hand rather than the document.\n\nA comment anchored in the Docs UI carries quotedFileContent, the passage it is attached\nto, so finding that text in the document body places the comment. A comment that covers\nthe whole document has no quotedFileContent. Each comment also reports whether its thread\nhas been resolved.",
       "parameters": [
         {
@@ -769,7 +769,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "The pagination token to continue a previous request. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -844,7 +844,7 @@
     {
       "name": "SearchAndRetrieveDocuments",
       "qualifiedName": "GoogleDocs.SearchAndRetrieveDocuments",
-      "fullyQualifiedName": "GoogleDocs.SearchAndRetrieveDocuments@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.SearchAndRetrieveDocuments@9.1.4",
       "description": "Search for documents in the user's Google Drive and return documents with their main body\ncontent and tab metadata. Excludes documents that are in the trash.\n\nSearches only the documents this app has been granted access to — by default, those\nit created or the user picked.\nContent it returns was written by whoever has edited each document, which need not be\nthe connected account and need not be the owner.\n\n\nReturns main body content only with metadata about tabs. To read every tab of a specific\ndocument, retrieve that document by its id. When only metadata is needed, search without\nretrieving content.",
       "parameters": [
         {
@@ -865,7 +865,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "description": "Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed. Defaults to all documents.",
           "enum": null,
           "inferrable": true
         },
@@ -874,7 +874,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Keywords or phrases that must NOT be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "description": "Keywords or phrases that must NOT be in the document title or body. Provide a list of keywords or phrases if needed. Defaults to no exclusions.",
           "enum": null,
           "inferrable": true
         },
@@ -882,7 +882,7 @@
           "name": "search_only_in_shared_drive_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to None, which searches across all drives.",
+          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to My Drive, plus all shared drives when include_shared_drives is true.",
           "enum": null,
           "inferrable": true
         },
@@ -946,7 +946,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "The pagination token to continue a previous request. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1055,7 +1055,7 @@
     {
       "name": "SearchDocuments",
       "qualifiedName": "GoogleDocs.SearchDocuments",
-      "fullyQualifiedName": "GoogleDocs.SearchDocuments@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.SearchDocuments@9.1.4",
       "description": "Search for documents in the user's Google Drive. Excludes documents in trash.\n\nSearches only the documents this app has been granted access to — by default, those\nit created or the user picked.\n\nReturns metadata only. To read a document's content, retrieve it by its id.",
       "parameters": [
         {
@@ -1063,7 +1063,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "description": "Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed. Defaults to all documents.",
           "enum": null,
           "inferrable": true
         },
@@ -1072,7 +1072,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Keywords or phrases that must NOT be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "description": "Keywords or phrases that must NOT be in the document title or body. Provide a list of keywords or phrases if needed. Defaults to no exclusions.",
           "enum": null,
           "inferrable": true
         },
@@ -1080,7 +1080,7 @@
           "name": "search_only_in_shared_drive_id",
           "type": "string",
           "required": false,
-          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to None, which searches across all drives.",
+          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to My Drive, plus all shared drives when include_shared_drives is true.",
           "enum": null,
           "inferrable": true
         },
@@ -1105,7 +1105,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Sort order. Defaults to listing the most recently modified documents first. If document_contains or document_not_contains is provided, then the order_by will be ignored.",
+          "description": "Sort order. If document_contains or document_not_contains is provided, then the order_by will be ignored. Defaults to listing the most recently modified documents first.",
           "enum": [
             "createdTime",
             "createdTime desc",
@@ -1144,7 +1144,7 @@
           "name": "pagination_token",
           "type": "string",
           "required": false,
-          "description": "The pagination token to continue a previous request",
+          "description": "The pagination token to continue a previous request. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1248,7 +1248,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "GoogleDocs.WhoAmI",
-      "fullyQualifiedName": "GoogleDocs.WhoAmI@9.1.3",
+      "fullyQualifiedName": "GoogleDocs.WhoAmI@9.1.4",
       "description": "Get the connected Google account's profile: name, email address and profile picture.\n\nUse this to confirm which account the connection is acting as before creating or\nediting a document, or when the user asks who they are signed in as.\n\nIt reads the Google profile and opens no document, so it does not report which\ndocuments this app can reach. To find out whether a particular document is reachable,\nsearch for it or open it. Fields Google does not return are omitted rather than empty.",
       "parameters": [],
       "auth": {
@@ -1319,6 +1319,6 @@
   ],
   "subPages": [],
   "curationSourceHash": "33910354b796df23626997fca5e7d53bbf1479131ac0d258bc282833e12de451",
-  "generatedAt": "2026-10-07T21:25:11.945Z",
-  "summary": "## Google Docs Toolkit\n\nThe Google Docs toolkit connects Arcade to the Google Docs and Drive APIs, enabling LLMs to create, read, edit, search, and comment on documents on behalf of a connected Google account.\n\n## Capabilities\n\n- **Document creation**: Create blank documents or documents pre-populated with plain text or Markdown (headings, bold, italic, lists) in the connected account's Drive root.\n- **Reading and metadata**: Retrieve documents in raw API form, as compact DocMD (block IDs, character indices, styles), or as metadata only (title, ID, URL, tab structure, character counts).\n- **Editing and appending**: Apply structured `batchUpdate` requests to any accessible document using DocMD indices, or append text to the end of a specific tab.\n- **Comments**: Post whole-document comments as the connected account, and list a document's comments with replies, authors, quoted passages, and resolved status — paged for large threads.\n- **Search**: Search the accessible document corpus by query, returning metadata only or metadata plus body content; trash is excluded automatically.\n- **Access management and identity**: Generate a Google Drive file picker URL so users can grant per-file access to the app, and resolve the connected account's profile (name, email, avatar) via `WhoAmI`.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with **Google** as the provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — Controls whether the `GenerateGoogleFilePickerUrl` tool can surface a Google Drive file picker URL to end users. This is an Arcade-side configuration secret rather than a credential issued by Google; its value governs feature enablement for the inline picker flow. Set it through the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets) or via the Arcade config. See [Arcade tool secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for full configuration instructions."
+  "generatedAt": "2026-10-10T11:14:19.658Z",
+  "summary": "## Google Docs Toolkit\n\nThe Google Docs toolkit connects Arcade to the Google Docs (and Drive) APIs, enabling agents and LLMs to create, read, edit, search, and comment on documents using the connected user's Google account.\n\n## Capabilities\n\n- **Document creation & content authoring:** Create blank documents, create documents from plain text or Markdown (with headings, bold, italic, and lists), and append text to the end of any tab in an existing document.\n- **Reading & metadata:** Retrieve a document as raw Google Docs API JSON, as the compact DocMD format (with block IDs and character indices for editing), or as lightweight metadata (title, ID, URL, tab hierarchy, character counts).\n- **Structured editing:** Apply batchUpdate requests against precise character indices exposed by the DocMD representation; when called without requests, returns current DocMD for subsequent edits.\n- **Search & discovery:** Search Drive for documents by keyword (metadata-only or with body content), scoped to files this app can reach by default.\n- **Comments:** Post whole-document comments as the connected account, and list comments with thread state, replies, author display names, and quoted passage anchors.\n- **Account & access management:** Confirm which Google account is active (`WhoAmI`), and generate a Google Drive inline file-picker URL so users can grant the app access to additional files when a prior tool reports not-found or access-denied.\n\n## OAuth\n\nThis toolkit uses **OAuth 2.0** via Arcade's Google auth provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details, including which OAuth scopes are required.\n\n## Secrets\n\n- **`ENABLE_GOOGLE_DRIVE_INLINE_PICKER_URL`** — A secret that enables the `GoogleDocs.GenerateGoogleFilePickerUrl` tool to produce a functional Google Drive inline file-picker URL. This is an Arcade-side configuration value (not a Google-issued credential); obtain or activate it through the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets) or your self-hosted Arcade environment's secrets configuration. Without it, the picker URL tool either returns an empty URL or is non-functional. Because this secret gates a UI capability rather than a raw API key, there is no Google Cloud Console step involved — it is provisioned purely within Arcade.\n\nFor general guidance on configuring secrets in Arcade tools, see [Create Tool Secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
 }

@@ -1,7 +1,7 @@
 {
   "id": "GoogleFlights",
   "label": "Google Flights",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "Arcade.dev LLM tools for getting flights via Google Flights",
   "metadata": {
     "category": "search",
@@ -18,7 +18,7 @@
     {
       "name": "GetFlightBookingOptions",
       "qualifiedName": "GoogleFlights.GetFlightBookingOptions",
-      "fullyQualifiedName": "GoogleFlights.GetFlightBookingOptions@4.1.1",
+      "fullyQualifiedName": "GoogleFlights.GetFlightBookingOptions@4.1.2",
       "description": "Resolve a ``booking_token`` to the airlines and OTAs selling that itinerary.\n\nPass a ``booking_token`` from a one-way, round-trip, or multi-city\nflight search result to get the vendors selling that specific\nflight. The token encodes the route, dates, cabin class,\nand passenger counts (every segment for multi-city), so there are\nno ``travel_class``, ``num_adults``, or ``num_children`` parameters;\nsupplying a cabin or party size would silently disagree with the\nitinerary the token was issued for.\n\nLeave ``include_booking_post_data`` off (the default) when an LLM\nis comparing prices; turn it on only when a backend needs to\nrebuild the vendor hand-off, since the POST body is multiple\nkilobytes per option.",
       "parameters": [
         {
@@ -49,7 +49,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum vendor offers to return in this response (1-30). Defaults to 10. A popular round-trip can easily return 30+ vendors; the default keeps the response compact, and the caller can page through for the long tail.",
+          "description": "Maximum vendor offers to return in this response (1-30). A popular round-trip can easily return 30+ vendors; the default keeps the response compact, and the caller can page through for the long tail. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
@@ -130,7 +130,7 @@
     {
       "name": "LookupAirports",
       "qualifiedName": "GoogleFlights.LookupAirports",
-      "fullyQualifiedName": "GoogleFlights.LookupAirports@4.1.1",
+      "fullyQualifiedName": "GoogleFlights.LookupAirports@4.1.2",
       "description": "Find IATA airport codes for a city, country, or airport name.\n\nMetropolitan codes (NYC, LON, TYO, PAR, ...) are accepted as a\n``departure_airport_code`` or ``arrival_airport_code`` in flight\nsearches and mean \"any airport in this city\".",
       "parameters": [
         {
@@ -209,7 +209,7 @@
     {
       "name": "SearchFlights",
       "qualifiedName": "GoogleFlights.SearchFlights",
-      "fullyQualifiedName": "GoogleFlights.SearchFlights@4.1.1",
+      "fullyQualifiedName": "GoogleFlights.SearchFlights@4.1.2",
       "description": "Search Google Flights for one-way or round-trip itineraries.\n\nFor a trip where the traveler returns to their origin, issue a\nsingle call with both ``outbound_date`` and ``return_date`` set.\nDo NOT issue two separate one-way searches in opposite directions\nand sum the prices: airlines price round-trip fares independently\nfrom one-way fares, so the sum of two cheapest one-ways is rarely\nequal to the cheapest round-trip and is typically more expensive.\n\nEach returned itinerary carries a ``google_flights_url`` that opens\nthat specific pre-selected flight on Google Flights, so you can hand\nthe user a booking link straight from these results without a\nseparate booking-options lookup.",
       "parameters": [
         {
@@ -240,7 +240,7 @@
           "name": "return_date",
           "type": "string",
           "required": false,
-          "description": "Return date in YYYY-MM-DD format for a round-trip search. Leave empty for a one-way search. When set and earlier than outbound_date, the response returns an empty flights list with a structured `return_before_outbound` warning rather than raising.",
+          "description": "Return date in YYYY-MM-DD format for a round-trip search. When set and earlier than outbound_date, the response returns an empty flights list with a structured `return_before_outbound` warning rather than raising. Defaults to a one-way search.",
           "enum": null,
           "inferrable": true
         },
@@ -314,7 +314,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Restrict results to these 2-letter IATA airline codes (e.g. ['DL', 'AA']). Leave empty for no filter. Cannot be combined with exclude_airlines.",
+          "description": "Restrict results to these 2-letter IATA airline codes (e.g. ['DL', 'AA']). Cannot be combined with exclude_airlines. Defaults to all airlines.",
           "enum": null,
           "inferrable": true
         },
@@ -323,7 +323,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Exclude these 2-letter IATA airline codes from results. Leave empty for no filter. Cannot be combined with include_airlines.",
+          "description": "Exclude these 2-letter IATA airline codes from results. Cannot be combined with include_airlines. Defaults to excluding no airlines.",
           "enum": null,
           "inferrable": true
         },
@@ -387,7 +387,7 @@
           "name": "max_total_duration_minutes",
           "type": "integer",
           "required": false,
-          "description": "Maximum end-to-end itinerary duration in minutes (each direction). Leave empty for no limit.",
+          "description": "Maximum end-to-end itinerary duration in minutes (each direction). Defaults to no limit.",
           "enum": null,
           "inferrable": true
         },
@@ -395,7 +395,7 @@
           "name": "connection_airport_code",
           "type": "string",
           "required": false,
-          "description": "Require itineraries to connect through this 3-letter IATA airport. Filters results client-side after the search, so nonstop itineraries are dropped and the response may shrink. Leave empty for no constraint.",
+          "description": "Require itineraries to connect through this 3-letter IATA airport. Filters results client-side after the search, so nonstop itineraries are dropped and the response may shrink. Defaults to no connection filter.",
           "enum": null,
           "inferrable": true
         },
@@ -411,7 +411,7 @@
           "name": "include_price_history",
           "type": "boolean",
           "required": false,
-          "description": "Include the ~60-row daily price_history series under price_insights. Off by default because the rolling history dwarfs the rest of the response for an LLM that only needs typical_lowest_for_route, price_level, and typical_price_range. Set true when the caller is specifically visualising the price trend over time.",
+          "description": "Include the ~60-row daily price_history series under price_insights. The rolling history dwarfs the rest of the response for an LLM that only needs typical_lowest_for_route, price_level, and typical_price_range. Set true when the caller is specifically visualising the price trend over time. Defaults to false.",
           "enum": null,
           "inferrable": true
         },
@@ -419,7 +419,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum itineraries to return in this response (1-50). Defaults to 20. A popular route can easily return 50+ itineraries; trim down to keep the response compact, or page through to see more.",
+          "description": "Maximum itineraries to return in this response (1-50). A popular route can easily return 50+ itineraries; trim down to keep the response compact, or page through to see more. Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -588,7 +588,7 @@
     {
       "name": "SearchMultiCityFlights",
       "qualifiedName": "GoogleFlights.SearchMultiCityFlights",
-      "fullyQualifiedName": "GoogleFlights.SearchMultiCityFlights@4.1.1",
+      "fullyQualifiedName": "GoogleFlights.SearchMultiCityFlights@4.1.2",
       "description": "Search Google Flights for a multi-city (open-jaw) itinerary.\n\nUse this for trips that are neither a simple one-way nor a round-trip\n(e.g. an open-jaw three-leg trip that ends back at the origin).\nThe open-jaw bundle is typically cheaper than the equivalent set\nof one-way searches summed; never substitute several one-way\nsearches for a single multi-city query.\n\nEach returned itinerary carries a ``google_flights_url`` that opens\nthat specific pre-selected itinerary on Google Flights, so you can\nhand the user a booking link straight from these results without a\nseparate booking-options lookup.",
       "parameters": [
         {
@@ -830,6 +830,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "10f0abfb85a7b8a10ee6a4741e8a63ef7f51163ddfa3203c3cdf3a3a95527669",
-  "generatedAt": "2026-10-07T21:25:14.074Z",
-  "summary": "## Google Flights Toolkit\n\nArcade's Google Flights toolkit lets LLMs search and resolve flight itineraries via the SerpApi Google Flights endpoint, returning structured results with direct booking links.\n\n## Capabilities\n\n- **Airport lookup:** Resolve city names, country names, or airport names to IATA codes, including metropolitan area codes (NYC, LON, etc.) usable in flight searches.\n- **One-way & round-trip search:** Query flights with full control over dates, cabin class, and passenger counts; round-trip fares are fetched in a single call to return accurately bundled pricing.\n- **Multi-city (open-jaw) search:** Search multi-leg itineraries that are neither simple one-ways nor round-trips; bundled pricing is typically cheaper than equivalent summed one-ways.\n- **Booking option resolution:** Convert a `booking_token` from any search result into a list of airlines and OTAs selling that specific itinerary, with optional POST data for backend vendor hand-offs.\n- **Direct booking links:** Every search result includes a `google_flights_url` that opens the pre-selected itinerary on Google Flights, enabling immediate user hand-off without a secondary lookup.\n\n## Secrets\n\n`SERP_API_KEY` — An API key issued by [SerpApi](https://serpapi.com/), the service that powers the underlying Google Flights data. To obtain one: create an account at [serpapi.com](https://serpapi.com/users/sign_up), navigate to your [dashboard](https://serpapi.com/dashboard), and copy the **API Key** shown there. Free-tier accounts include a limited number of monthly searches; paid plans are required for higher volume. The key must have access to the Google Flights engine — no additional per-engine toggle is needed on SerpApi's side.\n\nFor configuring secrets in Arcade, see [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-10T11:14:21.144Z",
+  "summary": "## Google Flights Toolkit\n\nArcade's Google Flights toolkit lets LLMs search real-time flight data and surface booking options via the SerpApi Google Flights endpoint — no user auth required.\n\n## Capabilities\n\n- **Airport lookup** — resolve city names, country names, or airport names to IATA codes, including metropolitan codes (NYC, LON, TYO) that span multiple airports.\n- **One-way & round-trip search** — query fares for a single direction or a full return trip in one call; results include direct Google Flights URLs for pre-selected itineraries, ready to hand to users.\n- **Multi-city (open-jaw) search** — search multi-leg itineraries that don't fit the round-trip model; the bundled fare is typically cheaper than summing individual one-ways.\n- **Booking-option resolution** — convert a `booking_token` from any search result into a list of airlines and OTAs selling that specific itinerary, with optional POST data for backend vendor hand-off.\n\n## Secrets\n\n`SERP_API_KEY` — An API key issued by [SerpApi](https://serpapi.com/), the service that powers the underlying Google Flights data. To obtain one: create an account at [serpapi.com](https://serpapi.com/users/sign_up), navigate to your [dashboard](https://serpapi.com/dashboard), and copy the API key shown there. Free-tier accounts have a monthly search limit; paid plans are required for higher volume. The key is passed with every request and must be registered as a secret in Arcade before the toolkit will function.\n\nFor details on configuring secrets in Arcade, see [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftPowerbi",
   "label": "Microsoft Power BI",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Arcade MCP toolkit for Microsoft Power BI",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "DatasetGatewayHealth",
       "qualifiedName": "MicrosoftPowerbi.DatasetGatewayHealth",
-      "fullyQualifiedName": "MicrosoftPowerbi.DatasetGatewayHealth@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.DatasetGatewayHealth@1.0.2",
       "description": "Report whether each of a dataset's gateway-bound data sources is currently\nreachable.\n\nPoint this at a dataset whose refresh failed to tell whether the gateway path is\nhealthy before escalating. Stored credentials are never returned.",
       "parameters": [
         {
@@ -100,7 +100,7 @@
     {
       "name": "GetDatasetRefreshHistory",
       "qualifiedName": "MicrosoftPowerbi.GetDatasetRefreshHistory",
-      "fullyQualifiedName": "MicrosoftPowerbi.GetDatasetRefreshHistory@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.GetDatasetRefreshHistory@1.0.2",
       "description": "Get the most recent refresh runs of a semantic model, with status and timing.\n\nReturns each run newest first with its status, type, start/end time, and any error.\nPower BI reports a run's status as 'Unknown' while it is still in progress or its\noutcome is not yet known, so each run also carries `is_terminal`: false while the run\nis still running (status 'Unknown'), true once it has settled ('Completed', 'Failed',\nor 'Disabled'). Re-poll this tool while the newest run is not terminal to obtain its\nfinal status.",
       "parameters": [
         {
@@ -123,7 +123,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "How many recent refresh runs to return (default 20, max 50).",
+          "description": "How many recent refresh runs to return (max 50). Defaults to 20.",
           "enum": null,
           "inferrable": true
         }
@@ -186,7 +186,7 @@
     {
       "name": "GetReport",
       "qualifiedName": "MicrosoftPowerbi.GetReport",
-      "fullyQualifiedName": "MicrosoftPowerbi.GetReport@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.GetReport@1.0.2",
       "description": "Get a single Power BI report's detail, including the semantic model (dataset) it is\nbuilt on.",
       "parameters": [
         {
@@ -259,7 +259,7 @@
     {
       "name": "GetSchema",
       "qualifiedName": "MicrosoftPowerbi.GetSchema",
-      "fullyQualifiedName": "MicrosoftPowerbi.GetSchema@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.GetSchema@1.0.2",
       "description": "Get the full structure of a Power BI semantic model.\n\nReturns each table with its columns and measures and the relationships between tables,\nso a caller can compose valid DAX that references real table and column names. Each\nmeasure carries its DAX expression when the model exposes it; a read-only caller may\nnot receive measure formulas, in which case expression_available is false.",
       "parameters": [
         {
@@ -332,7 +332,7 @@
     {
       "name": "InspectDataset",
       "qualifiedName": "MicrosoftPowerbi.InspectDataset",
-      "fullyQualifiedName": "MicrosoftPowerbi.InspectDataset@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.InspectDataset@1.0.2",
       "description": "Inspect one dataset in a single call: where it pulls data from, what parameters\ndrive it, when it refreshes, and its core detail (owner, storage mode, refreshable).\n\nUse this to diagnose a dataset that \"looks wrong\" without three separate calls.\nStored credentials are never returned for any data source.",
       "parameters": [
         {
@@ -405,7 +405,7 @@
     {
       "name": "ListDatasets",
       "qualifiedName": "MicrosoftPowerbi.ListDatasets",
-      "fullyQualifiedName": "MicrosoftPowerbi.ListDatasets@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListDatasets@1.0.2",
       "description": "List the Power BI semantic models (datasets) in a workspace.\n\nResults are paginated: when next_cursor is non-empty, pass it back verbatim to fetch\nthe next page.",
       "parameters": [
         {
@@ -420,7 +420,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum datasets to return (default 20, max 50).",
+          "description": "Maximum datasets to return (max 50). Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -428,7 +428,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Opaque pagination token from a prior call's next_cursor; omit for the first page.",
+          "description": "Opaque pagination token from a prior call's next_cursor. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -491,7 +491,7 @@
     {
       "name": "ListGateways",
       "qualifiedName": "MicrosoftPowerbi.ListGateways",
-      "fullyQualifiedName": "MicrosoftPowerbi.ListGateways@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListGateways@1.0.2",
       "description": "List the data gateways the caller administers, with the id needed to reference\neach one.",
       "parameters": [],
       "auth": {
@@ -536,7 +536,7 @@
     {
       "name": "ListReports",
       "qualifiedName": "MicrosoftPowerbi.ListReports",
-      "fullyQualifiedName": "MicrosoftPowerbi.ListReports@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListReports@1.0.2",
       "description": "List the Power BI reports in a workspace, each with the semantic model (dataset) it is\nbuilt on.\n\nResults are paginated: when next_cursor is non-empty, pass it back verbatim to fetch\nthe next page.",
       "parameters": [
         {
@@ -551,7 +551,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum reports to return (default 20, max 50).",
+          "description": "Maximum reports to return (max 50). Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -559,7 +559,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Opaque pagination token from a prior call's next_cursor; omit for the first page.",
+          "description": "Opaque pagination token from a prior call's next_cursor. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -622,7 +622,7 @@
     {
       "name": "ListWorkspaceMembers",
       "qualifiedName": "MicrosoftPowerbi.ListWorkspaceMembers",
-      "fullyQualifiedName": "MicrosoftPowerbi.ListWorkspaceMembers@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListWorkspaceMembers@1.0.2",
       "description": "List who can access a workspace and the role each principal holds, for an\naccess review.\n\nA single call returns one consistent snapshot of the page it serves, in a stable\nsorted order (by principal identifier) so pages are deterministic. The default limit\nis the maximum (50), so a definitive access review should fit in one page; when\nnext_cursor is non-empty the listing was truncated and multi-page reads are best-effort\n(membership changes between pages can skip or duplicate principals) -- the warning field\nflags this. Only what the Power BI portal itself shows for a member is returned; no\nsecrets.",
       "parameters": [
         {
@@ -637,7 +637,7 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum members to return (default 50, max 50). The default is the maximum so a typical access review fits in one page.",
+          "description": "Maximum members to return (max 50). The default is the maximum so a typical access review fits in one page. Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
@@ -645,7 +645,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Opaque pagination token from a prior call's next_cursor; omit for the first page.",
+          "description": "Opaque pagination token from a prior call's next_cursor. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -708,14 +708,14 @@
     {
       "name": "ListWorkspaces",
       "qualifiedName": "MicrosoftPowerbi.ListWorkspaces",
-      "fullyQualifiedName": "MicrosoftPowerbi.ListWorkspaces@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.ListWorkspaces@1.0.2",
       "description": "List the Power BI workspaces (groups) the calling user can access.\n\nReturns each workspace's id and name. Results are paginated: when next_cursor is\nnon-empty, pass it back verbatim to fetch the next page.",
       "parameters": [
         {
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "Maximum workspaces to return (default 20, max 50).",
+          "description": "Maximum workspaces to return (max 50). Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
@@ -723,7 +723,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Opaque pagination token from a prior call's next_cursor; omit for the first page.",
+          "description": "Opaque pagination token from a prior call's next_cursor. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -781,7 +781,7 @@
     {
       "name": "RunDax",
       "qualifiedName": "MicrosoftPowerbi.RunDax",
-      "fullyQualifiedName": "MicrosoftPowerbi.RunDax@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.RunDax@1.0.2",
       "description": "Run a DAX query against a semantic model and return the rows as structured data.\n\nThe query must be a DAX EVALUATE statement, for example:\n  EVALUATE TOPN(100, 'Sales')\n  EVALUATE SUMMARIZECOLUMNS('Date'[Year], \"Revenue\", SUM('Sales'[Amount]))\n  EVALUATE FILTER('Product', 'Product'[Category] = \"Bikes\")\nResults are capped at max_rows and a size budget; when capped, truncated is true,\nso narrow the query rather than assume the rows are complete. columns lists the full\nprojection the query returned even when a wide row is size-trimmed, so a column may\nappear in columns without a matching key in every returned row. Invalid DAX is\nreported as a clear error.",
       "parameters": [
         {
@@ -812,7 +812,7 @@
           "name": "max_rows",
           "type": "integer",
           "required": false,
-          "description": "Maximum rows to return (default 100, capped at 100).",
+          "description": "Maximum rows to return (capped at 100). Defaults to 100.",
           "enum": null,
           "inferrable": true
         }
@@ -880,7 +880,7 @@
     {
       "name": "TriggerDatasetRefresh",
       "qualifiedName": "MicrosoftPowerbi.TriggerDatasetRefresh",
-      "fullyQualifiedName": "MicrosoftPowerbi.TriggerDatasetRefresh@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.TriggerDatasetRefresh@1.0.2",
       "description": "Start an on-demand refresh of a semantic model.\n\nA refresh can take a long time (minutes or more for a large model), so this\nreturns as soon as the refresh is accepted rather than waiting for it to finish.\nThe run's progress and final success or failure are recorded in the model's\nrefresh history.",
       "parameters": [
         {
@@ -953,7 +953,7 @@
     {
       "name": "UpdateDatasetSettings",
       "qualifiedName": "MicrosoftPowerbi.UpdateDatasetSettings",
-      "fullyQualifiedName": "MicrosoftPowerbi.UpdateDatasetSettings@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.UpdateDatasetSettings@1.0.2",
       "description": "Repoint a dataset's parameters and/or change its refresh timing in one request.\n\nUpsert/patch semantics: only the fields supplied are applied; everything else is\nleft untouched. Setting a parameter the dataset does not define is refused with the\nlist of parameter names it actually exposes, rather than reported as a false success.\nPower BI ignores day/time edits while scheduled refresh is disabled, so set\nrefresh_enabled=true in the same call when you want new times to take effect.\nEach applied parameter is returned with the previous_value observed just before the\nwrite, so the change is auditable and the prior value can be restored. A committed\nparameter change only updates the model definition; refresh the dataset afterwards\nso query and report results reflect the new values.",
       "parameters": [
         {
@@ -977,7 +977,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Parameter values to set. Only the listed parameters change; the rest are left untouched. Omit to change no parameters.",
+          "description": "Parameter values to set. Only the listed parameters change; the rest are left untouched. Defaults to changing no parameters.",
           "enum": null,
           "inferrable": true
         },
@@ -986,7 +986,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Days the refresh runs on. Provide to replace the scheduled days; omit to leave the days unchanged.",
+          "description": "Days the refresh runs on. Provide to replace the scheduled days. Defaults to leaving the days unchanged.",
           "enum": [
             "Monday",
             "Tuesday",
@@ -1003,7 +1003,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Times the refresh runs at, each as HH:MM on the hour or half-hour (e.g. 08:00, 08:30). Provide to replace the scheduled times; omit to leave them unchanged.",
+          "description": "Times the refresh runs at, each as HH:MM on the hour or half-hour (e.g. 08:00, 08:30). Provide to replace the scheduled times. Defaults to leaving the times unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1011,7 +1011,7 @@
           "name": "refresh_enabled",
           "type": "boolean",
           "required": false,
-          "description": "Whether scheduled refresh is on. Provide to toggle it; omit to leave it unchanged.",
+          "description": "Whether scheduled refresh is on. Provide to toggle it. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -1019,7 +1019,7 @@
           "name": "refresh_local_time_zone_id",
           "type": "string",
           "required": false,
-          "description": "The schedule's time zone id (e.g. 'UTC', 'Pacific Standard Time'). Provide to change it; omit to leave it unchanged.",
+          "description": "The schedule's time zone id (e.g. 'UTC', 'Pacific Standard Time'). Provide to change it. Defaults to leaving the time zone unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -1123,7 +1123,7 @@
     {
       "name": "ValidateDax",
       "qualifiedName": "MicrosoftPowerbi.ValidateDax",
-      "fullyQualifiedName": "MicrosoftPowerbi.ValidateDax@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.ValidateDax@1.0.2",
       "description": "Check whether a DAX query is valid for a semantic model without returning its rows.\n\nReturns valid=true when the query is accepted, or valid=false with a short error\nwhen it is not. Transient, auth, and server errors are raised (not reported as\ninvalid) so the caller retries rather than rewriting valid DAX.",
       "parameters": [
         {
@@ -1209,7 +1209,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftPowerbi.WhoAmI",
-      "fullyQualifiedName": "MicrosoftPowerbi.WhoAmI@1.0.1",
+      "fullyQualifiedName": "MicrosoftPowerbi.WhoAmI@1.0.2",
       "description": "Report the Microsoft account the toolkit is acting as: id, name, UPN, and tenant.\n\nUse this to confirm which user the current connection authenticates as before\nreading or changing anything. Identity is read from the signed-in user's own Power\nBI access token (Power BI has no current-user endpoint); it is for display and\nconfirmation only, not an authorization decision, and the fields are best-effort.\nBecause identity is derived from the token's claims, it is unavailable when Microsoft\nissues an opaque or encrypted (non-JWT) access token -- Microsoft is rolling out\nencrypted access tokens for Microsoft-owned APIs -- in which case this tool fails with\na clear error while every other Power BI tool keeps working.",
       "parameters": [],
       "auth": {
@@ -1256,6 +1256,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:25:38.750Z",
-  "summary": "## Microsoft Power BI Toolkit\n\nArcade's Microsoft Power BI toolkit connects agents and MCP clients to Power BI workspaces, enabling programmatic reporting, semantic model inspection, DAX execution, and refresh management through the Power BI REST API.\n\n## Capabilities\n\n- **Discovery & navigation**: List and paginate workspaces, reports, datasets, and gateways; retrieve individual report or dataset details in a single call.\n- **Schema & DAX**: Fetch full semantic model structure (tables, columns, measures, relationships) to compose valid DAX; execute `EVALUATE` queries with row/size caps and truncation signals; validate DAX syntax without fetching data.\n- **Dataset diagnostics**: Inspect a dataset's data sources, parameters, refresh schedule, and core metadata in one call; check gateway data-source reachability; retrieve paginated refresh history with terminal/in-progress status signals.\n- **Dataset management**: Trigger on-demand refreshes; update dataset parameters and refresh schedule with patch semantics and auditable before/after values.\n- **Access & identity**: List workspace members with roles for access review (paginated, sorted, with best-effort multi-page warnings); confirm the authenticated Microsoft account and tenant from the current token.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Microsoft Power BI** provider. See the [Arcade Microsoft Power BI auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft-powerbi) for configuration details."
+  "generatedAt": "2026-10-10T11:14:43.884Z",
+  "summary": "## Microsoft Power BI Toolkit\n\nThe Arcade Microsoft Power BI toolkit connects agents and tools to the Power BI REST API, enabling programmatic access to workspaces, semantic models, reports, gateways, and DAX execution.\n\n## Capabilities\n\n- **Discovery & navigation:** List and inspect workspaces, reports, datasets (semantic models), and gateways; retrieve workspace membership for access reviews.\n- **Schema & query:** Fetch the full structure of a semantic model (tables, columns, measures, relationships) and run or validate DAX `EVALUATE` queries against live data.\n- **Dataset diagnostics:** Inspect a dataset's data sources, parameters, refresh schedule, and ownership in one call; check gateway-bound source reachability to diagnose failed refreshes.\n- **Refresh management:** Trigger on-demand refreshes, poll refresh history with terminal/in-progress status tracking, and update dataset parameters or scheduled refresh settings with auditable before/after values.\n- **Identity & audit:** Confirm the authenticated Microsoft account (UPN, tenant, id) before reading or mutating anything; list workspace members with roles for access reviews.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 delegated auth via the **Microsoft Power BI** provider. See the [Arcade Microsoft Power BI auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft-powerbi) for setup details, required app registrations, and scope configuration."
 }
