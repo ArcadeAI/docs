@@ -196,7 +196,7 @@ All settings live under `deployments.*` in the chart values. Leave a value at it
 | `deployments.mutationsAllowed` | `true` | When `false`, the Arcade Engine blocks creating and updating deployments. |
 | `deployments.domain` | `""` | Root domain for deployments, passed to the Arcade Engine. Falls back to `gateway.hostname`, then `ingress.hostname`. The chart refuses to render if none of them is set. In the platform's own cluster, the Arcade Engine reaches deployed servers on their in-cluster Service address. |
 | `deployments.timeout` | `5m` | How long a deploy may take to become healthy before it's marked failed. |
-| `deployments.autoRoll` | `true` | When `true`, the reconciler moves deployed servers onto a new runner image one at a time (see [Upgrades](#upgrades)). When `false`, the move is deferred and deployed servers stay on the runner image they already run. |
+| `deployments.autoRoll` | `true` | When `true`, the reconciler moves deployed servers onto a new runner image one at a time (see [Upgrades](#upgrades)). When `false`, the move is deferred and deployed servers stay on the runner image they already run until they're redeployed. A redeploy picks up the configured runner image. |
 | `deployments.reconciler.enabled` | `true` | Runs the deployment reconciler. It moves deployed servers onto a new runner image and removes NetworkPolicies left behind by removed servers. |
 | `deployments.readinessProbe` | `rollout` | How the Arcade Engine decides a deployed server is ready. `rollout` waits for the Kubernetes rollout to finish, which needs the pod to accept TCP connections on the server's port. Any other value, such as `health`, also waits until the server's `/worker/health` endpoint answers HTTP 200 to the Arcade Engine. |
 
@@ -214,7 +214,7 @@ Deployed servers' pods get no bucket credentials: their ServiceAccount mounts no
 | GCS | A key file is configured, or the Arcade Engine's service account holds `iam.serviceAccounts.signBlob`. | The pod falls back to the store URL, which it has no credentials for. |
 | Azure Blob | A shared key is configured (`AZURE_STORAGE_KEY`). | Workload and managed identities can't sign, so the pod falls back to the store URL, which it has no credentials for. |
 
-A signing failure doesn't fail the deploy, but the pod then can't fetch its bundle. With Azure Workload Identity or GKE Workload Identity, make sure signing works as described above.
+A signing failure doesn't fail the deploy, but when no valid signed URL remains, the pod can't fetch its bundle. With Azure Workload Identity or GKE Workload Identity, make sure signing works as described above.
 
 ### Runner image and registry
 
@@ -297,7 +297,9 @@ deployments:
 
 To use a namespace you manage yourself, set `deployments.createNamespace: false`. The chart then adds no default-deny NetworkPolicy, unless you also set `deployments.network.defaultDenyExistingNamespace: true`. Only do that when the namespace holds nothing but deployed servers.
 
-{/* TODO(DEP-371): The runbook says arcade-deployments-budget should be the only quota in the workers namespace, but the chart also renders <release>-workers-quota by default. Confirm the recommended deployments.resourceQuota.enabled setting when the reconciler is on. */}
+When the reconciler is on, the Arcade Engine also applies its own ResourceQuota, `arcade-deployments-budget`, in the workers namespace. It limits `pods`, `limits.cpu`, and `limits.memory`, and the reconciler re-applies it on every pass, so manual edits to it don't last. A pod has to fit every quota in the namespace.
+
+{/* TODO(DEP-371): Confirm the recommended deployments.resourceQuota.enabled setting when the reconciler is on. */}
 
 ### Network
 
@@ -382,8 +384,8 @@ Upgrade the chart with `helm upgrade` as described in [Self-host with Helm](/ope
 When an upgrade changes the runner image tag, the reconciler moves running deployed servers onto it one at a time. This needs `deployments.reconciler.enabled: true`.
 
 - On each pass (every 30 seconds), the reconciler starts at most one move, and only when no other move is still rolling out.
-- If a server can't start on the new runner image, the Arcade Engine rolls it back to the previous one and marks it `degraded` with the message "could not start on the upgraded runtime; the previous runtime is still serving". The move then halts: no other server moves onto that image.
-- Set `deployments.autoRoll: false` to defer the move. Deployed servers then stay on the runner image they already run.
+- If a server can't start on the new runner image, the Arcade Engine rolls it back to the previous one and marks it `degraded` with the message "could not start on the upgraded runtime; the previous runtime is still serving". If no instance of the server is serving when it's marked `degraded`, the reason is "release artifact unavailable" instead. The move then halts: no other server moves onto that image.
+- Set `deployments.autoRoll: false` to defer the move. Deployed servers then stay on the runner image they already run until they're redeployed.
 
 ## Troubleshooting
 
