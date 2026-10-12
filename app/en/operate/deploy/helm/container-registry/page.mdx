@@ -48,9 +48,6 @@ redis:
     repository: registry.example.com/redis
 postgres:
   image: registry.example.com/postgres:17-alpine
-opentelemetry-collector:
-  image:
-    repository: registry.example.com/otel/opentelemetry-collector-contrib
 
 supportImages:
   busybox:
@@ -72,11 +69,15 @@ deployments:
 
 ### Pull credentials
 
-`dockerRegistry` controls the pull Secret on every Arcade pod:
+`dockerRegistry` controls the pull Secret on the Arcade pods:
 
-- `dockerRegistry.enabled` (default `true`) adds an `imagePullSecrets` entry to every Arcade pod. Leave it on for the private `arcadedev/*` images or a registry that needs credentials.
+- `dockerRegistry.enabled` (default `true`) adds an `imagePullSecrets` entry to the Arcade component pods (Arcade Engine, coordinator, dashboard, Experience API, OpenFGA, workers, and the chart's Jobs). Leave it on for the private `arcadedev/*` images or a registry that needs credentials.
 - `dockerRegistry.existingSecret` names a Secret you create in the release namespace, of type `kubernetes.io/dockerconfigjson`. This is the usual choice for a mirror.
 - Without `existingSecret`, the chart generates a Secret named `dockerRegistry.secretName` from `dockerRegistry.server`, `dockerRegistry.username`, and `dockerRegistry.token` (a Docker Hub access token).
+
+<Callout type="warning">
+The bundled PostgreSQL and Redis StatefulSets don't get a pull Secret. If your mirror requires authentication, they can't pull from it. Mirror `postgres.image` and `redis.image` to a path your nodes can pull without credentials (for example, through node-level registry credentials), or use external PostgreSQL and Redis.
+</Callout>
 
 ### Support images
 
@@ -118,6 +119,7 @@ For Arcade Deploy, deploy a test server and run the same image check in the work
 | --- | --- |
 | `ImagePullBackOff` on one component | Its `image.repository` still points at Docker Hub, or the tag isn't mirrored. Check the pod's image and mirror the missing tag. |
 | `ImagePullBackOff` on init containers | `supportImages.*` still point at Docker Hub. Override them. |
+| `401` or `unauthorized` pulling PostgreSQL or Redis | The bundled StatefulSets have no pull Secret. See the warning under [Pull credentials](#pull-credentials). |
 | `401` or `unauthorized` pulling | The pull Secret is missing, in the wrong namespace, or not `kubernetes.io/dockerconfigjson`. Check `dockerRegistry.existingSecret`. |
 | Deployed servers fail to pull the runner image | The Secret isn't in the workers namespace, or isn't listed in `deployments.registry.imagePullSecrets`. |
 | The runner image path is doubled, for example `registry.example.com/registry.example.com/...` | `deployments.image.repository` includes the registry host while `deployments.registry.server` is also set. Set the host in one place. |

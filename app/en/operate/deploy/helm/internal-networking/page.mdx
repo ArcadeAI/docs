@@ -21,7 +21,7 @@ The chart doesn't create a load balancer itself. Every Arcade Service is `Cluste
 
 ### Gateway API (recommended)
 
-The chart renders `HTTPRoute`s only; you run the `Gateway`. Point the routes at an internal Gateway, one whose listener is backed by an internal load balancer in your environment:
+The chart renders `HTTPRoute`s, never the `Gateway`; you run that. When the AWS Load Balancer Controller's `TargetGroupConfiguration` CRD (`gateway.k8s.aws/v1beta1`) is installed, the chart also renders one per service to set its health check path. Point the routes at an internal Gateway, one whose listener is backed by an internal load balancer in your environment:
 
 ```yaml
 gateway:
@@ -37,7 +37,7 @@ ingress:
   enabled: false
 ```
 
-With an empty `gateway.parentRefs`, no routes render. Services get hostnames from `gateway.subdomains.*` (`api`, `coordinator`, `dashboard`, `experienceApi`) under `gateway.hostname`. To attach one service to a different Gateway, set its own `gateway.<service>.parentRefs` (`engine`, `coordinator`, `dashboard`, `experienceApi`), which replaces the shared list for that service. If your controller only serves `v1beta1` routes, set `gateway.apiVersion`.
+A service's route renders only when it has parentRefs: its own `gateway.<service>.parentRefs` if set, otherwise the shared `gateway.parentRefs`. With both empty, that service gets no route. Services get hostnames from `gateway.subdomains.*` (`api`, `coordinator`, `dashboard`, `experienceApi`) under `gateway.hostname`. To attach one service to a different Gateway, set its own `gateway.<service>.parentRefs` (`engine`, `coordinator`, `dashboard`, `experienceApi`), which replaces the shared list for that service. A service with its own `parentRefs` gets a route even when the shared list is empty. If your controller only serves `v1beta1` routes, set `gateway.apiVersion`.
 
 ### Legacy Ingress
 
@@ -95,7 +95,7 @@ Then, from a machine inside your network, open the dashboard hostname and sign i
 
 | Symptom | Likely cause and fix |
 | --- | --- |
-| No `HTTPRoute`s exist | `gateway.parentRefs` is empty or `gateway.enabled` is `false`. Set both. |
+| No `HTTPRoute` for a service | `gateway.enabled` is `false`, or neither `gateway.parentRefs` nor that service's `gateway.<service>.parentRefs` is set. |
 | Routes exist but don't serve traffic | The Gateway doesn't accept them. Check the route's `status.parents` conditions, the listener's `sectionName`, and whether the Gateway allows routes from the release namespace. |
 | Sign-in redirects to `http://` or loops | TLS ends upstream and the coordinator doesn't trust the proxy. Set `coordinator.proxyHeaders.forwardedAllowIps`. |
 | A worker or MCP server on a private address fails to connect | The Arcade Engine's private-address block refused it. Add the host, wildcard, or CIDR to `engine.ssrfAllowlist`. For an OAuth provider endpoint, use `engine.authSsrfAllowlist`. |
