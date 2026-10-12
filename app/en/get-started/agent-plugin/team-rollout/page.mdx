@@ -1,13 +1,13 @@
 ---
 title: "From personal use to team rollout"
-description: "What changes when an Arcade workflow you proved with the agent plugin becomes something a team depends on: your own MCP Gateway, a curated tool list, and your own identity provider."
+description: "What changes when an Arcade workflow you proved with the agent plugin becomes something a team depends on: a dedicated MCP Gateway, a curated tool list, and how end users sign in."
 ---
 
 import { Callout } from "nextra/components";
 
 # From personal use to team rollout
 
-The [agent plugin](/get-started/agent-plugin) serves one person working on their own. Every install points at the same global gateway URL, and that is where the sharing ends. Your tool calls, tokens, and secrets route through your own Arcade project, isolated from every other user of that gateway. No one else's agent can reach your Gmail, and yours cannot reach theirs.
+The [agent plugin](/get-started/agent-plugin) serves one person working on their own. Every install points at the same global gateway URL. Arcade uses the app connections authorized for your signed-in identity. Authorize only the accounts you intend the agent to use.
 
 What the plugin gives you is a broad tool selection and an identity that is yours alone, which is what you want for your own work.
 
@@ -20,14 +20,13 @@ Once a team depends on that workflow, three questions you never had to answer st
 Each one has a section below, in that order.
 
 <Callout type="info">
-  If your agent loaded the plugin's skills, ask it to run `/scale-arcade`. The
-  skill walks through the same decisions interactively against your own
-  workspace.
+  If your client loads the plugin's skills, ask Arcade to help move your
+  workflow onto a team gateway. In Codex, use `$arcade:scale-arcade`.
 </Callout>
 
 ## Where does your team connect?
 
-An [MCP Gateway](/operate/governance/mcp-gateways) is the endpoint your team's clients connect to, and it is where you decide what those clients can do. Create one per project in the [Arcade dashboard](https://app.arcade.dev) so each project gets a URL you control, its own tool list, and its own audit trail.
+An [MCP Gateway](/operate/governance/mcp-gateways) is the endpoint your team's clients connect to, and it is where you decide what those clients can do. Create a gateway in the relevant Arcade project for the workflow and tool boundary you need from the [Arcade dashboard](https://app.arcade.dev).
 
 Clients connect to it exactly the way they connected to the plugin's gateway. See the [MCP client guides](/get-started/mcp-clients) for Cursor, Claude Code, Claude Desktop, VS Code, and Copilot.
 
@@ -43,7 +42,7 @@ Beyond the allowlist, [contextual access](/operate/governance/contextual-access)
 
 When you are the only user, signing in to each app yourself is enough. In production, each of your end users needs their own authorization, so an agent acting for one person can never reach another person's data.
 
-Configure a [User Source](/operate/identity/user-sources) on your gateway and Arcade redirects each end user to your existing identity provider, whether that is Entra ID, Okta, Auth0, Clerk, or another OIDC provider, then identifies them by an OIDC subject claim.
+Choose how your end users sign in. Internal teams whose users are Arcade project members can use [Arcade Auth](/operate/identity/user-sources#when-to-use-a-user-source). If users already have identities in your organization's OIDC provider, configure a [User Source](/operate/identity/user-sources) on the gateway.
 
 ## Building your own product?
 

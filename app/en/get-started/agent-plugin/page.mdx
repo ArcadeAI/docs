@@ -27,11 +27,11 @@ Install the Arcade agent plugin in your agent and run your first task against a 
 </GuideOverview>
 
 <Callout type="info">
-  The plugin is built for personal use. When you are ready to put a workflow in
-  front of a team, read [from personal use to team
-  rollout](/get-started/agent-plugin/team-rollout). You will want your own [MCP
-  Gateway](/operate/governance/mcp-gateways) with a curated tool list and your
-  own identity provider.
+  The plugin is built for personal use. For team use, consider a dedicated [MCP
+  Gateway](/operate/governance/mcp-gateways) with a curated tool list. Add a
+  [User Source](/operate/identity/user-sources) when end users should sign in
+  through your organization's identity provider. See [from personal use to team
+  rollout](/get-started/agent-plugin/team-rollout).
 </Callout>
 
 ## Install
@@ -67,6 +67,8 @@ codex plugin add arcade@arcade
 ```
 
 Start a new Codex session or ChatGPT desktop chat. Open `/plugins`, confirm **arcade** is installed and enabled, then confirm the **arcade** MCP server is connected.
+
+To invoke Arcade explicitly, choose `@Arcade` or use `$arcade:try-arcade`. For team-rollout guidance, use `$arcade:scale-arcade`. Codex does not expose these skills as slash commands.
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -120,13 +122,17 @@ After installation, reload your agent or start a new session. Using another clie
 Authentication happens in two layers:
 
 1. **Into the gateway.** Your client will ask you to authenticate when it first connects. You sign in to Arcade in the browser, and the client can reach the gateway from then on.
-2. **Into each app.** When a task needs Gmail, Slack, Linear, or anything else, your agent hands you a link that grants the scopes that task requires. Approve it once and Arcade holds the token for that app. You won't need to authenticate that service again unless a later task requires greater scopes.
+2. **Into each app.** When a task needs an app, your agent gives you a browser sign-in link for the required permissions. After approval, Arcade stores the authorization. You may need to reconnect if the connection expires or a later task needs additional permissions.
 
-You never give your agent an API key or a password for either layer. Ask your agent to run `/arcade-status` to list the applications you enabled, or `/arcade-connect google` to authorize an app with the widest possible scope before you need it.
+You never give your agent an API key or a password for either layer. To check or manage connections, ask your agent to "Check my Arcade connection," "Show my connected apps," or "Connect Google." You can connect an app before you need it. Clients that support Arcade commands also provide the shortcuts listed below.
 
-All of your tool calls, tokens, and secrets route through your own Arcade project, isolated from every other user of that gateway. No one else's agent can ever reach your apps, tools, or tokens.
+Arcade uses the app connections authorized for your signed-in identity. Authorize only the accounts you intend the agent to use.
 
-Every Arcade gateway works this way, not just the one in the plugin. [Server-level and tool-level authorization](/learn/server-level-vs-tool-level-auth) goes deeper on the split.
+### Privacy
+
+The current plugin build sends no client-side usage telemetry. The build turns telemetry off, and no environment setting turns it on. Requests you make through Arcade still go to its hosted gateway and the apps you authorize. See [Arcade's privacy policy](https://www.arcade.dev/privacy-policy).
+
+Gateway sign-in and app authorization stay separate on every Arcade gateway, including the one in the plugin. [Server-level and tool-level authorization](/learn/server-level-vs-tool-level-auth) goes deeper on the split.
 
 ## What you get in each agent
 
@@ -141,7 +147,7 @@ Every install connects to the same Arcade gateway and gets the same tools. What 
 | GitHub Copilot CLI                  |  ✅   |   2    |    ✅    |    —     |  —   |    ✅⁵   |
 | VS Code                             |  ✅   |   2    |    ✅    |    —     |  —   |    —⁶    |
 | Codex and ChatGPT local runtime     |  ✅   |   2    |    —     |    —     |  —   |    —⁷    |
-| Claude Desktop                      |  ✅   |   2    |    —     |    —     |  —   |    —     |
+| Claude Desktop Chat                 |  ✅   |   2    |    —     |    —     |  —   |    —     |
 | OpenCode                            |  ✅   |   —    |    —     |    —     |  —   |    —     |
 | Any other Streamable HTTP MCP client |  ✅   |   —    |    —     |    —     |  —   |    —     |
 
@@ -173,7 +179,7 @@ Lists the apps you have connected and lets you disconnect one.
 
 ### Skills
 
-Skills are instructions your agent reads on its own, so you never have to invoke them. `try-arcade` teaches it to turn a request like "reply to that thread" into the right sequence of tool calls across your apps. `scale-arcade` handles the other kind of question, the one about moving a workflow onto a team gateway, and it walks you through the decisions on [this page](/get-started/agent-plugin/team-rollout) against your own project.
+Skills are instructions your agent reads on its own, so you do not have to invoke them in most clients. `try-arcade` teaches it to turn a request like "reply to that thread" into the right sequence of tool calls across your apps. `scale-arcade` handles the other kind of question, the one about moving a workflow onto a team gateway, and it walks you through the decisions on [this page](/get-started/agent-plugin/team-rollout) against your own project. Codex does not expose these skills as slash commands. Choose `@Arcade` or `$arcade:try-arcade`, and use `$arcade:scale-arcade` for team-rollout guidance.
 
 ### Subagent
 
@@ -184,6 +190,12 @@ The `arcade-operator` subagent runs an app task in its own context and reports b
 The rule and hooks tell your agent that Arcade exists and when reaching for it is the right move, which is the difference between a tool that sits unused and one your agent actually picks up. Cursor IDE and Cloud Agents use an always-apply rule. Cursor CLI, Claude Code, Cowork, and Copilot CLI run the hooks their hosts support.
 
 The columns thin out because the [Agent Plugins](https://agent-plugins.org) 1.0 specification only makes skills and MCP servers portable. Commands, subagents, hooks, and editor rules are specific to each agent, so the plugin ships them where the agents that support them will find them.
+
+### How Arcade chooses a connection
+
+Arcade prefers the plugin's gateway. If it cannot complete a task for a reason other than sign-in or permission denial, your agent may use another already-authorized connection within the task you approved. It checks the intended app account before using another Arcade gateway. Sign-in and permission failures require your attention. The agent does not switch connections to get around them. The plugin instructs your agent to confirm the action and destination before changing something in an app.
+
+`arcade-operator` falls back only to another authorized Arcade gateway. Fallback to any other tool belongs to the parent agent.
 
 ## Try it
 
