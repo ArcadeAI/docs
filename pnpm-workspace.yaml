@@ -1,5 +1,8 @@
 settings:
-  # Block packages published within the last 7 days to guard against supply chain attacks
+  # Intended supply-chain guard: refuse versions published in the last 7 days (10080 minutes).
+  # packageManager is pnpm 10.11.0, which does not implement minimumReleaseAge (added in 10.16.0).
+  # This key documents the policy. It does not enforce it. Override pins are the control.
+  # This remediation does not upgrade pnpm.
   minimumReleaseAge: 10080
 
 overrides:
@@ -22,17 +25,24 @@ overrides:
   # Cap below 6 to stay within minimatch's ^5 range. 5.0.9 still matches the two High ranges.
   brace-expansion: ">=5.0.12 <6"
   # Force seroval (via @tanstack/router-core) past CVE-2026-104846 (GHSA-p6vx-979v-rg4c, fixed in 1.6.2)
-  # and CVE-2026-104845 (GHSA-jp82-f5mq-hwhp, fixed in 1.6.3). Pinned to 1.6.8 because 1.6.9 is still
-  # inside the 7-day minimumReleaseAge window. @tanstack/router-core@1.171.15 declares seroval ^1.5.4.
+  # and CVE-2026-104845 (GHSA-jp82-f5mq-hwhp, fixed in 1.6.3). 1.6.8 was selected manually.
+  # 1.6.9 (published 2026-10-09) is still inside the intended 7-day release-age window.
+  # pnpm 10.11.0 does not implement minimumReleaseAge, so the setting above would not hold 1.6.9 back.
+  # @tanstack/router-core@1.171.15 declares seroval ^1.5.4.
   seroval: "1.6.8"
-  # Keep seroval-plugins on the same 1.6.8 release. router-core imports seroval-plugins/web and declares
-  # ^1.5.4. 1.6.9 is inside the minimumReleaseAge window, so this is pinned rather than a range.
+  # Keep seroval-plugins on the same manually selected 1.6.8 release. router-core imports
+  # seroval-plugins/web and declares ^1.5.4. 1.6.9 is inside the intended 7-day window, and
+  # pnpm 10.11.0 would not age-gate a range, so this stays an exact pin.
   seroval-plugins: "1.6.8"
   # Force source-map-js (via postcss and @tailwindcss/node) past CVE-2026-93749 (GHSA-68fv-2mgg-jv7q, fixed in 1.2.2).
-  # Both parents declare ^1.2.1.
+  # Both parents declare ^1.2.1. 1.2.2 is the only published patched release. The exact pin is retained
+  # because pnpm 10.11.0 does not enforce minimumReleaseAge: a range would float to a newer publish
+  # the next time the lockfile is regenerated, including one still inside the intended 7-day window.
   source-map-js: "1.2.2"
   # Force sharp (optional dependency of next@16.3.8, range ^0.35.4) past GHSA-wq5f-xc86-pv6w
-  # (librsvg CVE-2026-96889, fixed in 0.35.5). Leave next itself on 16.3.8.
+  # (librsvg CVE-2026-96889, fixed in 0.35.5). 0.35.5 is the latest 0.35.x and stays inside Next's range.
+  # The exact pin is retained for the same reason as source-map-js: pnpm 10.11.0 will not age-gate a range.
+  # Leave next itself on 16.3.8.
   sharp: "0.35.5"
   # braces@3.0.3 (nextra and the direct fast-glob devDependency -> micromatch@4.0.8) has no published
   # fix for GHSA-vfj7-8cjw-p6xm / CVE-2026-93687. The advisory range is <=3.0.3 and first_patched_version
