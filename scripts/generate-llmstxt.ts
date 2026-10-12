@@ -2,9 +2,9 @@ import { execSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import Anthropic from "@anthropic-ai/sdk";
 import chalk from "chalk";
 import glob from "fast-glob";
-import OpenAI from "openai";
 import { getToolkitCanonicalPath } from "../lib/toolkit-static-params";
 import { resolveToolkitDataDir } from "../toolkit-docs-generator/src/shared/toolkit-data-dir";
 import type {
@@ -49,15 +49,18 @@ const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const METADATA_REGEX =
   /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
 const LINK_REGEX = /- \[([^\]]+)\]\(([^)]+)\):\s*(.+)$/gm;
+const LEADING_HEADING_LINE_REGEX = /^\s*#+[^\n]*(\n|$)/;
+const WHITESPACE_RUN_REGEX = /\s+/g;
 
 // Constants for content processing
 const MAX_CONTENT_LENGTH = 4000;
 const BATCH_DELAY_MS = 1000;
 const SHA_SHORT_LENGTH = 7;
+const PLACEHOLDER_DESCRIPTION = "Documentation page";
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// Initialize Anthropic client
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
 /**
@@ -237,7 +240,7 @@ type ToolkitData = Partial<
 
 /**
  * Builds a concise, deterministic description for a toolkit from its own
- * metadata (no OpenAI): its summary/description with markdown stripped, or a
+ * metadata (no Claude): its summary/description with markdown stripped, or a
  * label + tool-count fallback.
  */
 function buildToolkitDescription(data: ToolkitData): string {
@@ -269,7 +272,7 @@ function buildToolkitDescription(data: ToolkitData): string {
  * Discovers toolkit (integration) pages from generated toolkit data. These are
  * dynamic routes, so the MDX glob can't find them; build them straight from the
  * toolkit JSON, reusing the app's canonical path logic so URLs match the real
- * pages. Descriptions are templated (no OpenAI call).
+ * pages. Descriptions are templated (no Claude call).
  */
 async function discoverToolkitPages(): Promise<
   Array<PageMetadata & { title: string; description: string }>
@@ -344,7 +347,7 @@ async function discoverToolkitPages(): Promise<
 }
 
 /**
- * Summarizes a page using OpenAI
+ * Summarizes a page using Claude
  */
 async function summarizePage(
   page: PageMetadata
@@ -364,31 +367,35 @@ async function summarizePage(
 
     contentForSummary = contentForSummary.slice(0, MAX_CONTENT_LENGTH);
 
-    const response = await openai.chat.completions.create({
-      max_tokens: 50,
+    const response = await anthropic.messages.create({
+      max_tokens: 200,
       messages: [
-        {
-          content:
-            "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn.",
-          role: "system",
-        },
         {
           content: `Summarize this documentation page:\n\nTitle: ${title}\n\nContent:\n${contentForSummary}`,
           role: "user",
         },
       ],
-      model: "gpt-4o-mini",
+      model: "claude-haiku-4-5-20251001",
+      system:
+        "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn. Reply with one or two plain sentences only: no headings, no markdown, no line breaks.",
       temperature: 0.3,
     });
 
+    const text = response.content
+      .filter((block) => block.type === "text")
+      .map((block) => block.text)
+      .join("");
     const description =
-      response.choices[0]?.message?.content?.trim() || "Documentation page";
+      text
+        .replace(LEADING_HEADING_LINE_REGEX, "")
+        .replace(WHITESPACE_RUN_REGEX, " ")
+        .trim() || PLACEHOLDER_DESCRIPTION;
 
     return { description, title };
   } catch (error) {
     console.error(chalk.red(`✗ Error summarizing ${page.path}:`), error);
     return {
-      description: "Documentation page",
+      description: PLACEHOLDER_DESCRIPTION,
       title: extractPageTitle(page.content, page.path),
     };
   }
@@ -611,7 +618,11 @@ function partitionMdxPages(
     const { url } = page;
     const existingSummary = existingSummaries.get(url);
 
-    if (changedFiles.has(page.path) || !existingSummary) {
+    if (
+      changedFiles.has(page.path) ||
+      !existingSummary ||
+      existingSummary.description === PLACEHOLDER_DESCRIPTION
+    ) {
       pagesToSummarize.push(page);
       continue;
     }
@@ -634,7 +645,7 @@ function partitionMdxPages(
 }
 
 /**
- * Toolkit pages are rebuilt every run (no OpenAI). A change is any toolkit
+ * Toolkit pages are rebuilt every run (no Claude). A change is any toolkit
  * page that is new or whose title/description differs from the previous
  * output. URLs already covered by MDX pages are skipped: those win at merge
  * and their summaries are tracked by `partitionMdxPages`.
@@ -744,7 +755,7 @@ async function summarizePagesInBatches(
     return summarizedPages;
   }
 
-  console.log(chalk.blue("\n📝 Summarizing pages with OpenAI..."));
+  console.log(chalk.blue("\n📝 Summarizing pages with Claude..."));
   // Process in batches to avoid rate limits
   const batchSize = 5;
   for (let i = 0; i < pagesToSummarize.length; i += batchSize) {
@@ -771,7 +782,22 @@ async function summarizePagesInBatches(
   }
 
   console.log(chalk.green(`✓ Summarized ${pagesToSummarize.length} pages`));
+  const fallbacks = summarizedPages
+    .slice(pagesToKeep.length)
+    .filter((page) => page.description === PLACEHOLDER_DESCRIPTION).length;
+  if (fallbacks > 0) {
+    console.log(
+      `::warning::${fallbacks} of ${pagesToSummarize.length} page summaries fell back to "${PLACEHOLDER_DESCRIPTION}"; check the Claude summary errors above`
+    );
+  }
   return summarizedPages;
+}
+
+/**
+ * True when two llms.txt contents differ at most in their git-sha/date header
+ */
+function hasSameBody(a: string, b: string): boolean {
+  return a.replace(METADATA_REGEX, "") === b.replace(METADATA_REGEX, "");
 }
 
 /**
@@ -780,10 +806,10 @@ async function summarizePagesInBatches(
 async function main() {
   console.log(chalk.bold(chalk.blue("\n🚀 Generating llms.txt file...\n")));
 
-  // Check for OpenAI API key
-  if (!process.env.OPENAI_API_KEY) {
+  // Check for Anthropic API key
+  if (!process.env.ANTHROPIC_API_KEY) {
     console.error(
-      chalk.red("✗ OPENAI_API_KEY environment variable is required")
+      chalk.red("✗ ANTHROPIC_API_KEY environment variable is required")
     );
     process.exit(1);
   }
@@ -816,13 +842,13 @@ async function main() {
         toolkitPages
       );
 
-    // Step 3: Summarize changed/new pages using OpenAI
+    // Step 3: Summarize changed/new pages using Claude
     const summarizedPages = await summarizePagesInBatches(
       pagesToSummarize,
       pagesToKeep
     );
 
-    // Toolkit pages already have templated title/description (no OpenAI).
+    // Toolkit pages already have templated title/description (no Claude).
     // Deduplicate by URL: MDX-authored pages take precedence over toolkit JSON
     // pages so a static page (e.g. resources/integrations/search/tavily) that
     // appears in both sets doesn't emit two entries in llms.txt.
@@ -856,9 +882,13 @@ async function main() {
         };
     const content = generateLlmsTxt(sections, metadata);
 
-    // Step 6: Write to file
-    await fs.writeFile(OUTPUT_PATH, content, "utf-8");
-    if (hasChanges) {
+    // Step 6: Write to file, unless only the header would change (e.g. every
+    // placeholder retry failed again and nothing else moved)
+    const existingContent = await fs
+      .readFile(OUTPUT_PATH, "utf-8")
+      .catch(() => null);
+    if (existingContent === null || !hasSameBody(existingContent, content)) {
+      await fs.writeFile(OUTPUT_PATH, content, "utf-8");
       console.log(chalk.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
     } else {
       console.log(
@@ -884,4 +914,4 @@ if (
   main();
 }
 
-export { main as generateLlmsTxt };
+export { hasSameBody, main as generateLlmsTxt, summarizePagesInBatches };

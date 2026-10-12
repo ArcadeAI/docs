@@ -1,7 +1,7 @@
 {
   "id": "Pagerduty",
   "label": "PagerDuty",
-  "version": "1.0.0",
+  "version": "1.1.1",
   "description": "Arcade tools designed for LLMs to interact with PagerDuty",
   "metadata": {
     "category": "development",
@@ -32,7 +32,7 @@
     {
       "name": "GetEscalationPolicy",
       "qualifiedName": "Pagerduty.GetEscalationPolicy",
-      "fullyQualifiedName": "Pagerduty.GetEscalationPolicy@1.0.0",
+      "fullyQualifiedName": "Pagerduty.GetEscalationPolicy@1.1.1",
       "description": "Get a single escalation policy by ID.",
       "parameters": [
         {
@@ -92,7 +92,7 @@
     {
       "name": "GetIncident",
       "qualifiedName": "Pagerduty.GetIncident",
-      "fullyQualifiedName": "Pagerduty.GetIncident@1.0.0",
+      "fullyQualifiedName": "Pagerduty.GetIncident@1.1.1",
       "description": "Get a single incident by ID.",
       "parameters": [
         {
@@ -152,7 +152,7 @@
     {
       "name": "GetService",
       "qualifiedName": "Pagerduty.GetService",
-      "fullyQualifiedName": "Pagerduty.GetService@1.0.0",
+      "fullyQualifiedName": "Pagerduty.GetService@1.1.1",
       "description": "Get a single service by ID.",
       "parameters": [
         {
@@ -212,7 +212,7 @@
     {
       "name": "GetTeam",
       "qualifiedName": "Pagerduty.GetTeam",
-      "fullyQualifiedName": "Pagerduty.GetTeam@1.0.0",
+      "fullyQualifiedName": "Pagerduty.GetTeam@1.1.1",
       "description": "Get a single team by ID including members and linked resources.",
       "parameters": [
         {
@@ -230,22 +230,22 @@
         "scopes": [
           "teams.read",
           "users.read",
-          "escalation_policies.read",
-          "services.read"
+          "services.read",
+          "schedules.read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Team details."
+        "description": "Team details. When present, truncated names the collections (members, services, schedules) that had more items than the tool fetches, so those lists are incomplete."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Pagerduty.GetTeam",
         "parameters": {
           "team_id": {
-            "value": "P1A2B3C",
+            "value": "P1ABC23",
             "type": "string",
             "required": true
           }
@@ -275,7 +275,7 @@
     {
       "name": "ListEscalationPolicies",
       "qualifiedName": "Pagerduty.ListEscalationPolicies",
-      "fullyQualifiedName": "Pagerduty.ListEscalationPolicies@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ListEscalationPolicies@1.1.1",
       "description": "List escalation policies.",
       "parameters": [
         {
@@ -348,7 +348,7 @@
     {
       "name": "ListIncidents",
       "qualifiedName": "Pagerduty.ListIncidents",
-      "fullyQualifiedName": "Pagerduty.ListIncidents@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ListIncidents@1.1.1",
       "description": "List incidents with optional status, urgency, service, team, and time filters.",
       "parameters": [
         {
@@ -514,7 +514,7 @@
     {
       "name": "ListLogEntries",
       "qualifiedName": "Pagerduty.ListLogEntries",
-      "fullyQualifiedName": "Pagerduty.ListLogEntries@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ListLogEntries@1.1.1",
       "description": "List log entries (activity feed) showing recent incident events.\n\nReturns events like incident triggers, acknowledgments, escalations,\nand resolutions across the account.",
       "parameters": [
         {
@@ -656,7 +656,7 @@
     {
       "name": "ListOncalls",
       "qualifiedName": "Pagerduty.ListOncalls",
-      "fullyQualifiedName": "Pagerduty.ListOncalls@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ListOncalls@1.1.1",
       "description": "List on-call entries with optional filters.",
       "parameters": [
         {
@@ -731,9 +731,7 @@
         "providerId": "pagerduty",
         "providerType": "oauth2",
         "scopes": [
-          "oncalls.read",
-          "schedules.read",
-          "escalation_policies.read"
+          "oncalls.read"
         ]
       },
       "secrets": [],
@@ -748,24 +746,24 @@
         "parameters": {
           "schedule_ids": {
             "value": [
-              "P1ABC23",
-              "P4DEF56"
+              "P1234AB",
+              "P5678CD"
             ],
             "type": "array",
             "required": false
           },
           "escalation_policy_ids": {
             "value": [
-              "P7GHI89",
-              "PJKL012"
+              "PE1A2B3",
+              "PE4D5E6"
             ],
             "type": "array",
             "required": false
           },
           "team_ids": {
             "value": [
-              "PMN0345",
-              "PPQR678"
+              "T1A2B3C",
+              "T4D5E6F"
             ],
             "type": "array",
             "required": false
@@ -791,7 +789,7 @@
             "required": false
           },
           "until": {
-            "value": "2024-01-22T08:00:00Z",
+            "value": "2024-01-15T20:00:00Z",
             "type": "string",
             "required": false
           }
@@ -821,7 +819,7 @@
     {
       "name": "ListSchedules",
       "qualifiedName": "Pagerduty.ListSchedules",
-      "fullyQualifiedName": "Pagerduty.ListSchedules@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ListSchedules@1.1.1",
       "description": "List schedules.",
       "parameters": [
         {
@@ -853,8 +851,7 @@
         "providerId": "pagerduty",
         "providerType": "oauth2",
         "scopes": [
-          "schedules.read",
-          "oncalls.read"
+          "schedules.read"
         ]
       },
       "secrets": [],
@@ -908,7 +905,7 @@
     {
       "name": "ListServices",
       "qualifiedName": "Pagerduty.ListServices",
-      "fullyQualifiedName": "Pagerduty.ListServices@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ListServices@1.1.1",
       "description": "List services with optional name search.",
       "parameters": [
         {
@@ -994,7 +991,7 @@
     {
       "name": "ListTeams",
       "qualifiedName": "Pagerduty.ListTeams",
-      "fullyQualifiedName": "Pagerduty.ListTeams@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ListTeams@1.1.1",
       "description": "List teams.",
       "parameters": [
         {
@@ -1067,7 +1064,7 @@
     {
       "name": "ListUsers",
       "qualifiedName": "Pagerduty.ListUsers",
-      "fullyQualifiedName": "Pagerduty.ListUsers@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ListUsers@1.1.1",
       "description": "List users.",
       "parameters": [
         {
@@ -1091,7 +1088,8 @@
         "providerId": "pagerduty",
         "providerType": "oauth2",
         "scopes": [
-          "users.read"
+          "users.read",
+          "teams.read"
         ]
       },
       "secrets": [],
@@ -1140,7 +1138,7 @@
     {
       "name": "ReassignIncident",
       "qualifiedName": "Pagerduty.ReassignIncident",
-      "fullyQualifiedName": "Pagerduty.ReassignIncident@1.0.0",
+      "fullyQualifiedName": "Pagerduty.ReassignIncident@1.1.1",
       "description": "Reassign an incident to a specific user without changing its status.",
       "parameters": [
         {
@@ -1214,7 +1212,7 @@
     {
       "name": "SearchUsers",
       "qualifiedName": "Pagerduty.SearchUsers",
-      "fullyQualifiedName": "Pagerduty.SearchUsers@1.0.0",
+      "fullyQualifiedName": "Pagerduty.SearchUsers@1.1.1",
       "description": "Search users using local fuzzy matching on name/email.",
       "parameters": [
         {
@@ -1238,7 +1236,8 @@
         "providerId": "pagerduty",
         "providerType": "oauth2",
         "scopes": [
-          "users.read"
+          "users.read",
+          "teams.read"
         ]
       },
       "secrets": [],
@@ -1287,7 +1286,7 @@
     {
       "name": "UpdateIncidentStatus",
       "qualifiedName": "Pagerduty.UpdateIncidentStatus",
-      "fullyQualifiedName": "Pagerduty.UpdateIncidentStatus@1.0.0",
+      "fullyQualifiedName": "Pagerduty.UpdateIncidentStatus@1.1.1",
       "description": "Update an incident's status (acknowledge, resolve/close, or reopen).",
       "parameters": [
         {
@@ -1378,7 +1377,7 @@
     {
       "name": "Whoami",
       "qualifiedName": "Pagerduty.Whoami",
-      "fullyQualifiedName": "Pagerduty.Whoami@1.0.0",
+      "fullyQualifiedName": "Pagerduty.Whoami@1.1.1",
       "description": "Get the authenticated PagerDuty user's profile with contact and notification summaries.",
       "parameters": [],
       "auth": {
@@ -1447,6 +1446,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "07d907a3da0482c380fb3d61f72187694ccac5f75c2461ccefd4a96be4674274",
-  "generatedAt": "2026-09-24T21:02:13.790Z",
-  "summary": "## PagerDuty Toolkit\n\nArcade toolkit for LLMs to interact with PagerDuty, enabling incident management, on-call scheduling, team inspection, and account activity monitoring via natural language.\n\n## Capabilities\n\n- **Incident lifecycle**: Retrieve, list (with filters by status, urgency, service, team, and time), update status (acknowledge, resolve, reopen), and reassign incidents to specific users.\n- **On-call & scheduling**: List on-call entries and schedules to determine who is currently on call and inspect rotation configurations.\n- **Teams, users & services**: List and retrieve teams (including members and linked resources), users (with fuzzy search by name/email), and services (with name search).\n- **Escalation policies**: List and retrieve individual escalation policies by ID.\n- **Activity & audit**: Fetch the account-wide log entry feed showing triggers, acknowledgments, escalations, and resolutions.\n- **Identity**: Resolve the authenticated user's profile, including contact and notification summaries, via `Whoami`.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with **PagerDuty** as the identity provider. See the [PagerDuty auth provider docs](https://docs.arcade.dev/en/references/auth-providers/pagerduty) for configuration details."
+  "generatedAt": "2026-10-07T21:25:50.988Z",
+  "summary": "## PagerDuty Toolkit\n\nThe Arcade PagerDuty toolkit lets LLMs interact with PagerDuty to query and manage incidents, on-call schedules, teams, services, and escalation policies.\n\n## Capabilities\n\n- **Incident management** — retrieve, list (with filters for status, urgency, service, team, and time), update status (acknowledge, resolve, reopen), and reassign incidents to specific users.\n- **On-call & scheduling** — list on-call entries, schedules, and escalation policies; fetch individual policies by ID.\n- **Teams, users & services** — list and look up teams (with members and linked resources), users, and services; fuzzy-search users by name or email; retrieve individual records by ID.\n- **Activity feed** — list log entries showing incident triggers, acknowledgments, escalations, and resolutions across the account.\n- **Identity** — retrieve the authenticated user's PagerDuty profile including contact and notification summaries via `Whoami`.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **PagerDuty** Arcade auth provider. See the [PagerDuty provider docs](https://docs.arcade.dev/en/references/auth-providers/pagerduty) for configuration details."
 }

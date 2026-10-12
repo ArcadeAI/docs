@@ -1,7 +1,7 @@
 {
   "id": "Airtable",
   "label": "Airtable",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Arcade tools designed for LLMs to interact with Airtable bases and records",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "CreateRecords",
       "qualifiedName": "Airtable.CreateRecords",
-      "fullyQualifiedName": "Airtable.CreateRecords@1.0.0",
+      "fullyQualifiedName": "Airtable.CreateRecords@1.0.2",
       "description": "Create rows in an Airtable table, up to 10 per call.\n\nRepeating this call creates additional rows rather than replacing the first set.\n`count` and `requested_count` are equal on success, and `record_ids` names the rows.\nIf Airtable confirms fewer rows than requested, this call raises instead of reporting\nan incomplete success, because new rows do not have caller-known IDs to reconcile.",
       "parameters": [
         {
@@ -176,7 +176,7 @@
     {
       "name": "DeleteRecords",
       "qualifiedName": "Airtable.DeleteRecords",
-      "fullyQualifiedName": "Airtable.DeleteRecords@1.0.0",
+      "fullyQualifiedName": "Airtable.DeleteRecords@1.0.2",
       "description": "Delete rows from an Airtable table, up to 10 per call.\n\nDeleted rows are removed from the table and cannot be restored through the API.\n`record_ids` holds only the rows Airtable confirmed deleted. When `count` is lower than\n`requested_count`, `unconfirmed_record_ids` names the rest; re-read those before\ndeleting again.",
       "parameters": [
         {
@@ -267,7 +267,7 @@
     {
       "name": "GetBaseSchema",
       "qualifiedName": "Airtable.GetBaseSchema",
-      "fullyQualifiedName": "Airtable.GetBaseSchema@1.0.0",
+      "fullyQualifiedName": "Airtable.GetBaseSchema@1.0.2",
       "description": "Get the column names, column types and select options inside an Airtable base.\n\nRead this before writing records: writes key on column names, a select column\nrejects values outside the options reported here, and a linked-record column only\naccepts record IDs from the table it names.\n\n`views_included` is false whenever a table's views were not returned: include_views\nwas false, or they were left out to fit the response (then `truncated` is true). An\nempty views list with `views_included` true means the table has no saved views.\n\nNarrow with `table` when only one table matters. Airtable returns the whole base,\nso leaving it empty on a wide base costs the context the records themselves need.\n`truncated` says detail was left out to keep the response usable: descriptions and\nviews go first, then columns from the end of a table. Ask for one named table to give\nit the whole response; a table still too wide returns its leading columns in order,\nalways at least its first, whose select options may be cut from the end.",
       "parameters": [
         {
@@ -282,7 +282,7 @@
           "name": "table",
           "type": "string",
           "required": false,
-          "description": "Describe only this table, by name or a table ID starting with 'tbl'. Leave empty to describe every table in the base.",
+          "description": "Describe only this table, by name or a table ID starting with 'tbl'. Defaults to an empty string, which describes every table in the base.",
           "enum": null,
           "inferrable": true
         },
@@ -353,7 +353,7 @@
     {
       "name": "GetRecord",
       "qualifiedName": "Airtable.GetRecord",
-      "fullyQualifiedName": "Airtable.GetRecord@1.0.0",
+      "fullyQualifiedName": "Airtable.GetRecord@1.0.2",
       "description": "Get a single Airtable row by its record ID.\n\nReturns every column unless fields narrows it. Long cell values are clipped the same\nway they are in a listing, and `truncated` says when that happened. A record ID that\ndoes not exist, or was deleted, comes back as a refusal that does not distinguish\nthe two.",
       "parameters": [
         {
@@ -458,14 +458,14 @@
     {
       "name": "ListBases",
       "qualifiedName": "Airtable.ListBases",
-      "fullyQualifiedName": "Airtable.ListBases@1.0.0",
+      "fullyQualifiedName": "Airtable.ListBases@1.0.2",
       "description": "List the Airtable bases this authorization can reach, with permission levels.\n\nReturns bases in Airtable's default order.",
       "parameters": [
         {
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "description": "Continuation token from a previous call's next_cursor. Defaults to an empty string, which starts from the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -518,7 +518,7 @@
     {
       "name": "ListRecords",
       "qualifiedName": "Airtable.ListRecords",
-      "fullyQualifiedName": "Airtable.ListRecords@1.0.0",
+      "fullyQualifiedName": "Airtable.ListRecords@1.0.2",
       "description": "List rows from an Airtable table, optionally filtered, sorted and column-limited.\n\nUse this when the condition combines columns, or compares numbers or dates. To match\none column against plain text, use the record search tool instead.\n\nReturns records in the view's order, or Airtable's default order when no view is\ngiven, unless sort_field overrides it.",
       "parameters": [
         {
@@ -541,7 +541,7 @@
           "name": "view",
           "type": "string",
           "required": false,
-          "description": "Only return records visible in this view, by view name or view ID. Leave empty to read the whole table.",
+          "description": "Only return records visible in this view, by view name or view ID. Defaults to an empty string, which reads the whole table.",
           "enum": null,
           "inferrable": true
         },
@@ -549,7 +549,7 @@
           "name": "filter_formula",
           "type": "string",
           "required": false,
-          "description": "An Airtable formula that must evaluate true for a record to be returned, in the form {Column Name} = \"value\". Any literal value inside the formula must have its double quotes and backslashes escaped by the caller; this parameter is sent as written. To match one column against plain text, use the record search tool instead, which escapes the term for you. Leave empty for no filter.",
+          "description": "An Airtable formula that must evaluate true for a record to be returned, in the form {Column Name} = \"value\". Any literal value inside the formula must have its double quotes and backslashes escaped by the caller; this parameter is sent as written. To match one column against plain text, use the record search tool instead, which escapes the term for you. Defaults to an empty string, which applies no filter.",
           "enum": null,
           "inferrable": true
         },
@@ -566,7 +566,7 @@
           "name": "sort_field",
           "type": "string",
           "required": false,
-          "description": "Column name to sort by. Leave empty to use the table or view's own order.",
+          "description": "Column name to sort by. Defaults to an empty string, which keeps the table or view's own order.",
           "enum": null,
           "inferrable": true
         },
@@ -593,7 +593,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "description": "Continuation token from a previous call's next_cursor. Defaults to an empty string, which starts from the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -691,7 +691,7 @@
     {
       "name": "SearchRecords",
       "qualifiedName": "Airtable.SearchRecords",
-      "fullyQualifiedName": "Airtable.SearchRecords@1.0.0",
+      "fullyQualifiedName": "Airtable.SearchRecords@1.0.2",
       "description": "Find rows in an Airtable table whose column matches a search term.\n\nUse this to match one column against text: quotes and backslashes in the search term\nare escaped, so arbitrary text is safe to pass. Use the formula-based listing instead\nwhen the condition combines columns or compares numbers or dates.\n\nReturns records in the table's order unless sort_field is given.",
       "parameters": [
         {
@@ -738,7 +738,7 @@
           "name": "view",
           "type": "string",
           "required": false,
-          "description": "Only search records visible in this view, by view name or view ID. Leave empty to search the whole table.",
+          "description": "Only search records visible in this view, by view name or view ID. Defaults to an empty string, which searches the whole table.",
           "enum": null,
           "inferrable": true
         },
@@ -755,7 +755,7 @@
           "name": "sort_field",
           "type": "string",
           "required": false,
-          "description": "Column name to sort matches by. Leave empty to use the table's own order.",
+          "description": "Column name to sort matches by. Defaults to an empty string, which keeps the table's own order.",
           "enum": null,
           "inferrable": true
         },
@@ -782,7 +782,7 @@
           "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "Continuation token from a previous call's next_cursor. Leave empty to start from the first page.",
+          "description": "Continuation token from a previous call's next_cursor. Defaults to an empty string, which starts from the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -890,7 +890,7 @@
     {
       "name": "UpdateRecords",
       "qualifiedName": "Airtable.UpdateRecords",
-      "fullyQualifiedName": "Airtable.UpdateRecords@1.0.0",
+      "fullyQualifiedName": "Airtable.UpdateRecords@1.0.2",
       "description": "Change columns on existing Airtable rows, up to 10 per call.\n\nOnly the columns supplied are written; every other column is left untouched.\n`count` is how many rows Airtable confirmed. When it is lower than `requested_count`,\n`unconfirmed_record_ids` names the rest; re-read those before updating them again.",
       "parameters": [
         {
@@ -1020,7 +1020,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Airtable.WhoAmI",
-      "fullyQualifiedName": "Airtable.WhoAmI@1.0.0",
+      "fullyQualifiedName": "Airtable.WhoAmI@1.0.2",
       "description": "Get the Airtable account this authorization belongs to, and its granted scopes.\n\nUseful for confirming whose bases are being read or changed.",
       "parameters": [],
       "auth": {
@@ -1067,6 +1067,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-09-26T11:13:07.164Z",
-  "summary": "Arcade's Airtable toolkit lets LLMs read and write Airtable bases and records through the Airtable REST API.\n\n## Capabilities\n\n- **Discovery** — List accessible bases with permission levels; retrieve a base's full schema (tables, column names, types, select options, linked-record targets, and saved views) before writing to avoid type or value mismatches.\n- **Record retrieval** — Fetch a single record by ID or list records with optional filtering, sorting, column limiting, and view scoping; use the dedicated search tool for single-column text matching and the formula-based list tool for multi-column or numeric/date conditions.\n- **Record writes** — Create up to 10 rows per call (repeating appends, never replaces); update specific columns on existing rows without touching others (up to 10 per call); delete rows permanently with partial-confirmation handling via `unconfirmed_record_ids`.\n- **Auth introspection** — Confirm which Airtable account the current authorization belongs to and which scopes have been granted.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Airtable** provider. See the [Arcade Airtable auth provider docs](https://docs.arcade.dev/en/references/auth-providers/airtable) for setup details."
+  "generatedAt": "2026-10-07T21:24:45.436Z",
+  "summary": "Arcade's Airtable toolkit lets LLMs read and write Airtable bases and records through OAuth-authenticated API calls. It covers the full CRUD lifecycle — discovering bases and schemas, querying and searching rows, and creating, updating, or deleting them.\n\n## Capabilities\n\n- **Discovery**: List accessible bases (with permission levels) and retrieve full base schemas — column names, types, select options, linked-record targets, and views — before writing to avoid field-name or value mismatches.\n- **Reading records**: Fetch a single row by ID or list rows with optional filtering (formula-based), sorting, column selection, and view scoping; search rows by matching one column against arbitrary text.\n- **Writing records**: Create up to 10 rows per call (repeating adds more rows rather than replacing); update specific columns on existing rows without touching others; delete rows permanently (up to 10 per call).\n- **Partial-success handling**: All write and delete tools distinguish confirmed vs. unconfirmed record IDs and surface `count` / `requested_count` / `unconfirmed_record_ids` so callers can safely retry only the unresolved subset.\n- **Account introspection**: Resolve which Airtable account and granted scopes the current authorization represents.\n\n## OAuth\n\nThis toolkit uses **OAuth 2.0** via the Airtable provider. See the [Arcade Airtable auth provider docs](https://docs.arcade.dev/en/references/auth-providers/airtable) for setup details including required scopes and how to register an OAuth app in Airtable."
 }
