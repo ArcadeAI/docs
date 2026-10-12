@@ -326,14 +326,14 @@ arcade login --url https://arcade.example.com
 arcade deploy -e src/my_server/server.py
 ```
 
-`arcade login --url` signs the developer in and saves a context for your installation, and `arcade deploy` targets that context with no `--host` or other target argument. `arcade project set <project-id>` switches the project the context selects. An `arcade deploy` without a saved context exits with an error that names the `arcade login` command to run first, and uploads nothing. See [Arcade Deploy](/build/arcade-deploy) for the full developer guide and the [CLI cheat sheet](/references/cli-cheat-sheet) for every flag.
+`arcade login --url` signs the developer in and saves a context for your installation, and `arcade deploy` targets that context with no `--host` or other target argument. `arcade project set <project-id>` switches the project the context selects. An `arcade deploy` without a saved context exits with an error that names the `arcade login` command to run first, and uploads nothing, unless `ARCADE_URL` and `ARCADE_API_KEY` are set (see the CI deploys below). See [Arcade Deploy](/build/arcade-deploy) for the full developer guide and the [CLI cheat sheet](/references/cli-cheat-sheet) for every flag.
 
 - Deploy MCP servers built with the Arcade MCP framework for Python. The Arcade Engine refuses a bundle without a Python project definition or with a missing entrypoint.
 - The Arcade Engine refuses a changed redeploy while the previous one is still rolling out.
 - The Arcade Engine also refuses a bundle over its 16 MiB limit or one that unpacks past 256 MiB, and discards a virtual environment that the bundle ships. The 16 MiB limit caps the upload request, with a little headroom for encoding. Both limits are built into the Arcade Engine; no chart or configuration value changes them.
 - A redeploy that changes the server's code or secrets replaces the release under the same name and gateway URL. A redeploy of a running release that changes nothing is a no-op. Deploying again after a failed release rolls it out again, even if nothing changed.
 
-{/* TODO(DEP-371): Verified end to end against a self-hosted install with arcade-mcp 1.16.2 (monorepo #5382). Still unverified: that the first deploy needs no post-install onboarding (SVD1.R6 first_deploy_needs_no_post_install_onboarding, @wip pending DEP-248), and that the CLI or Engine refuses a server not built with the Arcade MCP framework (SVD1.R4 has only the accepted-server scenario). */}
+{/* TODO(DEP-371): The sign-in and deploy flow is covered on the owned test stack, with browser sign-in and the cluster stubbed and `arcade deploy --skip-validate` (monorepo #5382, arcade-mcp 1.16.2). Still unproven: that the first deploy needs no post-install onboarding (SVD1.R6 first_deploy_needs_no_post_install_onboarding, @wip pending DEP-248), and that the CLI or Engine refuses a server not built with the Arcade MCP framework (SVD1.R4 has only the accepted-server scenario). */}
 
 For non-interactive CI deploys, set `ARCADE_URL` and `ARCADE_API_KEY` (a project API key) in the CI environment, then run `arcade deploy`. With both set, the CLI skips the saved context and browser sign-in and uses `ARCADE_URL` directly as the Arcade Engine's URL, without discovery. This needs `arcade-mcp` 1.16.0 or later.
 
