@@ -1,0 +1,80 @@
+---
+title: "IPv6 and dual-stack"
+description: "Run the Helm-installed Arcade platform on a dual-stack Kubernetes cluster, and what doesn't support IPv6 yet"
+---
+
+import { Callout } from "nextra/components";
+
+# IPv6 and dual-stack
+
+This guide covers running the [Helm-installed Arcade platform](/operate/deploy/helm) on a dual-stack Kubernetes cluster, and lists the parts that still assume IPv4.
+
+<Callout type="warning">
+Dual-stack is the supported way to serve Arcade over IPv6. IPv6-only clusters aren't supported: several parts of the chart and the Arcade Engine still use IPv4-only addresses (see [What doesn't support IPv6](#what-doesnt-support-ipv6)).
+</Callout>
+
+## When you need it
+
+- Your cluster is dual-stack and clients reach Arcade over IPv6.
+- Your network policy requires Services to expose both an IPv4 and an IPv6 ClusterIP.
+
+## Values overlay
+
+```yaml
+global:
+  bindAddress: "::"
+  ipFamilyPolicy: PreferDualStack
+  ipFamilies: [IPv4, IPv6]
+```
+
+You usually need both halves:
+
+- `global.bindAddress` sets the address every Arcade pod's HTTP server listens on. The default `0.0.0.0` listens on IPv4 only. `::` listens on IPv6 and, on Linux, also accepts IPv4 through IPv4-mapped addresses. Brackets are stripped, so `[::]` works too.
+- `global.ipFamilyPolicy` and `global.ipFamilies` set `spec.ipFamilyPolicy` and `spec.ipFamilies` on every Service the chart renders: the Arcade Engine, coordinator, dashboard, Experience API, OpenFGA, and worker Services. `ipFamilyPolicy` takes `SingleStack`, `PreferDualStack`, or `RequireDualStack`. The first entry in `ipFamilies` picks the Service's primary ClusterIP. If you leave both unset, Services get your cluster's default, usually IPv4 single-stack.
+
+`PreferDualStack` falls back to a single family on a cluster that isn't dual-stack. Use `RequireDualStack` if you'd rather the install fail there.
+
+The OpenTelemetry collector subchart doesn't read `global.bindAddress`. Its receivers listen on `0.0.0.0` by default; override its receiver endpoints under `opentelemetry-collector.config` to `[::]:<port>` if it needs IPv6.
+
+If you enable `networkPolicy.enabled`, `networkPolicy.egressCIDRs` takes IPv6 ranges as well as IPv4 ranges; add the IPv6 ranges Arcade pods need to reach.
+
+## Verify it
+
+```bash
+# Each Service lists both families and two ClusterIPs
+kubectl -n arcade get svc -o custom-columns=NAME:.metadata.name,FAMILIES:.spec.ipFamilies,IPS:.spec.clusterIPs
+
+# Pods have an IPv6 address
+kubectl -n arcade get pods -o wide
+```
+
+Then reach the Arcade Engine's IPv6 ClusterIP from a pod in the cluster, for example `curl -g "http://[<ipv6-cluster-ip>]:9099/v1/health"`.
+
+## Common failures
+
+| Symptom | Likely cause and fix |
+| --- | --- |
+| Services have an IPv6 ClusterIP, but IPv6 connections are refused | `global.bindAddress` is still `0.0.0.0`. Set it to `::`. |
+| Services stay single-stack | `global.ipFamilyPolicy` is unset or `SingleStack`, or the cluster isn't dual-stack. Set `PreferDualStack`, and check the cluster's Service CIDRs. |
+| `RequireDualStack` Services fail to create | The cluster has no IPv6 Service CIDR. Enable dual-stack on the cluster, or use `PreferDualStack`. |
+| Deployed MCP servers can't reach an IPv6-only destination | Expected: their egress allows public IPv4 only. See below. |
+
+## What doesn't support IPv6
+
+These parts are IPv4-only today. Plan around them, especially for [Arcade Deploy](/build/arcade-deploy):
+
+- **Deployed MCP servers' outbound traffic.** The NetworkPolicy the Arcade Engine applies to each deployed server allows public egress only to `0.0.0.0/0`, minus private and cluster ranges. There's no IPv6 equivalent, so deployed servers can't reach IPv6 destinations.
+- **The private ranges deployed servers are blocked from** are IPv4 (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `100.64.0.0/10`, `169.254.0.0/16`). Don't put IPv6 ranges in `deployments.network.clusterCIDRs`: they're added as exceptions to the IPv4 `0.0.0.0/0` rule.
+- **External DNS for deployed servers.** With `deployments.network.dns.mode: external`, `deployments.network.dns.nameservers` must be public IPv4 addresses. The Arcade Engine refuses to start with an IPv6 nameserver.
+- **Deployed servers' Services** don't set `ipFamilyPolicy` or `ipFamilies`, so they get the cluster's default family. `global.ipFamilyPolicy` doesn't apply to them.
+
+The Arcade Engine's private-address block (for worker, MCP server, and OAuth URLs) does cover IPv6: it blocks `::1`, `::`, `fe80::/10`, `fc00::/7`, and `ff00::/8` alongside the IPv4 private ranges. IPv6 CIDRs and addresses work in `engine.ssrfAllowlist`.
+
+## What you own and what the chart handles
+
+| You | The chart |
+| --- | --- |
+| A dual-stack cluster: pod and Service CIDRs for both families, and a CNI that routes IPv6 | Bind address for Arcade pods (`global.bindAddress`) |
+| IPv6 load balancing, DNS `AAAA` records, and your Gateway or ingress listeners | `ipFamilyPolicy` and `ipFamilies` on every chart-rendered Service |
+| IPv6 settings for subcharts the chart doesn't template, such as the OpenTelemetry collector | IPv6 ranges you list in `networkPolicy.egressCIDRs` |
+| Keeping Arcade Deploy egress needs on IPv4 until IPv6 is supported | |

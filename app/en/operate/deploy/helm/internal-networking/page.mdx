@@ -1,0 +1,112 @@
+---
+title: "Internal networking"
+description: "Run a Helm-installed Arcade platform with no public ingress, behind an internal load balancer or Gateway API, and let it reach MCP servers on your internal network"
+---
+
+import { Callout } from "nextra/components";
+
+# Internal networking
+
+This guide covers running the [Helm-installed Arcade platform](/operate/deploy/helm) entirely inside your network: no public ingress, traffic through an internal load balancer or a Gateway API implementation you run, and MCP servers on internal addresses that the Arcade Engine is allowed to reach.
+
+## When you need it
+
+- Arcade must not be reachable from the internet, only from your corporate network or VPN.
+- Your cluster already exposes internal services through a Gateway API implementation or an internal ingress controller.
+- MCP servers or workers that Arcade calls live on private addresses (for example `10.0.0.0/8` or `*.corp.internal`).
+
+## Values overlay
+
+The chart doesn't create a load balancer itself. Every Arcade Service is `ClusterIP` by default (`engine.service.type`, `coordinator.service.type`, `dashboard.service.type`, `experienceApi.service.type`), and traffic enters through routes the chart renders for your own Gateway or ingress controller. Making that entry point internal is a property of the Gateway or ingress controller you attach to.
+
+### Gateway API (recommended)
+
+The chart renders `HTTPRoute`s only; you run the `Gateway`. Point the routes at an internal Gateway, one whose listener is backed by an internal load balancer in your environment:
+
+```yaml
+gateway:
+  enabled: true
+  parentRefs:
+    - name: arcade-internal-gw
+      namespace: gateway-system
+      sectionName: https
+  hostname: arcade.corp.example.com
+  protocol: https
+
+ingress:
+  enabled: false
+```
+
+With an empty `gateway.parentRefs`, no routes render. Services get hostnames from `gateway.subdomains.*` (`api`, `coordinator`, `dashboard`, `experienceApi`) under `gateway.hostname`. To attach one service to a different Gateway, set its own `gateway.<service>.parentRefs` (`engine`, `coordinator`, `dashboard`, `experienceApi`), which replaces the shared list for that service. If your controller only serves `v1beta1` routes, set `gateway.apiVersion`.
+
+### Legacy Ingress
+
+The `ingress.*` path is deprecated in favor of `gateway.*`, but still works. Use the private ingress class, the one backed by your internal load balancer:
+
+```yaml
+ingress:
+  enabled: true
+  type: private
+  privateIngressClass: nginx-internal
+  hostname: arcade.corp.example.com
+  privateAnnotations:
+    cert-manager.io/cluster-issuer: selfsigned-ca-issuer
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+```
+
+`ingress.type: private` (the default) selects `ingress.privateIngressClass` and `ingress.privateAnnotations`. With `ingress.selfSignedIssuer.enabled` (on by default), the chart also creates a self-signed ClusterIssuer named by `ingress.selfSignedIssuer.name`; replace it with your internal CA's issuer if you have one.
+
+### Let the Arcade Engine reach internal MCP servers
+
+By default the Arcade Engine refuses to dial private and internal addresses from user-created worker and MCP server URLs. List the destinations it may reach in `engine.ssrfAllowlist`:
+
+```yaml
+engine:
+  ssrfAllowlist:
+    - https://tools.corp.example.com:8443 # exact scheme + host [+ port]
+    - "*.corp.internal" # any subdomain of the suffix
+    - 10.20.0.0/16 # CIDR or bare IP, matched against the dialed IP
+```
+
+An empty list (the default) keeps the private-address block. `"*"` turns the check off for every destination; avoid it outside evaluation. Two related lists use the same entry shapes: `engine.authSsrfAllowlist` for tenant-created OAuth provider endpoints (empty by default), and `engine.pluginSsrfAllowlist` for plugin webhook hooks.
+
+<Callout type="warning">
+`engine.pluginSsrfAllowlist` defaults to `["*"]`, so plugin hooks can reach any internal address, cloud metadata included. On an internal network, narrow it to the hook endpoints you use, or set it to `[]` if no hook needs an internal address.
+</Callout>
+
+### Trust your internal proxy's forwarded headers
+
+If TLS ends at your load balancer or Gateway, the coordinator needs to trust its `X-Forwarded-*` headers to build `https://` sign-in redirects. Set `coordinator.proxyHeaders.forwardedAllowIps` to the pod or Service CIDR of your ingress controller or Gateway data plane (comma-separated); the default trusts only `127.0.0.1`.
+
+## Verify it
+
+```bash
+# Routes attached to your Gateway, and accepted by it
+kubectl -n arcade get httproute
+kubectl -n arcade describe httproute
+
+# No public ingress or LoadBalancer Services from the chart
+kubectl -n arcade get ingress,svc
+```
+
+Then, from a machine inside your network, open the dashboard hostname and sign in. From outside the network, the hostname shouldn't resolve or connect.
+
+## Common failures
+
+| Symptom | Likely cause and fix |
+| --- | --- |
+| No `HTTPRoute`s exist | `gateway.parentRefs` is empty or `gateway.enabled` is `false`. Set both. |
+| Routes exist but don't serve traffic | The Gateway doesn't accept them. Check the route's `status.parents` conditions, the listener's `sectionName`, and whether the Gateway allows routes from the release namespace. |
+| Sign-in redirects to `http://` or loops | TLS ends upstream and the coordinator doesn't trust the proxy. Set `coordinator.proxyHeaders.forwardedAllowIps`. |
+| A worker or MCP server on a private address fails to connect | The Arcade Engine's private-address block refused it. Add the host, wildcard, or CIDR to `engine.ssrfAllowlist`. For an OAuth provider endpoint, use `engine.authSsrfAllowlist`. |
+| Connections to an allowed internal address still time out with `networkPolicy.enabled: true` | The chart's egress policy for Arcade pods doesn't include that range. Add it to `networkPolicy.egressCIDRs`. |
+
+## What you own and what the chart handles
+
+| You | The chart |
+| --- | --- |
+| The `Gateway` or ingress controller, and the internal load balancer behind it | `HTTPRoute`s (or Ingress resources) for each Arcade service |
+| Internal DNS records for the hostnames | `ClusterIP` Services for every component |
+| TLS certificates or the issuer for your internal CA | A self-signed ClusterIssuer when `ingress.selfSignedIssuer.enabled` |
+| Firewalls and network reachability between your network and the cluster | The Arcade Engine's private-address block and the allowlists you configure |
+| Choosing which internal destinations Arcade may reach | Optional NetworkPolicies for Arcade pods (`networkPolicy.*`) |
