@@ -1,7 +1,7 @@
 {
   "id": "Clickhouse",
   "label": "Clickhouse",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Tools to query and explore a ClickHouse database",
   "metadata": {
     "category": "databases",
@@ -18,7 +18,7 @@
     {
       "name": "DiscoverDatabases",
       "qualifiedName": "Clickhouse.DiscoverDatabases",
-      "fullyQualifiedName": "Clickhouse.DiscoverDatabases@1.0.0",
+      "fullyQualifiedName": "Clickhouse.DiscoverDatabases@1.0.1",
       "description": "Discover all the databases in the ClickHouse database.",
       "parameters": [],
       "auth": null,
@@ -61,7 +61,7 @@
     {
       "name": "DiscoverSchemas",
       "qualifiedName": "Clickhouse.DiscoverSchemas",
-      "fullyQualifiedName": "Clickhouse.DiscoverSchemas@1.0.0",
+      "fullyQualifiedName": "Clickhouse.DiscoverSchemas@1.0.1",
       "description": "Discover all the schemas in the ClickHouse database.\n\nNote: ClickHouse doesn't have schemas like PostgreSQL, so this returns a default schema name.",
       "parameters": [],
       "auth": null,
@@ -104,7 +104,7 @@
     {
       "name": "DiscoverTables",
       "qualifiedName": "Clickhouse.DiscoverTables",
-      "fullyQualifiedName": "Clickhouse.DiscoverTables@1.0.0",
+      "fullyQualifiedName": "Clickhouse.DiscoverTables@1.0.1",
       "description": "Discover all the tables in the ClickHouse database when the list of tables is not known.\n\nALWAYS use this tool before any other tool that requires a table name.",
       "parameters": [],
       "auth": null,
@@ -147,8 +147,8 @@
     {
       "name": "ExecuteSelectQuery",
       "qualifiedName": "Clickhouse.ExecuteSelectQuery",
-      "fullyQualifiedName": "Clickhouse.ExecuteSelectQuery@1.0.0",
-      "description": "You have a connection to a ClickHouse database.\nExecute a SELECT query and return the results against the ClickHouse database.\nNo other queries (INSERT, UPDATE, DELETE, etc.) are allowed.\n\nONLY use this tool if you have already loaded the schema of the tables you need to query.\nUse the <GetTableSchema> tool to load the schema if not already known.\n\nThe final query will be constructed as follows:\nSELECT {select_query_part} FROM {from_clause} JOIN {join_clause}\nWHERE {where_clause} HAVING {having_clause}\nORDER BY {order_by_clause} LIMIT {limit} OFFSET {offset}\n\nWhen running queries, follow these rules which will help avoid errors:\n* Never \"select *\" from a table. Always select the columns you need.\n* Always order your results. Use the most important columns or the primary key if you're unsure.\n* Always use case-insensitive queries to match strings in the query.\n* Always trim strings in the query.\n* Prefer LIKE queries over direct string matches or regex queries.\n* Only join on columns that are indexed or the primary key. Do not join on arbitrary columns.\n* ClickHouse is case-sensitive, so be careful with table and column names.",
+      "fullyQualifiedName": "Clickhouse.ExecuteSelectQuery@1.0.1",
+      "description": "You have a connection to a ClickHouse database.\nExecute a SELECT query and return the results against the ClickHouse database.\nNo other queries (INSERT, UPDATE, DELETE, etc.) are allowed.\n\nONLY use this tool if you have already loaded the schema of the tables you need to query.\n\nThe final query will be constructed as follows:\nSELECT {select_query_part} FROM {from_clause} JOIN {join_clause}\nWHERE {where_clause} HAVING {having_clause}\nORDER BY {order_by_clause} LIMIT {limit} OFFSET {offset}\n\nWhen running queries, follow these rules which will help avoid errors:\n* Never \"select *\" from a table. Always select the columns you need.\n* Always order your results. Use the most important columns or the primary key if you're unsure.\n* Always use case-insensitive queries to match strings in the query.\n* Always trim strings in the query.\n* Prefer LIKE queries over direct string matches or regex queries.\n* Only join on columns that are indexed or the primary key. Do not join on arbitrary columns.\n* ClickHouse is case-sensitive, so be careful with table and column names.",
       "parameters": [
         {
           "name": "select_clause",
@@ -322,8 +322,8 @@
     {
       "name": "GetTableSchema",
       "qualifiedName": "Clickhouse.GetTableSchema",
-      "fullyQualifiedName": "Clickhouse.GetTableSchema@1.0.0",
-      "description": "Get the schema/structure of a ClickHouse table in the ClickHouse database\nwhen the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.\nAll tables in the query must be discovered first\nusing the <DiscoverTables> tool.",
+      "fullyQualifiedName": "Clickhouse.GetTableSchema@1.0.1",
+      "description": "Get the schema/structure of a ClickHouse table in the ClickHouse database\nwhen the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.\nAll tables in the query must be discovered first,\nso that their exact names are known.",
       "parameters": [
         {
           "name": "schema_name",
@@ -395,6 +395,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-09-24T21:01:55.079Z",
-  "summary": "## Arcade ClickHouse Toolkit\n\nProvides tools to connect to and explore a ClickHouse database, enabling agents to introspect structure and execute read-only queries.\n\n## Capabilities\n\n- **Schema discovery** — enumerate databases, retrieve a default schema representation, and list all tables in the connected instance.\n- **Table introspection** — fetch the full column structure of any named table before querying; required prior to any SELECT execution.\n- **Read-only query execution** — run parameterized SELECT queries with explicit support for joins, filtering, ordering, pagination (LIMIT/OFFSET), and HAVING clauses; INSERT/UPDATE/DELETE are blocked.\n\n## Secrets\n\n`CLICKHOUSE_DATABASE_CONNECTION_STRING` — A connection string that encodes the ClickHouse host, port, database name, username, and password needed to authenticate and connect to the instance. The format typically follows `clickhouse://[user]:[password]@[host]:[port]/[database]` (or the HTTP DSN variant your driver expects). Obtain this by noting your ClickHouse host and port (default native: `9000`, HTTP: `8123`), the target database, and a user account with at minimum `SELECT` privileges on the databases/tables you want to expose. You can create users and grant permissions via the ClickHouse `CREATE USER` / `GRANT` SQL commands or through your cloud provider's console (e.g., [ClickHouse Cloud console](https://clickhouse.com/docs/en/cloud/security/cloud-access-management)). For self-hosted instances, refer to the [ClickHouse access control documentation](https://clickhouse.com/docs/en/operations/access-rights).\n\nStore secrets in Arcade at https://api.arcade.dev/dashboard/auth/secrets and see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for configuration details."
+  "generatedAt": "2026-10-07T21:24:45.437Z",
+  "summary": "## ClickHouse Toolkit\n\nArcade toolkit for connecting to and querying a ClickHouse database — enabling schema discovery, table exploration, and read-only SQL execution.\n\n## Capabilities\n\n- **Database & schema discovery**: Enumerate all databases and retrieve schema information (returns a default schema name, since ClickHouse does not use PostgreSQL-style schemas).\n- **Table discovery**: List all tables in the database; intended to be run before any query so exact table names are known.\n- **Schema inspection**: Fetch the full structure of a specific table, including column names and types, before constructing queries.\n- **Read-only query execution**: Run `SELECT` statements with full support for joins, filtering, ordering, pagination (`LIMIT`/`OFFSET`), and aggregation (`HAVING`); no write operations (`INSERT`, `UPDATE`, `DELETE`) are permitted.\n\n## Secrets\n\n`CLICKHOUSE_DATABASE_CONNECTION_STRING` — A connection string that encodes all credentials and connection parameters needed to reach your ClickHouse instance. ClickHouse supports multiple connection string formats depending on the client driver; a typical format is `clickhouse://[user]:[password]@[host]:[port]/[database]` or the HTTP-equivalent `http://[user]:[password]@[host]:[port]/[database]`. Obtain the host, port, default database, and credentials from your ClickHouse deployment — for ClickHouse Cloud, find these on the **Connect** page of your service in the [ClickHouse Cloud console](https://clickhouse.cloud); for self-hosted instances, consult your administrator or your server's `config.xml` / `users.xml`. Ensure the user has at minimum `SELECT` privileges on the target database and tables.\n\nFor configuring secrets in Arcade, see [Tool Secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at https://api.arcade.dev/dashboard/auth/secrets."
 }

@@ -10,6 +10,9 @@ export const meta: MetaRecord = {
   "remote-mcp-servers": {
     title: "Remote MCP servers",
   },
+  "private-registry": {
+    title: "Private Registry",
+  },
   "contextual-access": {
     title: "Contextual Access",
   },

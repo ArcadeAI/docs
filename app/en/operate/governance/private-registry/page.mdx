@@ -1,0 +1,282 @@
+---
+title: "Private Registry"
+description: "Share a login-gated catalog of each MCP gateway with end users, and review the capability requests they send back"
+---
+
+import { Callout, Steps } from "nextra/components";
+import Image from "next/image";
+
+# Private Registry
+
+This page is for platform operators who roll out Arcade MCP gateways to end users. Every gateway has a Private Registry: an authentication-gated page at the gateway URL where end users see the apps and tools the gateway gives them, interact with tool capabilities, and ask for what's missing. Requests from every gateway in a project land in one dashboard **Inbox**, ranked by how many people want them. We recommend using the Registry when your rollout grows past a pilot group and you can no longer walk each person through what their agent can do.
+
+## How it works
+
+1. You share the gateway URL with end users.
+2. An end user opens that URL in a browser and signs in the same way their MCP client does.
+3. The Registry shows the apps and tools on that gateway, and which ones need the end user to log in first.
+4. When something is missing, the end user (or their agent) files a capability request, or upvotes a request someone already filed.
+5. You review requests in the dashboard **Inbox** and respond. End users on that gateway see your response.
+
+The Registry only shows what the gateway already exposes. Filing or responding to a request never adds tools to a gateway or changes who can reach them. You enable new tools separately, by [editing the gateway](/operate/governance/mcp-gateways/create-via-dashboard).
+
+## Share the Registry
+
+The Registry URL is the gateway URL:
+
+```text
+https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}
+```
+
+A browser that opens this URL gets the Registry. An MCP client that sends an MCP request to the same URL gets the gateway. You share one link for both.
+
+To get the link from the dashboard:
+
+<Steps>
+
+### Open the gateway list
+
+Go to [MCP gateways](https://api.arcade.dev/dashboard/mcp-gateways) in the Arcade dashboard.
+
+### Copy the Registry link
+
+Open the actions menu (**⋮**) on the gateway row. Under **Employee registry**, select **Copy registry link** to copy the URL, or **Open registry** to view it in a new tab.
+
+</Steps>
+
+### Sign-in by gateway auth type
+
+Every gateway has a Registry, whatever its [authentication mode](/operate/governance/mcp-gateways#authentication). The Registry detects which sign-in to show:
+
+| Gateway authentication | How end users sign in to the Registry |
+| --- | --- |
+| **Arcade Auth** | OAuth sign-in with their Arcade account, in a popup |
+| **User Source** | OAuth sign-in through your identity provider, in a popup |
+| **Arcade Headers** | A form that asks for an Arcade API key (`Authorization`) and a user ID (`Arcade-User-ID`) |
+
+<Callout type="warning">
+On an **Arcade Headers** gateway, the user ID is whatever the person signing in types. Arcade does not verify it, so Arcade attributes requests from that gateway to an unverified ID. Use **Arcade Auth** or a **User Source** when you need to know who asked.
+</Callout>
+
+### Security model
+
+- **No sign-in bypass.** Sharing the link does not grant access. Each visitor must sign in to the gateway before the Registry shows anything.
+- **One gateway per page.** The Registry browses only the gateway at its own URL. No query parameter or text field can point it at another server, so a shared link can't land someone on a look-alike sign-in screen.
+- **Tokens stay in memory.** The access token and any header values live only in the open tab. Arcade does not write them to `localStorage`, `sessionStorage`, or cookies. Reloading or closing the tab signs the end user out.
+- **Minimal browser storage.** The Registry stores only request IDs in `localStorage`: requests the end user upvoted from that browser, and resolved requests they've already seen.
+
+## What end users see
+
+After signing in, end users land on **Your Apps**: a card for each app on the gateway, with its tools and their login status. Tools that need the end user's own account show a lock, and their tool page has a **Connect** button. Tools that run without a login count as ready.
+
+<Image
+  alt="The Your Apps page with an app card for each app on the gateway, and locked tools in the sidebar"
+  className="mt-4 max-w-full"
+  src="/images/private-registry/registry-your-apps.png"
+  width={1200}
+  height={750}
+/>
+
+From there, end users can:
+
+- **Browse by app.** Select an app card or a sidebar entry to see that app's tools.
+- **Search.** The sidebar search filters the tool list. When nothing matches, the sidebar offers to request it.
+- **Try a tool.** Each tool page has a **Try** section that builds an input form from the tool's schema, runs the tool, and shows the result as a summary or raw JSON. The Registry warns before running a destructive tool.
+- **Log in to an app.** **Connect** starts that app's authorization for the end user, one tool at a time.
+- **Show Arcade tools.** By default the Registry hides Arcade's own agent tools, such as `Arcade_ListApps`. A switch at the top of the tool list shows them.
+
+The Registry lists every tool the gateway allows, even if the gateway uses tool recommendation for agents. It never shows tools from other gateways, including other gateways in the same project.
+
+## Capability requests
+
+A capability request is free text that describes something an end user needs and can't find, for example `Cloudflare`, `mcp.cloudflare.com`, or `create Jira tickets from Slack threads`. Each request belongs to the gateway where someone filed it.
+
+### Request from the Registry
+
+Requests live in a chat-style bubble in the bottom-right corner of the Registry. End users can also open it from:
+
+- **Missing an app? Request it**, next to the **Your Apps** heading
+- **Request it**, when a sidebar search matches nothing (the search text carries over)
+- **Request a tool**, in the sidebar footer
+
+As the end user types, the bubble lists similar requests so they can upvote an existing one instead of filing a duplicate. Sending opens a review step that shows the message, explains that it goes to an administrator, and explains that others on the gateway can see and upvote it. Only **Send to admin** files the request.
+
+The bubble shows every request on the gateway. A **Show only my requests** switch narrows the list to requests the end user filed or upvoted, and a badge counts their requests that you resolved since they last looked.
+
+<Image
+  alt="The request bubble opened from a sidebar search that matched nothing, with a similar existing request to upvote"
+  className="mt-4 max-w-full"
+  src="/images/private-registry/registry-request-bubble.png"
+  width={1200}
+  height={750}
+/>
+
+### Request through an agent
+
+Any MCP client connected to the gateway also gets four Registry tools, so agents can pass on a gap without the end user opening the Registry:
+
+| Tool | What it does |
+| --- | --- |
+| `Arcade_Registry_Get_Existing_Suggestions` | Search requests already filed on this gateway, most-supported first. Optional inputs: `query`, `limit`, `offset`, `showResolved`. |
+| `Arcade_Registry_Create_Suggestion` | File a new request. Input: `content`, up to 1,000 characters. |
+| `Arcade_Registry_Support_Suggestion` | Upvote an existing request. Input: `id` from the search results. |
+| `Arcade_Registry_Get_My_Suggestions` | List requests the signed-in end user filed, with their support count and, once resolved, `resolved_at` and `resolution_notes`. |
+
+The tool descriptions tell the agent to search before filing, upvote a match instead of duplicating it, and ask the end user before filing or upvoting. They also tell the agent that filing a request does not make the capability available.
+
+For example, an end user on a gateway without Cloudflare tools asks their agent to purge a cache:
+
+```text
+End user: Purge the Cloudflare cache for docs.example.com.
+Agent:    This gateway doesn't have Cloudflare tools. Someone already asked
+          for Cloudflare access, and 4 people support it. Want me to add
+          your support?
+End user: Yes.
+Agent:    Done. You can ask me later whether your admins have responded.
+```
+
+### Privacy and attribution
+
+- Search results never show who filed or upvoted a request. Only you, in the **Inbox**, see the submitter.
+- `Arcade_Registry_Get_My_Suggestions` returns only the signed-in end user's own requests on the current gateway.
+- Upvoting your own request, or upvoting the same request twice, succeeds without adding support.
+- Arcade records submitters by user ID within the gateway's identity scope: the User Source, Arcade accounts, or (for Arcade Headers) the project.
+
+## Turn capability requests on or off
+
+Capability requests are on for every gateway by default.
+
+**Per gateway.** The gateway form in the dashboard has a **Capability requests** checkbox. Clear it to remove the four Registry tools from every connection to that gateway, and to hide the request bubble in its Registry. Through the API, this is the gateway's `tool_filter.registry_suggestions.enabled` field.
+
+**Per connection.** Add a query parameter to the gateway URL in an MCP client's configuration:
+
+| URL parameter | Effect |
+| --- | --- |
+| `registry_suggestions=false` | Hides the four Registry tools on this connection |
+| `arcade_tools=false` | Hides all of Arcade's agent tools, including the Registry tools |
+
+```text
+https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}?registry_suggestions=false
+```
+
+A URL parameter can only turn the tools off. If the gateway setting is off, `registry_suggestions=true` does not bring them back. While the tools are off, calls to them fail with `tool not enabled for this gateway`.
+
+The Registry tools stay available whether or not the gateway uses tool recommendation, the same as `Arcade_ListApps`.
+
+## Review requests in the Inbox
+
+Select **Inbox** in the dashboard sidebar to see open requests from every gateway in the project, most-supported first. The sidebar badge counts open requests. To jump to one gateway's requests, open the gateway's actions menu (**⋮**) and select **View suggestions inbox**.
+
+Each row shows the request text, the gateway it came from, the number of supporters, and the submitter's user ID. Filter the list with:
+
+- **Search suggestions**: matches request text
+- **Gateways**: one or more gateways
+- **Users**: one or more submitters
+- **Include responded**: shows resolved requests too
+
+The filters are part of the page URL, so you can bookmark or share a filtered view.
+
+<Image
+  alt="The dashboard Inbox with requests from three gateways, including responded requests"
+  className="mt-4 max-w-full"
+  src="/images/private-registry/dashboard-inbox.png"
+  width={1200}
+  height={750}
+/>
+
+### Respond to a request
+
+<Steps>
+
+### Open the request
+
+Select **Respond** on an open request.
+
+### Write a response
+
+Add an optional response of up to 1,000 characters, for example `Added Cloudflare read-only tools to this gateway` or `Not approved for production data. Use the staging gateway instead.`
+
+<Image
+  alt="The Respond dialog with an optional response"
+  className="mt-4 max-w-full"
+  src="/images/private-registry/dashboard-respond-dialog.png"
+  width={485}
+  height={360}
+/>
+
+### Send it
+
+Select **Respond**. The request moves out of your open inbox. End users on that gateway see it as resolved, along with your response.
+
+</Steps>
+
+To read a response later, turn on **Include responded** and select **Response** on the row.
+
+Responding does not change the gateway. If you decide to add the capability, edit the gateway's tools or add a [remote MCP server](/operate/governance/remote-mcp-servers) as a separate step. Viewing the Inbox requires permission to read MCP gateways; responding requires permission to update them.
+
+## Use the API
+
+You can read and resolve requests with a project API key, for example to sync them into your own ticketing system.
+
+### List requests
+
+```bash
+curl -s "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/suggestions?gateway_id={gateway_id}&limit=25" \
+  -H "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+| Query parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `gateway_id` | string, repeatable | All gateways in the project | Only return requests from these gateways |
+| `query` | string | None | Case-insensitive search over request text |
+| `suggestion_submitter` | string, repeatable | None | Only return requests from these submitter user IDs |
+| `show_resolved` | boolean | `false` | Include resolved requests |
+| `limit` | integer | `50` | Page size |
+| `offset` | integer | `0` | Number of requests to skip |
+
+Repeat a parameter to match any of its values, for example `?gateway_id=gw_1&gateway_id=gw_2`. The most-supported requests come first.
+
+```json
+{
+  "items": [
+    {
+      "id": "2m4Q8vZcKx1yR7bT0nWfJdL3sHp",
+      "gateway_id": "8b0e4f2a-3c1d-4e5f-9a6b-7c8d9e0f1a2b",
+      "gateway_name": "Support team",
+      "submitter_user_source_id": "us_okta_prod",
+      "submitter_user_id": "jane@example.com",
+      "content": "Cloudflare",
+      "supporters": 4,
+      "created_at": "2026-10-01T15:04:05Z",
+      "resolved_at": null,
+      "resolution_notes": null
+    }
+  ],
+  "total_count": 1,
+  "limit": 25,
+  "offset": 0
+}
+```
+
+### Resolve a request
+
+```bash
+curl -s -X POST "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/gateways/{gateway_id}/suggestions/{suggestion_id}/resolve" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"resolution_notes": "Added Cloudflare read-only tools to this gateway"}'
+```
+
+`resolution_notes` is optional. Resolving is idempotent: resolving an already-resolved request keeps its original `resolved_at` and `resolution_notes`.
+
+## Current limitations
+
+- A request is either open or resolved. Requests have no separate accepted or declined states, so put your decision in the response.
+- You can't reopen a resolved request.
+- The Registry shows only the tools already on the gateway. It does not list Arcade tools you could add.
+
+## Next steps
+
+- [Create an MCP gateway](/operate/governance/mcp-gateways/create-via-dashboard) to share with end users
+- [Set up a User Source](/operate/identity/user-sources) so Arcade attributes requests to verified identities
+- [Add remote MCP servers](/operate/governance/remote-mcp-servers) to fill the gaps end users report

@@ -24,8 +24,9 @@ export interface PublicCatalogApiSourceConfig {
   readonly toolsPageSize?: number;
 }
 
+// The public catalog rejects any `limit` above 1,000 with a 400.
 const DEFAULT_CATALOG_PAGE_SIZE = 100;
-const DEFAULT_TOOLS_PAGE_SIZE = 25_000;
+const DEFAULT_TOOLS_PAGE_SIZE = 1000;
 
 const buildEndpointUrl = (baseUrl: string, path: string): string =>
   `${baseUrl.replace(/\/+$/, "")}/${path}`;

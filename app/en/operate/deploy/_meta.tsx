@@ -22,6 +22,9 @@ const meta: MetaRecord = {
   helm: {
     title: "Self-host with Helm",
   },
+  worker: {
+    title: "Arcade Worker",
+  },
   "on-prem": {
     title: "Hybrid MCP servers",
   },

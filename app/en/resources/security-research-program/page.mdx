@@ -28,6 +28,8 @@ We're interested in reports about:
 - Logic flaws affecting agent behavior
 - Issues that could compromise user data or agent integrity
 
+A finding that shows one Arcade organization reading or changing another organization's tokens, secrets, or data is in scope. Send that.
+
 ## Reporting process
 
 Please email <ContactEmail domain="arcade.dev" user="security">our security team</ContactEmail> with:
@@ -51,3 +53,70 @@ We'll acknowledge receipt within 72 hours and aim to provide an initial assessme
 While we're a small team with limited resources, we appreciate the effort researchers put into improving our security. We'll credit researchers (with permission) in our security updates and may provide modest rewards for significant findings on a case-by-case basis.
 
 For questions about this program, please <ContactEmail domain="arcade.dev" user="security">contact our security team</ContactEmail>.
+
+## Common questions
+
+Researchers most often ask about mail authentication, DNS, and OAuth security details that relate to the Arcade data model.
+
+### Arcade's DNS settings are intentional
+
+Arcade manages email authentication with SPF, DKIM, and DMARC. The SPF record ends in `~all` (SoftFail), while DMARC uses `p=reject`. Receivers reject unaligned mail that claims to come from `arcade.dev`. Valimail manages this configuration.
+
+Reports that only recommend `-all`, DNSSEC, RRSIG, or CAA describe hardening choices, not vulnerabilities. Include a demonstrated security impact if you believe the configuration is exploitable.
+
+### Public discovery documents are public
+
+`auth.arcade.dev/.well-known/openid-configuration` publishes standard OpenID metadata for clients. Its contents are not sensitive, and Arcade does not support dynamic client registration.
+
+### A project API key is an administrator credential
+
+Arcade Cloud isolates data by organization and by [project](/resources/glossary#project). Organizations and projects are trust boundaries. Project administrators and anyone with an API key share access to that project's users, brokered tokens, and secrets. They can also start authorization for those users. Invite only people you trust, and join projects you trust.
+
+A project API key is a service-level credential It can start authorization and read tokens for that project's users by design to support offline and background workloads. A report that uses a project key to read data from the same project describes expected behavior.
+
+### Projects scope user IDs
+
+`user_id` is an opaque, authenticated-caller-supplied string in Arcade's data model. The same user ID value can appear in many projects, but user IDs are strictly local to each project. Using `ada@example.com` in one project does not grant access to records for `ada@example.com` in another project.
+
+### User-facing (browser) OAuth flows require verification
+
+To complete authorization, the [user verifier](/build/user-facing-agents/secure-auth-production) must use an API key from the project that started the flow and submit the same `user_id` supplied at the start. The user ID does not travel through the browser redirect.
+
+### A custom auth provider replaces the platform provider for your tenant
+
+You can add an auth provider whose ID matches a platform provider, such as `google`. Arcade then uses that OAuth client for authorization in your project, and its client ID appears in the authorization URL. The identity provider still validates the client and redirect URI.
+
+A broken provider configuration can disrupt that project's tools. This reflects expected administrator access, not an outage.
+
+### Default OAuth apps follow project membership
+
+Arcade's default OAuth apps work with the [Arcade user verifier](/build/user-facing-agents/secure-auth-production#use-the-arcade-user-verifier) only. The verifier asks the end-user to sign in to an Arcade Cloud account that is a member of the project.
+
+
+For a multi-user production app, add your own OAuth client and a [custom user verifier](/build/user-facing-agents/secure-auth-production#build-a-custom-user-verifier). Default, Arcade.dev-branded apps are **only** meant for development, testing, and personal use.
+
+Read [Confused deputy attacks on OAuth](https://www.arcade.dev/blog/arcade-proactively-addressed-coat-vulnerability-in-agentic-ai/) for background on OAuth-related account takeover and Arcade's controls.
+
+### Secret names are public
+
+Platform secret names are public so customers can replace defaults with their own values. Knowing a secret (key) name does not expose the secret's value.
+
+An API response that returns secret values, or another organization's secret material, is a different finding. Send that.
+
+### Health-check tokens authenticate the health check request only
+
+Worker health checks use a credential limited to that check. Steady-state calls use a secret for the worker deployment.
+
+Don't submit reports describing the health check request as weakly-authenticated; this is by design. Include evidence that the token succeeds on a real worker request, reaches another organization's data, or is a demonstrable SSRF leak.
+
+### Plan limits are soft
+
+Arcade Cloud uses soft plan limits and allows billing overages. Exceeding a listed limit does not indicate an authorization bypass.
+
+### Archived examples
+
+Archived example repositories are samples. A static scan of an archived repo, with no impact on Arcade Cloud, is outside this program.
+
+### Files on a developer laptop
+
+The Arcade CLI stores credentials on the machine where it runs. A local file-permission finding must expose another user's data or affect Arcade Cloud to fit this program.

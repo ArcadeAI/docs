@@ -2,6 +2,13 @@ name: Update design system dependency
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: >-
+          Exact @arcadeai/design-system version to install. The monorepo publish
+          workflow passes the version it just published. Leave empty for latest.
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -29,8 +36,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Update @arcadeai/design-system to latest
-        run: pnpm install @arcadeai/design-system@latest
+      # The monorepo dispatches this workflow seconds after `bun publish`
+      # returns, but the npm registry takes several minutes to serve the new
+      # version. Resolving `latest` right away picks up the previous release,
+      # so when a version is given, wait until npm serves it and install it.
+      - name: Wait for requested version on npm
+        if: inputs.version != ''
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Invalid version input: $VERSION"
+            exit 1
+          fi
+          for attempt in $(seq 1 20); do
+            if [ "$(npm view "@arcadeai/design-system@$VERSION" version --prefer-online 2>/dev/null)" = "$VERSION" ]; then
+              echo "@arcadeai/design-system@$VERSION is available on npm"
+              exit 0
+            fi
+            echo "Attempt $attempt: $VERSION not on npm yet, retrying in 30s"
+            sleep 30
+          done
+          echo "::error::@arcadeai/design-system@$VERSION did not appear on npm within 10 minutes"
+          exit 1
+
+      - name: Update @arcadeai/design-system
+        env:
+          VERSION: ${{ inputs.version || 'latest' }}
+        run: pnpm install "@arcadeai/design-system@$VERSION"
 
       - name: Check for changes
         id: check-changes

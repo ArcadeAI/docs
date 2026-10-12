@@ -162,6 +162,15 @@ describe("fetchAllPages", () => {
       fetchAllPages("https://api.example/v1/public/tools", fetchFn)
     ).rejects.toThrow(/read 1 of 5/);
   });
+
+  it("includes the response body, capped at 500 characters, when the API rejects a page", async () => {
+    const fetchFn = (async () =>
+      new Response("x".repeat(2000), { status: 400 })) as typeof fetch;
+
+    await expect(
+      fetchAllPages("https://api.example/v1/public/tools", fetchFn)
+    ).rejects.toThrow(/error 400 from .*: x{500}$/);
+  });
 });
 
 type PublicToolRequirements = Parameters<
@@ -260,6 +269,25 @@ describe("groupToolsByToolkit", () => {
 });
 
 describe("PublicCatalogApiSource", () => {
+  it("requests tools within the public catalog's 1,000 limit cap", async () => {
+    const limits: (string | null)[] = [];
+    const serve = stubCatalogFetch([githubCatalogEntry], [githubTool]);
+    const fetchFn = ((input: string | URL | Request) => {
+      const url = new URL(input.toString());
+      if (url.pathname.endsWith("/public/tools")) {
+        limits.push(url.searchParams.get("limit"));
+      }
+      return serve(input);
+    }) as typeof fetch;
+
+    await new PublicCatalogApiSource({
+      baseUrl: "https://api.example",
+      fetchFn,
+    }).fetchAllTools();
+
+    expect(limits).toEqual(["1000"]);
+  });
+
   it("loads catalog and tools once, then filters by toolkit", async () => {
     let catalogCalls = 0;
     let toolsCalls = 0;
