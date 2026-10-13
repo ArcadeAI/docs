@@ -34,11 +34,10 @@ const CHANGELOG_PATH = path.join(
   __dirname,
   "..",
   "..",
-  "app",
-  "en",
+  "content",
+  "docs",
   "references",
-  "changelog",
-  "page.mdx",
+  "changelog.mdx",
 );
 
 // --- Types ---
