@@ -37,11 +37,11 @@ export const EarlyAccessRegistrySurvey = () => {
       >
         Early Access Registry Survey
       </h2>
-      {completed ? (
+      {completed && (
         <p className="mb-4 text-gray-500 text-sm">
           Thank you! We will be in touch soon.
         </p>
-      ) : null}
+      )}
       {!completed && (
         <DynamicSurvey
           onBack={handleSurveyBack}

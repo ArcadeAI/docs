@@ -14,15 +14,15 @@ import { visit } from "unist-util-visit";
 
 type TokenType = "word" | "space" | "punctuation";
 
-interface Token {
+type Token = {
   type: TokenType;
   value: string;
-}
+};
 
-interface Literal {
+type Literal = {
   type: string;
   value: string;
-}
+};
 
 const WORD_CHAR = /[\p{L}\p{N}\p{M}]/u;
 const SPACE_CHAR = /\s/u;
@@ -87,24 +87,34 @@ function educateQuote(tokens: Token[], index: number): void {
     next.value = OPENING[next.value];
   } else if (next && DECADE.test(next.value)) {
     node.value = CLOSING[value];
-  } else if (previous && SENTENCE_END.has(previous.value)) {
+  } else {
+    node.value = closesByContext(value, previous, next)
+      ? CLOSING[value]
+      : OPENING[value];
+  }
+}
+
+/** The rules that look at the token before the quote, in their original order. */
+function closesByContext(
+  value: '"' | "'",
+  previous: Token | undefined,
+  next: Token | undefined
+): boolean {
+  if (previous && SENTENCE_END.has(previous.value)) {
     // A quote right after sentence-ending punctuation closes it. retext sees
     // this through sentence boundaries; the joined text has none where a
     // table cell or heading follows the paragraph.
-    node.value = CLOSING[value];
-  } else if (previous && previous.type !== "word" && next?.type === "word") {
-    node.value = OPENING[value];
-  } else if (previous && previous.type === "word") {
-    node.value = CLOSING[value];
-  } else if (
-    !next ||
-    next.type === "space" ||
-    (value === "'" && next.value === "s")
-  ) {
-    node.value = CLOSING[value];
-  } else {
-    node.value = OPENING[value];
+    return true;
   }
+  if (previous && previous.type !== "word" && next?.type === "word") {
+    return false;
+  }
+  if (previous && previous.type === "word") {
+    return true;
+  }
+  return (
+    !next || next.type === "space" || (value === "'" && next.value === "s")
+  );
 }
 
 export function educateQuotes(text: string): string {

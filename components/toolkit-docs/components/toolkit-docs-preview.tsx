@@ -2,10 +2,10 @@ import { readToolkitData } from "@/lib/toolkit-data";
 import type { ToolkitData } from "../types";
 import { ToolkitPage } from "./toolkit-page";
 
-interface ToolkitDocsPreviewProps {
-  fallbackData?: ToolkitData;
+type ToolkitDocsPreviewProps = {
   toolkitId: string;
-}
+  fallbackData?: ToolkitData;
+};
 
 export async function ToolkitDocsPreview({
   toolkitId,

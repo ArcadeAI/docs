@@ -85,8 +85,7 @@ const parseMarkdownDocument = (
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Curation frontmatter is invalid (${sourcePath}): ${message}`,
-      { cause: error }
+      `Curation frontmatter is invalid (${sourcePath}): ${message}`
     );
   }
 
@@ -104,8 +103,7 @@ const validateMdx = async (body: string, sourcePath: string): Promise<void> => {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Curation document has invalid MDX (${sourcePath}): ${message}`,
-      { cause: error }
+      `Curation document has invalid MDX (${sourcePath}): ${message}`
     );
   }
 };
@@ -184,9 +182,9 @@ const parsePage = async (
   }
   await validateMdx(document.body, sourcePath);
   return {
+    type: parsed.data.type,
     content: document.body,
     relativePath,
-    type: parsed.data.type,
   };
 };
 
@@ -295,8 +293,8 @@ const loadToolkitDirectory = async (
   );
 
   return CustomSectionsSchema.parse({
-    customImports,
     documentationChunks,
+    customImports,
     subPages,
     toolChunks,
   });
@@ -319,8 +317,7 @@ const assertCurationRoot = async (rootPath: string): Promise<void> => {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       throw new Error(
-        `Configured curation directory does not exist: ${rootPath}`,
-        { cause: error }
+        `Configured curation directory does not exist: ${rootPath}`
       );
     }
     throw error;
@@ -392,16 +389,16 @@ export const compileCurationDirectory = async (
   for (const toolkitId of toolkitIds) {
     try {
       results.push({
+        toolkitId,
         sections: await loadToolkitDirectory(
           join(rootPath, toolkitId),
           toolkitId
         ),
-        toolkitId,
       });
     } catch (error) {
       results.push({
-        error: error instanceof Error ? error : new Error(String(error)),
         toolkitId,
+        error: error instanceof Error ? error : new Error(String(error)),
       });
     }
   }

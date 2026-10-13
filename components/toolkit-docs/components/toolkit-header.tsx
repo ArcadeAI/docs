@@ -24,7 +24,7 @@ function ToolkitBadges({
   isByoc: boolean;
   isPro: boolean;
 }) {
-  const typeInfo = type === "auth" ? null : TYPE_CONFIG[type];
+  const typeInfo = type !== "auth" ? TYPE_CONFIG[type] : null;
   const TypeIcon = typeInfo?.icon;
 
   const showBadges = isPro || isByoc || typeInfo;
@@ -35,7 +35,7 @@ function ToolkitBadges({
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-1.5">
-      {typeInfo && TypeIcon ? (
+      {typeInfo && TypeIcon && (
         <Badge
           className="gap-1 border-gray-300 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
           variant="outline"
@@ -43,9 +43,9 @@ function ToolkitBadges({
           <TypeIcon className={`h-3.5 w-3.5 ${typeInfo.color}`} />
           {typeInfo.label}
         </Badge>
-      ) : null}
-      {isByoc ? <ByocBadge className="gap-1.5 rounded-md" /> : null}
-      {isPro ? <ProBadge className="gap-1.5 rounded-md" /> : null}
+      )}
+      {isByoc && <ByocBadge className="gap-1.5 rounded-md" />}
+      {isPro && <ProBadge className="gap-1.5 rounded-md" />}
     </div>
   );
 }
@@ -80,7 +80,7 @@ export function ToolkitHeader({
   toolStats,
 }: ToolkitHeaderProps): React.ReactElement {
   // Icon comes from the JSON metadata - the source of truth
-  const { iconUrl } = metadata;
+  const iconUrl = metadata.iconUrl;
 
   // Determine auth display
   const authProviderName = auth?.providerId
@@ -119,7 +119,7 @@ export function ToolkitHeader({
       return (
         <>
           {AUTH_TYPE_LABELS.oauth2}
-          {authProviderLink ? <> via the {authProviderLink}</> : null}
+          {authProviderLink && <> via the {authProviderLink}</>}
         </>
       );
     }
@@ -130,7 +130,7 @@ export function ToolkitHeader({
       return (
         <>
           {AUTH_TYPE_LABELS.mixed}
-          {authProviderLink ? <> via the {authProviderLink}</> : null}{" "}
+          {authProviderLink && <> via the {authProviderLink}</>}{" "}
           {AUTH_TYPE_LABELS.mixedSuffix}
         </>
       );
@@ -157,11 +157,11 @@ export function ToolkitHeader({
           />
 
           {/* Description */}
-          {description ? (
+          {description && (
             <p className="text-base text-foreground leading-relaxed">
               {description}
             </p>
-          ) : null}
+          )}
 
           {/* Info Grid */}
           <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
@@ -172,14 +172,14 @@ export function ToolkitHeader({
             </div>
 
             {/* Version */}
-            {version ? (
+            {version && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Version:</span>
                 <code className="font-mono text-foreground text-xs">
                   {version}
                 </code>
               </div>
-            ) : null}
+            )}
 
             {/* Auth info */}
             <div className="flex items-start gap-2 sm:col-span-2">
@@ -189,7 +189,7 @@ export function ToolkitHeader({
           </div>
 
           {/* Tool Stats */}
-          {toolStats ? (
+          {toolStats && (
             <div className="flex flex-wrap items-center gap-4 pt-3 text-sm">
               {/* Total tools */}
               <div className="flex items-center gap-2 text-muted-foreground">
@@ -211,9 +211,11 @@ export function ToolkitHeader({
                 </div>
               )}
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </div>
   );
 }
+
+export default ToolkitHeader;

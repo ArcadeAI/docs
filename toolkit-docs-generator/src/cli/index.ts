@@ -4,7 +4,7 @@
  * Toolkit Docs Generator CLI
  *
  * Entry point for the CLI application.
- * Run with: bunx tsx src/cli/index.ts <command>
+ * Run with: npx toolkit-docs-generator <command>
  *
  * Input format for providers:
  *   --providers "Github:1.0.0,Slack:2.1.0"
@@ -143,9 +143,9 @@ const getDefaultLogDir = (): string =>
   resolve(getDefaultVerificationDir(), "logs");
 
 const buildLogPaths = (logDir: string) => ({
+  runLogPath: join(logDir, "runs.log"),
   changeLogPath: join(logDir, "changes.log"),
   failedToolsPath: join(logDir, "failed-tools.json"),
-  runLogPath: join(logDir, "runs.log"),
 });
 
 const createMetadataSource = async (options: {
@@ -223,7 +223,7 @@ const filterProvidersByMetadataPresence = async (
     }
   }
 
-  return { excluded, included };
+  return { included, excluded };
 };
 
 const buildChangeLogDetails = (
@@ -336,6 +336,7 @@ const resolveLlmConfig = (
     : undefined;
 
   const client = createLlmClient({
+    provider,
     config: {
       apiKey,
       ...(options.llmBaseUrl ? { baseUrl: options.llmBaseUrl } : {}),
@@ -344,18 +345,17 @@ const resolveLlmConfig = (
         onRetry,
       },
     },
-    provider,
   });
 
   return {
     client,
     model,
-    ...(options.llmTemperature === undefined
-      ? {}
-      : { temperature: options.llmTemperature }),
-    ...(options.llmMaxTokens === undefined
-      ? {}
-      : { maxTokens: options.llmMaxTokens }),
+    ...(options.llmTemperature !== undefined
+      ? { temperature: options.llmTemperature }
+      : {}),
+    ...(options.llmMaxTokens !== undefined
+      ? { maxTokens: options.llmMaxTokens }
+      : {}),
     ...(options.llmSystemPrompt
       ? { systemPrompt: options.llmSystemPrompt }
       : {}),
@@ -363,13 +363,13 @@ const resolveLlmConfig = (
 };
 
 interface SecretEditorCliOptions {
+  llmEditorProvider?: string;
+  llmEditorModel?: string;
   llmEditorApiKey?: string;
   llmEditorBaseUrl?: string;
-  llmEditorMaxRetries?: number;
-  llmEditorMaxTokens?: number;
-  llmEditorModel?: string;
-  llmEditorProvider?: string;
   llmEditorTemperature?: number;
+  llmEditorMaxTokens?: number;
+  llmEditorMaxRetries?: number;
   skipSecretCoherence?: boolean;
 }
 
@@ -457,6 +457,7 @@ const resolveSecretEditGenerator = (
     : undefined;
 
   const client = createLlmClient({
+    provider,
     config: {
       apiKey,
       ...(options.llmEditorBaseUrl
@@ -467,15 +468,14 @@ const resolveSecretEditGenerator = (
         onRetry,
       },
     },
-    provider,
   });
 
   return new LlmSecretEditGenerator({
     client,
     model,
-    ...(options.llmEditorTemperature === undefined
-      ? {}
-      : { temperature: options.llmEditorTemperature }),
+    ...(options.llmEditorTemperature !== undefined
+      ? { temperature: options.llmEditorTemperature }
+      : {}),
     maxTokens: options.llmEditorMaxTokens ?? DEFAULT_EDITOR_MAX_TOKENS,
   });
 };
@@ -489,9 +489,9 @@ const resolveSecretEditGenerator = (
 const DEFAULT_PUBLIC_CATALOG_URL = "https://experience.arcade.dev/api";
 
 interface ToolkitDataSourceOptions {
-  apiPageSize?: number;
   apiSource?: string;
   apiUrl?: string;
+  apiPageSize?: number;
 }
 
 const resolvePublicCatalogConfig = (options: ToolkitDataSourceOptions) => {
@@ -543,8 +543,8 @@ const createToolkitDataSourceForApi = async (
     console.log(chalk.dim(`Using mock data: ${mockDataDir}`));
   }
   return {
-    metadataSource: await getFallbackMetadataSource(),
     toolkitDataSource: createMockToolkitDataSource({ dataDir: mockDataDir }),
+    metadataSource: await getFallbackMetadataSource(),
   };
 };
 
@@ -552,24 +552,24 @@ const normalizeToolkitKey = (toolkitId: string): string =>
   toolkitId.toLowerCase();
 
 interface PreviousToolkitLoadStats {
-  failedFiles: string[];
-  fallbackFiles: number;
-  loadedFiles: number;
-  missingFiles: number;
   scannedFiles: number;
+  loadedFiles: number;
+  fallbackFiles: number;
+  missingFiles: number;
+  failedFiles: string[];
 }
 
 interface PreviousToolkitLoadResult {
-  stats: PreviousToolkitLoadStats;
   toolkits: ReadonlyMap<string, MergedToolkit>;
+  stats: PreviousToolkitLoadStats;
 }
 
 const createPreviousToolkitLoadStats = (): PreviousToolkitLoadStats => ({
-  failedFiles: [],
-  fallbackFiles: 0,
-  loadedFiles: 0,
-  missingFiles: 0,
   scannedFiles: 0,
+  loadedFiles: 0,
+  fallbackFiles: 0,
+  missingFiles: 0,
+  failedFiles: [],
 });
 
 const getFileStem = (filePath: string): string => {
@@ -578,10 +578,10 @@ const getFileStem = (filePath: string): string => {
 };
 
 interface PreviousToolkitLoadOutcome {
-  missing: boolean;
-  reason?: string;
   toolkit: MergedToolkit | null;
+  missing: boolean;
   usedFallback: boolean;
+  reason?: string;
 }
 
 const loadPreviousToolkit = async (
@@ -595,8 +595,8 @@ const loadPreviousToolkit = async (
       getFileStem(filePath)
     );
     return {
-      missing: false,
       toolkit: parsedToolkit.toolkit,
+      missing: false,
       usedFallback: parsedToolkit.usedFallback,
       ...(parsedToolkit.reason ? { reason: parsedToolkit.reason } : {}),
     };
@@ -607,17 +607,17 @@ const loadPreviousToolkit = async (
         : undefined;
     if (errorWithCode?.code === "ENOENT") {
       return {
-        missing: true,
         toolkit: null,
+        missing: true,
         usedFallback: false,
       };
     }
 
     return {
-      missing: false,
-      reason: error instanceof Error ? error.message : String(error),
       toolkit: null,
+      missing: false,
       usedFallback: false,
+      reason: error instanceof Error ? error.message : String(error),
     };
   }
 };
@@ -705,7 +705,7 @@ const loadPreviousToolkitsForProviders = async (
     }
   }
 
-  return { stats, toolkits: previousToolkits };
+  return { toolkits: previousToolkits, stats };
 };
 
 const loadPreviousToolkitsFromDir = async (
@@ -745,7 +745,7 @@ const loadPreviousToolkitsFromDir = async (
     }
   }
 
-  return { stats, toolkits: previousToolkits };
+  return { toolkits: previousToolkits, stats };
 };
 
 const processProviders = async (
@@ -970,8 +970,8 @@ program
     }) => {
       const spinner = ora("Parsing input...").start();
       const logPaths = buildLogPaths(resolve(options.logDir));
-      const { requireComplete } = options;
-      const { preserveLastKnownGood } = options;
+      const requireComplete = options.requireComplete;
+      const preserveLastKnownGood = options.preserveLastKnownGood;
 
       let excludedToolkitIds = new Set<string>();
       if (options.excludeFile) {
@@ -1038,11 +1038,11 @@ program
           if (toolkitIds.length === 0) {
             spinner.succeed("No failed toolkits found in report.");
             await appendLogEntry(logPaths.runLogPath, {
+              title: "generate (failed-tools-file no-op)",
               details: [
                 `output=${resolve(options.output)}`,
                 `file=${options.failedToolsFile}`,
               ],
-              title: "generate (failed-tools-file no-op)",
             });
             process.exit(0);
           }
@@ -1086,7 +1086,7 @@ program
           mockDataDir,
           options.verbose
         );
-        const { metadataSource } = sources;
+        const metadataSource = sources.metadataSource;
         const toolkitDataSource = createCachedToolkitDataSource(
           sources.toolkitDataSource
         );
@@ -1115,12 +1115,12 @@ program
               "No providers left after metadata filtering. Nothing to generate."
             );
             await appendLogEntry(logPaths.runLogPath, {
+              title: "generate (metadata-filter no-op)",
               details: [
                 `output=${resolve(options.output)}`,
                 "mode=providers",
                 "reason=no providers matched metadata source",
               ],
-              title: "generate (metadata-filter no-op)",
             });
             process.exit(0);
           }
@@ -1227,10 +1227,10 @@ program
 
         // Create generator (needed early for resume check)
         const generator = createJsonGenerator({
-          generateIndex: true,
-          indexSource: options.indexFromOutput ? "output" : "current",
           outputDir: resolve(options.output),
           prettyPrint: true,
+          generateIndex: true,
+          indexSource: options.indexFromOutput ? "output" : "current",
         });
 
         // Handle resume mode - check for already completed toolkits
@@ -1342,9 +1342,9 @@ program
             console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
 
             const noChangeCleanup = await cleanupExcludedToolkitOutput({
+              outputDir: options.output,
               excludedToolkitIds,
               generator,
-              outputDir: options.output,
               verbose: options.verbose,
             });
             if (noChangeCleanup.deleted.length > 0 && options.verbose) {
@@ -1359,17 +1359,17 @@ program
             }
 
             await appendLogEntry(logPaths.runLogPath, {
+              title: "generate --skip-unchanged (no changes)",
               details: [
                 `output=${resolve(options.output)}`,
                 `apiSource=${apiSource}`,
                 `summary=${formatChangeSummary(detectedChanges)}`,
                 `excludedFilesDeleted=${noChangeCleanup.deleted.length}`,
               ],
-              title: "generate --skip-unchanged (no changes)",
             });
             await appendLogEntry(logPaths.changeLogPath, {
-              details: [formatChangeSummary(detectedChanges)],
               title: "changes (no-op)",
+              details: [formatChangeSummary(detectedChanges)],
             });
             return;
           }
@@ -1438,8 +1438,8 @@ program
 
         // Create merger using unified source
         const merger = createDataMerger({
-          customSectionsSource,
           toolkitDataSource,
+          customSectionsSource,
           ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
           ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
           ...(secretEditGenerator ? { secretEditGenerator } : {}),
@@ -1453,8 +1453,8 @@ program
             : {}),
           ...(runAll ? { onToolkitProgress } : {}),
           ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
-          preserveLastKnownGood,
           requireCompleteData: requireComplete,
+          preserveLastKnownGood,
           ...(onToolkitComplete ? { onToolkitComplete } : {}),
           ...(resolveProviderId ? { resolveProviderId } : {}),
         });
@@ -1534,6 +1534,7 @@ program
 
             // Set up progress tracker
             const progressTracker = createProgressTracker({
+              total: toProcess,
               barWidth: 25,
               onUpdate: (event) => {
                 if (options.verbose && event.type === "complete") {
@@ -1542,7 +1543,6 @@ program
                   );
                 }
               },
-              total: toProcess,
             });
 
             onToolkitProgress = (
@@ -1561,8 +1561,8 @@ program
 
             // Re-create merger with the progress callback
             const mergerWithProgress = createDataMerger({
-              customSectionsSource,
               toolkitDataSource,
+              customSectionsSource,
               ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
               ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
               ...(secretEditGenerator ? { secretEditGenerator } : {}),
@@ -1578,8 +1578,8 @@ program
                 : {}),
               onToolkitProgress,
               ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
-              preserveLastKnownGood,
               requireCompleteData: requireComplete,
+              preserveLastKnownGood,
               ...(onToolkitComplete ? { onToolkitComplete } : {}),
               ...(resolveProviderId ? { resolveProviderId } : {}),
             });
@@ -1699,9 +1699,9 @@ program
         }
 
         const exclusionCleanup = await cleanupExcludedToolkitOutput({
+          outputDir: options.output,
           excludedToolkitIds,
           generator,
-          outputDir: options.output,
           verbose: options.verbose,
         });
         if (exclusionCleanup.deleted.length > 0 && options.verbose) {
@@ -1754,9 +1754,9 @@ program
           spinner.start("Verifying output...");
           const onVerifyProgress = (progress: VerificationProgress) => {
             const phaseLabels = {
-              "cross-referencing": "Cross-referencing",
               reading: "Reading",
               validating: "Validating",
+              "cross-referencing": "Cross-referencing",
             };
             spinner.text = `${phaseLabels[progress.phase]} ${progress.current}/${progress.total}: ${progress.fileName ?? ""}`;
           };
@@ -1787,8 +1787,8 @@ program
           .filter((result) => result.recovery !== undefined)
           .map((result) => ({
             id: result.toolkit.id,
-            reason: result.error ?? "unknown error",
             recovery: result.recovery as "preserved" | "omitted",
+            reason: result.error ?? "unknown error",
           }));
         const preservedToolkits = recoveredToolkits
           .filter((entry) => entry.recovery === "preserved")
@@ -1856,22 +1856,22 @@ program
         if (changeResult) {
           runDetails.push(...buildChangeLogDetails(changeResult));
           await appendLogEntry(logPaths.changeLogPath, {
-            details: buildChangeLogDetails(changeResult),
             title: "changes",
+            details: buildChangeLogDetails(changeResult),
           });
         }
 
         await writeFailedToolsReport(logPaths.failedToolsPath, {
-          failedToolkits,
           generatedAt: new Date().toISOString(),
-          recoveredToolkits,
           toolkits: failedToolkitsFromTools,
+          failedToolkits,
+          recoveredToolkits,
           tools: failedTools,
         });
 
         await appendLogEntry(logPaths.runLogPath, {
-          details: runDetails,
           title: "generate",
+          details: runDetails,
         });
         if (
           writeErrors.length > 0 ||
@@ -1884,11 +1884,11 @@ program
           `Error: ${error instanceof Error ? error.message : String(error)}`
         );
         await appendLogEntry(logPaths.runLogPath, {
+          title: "generate (error)",
           details: [
             `output=${resolve(options.output)}`,
             `message=${error instanceof Error ? error.message : String(error)}`,
           ],
-          title: "generate (error)",
         });
         process.exit(1);
       }
@@ -2057,7 +2057,7 @@ program
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Initializing...").start();
-      const { requireComplete } = options;
+      const requireComplete = options.requireComplete;
 
       let excludedToolkitIds = new Set<string>();
       if (options.excludeFile) {
@@ -2205,10 +2205,10 @@ program
 
         // Create generator (needed early for resume check)
         const generator = createJsonGenerator({
-          generateIndex: true,
-          indexSource: options.indexFromOutput ? "output" : "current",
           outputDir: resolve(options.output),
           prettyPrint: true,
+          generateIndex: true,
+          indexSource: options.indexFromOutput ? "output" : "current",
         });
 
         // Handle resume mode
@@ -2319,6 +2319,7 @@ program
 
           // Set up progress tracker
           const progressTracker = createProgressTracker({
+            total: toProcess,
             barWidth: 25,
             onUpdate: (event) => {
               if (options.verbose && event.type === "complete") {
@@ -2327,7 +2328,6 @@ program
                 );
               }
             },
-            total: toProcess,
           });
 
           const onToolkitProgress = (
@@ -2346,8 +2346,8 @@ program
 
           // Create merger using unified source
           const merger = createDataMerger({
-            customSectionsSource,
             toolkitDataSource,
+            customSectionsSource,
             ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
             ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
             ...(secretEditGenerator ? { secretEditGenerator } : {}),
@@ -2472,9 +2472,9 @@ program
         }
 
         const exclusionCleanup = await cleanupExcludedToolkitOutput({
+          outputDir: options.output,
           excludedToolkitIds,
           generator,
-          outputDir: options.output,
           verbose: options.verbose,
         });
         if (exclusionCleanup.deleted.length > 0 && options.verbose) {
@@ -2495,9 +2495,9 @@ program
           spinner.start("Verifying output...");
           const onVerifyProgress = (progress: VerificationProgress) => {
             const phaseLabels = {
-              "cross-referencing": "Cross-referencing",
               reading: "Reading",
               validating: "Validating",
+              "cross-referencing": "Cross-referencing",
             };
             spinner.text = `${phaseLabels[progress.phase]} ${progress.current}/${progress.total}: ${progress.fileName ?? ""}`;
           };
@@ -2692,9 +2692,9 @@ program
     try {
       const onVerifyProgress = (progress: VerificationProgress) => {
         const phaseLabels = {
-          "cross-referencing": "Cross-referencing",
           reading: "Reading",
           validating: "Validating",
+          "cross-referencing": "Cross-referencing",
         };
         spinner.text = `${phaseLabels[progress.phase]} ${progress.current}/${progress.total}: ${progress.fileName ?? ""}`;
       };
@@ -2887,6 +2887,7 @@ program
         }
 
         await appendLogEntry(logPaths.runLogPath, {
+          title: "check-changes",
           details: [
             `output=${resolve(options.output)}`,
             `apiSource=${apiSource}`,
@@ -2899,14 +2900,13 @@ program
               : []),
             ...buildChangeLogDetails(changeResult, curationChangedToolkitIds),
           ],
-          title: "check-changes",
         });
         await appendLogEntry(logPaths.changeLogPath, {
+          title: "changes",
           details: buildChangeLogDetails(
             changeResult,
             curationChangedToolkitIds
           ),
-          title: "changes",
         });
 
         // Output results
@@ -2915,19 +2915,19 @@ program
             JSON.stringify(
               {
                 ...changeResult,
-                changedToolkitIds: allChangedToolkitIds,
                 curationChangedToolkitIds,
+                changedToolkitIds: allChangedToolkitIds,
                 diagnostics: {
                   currentToolkitCount: currentToolkitDataForDiff.size,
+                  previousToolkitCount: previousToolkits.size,
+                  previousLoad: previousToolkitLoad.stats,
                   customSectionsPath: customSectionsPath
                     ? resolve(customSectionsPath)
                     : null,
-                  previousLoad: previousToolkitLoad.stats,
-                  previousToolkitCount: previousToolkits.size,
                   timingMs: {
-                    compare: compareDurationMs,
                     fetch: fetchDurationMs,
                     loadPrevious: loadPreviousDurationMs,
+                    compare: compareDurationMs,
                   },
                 },
               },
@@ -2995,8 +2995,8 @@ program
 
                 const icon = {
                   added: chalk.green("+ "),
-                  modified: chalk.yellow("~ "),
                   removed: chalk.red("- "),
+                  modified: chalk.yellow("~ "),
                   unchanged: "  ",
                 }[change.changeType];
 
@@ -3036,11 +3036,11 @@ program
           `Error: ${error instanceof Error ? error.message : String(error)}`
         );
         await appendLogEntry(logPaths.runLogPath, {
+          title: "check-changes (error)",
           details: [
             `output=${resolve(options.output)}`,
             `message=${error instanceof Error ? error.message : String(error)}`,
           ],
-          title: "check-changes (error)",
         });
         process.exit(1);
       }

@@ -20,11 +20,11 @@ import { existsSync } from "node:fs";
 // `permanent` is optional here (unlike redirects.ts's `Redirect`, where it's
 // required) because none of these helpers read it — they only match on
 // `source`/`destination`. A `redirects.ts` entry satisfies this type as-is.
-export interface Redirect {
+export type Redirect = {
+  source: string;
   destination: string;
   permanent?: boolean;
-  source: string;
-}
+};
 
 export const CONTENT_ROOT = "content/docs";
 export const TOOLKIT_ROUTE_MODULE = "lib/toolkit-route.tsx";
@@ -45,12 +45,12 @@ const DYNAMIC_SEGMENT_REGEX = /\[([^\]]+)\]/g;
 const TOOLKIT_ROUTE_PREFIX = ["resources", "integrations"];
 const TOOLKIT_ROUTE_SEGMENT_COUNT = 4;
 
-export interface DynamicRouteMove {
-  newPath: string;
-  newUrl: string;
+export type DynamicRouteMove = {
   oldPath: string;
+  newPath: string;
   oldUrl: string;
-}
+  newUrl: string;
+};
 
 /**
  * Strip the content root and the `.mdx`/`index.mdx` suffix from a file path,
@@ -211,7 +211,7 @@ export function parseDynamicRouteMoves(output: string): DynamicRouteMove[] {
     // Record the move if either path has a dynamic route
     // or if the directory structure changed significantly
     if (oldHasDynamic || newHasDynamic) {
-      moves.push({ newPath, newUrl, oldPath, oldUrl });
+      moves.push({ oldPath, newPath, oldUrl, newUrl });
     }
   }
 

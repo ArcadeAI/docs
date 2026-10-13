@@ -9,24 +9,23 @@ import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import posthog from "posthog-js";
-import { useCallback } from "react";
 
-interface LogoItem {
-  alt: string;
-  invertInDark?: boolean;
-  invertInLight?: boolean;
+type LogoItem = {
   src: string;
-}
+  alt: string;
+  invertInLight?: boolean;
+  invertInDark?: boolean;
+};
 
-interface QuickStartCardProps {
-  code?: string;
+type QuickStartCardProps = {
+  icon: React.ElementType;
+  title: string;
   description: string;
   href?: string;
-  icon: React.ElementType;
-  logos?: LogoItem[];
   onClick?: () => void;
-  title: string;
-}
+  code?: string;
+  logos?: LogoItem[];
+};
 
 export function QuickStartCard({
   icon: Icon,
@@ -37,18 +36,13 @@ export function QuickStartCard({
   code,
   logos,
 }: QuickStartCardProps) {
-  const handleCardClick = useCallback(() => {
+  const handleCardClick = () => {
     posthog.capture("Quickstart card clicked", {
-      card_href: href || null,
       card_title: title,
+      card_href: href || null,
       has_custom_onclick: !!onClick,
     });
-  }, [href, title, onClick]);
-
-  const handleClick = useCallback(() => {
-    handleCardClick();
-    onClick?.();
-  }, [handleCardClick, onClick]);
+  };
 
   const isClickable = href || onClick;
 
@@ -102,20 +96,25 @@ export function QuickStartCard({
             />
           </div>
         )}
-        {code ? (
+        {code && (
           <pre className="mt-1 rounded-md bg-gray-100 p-1 text-gray-800 text-sm dark:bg-gray-900 dark:text-gray-300">
             <code>{code}</code>
           </pre>
-        ) : null}
-        {isClickable ? (
+        )}
+        {isClickable && (
           <div className="mt-4 flex items-center justify-end font-medium text-brand-accent text-sm">
             Learn more
             <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
-        ) : null}
+        )}
       </CardContent>
     </>
   );
+
+  const handleClick = () => {
+    handleCardClick();
+    onClick?.();
+  };
 
   let wrapper: React.ReactElement | null = null;
   if (onClick) {

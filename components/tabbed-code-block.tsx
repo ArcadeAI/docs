@@ -2,7 +2,7 @@
 import { Button } from "@arcadeai/design-system";
 import { ChevronDown } from "lucide-react";
 import posthog from "posthog-js";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   atomDark,
@@ -14,14 +14,14 @@ import { LanguageTabs } from "./tabbed-code-block/language-tabs";
 import { TabSelect } from "./tabbed-code-block/tab-select";
 import { useExampleFile } from "./tabbed-code-block/use-example-file";
 
-interface TabContent {
-  content: Record<string, string[]>;
+type TabContent = {
   label: string;
-}
+  content: Record<string, string[]>;
+};
 
-interface CodeTabSwitcherProps {
+type CodeTabSwitcherProps = {
   tabs: TabContent[];
-}
+};
 
 const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -61,8 +61,8 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
     // Listen for theme changes
     const observer = new MutationObserver(updateTheme);
     observer.observe(document.documentElement, {
-      attributeFilter: ["class", "data-theme"],
       attributes: true,
+      attributeFilter: ["class", "data-theme"],
     });
 
     // Also listen for system theme changes
@@ -96,7 +96,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
   const { filePath, fileName } = useMemo(() => {
     const path = currentTab?.content[validLanguage]?.[0] || "";
     const name = path.split("/").pop() || "";
-    return { fileName: name, filePath: path };
+    return { filePath: path, fileName: name };
   }, [currentTab, validLanguage]);
 
   const { fileContent, loading, error, retry } = useExampleFile(
@@ -105,13 +105,11 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
     fileName
   );
 
-  const handleCollapse = useCallback(() => setIsExpanded(false), []);
-
   const handleExpandExample = () => {
     setIsExpanded(true);
     posthog.capture("Code example expanded", {
-      initial_language: selectedLanguage,
       tab_count: tabs.length,
+      initial_language: selectedLanguage,
     });
   };
 
@@ -147,7 +145,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
 
         <Button
           className="text-muted-foreground hover:text-foreground"
-          onClick={handleCollapse}
+          onClick={() => setIsExpanded(false)}
           size="sm"
           variant="ghost"
         >
@@ -162,7 +160,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
             <span className="font-mono text-muted-foreground text-xs">
               {fileName || `${validLanguage.toLowerCase()}`}
             </span>
-            {error ? (
+            {error && (
               <Button
                 className="h-6 px-2 text-destructive text-xs hover:text-destructive"
                 onClick={retry}
@@ -171,7 +169,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
               >
                 Retry
               </Button>
-            ) : null}
+            )}
           </div>
           <CopyButton
             content={fileContent}
@@ -185,11 +183,11 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
           ) : (
             <SyntaxHighlighter
               customStyle={{
-                background: isDarkMode ? "transparent" : "#fafafa",
-                fontSize: "13px",
-                lineHeight: "1.4",
                 margin: 0,
                 padding: "1rem",
+                fontSize: "13px",
+                lineHeight: "1.4",
+                background: isDarkMode ? "transparent" : "#fafafa",
               }}
               language={validLanguage.toLowerCase()}
               style={syntaxTheme}

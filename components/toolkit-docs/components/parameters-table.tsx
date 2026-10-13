@@ -143,3 +143,5 @@ export function ParametersTable({
     </div>
   );
 }
+
+export default ParametersTable;

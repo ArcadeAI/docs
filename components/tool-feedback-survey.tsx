@@ -41,11 +41,11 @@ export const ToolFeedbackSurvey = () => {
       <h2 className="mb-4 font-bold text-2xl" id="tool-feedback-survey-header">
         Tool feedback survey
       </h2>
-      {completed ? (
+      {completed && (
         <p className="mb-4 text-gray-500 text-sm">
           Thank you! We will review your feedback soon.
         </p>
-      ) : null}
+      )}
       {!completed && (
         <DynamicSurvey
           onBack={handleSurveyBack}

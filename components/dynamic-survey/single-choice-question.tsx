@@ -1,10 +1,10 @@
 import { Label, RadioGroup, RadioGroupItem } from "@arcadeai/design-system";
 import type { MultipleSurveyQuestion } from "posthog-js";
 
-interface SingleChoiceQuestionProps {
-  previousResponse?: string;
+type SingleChoiceQuestionProps = {
   question: MultipleSurveyQuestion;
-}
+  previousResponse?: string;
+};
 
 export function SingleChoiceQuestion({
   question,
@@ -17,7 +17,7 @@ export function SingleChoiceQuestion({
       name="choice"
       required={!question.optional}
     >
-      {question.choices.map((choice) => (
+      {question.choices?.map((choice) => (
         <div className="flex items-center space-x-2" key={choice}>
           <RadioGroupItem id={choice} value={choice} />
           <Label htmlFor={choice}>{choice}</Label>

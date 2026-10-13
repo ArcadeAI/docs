@@ -47,27 +47,11 @@ import {
 // Merger Configuration
 // ============================================================================
 
-export interface DataMergerConfig {
+export type DataMergerConfig = {
+  toolkitDataSource: ToolkitDataSource;
   customSectionsSource: ICustomSectionsSource;
-  /** Maximum concurrent LLM calls for tool examples (default: 5) */
-  llmConcurrency?: number;
-  /** Callback when a toolkit is completed - for incremental writes */
-  onToolkitComplete?: ((result: MergeResult) => Promise<void>) | undefined;
-  /** Progress callback for toolkit processing (extended with tool count) */
-  onToolkitProgress?:
-    | ((
-        toolkitId: string,
-        status: "start" | "done",
-        toolCount?: number
-      ) => void)
-    | undefined;
-  /** Preserve previous output for a broken toolkit instead of failing the run. */
-  preserveLastKnownGood?: boolean;
-  previousToolkits?: ReadonlyMap<string, MergedToolkit>;
-  /** When true, only process toolkits with metadata and tools */
-  requireCompleteData?: boolean;
-  /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
-  resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
+  toolExampleGenerator?: ToolExampleGenerator;
+  toolkitSummaryGenerator?: ToolkitSummaryGenerator;
   /**
    * Optional editor used to repair stale secret references and fill
    * coverage gaps in summary / documentation chunks. When omitted the
@@ -80,28 +64,45 @@ export interface DataMergerConfig {
    * from the CLI's `--skip-secret-coherence` flag.
    */
   skipSecretCoherence?: boolean;
-  /** Set of toolkit IDs to skip (for resume support) */
-  skipToolkitIds?: ReadonlySet<string> | undefined;
-  toolExampleGenerator?: ToolExampleGenerator;
+  previousToolkits?: ReadonlyMap<string, MergedToolkit>;
+  /** Maximum concurrent LLM calls for tool examples (default: 5) */
+  llmConcurrency?: number;
   /** Maximum concurrent toolkit processing (default: 3) */
   toolkitConcurrency?: number;
-  toolkitDataSource: ToolkitDataSource;
-  toolkitSummaryGenerator?: ToolkitSummaryGenerator;
-}
+  /** Progress callback for toolkit processing (extended with tool count) */
+  onToolkitProgress?:
+    | ((
+        toolkitId: string,
+        status: "start" | "done",
+        toolCount?: number
+      ) => void)
+    | undefined;
+  /** Callback when a toolkit is completed - for incremental writes */
+  onToolkitComplete?: ((result: MergeResult) => Promise<void>) | undefined;
+  /** Set of toolkit IDs to skip (for resume support) */
+  skipToolkitIds?: ReadonlySet<string> | undefined;
+  /** When true, only process toolkits with metadata and tools */
+  requireCompleteData?: boolean;
+  /** Preserve previous output for a broken toolkit instead of failing the run. */
+  preserveLastKnownGood?: boolean;
+  /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
+  resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
+};
 
-export interface FailedTool {
-  readonly qualifiedName: string;
-  readonly reason: string;
+export type FailedTool = {
   readonly toolkitId: string;
   readonly toolName: string;
-}
+  readonly qualifiedName: string;
+  readonly reason: string;
+};
 
-export interface MergeResult {
-  error?: string;
+export type MergeResult = {
+  toolkit: MergedToolkit;
+  warnings: string[];
   failedTools: FailedTool[];
+  error?: string;
   /** A recoverable failure retained prior output or omitted a new toolkit. */
   recovery?: "preserved" | "omitted";
-  toolkit: MergedToolkit;
   /**
    * True when the design system had no metadata for this toolkit and
    * `getDefaultMetadata`'s placeholder (category, icon, docsLink, and
@@ -111,21 +112,20 @@ export interface MergeResult {
    * since that's easy to miss in a warnings list read only on failure.
    */
   usedDefaultMetadata: boolean;
-  warnings: string[];
-}
+};
 
-export interface ToolExampleResult {
+export type ToolExampleResult = {
   codeExample: ToolCodeExample;
   secretsInfo: MergedTool["secretsInfo"];
-}
+};
 
-export interface ToolExampleGenerator {
+export type ToolExampleGenerator = {
   generate: (tool: ToolDefinition) => Promise<ToolExampleResult>;
-}
+};
 
-export interface ToolkitSummaryGenerator {
+export type ToolkitSummaryGenerator = {
   generate: (toolkit: MergedToolkit) => Promise<string>;
-}
+};
 
 /**
  * Under `--require-complete`, every toolkit must have design-system metadata.
@@ -146,13 +146,13 @@ export const assertRequireCompleteMetadata = (
   }
 };
 
-interface MergeToolkitOptions {
+type MergeToolkitOptions = {
+  previousToolkit?: MergedToolkit | undefined;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
-  previousToolkit?: MergedToolkit | undefined;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
   resolveProviderId?: (toolkitId: string) => string | null;
-}
+};
 
 // ============================================================================
 // Pure Functions for Data Transformation
@@ -251,6 +251,20 @@ export type ToolSignatureInput = {
 export const buildToolSignatureInput = (
   tool: ToolDefinition | MergedTool
 ): ToolSignatureInput => ({
+  name: tool.name,
+  qualifiedName: tool.qualifiedName,
+  description: tool.description ?? null,
+  parameters: tool.parameters
+    .map((param) => ({
+      name: param.name,
+      type: param.type,
+      innerType: param.innerType ?? null,
+      required: param.required,
+      description: param.description ?? null,
+      enum: param.enum ? normalizeList(param.enum) : null,
+      inferrable: param.inferrable ?? true,
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name)),
   auth: tool.auth
     ? {
         providerId: tool.auth.providerId ?? null,
@@ -258,27 +272,13 @@ export const buildToolSignatureInput = (
         scopes: normalizeList(tool.auth.scopes),
       }
     : null,
-  description: tool.description ?? null,
-  name: tool.name,
+  secrets: normalizeList(tool.secrets),
   output: tool.output
     ? {
-        description: tool.output.description ?? null,
         type: tool.output.type,
+        description: tool.output.description ?? null,
       }
     : null,
-  parameters: tool.parameters
-    .map((param) => ({
-      description: param.description ?? null,
-      enum: param.enum ? normalizeList(param.enum) : null,
-      inferrable: param.inferrable ?? true,
-      innerType: param.innerType ?? null,
-      name: param.name,
-      required: param.required,
-      type: param.type,
-    }))
-    .sort((left, right) => left.name.localeCompare(right.name)),
-  qualifiedName: tool.qualifiedName,
-  secrets: normalizeList(tool.secrets),
 });
 
 export const buildToolSignature = (tool: ToolDefinition | MergedTool): string =>
@@ -311,19 +311,19 @@ export const buildComparableToolSignatureInput = (
   const output = signatureInput.output
     ? {
         ...signatureInput.output,
+        type: normalizeOutputTypeForComparison(signatureInput.output.type),
         // Output descriptions vary by source and should not force regeneration.
         description: null,
-        type: normalizeOutputTypeForComparison(signatureInput.output.type),
       }
     : null;
 
   return {
     ...signatureInput,
-    auth,
     // Tool descriptions are metadata and should not force regeneration.
     description: null,
-    output,
     parameters,
+    auth,
+    output,
   };
 };
 
@@ -336,16 +336,16 @@ const buildToolReuseSignature = (tool: ToolDefinition | MergedTool): string =>
 
 export const buildToolkitSummarySignature = (toolkit: MergedToolkit): string =>
   stableStringify({
-    auth: toolkit.auth
-      ? {
-          allScopes: normalizeList(toolkit.auth.allScopes),
-          providerId: toolkit.auth.providerId ?? null,
-          type: toolkit.auth.type,
-        }
-      : null,
-    description: toolkit.description ?? null,
     id: toolkit.id,
     label: toolkit.label,
+    description: toolkit.description ?? null,
+    auth: toolkit.auth
+      ? {
+          type: toolkit.auth.type,
+          providerId: toolkit.auth.providerId ?? null,
+          allScopes: normalizeList(toolkit.auth.allScopes),
+        }
+      : null,
     tools: toolkit.tools
       .map((tool) => ({
         qualifiedName: tool.qualifiedName,
@@ -514,13 +514,13 @@ const DEFAULT_METADATA_CATEGORY: MergedToolkitMetadata["category"] =
 const getDefaultMetadata = (toolkitId: string): MergedToolkitMetadata =>
   applyToolkitTypeOverrides(toolkitId, {
     category: DEFAULT_METADATA_CATEGORY,
-    docsLink: `https://docs.arcade.dev/en/resources/integrations/${DEFAULT_METADATA_CATEGORY}/${getDefaultDocsSlug(toolkitId)}`,
     iconUrl: `https://design-system.arcade.dev/icons/${getDefaultIconId(toolkitId)}.svg`,
     isBYOC: false,
-    isComingSoon: false,
-    isHidden: true,
     isPro: false,
     type: "arcade",
+    docsLink: `https://docs.arcade.dev/en/resources/integrations/${DEFAULT_METADATA_CATEGORY}/${getDefaultDocsSlug(toolkitId)}`,
+    isComingSoon: false,
+    isHidden: true,
   });
 
 /**
@@ -530,13 +530,13 @@ const transformMetadata = (
   metadata: ToolkitMetadata
 ): MergedToolkitMetadata => ({
   category: metadata.category,
-  docsLink: metadata.docsLink,
   iconUrl: metadata.iconUrl,
   isBYOC: metadata.isBYOC,
-  isComingSoon: metadata.isComingSoon,
-  isHidden: metadata.isHidden,
   isPro: metadata.isPro,
   type: metadata.type,
+  docsLink: metadata.docsLink,
+  isComingSoon: metadata.isComingSoon,
+  isHidden: metadata.isHidden,
 });
 
 /**
@@ -717,9 +717,9 @@ const buildToolkitAuth = (
   }
 
   return {
-    allScopes: computeAllScopes(tools),
-    providerId: getProviderId(tools),
     type: authType,
+    providerId: getProviderId(tools),
+    allScopes: computeAllScopes(tools),
   };
 };
 
@@ -781,32 +781,32 @@ const buildMergedToolkit = (options: {
   );
 
   return {
-    auth: options.auth,
-    customImports: mergeCustomSectionsArrays(
-      options.customSections?.customImports,
-      options.previousToolkit?.customImports,
-      customSectionsAuthoritative
-    ),
+    id: options.toolkitId,
+    label: resolveToolkitLabel({
+      toolkitId: options.toolkitId,
+      metadata: options.metadata,
+      description: options.description,
+    }),
+    version: options.version,
     description: options.description,
+    metadata: mergedMetadata,
+    auth: options.auth,
+    tools: options.tools,
     documentationChunks: mergeCustomSectionsArrays(
       options.customSections?.documentationChunks,
       options.previousToolkit?.documentationChunks,
       customSectionsAuthoritative
     ),
-    id: options.toolkitId,
-    label: resolveToolkitLabel({
-      description: options.description,
-      metadata: options.metadata,
-      toolkitId: options.toolkitId,
-    }),
-    metadata: mergedMetadata,
+    customImports: mergeCustomSectionsArrays(
+      options.customSections?.customImports,
+      options.previousToolkit?.customImports,
+      customSectionsAuthoritative
+    ),
     subPages: mergeCustomSectionsArrays(
       options.customSections?.subPages,
       options.previousToolkit?.subPages,
       customSectionsAuthoritative
     ),
-    tools: options.tools,
-    version: options.version,
     ...(options.customSections
       ? {
           curationSourceHash: getCustomSectionsSourceHash(
@@ -853,10 +853,10 @@ export const applyCustomSectionsToToolkit = (
 
   return {
     ...toolkit,
-    curationSourceHash: getCustomSectionsSourceHash(customSections),
-    customImports: customSections.customImports,
     documentationChunks: customSections.documentationChunks,
+    customImports: customSections.customImports,
     subPages: customSections.subPages,
+    curationSourceHash: getCustomSectionsSourceHash(customSections),
     tools: toolkit.tools.map((tool) => ({
       ...tool,
       documentationChunks: customSections.toolChunks[tool.name] ?? [],
@@ -885,34 +885,34 @@ const transformTool = async (
 
   if (previousTool && shouldReuseExample(tool, previousTool)) {
     return {
-      auth: tool.auth,
-      codeExample: previousTool.codeExample,
-      description: tool.description,
-      documentationChunks,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      metadata: tool.metadata ?? null,
       name: tool.name,
-      output: tool.output,
-      parameters: tool.parameters,
       qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      auth: tool.auth,
       secrets: tool.secrets,
       secretsInfo: previousTool.secretsInfo ?? [],
+      output: tool.output,
+      documentationChunks,
+      codeExample: previousTool.codeExample,
+      metadata: tool.metadata ?? null,
     };
   }
 
   if (!toolExampleGenerator) {
     return {
-      auth: tool.auth,
-      description: tool.description,
-      documentationChunks,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      metadata: tool.metadata ?? null,
       name: tool.name,
-      output: tool.output,
-      parameters: tool.parameters,
       qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      auth: tool.auth,
       secrets: tool.secrets,
       secretsInfo: [],
+      output: tool.output,
+      documentationChunks,
+      metadata: tool.metadata ?? null,
     };
   }
 
@@ -920,18 +920,18 @@ const transformTool = async (
     const exampleResult = await toolExampleGenerator.generate(tool);
 
     return {
-      auth: tool.auth,
-      codeExample: exampleResult.codeExample,
-      description: tool.description,
-      documentationChunks,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      metadata: tool.metadata ?? null,
       name: tool.name,
-      output: tool.output,
-      parameters: tool.parameters,
       qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      auth: tool.auth,
       secrets: tool.secrets,
       secretsInfo: exampleResult.secretsInfo,
+      output: tool.output,
+      documentationChunks,
+      codeExample: exampleResult.codeExample,
+      metadata: tool.metadata ?? null,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -939,24 +939,24 @@ const transformTool = async (
       `Example generation failed for ${tool.qualifiedName}: ${message}`
     );
     failedTools.push({
-      qualifiedName: tool.qualifiedName,
-      reason: message,
       toolkitId: tool.qualifiedName.split(".")[0] ?? tool.qualifiedName,
       toolName: tool.name,
+      qualifiedName: tool.qualifiedName,
+      reason: message,
     });
 
     return {
-      auth: tool.auth,
-      description: tool.description,
-      documentationChunks,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      metadata: tool.metadata ?? null,
       name: tool.name,
-      output: tool.output,
-      parameters: tool.parameters,
       qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      auth: tool.auth,
       secrets: tool.secrets,
       secretsInfo: previousTool?.secretsInfo ?? [],
+      output: tool.output,
+      documentationChunks,
+      metadata: tool.metadata ?? null,
     };
   }
 };
@@ -1001,9 +1001,8 @@ export const mergeToolkit = async (
       : null;
 
   const toolsWithResolvedProviderId =
-    resolvedProviderId === null
-      ? tools
-      : tools.map((tool) => {
+    resolvedProviderId !== null
+      ? tools.map((tool) => {
           if (
             tool.auth?.providerType === "oauth2" &&
             (tool.auth.providerId === null ||
@@ -1015,7 +1014,8 @@ export const mergeToolkit = async (
             };
           }
           return tool;
-        });
+        })
+      : tools;
 
   let auth = buildToolkitAuth(toolsWithResolvedProviderId);
 
@@ -1033,25 +1033,25 @@ export const mergeToolkit = async (
     options.previousToolkit
   );
   const mergedTools = await buildMergedTools({
-    customSectionsAuthoritative,
-    failedTools,
-    llmConcurrency,
-    previousToolByQualifiedName,
+    tools: toolsWithResolvedProviderId,
     toolChunks,
     toolExampleGenerator,
-    tools: toolsWithResolvedProviderId,
     warnings,
+    failedTools,
+    previousToolByQualifiedName,
+    llmConcurrency,
+    customSectionsAuthoritative,
   });
 
   const toolkit = buildMergedToolkit({
-    auth,
-    customSections,
-    description,
-    metadata,
-    previousToolkit: options.previousToolkit,
     toolkitId,
-    tools: mergedTools,
+    metadata,
     version,
+    description,
+    auth,
+    tools: mergedTools,
+    customSections,
+    previousToolkit: options.previousToolkit,
   });
 
   // Modular step: detect design system metadata drifts
@@ -1066,10 +1066,10 @@ export const mergeToolkit = async (
   }
 
   return {
-    failedTools,
     toolkit,
-    usedDefaultMetadata: metadata === null,
     warnings,
+    failedTools,
+    usedDefaultMetadata: metadata === null,
   };
 };
 
@@ -1146,16 +1146,16 @@ export class DataMerger {
   ): MergeResult {
     if (previousToolkit) {
       return {
-        error: message,
-        failedTools: [],
-        recovery: "preserved",
         toolkit: applyCustomSectionsToToolkit(previousToolkit, customSections, {
           // A previous artifact can legitimately predate a newly curated tool.
           // Preserve it while applying the curation that still has a target.
           ignoreUnknownToolChunks: true,
         }),
-        usedDefaultMetadata: false,
         warnings: [`Error processing toolkit: ${message}`],
+        failedTools: [],
+        error: message,
+        recovery: "preserved",
+        usedDefaultMetadata: false,
       };
     }
 
@@ -1165,33 +1165,33 @@ export class DataMerger {
     // `isHidden: true` as `getDefaultMetadata` and for the same reason —
     // it's a guess, not a fact, so it must not be routable.
     return {
-      error: message,
-      failedTools: [],
-      recovery: "omitted",
       toolkit: {
-        auth: null,
-        customImports: [],
-        description: null,
-        documentationChunks: [],
-        generatedAt: new Date().toISOString(),
         id: toolkitId,
         label: toolkitId,
+        version: "0.0.0",
+        description: null,
         metadata: {
           category: DEFAULT_METADATA_CATEGORY,
-          docsLink: "",
           iconUrl: "",
           isBYOC: false,
-          isComingSoon: false,
-          isHidden: true,
           isPro: false,
           type: isApiSuffixedToolkitId(toolkitId) ? "arcade_starter" : "arcade",
+          docsLink: "",
+          isComingSoon: false,
+          isHidden: true,
         },
-        subPages: [],
+        auth: null,
         tools: [],
-        version: "0.0.0",
+        documentationChunks: [],
+        customImports: [],
+        subPages: [],
+        generatedAt: new Date().toISOString(),
       },
-      usedDefaultMetadata: true,
       warnings: [`Error processing toolkit: ${message}`],
+      failedTools: [],
+      error: message,
+      recovery: "omitted",
+      usedDefaultMetadata: true,
     };
   }
 
@@ -1455,10 +1455,10 @@ export class DataMerger {
     for (const target of targets) {
       try {
         const edited = await editor.cleanupStaleReferences({
-          content: target.content,
-          currentSecrets,
           kind: target.kind === "summary" ? "summary" : "documentation_chunk",
+          content: target.content,
           removedSecrets: target.removedSecrets,
+          currentSecrets,
           toolkitLabel: result.toolkit.label,
         });
         applyEditedContent(result.toolkit, target, edited);
@@ -1498,10 +1498,10 @@ export class DataMerger {
     try {
       const edited = await editor.fillCoverageGaps({
         content: summary,
-        currentSecrets,
         missingSecretNames: missing,
-        requireConfigLink: needsLink,
+        currentSecrets,
         toolkitLabel: result.toolkit.label,
+        requireConfigLink: needsLink,
       });
       result.toolkit.summary = edited;
     } catch (error) {
@@ -1640,9 +1640,9 @@ export class DataMerger {
         (this.requireCompleteData && toolkitData.tools.length === 0)
     ).length;
     return {
-      skipped,
-      toProcess: total - skipped,
       total,
+      toProcess: total - skipped,
+      skipped,
     };
   }
 }

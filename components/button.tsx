@@ -9,7 +9,7 @@ export const ExternalLink = ({
   href: string;
   [key: string]: unknown;
 }) => (
-  <a href={href} {...rest} className="button" rel="noopener" target="_blank">
+  <a href={href} {...rest} className="button" target="_blank">
     {children}
   </a>
 );

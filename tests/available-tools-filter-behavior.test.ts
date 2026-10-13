@@ -5,32 +5,32 @@ const makeTool = (
   name: string,
   behavior: Record<string, boolean | undefined>
 ) => ({
+  name,
+  qualifiedName: `Test.${name}`,
   description: null,
   metadata: {
+    classification: { serviceDomains: [] },
     behavior: {
+      operations: [],
+      readOnly: behavior.readOnly,
       destructive: behavior.destructive,
       idempotent: behavior.idempotent,
       openWorld: behavior.openWorld,
-      operations: [],
-      readOnly: behavior.readOnly,
     },
-    classification: { serviceDomains: [] },
     extras: null,
   },
-  name,
-  qualifiedName: `Test.${name}`,
 });
 
 describe("filterTools — behavior flags", () => {
   const tools = [
-    makeTool("ReadOnly", { destructive: false, readOnly: true }),
-    makeTool("Destructive", { destructive: true, readOnly: false }),
-    makeTool("Safe", { destructive: false, readOnly: false }),
+    makeTool("ReadOnly", { readOnly: true, destructive: false }),
+    makeTool("Destructive", { readOnly: false, destructive: true }),
+    makeTool("Safe", { readOnly: false, destructive: false }),
     {
-      description: null,
-      metadata: null,
       name: "NoMeta",
       qualifiedName: "Test.NoMeta",
+      description: null,
+      metadata: null,
     },
   ];
 
@@ -54,7 +54,7 @@ describe("filterTools — behavior flags", () => {
 
   it("ANDs multiple flags together", () => {
     const result = filterTools(tools, "", "all", {
-      behaviorFlags: { destructive: true, readOnly: true },
+      behaviorFlags: { readOnly: true, destructive: true },
     });
     expect(result).toHaveLength(0);
   });

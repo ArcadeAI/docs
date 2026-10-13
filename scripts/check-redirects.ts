@@ -31,10 +31,10 @@ import {
 
 // Colors for terminal output
 const colors = {
-  blue: (s: string) => `\x1b[0;34m${s}\x1b[0m`,
-  green: (s: string) => `\x1b[0;32m${s}\x1b[0m`,
   red: (s: string) => `\x1b[0;31m${s}\x1b[0m`,
+  green: (s: string) => `\x1b[0;32m${s}\x1b[0m`,
   yellow: (s: string) => `\x1b[1;33m${s}\x1b[0m`,
+  blue: (s: string) => `\x1b[0;34m${s}\x1b[0m`,
 };
 
 // Parse command line arguments
@@ -49,11 +49,11 @@ const REDIRECTS_FILE = "redirects.ts";
 const LOCALE_PATH_PREFIX_REGEX = /^\/:locale\//;
 const SPECIAL_REGEX_CHARS_REGEX = /[.*+?^${}()|[\]\\]/g;
 
-interface RedirectChain {
-  newDest: string;
-  oldDest: string;
+type RedirectChain = {
   source: string;
-}
+  oldDest: string;
+  newDest: string;
+};
 
 /**
  * Parse git diff output for deleted and renamed files
@@ -327,7 +327,7 @@ for (const redirect of redirects) {
       if (finalDest) {
         console.log(colors.yellow(`⚠ Redirect chain detected: ${source}`));
         console.log(colors.blue(`  ${source} → ${destination} → ${finalDest}`));
-        chains.push({ newDest: finalDest, oldDest: destination, source });
+        chains.push({ source, oldDest: destination, newDest: finalDest });
       } else {
         console.log(colors.red(`✗ Invalid redirect: ${source}`));
         console.log(

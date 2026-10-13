@@ -21,10 +21,10 @@ import {
 
 // Colors for terminal output
 const colors = {
-  blue: (s: string) => `\x1b[0;34m${s}\x1b[0m`,
-  green: (s: string) => `\x1b[0;32m${s}\x1b[0m`,
   red: (s: string) => `\x1b[0;31m${s}\x1b[0m`,
+  green: (s: string) => `\x1b[0;32m${s}\x1b[0m`,
   yellow: (s: string) => `\x1b[1;33m${s}\x1b[0m`,
+  blue: (s: string) => `\x1b[0;34m${s}\x1b[0m`,
 };
 
 // Parse command line arguments

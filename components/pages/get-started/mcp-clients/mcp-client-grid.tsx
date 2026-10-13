@@ -5,42 +5,42 @@ import meta from "./client-titles";
 // MCP Client data with logos and descriptions
 const mcpClients = [
   {
-    description: "AI-powered code editor with built-in MCP support",
-    invertInLight: true,
     key: "cursor",
     name: "Cursor",
+    description: "AI-powered code editor with built-in MCP support",
+    invertInLight: true,
   },
   {
-    description: "Anthropic's desktop app for Claude with MCP integration",
-    invertInLight: true,
     key: "claude-desktop",
     name: "Claude Desktop",
+    description: "Anthropic's desktop app for Claude with MCP integration",
+    invertInLight: true,
   },
   {
-    description: "Anthropic's coding agent CLI with MCP support",
-    invertInLight: true,
     key: "claude-code",
     name: "Claude Code",
+    description: "Anthropic's coding agent CLI with MCP support",
+    invertInLight: true,
   },
   {
-    description: "Microsoft's code editor with MCP extensions",
     key: "visual-studio-code",
     name: "Visual Studio Code",
+    description: "Microsoft's code editor with MCP extensions",
   },
   {
-    description: "Microsoft's AI agent platform with MCP integration",
     key: "copilot-studio",
     name: "Microsoft Copilot Studio",
+    description: "Microsoft's AI agent platform with MCP integration",
   },
 ];
 
 // Logo mapping
 const logoSrc = {
-  "claude-code": "/images/icons/claude.png",
-  "claude-desktop": "/images/icons/claude.png",
-  "copilot-studio": "/images/icons/microsoft-copilot-studio.png",
   cursor: "/images/icons/cursor.png",
+  "claude-desktop": "/images/icons/claude.png",
+  "claude-code": "/images/icons/claude.png",
   "visual-studio-code": "/images/icons/vscode.svg",
+  "copilot-studio": "/images/icons/microsoft-copilot-studio.png",
 };
 
 export function MCPClientGrid() {

@@ -3,24 +3,24 @@ import { Configuration, FrontendApi } from "@ory/client";
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 
-interface OrySessionContextType {
+type OrySessionContextType = {
   email: string | null;
-  error: Error | null;
   loading: boolean;
-}
+  error: Error | null;
+};
 
 const OrySessionContext = createContext<OrySessionContextType>({
   email: null,
-  error: null,
   loading: true,
+  error: null,
 });
 
 const ory = new FrontendApi(
   new Configuration({
+    basePath: process.env.NEXT_PUBLIC_ORY_SDK_URL || "https://auth.arcade.dev",
     baseOptions: {
       withCredentials: true,
     },
-    basePath: process.env.NEXT_PUBLIC_ORY_SDK_URL || "https://auth.arcade.dev",
   })
 );
 
@@ -63,7 +63,7 @@ export function OrySessionProvider({
   }, []);
 
   return (
-    <OrySessionContext.Provider value={{ email, error, loading }}>
+    <OrySessionContext.Provider value={{ email, loading, error }}>
       {children}
     </OrySessionContext.Provider>
   );

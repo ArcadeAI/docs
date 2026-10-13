@@ -11,102 +11,16 @@ import {
   DropdownMenuTrigger,
   Input,
   Separator,
-  type ToolkitCategory,
   type ToolkitType,
 } from "@arcadeai/design-system";
 import { Check, Filter, FolderOpen, Layers, Search, X } from "lucide-react";
 import type React from "react";
-import { useCallback } from "react";
-import { TYPE_CONFIG, TYPE_CONFIG_ENTRIES } from "./type-config";
+import { TYPE_CONFIG } from "./type-config";
 import { useFilters } from "./use-filters";
 
-interface FiltersBarProps {
+type FiltersBarProps = {
   resultsCount: number;
-}
-
-type Category = (typeof CATEGORIES)[number];
-
-function CategoryMenuItem({
-  category,
-  isSelected,
-  onSelect,
-}: {
-  category: Category;
-  isSelected: boolean;
-  onSelect: (category: ToolkitCategory) => void;
-}) {
-  const handleClick = useCallback(
-    () => onSelect(category.id),
-    [category.id, onSelect]
-  );
-  return (
-    <DropdownMenuItem onClick={handleClick}>
-      {isSelected ? (
-        <Check className="mr-2 h-3.5 w-3.5" />
-      ) : (
-        <span className="mr-2 h-3.5 w-3.5" />
-      )}
-      {category.name}
-    </DropdownMenuItem>
-  );
-}
-
-function TypeMenuItem({
-  typeKey,
-  label,
-  icon: Icon,
-  isSelected,
-  onSelect,
-}: {
-  typeKey: ToolkitType;
-  label: string;
-  icon: React.ElementType;
-  isSelected: boolean;
-  onSelect: (type: ToolkitType | "all") => void;
-}) {
-  const handleClick = useCallback(() => onSelect(typeKey), [onSelect, typeKey]);
-  return (
-    <DropdownMenuItem onClick={handleClick}>
-      {isSelected ? (
-        <Check className="mr-2 h-3.5 w-3.5" />
-      ) : (
-        <Icon className="mr-2 h-3.5 w-3.5" />
-      )}
-      {label}
-    </DropdownMenuItem>
-  );
-}
-
-function FilterChip({
-  label,
-  removeLabel,
-  onRemove,
-}: {
-  label: React.ReactNode;
-  removeLabel: string;
-  onRemove: () => void;
-}) {
-  const handleRemove = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      onRemove();
-    },
-    [onRemove]
-  );
-  return (
-    <Badge className="gap-1" variant="secondary">
-      {label}
-      <button
-        aria-label={removeLabel}
-        className="hover:opacity-70"
-        onClick={handleRemove}
-        type="button"
-      >
-        <X className="h-3 w-3 cursor-pointer" />
-      </button>
-    </Badge>
-  );
-}
+};
 
 export function FiltersBar({ resultsCount }: FiltersBarProps) {
   const {
@@ -130,45 +44,9 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
     filterByByoc ||
     searchQuery !== "";
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value);
-    },
-    [setSearchQuery]
-  );
-  const handleClearSearch = useCallback(
-    () => setSearchQuery(""),
-    [setSearchQuery]
-  );
-  const handleSelectAllTypes = useCallback(
-    () => setSelectedType("all"),
-    [setSelectedType]
-  );
-  const handleProChange = useCallback(
-    (v: boolean | "indeterminate") => setFilterByPro(Boolean(v)),
-    [setFilterByPro]
-  );
-  const handleByocChange = useCallback(
-    (v: boolean | "indeterminate") => setFilterByByoc(Boolean(v)),
-    [setFilterByByoc]
-  );
-  const handleClearFeatures = useCallback(() => {
-    setFilterByPro(false);
-    setFilterByByoc(false);
-  }, [setFilterByByoc, setFilterByPro]);
-  const handleRemoveCategory = useCallback(
-    () => setSelectedCategory("all"),
-    [setSelectedCategory]
-  );
-  const handleRemovePro = useCallback(
-    () => setFilterByPro(false),
-    [setFilterByPro]
-  );
-  const handleRemoveByoc = useCallback(
-    () => setFilterByByoc(false),
-    [setFilterByByoc]
-  );
-
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
   return (
     <div className="py-6">
       {/* Search and Filters */}
@@ -184,16 +62,16 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
               type="text"
               value={searchQuery}
             />
-            {searchQuery ? (
+            {searchQuery && (
               <button
                 aria-label="Clear search"
                 className="-translate-y-1/2 absolute top-1/2 right-3 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                onClick={handleClearSearch}
+                onClick={() => setSearchQuery("")}
                 type="button"
               >
                 <X className="h-4 w-4" />
               </button>
-            ) : null}
+            )}
           </div>
 
           {/* Filter dropdowns and results count */}
@@ -217,12 +95,18 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
                 className="w-56 border-gray-200 p-2 dark:border-gray-700"
               >
                 {CATEGORIES.map((c) => (
-                  <CategoryMenuItem
-                    category={c}
-                    isSelected={selectedCategory === c.id}
+                  <DropdownMenuItem
                     key={c.id}
-                    onSelect={setSelectedCategory}
-                  />
+                    onClick={() => setSelectedCategory(c.id)}
+                  >
+                    {selectedCategory === c.id && (
+                      <Check className="mr-2 h-3.5 w-3.5" />
+                    )}
+                    {selectedCategory !== c.id && (
+                      <span className="mr-2 h-3.5 w-3.5" />
+                    )}
+                    {c.name}
+                  </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
@@ -245,24 +129,30 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
                 align="start"
                 className="w-56 border-gray-200 p-2 dark:border-gray-700"
               >
-                <DropdownMenuItem onClick={handleSelectAllTypes}>
-                  {selectedType === "all" ? (
+                <DropdownMenuItem onClick={() => setSelectedType("all")}>
+                  {selectedType === "all" && (
                     <Check className="mr-2 h-3.5 w-3.5" />
-                  ) : (
+                  )}
+                  {selectedType !== "all" && (
                     <span className="mr-2 h-3.5 w-3.5" />
                   )}
                   All Types
                 </DropdownMenuItem>
-                {TYPE_CONFIG_ENTRIES.map(([key, { label, icon: Icon }]) => (
-                  <TypeMenuItem
-                    icon={Icon}
-                    isSelected={selectedType === key}
-                    key={key}
-                    label={label}
-                    onSelect={setSelectedType}
-                    typeKey={key as ToolkitType}
-                  />
-                ))}
+                {Object.entries(TYPE_CONFIG).map(
+                  ([key, { label, icon: Icon }]) => (
+                    <DropdownMenuItem
+                      key={key}
+                      onClick={() => setSelectedType(key as ToolkitType)}
+                    >
+                      {selectedType === key ? (
+                        <Check className="mr-2 h-3.5 w-3.5" />
+                      ) : (
+                        <Icon className="mr-2 h-3.5 w-3.5" />
+                      )}
+                      {label}
+                    </DropdownMenuItem>
+                  )
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -286,30 +176,35 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
               >
                 <DropdownMenuCheckboxItem
                   checked={filterByPro}
-                  onCheckedChange={handleProChange}
+                  onCheckedChange={(v) => setFilterByPro(Boolean(v))}
                 >
                   Pro
                 </DropdownMenuCheckboxItem>
                 <DropdownMenuCheckboxItem
                   checked={filterByByoc}
-                  onCheckedChange={handleByocChange}
+                  onCheckedChange={(v) => setFilterByByoc(Boolean(v))}
                 >
                   BYOC
                 </DropdownMenuCheckboxItem>
 
-                {filterByPro || filterByByoc ? (
+                {(filterByPro || filterByByoc) && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleClearFeatures}>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setFilterByPro(false);
+                        setFilterByByoc(false);
+                      }}
+                    >
                       <X className="mr-2 h-3.5 w-3.5" />
                       Clear features
                     </DropdownMenuItem>
                   </>
-                ) : null}
+                )}
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {hasActiveFilters ? (
+            {hasActiveFilters && (
               <Button
                 className="h-9 flex-1 sm:flex-none"
                 onClick={clearAllFilters}
@@ -319,7 +214,7 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
                 <X className="h-4 w-4 sm:mr-1.5" />
                 <span className="hidden sm:inline">Clear all</span>
               </Button>
-            ) : null}
+            )}
 
             {/* Divider - hidden on mobile */}
             <div className="mx-1 hidden h-6 w-px bg-gray-300 sm:block dark:bg-gray-700" />
@@ -335,42 +230,78 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
         </div>
 
         {/* Active filter chips */}
-        {selectedCategory !== "all" ||
-        selectedType !== "all" ||
-        filterByPro ||
-        filterByByoc ? (
+        {(selectedCategory !== "all" ||
+          selectedType !== "all" ||
+          filterByPro ||
+          filterByByoc) && (
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-muted-foreground text-xs">Active:</span>
-            {selectedCategory === "all" ? null : (
-              <FilterChip
-                label={CATEGORIES.find((c) => c.id === selectedCategory)?.name}
-                onRemove={handleRemoveCategory}
-                removeLabel="Remove category filter"
-              />
+            {selectedCategory !== "all" && (
+              <Badge className="gap-1" variant="secondary">
+                {CATEGORIES.find((c) => c.id === selectedCategory)?.name}
+                <button
+                  aria-label="Remove category filter"
+                  className="hover:opacity-70"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedCategory("all");
+                  }}
+                  type="button"
+                >
+                  <X className="h-3 w-3 cursor-pointer" />
+                </button>
+              </Badge>
             )}
-            {selectedType === "all" ? null : (
-              <FilterChip
-                label={TYPE_CONFIG[selectedType as ToolkitType].label}
-                onRemove={handleSelectAllTypes}
-                removeLabel="Remove type filter"
-              />
+            {selectedType !== "all" && (
+              <Badge className="gap-1" variant="secondary">
+                {TYPE_CONFIG[selectedType as ToolkitType].label}
+                <button
+                  aria-label="Remove type filter"
+                  className="hover:opacity-70"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedType("all");
+                  }}
+                  type="button"
+                >
+                  <X className="h-3 w-3 cursor-pointer" />
+                </button>
+              </Badge>
             )}
-            {filterByPro ? (
-              <FilterChip
-                label="Pro"
-                onRemove={handleRemovePro}
-                removeLabel="Remove Pro filter"
-              />
-            ) : null}
-            {filterByByoc ? (
-              <FilterChip
-                label="BYOC"
-                onRemove={handleRemoveByoc}
-                removeLabel="Remove BYOC filter"
-              />
-            ) : null}
+            {filterByPro && (
+              <Badge className="gap-1" variant="secondary">
+                Pro
+                <button
+                  aria-label="Remove Pro filter"
+                  className="hover:opacity-70"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFilterByPro(false);
+                  }}
+                  type="button"
+                >
+                  <X className="h-3 w-3 cursor-pointer" />
+                </button>
+              </Badge>
+            )}
+            {filterByByoc && (
+              <Badge className="gap-1" variant="secondary">
+                BYOC
+                <button
+                  aria-label="Remove BYOC filter"
+                  className="hover:opacity-70"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFilterByByoc(false);
+                  }}
+                  type="button"
+                >
+                  <X className="h-3 w-3 cursor-pointer" />
+                </button>
+              </Badge>
+            )}
           </div>
-        ) : null}
+        )}
       </div>
 
       <Separator />

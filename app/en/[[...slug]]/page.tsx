@@ -16,9 +16,9 @@ import {
 } from "@/lib/toolkit-route";
 import { getMDXComponents } from "@/mdx-components";
 
-interface Props {
+type Props = {
   params: Promise<{ slug?: string[] }>;
-}
+};
 
 /**
  * Pages that open with a second-level heading and show no page title. Their

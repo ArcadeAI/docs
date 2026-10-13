@@ -16,7 +16,7 @@ import { CONTENT_ROOT } from "./helpers/content-paths";
 // toolkit UI (browser-only at module scope) and the fumadocs source into the
 // module graph. Only the pure `matchToolkitRoute` is under test here.
 vi.mock("@/components/toolkit-docs", () => ({ ToolkitPage: () => null }));
-vi.mock("@/lib/source", () => ({ source: { getPage: () => undefined } }));
+vi.mock("@/lib/source", () => ({ source: { getPage: vi.fn() } }));
 
 const INTEGRATIONS_CONTENT_DIR = join(
   CONTENT_ROOT,
@@ -80,7 +80,7 @@ describe("integration category routes", () => {
 
       expect(missingCategoryMeta(scratchDir)).toEqual([removedCategory]);
     } finally {
-      rmSync(scratchDir, { force: true, recursive: true });
+      rmSync(scratchDir, { recursive: true, force: true });
     }
   });
 });

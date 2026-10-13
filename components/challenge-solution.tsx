@@ -11,7 +11,7 @@ import { ArrowDown, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 
-interface ChallengeSolutionProps {
+type ChallengeSolutionProps = {
   challenge: {
     icon: React.ElementType;
     title: string;
@@ -23,7 +23,7 @@ interface ChallengeSolutionProps {
     description: string;
     href: string;
   };
-}
+};
 
 export function ChallengeSolution({
   challenge,

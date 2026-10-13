@@ -5,8 +5,8 @@ import {
 import type { CustomSections, MergedToolkit } from "../types/index";
 
 const customSectionsFromToolkit = (toolkit: MergedToolkit): CustomSections => ({
-  customImports: toolkit.customImports ?? [],
   documentationChunks: toolkit.documentationChunks ?? [],
+  customImports: toolkit.customImports ?? [],
   subPages: toolkit.subPages ?? [],
   toolChunks: Object.fromEntries(
     (toolkit.tools ?? [])
@@ -24,8 +24,8 @@ const findPreviousToolkit = (
   )?.[1];
 
 const emptyCustomSections = (): CustomSections => ({
-  customImports: [],
   documentationChunks: [],
+  customImports: [],
   subPages: [],
   toolChunks: {},
 });

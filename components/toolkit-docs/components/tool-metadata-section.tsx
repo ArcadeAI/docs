@@ -2,7 +2,7 @@
 
 import { Badge } from "@arcadeai/design-system";
 import { Check, ChevronDown, Lightbulb, Minus, X } from "lucide-react";
-import { GlossaryTerm } from "@/components/glossary-term";
+import { GlossaryTerm } from "../../glossary-term";
 import {
   TOOL_METADATA_FALLBACK_STYLE,
   TOOL_METADATA_OPERATION_STYLES,
@@ -13,29 +13,24 @@ import type { ToolMetadata, ToolMetadataBehavior } from "../types";
 type BehaviorFlagKey = "readOnly" | "destructive" | "idempotent" | "openWorld";
 
 const BEHAVIOR_LABELS: Record<BehaviorFlagKey, string> = {
+  readOnly: "Read only",
   destructive: "Destructive",
   idempotent: "Idempotent",
   openWorld: "Open world",
-  readOnly: "Read only",
 };
 
-/** Display order of behavior flags (object keys above are linter-sorted). */
-const BEHAVIOR_KEYS: readonly BehaviorFlagKey[] = [
-  "readOnly",
-  "destructive",
-  "idempotent",
-  "openWorld",
-];
-
 const BEHAVIOR_DESCRIPTIONS: Record<BehaviorFlagKey, string> = {
+  readOnly: "Reads data without modifying any state in the target system.",
   destructive: "May permanently delete or overwrite data in the target system.",
   idempotent:
     "Repeated calls with the same inputs produce no additional effect.",
   openWorld: "Communicates with external APIs, databases, or other services.",
-  readOnly: "Reads data without modifying any state in the target system.",
 };
 
 const BEHAVIOR_GLOSSARY: Record<BehaviorFlagKey, { definition: string }> = {
+  readOnly: {
+    definition: "If true, the tool does not modify its environment.",
+  },
   destructive: {
     definition:
       "If true, the tool may perform destructive updates to its environment. If false, the tool performs only additive updates.",
@@ -48,21 +43,18 @@ const BEHAVIOR_GLOSSARY: Record<BehaviorFlagKey, { definition: string }> = {
     definition:
       "If true, this tool may interact with an open world of external entities. If false, the tool's domain of interaction is closed.",
   },
-  readOnly: {
-    definition: "If true, the tool does not modify its environment.",
-  },
 };
 
-export interface BehaviorRow {
+export type BehaviorRow = {
   key: BehaviorFlagKey;
   label: string;
   value: boolean | null;
-}
+};
 
 export function buildBehaviorRows(
   behavior: ToolMetadataBehavior
 ): readonly BehaviorRow[] {
-  return BEHAVIOR_KEYS.map((key) => ({
+  return (Object.keys(BEHAVIOR_LABELS) as BehaviorFlagKey[]).map((key) => ({
     key,
     label: BEHAVIOR_LABELS[key],
     value: behavior[key] ?? null,
@@ -146,9 +138,7 @@ export function ToolMetadataSection({
   const hasServiceDomains = metadata.classification.serviceDomains.length > 0;
   const hasAnyBehaviorValue = behaviorRows.some((row) => row.value !== null);
   const hasExtras =
-    metadata.extras !== null &&
-    metadata.extras !== undefined &&
-    Object.keys(metadata.extras).length > 0;
+    metadata.extras != null && Object.keys(metadata.extras).length > 0;
 
   if (
     !(hasOperations || hasServiceDomains || hasAnyBehaviorValue || hasExtras)
@@ -173,7 +163,7 @@ export function ToolMetadataSection({
       </div>
 
       <div className="space-y-3">
-        {hasOperations || hasServiceDomains ? (
+        {(hasOperations || hasServiceDomains) && (
           <div className="grid gap-3 md:grid-cols-2">
             {hasOperations && (
               <div className="rounded-lg bg-neutral-dark/20 p-3">
@@ -209,7 +199,7 @@ export function ToolMetadataSection({
               </div>
             )}
           </div>
-        ) : null}
+        )}
 
         {hasAnyBehaviorValue && (
           <div className="rounded-lg bg-neutral-dark/20 p-3">
@@ -242,7 +232,7 @@ export function ToolMetadataSection({
           </div>
         )}
 
-        {hasExtras ? (
+        {hasExtras && (
           <details className="group mt-2 rounded-lg bg-neutral-dark/20">
             <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 text-muted-foreground/85 text-xs font-medium">
               Additional metadata
@@ -252,7 +242,7 @@ export function ToolMetadataSection({
               {JSON.stringify(metadata.extras, null, 2)}
             </pre>
           </details>
-        ) : null}
+        )}
       </div>
     </div>
   );

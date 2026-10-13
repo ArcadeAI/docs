@@ -32,10 +32,10 @@ export const getDashboardUrl = (path = "") =>
     .filter(Boolean)
     .join("/");
 
-interface DashboardLinkProps {
-  children?: React.ReactNode;
+type DashboardLinkProps = {
   path?: string;
-}
+  children?: React.ReactNode;
+};
 
 export const DashboardLink = ({
   path = "",

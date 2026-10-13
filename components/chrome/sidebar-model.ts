@@ -8,7 +8,7 @@ import type { ReactNode } from "react";
  */
 export type SidebarNode = SidebarFolder | SidebarPage | SidebarSeparator;
 
-export interface SidebarPage {
+export type SidebarPage = {
   href: string;
   icon?: ReactNode;
   id: string;
@@ -19,9 +19,9 @@ export interface SidebarPage {
    */
   linkOnly?: boolean;
   title: ReactNode;
-}
+};
 
-export interface SidebarFolder {
+export type SidebarFolder = {
   children: SidebarNode[];
   icon?: ReactNode;
   id: string;
@@ -29,13 +29,13 @@ export interface SidebarFolder {
   /** URL prefix the folder stands for, e.g. `/en/operate/governance`. */
   route: string;
   title: ReactNode;
-}
+};
 
-export interface SidebarSeparator {
+export type SidebarSeparator = {
   id: string;
   kind: "separator";
   title?: ReactNode;
-}
+};
 
 const TRAILING_INDEX = /\/index$/;
 

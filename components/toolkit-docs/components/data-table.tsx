@@ -1,11 +1,11 @@
 "use client";
 
-export interface DataTableProps {
-  caption?: string;
+export type DataTableProps = {
   columns: string[];
-  compact?: boolean;
   rows: string[][];
-}
+  caption?: string;
+  compact?: boolean;
+};
 
 export function DataTable({
   columns,
@@ -75,3 +75,5 @@ export function DataTable({
     </div>
   );
 }
+
+export default DataTable;

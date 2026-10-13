@@ -8,10 +8,10 @@ import { MultipleChoiceQuestion } from "./multiple-choice-question";
 import { OpenQuestion } from "./open-question";
 import { SingleChoiceQuestion } from "./single-choice-question";
 
-interface QuestionProps {
-  previousResponse?: string;
+type QuestionProps = {
   question: SurveyQuestion;
-}
+  previousResponse?: string;
+};
 
 export function Question({ question, previousResponse }: QuestionProps) {
   if (question.type === "single_choice") {

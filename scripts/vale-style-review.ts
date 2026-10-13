@@ -56,36 +56,36 @@ const STYLE_GUIDE = existsSync(STYLE_GUIDE_PATH)
   : "";
 
 // Types
-interface ValeIssue {
-  column: number;
+type ValeIssue = {
   line: number;
+  column: number;
+  severity: string;
   message: string;
   rule: string;
-  severity: string;
-}
+};
 
 type ValeOutput = Record<string, ValeIssue[]>;
 
-interface Suggestion {
+type Suggestion = {
+  line: number;
   endLine?: number;
-  line: number;
   original: string;
-  reason: string;
-  rule: string;
   suggested: string;
-}
+  rule: string;
+  reason: string;
+};
 
-interface ReviewComment {
-  body: string;
-  line: number;
+type ReviewComment = {
   path: string;
+  line: number;
   start_line?: number;
-}
+  body: string;
+};
 
-interface FileWithDiff {
-  commentableLines: Set<number>;
+type FileWithDiff = {
   filename: string;
-}
+  commentableLines: Set<number>;
+};
 
 // Regex to identify Vale-generated comments (starts with **`Rule.Name`**:)
 const VALE_COMMENT_REGEX = /^\*\*`[A-Za-z]+\.[A-Za-z]+`\*\*:/;
@@ -156,8 +156,8 @@ async function getChangedFiles(
 ): Promise<FileWithDiff[]> {
   const { data: files } = await octokit.rest.pulls.listFiles({
     owner: OWNER,
-    pull_number: prNumber,
     repo: REPO,
+    pull_number: prNumber,
   });
 
   return files
@@ -166,8 +166,8 @@ async function getChangedFiles(
     .filter((f) => f.status !== "removed")
     .slice(0, MAX_FILES)
     .map((f) => ({
-      commentableLines: parseDiffForCommentableLines(f.patch),
       filename: f.filename,
+      commentableLines: parseDiffForCommentableLines(f.patch),
     }));
 }
 
@@ -181,9 +181,9 @@ async function hasExistingValeReview(
     // Get all reviews on the PR
     const reviews = await octokit.paginate(octokit.rest.pulls.listReviews, {
       owner: OWNER,
-      per_page: 100,
-      pull_number: prNumber,
       repo: REPO,
+      pull_number: prNumber,
+      per_page: 100,
     });
 
     // Check if any review body matches the Vale review summary pattern
@@ -213,9 +213,9 @@ async function getExistingValeComments(
       octokit.rest.pulls.listReviewComments,
       {
         owner: OWNER,
-        per_page: 100,
-        pull_number: prNumber,
         repo: REPO,
+        pull_number: prNumber,
+        per_page: 100,
       }
     );
 
@@ -343,13 +343,13 @@ async function getSuggestionsFromAnthropic(
   prompt: string
 ): Promise<Suggestion[]> {
   const response = await client.messages.create({
-    max_tokens: MAX_AI_TOKENS,
-    messages: [{ content: prompt, role: "user" }],
     model: "claude-sonnet-4-20250514",
+    max_tokens: MAX_AI_TOKENS,
+    messages: [{ role: "user", content: prompt }],
   });
 
   const textBlock = response.content.find((block) => block.type === "text");
-  if (textBlock?.type !== "text") {
+  if (!textBlock || textBlock.type !== "text") {
     return [];
   }
 
@@ -367,9 +367,9 @@ async function getSuggestionsFromOpenAI(
   prompt: string
 ): Promise<Suggestion[]> {
   const response = await client.chat.completions.create({
-    max_tokens: MAX_AI_TOKENS,
-    messages: [{ content: prompt, role: "user" }],
     model: "gpt-4-turbo",
+    max_tokens: MAX_AI_TOKENS,
+    messages: [{ role: "user", content: prompt }],
     response_format: { type: "json_object" },
   });
 
@@ -429,7 +429,7 @@ function countLeadingFenceChars(trimmedLine: string): {
 } {
   const [firstChar] = trimmedLine;
   if (firstChar !== "`" && firstChar !== "~") {
-    return { char: "", count: 0 };
+    return { count: 0, char: "" };
   }
 
   let count = 0;
@@ -440,7 +440,7 @@ function countLeadingFenceChars(trimmedLine: string): {
       break;
     }
   }
-  return { char: firstChar, count };
+  return { count, char: firstChar };
 }
 
 // Check if a line could be a fence marker (has valid indentation and starts with ``` or ~~~)
@@ -475,7 +475,7 @@ function getLinesInCodeBlocks(content: string): Set<number> {
   const linesInCodeBlocks = new Set<number>();
   const lines = content.split("\n");
   let inCodeBlock = false;
-  let openingFenceInfo = { char: "", count: 0 };
+  let openingFenceInfo = { count: 0, char: "" };
 
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
@@ -489,7 +489,7 @@ function getLinesInCodeBlocks(content: string): Set<number> {
         linesInCodeBlocks.add(lineNum);
         if (isValidClosingFence(trimmedLine, fenceInfo, openingFenceInfo)) {
           inCodeBlock = false;
-          openingFenceInfo = { char: "", count: 0 };
+          openingFenceInfo = { count: 0, char: "" };
         }
       } else {
         // Opening a code block
@@ -599,13 +599,13 @@ function formatReviewComments(options: {
       );
     })
     .map((s) => ({
+      path: filename,
+      line: s.line,
       body: `**\`${s.rule}\`**: ${s.reason}
 
 \`\`\`suggestion
 ${s.suggested}
 \`\`\``,
-      line: s.line,
-      path: filename,
     }));
 }
 
@@ -625,20 +625,20 @@ async function postReview(
 
   try {
     await octokit.rest.pulls.createReview({
+      owner: OWNER,
+      repo: REPO,
+      pull_number: prNumber,
+      event: "COMMENT",
       body: `## Style Review
 
 Found ${comments.length} style suggestion(s).
 
 _Powered by Vale + ${providerName}_`,
       comments: comments.map((c) => ({
-        body: c.body,
-        line: c.line,
         path: c.path,
+        line: c.line,
+        body: c.body,
       })),
-      event: "COMMENT",
-      owner: OWNER,
-      pull_number: prNumber,
-      repo: REPO,
     });
 
     console.log(`Posted review with ${comments.length} suggestions`);
@@ -672,10 +672,10 @@ async function main() {
   // Prefer Anthropic, fall back to OpenAI
   let ai: AIClient;
   if (anthropicKey) {
-    ai = { client: new Anthropic({ apiKey: anthropicKey }), type: "anthropic" };
+    ai = { type: "anthropic", client: new Anthropic({ apiKey: anthropicKey }) };
     console.log("Using Claude (Anthropic) for suggestions");
   } else {
-    ai = { client: new OpenAI({ apiKey: openaiKey }), type: "openai" };
+    ai = { type: "openai", client: new OpenAI({ apiKey: openaiKey }) };
     console.log("Using GPT-4 Turbo (OpenAI) for suggestions");
   }
 
@@ -770,11 +770,11 @@ async function main() {
     const suggestions = await getSuggestions(ai, filename, content, issues);
 
     const comments = formatReviewComments({
-      commentableLines,
-      existingComments,
-      fileContent: content,
       filename,
       suggestions,
+      fileContent: content,
+      commentableLines,
+      existingComments,
     });
     allComments.push(...comments);
 

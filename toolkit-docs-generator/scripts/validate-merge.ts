@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env tsx
 
 /**
  * Validate Merged Custom Sections
@@ -7,7 +7,7 @@
  * It checks for the presence of expected fields and provides a summary.
  *
  * Usage:
- *   bun scripts/validate-merge.ts
+ *   tsx scripts/validate-merge.ts
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
@@ -62,11 +62,11 @@ function getToolkitCounts(json: ToolkitJson) {
 
   return {
     docChunksCount,
+    importsCount,
+    subPagesCount,
     hasDocChunks: docChunksCount > 0,
     hasImports: importsCount > 0,
     hasSubPages: subPagesCount > 0,
-    importsCount,
-    subPagesCount,
   };
 }
 
@@ -80,13 +80,13 @@ function buildDetail(
   }
 
   return {
-    docChunksCount: counts.docChunksCount,
     file,
+    label: json.label || json.id,
     hasDocChunks: counts.hasDocChunks,
     hasImports: counts.hasImports,
     hasSubPages: counts.hasSubPages,
+    docChunksCount: counts.docChunksCount,
     importsCount: counts.importsCount,
-    label: json.label || json.id,
     subPagesCount: counts.subPagesCount,
   };
 }
@@ -100,12 +100,12 @@ export function validateMergedCustomSections(
 
   const files = getToolkitFiles(dataDir);
   const result: MergeValidationResult = {
+    totalToolkits: 0,
+    withDocChunks: 0,
+    withCustomImports: 0,
+    withSubPages: 0,
     detailedResults: [],
     errors: [],
-    totalToolkits: 0,
-    withCustomImports: 0,
-    withDocChunks: 0,
-    withSubPages: 0,
   };
 
   for (const file of files) {
@@ -181,7 +181,7 @@ export function buildValidationOutputLines(
       "",
       "⚠️  No toolkits found with custom sections.",
       "   Did you run the merge script? Run:",
-      "   bun toolkit-docs-generator/scripts/merge-custom-sections.ts"
+      "   npm run merge-custom-sections"
     );
   }
 
@@ -214,7 +214,7 @@ export function main(): void {
 }
 
 const currentFile = fileURLToPath(import.meta.url);
-const [, entryFile] = process.argv;
+const entryFile = process.argv[1];
 if (entryFile && resolve(entryFile) === resolve(currentFile)) {
   main();
 }

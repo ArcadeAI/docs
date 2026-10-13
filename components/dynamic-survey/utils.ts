@@ -1,14 +1,5 @@
 import { type Survey, SurveyQuestionBranchingType } from "posthog-js";
 
-/** The part of the PostHog client used for survey branching. */
-interface SurveyBranchingClient {
-  getNextSurveyStep: (
-    survey: Survey,
-    currentIndex: number,
-    response: unknown
-  ) => number | SurveyQuestionBranchingType | undefined;
-}
-
 export const getQuestionResponse = (
   formData: FormData,
   questionType: string
@@ -40,29 +31,29 @@ export const formatSurveyResponse = (
     if (response.length === 0) {
       return null;
     }
-    return response.map((r) =>
-      r === null || r === undefined ? "" : String(r)
-    );
+    return response.map((r) => (r != null ? String(r) : ""));
   }
-  return response === null ? null : String(response);
+  return response != null ? String(response) : null;
 };
 export const createSurveyEventProperties = (
   responses: Record<number, unknown>,
   surveyId: string
 ) => {
-  const properties: Record<string, string | string[]> = {
-    $survey_id: surveyId,
-  };
-  Object.entries(responses).forEach(([, response], i) => {
-    const formattedResponse = formatSurveyResponse(response);
-    // Only include responses that have a value
-    if (formattedResponse === null) {
-      return;
-    }
-    const key = i === 0 ? "$survey_response" : `$survey_response_${i}`;
-    properties[key] = formattedResponse;
-  });
-  return properties;
+  return Object.entries(responses).reduce(
+    (acc, [, response], i) => {
+      const formattedResponse = formatSurveyResponse(response);
+      // Only include responses that have a value
+      if (formattedResponse === null) {
+        return acc;
+      }
+
+      const key = i === 0 ? "$survey_response" : `$survey_response_${i}`;
+      // Avoid spreading into accumulator to satisfy performance rule
+      // biome-ignore lint/performance/noAccumulatingSpread: safe and clearer here, small object size
+      return { ...acc, [key]: formattedResponse };
+    },
+    { $survey_id: surveyId }
+  );
 };
 
 export const getNextQuestionIndex = (
@@ -79,9 +70,12 @@ export const getNextQuestionIndex = (
     return currentIndex + 1;
   }
 
-  const nextStep = (
-    posthog as SurveyBranchingClient | null | undefined
-  )?.getNextSurveyStep(survey, currentIndex, response);
+  // biome-ignore lint/suspicious/noExplicitAny: third-party library type
+  const nextStep = (posthog as any)?.getNextSurveyStep(
+    survey,
+    currentIndex,
+    response
+  );
 
   if (nextStep === SurveyQuestionBranchingType.End) {
     return "end";

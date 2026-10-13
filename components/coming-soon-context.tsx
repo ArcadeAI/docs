@@ -2,11 +2,11 @@
 import type React from "react";
 import { createContext, useContext, useState } from "react";
 
-interface ComingSoonContextType {
+type ComingSoonContextType = {
   email: string;
   // eslint-disable-next-line no-unused-vars
   setEmail: (email: string) => void;
-}
+};
 
 const ComingSoonContext = createContext<ComingSoonContextType>({
   email: "",

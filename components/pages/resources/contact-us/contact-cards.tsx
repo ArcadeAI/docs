@@ -62,9 +62,9 @@ async function fireHoneypot(): Promise<void> {
   }
   try {
     await fetch(WEBHOOK_URL, {
-      body: JSON.stringify({ _hp: true }),
-      headers: { "Content-Type": "application/json" },
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ _hp: true }),
     });
   } catch {
     // Swallow errors for spam submissions
@@ -75,44 +75,44 @@ async function submitToAttio(
   fields: Record<string, string>
 ): Promise<{ success: boolean; error?: string }> {
   if (!WEBHOOK_URL) {
-    return { error: "Webhook URL not configured", success: false };
+    return { success: false, error: "Webhook URL not configured" };
   }
 
   const payload = {
+    submission_id: crypto.randomUUID(),
+    form_type: "contact_sales",
+    fields,
     context: {
-      pageName: "Contact Sales",
       pageUri: window.location.href,
+      pageName: "Contact Sales",
       timestamp: new Date().toISOString(),
       ...getUtmParams(),
     },
-    fields,
-    form_type: "contact_sales",
-    submission_id: crypto.randomUUID(),
   };
 
   const response = await fetch(WEBHOOK_URL, {
-    body: JSON.stringify(payload),
-    headers: { "Content-Type": "application/json" },
     method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
   });
 
   if (response.ok) {
     return { success: true };
   }
   return {
-    error: `HTTP ${response.status}: ${response.statusText}`,
     success: false,
+    error: `HTTP ${response.status}: ${response.statusText}`,
   };
 }
 
-interface FormValues {
-  company: string;
-  email: string;
+type FormValues = {
   firstname: string;
   lastname: string;
+  email: string;
+  company: string;
   message: string;
   website: string;
-}
+};
 
 function ContactSalesForm({ onSuccess }: { onSuccess: () => void }) {
   const [submitError, setSubmitError] = useState("");
@@ -143,9 +143,9 @@ function ContactSalesForm({ onSuccess }: { onSuccess: () => void }) {
       onSuccess();
     } else {
       posthog.capture("contact_sales_form_submit_failed", {
-        error: result.error,
         form_type: "contact_sales",
         page: "Contact Sales",
+        error: result.error,
       });
       setSubmitError("Oops! Something went wrong. Please try again.");
     }

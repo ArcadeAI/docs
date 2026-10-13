@@ -3,13 +3,7 @@
 import { Button } from "@arcadeai/design-system";
 import { Check, Copy, KeyRound, ShieldCheck, Wrench } from "lucide-react";
 import posthog from "posthog-js";
-import {
-  type ChangeEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { loadToolkitDetail } from "./toolkit-docs/components/use-toolkit-detail";
 
 const COPY_FEEDBACK_MS = 2000;
@@ -28,35 +22,35 @@ const TOOLS_PAGE_SIZE_OPTIONS = [
 
 const JSON_PRETTY_PRINT_INDENT = 2;
 
-interface ToolParameter {
+type ToolParameter = {
+  name: string;
+  type: string;
+  required: boolean;
   description: string | null;
   enum: string[] | null;
-  name: string;
-  required: boolean;
-  type: string;
-}
+};
 
-interface Tool {
-  description?: string | null;
-  fullyQualifiedName?: string;
+type Tool = {
   name: string;
-  output?: { type: string; description: string | null } | null;
-  parameters?: ToolParameter[];
-  // Full tool definition fields (optional for backward compatibility)
-  qualifiedName?: string;
   scopes: string[];
   secrets?: string[];
-}
+  // Full tool definition fields (optional for backward compatibility)
+  qualifiedName?: string;
+  fullyQualifiedName?: string;
+  description?: string | null;
+  parameters?: ToolParameter[];
+  output?: { type: string; description: string | null } | null;
+};
 
 export const DEFAULT_SHOW_UNSELECTED_TOOLS = false;
 
-interface ScopePickerProps {
-  onSelectedToolsChange?: (selectedTools: string[]) => void;
+type ScopePickerProps = {
+  tools: Tool[];
   selectedTools?: string[];
+  onSelectedToolsChange?: (selectedTools: string[]) => void;
   /** Toolkit id — lets "Copy tools JSON" lazily fetch full per-tool detail. */
   toolkitId?: string;
-  tools: Tool[];
-}
+};
 
 function CopyButton({
   text,
@@ -82,8 +76,6 @@ function CopyButton({
     }
   }, [text, getText]);
 
-  const buttonLabel = copied ? "Copied!" : label;
-
   return (
     <Button onClick={handleCopy} size="sm" title={label} variant="outline">
       {copied ? (
@@ -91,7 +83,7 @@ function CopyButton({
       ) : (
         <Copy className="h-3 w-3" />
       )}
-      {buttonLabel}
+      {copied ? "Copied!" : label}
     </Button>
   );
 }
@@ -119,18 +111,18 @@ function buildSelectedToolsJson(
       const name = tool.qualifiedName ?? tool.name;
       if (parameters) {
         return {
-          description: detail?.description ?? tool.description ?? null,
           name,
-          output: detail?.output ?? tool.output ?? null,
+          description: detail?.description ?? tool.description ?? null,
           parameters: parameters.map((p) => ({
-            description: p.description,
             name: p.name,
-            required: p.required,
             type: p.type,
+            required: p.required,
+            description: p.description,
             ...(p.enum ? { enum: p.enum } : {}),
           })),
           scopes: tool.scopes,
           secrets: tool.secrets ?? [],
+          output: detail?.output ?? tool.output ?? null,
         };
       }
       return { name, scopes: tool.scopes, secrets: tool.secrets ?? [] };
@@ -342,52 +334,47 @@ export default function ScopePicker({
     DEFAULT_SHOW_UNSELECTED_TOOLS
   );
 
-  const trackScopeCalculatorUsed = useCallback(
-    (
-      action: string,
-      toolName: string | undefined,
-      newSelectedCount: number
-    ) => {
-      posthog.capture("Scope calculator used", {
-        action,
-        selected_tools_count: newSelectedCount,
-        tool_name: toolName || null,
-        total_tools_available: tools.length,
-      });
-    },
-    [tools.length]
-  );
+  const trackScopeCalculatorUsed = (
+    action: string,
+    toolName: string | undefined,
+    newSelectedCount: number
+  ) => {
+    posthog.capture("Scope calculator used", {
+      action,
+      tool_name: toolName || null,
+      selected_tools_count: newSelectedCount,
+      total_tools_available: tools.length,
+    });
+  };
 
-  const updateSelectedTools = useCallback(
-    (nextSelected: Set<string>, action: string, toolName?: string) => {
-      const nextList = Array.from(nextSelected).sort();
-      trackScopeCalculatorUsed(action, toolName, nextSelected.size);
-      if (isControlled) {
-        onSelectedToolsChange?.(nextList);
-      } else {
-        setInternalSelectedTools(nextSelected);
-      }
-    },
-    [isControlled, onSelectedToolsChange, trackScopeCalculatorUsed]
-  );
+  const updateSelectedTools = (
+    nextSelected: Set<string>,
+    action: string,
+    toolName?: string
+  ) => {
+    const nextList = Array.from(nextSelected).sort();
+    trackScopeCalculatorUsed(action, toolName, nextSelected.size);
+    if (isControlled) {
+      onSelectedToolsChange?.(nextList);
+    } else {
+      setInternalSelectedTools(nextSelected);
+    }
+  };
 
-  const toggleTool = useCallback(
-    (toolName: string) => {
-      const newSelected = new Set(selectedToolsSet);
-      const isSelecting = !newSelected.has(toolName);
-      if (newSelected.has(toolName)) {
-        newSelected.delete(toolName);
-      } else {
-        newSelected.add(toolName);
-      }
-      updateSelectedTools(
-        newSelected,
-        isSelecting ? "tool_selected" : "tool_deselected",
-        toolName
-      );
-    },
-    [selectedToolsSet, updateSelectedTools]
-  );
+  const toggleTool = (toolName: string) => {
+    const newSelected = new Set(selectedToolsSet);
+    const isSelecting = !newSelected.has(toolName);
+    if (newSelected.has(toolName)) {
+      newSelected.delete(toolName);
+    } else {
+      newSelected.add(toolName);
+    }
+    updateSelectedTools(
+      newSelected,
+      isSelecting ? "tool_selected" : "tool_deselected",
+      toolName
+    );
+  };
 
   const selectAll = () => {
     updateSelectedTools(new Set(tools.map((t) => t.name)), "select_all");
@@ -426,50 +413,6 @@ export default function ScopePicker({
   const secretsAsText = requiredSecrets.join("\n");
   const toolNamesAsText = selectedToolNames.join(", ");
 
-  const toggleShowUnselected = useCallback(() => {
-    setShowUnselectedTools((current) => !current);
-    setPage(1);
-  }, []);
-  const handlePageSizeChange = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>) => {
-      setPageSize(Number(event.target.value));
-      setPage(1);
-    },
-    []
-  );
-  const goToPreviousPage = useCallback(() => {
-    setPage((current) => Math.max(1, current - 1));
-  }, []);
-  const goToNextPage = useCallback(() => {
-    setPage((current) => Math.min(pageCount, current + 1));
-  }, [pageCount]);
-  const handleToolToggle = useCallback(
-    (event: ChangeEvent<HTMLInputElement>) => {
-      const toolName = event.currentTarget.dataset.tool;
-      if (toolName) {
-        toggleTool(toolName);
-      }
-    },
-    [toggleTool]
-  );
-  const toggleAdvanced = useCallback(() => {
-    setShowAdvanced((current) => !current);
-  }, []);
-  const getSelectedToolsJson = useCallback(async () => {
-    // Pull full per-tool detail (parameters/output) on demand — the
-    // page payload only carries the summary — so the JSON keeps full
-    // fidelity; fall back to the summary if the fetch fails.
-    let detailMap: ToolDetailMap | undefined;
-    if (toolkitId) {
-      try {
-        detailMap = await loadToolkitDetail(toolkitId);
-      } catch {
-        // Keep detailMap undefined → summary-only JSON.
-      }
-    }
-    return buildSelectedToolsJson(tools, selectedToolsSet, detailMap);
-  }, [toolkitId, tools, selectedToolsSet]);
-
   return (
     <div className="my-6 overflow-hidden rounded-xl bg-neutral-dark/20">
       {/* Header */}
@@ -487,7 +430,10 @@ export default function ScopePicker({
           <div className="flex items-center gap-2">
             <Button
               aria-pressed={showUnselectedTools}
-              onClick={toggleShowUnselected}
+              onClick={() => {
+                setShowUnselectedTools((current) => !current);
+                setPage(1);
+              }}
               size="sm"
               variant={showUnselectedTools ? "default" : "outline"}
             >
@@ -515,7 +461,10 @@ export default function ScopePicker({
               <select
                 aria-label="Tools per page"
                 className="rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2.5 py-1.5 text-muted-foreground text-xs transition-colors focus:border-brand-accent focus:outline-none"
-                onChange={handlePageSizeChange}
+                onChange={(event) => {
+                  setPageSize(Number(event.target.value));
+                  setPage(1);
+                }}
                 value={pageSize}
               >
                 {TOOLS_PAGE_SIZE_OPTIONS.map((size) => (
@@ -532,7 +481,7 @@ export default function ScopePicker({
               <button
                 className="rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2.5 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={page <= 1}
-                onClick={goToPreviousPage}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
                 type="button"
               >
                 Prev
@@ -540,7 +489,9 @@ export default function ScopePicker({
               <button
                 className="rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2.5 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={page >= pageCount}
-                onClick={goToNextPage}
+                onClick={() =>
+                  setPage((current) => Math.min(pageCount, current + 1))
+                }
                 type="button"
               >
                 Next
@@ -565,8 +516,7 @@ export default function ScopePicker({
                   <input
                     checked={selectedToolsSet.has(tool.name)}
                     className="rounded border-neutral-dark-high text-brand-accent focus:ring-brand-accent"
-                    data-tool={tool.name}
-                    onChange={handleToolToggle}
+                    onChange={() => toggleTool(tool.name)}
                     type="checkbox"
                   />
                   <div className="relative flex-1 overflow-hidden">
@@ -578,12 +528,12 @@ export default function ScopePicker({
                     </span>
                   </div>
                   <div className="flex items-center gap-1">
-                    {showAdvanced && toolHasScopes ? (
+                    {showAdvanced && toolHasScopes && (
                       <ShieldCheck
                         aria-label="Requires scopes"
                         className="h-3 w-3 text-red-400"
                       />
-                    ) : null}
+                    )}
                     {toolHasSecrets && (
                       <KeyRound
                         aria-label="Requires secrets"
@@ -611,7 +561,24 @@ export default function ScopePicker({
           <div className="mb-4 flex flex-wrap gap-2">
             <CopyButton label="Copy tool names" text={toolNamesAsText} />
             <CopyButton
-              getText={getSelectedToolsJson}
+              getText={async () => {
+                // Pull full per-tool detail (parameters/output) on demand — the
+                // page payload only carries the summary — so the JSON keeps full
+                // fidelity; fall back to the summary if the fetch fails.
+                let detailMap: ToolDetailMap | undefined;
+                if (toolkitId) {
+                  try {
+                    detailMap = await loadToolkitDetail(toolkitId);
+                  } catch {
+                    // Keep detailMap undefined → summary-only JSON.
+                  }
+                }
+                return buildSelectedToolsJson(
+                  tools,
+                  selectedToolsSet,
+                  detailMap
+                );
+              }}
               label="Copy tools JSON"
             />
             {showAdvanced && requiredScopes.length > 0 && (
@@ -625,7 +592,7 @@ export default function ScopePicker({
 
         {/* Requirements Summary */}
         <RequirementsPanel
-          onToggleAdvanced={toggleAdvanced}
+          onToggleAdvanced={() => setShowAdvanced((current) => !current)}
           requiredScopes={requiredScopes}
           requiredSecrets={requiredSecrets}
           selectedToolNames={selectedToolNames}

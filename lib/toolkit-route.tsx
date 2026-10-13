@@ -24,10 +24,10 @@ import {
 } from "@/lib/toolkit-static-params";
 import { INTEGRATION_CATEGORIES } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 
-export interface ToolkitRouteMatch {
+export type ToolkitRouteMatch = {
   category: string;
   toolkitId: string;
-}
+};
 
 const ROUTE_PREFIX = ["resources", "integrations"] as const;
 const ROUTE_LENGTH = ROUTE_PREFIX.length + 2;

@@ -69,14 +69,14 @@ const slots: Partial<DocsSlots> = {
   },
 };
 
-interface ChromeLayoutProps {
+type ChromeLayoutProps = {
   /** Render the page without the sidebar and the centered content row. */
   bare?: boolean;
   children: ReactNode;
   /** Sidebar entries, see components/chrome/sidebar-model.ts. */
   directories: SidebarNode[];
   tree: PageTree.Root;
-}
+};
 
 /**
  * Docs layout. Fumadocs provides the page tree, sidebar state and search

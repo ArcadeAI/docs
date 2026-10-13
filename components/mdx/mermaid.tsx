@@ -2,9 +2,9 @@
 
 import { type RefObject, useEffect, useId, useRef, useState } from "react";
 
-interface MermaidProps {
+type MermaidProps = {
   chart: string;
-}
+};
 
 function useIsVisible(ref: RefObject<HTMLDivElement | null>): boolean {
   const [isIntersecting, setIsIntersecting] = useState(false);

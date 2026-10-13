@@ -16,7 +16,7 @@ const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   try {
     await fn(dir);
   } finally {
-    await rm(dir, { force: true, recursive: true });
+    await rm(dir, { recursive: true, force: true });
   }
 };
 
@@ -25,19 +25,19 @@ const writeIndex = async (
   toolkits: Array<{ id: string; category?: string }>
 ) => {
   const entries = toolkits.map((toolkit) => ({
-    authType: "none",
-    category: toolkit.category ?? "development",
     id: toolkit.id,
     label: toolkit.id,
-    toolCount: 0,
-    type: "arcade",
     version: "1.0.0",
+    category: toolkit.category ?? "development",
+    type: "arcade",
+    toolCount: 0,
+    authType: "none",
   }));
   const indexFixture = JSON.stringify(
     {
       generatedAt: "2026-01-15T00:00:00.000Z",
-      toolkits: entries,
       version: "1.0.0",
+      toolkits: entries,
     },
     null,
     2
@@ -59,21 +59,21 @@ const writeToolkitData = async (
   // site restating boilerplate.
   const toolkitFixture = JSON.stringify(
     {
-      auth: null,
-      description: null,
-      label: toolkit.label ?? toolkit.id,
-      tools: [],
       version: "1.0.0",
+      description: null,
+      tools: [],
+      auth: null,
+      label: toolkit.label ?? toolkit.id,
       ...toolkit,
       metadata: {
         category: "productivity",
-        docsLink: "",
         iconUrl: "https://design-system.arcade.dev/icons/placeholder.svg",
         isBYOC: false,
-        isComingSoon: false,
-        isHidden: false,
         isPro: false,
         type: "arcade",
+        docsLink: "",
+        isComingSoon: false,
+        isHidden: false,
         ...toolkit.metadata,
       },
     },
@@ -92,8 +92,8 @@ describe("toolkit static params", () => {
   it("lists toolkit routes from the index", async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [
-        { category: "development", id: "Github" },
-        { category: "productivity", id: "Gmail" },
+        { id: "Github", category: "development" },
+        { id: "Gmail", category: "productivity" },
       ]);
 
       const routes = await listToolkitRoutes({
@@ -103,8 +103,8 @@ describe("toolkit static params", () => {
 
       expect(routes).toEqual(
         expect.arrayContaining([
-          { category: "development", toolkitId: "github" },
-          { category: "productivity", toolkitId: "gmail" },
+          { toolkitId: "github", category: "development" },
+          { toolkitId: "gmail", category: "productivity" },
         ])
       );
     });
@@ -112,21 +112,21 @@ describe("toolkit static params", () => {
 
   it("uses catalog category as fallback when JSON file is absent", async () => {
     await withTempDir(async (dir) => {
-      await writeIndex(dir, [{ category: "development", id: "Github" }]);
+      await writeIndex(dir, [{ id: "Github", category: "development" }]);
 
       const toolkitsCatalog: ToolkitCatalogEntry[] = [
-        { category: "social", id: "Github" },
+        { id: "Github", category: "social" },
       ];
 
       // No JSON file written — catalog is the only source for category
       const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
-      expect(routes).toEqual([{ category: "social", toolkitId: "github" }]);
+      expect(routes).toEqual([{ toolkitId: "github", category: "social" }]);
     });
   });
 
   it("prefers JSON category over catalog when JSON file is present", async () => {
     await withTempDir(async (dir) => {
-      await writeIndex(dir, [{ category: "development", id: "Github" }]);
+      await writeIndex(dir, [{ id: "Github", category: "development" }]);
       // JSON says "social"; catalog says "development" — JSON wins
       await writeToolkitData(dir, {
         id: "Github",
@@ -134,11 +134,11 @@ describe("toolkit static params", () => {
       });
 
       const toolkitsCatalog: ToolkitCatalogEntry[] = [
-        { category: "development", id: "Github" },
+        { id: "Github", category: "development" },
       ];
 
       const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
-      expect(routes).toEqual([{ category: "social", toolkitId: "github" }]);
+      expect(routes).toEqual([{ toolkitId: "github", category: "social" }]);
 
       const params = await getToolkitStaticParamsForCategory("social", {
         dataDir: dir,
@@ -151,7 +151,7 @@ describe("toolkit static params", () => {
   it("reads correct category from JSON for *Api toolkit with stale index", async () => {
     await withTempDir(async (dir) => {
       // Simulates WeaviateApi: index.json says "development" (stale), JSON says "databases"
-      await writeIndex(dir, [{ category: "development", id: "WeaviateApi" }]);
+      await writeIndex(dir, [{ id: "WeaviateApi", category: "development" }]);
       await writeToolkitData(dir, {
         id: "WeaviateApi",
         metadata: {
@@ -166,7 +166,7 @@ describe("toolkit static params", () => {
         toolkitsCatalog: [],
       });
       expect(routes).toEqual([
-        { category: "databases", toolkitId: "weaviate-api" },
+        { toolkitId: "weaviate-api", category: "databases" },
       ]);
 
       const params = await getToolkitStaticParamsForCategory("databases", {
@@ -180,21 +180,21 @@ describe("toolkit static params", () => {
   it("uses docsLink slugs when available", async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [
-        { category: "productivity", id: "GoogleCalendar" },
+        { id: "GoogleCalendar", category: "productivity" },
       ]);
 
       const toolkitsCatalog: ToolkitCatalogEntry[] = [
         {
+          id: "GoogleCalendar",
           category: "productivity",
           docsLink:
             "https://docs.arcade.dev/en/mcp-servers/productivity/google-calendar",
-          id: "GoogleCalendar",
         },
       ];
 
       const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
       expect(routes).toEqual([
-        { category: "productivity", toolkitId: "google-calendar" },
+        { toolkitId: "google-calendar", category: "productivity" },
       ]);
     });
   });
@@ -202,7 +202,7 @@ describe("toolkit static params", () => {
   it("falls back to data docsLink when catalog entry lacks it", async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [
-        { category: "sales", id: "HubspotConversationsApi" },
+        { id: "HubspotConversationsApi", category: "sales" },
       ]);
       await writeToolkitData(dir, {
         id: "HubspotConversationsApi",
@@ -214,12 +214,12 @@ describe("toolkit static params", () => {
       });
 
       const toolkitsCatalog: ToolkitCatalogEntry[] = [
-        { category: "sales", id: "HubspotConversationsApi" },
+        { id: "HubspotConversationsApi", category: "sales" },
       ];
 
       const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
       expect(routes).toEqual([
-        { category: "sales", toolkitId: "hubspot-conversations-api" },
+        { toolkitId: "hubspot-conversations-api", category: "sales" },
       ]);
     });
   });
@@ -241,17 +241,17 @@ describe("toolkit static params", () => {
       });
 
       expect(routes).toEqual([
-        { category: "productivity", toolkitId: "google-calendar" },
+        { toolkitId: "google-calendar", category: "productivity" },
       ]);
     });
   });
 
   it("skips toolkits marked as hidden in the design system catalog", async () => {
     await withTempDir(async (dir) => {
-      await writeIndex(dir, [{ category: "development", id: "Github" }]);
+      await writeIndex(dir, [{ id: "Github", category: "development" }]);
 
       const toolkitsCatalog: ToolkitCatalogEntry[] = [
-        { category: "development", id: "Github", isHidden: true },
+        { id: "Github", category: "development", isHidden: true },
       ];
 
       const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
@@ -261,7 +261,7 @@ describe("toolkit static params", () => {
 
   it("rejects an unrecognized category in the index schema", async () => {
     await withTempDir(async (dir) => {
-      await writeIndex(dir, [{ category: "weird", id: "Github" }]);
+      await writeIndex(dir, [{ id: "Github", category: "weird" }]);
 
       await expect(
         listToolkitRoutes({ dataDir: dir, toolkitsCatalog: [] })

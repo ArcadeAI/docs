@@ -119,10 +119,10 @@ export function proxy(request: NextRequest) {
   );
   if (currentLocale) {
     response.cookies.set("NEXT_LOCALE", currentLocale, {
-      httpOnly: false,
       maxAge: 31_536_000,
       path: "/",
       sameSite: "lax",
+      httpOnly: false,
     });
   }
 

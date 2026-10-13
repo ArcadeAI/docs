@@ -19,7 +19,7 @@ const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   try {
     await fn(dir);
   } finally {
-    await rm(dir, { force: true, recursive: true });
+    await rm(dir, { recursive: true, force: true });
   }
 };
 
@@ -49,18 +49,18 @@ describe("toolkit data loader", () => {
       const indexFixture = JSON.stringify(
         {
           generatedAt: "2026-01-15T00:00:00.000Z",
+          version: "1.0.0",
           toolkits: [
             {
-              authType: "oauth2",
-              category: "development",
               id: "Github",
               label: "GitHub",
-              toolCount: 3,
-              type: "arcade",
               version: "1.0.0",
+              category: "development",
+              type: "arcade",
+              toolCount: 3,
+              authType: "oauth2",
             },
           ],
-          version: "1.0.0",
         },
         null,
         2
@@ -79,23 +79,23 @@ describe("toolkit data loader", () => {
       // File is named posthogapi.json (normalized) but we look up by the
       // hyphenated slug "posthog-api" that comes from the docsLink.
       const toolkitData = {
-        auth: null,
-        description: null,
         id: "PosthogApi",
         label: "PostHog API",
+        version: "1.0.0",
+        description: null,
+        tools: [],
+        auth: null,
         metadata: {
           category: "development",
-          docsLink:
-            "https://docs.arcade.dev/en/mcp-servers/development/posthog-api",
           iconUrl: "https://design-system.arcade.dev/icons/posthog.svg",
           isBYOC: false,
-          isComingSoon: false,
-          isHidden: false,
           isPro: false,
           type: "arcade_starter",
+          docsLink:
+            "https://docs.arcade.dev/en/mcp-servers/development/posthog-api",
+          isComingSoon: false,
+          isHidden: false,
         },
-        tools: [],
-        version: "1.0.0",
       };
       await writeFile(
         join(dir, "posthogapi.json"),

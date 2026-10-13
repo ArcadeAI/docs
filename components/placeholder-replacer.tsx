@@ -50,10 +50,10 @@ export function PlaceholderReplacer() {
         },
       });
 
-      let currentNode: Node | null = walker.nextNode();
-      while (currentNode) {
+      let currentNode: Node | null;
+      // biome-ignore lint/suspicious/noAssignInExpressions: standard walker iteration pattern
+      while ((currentNode = walker.nextNode())) {
         replaceInTextNode(currentNode as Text);
-        currentNode = walker.nextNode();
       }
     };
 
@@ -94,10 +94,10 @@ export function PlaceholderReplacer() {
 
     // Start observing
     observer.observe(document.body, {
-      characterData: true,
-      characterDataOldValue: true,
       childList: true,
       subtree: true,
+      characterData: true,
+      characterDataOldValue: true,
     });
 
     // Cleanup

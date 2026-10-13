@@ -3,17 +3,16 @@ import { Card, CardContent } from "@arcadeai/design-system";
 import { motion } from "motion/react";
 import Link from "next/link";
 import posthog from "posthog-js";
-import { useCallback } from "react";
 
-interface SampleAppCardProps {
-  blank?: boolean;
-  date?: string;
-  description: string;
-  href: string;
-  image?: string;
-  tags?: string[];
+type SampleAppCardProps = {
   title: string;
-}
+  description: string;
+  image?: string;
+  href: string;
+  blank?: boolean;
+  tags?: string[];
+  date?: string;
+};
 
 export function SampleAppCard({
   title,
@@ -24,14 +23,14 @@ export function SampleAppCard({
   tags = [],
   date,
 }: SampleAppCardProps) {
-  const handleClick = useCallback(() => {
+  const handleClick = () => {
     posthog.capture("Sample app clicked", {
-      app_href: href,
       app_title: title,
-      opens_in_new_tab: blank,
+      app_href: href,
       tags,
+      opens_in_new_tab: blank,
     });
-  }, [href, title, blank, tags]);
+  };
 
   return (
     <motion.div
@@ -47,7 +46,7 @@ export function SampleAppCard({
       >
         <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-primary/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
           <CardContent className="p-0">
-            {image ? (
+            {image && (
               <div className="relative aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100 dark:bg-gray-800">
                 <img
                   alt={title}
@@ -57,17 +56,17 @@ export function SampleAppCard({
                   width={640}
                 />
               </div>
-            ) : null}
+            )}
             <div className="space-y-2 p-4 min-[1062px]:p-6">
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
                   {title}
                 </h3>
-                {date ? (
+                {date && (
                   <span className="whitespace-nowrap font-medium text-gray-500 text-xs dark:text-gray-400">
                     {date}
                   </span>
-                ) : null}
+                )}
               </div>
               <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
                 {description}

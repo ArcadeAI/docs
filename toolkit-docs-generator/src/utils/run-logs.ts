@@ -6,20 +6,20 @@ import { appendFile, mkdir, readFile, writeFile } from "fs/promises";
 import { dirname } from "path";
 
 export interface LogFilePaths {
-  readonly changeLogPath: string;
   readonly runLogPath: string;
+  readonly changeLogPath: string;
 }
 
 export interface LogEntry {
-  readonly details: readonly string[];
   readonly title: string;
+  readonly details: readonly string[];
 }
 
 export interface FailedToolEntry {
-  readonly qualifiedName: string;
-  readonly reason: string;
   readonly toolkitId: string;
   readonly toolName: string;
+  readonly qualifiedName: string;
+  readonly reason: string;
 }
 
 /**
@@ -31,15 +31,15 @@ export interface FailedToolEntry {
  */
 export interface RecoveredToolkitEntry {
   readonly id: string;
-  readonly reason: string;
   readonly recovery: "preserved" | "omitted";
+  readonly reason: string;
 }
 
 export interface FailedToolsReport {
-  readonly failedToolkits: readonly string[];
   readonly generatedAt: string;
-  readonly recoveredToolkits?: readonly RecoveredToolkitEntry[];
   readonly toolkits: readonly string[];
+  readonly failedToolkits: readonly string[];
+  readonly recoveredToolkits?: readonly RecoveredToolkitEntry[];
   readonly tools: readonly FailedToolEntry[];
 }
 

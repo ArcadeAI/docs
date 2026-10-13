@@ -2,16 +2,15 @@
 import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import posthog from "posthog-js";
-import { useCallback } from "react";
 import { getDashboardUrl } from "./dashboard-link";
 
-export interface LinkClickedProps {
+export type LinkClickedProps = {
+  linkLocation: string;
   children?: React.ReactNode;
   className?: string;
-  linkLocation: string;
   utmCampaign?: string;
   utmMedium?: string;
-}
+};
 
 const UTM_SOURCE = "docs";
 const DEFAULT_UTM_CAMPAIGN = "docs";
@@ -33,17 +32,17 @@ export const SignupLink = ({
   utmCampaign = DEFAULT_UTM_CAMPAIGN,
   utmMedium,
 }: LinkClickedProps) => {
-  const handleClick = useCallback(() => {
+  const trackSignupClick = (source: string) => {
     posthog.capture("Signup clicked", {
-      link_location: linkLocation,
+      link_location: source,
     });
-  }, [linkLocation]);
+  };
 
   return (
     <Link
       className={cn("text-brand-accent", className)}
       href={buildRegisterHref(utmCampaign, utmMedium)}
-      onClick={handleClick}
+      onClick={() => trackSignupClick(linkLocation)}
     >
       {children}
     </Link>

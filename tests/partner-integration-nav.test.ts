@@ -34,8 +34,8 @@ const INTEGRATIONS_BASE_PATH = "/en/resources/integrations";
 const partnerCases = PARTNER_TOOLKITS.map((partner) => ({
   partner,
   slug: getToolkitSlug({
-    docsLink: partner.relativeDocsLink,
     id: partner.id,
+    docsLink: partner.relativeDocsLink,
   }),
 }));
 
@@ -56,7 +56,7 @@ const sidebarLabelFor = (
   if (pages.includes(slug)) {
     const file = resolveContentFile(href);
     if (!file) {
-      return undefined;
+      return;
     }
     const content = readFileSync(file, "utf-8");
     return (

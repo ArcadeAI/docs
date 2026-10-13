@@ -2,23 +2,23 @@ import { z } from "zod";
 import type { ToolDefinition, ToolParameter } from "../types/index";
 
 const ToolMetadataValueSchema = z.object({
-  enum: z.array(z.string()).nullable().optional(),
-  inner_val_type: z.string().nullable().optional(),
   val_type: z.string(),
+  inner_val_type: z.string().nullable().optional(),
+  enum: z.array(z.string()).nullable().optional(),
 });
 
 const ToolMetadataParameterSchema = z.object({
-  description: z.string().nullable(),
-  inferrable: z.boolean().default(true),
   name: z.string(),
   required: z.boolean(),
+  description: z.string().nullable(),
   value_schema: ToolMetadataValueSchema,
+  inferrable: z.boolean().default(true),
 });
 
 const ToolMetadataToolkitSchema = z.object({
-  description: z.string().nullable(),
   name: z.string(),
   version: z.string(),
+  description: z.string().nullable(),
 });
 
 const ToolMetadataInputSchema = z.object({
@@ -63,32 +63,32 @@ const ToolItemMetadataClassificationSchema = z.object({
 });
 
 const ToolItemMetadataBehaviorSchema = z.object({
+  operations: z.array(z.string()).default([]),
+  read_only: z.boolean().optional(),
   destructive: z.boolean().optional(),
   idempotent: z.boolean().optional(),
   open_world: z.boolean().optional(),
-  operations: z.array(z.string()).default([]),
-  read_only: z.boolean().optional(),
 });
 
 const ToolItemMetadataSchema = z
   .object({
-    behavior: ToolItemMetadataBehaviorSchema.optional().nullable(),
     classification: ToolItemMetadataClassificationSchema.optional().nullable(),
+    behavior: ToolItemMetadataBehaviorSchema.optional().nullable(),
     extras: z.record(z.string(), z.unknown()).optional().nullable(),
   })
   .optional()
   .nullable();
 
 export const ToolMetadataItemSchema = z.object({
-  description: z.string().nullable(),
   fully_qualified_name: z.string(),
-  input: ToolMetadataInputSchema,
-  metadata: ToolItemMetadataSchema,
-  name: z.string(),
-  output: ToolMetadataOutputSchema,
   qualified_name: z.string(),
-  requirements: ToolMetadataRequirementsSchema,
+  name: z.string(),
+  description: z.string().nullable(),
   toolkit: ToolMetadataToolkitSchema,
+  input: ToolMetadataInputSchema,
+  output: ToolMetadataOutputSchema,
+  requirements: ToolMetadataRequirementsSchema,
+  metadata: ToolItemMetadataSchema,
 });
 
 export const ToolMetadataResponseSchema = z.object({
@@ -101,22 +101,22 @@ export const ToolMetadataResponseSchema = z.object({
 
 const ToolMetadataToolkitSummarySchema = z.object({
   name: z.string(),
-  requires_oauth: z.boolean(),
-  requires_secrets: z.boolean(),
-  tool_count: z.number(),
   version: z.string(),
+  tool_count: z.number(),
+  requires_secrets: z.boolean(),
+  requires_oauth: z.boolean(),
 });
 
 export const ToolMetadataSummaryResponseSchema = z.object({
+  total_tools: z.number(),
+  total_toolkits: z.number(),
   starter_toolkits: z.number(),
   toolkits: z.array(ToolMetadataToolkitSummarySchema),
-  total_toolkits: z.number(),
-  total_tools: z.number(),
 });
 
 const ToolMetadataErrorSchema = z.object({
-  message: z.string(),
   name: z.string(),
+  message: z.string(),
 });
 
 type ToolMetadataItem = z.infer<typeof ToolMetadataItemSchema>;
@@ -143,13 +143,13 @@ const normalizeEnum = (values: string[] | null | undefined): string[] | null =>
 const transformParameter = (
   apiParam: z.infer<typeof ToolMetadataParameterSchema>
 ): ToolParameter => ({
+  name: apiParam.name,
+  type: apiParam.value_schema.val_type,
+  innerType: apiParam.value_schema.inner_val_type ?? undefined,
+  required: apiParam.required,
   description: apiParam.description,
   enum: normalizeEnum(apiParam.value_schema.enum),
   inferrable: apiParam.inferrable,
-  innerType: apiParam.value_schema.inner_val_type ?? undefined,
-  name: apiParam.name,
-  required: apiParam.required,
-  type: apiParam.value_schema.val_type,
 });
 
 const normalizeSecrets = (
@@ -182,12 +182,12 @@ const transformBehavior = (
 const transformItemMetadata = (
   raw: z.infer<typeof ToolItemMetadataSchema>
 ): ToolDefinition["metadata"] => {
-  if (raw === null || raw === undefined) return null;
+  if (raw == null) return null;
   return {
-    behavior: transformBehavior(raw.behavior),
     classification: {
       serviceDomains: raw.classification?.service_domains ?? [],
     },
+    behavior: transformBehavior(raw.behavior),
     extras: raw.extras ?? null,
   };
 };
@@ -201,6 +201,12 @@ export const transformToolMetadataItem = (
   const metadata = transformItemMetadata(apiTool.metadata);
 
   return {
+    name: apiTool.name,
+    qualifiedName: apiTool.qualified_name,
+    fullyQualifiedName: apiTool.fully_qualified_name,
+    description: apiTool.description,
+    toolkitDescription: apiTool.toolkit.description,
+    parameters: apiTool.input.parameters.map(transformParameter),
     auth:
       authEntry && providerType
         ? {
@@ -209,21 +215,15 @@ export const transformToolMetadataItem = (
             scopes: authEntry.scopes ?? [],
           }
         : null,
-    description: apiTool.description,
-    fullyQualifiedName: apiTool.fully_qualified_name,
-    metadata,
-    name: apiTool.name,
+    secrets: normalizeSecrets(apiTool.requirements?.secrets),
     output: apiTool.output
       ? {
-          description: apiTool.output.description ?? null,
           // Keep parity with /v1/tools normalization for source-agnostic diffs.
           type: apiTool.output.value_schema?.val_type ?? "string",
+          description: apiTool.output.description ?? null,
         }
       : null,
-    parameters: apiTool.input.parameters.map(transformParameter),
-    qualifiedName: apiTool.qualified_name,
-    secrets: normalizeSecrets(apiTool.requirements?.secrets),
-    toolkitDescription: apiTool.toolkit.description,
+    metadata,
   };
 };
 
@@ -242,16 +242,16 @@ export const parseToolMetadataSummaryResponse = (
 ): ToolMetadataSummary => {
   const parsed = ToolMetadataSummaryResponseSchema.parse(payload);
   return {
+    totalTools: parsed.total_tools,
+    totalToolkits: parsed.total_toolkits,
     starterToolkits: parsed.starter_toolkits,
     toolkits: parsed.toolkits.map((toolkit: ToolMetadataToolkitSummary) => ({
       name: toolkit.name,
-      requiresOauth: toolkit.requires_oauth,
-      requiresSecrets: toolkit.requires_secrets,
-      toolCount: toolkit.tool_count,
       version: toolkit.version,
+      toolCount: toolkit.tool_count,
+      requiresSecrets: toolkit.requires_secrets,
+      requiresOauth: toolkit.requires_oauth,
     })),
-    totalToolkits: parsed.total_toolkits,
-    totalTools: parsed.total_tools,
   };
 };
 

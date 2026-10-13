@@ -32,15 +32,15 @@ export function toToolkitSummary(data: ToolkitData): ToolkitSummary {
     ...data,
     tools: data.tools.map(
       (tool): ToolSummary => ({
-        auth: tool.auth,
-        description: tool.description,
-        documentationChunks: tool.documentationChunks,
-        fullyQualifiedName: tool.fullyQualifiedName,
-        metadata: tool.metadata,
         name: tool.name,
         qualifiedName: tool.qualifiedName,
+        fullyQualifiedName: tool.fullyQualifiedName,
+        description: tool.description,
+        auth: tool.auth,
         secrets: tool.secrets,
         secretsInfo: tool.secretsInfo,
+        metadata: tool.metadata,
+        documentationChunks: tool.documentationChunks,
       })
     ),
   };
@@ -49,9 +49,9 @@ export function toToolkitSummary(data: ToolkitData): ToolkitSummary {
 export type ToolkitIndexEntry = z.infer<typeof ToolkitIndexEntrySchema>;
 export type ToolkitIndex = z.infer<typeof ToolkitIndexSchema>;
 
-interface ToolkitDataOptions {
+type ToolkitDataOptions = {
   dataDir?: string;
-}
+};
 
 const resolveDataDir = (options?: ToolkitDataOptions): string =>
   resolveToolkitDataDir(options?.dataDir);
@@ -84,8 +84,7 @@ export const readToolkitFile = async (
       return null;
     }
     throw new Error(
-      `Failed to read toolkit file ${filePath}: ${describeError(error)}`,
-      { cause: error }
+      `Failed to read toolkit file ${filePath}: ${describeError(error)}`
     );
   }
 
@@ -94,8 +93,7 @@ export const readToolkitFile = async (
     parsed = JSON.parse(content);
   } catch (error) {
     throw new Error(
-      `Invalid JSON in toolkit file ${filePath}: ${describeError(error)}`,
-      { cause: error }
+      `Invalid JSON in toolkit file ${filePath}: ${describeError(error)}`
     );
   }
 
@@ -117,10 +115,10 @@ export const readToolkitFile = async (
  * `readToolkitData` below tries the id map first, then the slug map, mirroring
  * the direct-file-then-scan order the old implementation used.
  */
-interface ToolkitDataMap {
+type ToolkitDataMap = {
   byNormalizedId: Map<string, ToolkitData>;
   bySlug: Map<string, ToolkitData>;
-}
+};
 
 /**
  * The production data directory is immutable for the lifetime of a process,
@@ -164,34 +162,30 @@ const loadAllToolkitDataUncached = async (
     entries = await readdir(dataDir);
   } catch (error) {
     throw new Error(
-      `Failed to read toolkit data directory ${dataDir}: ${describeError(error)}`,
-      { cause: error }
+      `Failed to read toolkit data directory ${dataDir}: ${describeError(error)}`
     );
   }
 
   const byNormalizedId = new Map<string, ToolkitData>();
   const bySlug = new Map<string, ToolkitData>();
 
-  const toolkitEntries = entries.filter(
-    (entry) => entry.endsWith(".json") && entry !== "index.json"
-  );
-  // Throws on a corrupt file (see readToolkitFile) — a malformed file here
-  // is never legitimately "absent", so it fails the build/request loudly
-  // rather than being dropped from the map. Files are read concurrently but
-  // inserted in directory order so later entries still win on key collisions.
-  const loaded = await Promise.all(
-    toolkitEntries.map((entry) => readToolkitFile(join(dataDir, entry)))
-  );
+  for (const entry of entries) {
+    if (!entry.endsWith(".json") || entry === "index.json") {
+      continue;
+    }
 
-  for (const data of loaded) {
+    // Throws on a corrupt file (see readToolkitFile) — a malformed file here
+    // is never legitimately "absent", so it fails the build/request loudly
+    // rather than being dropped from the map.
+    const data = await readToolkitFile(join(dataDir, entry));
     if (!data) {
       continue;
     }
 
     byNormalizedId.set(normalizeToolkitId(data.id), data);
     const slug = getToolkitSlug({
-      docsLink: data.metadata?.docsLink,
       id: data.id,
+      docsLink: data.metadata?.docsLink,
     });
     bySlug.set(slug.toLowerCase(), data);
   }
@@ -320,8 +314,7 @@ export const readToolkitIndex = async (
       return null;
     }
     throw new Error(
-      `Failed to read toolkit index ${filePath}: ${describeError(error)}`,
-      { cause: error }
+      `Failed to read toolkit index ${filePath}: ${describeError(error)}`
     );
   }
 
@@ -330,8 +323,7 @@ export const readToolkitIndex = async (
     parsed = JSON.parse(content);
   } catch (error) {
     throw new Error(
-      `Invalid JSON in toolkit index ${filePath}: ${describeError(error)}`,
-      { cause: error }
+      `Invalid JSON in toolkit index ${filePath}: ${describeError(error)}`
     );
   }
 

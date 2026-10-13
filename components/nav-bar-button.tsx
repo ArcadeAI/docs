@@ -5,11 +5,11 @@ import type { ComponentProps } from "react";
 
 type ButtonVariant = ComponentProps<typeof Button>["variant"];
 
-interface NavBarButtonProps {
-  hideOnPath?: string[];
+type NavBarButtonProps = {
   text: string;
+  hideOnPath?: string[];
   variant?: ButtonVariant;
-}
+};
 
 export const NavBarButton = ({
   text,
@@ -22,3 +22,5 @@ export const NavBarButton = ({
   }
   return <Button variant={variant}>{text}</Button>;
 };
+
+export default NavBarButton;

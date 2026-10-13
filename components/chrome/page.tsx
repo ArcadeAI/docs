@@ -41,14 +41,14 @@ function nodeRoute(node: SidebarNode | undefined): string {
   return node.kind === "folder" ? node.route : "";
 }
 
-interface ActiveInfo {
+type ActiveInfo = {
   /** Entries that can be paged through, in sidebar order. */
   flat: SidebarPage[];
   /** Position of the current page in `flat`. */
   index: number;
   /** Sidebar entries from the top-level section down to the current page. */
   path: (SidebarFolder | SidebarPage)[];
-}
+};
 
 /**
  * Walks the sidebar in display order. Link-only entries (toolkit pages, cross
@@ -60,18 +60,21 @@ function findActive(directories: SidebarNode[], route: string): ActiveInfo {
   let index = -1;
   let path: (SidebarFolder | SidebarPage)[] = [];
 
+  const visitPage = (node: SidebarPage, parents: SidebarFolder[]) => {
+    if (index === -1 && isActive(route, node.href)) {
+      index = flat.length;
+      path = [...parents, node];
+    }
+    if (!node.linkOnly) {
+      flat.push(node);
+    }
+  };
   const walk = (nodes: SidebarNode[], parents: SidebarFolder[]) => {
     for (const node of nodes) {
       if (node.kind === "folder") {
         walk(node.children, [...parents, node]);
       } else if (node.kind === "page") {
-        if (index === -1 && isActive(route, node.href)) {
-          index = flat.length;
-          path = [...parents, node];
-        }
-        if (!node.linkOnly) {
-          flat.push(node);
-        }
+        visitPage(node, parents);
       }
     }
   };
@@ -385,7 +388,7 @@ const DATE_FORMAT = new Intl.DateTimeFormat("en", {
   year: "numeric",
 });
 
-export interface DocsPageShellProps {
+export type DocsPageShellProps = {
   /** Show the breadcrumb above the page. */
   breadcrumb?: boolean;
   children: ReactNode;
@@ -404,7 +407,7 @@ export interface DocsPageShellProps {
   /** Show the table of contents column content. */
   toc?: boolean;
   tocItems?: TocEntry[];
-}
+};
 
 const NO_TOC: TocEntry[] = [];
 

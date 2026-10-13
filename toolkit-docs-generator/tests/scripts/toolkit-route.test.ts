@@ -20,7 +20,7 @@ vi.mock("fumadocs-ui/layouts/docs/page", () => ({
 // the fumadocs-mdx plugin; the route only asks it whether an MDX page already
 // owns a slug, and no authored page collides with a generated toolkit.
 vi.mock("../../../lib/source", () => ({
-  source: { getPage: () => undefined },
+  source: { getPage: vi.fn() },
 }));
 
 import {

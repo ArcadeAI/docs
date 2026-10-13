@@ -12,25 +12,25 @@ import type {
   MergedToolkitMetadata,
 } from "../toolkit-docs-generator/src/shared/toolkit-schemas";
 
-interface PageMetadata {
-  content: string;
+type PageMetadata = {
   path: string;
   url: string;
-}
+  content: string;
+};
 
-interface Section {
+type Section = {
   name: string;
   pages: Array<{
     title: string;
     url: string;
     description: string;
   }>;
-}
+};
 
-interface LlmsTxtMetadata {
-  generationDate: string;
+type LlmsTxtMetadata = {
   gitSha: string;
-}
+  generationDate: string;
+};
 
 const BASE_URL = "https://docs.arcade.dev";
 const OUTPUT_PATH = path.join(process.cwd(), "public", "llms.txt");
@@ -71,9 +71,7 @@ function getCurrentGitSha(): string {
     return execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
   } catch (error) {
     console.error(
-      chalk.red(
-        "✗ Could not get git SHA. Make sure you're in a git repository."
-      )
+      chalk.red("✗ Could not get git SHA. Make sure you're in a git repository.")
     );
     throw new Error("Failed to get git SHA", { cause: error });
   }
@@ -88,11 +86,11 @@ async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
     const metadataMatch = content.match(METADATA_REGEX);
     if (metadataMatch) {
       return {
-        generationDate: metadataMatch[2],
         gitSha: metadataMatch[1],
+        generationDate: metadataMatch[2],
       };
     }
-  } catch {
+  } catch (_error) {
     // File doesn't exist or can't be read - that's okay
   }
   return null;
@@ -134,7 +132,7 @@ function getChangedFilesSince(lastSha: string): Set<string> {
 
     const allChanged = new Set([...added, ...modified, ...deleted]);
     return allChanged;
-  } catch {
+  } catch (_error) {
     console.warn(
       chalk.yellow(
         `⚠ Could not get changed files since ${lastSha}, processing all files`
@@ -157,7 +155,7 @@ async function extractExistingSummaries(): Promise<
     for (const [, title, url, rawDescription] of content.matchAll(LINK_REGEX)) {
       summaries.set(url, { description: rawDescription.trim(), title });
     }
-  } catch {
+  } catch (_error) {
     // File doesn't exist or can't be read - that's okay
   }
   return summaries;
@@ -204,9 +202,9 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
     const url = contentFileToUrl(filePath);
 
     pages.push({
-      content,
       path: filePath,
       url,
+      content,
     });
   }
 
@@ -291,9 +289,9 @@ async function discoverToolkitPages(): Promise<
   let allowedIds: Set<string> | null = null;
   try {
     const indexPath = path.join(TOOLKIT_DATA_DIR, "index.json");
-    const indexData = JSON.parse(await fs.readFile(indexPath, "utf-8")) as {
-      toolkits?: Array<{ id: string }>;
-    };
+    const indexData = JSON.parse(
+      await fs.readFile(indexPath, "utf-8")
+    ) as { toolkits?: Array<{ id: string }> };
     if (indexData.toolkits && indexData.toolkits.length > 0) {
       allowedIds = new Set(indexData.toolkits.map((t) => t.id));
     }
@@ -325,16 +323,16 @@ async function discoverToolkitPages(): Promise<
         continue;
       }
       const url = `${BASE_URL}${getToolkitCanonicalPath({
+        id: data.id,
         category: data.metadata?.category,
         docsLink: data.metadata?.docsLink,
-        id: data.id,
       })}`;
       pagesByUrl.set(url, {
-        content: "",
-        description: buildToolkitDescription(data),
         path: path.relative(process.cwd(), filePath),
-        title: (data.label || data.id).trim(),
         url,
+        content: "",
+        title: (data.label || data.id).trim(),
+        description: buildToolkitDescription(data),
       });
     } catch {
       // Ignore malformed toolkit data files.
@@ -368,17 +366,17 @@ async function summarizePage(
     contentForSummary = contentForSummary.slice(0, MAX_CONTENT_LENGTH);
 
     const response = await anthropic.messages.create({
-      max_tokens: 200,
-      messages: [
-        {
-          content: `Summarize this documentation page:\n\nTitle: ${title}\n\nContent:\n${contentForSummary}`,
-          role: "user",
-        },
-      ],
       model: "claude-haiku-4-5-20251001",
       system:
         "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn. Reply with one or two plain sentences only: no headings, no markdown, no line breaks.",
+      messages: [
+        {
+          role: "user",
+          content: `Summarize this documentation page:\n\nTitle: ${title}\n\nContent:\n${contentForSummary}`,
+        },
+      ],
       temperature: 0.3,
+      max_tokens: 200,
     });
 
     const text = response.content
@@ -391,12 +389,12 @@ async function summarizePage(
         .replace(WHITESPACE_RUN_REGEX, " ")
         .trim() || PLACEHOLDER_DESCRIPTION;
 
-    return { description, title };
+    return { title, description };
   } catch (error) {
     console.error(chalk.red(`✗ Error summarizing ${page.path}:`), error);
     return {
-      description: PLACEHOLDER_DESCRIPTION,
       title: extractPageTitle(page.content, page.path),
+      description: PLACEHOLDER_DESCRIPTION,
     };
   }
 }
@@ -449,9 +447,9 @@ function organizeSections(
     const section = sectionMap.get(sectionName);
     if (section) {
       section.pages.push({
-        description: page.description,
         title: page.title,
         url: page.url,
+        description: page.description,
       });
     }
   }
@@ -853,9 +851,7 @@ async function main() {
     // pages so a static page (e.g. resources/integrations/search/tavily) that
     // appears in both sets doesn't emit two entries in llms.txt.
     const seenUrls = new Set<string>();
-    const allPages: Array<
-      PageMetadata & { title: string; description: string }
-    > = [];
+    const allPages: Array<PageMetadata & { title: string; description: string }> = [];
     for (const page of [...summarizedPages, ...toolkitPages]) {
       if (!seenUrls.has(page.url)) {
         seenUrls.add(page.url);
@@ -873,12 +869,12 @@ async function main() {
     // Only update metadata if there are changes, otherwise keep previous metadata
     const metadata: LlmsTxtMetadata = hasChanges
       ? {
-          generationDate: new Date().toISOString(),
           gitSha: currentSha,
+          generationDate: new Date().toISOString(),
         }
       : previousMetadata || {
-          generationDate: new Date().toISOString(),
           gitSha: currentSha,
+          generationDate: new Date().toISOString(),
         };
     const content = generateLlmsTxt(sections, metadata);
 

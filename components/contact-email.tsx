@@ -10,14 +10,14 @@ const CONTACT_PAGE = "/en/resources/contact-us";
 const linkClassName =
   "text-brand-accent underline decoration-from-font [text-underline-position:from-font]";
 
-interface ContactEmailProps {
-  /** Visible link text. Keep it free of the raw address (see below). */
-  children: ReactNode;
-  /** Domain of the address, e.g. "arcade.dev". */
-  domain: string;
+type ContactEmailProps = {
   /** Local part of the address, e.g. "security" for security@arcade.dev. */
   user: string;
-}
+  /** Domain of the address, e.g. "arcade.dev". */
+  domain: string;
+  /** Visible link text. Keep it free of the raw address (see below). */
+  children: ReactNode;
+};
 
 /**
  * A mailto link whose address is assembled only after hydration.

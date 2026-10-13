@@ -36,8 +36,8 @@ export function CodeSkeleton({
           <div
             className="h-4 animate-pulse rounded bg-muted/40"
             style={{
-              animationDelay: `${lineIndex * delayStep}ms`,
               width: `${widths[lineIndex]}%`,
+              animationDelay: `${lineIndex * delayStep}ms`,
             }}
           />
         </div>

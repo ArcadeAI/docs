@@ -9,6 +9,7 @@ const config: NextConfig = {
   headers: () =>
     Promise.resolve([
       {
+        source: "/(.*)",
         headers: [
           {
             key: "X-Frame-Options",
@@ -27,7 +28,6 @@ const config: NextConfig = {
             value: "strict-origin-when-cross-origin",
           },
         ],
-        source: "/(.*)",
       },
     ]),
   reactStrictMode: true,

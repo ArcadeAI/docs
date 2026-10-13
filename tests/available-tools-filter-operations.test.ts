@@ -2,20 +2,20 @@ import { describe, expect, it } from "vitest";
 import { filterTools } from "@/components/toolkit-docs/components/available-tools-filter";
 
 const makeTool = (name: string, operations: string[]) => ({
+  name,
+  qualifiedName: `Slack.${name}`,
   description: null,
   metadata: {
+    classification: { serviceDomains: [] },
     behavior: {
+      operations,
+      readOnly: false,
       destructive: false,
       idempotent: false,
       openWorld: false,
-      operations,
-      readOnly: false,
     },
-    classification: { serviceDomains: [] },
     extras: null,
   },
-  name,
-  qualifiedName: `Slack.${name}`,
 });
 
 describe("filterTools — operations", () => {
@@ -24,10 +24,10 @@ describe("filterTools — operations", () => {
     makeTool("PostMessage", ["create"]),
     makeTool("DeleteMessage", ["delete"]),
     {
-      description: null,
-      metadata: null,
       name: "NoMeta",
       qualifiedName: "Slack.NoMeta",
+      description: null,
+      metadata: null,
     },
   ];
 

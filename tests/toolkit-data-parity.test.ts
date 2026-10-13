@@ -55,8 +55,8 @@ describe("toolkit data parity", () => {
         .filter((toolkit) => !toolkit.metadata.isHidden)
         .map((toolkit) => {
           const slug = getToolkitSlug({
-            docsLink: toolkit.metadata.docsLink,
             id: toolkit.id,
+            docsLink: toolkit.metadata.docsLink,
           });
           return `${toolkit.metadata.category}/${slug}`;
         })

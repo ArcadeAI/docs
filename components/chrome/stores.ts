@@ -11,11 +11,11 @@ import type { SidebarNode } from "@/components/chrome/sidebar-model";
 /** Sidebar entries, provided by the docs layout. */
 export const DirectoriesContext = createContext<SidebarNode[]>([]);
 
-export interface TocEntry {
+export type TocEntry = {
   depth: number;
   id: string;
   title: ReactNode;
-}
+};
 
 function createStore<T>(initial: T) {
   let value = initial;

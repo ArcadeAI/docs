@@ -30,18 +30,18 @@ function CopyToolButton({ tool }: { tool: ToolDefinition }) {
 
   const handleCopy = useCallback(async () => {
     const toolDefinition = {
-      description: tool.description,
       name: tool.qualifiedName,
-      output: tool.output,
+      description: tool.description,
       parameters: tool.parameters.map((p) => ({
-        description: p.description,
         name: p.name,
-        required: p.required,
         type: p.type,
+        required: p.required,
+        description: p.description,
         ...(p.enum ? { enum: p.enum } : {}),
       })),
       scopes: tool.auth?.scopes ?? [],
       secrets: tool.secrets,
+      output: tool.output,
     };
 
     try {
@@ -163,20 +163,17 @@ function ToolSelectionToggle({
   hasScopes: boolean;
   hasSecrets: boolean;
 }) {
-  const handleChange = useCallback(() => {
-    onToggleSelection?.(tool.name);
-  }, [onToggleSelection, tool.name]);
   return (
     <label className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-dark-high bg-neutral-dark/40 px-3 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark/60">
       <input
         aria-label={`Add ${tool.name} to selected tools`}
         checked={isSelected}
         className="rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
-        onChange={handleChange}
+        onChange={() => onToggleSelection?.(tool.name)}
         type="checkbox"
       />
       Add to selected tools
-      {hasScopes || hasSecrets ? null : (
+      {!(hasScopes || hasSecrets) && (
         <span className="text-muted-foreground/60">(no auth required)</span>
       )}
     </label>
@@ -197,11 +194,11 @@ function ToolDescriptionSection({
         location="description"
         position="before"
       />
-      {showDescription ? (
+      {showDescription && (
         <p className="text-foreground text-sm leading-relaxed">
           {tool.description ?? "No description provided."}
         </p>
-      ) : null}
+      )}
       <DocumentationChunkRenderer
         chunks={tool.documentationChunks}
         location="description"
@@ -233,7 +230,7 @@ function ToolParametersSection({
         location="parameters"
         position="before"
       />
-      {showParameters ? <ParametersTable parameters={tool.parameters} /> : null}
+      {showParameters && <ParametersTable parameters={tool.parameters} />}
       <DocumentationChunkRenderer
         chunks={tool.documentationChunks}
         location="parameters"
@@ -274,21 +271,21 @@ function ToolRequirementsSection({
         Requirements
       </h4>
 
-      {showAdvanced && hasScopes ? (
+      {showAdvanced && hasScopes && (
         <div className="mb-3 flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-red-600 dark:text-red-400" />
           <span className="text-foreground text-sm">
             Requires {scopes.length} OAuth scope{scopes.length > 1 ? "s" : ""}
           </span>
         </div>
-      ) : null}
+      )}
 
       <DocumentationChunkRenderer
         chunks={tool.documentationChunks}
         location="secrets"
         position="before"
       />
-      {showSecrets ? (
+      {showSecrets && (
         <div className="flex items-start gap-2">
           <KeyRound
             className={`mt-0.5 h-4 w-4 shrink-0 ${hasSecrets ? "text-amber-400" : "text-muted-foreground/50"}`}
@@ -320,7 +317,7 @@ function ToolRequirementsSection({
             </span>
           )}
         </div>
-      ) : null}
+      )}
       <DocumentationChunkRenderer
         chunks={tool.documentationChunks}
         location="secrets"
@@ -332,7 +329,7 @@ function ToolRequirementsSection({
         position="after"
       />
 
-      {hasScopes ? (
+      {hasScopes && (
         <div className="mt-3 border-neutral-dark-high/30 border-t pt-3">
           <Button
             onClick={onToggleAdvanced}
@@ -346,7 +343,7 @@ function ToolRequirementsSection({
               : "Show OAuth requirements"}
           </Button>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
@@ -382,7 +379,7 @@ function ToolScopesDetailsSection({
         location="auth"
         position="before"
       />
-      {showAuth ? <ScopesDisplay scopes={scopes} variant="inline" /> : null}
+      {showAuth && <ScopesDisplay scopes={scopes} variant="inline" />}
       <DocumentationChunkRenderer
         chunks={tool.documentationChunks}
         location="auth"
@@ -414,7 +411,7 @@ function ToolOutputSection({
         location="output"
         position="before"
       />
-      {showOutput ? (
+      {showOutput && (
         <div className="rounded-lg bg-neutral-dark/30 p-4 text-sm">
           {tool.output ? (
             <div className="flex items-center gap-3">
@@ -422,11 +419,11 @@ function ToolOutputSection({
               <code className="font-mono text-foreground text-xs">
                 {tool.output.type}
               </code>
-              {tool.output.description ? (
+              {tool.output.description && (
                 <span className="text-foreground">
                   — {tool.output.description}
                 </span>
-              ) : null}
+              )}
             </div>
           ) : (
             <p className="text-muted-foreground/70">
@@ -434,7 +431,7 @@ function ToolOutputSection({
             </p>
           )}
         </div>
-      ) : null}
+      )}
       <DocumentationChunkRenderer
         chunks={tool.documentationChunks}
         location="output"
@@ -553,19 +550,6 @@ export function ToolSection({
     "output"
   );
 
-  const handleToggleExpanded = useCallback(
-    () => setExpanded((value) => !value),
-    []
-  );
-  const handleToggleAdvanced = useCallback(
-    () => setShowAdvanced((value) => !value),
-    []
-  );
-  const handleRetry = useCallback(
-    () => setReloadToken((token) => token + 1),
-    []
-  );
-
   return (
     <section
       className="mt-10 rounded-xl border-neutral-dark-high/20 border-b bg-neutral-dark/20 p-6 last:border-b-0"
@@ -575,13 +559,13 @@ export function ToolSection({
       <ToolHeaderSection
         anchorId={anchorId}
         expanded={expanded}
-        onToggleExpanded={handleToggleExpanded}
+        onToggleExpanded={() => setExpanded((value) => !value)}
         tool={tool}
       />
 
-      {expanded ? (
+      {expanded && (
         <>
-          {showSelection ? (
+          {showSelection && (
             <ToolSelectionToggle
               hasScopes={hasScopes}
               hasSecrets={hasSecrets}
@@ -589,18 +573,20 @@ export function ToolSection({
               onToggleSelection={onToggleSelection}
               tool={tool}
             />
-          ) : null}
+          )}
           <ToolMetadataSection metadata={tool.metadata} />
           <ToolDescriptionSection
             showDescription={showDescription}
             tool={tool}
           />
 
-          {detail.status === "loading" ? <ToolDetailLoading /> : null}
-          {detail.status === "error" ? (
-            <ToolDetailError onRetry={handleRetry} />
-          ) : null}
-          {fullTool ? (
+          {detail.status === "loading" && <ToolDetailLoading />}
+          {detail.status === "error" && (
+            <ToolDetailError
+              onRetry={() => setReloadToken((token) => token + 1)}
+            />
+          )}
+          {fullTool && (
             <>
               <ToolParametersSection
                 showParameters={showParameters}
@@ -609,7 +595,7 @@ export function ToolSection({
               <ToolRequirementsSection
                 hasScopes={hasScopes}
                 hasSecrets={hasSecrets}
-                onToggleAdvanced={handleToggleAdvanced}
+                onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
                 scopes={scopes}
                 secretsInfo={secretsInfo}
                 showAdvanced={showAdvanced}
@@ -629,9 +615,11 @@ export function ToolSection({
                 <CopyToolButton tool={fullTool} />
               </div>
             </>
-          ) : null}
+          )}
         </>
-      ) : null}
+      )}
     </section>
   );
 }
+
+export default ToolSection;

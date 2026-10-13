@@ -9,17 +9,17 @@ const DEBOUNCE_TIME = 300;
 const TYPE_PRIORITY: Record<ToolkitType, number> = {
   arcade: 0,
   arcade_starter: 1,
-  auth: 4,
-  community: 3,
   verified: 2,
+  community: 3,
+  auth: 4,
 };
 
 const TYPE_LABELS: Record<ToolkitType, string> = {
   arcade: "Arcade Optimized",
   arcade_starter: "Arcade Unoptimized",
-  auth: "Auth Provider",
-  community: "Community",
   verified: "Verified",
+  community: "Community",
+  auth: "Auth Provider",
 };
 
 const getTypePriority = (type: string): number =>
@@ -97,8 +97,8 @@ export function useToolkitFilters<T extends Toolkit>(toolkits: T[]) {
     searchQuery !== "";
 
   return {
-    filteredToolkits,
     hasActiveFilters,
+    filteredToolkits,
     resultsCount: filteredToolkits.length,
   };
 }

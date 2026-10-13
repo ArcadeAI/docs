@@ -3,16 +3,15 @@ import { Card, CardContent } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import posthog from "posthog-js";
-import { useCallback } from "react";
 
-interface IntegrationCardProps {
-  description: string;
-  icon: LucideIcon;
+type IntegrationCardProps = {
   id: string;
+  icon: LucideIcon;
+  title: string;
+  description: string;
   isActive?: boolean;
   onClick: () => void;
-  title: string;
-}
+};
 
 export function IntegrationCard({
   id,
@@ -22,14 +21,14 @@ export function IntegrationCard({
   isActive = false,
   onClick,
 }: IntegrationCardProps) {
-  const handleClick = useCallback(() => {
+  const handleClick = () => {
     posthog.capture("Integration card clicked", {
       integration_id: id,
       integration_title: title,
       is_active: isActive,
     });
     onClick();
-  }, [id, title, isActive, onClick]);
+  };
 
   return (
     <Card

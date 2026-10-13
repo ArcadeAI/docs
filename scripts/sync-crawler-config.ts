@@ -61,14 +61,11 @@ const payload = {
   })),
 };
 
-const configResponse = await fetch(
-  `${API_BASE}/crawlers/${CRAWLER_ID}/config`,
-  {
-    body: JSON.stringify(payload),
-    headers: { Authorization: authHeader, "Content-Type": "application/json" },
-    method: "PATCH",
-  }
-);
+const configResponse = await fetch(`${API_BASE}/crawlers/${CRAWLER_ID}/config`, {
+  method: "PATCH",
+  headers: { Authorization: authHeader, "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+});
 
 if (!configResponse.ok) {
   console.error(
@@ -88,13 +85,13 @@ if (ADMIN_API_KEY) {
     const response = await fetch(
       `https://${crawlerConfig.appId}-dsn.algolia.net/1/indexes/${encodeURIComponent(indexName)}/settings`,
       {
-        body: JSON.stringify(settings),
-        headers: {
-          "Content-Type": "application/json",
-          "X-Algolia-API-Key": ADMIN_API_KEY,
-          "X-Algolia-Application-Id": crawlerConfig.appId,
-        },
         method: "PUT",
+        headers: {
+          "X-Algolia-Application-Id": crawlerConfig.appId,
+          "X-Algolia-API-Key": ADMIN_API_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(settings),
       }
     );
     if (!response.ok) {
@@ -121,7 +118,7 @@ if (process.env.SKIP_REINDEX === "true") {
 
 const reindexResponse = await fetch(
   `${API_BASE}/crawlers/${CRAWLER_ID}/reindex`,
-  { headers: { Authorization: authHeader }, method: "POST" }
+  { method: "POST", headers: { Authorization: authHeader } }
 );
 
 if (!reindexResponse.ok) {

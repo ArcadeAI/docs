@@ -25,162 +25,162 @@ import { SampleAppCard } from "@/components/sample-app-card";
 
 const ANIMATION_DURATION = 0.5;
 const ANIMATION_DELAYS = {
-  buttons: 0.6,
   initial: 0.2,
   secondary: 0.4,
+  buttons: 0.6,
 } as const;
 const INTEGRATIONS_PAGE_HREF = "/en/resources/integrations";
 
 // Popular integrations to showcase (row 1: productivity/work)
 const POPULAR_INTEGRATIONS_ROW1 = [
   {
-    href: "/resources/integrations/productivity/google-sheets",
-    icon: "/images/icons/google_sheets.svg",
     name: "Google Sheets",
+    icon: "/images/icons/google_sheets.svg",
+    href: "/resources/integrations/productivity/google-sheets",
   },
   {
-    href: "/resources/integrations/productivity/jira",
-    icon: "/images/icons/jira.svg",
     name: "Jira",
+    icon: "/images/icons/jira.svg",
+    href: "/resources/integrations/productivity/jira",
   },
   {
-    href: "/resources/integrations/productivity/gmail",
-    icon: "/images/icons/gmail.png",
     name: "Gmail",
+    icon: "/images/icons/gmail.png",
+    href: "/resources/integrations/productivity/gmail",
   },
   {
-    href: "/resources/integrations/productivity/confluence",
-    icon: "/images/icons/confluence.svg",
-    invertInDark: true,
     name: "Confluence",
+    icon: "/images/icons/confluence.svg",
+    href: "/resources/integrations/productivity/confluence",
+    invertInDark: true,
   },
   {
-    href: "/resources/integrations/social/slack",
-    icon: "/images/icons/slack.png",
     name: "Slack",
+    icon: "/images/icons/slack.png",
+    href: "/resources/integrations/social/slack",
   },
   {
-    href: "/resources/integrations/productivity/google-docs",
-    icon: "/images/icons/google_docs.png",
     name: "Google Docs",
+    icon: "/images/icons/google_docs.png",
+    href: "/resources/integrations/productivity/google-docs",
   },
   {
-    href: "/resources/integrations/productivity/google-slides",
-    icon: "/images/icons/google_slides.png",
     name: "Google Slides",
+    icon: "/images/icons/google_slides.png",
+    href: "/resources/integrations/productivity/google-slides",
   },
   {
-    href: "/resources/integrations/sales/hubspot",
-    icon: "/images/icons/hubspot.png",
     name: "HubSpot",
+    icon: "/images/icons/hubspot.png",
+    href: "/resources/integrations/sales/hubspot",
   },
   {
-    href: "/resources/integrations/productivity/linear",
-    icon: "/images/icons/linear.svg",
     name: "Linear",
+    icon: "/images/icons/linear.svg",
+    href: "/resources/integrations/productivity/linear",
   },
   {
-    href: "/resources/integrations/productivity/google-drive",
-    icon: "/images/icons/google_drive.png",
     name: "Google Drive",
+    icon: "/images/icons/google_drive.png",
+    href: "/resources/integrations/productivity/google-drive",
   },
 ];
 
 // Row 2: developer/fun integrations
 const POPULAR_INTEGRATIONS_ROW2 = [
   {
-    href: "/resources/integrations/development/github",
-    icon: "/images/icons/github.png",
-    invertInLight: true,
     name: "GitHub",
+    icon: "/images/icons/github.png",
+    href: "/resources/integrations/development/github",
+    invertInLight: true,
   },
   {
-    href: "/resources/integrations/social/x",
-    icon: "/images/icons/twitter.png",
     name: "X",
+    icon: "/images/icons/twitter.png",
+    href: "/resources/integrations/social/x",
   },
   {
-    href: "/resources/integrations/social/microsoft-teams",
-    icon: "/images/icons/ms_teams.png",
     name: "MS Teams",
+    icon: "/images/icons/ms_teams.png",
+    href: "/resources/integrations/social/microsoft-teams",
   },
   {
-    href: "/resources/integrations/payments/stripe",
-    icon: "/images/icons/stripe.svg",
     name: "Stripe",
+    icon: "/images/icons/stripe.svg",
+    href: "/resources/integrations/payments/stripe",
   },
   {
-    href: "/resources/integrations/productivity/notion",
-    icon: "/images/icons/notion.png",
     name: "Notion",
+    icon: "/images/icons/notion.png",
+    href: "/resources/integrations/productivity/notion",
   },
   {
-    href: "/resources/integrations/productivity/asana",
-    icon: "/images/icons/asana.svg",
     name: "Asana",
+    icon: "/images/icons/asana.svg",
+    href: "/resources/integrations/productivity/asana",
   },
   {
-    href: "/resources/integrations/social/reddit",
-    icon: "/images/icons/reddit.png",
     name: "Reddit",
+    icon: "/images/icons/reddit.png",
+    href: "/resources/integrations/social/reddit",
   },
   {
-    href: "/resources/integrations/search/youtube",
-    icon: "/images/icons/youtube.png",
     name: "YouTube",
+    icon: "/images/icons/youtube.png",
+    href: "/resources/integrations/search/youtube",
   },
   {
-    href: "/resources/integrations/productivity/dropbox",
-    icon: "/images/icons/dropbox.png",
     name: "Dropbox",
+    icon: "/images/icons/dropbox.png",
+    href: "/resources/integrations/productivity/dropbox",
   },
 ];
 
 // Supported agent frameworks
 const FRAMEWORKS = [
   {
+    name: "AG2",
     href: "/get-started/agent-frameworks/ag2/use-arcade-tools",
     icon: "/images/icons/ag2.svg",
     invertInDark: true,
-    name: "AG2",
   },
   {
-    href: "/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
+    name: "LangChain",
+    href: "/get-started/agent-frameworks/langchain/use-arcade-tools",
     icon: "/images/icons/langchain.svg",
     invertInDark: true,
-    name: "LangChain",
   },
   {
+    name: "OpenAI Agents",
     href: "/get-started/agent-frameworks/openai-agents/overview",
     icon: "/images/icons/openai.png",
-    name: "OpenAI Agents",
   },
   {
+    name: "CrewAI",
     href: "/get-started/agent-frameworks/crewai/use-arcade-tools",
     icon: "https://avatars.githubusercontent.com/u/170677839?s=200&v=4",
-    name: "CrewAI",
   },
   {
+    name: "Vercel AI",
     href: "/get-started/agent-frameworks/vercelai",
     icon: "/images/icons/vercel.svg",
     invertInDark: true,
-    name: "Vercel AI",
   },
   {
+    name: "Google ADK",
     href: "/get-started/agent-frameworks/google-adk/overview",
     icon: "/images/icons/google.png",
-    name: "Google ADK",
   },
   {
-    href: "/get-started/agent-frameworks/mastra",
+    name: "Mastra",
+    href: "/get-started/agent-frameworks/mastra/use-arcade-tools",
     icon: "/images/icons/mastra.svg",
     invertInDark: true,
-    name: "Mastra",
   },
   {
+    name: "TanStack AI",
     href: "/get-started/agent-frameworks/tanstack-ai",
     icon: "https://avatars.githubusercontent.com/u/72518640?s=200&v=4",
-    name: "TanStack AI",
   },
 ];
 
@@ -237,8 +237,8 @@ export function LandingPage() {
               className="mt-6 text-gray-600 text-lg leading-relaxed dark:text-gray-300"
               initial={{ opacity: 0, y: 20 }}
               transition={{
-                delay: ANIMATION_DELAYS.initial,
                 duration: ANIMATION_DURATION,
+                delay: ANIMATION_DELAYS.initial,
               }}
             >
               Arcade handles OAuth and manages user tokens, enforces your
@@ -251,8 +251,8 @@ export function LandingPage() {
               className="mt-10 flex flex-wrap items-center justify-center gap-4"
               initial={{ opacity: 0, y: 20 }}
               transition={{
-                delay: ANIMATION_DELAYS.buttons,
                 duration: ANIMATION_DURATION,
+                delay: ANIMATION_DELAYS.buttons,
               }}
             >
               <Button
@@ -365,15 +365,15 @@ export function LandingPage() {
                 icon={Monitor}
                 logos={[
                   {
+                    src: "/images/icons/cursor.png",
                     alt: "Cursor",
                     invertInLight: true,
-                    src: "/images/icons/cursor.png",
                   },
-                  { alt: "VS Code", src: "/images/icons/vscode.svg" },
+                  { src: "/images/icons/vscode.svg", alt: "VS Code" },
                   {
+                    src: "/images/icons/claude.png",
                     alt: "Claude Desktop",
                     invertInLight: true,
-                    src: "/images/icons/claude.png",
                   },
                 ]}
                 title="MCP clients"
@@ -413,33 +413,33 @@ export function LandingPage() {
               href={INTEGRATIONS_PAGE_HREF}
               icon={Puzzle}
               logos={[
-                { alt: "Gmail", src: "/images/icons/gmail.png" },
-                { alt: "Slack", src: "/images/icons/slack.png" },
+                { src: "/images/icons/gmail.png", alt: "Gmail" },
+                { src: "/images/icons/slack.png", alt: "Slack" },
                 {
+                  src: "/images/icons/github.png",
                   alt: "GitHub",
                   invertInLight: true,
-                  src: "/images/icons/github.png",
                 },
                 {
-                  alt: "Google Sheets",
                   src: "/images/icons/google_sheets.svg",
+                  alt: "Google Sheets",
                 },
-                { alt: "Jira", src: "/images/icons/jira.svg" },
-                { alt: "Notion", src: "/images/icons/notion.png" },
-                { alt: "Linear", src: "/images/icons/linear.svg" },
-                { alt: "HubSpot", src: "/images/icons/hubspot.png" },
-                { alt: "Stripe", src: "/images/icons/stripe.svg" },
+                { src: "/images/icons/jira.svg", alt: "Jira" },
+                { src: "/images/icons/notion.png", alt: "Notion" },
+                { src: "/images/icons/linear.svg", alt: "Linear" },
+                { src: "/images/icons/hubspot.png", alt: "HubSpot" },
+                { src: "/images/icons/stripe.svg", alt: "Stripe" },
                 {
-                  alt: "Google Drive",
                   src: "/images/icons/google_drive.png",
+                  alt: "Google Drive",
                 },
-                { alt: "Dropbox", src: "/images/icons/dropbox.png" },
+                { src: "/images/icons/dropbox.png", alt: "Dropbox" },
                 {
+                  src: "/images/icons/confluence.svg",
                   alt: "Confluence",
                   invertInDark: true,
-                  src: "/images/icons/confluence.svg",
                 },
-                { alt: "Reddit", src: "/images/icons/reddit.png" },
+                { src: "/images/icons/reddit.png", alt: "Reddit" },
               ]}
               title="Pre-built integrations"
             />

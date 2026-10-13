@@ -2,7 +2,7 @@
 
 import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Configure,
   Highlight,
@@ -13,26 +13,26 @@ import {
   useInstantSearch,
 } from "react-instantsearch";
 
-interface DocSearchHierarchy {
+type DocSearchHierarchy = {
   lvl0: string | null;
   lvl1: string | null;
   lvl2: string | null;
   lvl3: string | null;
   lvl4: string | null;
   lvl5: string | null;
-}
+};
 
-interface DocSearchRecord {
-  anchor: string | null;
-  content: string | null;
-  description?: string;
-  hierarchy?: DocSearchHierarchy;
+type DocSearchRecord = {
   objectID: string;
+  type?: "lvl0" | "lvl1" | "lvl2" | "lvl3" | "lvl4" | "lvl5" | "content";
+  hierarchy: DocSearchHierarchy;
+  content: string | null;
+  url: string;
+  anchor: string | null;
   // Legacy flat fields from non-docsearch indexes
   title?: string;
-  type?: "lvl0" | "lvl1" | "lvl2" | "lvl3" | "lvl4" | "lvl5" | "content";
-  url: string;
-}
+  description?: string;
+};
 
 const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
 const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
@@ -81,11 +81,11 @@ function SectionPath({ hit }: { hit: DocSearchRecord }) {
     <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
       {sectionLevels.map((key, i) => (
         <span className="flex items-center gap-1" key={key}>
-          {i > 0 ? (
+          {i > 0 && (
             <span aria-hidden="true" className="text-muted-foreground/50">
               ›
             </span>
-          ) : null}
+          )}
           <span className="truncate">
             <Highlight attribute={["hierarchy", key]} hit={castHit} />
           </span>
@@ -124,22 +124,18 @@ function SearchHit({ hit }: { hit: DocSearchRecord }) {
         <HitTitle hit={hit} />
       </div>
       <SectionPath hit={hit} />
-      {isContentHit && hit.content ? (
+      {isContentHit && hit.content && (
         <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
           <Snippet attribute="content" hit={castHit} />
         </div>
-      ) : null}
-      {!isContentHit && hit.description ? (
+      )}
+      {!isContentHit && hit.description && (
         <div className="mt-0.5 truncate text-xs text-muted-foreground">
           <Highlight attribute="description" hit={castHit} />
         </div>
-      ) : null}
+      )}
     </a>
   );
-}
-
-function HitComponent({ hit }: { hit: unknown }) {
-  return <SearchHit hit={hit as DocSearchRecord} />;
 }
 
 function EmptyQuery() {
@@ -178,13 +174,6 @@ function SearchUnavailable() {
   );
 }
 
-/**
- * Docs search: the trigger button and its dialog. Each instance (navbar and
- * mobile menu) owns its dialog; ⌘K / Ctrl+K toggles it and Escape closes it.
- * Results come from the Algolia index built by the crawler config in
- * `algolia/`. Without the three `NEXT_PUBLIC_ALGOLIA_*` variables the dialog
- * explains how to enable search.
- */
 export function AlgoliaSearch() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -202,15 +191,12 @@ export function AlgoliaSearch() {
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  const open = useCallback(() => setIsOpen(true), []);
-  const close = useCallback(() => setIsOpen(false), []);
-
   return (
     <>
       <button
         aria-label="Search docs"
         className="algolia-search-button flex w-56 items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-neutral-200 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
-        onClick={open}
+        onClick={() => setIsOpen(true)}
         type="button"
       >
         <Search className="size-3.5 shrink-0" />
@@ -220,7 +206,7 @@ export function AlgoliaSearch() {
         </kbd>
       </button>
 
-      {isOpen ? (
+      {isOpen && (
         <div
           aria-label="Search"
           aria-modal="true"
@@ -230,7 +216,7 @@ export function AlgoliaSearch() {
           <button
             aria-label="Close search"
             className="fixed inset-0 bg-black/30 backdrop-blur-sm dark:bg-black/50"
-            onClick={close}
+            onClick={() => setIsOpen(false)}
             type="button"
           />
           <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-popover shadow-2xl">
@@ -263,7 +249,9 @@ export function AlgoliaSearch() {
                   <NoResults />
                   <Hits
                     classNames={{ item: "", list: "space-y-0.5", root: "" }}
-                    hitComponent={HitComponent}
+                    hitComponent={({ hit }) => (
+                      <SearchHit hit={hit as unknown as DocSearchRecord} />
+                    )}
                   />
                 </div>
               </InstantSearch>
@@ -272,7 +260,7 @@ export function AlgoliaSearch() {
             )}
           </div>
         </div>
-      ) : null}
+      )}
     </>
   );
 }

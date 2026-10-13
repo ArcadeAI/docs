@@ -19,7 +19,7 @@ export async function GET(
     const { toolkitId } = await params;
 
     // Validate toolkitId is not empty
-    if (!toolkitId.trim()) {
+    if (!toolkitId?.trim()) {
       return NextResponse.json(
         { error: "Toolkit ID is required" },
         { status: 400 }
@@ -49,6 +49,7 @@ export async function GET(
 
     return NextResponse.json(data, { headers: CACHE_HEADERS });
   } catch (error) {
+    // biome-ignore lint/suspicious/noConsole: Server-side error logging is appropriate
     console.error("Error fetching toolkit data:", error);
     return NextResponse.json(
       { error: "Internal server error" },

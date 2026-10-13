@@ -26,7 +26,7 @@ function isTabObjectItem(
   return !!item && typeof item === "object" && "label" in item;
 }
 
-export interface TabsProps {
+export type TabsProps = {
   children?: ReactNode;
   className?: string;
   defaultIndex?: number;
@@ -36,12 +36,12 @@ export interface TabsProps {
   /** Shares and remembers the selected tab (localStorage) across groups. */
   storageKey?: string;
   tabClassName?: string;
-}
+};
 
-interface TabsContextValue {
+type TabsContextValue = {
   baseId: string;
   selected: number;
-}
+};
 
 const TabsContext = createContext<TabsContextValue | null>(null);
 const TabIndexContext = createContext(0);

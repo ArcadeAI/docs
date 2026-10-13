@@ -41,7 +41,7 @@ export class MockToolFixtureSource implements ToolDataSource {
     const normalizedId = normalizeId(toolkitId);
 
     return tools.filter((tool) => {
-      const [toolToolkitId] = tool.qualifiedName.split(".");
+      const toolToolkitId = tool.qualifiedName.split(".")[0];
       return toolToolkitId && normalizeId(toolToolkitId) === normalizedId;
     });
   }
@@ -54,14 +54,14 @@ export class MockToolFixtureSource implements ToolDataSource {
     if (options?.toolkitId) {
       const normalizedId = normalizeId(options.toolkitId);
       tools = tools.filter((tool) => {
-        const [toolToolkitId] = tool.qualifiedName.split(".");
+        const toolToolkitId = tool.qualifiedName.split(".")[0];
         return toolToolkitId && normalizeId(toolToolkitId) === normalizedId;
       });
     }
 
     if (options?.version) {
       tools = tools.filter((tool) => {
-        const [, version] = tool.fullyQualifiedName.split("@");
+        const version = tool.fullyQualifiedName.split("@")[1];
         return version === options.version;
       });
     }

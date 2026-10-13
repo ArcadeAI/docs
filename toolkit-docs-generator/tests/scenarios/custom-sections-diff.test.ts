@@ -4,33 +4,33 @@ import { getCustomSectionsSourceHash } from "../../src/merger/data-merger";
 import type { MergedToolkit } from "../../src/types/index";
 
 const previousToolkit = (documentation = "old"): MergedToolkit => ({
-  auth: null,
-  customImports: [],
-  description: "GitHub",
-  documentationChunks: [
-    {
-      content: documentation,
-      location: "description",
-      position: "after",
-      type: "warning",
-    },
-  ],
-  generatedAt: "2026-01-01T00:00:00.000Z",
   id: "Github",
   label: "Github",
+  version: "1.0.0",
+  description: "GitHub",
   metadata: {
     category: "development",
-    docsLink: "https://docs.example.com",
     iconUrl: "https://example.com/icon.svg",
     isBYOC: false,
-    isComingSoon: false,
-    isHidden: false,
     isPro: false,
     type: "arcade",
+    docsLink: "https://docs.example.com",
+    isComingSoon: false,
+    isHidden: false,
   },
-  subPages: [],
+  auth: null,
   tools: [],
-  version: "1.0.0",
+  documentationChunks: [
+    {
+      type: "warning",
+      location: "description",
+      position: "after",
+      content: documentation,
+    },
+  ],
+  customImports: [],
+  subPages: [],
+  generatedAt: "2026-01-01T00:00:00.000Z",
 });
 
 describe("getChangedToolkitIdsFromCustomSections", () => {
@@ -39,15 +39,15 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
       getChangedToolkitIdsFromCustomSections(
         {
           github: {
-            customImports: [],
             documentationChunks: [
               {
-                content: "new",
+                type: "warning",
                 location: "description",
                 position: "after",
-                type: "warning",
+                content: "new",
               },
             ],
+            customImports: [],
             subPages: [],
             toolChunks: {},
           },
@@ -63,8 +63,8 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
       getChangedToolkitIdsFromCustomSections(
         {
           Github: {
-            customImports: [],
             documentationChunks: toolkit.documentationChunks,
+            customImports: [],
             subPages: [],
             toolChunks: {},
           },
@@ -76,15 +76,15 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
 
   it("uses the curation fingerprint after generated prose is edited", () => {
     const curation = {
-      customImports: [],
       documentationChunks: [
         {
-          content: "hand-authored source",
+          type: "warning" as const,
           location: "description" as const,
           position: "after" as const,
-          type: "warning" as const,
+          content: "hand-authored source",
         },
       ],
+      customImports: [],
       subPages: [],
       toolChunks: {},
     };
@@ -104,8 +104,8 @@ describe("getChangedToolkitIdsFromCustomSections", () => {
       getChangedToolkitIdsFromCustomSections(
         {
           github: {
-            customImports: [],
             documentationChunks: [],
+            customImports: [],
             subPages: [],
             toolChunks: {},
           },

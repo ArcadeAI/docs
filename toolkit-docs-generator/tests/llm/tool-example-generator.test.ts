@@ -9,47 +9,47 @@ import type { ToolDefinition } from "../../src/types/index";
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
+  name: "CreateIssue",
+  qualifiedName: "Github.CreateIssue",
+  fullyQualifiedName: "Github.CreateIssue@1.0.0",
+  description: "Create an issue",
+  parameters: [
+    {
+      name: "owner",
+      type: "string",
+      required: true,
+      description: "Repository owner",
+      enum: null,
+      inferrable: true,
+    },
+    {
+      name: "repo",
+      type: "string",
+      required: true,
+      description: "Repository name",
+      enum: null,
+      inferrable: true,
+    },
+  ],
   auth: {
     providerId: "github",
     providerType: "oauth2",
     scopes: ["repo"],
   },
-  description: "Create an issue",
-  fullyQualifiedName: "Github.CreateIssue@1.0.0",
-  name: "CreateIssue",
-  output: null,
-  parameters: [
-    {
-      description: "Repository owner",
-      enum: null,
-      inferrable: true,
-      name: "owner",
-      required: true,
-      type: "string",
-    },
-    {
-      description: "Repository name",
-      enum: null,
-      inferrable: true,
-      name: "repo",
-      required: true,
-      type: "string",
-    },
-  ],
-  qualifiedName: "Github.CreateIssue",
   secrets: ["API_KEY"],
+  output: null,
   ...overrides,
 });
 
 describe("LlmToolExampleGenerator", () => {
   it("should map LLM JSON output to parameter values", async () => {
     const fakeClient: LlmClient = {
+      provider: "openai",
       generateText: async () =>
         JSON.stringify({
           parameters: { owner: "arcadeai", repo: "docs" },
           secrets: { API_KEY: "api_key" },
         }),
-      provider: "openai",
     };
     const generator = new LlmToolExampleGenerator({
       client: fakeClient,
@@ -65,12 +65,12 @@ describe("LlmToolExampleGenerator", () => {
 
   it("should coerce numeric strings for integer parameters", async () => {
     const fakeClient: LlmClient = {
+      provider: "openai",
       generateText: async () =>
         JSON.stringify({
-          parameters: { owner: "arcadeai", per_page: "30", repo: "docs" },
+          parameters: { owner: "arcadeai", repo: "docs", per_page: "30" },
           secrets: { API_KEY: "api_key" },
         }),
-      provider: "openai",
     };
     const generator = new LlmToolExampleGenerator({
       client: fakeClient,
@@ -81,12 +81,12 @@ describe("LlmToolExampleGenerator", () => {
       parameters: [
         ...createTool().parameters,
         {
+          name: "per_page",
+          type: "integer",
+          required: false,
           description: null,
           enum: null,
           inferrable: true,
-          name: "per_page",
-          required: false,
-          type: "integer",
         },
       ],
     });
@@ -98,9 +98,9 @@ describe("LlmToolExampleGenerator", () => {
 
   it("should accept JSON wrapped in code fences", async () => {
     const fakeClient: LlmClient = {
+      provider: "openai",
       generateText: async () =>
         '```json\n{"parameters":{"owner":"arcadeai","repo":"toolkit"},"secrets":{"API_KEY":"api_key"}}\n```',
-      provider: "openai",
     };
     const generator = new LlmToolExampleGenerator({
       client: fakeClient,
@@ -116,12 +116,12 @@ describe("LlmToolExampleGenerator", () => {
 
   it("should coerce boolean strings for boolean parameters", async () => {
     const fakeClient: LlmClient = {
+      provider: "openai",
       generateText: async () =>
         JSON.stringify({
-          parameters: { archived: "true", owner: "arcadeai", repo: "docs" },
+          parameters: { owner: "arcadeai", repo: "docs", archived: "true" },
           secrets: { API_KEY: "api_key" },
         }),
-      provider: "openai",
     };
     const generator = new LlmToolExampleGenerator({
       client: fakeClient,
@@ -132,12 +132,12 @@ describe("LlmToolExampleGenerator", () => {
       parameters: [
         ...createTool().parameters,
         {
+          name: "archived",
+          type: "boolean",
+          required: false,
           description: null,
           enum: null,
           inferrable: true,
-          name: "archived",
-          required: false,
-          type: "boolean",
         },
       ],
     });

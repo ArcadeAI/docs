@@ -7,9 +7,9 @@ type RebuildIndexGenerator = {
 };
 
 export interface CleanupExcludedToolkitOutputOptions {
+  outputDir: string;
   excludedToolkitIds: Set<string>;
   generator: RebuildIndexGenerator;
-  outputDir: string;
   verbose: boolean;
 }
 

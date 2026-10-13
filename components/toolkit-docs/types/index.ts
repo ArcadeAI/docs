@@ -152,126 +152,97 @@ export type ToolkitSummary = Omit<ToolkitData, "tools"> & {
 /**
  * Props for DocumentationChunkRenderer component
  */
-export interface DocumentationChunkRendererProps {
+export type DocumentationChunkRendererProps = {
   /** Array of documentation chunks to filter and render */
   chunks?: DocumentationChunk[] | null;
-  /** Optional className for the wrapper */
-  className?: string;
   /** Filter by location */
   location: DocumentationChunkLocation;
   /** Filter by position */
   position: DocumentationChunkPosition;
-}
+  /** Optional className for the wrapper */
+  className?: string;
+};
 
 /**
  * Props for ToolkitHeader component
  */
-export interface ToolkitHeaderProps {
-  /** Authentication info */
-  auth: ToolkitAuth | null;
-  /** Author name (defaults to "Arcade") */
-  author?: string;
-  /** Toolkit description */
-  description: string | null;
+export type ToolkitHeaderProps = {
   /** Display label */
   label: string;
-  /** Toolkit metadata */
-  metadata: ToolkitMetadata;
+  /** Toolkit description */
+  description: string | null;
   /** Summary text (optional) */
   summary?: string;
+  /** Toolkit metadata */
+  metadata: ToolkitMetadata;
+  /** Authentication info */
+  auth: ToolkitAuth | null;
+  /** Toolkit version */
+  version?: string;
+  /** Author name (defaults to "Arcade") */
+  author?: string;
   /** Tool statistics */
   toolStats?: {
     total: number;
     withScopes: number;
     withSecrets: number;
   };
-  /** Toolkit version */
-  version?: string;
-}
+};
 
 /**
  * Props for ParametersTable component
  */
-export interface ParametersTableProps {
-  /** Base URL for enum references (optional) */
-  enumBaseUrl?: string;
+export type ParametersTableProps = {
   /** Array of parameters to render */
   parameters: ToolParameter[];
-}
+  /** Base URL for enum references (optional) */
+  enumBaseUrl?: string;
+};
 
 /**
  * Props for ScopesDisplay component
  */
-export interface ScopesDisplayProps {
+export type ScopesDisplayProps = {
   /** Array of OAuth scopes */
   scopes: string[];
-  /** Optional title for the callout */
-  title?: string;
   /** Display variant */
   variant?: "inline" | "callout";
-}
+  /** Optional title for the callout */
+  title?: string;
+};
 
 /**
  * Props for DynamicCodeBlock component
  */
-export interface DynamicCodeBlockProps {
+export type DynamicCodeBlockProps = {
   /** Code example configuration */
   codeExample: ToolCodeExample;
   /** Languages to generate (defaults to both) */
   languages?: ("python" | "javascript")[];
-}
+};
 
 /**
  * Props for ToolSection component
  */
-export interface ToolSectionProps {
-  /** Expand on mount and keep expanded (e.g. when the URL hash targets it) */
-  forceExpanded?: boolean;
-  /** Whether the tool is selected in the selected tools panel */
-  isSelected?: boolean;
-  /** Toggle selection handler */
-  onToggleSelection?: (toolName: string) => void;
-  /** Show selection checkbox */
-  showSelection?: boolean;
+export type ToolSectionProps = {
   /** Tool summary (heavy detail fetched lazily on expand) */
   tool: ToolSummary;
   /** Toolkit id, used to lazily fetch this tool's detail */
   toolkitId: string;
-}
+  /** Whether the tool is selected in the selected tools panel */
+  isSelected?: boolean;
+  /** Show selection checkbox */
+  showSelection?: boolean;
+  /** Toggle selection handler */
+  onToggleSelection?: (toolName: string) => void;
+  /** Expand on mount and keep expanded (e.g. when the URL hash targets it) */
+  forceExpanded?: boolean;
+};
 
 /**
  * Props for AvailableToolsTable component
  */
-export interface AvailableToolsTableProps {
-  /** Default filter selection */
-  defaultFilter?:
-    | "all"
-    | "has_scopes"
-    | "no_scopes"
-    | "has_secrets"
-    | "no_secrets";
-  /** Enable filters */
-  enableFilters?: boolean;
-  /** Enable search input */
-  enableSearch?: boolean;
-  /** Filter label */
-  filterLabel?: string;
-  /** Handler for toggling tool selection */
-  onToggleSelection?: (toolName: string) => void;
-  /** Search input placeholder */
-  searchPlaceholder?: string;
-  /** Optional label for the secrets column */
-  secretsColumnLabel?: string;
-  /** How to summarize secrets in the table */
-  secretsDisplay?: "summary" | "names" | "types";
-  /** Base URL for linking secret type docs */
-  secretTypeDocsBaseUrl?: string;
-  /** Override labels for secret types */
-  secretTypeLabels?: Partial<Record<SecretType, string>>;
-  /** Currently selected tool names */
-  selectedTools?: Set<string>;
-  /** Whether to show selection checkboxes */
-  showSelection?: boolean;
+export type AvailableToolsTableProps = {
   /** Tools to display in the table */
   tools: Array<{
     name: string;
@@ -282,12 +253,41 @@ export interface AvailableToolsTableProps {
     scopes?: string[];
     metadata?: ToolMetadata | null;
   }>;
-}
+  /** Optional label for the secrets column */
+  secretsColumnLabel?: string;
+  /** How to summarize secrets in the table */
+  secretsDisplay?: "summary" | "names" | "types";
+  /** Override labels for secret types */
+  secretTypeLabels?: Partial<Record<SecretType, string>>;
+  /** Base URL for linking secret type docs */
+  secretTypeDocsBaseUrl?: string;
+  /** Enable search input */
+  enableSearch?: boolean;
+  /** Enable filters */
+  enableFilters?: boolean;
+  /** Search input placeholder */
+  searchPlaceholder?: string;
+  /** Filter label */
+  filterLabel?: string;
+  /** Default filter selection */
+  defaultFilter?:
+    | "all"
+    | "has_scopes"
+    | "no_scopes"
+    | "has_secrets"
+    | "no_secrets";
+  /** Currently selected tool names */
+  selectedTools?: Set<string>;
+  /** Handler for toggling tool selection */
+  onToggleSelection?: (toolName: string) => void;
+  /** Whether to show selection checkboxes */
+  showSelection?: boolean;
+};
 
 /**
  * Props for ToolkitPage component
  */
-export interface ToolkitPageProps {
+export type ToolkitPageProps = {
   /** Toolkit data with per-tool detail stripped (fetched lazily on expand) */
   data: ToolkitSummary;
-}
+};

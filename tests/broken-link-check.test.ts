@@ -41,10 +41,10 @@ function getDocsLinkSlug(docsLink?: string | null): string | null {
   }
 }
 
-interface ToolkitMetadataFile {
+type ToolkitMetadataFile = {
   id?: string;
   metadata?: { docsLink?: string };
-}
+};
 
 function readToolkitMetadataFile(filePath: string): ToolkitMetadataFile | null {
   try {
@@ -110,7 +110,7 @@ function validateAnchorFragment(filePath: string, fragment: string): boolean {
     }
 
     return headings.includes(fragment.toLowerCase());
-  } catch {
+  } catch (_error) {
     // If we can't read the file, assume the fragment is invalid
     return false;
   }

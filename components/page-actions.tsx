@@ -17,12 +17,12 @@ import {
 } from "@/components/chrome/icons";
 import { Select } from "@/components/chrome/select";
 
-interface PageActionsProps {
+type PageActionsProps = {
   /** Kept for callers that pass it; the menu has no GitHub entry. */
   githubUrl?: string;
   /** URL that returns the page as Markdown (app/llms.mdx or /api/toolkit-data). */
   markdownUrl: string;
-}
+};
 
 type CopyState = "idle" | "copying" | "copied" | "failed";
 

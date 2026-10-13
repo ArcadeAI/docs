@@ -3,7 +3,7 @@
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 
-interface CollapseProps {
+type CollapseProps = {
   children: ReactNode;
   className?: string;
   closeDuration?: number;
@@ -11,7 +11,7 @@ interface CollapseProps {
   horizontal?: boolean;
   isOpen: boolean;
   openDuration?: number;
-}
+};
 
 /**
  * Animated open/close container. The children stay in the DOM while closed

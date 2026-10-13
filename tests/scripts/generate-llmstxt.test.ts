@@ -42,9 +42,9 @@ describe("placeholder retry that fails again", () => {
     const [retried] = await summarizePagesInBatches(
       [
         {
-          content: "# Quickstart\n\nGet going.",
           path: "content/docs/get-started/quickstart.mdx",
           url: PAGE_URL,
+          content: "# Quickstart\n\nGet going.",
         },
       ],
       []

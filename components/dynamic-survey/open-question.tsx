@@ -1,10 +1,10 @@
 import { Textarea } from "@arcadeai/design-system";
 import type { BasicSurveyQuestion } from "posthog-js";
 
-interface OpenQuestionProps {
-  previousResponse?: string;
+type OpenQuestionProps = {
   question: BasicSurveyQuestion;
-}
+  previousResponse?: string;
+};
 
 export function OpenQuestion({
   question,

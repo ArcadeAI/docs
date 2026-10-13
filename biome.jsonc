@@ -14,7 +14,7 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
+      "recommended": true,
       "nursery": {
         "useSortedClasses": "off"
       },
@@ -37,23 +37,6 @@
         "rules": {
           "style": {
             "noDescendingSpecificity": "off"
-          }
-        }
-      }
-    },
-    {
-      // CLI scripts serialize API calls on purpose (rate limits, interactive
-      // prompts, ordered git operations); the external URL check retries one
-      // URL with backoff. Promise.all would change that behavior.
-      "includes": [
-        "scripts/*.ts",
-        "scripts/lib/**",
-        "tests/external-url-check.test.ts"
-      ],
-      "linter": {
-        "rules": {
-          "performance": {
-            "noAwaitInLoops": "off"
           }
         }
       }
@@ -86,14 +69,10 @@
       }
     },
     {
-      // The generator serializes its loops on purpose: rate-limited LLM calls,
-      // ordered file reads/writes that later steps depend on, paginated API
-      // fetches, and retry/backoff. Promise.all would change that behavior.
       "includes": ["toolkit-docs-generator/**/*"],
       "linter": {
         "rules": {
           "performance": {
-            "noAwaitInLoops": "off",
             "noBarrelFile": "off",
             "noAccumulatingSpread": "off",
             "useTopLevelRegex": "off"
@@ -102,8 +81,7 @@
             "useGuardForIn": "off",
             "useAwait": "off",
             "noConsole": "off",
-            "noExplicitAny": "warn",
-            "noShadow": "off"
+            "noExplicitAny": "warn"
           },
           "style": {
             "noMagicNumbers": "off",
@@ -114,13 +92,15 @@
             "useCollapsedIf": "off",
             "useDefaultSwitchClause": "off",
             "useBlockStatements": "off",
-            "useNodejsImportProtocol": "off",
-            "noIncrementDecrement": "off"
+            "useNodejsImportProtocol": "off"
           },
-          "nursery": {},
-          "complexity": {
-            "noExcessiveCognitiveComplexity": "warn",
+          "nursery": {
+            "noIncrementDecrement": "off",
+            "noShadow": "off",
             "useMaxParams": "off"
+          },
+          "complexity": {
+            "noExcessiveCognitiveComplexity": "warn"
           }
         }
       }
@@ -133,11 +113,7 @@
       }
     }
   },
-  "extends": [
-    "ultracite/biome/core",
-    "ultracite/biome/react",
-    "ultracite/biome/next"
-  ],
+  "extends": ["ultracite/core", "ultracite/react", "ultracite/next"],
   "files": {
     "ignoreUnknown": false,
     "maxSize": 10485760,
@@ -148,15 +124,16 @@
       "!public",
       "!toolkit-docs-generator/data/toolkits",
       "!toolkit-docs-generator/curation",
+      "!scripts",
       "!agents",
       "!.vscode",
       "!.vscode/launch.json",
       "!.next",
-      "!.source",
       "!extract-custom-sections",
       "!custom-sections-transformer",
       "!examples",
-      "!app/global.css"
+      "!app/global.css",
+      "!.source"
     ]
   }
 }

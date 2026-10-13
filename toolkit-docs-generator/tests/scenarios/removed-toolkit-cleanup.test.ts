@@ -23,50 +23,50 @@ import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
 // ── Fixtures ──────────────────────────────────────────────────────────────────
 
 const makeTool = (toolkitId: string, toolName = "Tool1"): ToolDefinition => ({
-  auth: null,
-  description: "A test tool",
-  fullyQualifiedName: `${toolkitId}.${toolName}@1.0.0`,
   name: toolName,
-  output: null,
-  parameters: [],
   qualifiedName: `${toolkitId}.${toolName}`,
+  fullyQualifiedName: `${toolkitId}.${toolName}@1.0.0`,
+  description: "A test tool",
+  parameters: [],
+  auth: null,
   secrets: [],
+  output: null,
 });
 
 const makeToolkit = (id: string): MergedToolkit => ({
-  auth: null,
-  customImports: [],
-  description: "A toolkit for testing",
-  documentationChunks: [],
-  generatedAt: new Date().toISOString(),
   id,
   label: id,
+  version: "1.0.0",
+  description: "A toolkit for testing",
   metadata: {
     category: "development",
-    docsLink: `https://docs.example.com/${id.toLowerCase()}`,
     iconUrl: "https://example.com/icon.svg",
     isBYOC: false,
-    isComingSoon: false,
-    isHidden: false,
     isPro: false,
     type: "arcade",
+    docsLink: `https://docs.example.com/${id.toLowerCase()}`,
+    isComingSoon: false,
+    isHidden: false,
   },
-  subPages: [],
+  auth: null,
   tools: [
     {
-      auth: null,
-      description: "A test tool",
-      documentationChunks: [],
-      fullyQualifiedName: `${id}.Tool1@1.0.0`,
       name: "Tool1",
-      output: null,
-      parameters: [],
       qualifiedName: `${id}.Tool1`,
+      fullyQualifiedName: `${id}.Tool1@1.0.0`,
+      description: "A test tool",
+      parameters: [],
+      auth: null,
       secrets: [],
       secretsInfo: [],
+      output: null,
+      documentationChunks: [],
     },
   ],
-  version: "1.0.0",
+  documentationChunks: [],
+  customImports: [],
+  subPages: [],
+  generatedAt: new Date().toISOString(),
 });
 
 // ── Setup helpers ─────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ let tmpDir: string | undefined;
 
 afterEach(async () => {
   if (tmpDir) {
-    await rm(tmpDir, { force: true, recursive: true });
+    await rm(tmpDir, { recursive: true, force: true });
     tmpDir = undefined;
   }
 });
@@ -87,10 +87,10 @@ afterEach(async () => {
 const setupOutputDir = async (toolkitIds: string[]) => {
   tmpDir = await mkdtemp(join(tmpdir(), "removed-cleanup-test-"));
   const generator = createJsonGenerator({
-    generateIndex: true,
-    indexSource: "output",
     outputDir: tmpDir,
     prettyPrint: true,
+    generateIndex: true,
+    indexSource: "output",
   });
   await generator.generateAll(toolkitIds.map(makeToolkit));
   return { dir: tmpDir, generator };
@@ -112,9 +112,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     const removedIds = collectRemovedToolkitIds(diff);
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
-      outputDir: dir,
       verbose: false,
     });
 
@@ -141,9 +141,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     const removedIds = collectRemovedToolkitIds(diff);
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
-      outputDir: dir,
       verbose: false,
     });
 
@@ -181,9 +181,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     expect(removedIds).toEqual(new Set(["gonekit"]));
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
-      outputDir: dir,
       verbose: false,
     });
 
@@ -205,9 +205,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
 
     const diff = detectChanges(currentTools, previousToolkits);
     await cleanupExcludedToolkitOutput({
+      outputDir: dir,
       excludedToolkitIds: collectRemovedToolkitIds(diff),
       generator,
-      outputDir: dir,
       verbose: false,
     });
 
@@ -238,9 +238,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     expect(removedIds.size).toBe(0);
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
-      outputDir: dir,
       verbose: false,
     });
 
@@ -270,9 +270,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     expect(removedIds).toContain("googlecalendar");
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
-      outputDir: dir,
       verbose: false,
     });
 
@@ -301,9 +301,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     expect(removedIds).toContain("brokenkit");
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
-      outputDir: dir,
       verbose: false,
     });
 
@@ -333,9 +333,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     expect(excludedIds.size).toBe(1);
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
       excludedToolkitIds: excludedIds,
       generator,
-      outputDir: dir,
       verbose: false,
     });
 

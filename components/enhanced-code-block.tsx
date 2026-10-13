@@ -3,44 +3,43 @@
 import { Button } from "@arcadeai/design-system";
 import { Copy, FileText } from "lucide-react";
 import type React from "react";
-import { useCallback } from "react";
 
-interface EnhancedCodeBlockProps {
+type EnhancedCodeBlockProps = {
   children: string;
   className?: string;
-  filename?: string;
   language: string;
-}
+  filename?: string;
+};
 
 const languageDisplayNames: Record<string, string> = {
-  c: "C",
-  cpp: "C++",
-  css: "CSS",
-  go: "Go",
-  html: "HTML",
-  java: "Java",
-  javascript: "JavaScript",
   js: "JavaScript",
-  json: "JSON",
-  jsx: "JSX",
-  markdown: "Markdown",
-  md: "Markdown",
-  php: "PHP",
+  javascript: "JavaScript",
+  ts: "TypeScript",
+  typescript: "TypeScript",
   py: "Python",
   python: "Python",
+  java: "Java",
+  cpp: "C++",
+  c: "C",
+  go: "Go",
+  rust: "Rust",
+  php: "PHP",
   rb: "Ruby",
   ruby: "Ruby",
-  rust: "Rust",
-  sass: "Sass",
-  scss: "SCSS",
   sql: "SQL",
-  toml: "TOML",
-  ts: "TypeScript",
-  tsx: "TSX",
-  typescript: "TypeScript",
-  xml: "XML",
+  json: "JSON",
   yaml: "YAML",
   yml: "YAML",
+  xml: "XML",
+  html: "HTML",
+  css: "CSS",
+  scss: "SCSS",
+  sass: "Sass",
+  jsx: "JSX",
+  tsx: "TSX",
+  md: "Markdown",
+  markdown: "Markdown",
+  toml: "TOML",
 };
 
 const getLanguageDisplayName = (lang: string): string =>
@@ -54,24 +53,6 @@ const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
 }) => {
   const displayName = filename || getLanguageDisplayName(language);
 
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(children);
-    } catch {
-      // Fallback: try to select the text for manual copying
-      const textArea = document.createElement("textarea");
-      textArea.value = children;
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand("copy");
-      } catch {
-        // Silent fallback failure
-      }
-      document.body.removeChild(textArea);
-    }
-  }, [children]);
-
   return (
     <div className="my-4 overflow-hidden rounded border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-950">
       {/* Header Bar */}
@@ -82,7 +63,27 @@ const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
             {displayName}
           </span>
         </div>
-        <Button onClick={handleCopy} size="xs" variant="ghost">
+        <Button
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(children);
+            } catch {
+              // Fallback: try to select the text for manual copying
+              const textArea = document.createElement("textarea");
+              textArea.value = children;
+              document.body.appendChild(textArea);
+              textArea.select();
+              try {
+                document.execCommand("copy");
+              } catch {
+                // Silent fallback failure
+              }
+              document.body.removeChild(textArea);
+            }
+          }}
+          size="xs"
+          variant="ghost"
+        >
           <Copy />
           Copy
         </Button>

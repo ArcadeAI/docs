@@ -3,8 +3,8 @@ import { getSharedServiceDomain } from "@/components/toolkit-docs/components/too
 
 const makeTool = (domains: string[]) => ({
   metadata: {
-    behavior: { operations: [] },
     classification: { serviceDomains: domains },
+    behavior: { operations: [] },
     extras: null,
   },
 });
@@ -46,8 +46,8 @@ describe("getSharedServiceDomain", () => {
     const tools = [
       {
         metadata: {
-          behavior: { operations: [] },
           classification: { serviceDomains: [123] },
+          behavior: { operations: [] },
           extras: null,
         },
       },

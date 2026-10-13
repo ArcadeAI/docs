@@ -2,7 +2,7 @@ import { Discord, Github } from "@arcadeai/design-system";
 import { Mail } from "lucide-react";
 import type React from "react";
 import { urlConfig } from "@/lib/config";
-import { LinkedIn as Linkedin } from "./icons/linkedin";
+import Linkedin from "./icons/linkedin";
 
 const ArcadeLogo = () => (
   <div>
@@ -60,16 +60,16 @@ const Socials = () => (
   </div>
 );
 
-interface Resource {
-  external: boolean;
-  title: string;
+type Resource = {
   url: string;
-}
-
-interface ResourceColProps {
-  resources: Resource[];
   title: string;
-}
+  external: boolean;
+};
+
+type ResourceColProps = {
+  title: string;
+  resources: Resource[];
+};
 
 const ResourceCol: React.FC<ResourceColProps> = ({ title, resources }) => (
   <div className="mb-6 pr-14 md:mb-0">
@@ -96,50 +96,50 @@ const ResourceCol: React.FC<ResourceColProps> = ({ title, resources }) => (
 const Footer: React.FC = () => {
   const projectResources: Resource[] = [
     {
-      external: true,
-      title: "GitHub",
       url: "https://github.com/ArcadeAI/arcade-ai",
+      title: "GitHub",
+      external: true,
     },
     {
-      external: true,
-      title: "GitHub Container Registry",
       url: "https://github.com/orgs/ArcadeAI/packages",
+      title: "GitHub Container Registry",
+      external: true,
     },
     {
-      external: true,
-      title: "Status",
       url: "https://status.arcade.dev/",
+      title: "Status",
+      external: true,
     },
   ];
 
   const resources: Resource[] = [
     {
-      external: false,
-      title: "Documentation",
       url: "/",
+      title: "Documentation",
+      external: false,
     },
     {
-      external: true,
-      title: "Releases",
       url: "https://github.com/ArcadeAI/arcade-ai/releases",
+      title: "Releases",
+      external: true,
     },
     {
-      external: true,
-      title: "Examples",
       url: "https://github.com/ArcadeAI/arcade-ai/tree/main/examples",
+      title: "Examples",
+      external: true,
     },
   ];
 
   const feedbackResources: Resource[] = [
     {
-      external: true,
-      title: "Discord",
       url: urlConfig.company.discord,
+      title: "Discord",
+      external: true,
     },
     {
-      external: true,
-      title: "Report an issue on GitHub",
       url: "https://github.com/ArcadeAI/arcade-ai/issues/new/choose",
+      title: "Report an issue on GitHub",
+      external: true,
     },
   ];
 

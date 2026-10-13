@@ -11,12 +11,12 @@ import type { ToolDefinition, ToolkitMetadata } from "../types/index";
 // ============================================================================
 
 export interface FetchOptions {
-  /** Filter by auth provider ID */
-  readonly providerId?: string;
   /** Filter by toolkit ID */
   readonly toolkitId?: string;
   /** Filter by toolkit version */
   readonly version?: string;
+  /** Filter by auth provider ID */
+  readonly providerId?: string;
 }
 
 // ============================================================================
@@ -24,13 +24,13 @@ export interface FetchOptions {
 // ============================================================================
 
 export interface ToolDataSource {
-  /** Fetch all tools from the source */
-  readonly fetchAllTools: (
-    options?: FetchOptions
-  ) => Promise<readonly ToolDefinition[]>;
   /** Fetch tools for a specific toolkit */
   readonly fetchToolsByToolkit: (
     toolkitId: string
+  ) => Promise<readonly ToolDefinition[]>;
+  /** Fetch all tools from the source */
+  readonly fetchAllTools: (
+    options?: FetchOptions
   ) => Promise<readonly ToolDefinition[]>;
   /** Check if the data source is available */
   readonly isAvailable: () => Promise<boolean>;
@@ -41,12 +41,12 @@ export interface ToolDataSource {
 // ============================================================================
 
 export interface MetadataSource {
-  /** Get all toolkit metadata */
-  readonly getAllToolkitsMetadata: () => Promise<readonly ToolkitMetadata[]>;
   /** Get metadata for a specific toolkit */
   readonly getToolkitMetadata: (
     toolkitId: string
   ) => Promise<ToolkitMetadata | null>;
+  /** Get all toolkit metadata */
+  readonly getAllToolkitsMetadata: () => Promise<readonly ToolkitMetadata[]>;
   /** List all available toolkit IDs */
   readonly listToolkitIds: () => Promise<readonly string[]>;
 }

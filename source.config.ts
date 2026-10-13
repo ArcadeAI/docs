@@ -73,12 +73,12 @@ const INCLUSIVE_SEPARATORS = new Set(["-", "..", "\u2025"]);
 /** Languages Nextra rendered without token colours. */
 const PLAIN_LANGUAGES = new Set(["plaintext", "text", "txt", "plain"]);
 
-interface FenceMeta {
+type FenceMeta = {
   __raw?: string;
   _fenceLang?: string;
   "data-line-numbers"?: boolean;
   title?: string;
-}
+};
 
 function classList(value: unknown): string[] {
   if (Array.isArray(value)) {

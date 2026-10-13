@@ -33,7 +33,7 @@ describe("MarkdownCurationSource", () => {
 
   afterEach(async () => {
     if (tempDir) {
-      await rm(tempDir, { force: true, recursive: true });
+      await rm(tempDir, { recursive: true, force: true });
       tempDir = null;
     }
   });
@@ -52,8 +52,8 @@ describe("MarkdownCurationSource", () => {
     const source = createMarkdownCurationSource(tempDir);
 
     await expect(source.getCustomSections("Github")).resolves.toEqual({
-      customImports: [],
       documentationChunks: [],
+      customImports: [],
       subPages: [],
       toolChunks: {},
     });
@@ -77,8 +77,8 @@ describe("MarkdownCurationSource", () => {
 
     expect(sections.documentationChunks).toEqual([
       expect.objectContaining({
-        content: "## Setup\n\n<Callout>Read this.</Callout>",
         header: "## Setup",
+        content: "## Setup\n\n<Callout>Read this.</Callout>",
       }),
     ]);
     expect(sections.toolChunks.CreateIssue).toEqual([
@@ -104,9 +104,9 @@ type: environment-variables
 
     expect(sections.subPages).toEqual([
       {
+        type: "environment-variables",
         content: "# Environment variables",
         relativePath: "environment-variables/page.mdx",
-        type: "environment-variables",
       },
     ]);
   });
@@ -241,7 +241,7 @@ describe("compileCurationDirectory", () => {
 
   afterEach(async () => {
     if (tempDir) {
-      await rm(tempDir, { force: true, recursive: true });
+      await rm(tempDir, { recursive: true, force: true });
       tempDir = null;
     }
   });

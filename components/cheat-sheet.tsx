@@ -3,8 +3,9 @@
 import { AlertTriangle, Info, Lightbulb } from "lucide-react";
 import type React from "react";
 
-interface CheatSheetSectionProps {
-  children: React.ReactNode;
+type CheatSheetSectionProps = {
+  title: string;
+  icon: string;
   color:
     | "red"
     | "orange"
@@ -14,33 +15,32 @@ interface CheatSheetSectionProps {
     | "cyan"
     | "pink"
     | "yellow";
-  icon: string;
-  title: string;
-}
+  children: React.ReactNode;
+};
 
 const colorClasses = {
-  blue: "bg-blue-500/10 border-blue-500/20 dark:bg-blue-500/10 dark:border-blue-400/30",
-  cyan: "bg-cyan-500/10 border-cyan-500/20 dark:bg-cyan-500/10 dark:border-cyan-400/30",
-  green:
-    "bg-green-500/10 border-green-500/20 dark:bg-green-500/10 dark:border-green-400/30",
+  red: "bg-red-500/10 border-red-500/20 dark:bg-red-500/10 dark:border-red-400/30",
   orange:
     "bg-orange-500/10 border-orange-500/20 dark:bg-orange-500/10 dark:border-orange-400/30",
-  pink: "bg-pink-500/10 border-pink-500/20 dark:bg-pink-500/10 dark:border-pink-400/30",
   purple:
     "bg-purple-500/10 border-purple-500/20 dark:bg-purple-500/10 dark:border-purple-400/30",
-  red: "bg-red-500/10 border-red-500/20 dark:bg-red-500/10 dark:border-red-400/30",
+  blue: "bg-blue-500/10 border-blue-500/20 dark:bg-blue-500/10 dark:border-blue-400/30",
+  green:
+    "bg-green-500/10 border-green-500/20 dark:bg-green-500/10 dark:border-green-400/30",
+  cyan: "bg-cyan-500/10 border-cyan-500/20 dark:bg-cyan-500/10 dark:border-cyan-400/30",
+  pink: "bg-pink-500/10 border-pink-500/20 dark:bg-pink-500/10 dark:border-pink-400/30",
   yellow:
     "bg-yellow-500/10 border-yellow-500/20 dark:bg-yellow-500/10 dark:border-yellow-400/30",
 };
 
 const headerColorClasses = {
-  blue: "bg-blue-500 text-white",
-  cyan: "bg-cyan-500 text-white",
-  green: "bg-green-500 text-white",
-  orange: "bg-orange-500 text-white",
-  pink: "bg-pink-500 text-white",
-  purple: "bg-purple-500 text-white",
   red: "bg-red-500 text-white",
+  orange: "bg-orange-500 text-white",
+  purple: "bg-purple-500 text-white",
+  blue: "bg-blue-500 text-white",
+  green: "bg-green-500 text-white",
+  cyan: "bg-cyan-500 text-white",
+  pink: "bg-pink-500 text-white",
   yellow: "bg-yellow-500 text-black",
 };
 
@@ -108,11 +108,11 @@ export function CommandItem({
       <code className="print:!bg-gray-100 print:!border-0 print:!px-[2pt] print:!py-[1pt] print:!text-[5.5pt] block rounded bg-black/5 px-2 py-1 font-mono text-xs dark:bg-white/5">
         {command}
       </code>
-      {description ? (
+      {description && (
         <div className="print:!text-gray-600 print:!text-[5pt] print:!pl-[2pt] pl-2 text-gray-600 text-xs dark:text-gray-400">
           {description}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
@@ -125,15 +125,15 @@ export function InfoBox({
   children: React.ReactNode;
 }) {
   const styles = {
-    note: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200",
     tip: "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-800 dark:text-green-200",
+    note: "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200",
     warning:
       "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200",
   };
 
   const icons = {
-    note: Info,
     tip: Lightbulb,
+    note: Info,
     warning: AlertTriangle,
   };
 

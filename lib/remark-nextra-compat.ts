@@ -18,25 +18,25 @@ import { visit } from "unist-util-visit";
  * already set and builds the table of contents from it.
  */
 
-interface JsxAttribute {
+type JsxAttribute = {
   name: string;
   type: "mdxJsxAttribute";
   value?: unknown;
-}
+};
 
-interface JsxElement {
+type JsxElement = {
   attributes: JsxAttribute[];
   children: unknown[];
   data?: { _mdxExplicitJsx?: boolean };
   name: string | null;
   type: "mdxJsxFlowElement" | "mdxJsxTextElement";
-}
+};
 
-interface NodeLike {
+type NodeLike = {
   children?: NodeLike[];
   type: string;
   value?: string;
-}
+};
 
 const CUSTOM_ID_REGEX = /\s*\[#([\s\S]+?)]\s*$/;
 const COMPONENT_HTML_TAGS = new Set(["details", "summary"]);
@@ -102,10 +102,10 @@ function hiddenStyleAttribute(): JsxAttribute {
   };
 }
 
-interface EstreeLiteral {
+type EstreeLiteral = {
   type: string;
   value?: unknown;
-}
+};
 
 /** Reads the string entries of `items={["a", "b"]}` on a `<Tabs>` element. */
 function tabNames(tabs: JsxElement): (string | undefined)[] | null {
@@ -149,11 +149,11 @@ function addSummaryIds(node: NodeLike, slugger: Slugger): void {
   }
 }
 
-interface HeadingLike {
+type HeadingLike = {
   children: NodeLike[];
   data?: { hProperties?: Record<string, unknown> };
   depth: number;
-}
+};
 
 /** Applies `[#custom-id]` and gives every heading below `h1` its slug id. */
 function assignHeadingId(heading: HeadingLike, slugger: Slugger): void {
@@ -204,6 +204,26 @@ function addTabHeading(
   tab.children.unshift(heading);
 }
 
+function visitJsxElement(
+  node: JsxElement,
+  parent: unknown,
+  index: number | undefined,
+  slugger: Slugger
+): void {
+  if (node.name && COMPONENT_HTML_TAGS.has(node.name) && node.data) {
+    node.data._mdxExplicitJsx = undefined;
+  }
+  if (node.type !== "mdxJsxFlowElement") {
+    return;
+  }
+  if (node.name === "Tabs.Tab") {
+    addTabHeading(node, parent, index, slugger);
+  }
+  if (node.name === "details") {
+    addSummaryIds(node as unknown as NodeLike, slugger);
+  }
+}
+
 export function remarkNextraCompat(): (tree: Root) => void {
   return (tree: Root) => {
     const slugger = new Slugger();
@@ -213,20 +233,8 @@ export function remarkNextraCompat(): (tree: Root) => void {
         assignHeadingId(node as unknown as HeadingLike, slugger);
         return;
       }
-      if (!isJsxElement(node)) {
-        return;
-      }
-      if (node.name && COMPONENT_HTML_TAGS.has(node.name) && node.data) {
-        node.data._mdxExplicitJsx = undefined;
-      }
-      if (node.type !== "mdxJsxFlowElement") {
-        return;
-      }
-      if (node.name === "Tabs.Tab") {
-        addTabHeading(node, parent, index, slugger);
-      }
-      if (node.name === "details") {
-        addSummaryIds(node as unknown as NodeLike, slugger);
+      if (isJsxElement(node)) {
+        visitJsxElement(node, parent, index, slugger);
       }
     });
   };

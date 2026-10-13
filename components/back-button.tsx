@@ -3,13 +3,9 @@ import { Button } from "@arcadeai/design-system";
 import { ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 
-interface BackButtonProps {
+type BackButtonProps = {
   goBackText: string;
-}
-
-function goBack() {
-  window.history.back();
-}
+};
 
 export function BackButton({ goBackText }: BackButtonProps) {
   const [canGoBack, setCanGoBack] = useState(false);
@@ -26,7 +22,7 @@ export function BackButton({ goBackText }: BackButtonProps) {
   return (
     <Button
       className="flex-1 text-black sm:flex-initial dark:text-white"
-      onClick={goBack}
+      onClick={() => window.history.back()}
       size="lg"
       variant="outline"
     >

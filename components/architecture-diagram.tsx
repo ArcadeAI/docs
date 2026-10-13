@@ -15,22 +15,22 @@ const VIEW_W = 1000;
 const VIEW_H = 630;
 
 /** Zone boundaries. */
-const LOCAL = { w: 210, x: 8 };
-const PLATFORM = { w: 644, x: 348 };
-const ZONE = { h: 400, y: 70 };
+const LOCAL = { x: 8, w: 210 };
+const PLATFORM = { x: 348, w: 644 };
+const ZONE = { y: 70, h: 400 };
 
 /** Columns inside the Platform zone. */
-const GOVERNANCE = { w: 200, x: 364 };
-const SERVICES = { w: 368, x: 584 };
+const GOVERNANCE = { x: 364, w: 200 };
+const SERVICES = { x: 584, w: 368 };
 
 /** Vertical lanes kept clear so routed lines never cross a box. */
 const IDP_LANE_X = 574;
 const EXTERNAL_MCP_LANE_X = 972;
 const KIT_LANE_X = 308;
 
-const ROW_TOOLS = { h: 52, y: 302 };
-const ROW_ENGINE = { h: 52, y: 396 };
-const ROW_CONSUMERS = { h: 58, y: 560 };
+const ROW_TOOLS = { y: 302, h: 52 };
+const ROW_ENGINE = { y: 396, h: 52 };
+const ROW_CONSUMERS = { y: 560, h: 58 };
 
 const TOOLS_MID_Y = ROW_TOOLS.y + ROW_TOOLS.h / 2;
 const ENGINE_MID_Y = ROW_ENGINE.y + ROW_ENGINE.h / 2;
@@ -52,13 +52,13 @@ const ARROW_ACCENT = "url(#arcade-arrow-accent)";
 
 type Lines = readonly string[];
 
-interface LabelProps {
-  className: string;
+type LabelProps = {
   cx: number;
   cy: number;
-  fontSize: number;
   lines: Lines;
-}
+  className: string;
+  fontSize: number;
+};
 
 /** Centers one or more lines of text on (cx, cy). */
 function Label({ cx, cy, lines, className, fontSize }: LabelProps) {
@@ -79,13 +79,13 @@ function Label({ cx, cy, lines, className, fontSize }: LabelProps) {
   );
 }
 
-interface NodeProps {
-  h: number;
-  lines: Lines;
-  w: number;
+type NodeProps = {
   x: number;
   y: number;
-}
+  w: number;
+  h: number;
+  lines: Lines;
+};
 
 /** A capability inside one of the two zones. */
 function Box({ x, y, w, h, lines }: NodeProps) {
@@ -161,13 +161,13 @@ function External({ x, y, w, h, lines }: NodeProps) {
   );
 }
 
-interface ChipProps {
-  accent?: boolean;
+type ChipProps = {
   cx: number;
   cy: number;
-  label: string;
   w: number;
-}
+  label: string;
+  accent?: boolean;
+};
 
 /** A protocol label sitting on a connector, masking the line behind it. */
 function Chip({ cx, cy, w, label, accent = false }: ChipProps) {

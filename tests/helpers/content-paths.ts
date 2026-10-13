@@ -112,12 +112,12 @@ export function listChildSlugs(dir: string): string[] {
   return [...slugs].sort();
 }
 
-export interface MetaJson {
+export type MetaJson = {
   icon?: string;
   pages?: string[];
   title?: string;
   [key: string]: unknown;
-}
+};
 
 /** Parse `<dir>/meta.json`; returns null when it does not exist. */
 export function readMetaJson(dir: string): MetaJson | null {

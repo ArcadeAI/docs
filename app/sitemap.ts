@@ -67,6 +67,7 @@ async function collectToolkitRoutes(
     // The sitemap is an auxiliary artifact. Keep static pages available if a
     // malformed toolkit prevents the generated catalog from being enumerated;
     // the normal page/static-param validation still fails the build loudly.
+    // biome-ignore lint/suspicious/noConsole: surface a best-effort sitemap degradation
     console.warn("Unable to enumerate generated toolkit sitemap routes", error);
     return [];
   }
@@ -80,10 +81,10 @@ async function collectToolkitRoutes(
     }
 
     entries.push({
-      changeFrequency: "weekly",
-      lastModified: toolkitDataMtime,
-      priority: 0.7,
       url: `${NORMALIZED_SITE_URL}${link}`,
+      lastModified: toolkitDataMtime,
+      changeFrequency: "weekly",
+      priority: 0.7,
     });
   }
 

@@ -2,11 +2,11 @@
 import { Button } from "@arcadeai/design-system";
 import { useState } from "react";
 
-interface ToggleContentProps {
+type ToggleContentProps = {
   children: React.ReactNode;
-  hideText?: string;
   showText?: string;
-}
+  hideText?: string;
+};
 
 const ToggleContent: React.FC<ToggleContentProps> = ({
   children,
@@ -19,14 +19,12 @@ const ToggleContent: React.FC<ToggleContentProps> = ({
     setIsExpanded(!isExpanded);
   };
 
-  const buttonText = isExpanded ? hideText : showText;
-
   return (
     <div>
       <Button className="mb-4" onClick={handleToggle} variant="outline">
-        {buttonText}
+        {isExpanded ? hideText : showText}
       </Button>
-      {isExpanded ? <div>{children}</div> : null}
+      {isExpanded && <div>{children}</div>}
     </div>
   );
 };

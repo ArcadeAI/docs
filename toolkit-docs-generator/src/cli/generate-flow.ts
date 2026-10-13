@@ -19,11 +19,12 @@ export const resolveCustomSectionsPath = async (
   }
 
   const defaultPath = join(workingDir, "curation");
-  const exists = await access(defaultPath).then(
-    () => true,
-    () => false
-  );
-  return exists ? defaultPath : undefined;
+  try {
+    await access(defaultPath);
+    return defaultPath;
+  } catch {
+    return;
+  }
 };
 
 /**
@@ -74,9 +75,9 @@ export const assertSafeCurrentToolkitSnapshot = (
 };
 
 export interface ProcessingStats {
+  totalToolkits: number;
   effectiveSkipped: number;
   toProcess: number;
-  totalToolkits: number;
   unknownSkipIds: string[];
 }
 
@@ -119,7 +120,7 @@ export const computeProcessingStats = (
   const totalToolkits = toolkitList.size;
   const toProcess = Math.max(0, totalToolkits - effectiveSkipped);
 
-  return { effectiveSkipped, toProcess, totalToolkits, unknownSkipIds };
+  return { totalToolkits, effectiveSkipped, toProcess, unknownSkipIds };
 };
 
 /**

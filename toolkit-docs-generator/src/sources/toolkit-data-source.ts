@@ -24,10 +24,10 @@ import {
  * Combined toolkit data containing both tools and metadata
  */
 export interface ToolkitData {
-  /** Metadata from Design System */
-  readonly metadata: ToolkitMetadata | null;
   /** Tool definitions from the public catalog API */
   readonly tools: readonly ToolDefinition[];
+  /** Metadata from Design System */
+  readonly metadata: ToolkitMetadata | null;
 }
 
 // ============================================================================
@@ -38,13 +38,14 @@ export interface ToolkitData {
  * Interface for fetching combined toolkit data (tools + metadata)
  */
 export interface ToolkitDataSource {
-  readonly fetchAllToolkitsData: () => Promise<
-    ReadonlyMap<string, ToolkitData>
-  >;
   readonly fetchToolkitData: (
     toolkitId: string,
     version?: string
   ) => Promise<ToolkitData>;
+
+  readonly fetchAllToolkitsData: () => Promise<
+    ReadonlyMap<string, ToolkitData>
+  >;
 
   readonly isAvailable: () => Promise<boolean>;
 }
@@ -60,12 +61,12 @@ export const createCachedToolkitDataSource = (
     | undefined;
 
   return {
+    fetchToolkitData: (toolkitId, version) =>
+      source.fetchToolkitData(toolkitId, version),
     fetchAllToolkitsData: () => {
       allToolkitsSnapshot ??= source.fetchAllToolkitsData();
       return allToolkitsSnapshot;
     },
-    fetchToolkitData: (toolkitId, version) =>
-      source.fetchToolkitData(toolkitId, version),
     isAvailable: () => source.isAvailable(),
   };
 };
@@ -75,8 +76,8 @@ export const createCachedToolkitDataSource = (
 // ============================================================================
 
 export interface CombinedToolkitDataSourceConfig {
-  readonly metadataSource: MetadataSource;
   readonly toolSource: ToolDataSource;
+  readonly metadataSource: MetadataSource;
 }
 
 export class CombinedToolkitDataSource implements ToolkitDataSource {
@@ -124,14 +125,14 @@ export class CombinedToolkitDataSource implements ToolkitDataSource {
 
     const filteredTools = version
       ? tools.filter((tool) => {
-          const [, toolVersion] = tool.fullyQualifiedName.split("@");
+          const toolVersion = tool.fullyQualifiedName.split("@")[1];
           return toolVersion === version;
         })
       : filterToolsByHighestVersion(tools);
 
     return {
-      metadata,
       tools: filteredTools,
+      metadata,
     };
   }
 
@@ -143,7 +144,7 @@ export class CombinedToolkitDataSource implements ToolkitDataSource {
 
     const toolkitGroups = new Map<string, ToolDefinition[]>();
     for (const tool of allTools) {
-      const [toolkitId] = tool.qualifiedName.split(".");
+      const toolkitId = tool.qualifiedName.split(".")[0];
       if (toolkitId) {
         const existing = toolkitGroups.get(toolkitId) ?? [];
         toolkitGroups.set(toolkitId, [...existing, tool]);
@@ -172,7 +173,7 @@ export class CombinedToolkitDataSource implements ToolkitDataSource {
         tools,
         directMetadata
       );
-      result.set(toolkitId, { metadata, tools });
+      result.set(toolkitId, { tools, metadata });
     }
 
     return result;
@@ -196,13 +197,13 @@ export const createCombinedToolkitDataSource = (
 // ============================================================================
 
 export interface PublicCatalogSources {
+  /** Tools plus branding, both from the public catalog */
+  readonly toolkitDataSource: ToolkitDataSource;
   /**
    * The same catalog read exposed as a metadata source, for the CLI steps
    * that resolve toolkit names before any tools are fetched.
    */
   readonly metadataSource: MetadataSource;
-  /** Tools plus branding, both from the public catalog */
-  readonly toolkitDataSource: ToolkitDataSource;
 }
 
 /**
@@ -218,11 +219,11 @@ export const createPublicCatalogSources = (
   const source = createPublicCatalogApiSource(config);
 
   return {
-    metadataSource: source,
     toolkitDataSource: createCombinedToolkitDataSource({
-      metadataSource: source,
       toolSource: source,
+      metadataSource: source,
     }),
+    metadataSource: source,
   };
 };
 
@@ -241,7 +242,7 @@ export const createMockToolkitDataSource = (
   const metadataFixturePath = join(config.dataDir, "metadata.json");
 
   return createCombinedToolkitDataSource({
-    metadataSource: createMockMetadataSource(metadataFixturePath),
     toolSource: createMockToolFixtureSource(toolFixturePath),
+    metadataSource: createMockMetadataSource(metadataFixturePath),
   });
 };

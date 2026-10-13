@@ -8,36 +8,36 @@ export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface Logger {
   readonly debug: (message: string, context?: Record<string, unknown>) => void;
-  readonly endGroup: () => void;
-  readonly error: (message: string, context?: Record<string, unknown>) => void;
   readonly info: (message: string, context?: Record<string, unknown>) => void;
-  readonly progress: (current: number, total: number, message: string) => void;
-  readonly startGroup: (name: string) => void;
-  readonly success: (message: string) => void;
   readonly warn: (message: string, context?: Record<string, unknown>) => void;
+  readonly error: (message: string, context?: Record<string, unknown>) => void;
+  readonly progress: (current: number, total: number, message: string) => void;
+  readonly success: (message: string) => void;
+  readonly startGroup: (name: string) => void;
+  readonly endGroup: () => void;
 }
 
 export interface LoggerOptions {
-  /** Whether to use colors (default: true) */
-  readonly colors?: boolean;
   /** Minimum log level (default: "info") */
   readonly level?: LogLevel;
+  /** Whether to use colors (default: true) */
+  readonly colors?: boolean;
   /** Whether to show timestamps (default: false) */
   readonly timestamps?: boolean;
 }
 
 const LOG_LEVEL_ORDER: Record<LogLevel, number> = {
   debug: 0,
-  error: 3,
   info: 1,
   warn: 2,
+  error: 3,
 };
 
 const LOG_LEVEL_ICONS: Record<LogLevel, string> = {
   debug: "🔍",
-  error: "❌",
   info: "ℹ️ ",
   warn: "⚠️ ",
+  error: "❌",
 };
 
 const formatTimestamp = (): string => {
@@ -110,12 +110,9 @@ export const createLogger = (options?: LoggerOptions): Logger => {
 
   return {
     debug: (message, context) => log("debug", message, context),
-
-    endGroup: () => {
-      // Optional visual separator
-    },
-    error: (message, context) => log("error", message, context),
     info: (message, context) => log("info", message, context),
+    warn: (message, context) => log("warn", message, context),
+    error: (message, context) => log("error", message, context),
 
     progress: (current, total, message) => {
       if (!shouldLog("info")) {
@@ -131,6 +128,16 @@ export const createLogger = (options?: LoggerOptions): Logger => {
       console.log(`${prefix} ${message} (${current}/${total})`);
     },
 
+    success: (message) => {
+      if (!shouldLog("info")) {
+        return;
+      }
+      const formatted = useColors
+        ? chalk.green(`✓ ${message}`)
+        : `✓ ${message}`;
+      console.log(formatted);
+    },
+
     startGroup: (name) => {
       if (!shouldLog("info")) {
         return;
@@ -141,16 +148,9 @@ export const createLogger = (options?: LoggerOptions): Logger => {
       console.log(formatted);
     },
 
-    success: (message) => {
-      if (!shouldLog("info")) {
-        return;
-      }
-      const formatted = useColors
-        ? chalk.green(`✓ ${message}`)
-        : `✓ ${message}`;
-      console.log(formatted);
+    endGroup: () => {
+      // Optional visual separator
     },
-    warn: (message, context) => log("warn", message, context),
   };
 };
 

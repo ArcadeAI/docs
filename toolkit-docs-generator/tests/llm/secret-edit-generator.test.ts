@@ -3,8 +3,8 @@ import type { LlmClient } from "../../src/llm/client";
 import { LlmSecretEditGenerator } from "../../src/llm/secret-edit-generator";
 
 const fakeClient = (response: string): LlmClient => ({
-  generateText: vi.fn(async () => response),
   provider: "anthropic",
+  generateText: vi.fn(async () => response),
 });
 
 describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
@@ -12,10 +12,10 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     const client = fakeClient("unused");
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     const out = await editor.cleanupStaleReferences({
-      content: "original",
-      currentSecrets: ["KEEP"],
       kind: "summary",
+      content: "original",
       removedSecrets: [],
+      currentSecrets: ["KEEP"],
       toolkitLabel: "GitHub",
     });
     expect(out).toBe("original");
@@ -26,10 +26,10 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     const client = fakeClient("```markdown\nedited content\n```");
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     const out = await editor.cleanupStaleReferences({
-      content: "mentions OLD",
-      currentSecrets: ["KEEP"],
       kind: "summary",
+      content: "mentions OLD",
       removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
       toolkitLabel: "GitHub",
     });
     expect(out).toBe("edited content");
@@ -54,10 +54,10 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     const client = fakeClient(wrappedEdit);
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     const out = await editor.cleanupStaleReferences({
-      content: "mentions OLD",
-      currentSecrets: ["KEEP"],
       kind: "documentation_chunk",
+      content: "mentions OLD",
       removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
       toolkitLabel: "GitHub",
     });
     expect(out).toContain("```python");
@@ -71,10 +71,10 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     const client = fakeClient(response);
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     const out = await editor.cleanupStaleReferences({
-      content: "mentions OLD",
-      currentSecrets: ["KEEP"],
       kind: "documentation_chunk",
+      content: "mentions OLD",
       removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
       toolkitLabel: "GitHub",
     });
     expect(out).toBe(response);
@@ -88,10 +88,10 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     const client = fakeClient(response);
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     const out = await editor.cleanupStaleReferences({
-      content: "mentions OLD",
-      currentSecrets: ["KEEP"],
       kind: "documentation_chunk",
+      content: "mentions OLD",
       removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
       toolkitLabel: "GitHub",
     });
     expect(out).toBe(response);
@@ -102,10 +102,10 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     const client = fakeClient(response);
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     const out = await editor.cleanupStaleReferences({
-      content: "mentions OLD",
-      currentSecrets: ["KEEP"],
       kind: "documentation_chunk",
+      content: "mentions OLD",
       removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
       toolkitLabel: "GitHub",
     });
     expect(out).toBe(response);
@@ -115,10 +115,10 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     const client = fakeClient("ok");
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     await editor.cleanupStaleReferences({
-      content: "Mentions OLD_TOKEN in a row.",
-      currentSecrets: ["KEEP_URL"],
       kind: "documentation_chunk",
+      content: "Mentions OLD_TOKEN in a row.",
       removedSecrets: ["OLD_TOKEN"],
+      currentSecrets: ["KEEP_URL"],
       toolkitLabel: "GitHub",
     });
     expect(client.generateText).toHaveBeenCalledTimes(1);
@@ -134,10 +134,10 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     await expect(
       editor.cleanupStaleReferences({
-        content: "mentions OLD",
-        currentSecrets: [],
         kind: "summary",
+        content: "mentions OLD",
         removedSecrets: ["OLD"],
+        currentSecrets: [],
         toolkitLabel: "GitHub",
       })
     ).rejects.toThrow(/empty/i);
@@ -150,10 +150,10 @@ describe("LlmSecretEditGenerator.fillCoverageGaps", () => {
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     const out = await editor.fillCoverageGaps({
       content: "original",
-      currentSecrets: ["KEEP"],
       missingSecretNames: [],
-      requireConfigLink: false,
+      currentSecrets: ["KEEP"],
       toolkitLabel: "GitHub",
+      requireConfigLink: false,
     });
     expect(out).toBe("original");
     expect(client.generateText).not.toHaveBeenCalled();
@@ -164,10 +164,10 @@ describe("LlmSecretEditGenerator.fillCoverageGaps", () => {
     const editor = new LlmSecretEditGenerator({ client, model: "test" });
     const out = await editor.fillCoverageGaps({
       content: "Summary without a link.",
-      currentSecrets: ["KEEP"],
       missingSecretNames: [],
-      requireConfigLink: true,
+      currentSecrets: ["KEEP"],
       toolkitLabel: "GitHub",
+      requireConfigLink: true,
     });
     expect(out).toBe("edited");
     expect(client.generateText).toHaveBeenCalledTimes(1);

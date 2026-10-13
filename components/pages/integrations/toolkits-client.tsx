@@ -11,13 +11,13 @@ import {
 } from "@/lib/integration-index";
 import { FiltersBar } from "./filters-bar";
 import { ToolCard } from "./tool-card";
-import { TYPE_CONFIG_ENTRIES, TYPE_DESCRIPTIONS } from "./type-config";
+import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilters } from "./use-filters";
 import { useToolkitFilters } from "./use-toolkit-filters";
 
-interface ToolkitsClientProps {
+type ToolkitsClientProps = {
   toolkits: ResolvedIndexToolkit[];
-}
+};
 
 /**
  * Get toolkit icon with fallback for API toolkits.
@@ -33,7 +33,7 @@ function getToolkitIconWithFallback(
   const apiSuffix = "api";
 
   const resolved = getToolkitIcon(toolkitId);
-  if (resolved !== GenericIcon) {
+  if (resolved && resolved !== GenericIcon) {
     return resolved;
   }
 
@@ -41,7 +41,7 @@ function getToolkitIconWithFallback(
   if (normalizedId.endsWith(apiSuffix)) {
     const baseProviderId = toolkitId.slice(0, -apiSuffix.length);
     const baseIcon = getToolkitIcon(baseProviderId);
-    if (baseIcon !== GenericIcon) {
+    if (baseIcon && baseIcon !== GenericIcon) {
       return baseIcon;
     }
   }
@@ -67,7 +67,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
               There are 5 designations for Arcade MCP Servers:
             </p>
             <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {TYPE_CONFIG_ENTRIES.map(
+              {Object.entries(TYPE_CONFIG).map(
                 ([key, { label, icon: Icon, color }]) => (
                   <div className="flex items-start space-x-3" key={key}>
                     <div className="mt-1">
@@ -156,7 +156,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                 <p className="mt-2 text-gray-600 text-sm dark:text-gray-400">
                   Try adjusting your filters or search query
                 </p>
-                {hasActiveFilters ? (
+                {hasActiveFilters && (
                   <Button
                     className="mt-4"
                     onClick={clearAllFilters}
@@ -165,7 +165,7 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
                   >
                     Clear all filters
                   </Button>
-                ) : null}
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">

@@ -118,18 +118,18 @@ export async function collectToolMetadataStats(opts: {
   const jsonFiles = files.filter((f) => f.endsWith(".json"));
 
   const acc: AccumulatorState = {
-    booleans: {
-      destructive: { false: 0, true: 0, undefined: 0 },
-      idempotent: { false: 0, true: 0, undefined: 0 },
-      openWorld: { false: 0, true: 0, undefined: 0 },
-      readOnly: { false: 0, true: 0, undefined: 0 },
-    },
-    extrasKeysSet: new Set(),
     operationsSet: new Set(),
     serviceDomainsSet: new Set(),
-    toolsWithExtras: 0,
+    extrasKeysSet: new Set(),
     totalTools: 0,
     withMetadata: 0,
+    toolsWithExtras: 0,
+    booleans: {
+      readOnly: { true: 0, false: 0, undefined: 0 },
+      destructive: { true: 0, false: 0, undefined: 0 },
+      idempotent: { true: 0, false: 0, undefined: 0 },
+      openWorld: { true: 0, false: 0, undefined: 0 },
+    },
   };
 
   for (const file of jsonFiles) {
@@ -140,15 +140,15 @@ export async function collectToolMetadataStats(opts: {
   }
 
   return {
-    booleans: acc.booleans,
     coverage: { totalTools: acc.totalTools, withMetadata: acc.withMetadata },
     distinct: {
       operations: Array.from(acc.operationsSet).sort(),
       serviceDomains: Array.from(acc.serviceDomainsSet).sort(),
     },
+    booleans: acc.booleans,
     extras: {
-      distinctKeys: Array.from(acc.extrasKeysSet).sort(),
       toolsWithExtras: acc.toolsWithExtras,
+      distinctKeys: Array.from(acc.extrasKeysSet).sort(),
     },
   };
 }

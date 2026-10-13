@@ -35,7 +35,7 @@ test("the default data dir follows the working directory", async () => {
   const originalCwd = process.cwd();
   cleanup.push(() => {
     process.chdir(originalCwd);
-    rmSync(scratch, { force: true, recursive: true });
+    rmSync(scratch, { recursive: true, force: true });
   });
 
   process.chdir(scratch);

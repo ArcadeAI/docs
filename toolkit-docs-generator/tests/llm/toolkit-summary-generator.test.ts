@@ -6,55 +6,55 @@ import type { MergedToolkit } from "../../src/types/index";
 const createToolkit = (
   overrides: Partial<MergedToolkit> = {}
 ): MergedToolkit => ({
-  auth: {
-    allScopes: ["repo"],
-    providerId: "github",
-    type: "oauth2",
-  },
-  customImports: [],
-  description: "Tools for GitHub automation.",
-  documentationChunks: [],
-  generatedAt: "2026-01-15T00:00:00.000Z",
   id: "Github",
   label: "GitHub",
+  version: "1.0.0",
+  description: "Tools for GitHub automation.",
   metadata: {
     category: "development",
-    docsLink: "https://docs.arcade.dev/en/mcp-servers/development/github",
     iconUrl: "https://design-system.arcade.dev/icons/github.svg",
     isBYOC: false,
-    isComingSoon: false,
-    isHidden: false,
     isPro: false,
     type: "arcade",
+    docsLink: "https://docs.arcade.dev/en/mcp-servers/development/github",
+    isComingSoon: false,
+    isHidden: false,
   },
-  subPages: [],
+  auth: {
+    type: "oauth2",
+    providerId: "github",
+    allScopes: ["repo"],
+  },
   tools: [
     {
+      name: "CreateIssue",
+      qualifiedName: "Github.CreateIssue",
+      fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      description: "Create issues in a repository.",
+      parameters: [],
       auth: {
         providerId: "github",
         providerType: "oauth2",
         scopes: ["repo"],
       },
-      description: "Create issues in a repository.",
-      documentationChunks: [],
-      fullyQualifiedName: "Github.CreateIssue@1.0.0",
-      name: "CreateIssue",
-      output: null,
-      parameters: [],
-      qualifiedName: "Github.CreateIssue",
       secrets: ["GITHUB_API_KEY"],
       secretsInfo: [{ name: "GITHUB_API_KEY", type: "api_key" }],
+      output: null,
+      documentationChunks: [],
     },
   ],
-  version: "1.0.0",
+  documentationChunks: [],
+  customImports: [],
+  subPages: [],
+  generatedAt: "2026-01-15T00:00:00.000Z",
   ...overrides,
 });
 
 describe("LlmToolkitSummaryGenerator", () => {
   it("parses summary from a JSON response", async () => {
     const client: LlmClient = {
-      generateText: async () => '```json\n{"summary":"Concise summary."}\n```',
       provider: "openai",
+      generateText: async () => '```json\n{"summary":"Concise summary."}\n```',
     };
     const generator = new LlmToolkitSummaryGenerator({
       client,
@@ -69,11 +69,11 @@ describe("LlmToolkitSummaryGenerator", () => {
   it("includes tool descriptions and auth info in the prompt", async () => {
     let capturedPrompt = "";
     const client: LlmClient = {
+      provider: "openai",
       generateText: async ({ prompt }) => {
         capturedPrompt = prompt;
         return '{"summary":"OK"}';
       },
-      provider: "openai",
     };
     const generator = new LlmToolkitSummaryGenerator({
       client,
@@ -92,11 +92,11 @@ describe("LlmToolkitSummaryGenerator", () => {
   const capturePrompt = async (toolkit: MergedToolkit): Promise<string> => {
     let capturedPrompt = "";
     const client: LlmClient = {
+      provider: "openai",
       generateText: async ({ prompt }) => {
         capturedPrompt = prompt;
         return '{"summary":"OK"}';
       },
-      provider: "openai",
     };
     const generator = new LlmToolkitSummaryGenerator({
       client,
@@ -117,7 +117,7 @@ describe("LlmToolkitSummaryGenerator", () => {
   it("does not link to a provider page that does not exist", async () => {
     const prompt = await capturePrompt(
       createToolkit({
-        auth: { allScopes: [], providerId: "box", type: "oauth2" },
+        auth: { type: "oauth2", providerId: "box", allScopes: [] },
       })
     );
 

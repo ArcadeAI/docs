@@ -214,9 +214,9 @@ describe("parseDynamicRouteMoves", () => {
     expect(moves).toHaveLength(1);
     expect(moves[0]).toEqual({
       newPath: "content/docs/new/[toolkitId].mdx",
-      newUrl: "/:locale/new/:toolkitId",
       oldPath: "content/docs/old/[toolkitId].mdx",
       oldUrl: "/:locale/old/:toolkitId",
+      newUrl: "/:locale/new/:toolkitId",
     });
   });
 
@@ -268,9 +268,9 @@ describe("parseDynamicRouteMoves", () => {
 describe("isMoveCoveredByRedirect", () => {
   const move = {
     newPath: "content/docs/new/[toolkitId].mdx",
-    newUrl: "/:locale/new/:toolkitId",
     oldPath: "content/docs/old/[toolkitId].mdx",
     oldUrl: "/:locale/old/:toolkitId",
+    newUrl: "/:locale/new/:toolkitId",
   };
 
   it("matches an exact source", () => {

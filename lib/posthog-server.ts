@@ -10,10 +10,10 @@ export function getPostHogServer(): PostHog {
       throw new Error("NEXT_PUBLIC_POSTHOG_KEY is not set");
     }
     posthogClient = new PostHog(apiKey, {
+      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
       // Flush events immediately in serverless environments
       flushAt: 1,
       flushInterval: 0,
-      host: process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
     });
   }
   return posthogClient;
@@ -26,117 +26,117 @@ const AI_AGENT_CLASSIFIERS: Array<{
   provider: string;
 }> = [
   // OpenAI
-  { pattern: /GPTBot/i, provider: "OpenAI", type: "GPTBot" },
-  { pattern: /ChatGPT-User/i, provider: "OpenAI", type: "ChatGPT-User" },
-  { pattern: /OAI-SearchBot/i, provider: "OpenAI", type: "OAI-SearchBot" },
+  { pattern: /GPTBot/i, type: "GPTBot", provider: "OpenAI" },
+  { pattern: /ChatGPT-User/i, type: "ChatGPT-User", provider: "OpenAI" },
+  { pattern: /OAI-SearchBot/i, type: "OAI-SearchBot", provider: "OpenAI" },
 
   // Anthropic
-  { pattern: /ClaudeBot/i, provider: "Anthropic", type: "ClaudeBot" },
-  { pattern: /Claude-User/i, provider: "Anthropic", type: "Claude-User" },
+  { pattern: /ClaudeBot/i, type: "ClaudeBot", provider: "Anthropic" },
+  { pattern: /Claude-User/i, type: "Claude-User", provider: "Anthropic" },
   {
     pattern: /Claude-SearchBot/i,
-    provider: "Anthropic",
     type: "Claude-SearchBot",
+    provider: "Anthropic",
   },
-  { pattern: /anthropic/i, provider: "Anthropic", type: "Anthropic-Agent" },
+  { pattern: /anthropic/i, type: "Anthropic-Agent", provider: "Anthropic" },
 
   // Perplexity
-  { pattern: /PerplexityBot/i, provider: "Perplexity", type: "PerplexityBot" },
+  { pattern: /PerplexityBot/i, type: "PerplexityBot", provider: "Perplexity" },
   {
     pattern: /Perplexity-User/i,
-    provider: "Perplexity",
     type: "Perplexity-User",
+    provider: "Perplexity",
   },
 
   // Google
-  { pattern: /Google-Extended/i, provider: "Google", type: "Google-Extended" },
-  { pattern: /Googlebot/i, provider: "Google", type: "Googlebot" },
+  { pattern: /Google-Extended/i, type: "Google-Extended", provider: "Google" },
+  { pattern: /Googlebot/i, type: "Googlebot", provider: "Google" },
 
   // Amazon
-  { pattern: /Amazonbot/i, provider: "Amazon", type: "Amazonbot" },
-  { pattern: /amazonq/i, provider: "Amazon", type: "Amazon-Q" },
-  { pattern: /amazon-q/i, provider: "Amazon", type: "Amazon-Q" },
+  { pattern: /Amazonbot/i, type: "Amazonbot", provider: "Amazon" },
+  { pattern: /amazonq/i, type: "Amazon-Q", provider: "Amazon" },
+  { pattern: /amazon-q/i, type: "Amazon-Q", provider: "Amazon" },
 
   // Apple
   {
     pattern: /Applebot-Extended/i,
-    provider: "Apple",
     type: "Applebot-Extended",
+    provider: "Apple",
   },
 
   // Meta
-  { pattern: /meta-externalagent/i, provider: "Meta", type: "Meta-Agent" },
+  { pattern: /meta-externalagent/i, type: "Meta-Agent", provider: "Meta" },
 
   // ByteDance
-  { pattern: /Bytespider/i, provider: "ByteDance", type: "Bytespider" },
+  { pattern: /Bytespider/i, type: "Bytespider", provider: "ByteDance" },
 
   // Cohere
-  { pattern: /cohere-ai/i, provider: "Cohere", type: "Cohere-AI" },
+  { pattern: /cohere-ai/i, type: "Cohere-AI", provider: "Cohere" },
 
   // Common Crawl
-  { pattern: /CCBot/i, provider: "CommonCrawl", type: "CCBot" },
+  { pattern: /CCBot/i, type: "CCBot", provider: "CommonCrawl" },
 
   // Developer tools
-  { pattern: /cursor/i, provider: "Cursor", type: "Cursor" },
-  { pattern: /github.copilot/i, provider: "GitHub", type: "GitHub-Copilot" },
-  { pattern: /copilot/i, provider: "GitHub", type: "Copilot" },
-  { pattern: /codeium/i, provider: "Codeium", type: "Codeium" },
-  { pattern: /tabnine/i, provider: "Tabnine", type: "Tabnine" },
+  { pattern: /cursor/i, type: "Cursor", provider: "Cursor" },
+  { pattern: /github.copilot/i, type: "GitHub-Copilot", provider: "GitHub" },
+  { pattern: /copilot/i, type: "Copilot", provider: "GitHub" },
+  { pattern: /codeium/i, type: "Codeium", provider: "Codeium" },
+  { pattern: /tabnine/i, type: "Tabnine", provider: "Tabnine" },
 
   // Other AI services
-  { pattern: /gemini/i, provider: "Google", type: "Gemini" },
-  { pattern: /bard/i, provider: "Google", type: "Bard" },
-  { pattern: /phind/i, provider: "Phind", type: "Phind" },
-  { pattern: /you\.com/i, provider: "You.com", type: "You.com" },
-  { pattern: /ai21/i, provider: "AI21", type: "AI21" },
-  { pattern: /huggingface/i, provider: "HuggingFace", type: "HuggingFace" },
+  { pattern: /gemini/i, type: "Gemini", provider: "Google" },
+  { pattern: /bard/i, type: "Bard", provider: "Google" },
+  { pattern: /phind/i, type: "Phind", provider: "Phind" },
+  { pattern: /you\.com/i, type: "You.com", provider: "You.com" },
+  { pattern: /ai21/i, type: "AI21", provider: "AI21" },
+  { pattern: /huggingface/i, type: "HuggingFace", provider: "HuggingFace" },
 
   // Agent frameworks
-  { pattern: /langchain/i, provider: "LangChain", type: "LangChain" },
-  { pattern: /llamaindex/i, provider: "LlamaIndex", type: "LlamaIndex" },
-  { pattern: /autogpt/i, provider: "AutoGPT", type: "AutoGPT" },
-  { pattern: /agentgpt/i, provider: "AgentGPT", type: "AgentGPT" },
-  { pattern: /babyagi/i, provider: "BabyAGI", type: "BabyAGI" },
+  { pattern: /langchain/i, type: "LangChain", provider: "LangChain" },
+  { pattern: /llamaindex/i, type: "LlamaIndex", provider: "LlamaIndex" },
+  { pattern: /autogpt/i, type: "AutoGPT", provider: "AutoGPT" },
+  { pattern: /agentgpt/i, type: "AgentGPT", provider: "AgentGPT" },
+  { pattern: /babyagi/i, type: "BabyAGI", provider: "BabyAGI" },
 
   // Doc AI tools
-  { pattern: /kapa\.ai/i, provider: "Kapa", type: "Kapa.ai" },
-  { pattern: /mendable/i, provider: "Mendable", type: "Mendable" },
-  { pattern: /inkeep/i, provider: "Inkeep", type: "Inkeep" },
-  { pattern: /glean/i, provider: "Glean", type: "Glean" },
+  { pattern: /kapa\.ai/i, type: "Kapa.ai", provider: "Kapa" },
+  { pattern: /mendable/i, type: "Mendable", provider: "Mendable" },
+  { pattern: /inkeep/i, type: "Inkeep", provider: "Inkeep" },
+  { pattern: /glean/i, type: "Glean", provider: "Glean" },
 ];
 
-export interface AIAgentClassification {
-  agentProvider: string | null;
-  agentType: string | null;
+export type AIAgentClassification = {
   isAIAgent: boolean;
-}
+  agentType: string | null;
+  agentProvider: string | null;
+};
 
 export function classifyAIAgent(userAgent: string): AIAgentClassification {
   for (const classifier of AI_AGENT_CLASSIFIERS) {
     if (classifier.pattern.test(userAgent)) {
       return {
-        agentProvider: classifier.provider,
-        agentType: classifier.type,
         isAIAgent: true,
+        agentType: classifier.type,
+        agentProvider: classifier.provider,
       };
     }
   }
   return {
-    agentProvider: null,
-    agentType: null,
     isAIAgent: false,
+    agentType: null,
+    agentProvider: null,
   };
 }
 
-export interface ServerPageViewEvent {
+export type ServerPageViewEvent = {
+  distinctId: string;
+  pathname: string;
+  userAgent: string;
+  referer?: string;
+  ip?: string;
   acceptHeader?: string;
   acceptLanguage?: string;
-  distinctId: string;
-  ip?: string;
-  pathname: string;
-  referer?: string;
-  userAgent: string;
-}
+};
 
 export async function captureServerPageView(event: ServerPageViewEvent) {
   const posthog = getPostHogServer();
@@ -149,22 +149,22 @@ export async function captureServerPageView(event: ServerPageViewEvent) {
     event: "server_markdown_request",
     properties: {
       $current_url: event.pathname,
-
-      // Mark as server-side capture
-      $lib: "posthog-node",
       $pathname: event.pathname,
       $referrer: event.referer,
       $useragent: event.userAgent,
-      ai_agent_provider: classification.agentProvider,
-      ai_agent_type: classification.agentType,
 
       // AI agent classification
       is_ai_agent: classification.isAIAgent,
+      ai_agent_type: classification.agentType,
+      ai_agent_provider: classification.agentProvider,
 
       // Request metadata
       request_accept_header: event.acceptHeader,
       request_accept_language: event.acceptLanguage,
       request_source: "server",
+
+      // Mark as server-side capture
+      $lib: "posthog-node",
     },
   });
 

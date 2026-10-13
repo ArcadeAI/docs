@@ -3,10 +3,10 @@ import type React from "react";
 
 type NoteType = "notice" | "caution" | "learn-more";
 
-interface NoteProps {
-  children: React.ReactNode;
+type NoteProps = {
   type?: NoteType;
-}
+  children: React.ReactNode;
+};
 
 const noteConfig: Record<
   NoteType,
@@ -16,6 +16,12 @@ const noteConfig: Record<
     styles: string;
   }
 > = {
+  notice: {
+    icon: Info,
+    label: "Notice",
+    styles:
+      "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-100",
+  },
   caution: {
     icon: AlertTriangle,
     label: "Caution",
@@ -27,12 +33,6 @@ const noteConfig: Record<
     label: "Learn More",
     styles:
       "border-purple-200 bg-purple-50 text-purple-900 dark:border-purple-800 dark:bg-purple-950 dark:text-purple-100",
-  },
-  notice: {
-    icon: Info,
-    label: "Notice",
-    styles:
-      "border-blue-200 bg-blue-50 text-blue-900 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-100",
   },
 };
 

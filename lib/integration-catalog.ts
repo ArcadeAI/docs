@@ -10,6 +10,7 @@ const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
     const value = (toolkit as ToolkitWithDocsLink).docsLink;
     return value ?? undefined;
   }
+  return;
 };
 
 /**

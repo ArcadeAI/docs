@@ -2,10 +2,10 @@ import type * as PageTree from "fumadocs-core/page-tree";
 import Link from "next/link";
 import { source } from "@/lib/source";
 
-interface SubpageListProps {
+type SubpageListProps = {
   /** URL of the parent folder, e.g. `/en/operate/identity` or `/operate/identity`. */
   basePath: string;
-}
+};
 
 const TRAILING_SLASHES_REGEX = /\/+$/;
 

@@ -15,9 +15,9 @@ const TOOLKIT_CATEGORIES: readonly ToolkitCategory[] = CATEGORIES.map(
 const TOOLKIT_TYPE_MEMBERSHIP = {
   arcade: true,
   arcade_starter: true,
-  auth: true,
-  community: true,
   verified: true,
+  community: true,
+  auth: true,
 } satisfies Record<ToolkitType, true>;
 
 const TOOLKIT_TYPES = Object.keys(TOOLKIT_TYPE_MEMBERSHIP) as ToolkitType[];
@@ -36,20 +36,20 @@ export function isLabel(value: string): value is Label {
   return (LABELS as readonly string[]).includes(value);
 }
 
-export interface FilterState {
-  filterByByoc: boolean;
-  filterByPro: boolean;
-  searchQuery: string;
+export type FilterState = {
   selectedCategory: ToolkitCategory;
   selectedType: ToolkitType | "all";
-}
+  filterByPro: boolean;
+  filterByByoc: boolean;
+  searchQuery: string;
+};
 
 export const DEFAULT_FILTER_STATE: FilterState = {
-  filterByByoc: false,
-  filterByPro: false,
-  searchQuery: "",
   selectedCategory: "all",
   selectedType: "all",
+  filterByPro: false,
+  filterByByoc: false,
+  searchQuery: "",
 };
 
 export function isToolkitType(value: string): value is ToolkitType {

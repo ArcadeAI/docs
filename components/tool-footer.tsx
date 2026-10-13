@@ -3,9 +3,9 @@ import { Cloud, Puzzle } from "lucide-react";
 import type React from "react";
 import { QuickStartCard } from "./quick-start-card";
 
-interface ToolFooterProps {
+type ToolFooterProps = {
   pipPackageName: string;
-}
+};
 
 const ToolFooter: React.FC<ToolFooterProps> = ({ pipPackageName }) => (
   <div className="mt-8 border-neutral-dark-medium border-t pt-4">

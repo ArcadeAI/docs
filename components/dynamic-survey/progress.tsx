@@ -1,7 +1,7 @@
-interface ProgressProps {
+type ProgressProps = {
   currentIndex: number;
   totalQuestions: number;
-}
+};
 
 const PERCENTAGE_MULTIPLIER = 100;
 

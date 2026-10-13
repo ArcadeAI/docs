@@ -129,27 +129,27 @@ export function buildPipPackageName(toolkitId: string): string {
 }
 
 export const TOOLKIT_PAGE_OVERVIEW_LINK = {
-  href: "#overview",
   id: "overview",
   label: "Overview",
+  href: "#overview",
 } as const;
 
 export const TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK = {
-  href: "#available-tools",
   id: "available-tools",
   label: "Available tools",
+  href: "#available-tools",
 } as const;
 
 export const TOOLKIT_PAGE_SELECTED_TOOLS_LINK = {
-  href: "#selected-tools",
   id: "selected-tools",
   label: "Selected tools",
+  href: "#selected-tools",
 } as const;
 
 export const TOOLKIT_PAGE_GET_BUILDING_LINK = {
-  href: "#get-building",
   id: "get-building",
   label: "Get building",
+  href: "#get-building",
 } as const;
 
 // Regex for removing leading ## from headers (used for display label extraction)
@@ -180,9 +180,9 @@ export function extractChunkSectionLinks(
       if (!seenIds.has(id)) {
         seenIds.add(id);
         links.push({
-          href: `#${id}`,
           id,
           label: chunk.header.replace(HEADER_PREFIX_REGEX, ""), // Remove ## prefix for display
+          href: `#${id}`,
         });
       }
     }
@@ -420,16 +420,16 @@ function ToolsOnThisPage({
     // Check if item is outside visible area
     if (itemTop < containerScrollTop + TOC_SCROLL_PADDING) {
       container.scrollTo({
-        behavior: "smooth",
         top: Math.max(0, itemTop - TOC_SCROLL_PADDING),
+        behavior: "smooth",
       });
     } else if (
       itemTop + itemHeight >
       containerScrollTop + containerHeight - TOC_SCROLL_PADDING
     ) {
       container.scrollTo({
-        behavior: "smooth",
         top: itemTop + itemHeight - containerHeight + TOC_SCROLL_PADDING,
+        behavior: "smooth",
       });
     }
   }, [activeId]);
@@ -758,13 +758,13 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         selectedTools={selectedTools}
         showSelection={shouldShowSelection}
         tools={tools.map((tool) => ({
-          description: tool.description,
-          metadata: tool.metadata,
           name: tool.name,
           qualifiedName: tool.qualifiedName,
-          scopes: tool.auth?.scopes ?? [],
+          description: tool.description,
           secrets: tool.secrets,
           secretsInfo: tool.secretsInfo,
+          scopes: tool.auth?.scopes ?? [],
+          metadata: tool.metadata,
         }))}
       />
 

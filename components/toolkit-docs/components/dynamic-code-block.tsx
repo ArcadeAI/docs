@@ -2,15 +2,15 @@
 
 import { Button } from "@arcadeai/design-system";
 import { ChevronDown } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
   atomDark,
   oneLight,
 } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
-import { CopyButton } from "@/components/tabbed-code-block/copy-button";
-import { LanguageTabs } from "@/components/tabbed-code-block/language-tabs";
+import { CopyButton } from "../../tabbed-code-block/copy-button";
+import { LanguageTabs } from "../../tabbed-code-block/language-tabs";
 import type {
   DynamicCodeBlockProps,
   ExampleParameterValue,
@@ -25,16 +25,16 @@ type LanguageKey = "python" | "javascript";
 const DEFAULT_LANGUAGES: LanguageKey[] = ["python", "javascript"];
 
 const PLACEHOLDER_VALUES: Record<ExampleParameterValue["type"], unknown> = {
-  array: [],
-  boolean: true,
-  integer: 123,
-  object: {},
   string: "your_value",
+  integer: 123,
+  boolean: true,
+  array: [],
+  object: {},
 };
 
 const INDENT_SIZE: Record<LanguageKey, number> = {
-  javascript: 2,
   python: 4,
+  javascript: 2,
 };
 
 function indent(level: number, language: LanguageKey): string {
@@ -318,8 +318,8 @@ export function DynamicCodeBlock({
 
     const observer = new MutationObserver(updateTheme);
     observer.observe(document.documentElement, {
-      attributeFilter: ["class", "data-theme"],
       attributes: true,
+      attributeFilter: ["class", "data-theme"],
     });
 
     const mediaQuery = window.matchMedia?.("(prefers-color-scheme: dark)");
@@ -348,9 +348,6 @@ export function DynamicCodeBlock({
   const syntaxTheme = isDarkMode ? atomDark : oneLight;
   const selectedKey = selectedLanguage === "Python" ? "python" : "typescript";
 
-  const collapse = useCallback(() => setIsExpanded(false), []);
-  const expand = useCallback(() => setIsExpanded(true), []);
-
   return (
     <div className="my-4">
       {isExpanded ? (
@@ -370,7 +367,7 @@ export function DynamicCodeBlock({
             <Button
               aria-label="Hide example"
               className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
-              onClick={collapse}
+              onClick={() => setIsExpanded(false)}
               size="icon"
               variant="ghost"
             >
@@ -390,13 +387,13 @@ export function DynamicCodeBlock({
             </div>
             <SyntaxHighlighter
               customStyle={{
-                background: isDarkMode ? "transparent" : "#fafafa",
+                margin: 0,
+                padding: "1rem",
                 fontSize: "13px",
                 lineHeight: "1.4",
-                margin: 0,
+                background: isDarkMode ? "transparent" : "#fafafa",
                 maxHeight: "400px",
                 overflow: "auto",
-                padding: "1rem",
               }}
               language={selectedKey}
               style={syntaxTheme}
@@ -410,7 +407,7 @@ export function DynamicCodeBlock({
         <Button
           aria-expanded={false}
           className="group mt-2 h-auto w-full justify-between rounded-lg bg-neutral-dark/10 px-4 py-3 text-left text-sm font-medium text-foreground hover:bg-neutral-dark/20"
-          onClick={expand}
+          onClick={() => setIsExpanded(true)}
           variant="ghost"
         >
           <span className="flex flex-col items-start">
@@ -425,3 +422,5 @@ export function DynamicCodeBlock({
     </div>
   );
 }
+
+export default DynamicCodeBlock;

@@ -1,6 +1,6 @@
 "use client";
 
-import ScopePicker from "@/components/scope-picker";
+import ScopePicker from "../../scope-picker";
 import type { ToolSummary } from "../types";
 import { toToolAnchorId } from "./available-tools-table";
 import { ToolSection } from "./tool-section";
@@ -9,15 +9,15 @@ import { ToolSection } from "./tool-section";
 // sidebar's "Selected tools" nav link points at this anchor.
 const SELECTED_TOOLS_SECTION_ID = "selected-tools";
 
-interface ToolkitToolDetailProps {
-  activeHash: string;
-  onScopeSelectionChange: (toolNames: string[]) => void;
-  onToggleSelection: (toolName: string) => void;
+type ToolkitToolDetailProps = {
+  tools: ToolSummary[];
+  toolkitId: string;
   selectedTools: Set<string>;
   shouldShowSelection: boolean;
-  toolkitId: string;
-  tools: ToolSummary[];
-}
+  activeHash: string;
+  onToggleSelection: (toolName: string) => void;
+  onScopeSelectionChange: (toolNames: string[]) => void;
+};
 
 /**
  * The per-tool detail area (scope picker + tool sections). Loaded via
@@ -41,18 +41,18 @@ export function ToolkitToolDetail({
         ? (tool.secrets ?? [])
         : (tool.secretsInfo ?? []).map((secret) => secret.name);
     return {
-      description: tool.description,
-      fullyQualifiedName: tool.fullyQualifiedName,
       name: tool.name,
-      qualifiedName: tool.qualifiedName,
       scopes: tool.auth?.scopes ?? [],
       secrets,
+      qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
     };
   });
 
   return (
     <>
-      {shouldShowSelection ? (
+      {shouldShowSelection && (
         <section className="mt-10" id={SELECTED_TOOLS_SECTION_ID}>
           <ScopePicker
             onSelectedToolsChange={onScopeSelectionChange}
@@ -61,7 +61,7 @@ export function ToolkitToolDetail({
             tools={selectionTools}
           />
         </section>
-      ) : null}
+      )}
 
       {tools.map((tool) => (
         <ToolSection

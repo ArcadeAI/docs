@@ -28,7 +28,7 @@ export function CopyButton({
       // Track code copy event
       posthog.capture("Code copied", {
         content_length: content.length,
-        content_preview: content.slice(0, CONTENT_PREVIEW_LENGTH),
+        content_preview: content.substring(0, CONTENT_PREVIEW_LENGTH),
       });
     } catch {
       // Silent fail

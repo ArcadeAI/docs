@@ -8,10 +8,10 @@ export type AvailableToolsFilter =
   | "has_secrets"
   | "no_secrets";
 
-export interface FilterToolsOptions {
+export type FilterToolsOptions = {
   activeOperations?: Set<string>;
   behaviorFlags?: Partial<Record<BehaviorFlagKey, boolean>>;
-}
+};
 
 function buildScopeDisplayItems(scopes: string[]): string[] {
   return normalizeScopes(scopes);

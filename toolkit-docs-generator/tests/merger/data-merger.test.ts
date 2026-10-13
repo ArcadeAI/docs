@@ -43,55 +43,55 @@ import { extractVersion } from "../../src/utils/index";
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
+  name: "TestTool",
+  qualifiedName: "TestKit.TestTool",
+  fullyQualifiedName: "TestKit.TestTool@1.0.0",
+  description: "A test tool",
+  toolkitDescription: "Toolkit description",
+  parameters: [
+    {
+      name: "param1",
+      type: "string",
+      required: true,
+      description: "First parameter",
+      enum: null,
+      inferrable: true,
+    },
+  ],
   auth: {
     providerId: "test",
     providerType: "oauth2",
     scopes: ["read", "write"],
   },
-  description: "A test tool",
-  fullyQualifiedName: "TestKit.TestTool@1.0.0",
-  name: "TestTool",
-  output: {
-    description: "Result",
-    type: "object",
-  },
-  parameters: [
-    {
-      description: "First parameter",
-      enum: null,
-      inferrable: true,
-      name: "param1",
-      required: true,
-      type: "string",
-    },
-  ],
-  qualifiedName: "TestKit.TestTool",
   secrets: [],
-  toolkitDescription: "Toolkit description",
+  output: {
+    type: "object",
+    description: "Result",
+  },
   ...overrides,
 });
 
 const createMetadata = (
   overrides: Partial<ToolkitMetadata> = {}
 ): ToolkitMetadata => ({
-  category: "development",
-  docsLink: "https://docs.example.com/test",
-  iconUrl: "https://example.com/icon.svg",
   id: "TestKit",
+  label: "Test Kit",
+  category: "development",
+  iconUrl: "https://example.com/icon.svg",
   isBYOC: false,
+  isPro: false,
+  type: "arcade",
+  docsLink: "https://docs.example.com/test",
   isComingSoon: false,
   isHidden: false,
-  isPro: false,
-  label: "Test Kit",
-  type: "arcade",
   ...overrides,
 });
 
 const createCustomSections = (
   overrides: Partial<CustomSections> = {}
 ): CustomSections => ({
-  customImports: [],
   documentationChunks: [],
+  customImports: [],
   subPages: [],
   toolChunks: {},
   ...overrides,
@@ -100,13 +100,13 @@ const createCustomSections = (
 const createStubGenerator = (): ToolExampleGenerator => ({
   generate: async (tool) => ({
     codeExample: {
-      authProvider: tool.auth?.providerId ?? undefined,
+      toolName: tool.qualifiedName,
       parameters: {},
       requiresAuth: tool.auth !== null,
+      authProvider: tool.auth?.providerId ?? undefined,
       tabLabel: tool.auth
         ? "Call the Tool with User Authorization"
         : "Call the Tool",
-      toolName: tool.qualifiedName,
     },
     secretsInfo: tool.secrets.map((secret) => ({
       name: secret,
@@ -128,13 +128,13 @@ const createCountingGenerator = () => {
       calls += 1;
       return {
         codeExample: {
-          authProvider: tool.auth?.providerId ?? undefined,
+          toolName: tool.qualifiedName,
           parameters: {},
           requiresAuth: tool.auth !== null,
+          authProvider: tool.auth?.providerId ?? undefined,
           tabLabel: tool.auth
             ? "Call the Tool with User Authorization"
             : "Call the Tool",
-          toolName: tool.qualifiedName,
         },
         secretsInfo: tool.secrets.map((secret) => ({
           name: secret,
@@ -379,34 +379,34 @@ describe("mergeToolkit", () => {
   it("should merge tools, metadata, and custom sections", async () => {
     const tools = [
       createTool({
+        name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
+        fullyQualifiedName: "TestKit.Tool1@1.2.0",
         auth: {
           providerId: "test",
           providerType: "oauth2",
           scopes: ["scope1"],
         },
-        fullyQualifiedName: "TestKit.Tool1@1.2.0",
-        name: "Tool1",
-        qualifiedName: "TestKit.Tool1",
       }),
       createTool({
+        name: "Tool2",
+        qualifiedName: "TestKit.Tool2",
+        fullyQualifiedName: "TestKit.Tool2@1.2.0",
         auth: {
           providerId: "test",
           providerType: "oauth2",
           scopes: ["scope2"],
         },
-        fullyQualifiedName: "TestKit.Tool2@1.2.0",
-        name: "Tool2",
-        qualifiedName: "TestKit.Tool2",
       }),
     ];
     const metadata = createMetadata({ id: "TestKit", label: "Test Kit" });
     const customSections = createCustomSections({
       documentationChunks: [
         {
-          content: "Warning!",
+          type: "warning",
           location: "header",
           position: "after",
-          type: "warning",
+          content: "Warning!",
         },
       ],
     });
@@ -477,8 +477,8 @@ describe("mergeToolkit", () => {
   it("infers a readable label from toolkit description without metadata", async () => {
     const tools = [
       createTool({
-        fullyQualifiedName: "MicrosoftOnedrive.ListFolderItems@1.0.0",
         qualifiedName: "MicrosoftOnedrive.ListFolderItems",
+        fullyQualifiedName: "MicrosoftOnedrive.ListFolderItems@1.0.0",
         toolkitDescription: "Arcade.dev LLM tools for Microsoft OneDrive",
       }),
     ];
@@ -497,8 +497,8 @@ describe("mergeToolkit", () => {
   it("humanizes toolkit ID when metadata and description label are unavailable", async () => {
     const tools = [
       createTool({
-        fullyQualifiedName: "MyCustomApi.Run@1.0.0",
         qualifiedName: "MyCustomApi.Run",
+        fullyQualifiedName: "MyCustomApi.Run@1.0.0",
         toolkitDescription: "",
       }),
     ];
@@ -517,8 +517,8 @@ describe("mergeToolkit", () => {
   it("marks *Api toolkits as arcade_starter", async () => {
     const tools = [
       createTool({
-        fullyQualifiedName: "GithubApi.ListRepos@1.0.0",
         qualifiedName: "GithubApi.ListRepos",
+        fullyQualifiedName: "GithubApi.ListRepos@1.0.0",
       }),
     ];
     const metadata = createMetadata({ id: "GithubApi", type: "arcade" });
@@ -567,10 +567,10 @@ describe("mergeToolkit", () => {
       toolChunks: {
         SpecialTool: [
           {
-            content: "Note about params",
+            type: "info",
             location: "parameters",
             position: "after",
-            type: "info",
+            content: "Note about params",
           },
         ],
       },
@@ -591,11 +591,11 @@ describe("mergeToolkit", () => {
     const generator: ToolExampleGenerator = {
       generate: async () => ({
         codeExample: {
-          authProvider: "test",
+          toolName: "TestKit.CreateIssue",
           parameters: {},
           requiresAuth: true,
+          authProvider: "test",
           tabLabel: "Call the Tool with User Authorization",
-          toolName: "TestKit.CreateIssue",
         },
         secretsInfo: [
           { name: "API_KEY", type: "api_key" },
@@ -683,15 +683,15 @@ describe("mergeToolkit", () => {
       tools,
       null,
       createCustomSections({
-        customImports: ['import CustomComponent from "@/components/custom";'],
         documentationChunks: [
           {
-            content: "Important warning!",
+            type: "warning",
             location: "header",
             position: "after",
-            type: "warning",
+            content: "Important warning!",
           },
         ],
+        customImports: ['import CustomComponent from "@/components/custom";'],
         subPages: ["environment-variables"],
       }),
       createStubGenerator()
@@ -718,15 +718,15 @@ describe("mergeToolkit", () => {
       tools,
       null,
       createCustomSections({
-        customImports: ['import CustomComponent from "@/components/custom";'],
         documentationChunks: [
           {
-            content: "Important warning!",
+            type: "warning",
             location: "header",
             position: "after",
-            type: "warning",
+            content: "Important warning!",
           },
         ],
+        customImports: ['import CustomComponent from "@/components/custom";'],
         subPages: ["environment-variables"],
       }),
       createStubGenerator()
@@ -757,10 +757,10 @@ describe("mergeToolkit", () => {
       createCustomSections({
         documentationChunks: [
           {
-            content: "Old warning",
+            type: "warning",
             location: "header",
             position: "after",
-            type: "warning",
+            content: "Old warning",
           },
         ],
       }),
@@ -771,10 +771,10 @@ describe("mergeToolkit", () => {
     const newCustomSections = createCustomSections({
       documentationChunks: [
         {
-          content: "New info from source",
+          type: "info",
           location: "header",
           position: "before",
-          type: "info",
+          content: "New info from source",
         },
       ],
     });
@@ -808,10 +808,10 @@ describe("mergeToolkit", () => {
         toolChunks: {
           SpecialTool: [
             {
-              content: "Note about params",
+              type: "info",
               location: "parameters",
               position: "after",
-              type: "info",
+              content: "Note about params",
             },
           ],
         },
@@ -839,10 +839,10 @@ describe("mergeToolkit resolveProviderId fallback", () => {
   it("uses resolveProviderId when tools have null providerId", async () => {
     const tools = [
       createTool({
-        auth: { providerId: null, providerType: "oauth2", scopes: ["read"] },
-        fullyQualifiedName: "Salesforce.ReadAccount@2.0.1",
         name: "ReadAccount",
         qualifiedName: "Salesforce.ReadAccount",
+        fullyQualifiedName: "Salesforce.ReadAccount@2.0.1",
+        auth: { providerId: null, providerType: "oauth2", scopes: ["read"] },
       }),
     ];
 
@@ -865,14 +865,14 @@ describe("mergeToolkit resolveProviderId fallback", () => {
   it("does NOT override an existing non-null providerId from tools", async () => {
     const tools = [
       createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@2.0.1",
         auth: {
           providerId: "github",
           providerType: "oauth2",
           scopes: ["repo"],
         },
-        fullyQualifiedName: "Github.CreateIssue@2.0.1",
-        name: "CreateIssue",
-        qualifiedName: "Github.CreateIssue",
       }),
     ];
 
@@ -894,10 +894,10 @@ describe("mergeToolkit resolveProviderId fallback", () => {
     let resolverCalled = false;
     const tools = [
       createTool({
-        auth: null,
-        fullyQualifiedName: "NoAuth.PublicTool@1.0.0",
         name: "PublicTool",
         qualifiedName: "NoAuth.PublicTool",
+        fullyQualifiedName: "NoAuth.PublicTool@1.0.0",
+        auth: null,
         secrets: [],
       }),
     ];
@@ -923,10 +923,10 @@ describe("mergeToolkit resolveProviderId fallback", () => {
   it("leaves providerId null when resolver returns null", async () => {
     const tools = [
       createTool({
-        auth: { providerId: null, providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "Unknown.SomeTool@1.0.0",
         name: "SomeTool",
         qualifiedName: "Unknown.SomeTool",
+        fullyQualifiedName: "Unknown.SomeTool@1.0.0",
+        auth: { providerId: null, providerType: "oauth2", scopes: [] },
       }),
     ];
 
@@ -947,10 +947,10 @@ describe("mergeToolkit resolveProviderId fallback", () => {
   it("leaves providerId null when no resolver is provided", async () => {
     const tools = [
       createTool({
-        auth: { providerId: null, providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "Unknown.SomeTool@1.0.0",
         name: "SomeTool",
         qualifiedName: "Unknown.SomeTool",
+        fullyQualifiedName: "Unknown.SomeTool@1.0.0",
+        auth: { providerId: null, providerType: "oauth2", scopes: [] },
       }),
     ];
 
@@ -977,10 +977,10 @@ describe("mergeToolkit overview chunk handling", () => {
           toolChunks: {
             MissingTool: [
               {
-                content: "This target is stale.",
+                type: "markdown",
                 location: "description",
                 position: "after",
-                type: "markdown",
+                content: "This target is stale.",
               },
             ],
           },
@@ -1000,16 +1000,16 @@ describe("mergeToolkit overview chunk handling", () => {
       createCustomSections({
         documentationChunks: [
           {
-            content: "## Overview\n\nOverview text.",
+            type: "markdown",
             location: "header",
             position: "before",
-            type: "markdown",
+            content: "## Overview\n\nOverview text.",
           },
           {
-            content: "Keep this warning.",
+            type: "warning",
             location: "header",
             position: "after",
-            type: "warning",
+            content: "Keep this warning.",
           },
         ],
       }),
@@ -1036,16 +1036,16 @@ describe("mergeToolkit overview chunk handling", () => {
       createCustomSections({
         documentationChunks: [
           {
-            content: "## Overview\n\nOld overview.",
+            type: "markdown",
             location: "header",
             position: "before",
-            type: "markdown",
+            content: "## Overview\n\nOld overview.",
           },
           {
-            content: "Old tip.",
+            type: "info",
             location: "header",
             position: "after",
-            type: "info",
+            content: "Old tip.",
           },
         ],
       }),
@@ -1081,62 +1081,62 @@ describe("mergeToolkit overview chunk handling", () => {
 
 describe("DataMerger", () => {
   const githubTool1 = createTool({
-    auth: { providerId: "github", providerType: "oauth2", scopes: ["repo"] },
-    fullyQualifiedName: "Github.CreateIssue@1.0.0",
     name: "CreateIssue",
     qualifiedName: "Github.CreateIssue",
+    fullyQualifiedName: "Github.CreateIssue@1.0.0",
+    auth: { providerId: "github", providerType: "oauth2", scopes: ["repo"] },
   });
 
   const githubTool2 = createTool({
+    name: "SetStarred",
+    qualifiedName: "Github.SetStarred",
+    fullyQualifiedName: "Github.SetStarred@1.0.0",
     auth: {
       providerId: "github",
       providerType: "oauth2",
       scopes: ["public_repo"],
     },
-    fullyQualifiedName: "Github.SetStarred@1.0.0",
-    name: "SetStarred",
-    qualifiedName: "Github.SetStarred",
   });
 
   const slackTool = createTool({
+    name: "SendMessage",
+    qualifiedName: "Slack.SendMessage",
+    fullyQualifiedName: "Slack.SendMessage@1.2.0",
     auth: {
       providerId: "slack",
       providerType: "oauth2",
       scopes: ["chat:write"],
     },
-    fullyQualifiedName: "Slack.SendMessage@1.2.0",
-    name: "SendMessage",
-    qualifiedName: "Slack.SendMessage",
   });
 
   const githubMetadata = createMetadata({
-    category: "development",
     id: "Github",
     label: "GitHub",
+    category: "development",
   });
   const slackMetadata = createMetadata({
-    category: "social",
     id: "Slack",
     label: "Slack",
+    category: "social",
   });
 
   describe("mergeToolkit", () => {
     it("should merge data for a single toolkit", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([
-          githubMetadata,
-          slackMetadata,
-        ]),
         toolSource: new InMemoryToolDataSource([
           githubTool1,
           githubTool2,
           slackTool,
         ]),
+        metadataSource: new InMemoryMetadataSource([
+          githubMetadata,
+          slackMetadata,
+        ]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1151,13 +1151,13 @@ describe("DataMerger", () => {
 
     it("adds a summary when no overview chunk is present", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
         toolkitSummaryGenerator: createStubSummaryGenerator("Toolkit summary"),
       });
 
@@ -1168,26 +1168,26 @@ describe("DataMerger", () => {
 
     it("skips summary generation when an overview chunk is present", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const countingSummary = createCountingSummaryGenerator();
       const overviewCustomSectionsSource = new InMemoryCustomSectionsSource({
         Github: createCustomSections({
           documentationChunks: [
             {
-              content: "## Overview\n\nGenerated overview.",
+              type: "markdown",
               location: "header",
               position: "before",
-              type: "markdown",
+              content: "## Overview\n\nGenerated overview.",
             },
           ],
         }),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: overviewCustomSectionsSource,
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
         toolkitSummaryGenerator: countingSummary.generator,
       });
 
@@ -1204,8 +1204,8 @@ describe("DataMerger", () => {
 
     it("reuses the previous summary when toolkit input is unchanged", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1218,11 +1218,11 @@ describe("DataMerger", () => {
 
       const countingSummary = createCountingSummaryGenerator();
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: countingSummary.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1233,8 +1233,8 @@ describe("DataMerger", () => {
 
     it("does not reuse previous summary when current toolkit has an overview chunk", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1249,20 +1249,20 @@ describe("DataMerger", () => {
         Github: createCustomSections({
           documentationChunks: [
             {
-              content: "## Overview\n\nGenerated overview.",
+              type: "markdown",
               location: "header",
               position: "before",
-              type: "markdown",
+              content: "## Overview\n\nGenerated overview.",
             },
           ],
         }),
       });
       const merger = new DataMerger({
-        customSectionsSource: overviewCustomSectionsSource,
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: overviewCustomSectionsSource,
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: countingSummary.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1278,8 +1278,8 @@ describe("DataMerger", () => {
 
     it("preserves previous summary when no LLM generator is available and the signature changed", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1291,10 +1291,10 @@ describe("DataMerger", () => {
       previousResult.toolkit.summary = "Hand-authored summary";
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1314,8 +1314,8 @@ describe("DataMerger", () => {
 
     it("preserves previous summary when the LLM generator throws", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1333,11 +1333,11 @@ describe("DataMerger", () => {
       };
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: failingSummary,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1357,8 +1357,8 @@ describe("DataMerger", () => {
       // clean once the generator actually produces a new summary. This
       // proves the CI gate will stop flagging the toolkit once fixed.
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1372,11 +1372,11 @@ describe("DataMerger", () => {
       previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: createStubSummaryGenerator("Fresh summary"),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1391,8 +1391,8 @@ describe("DataMerger", () => {
       // valid proof of freshness and the reuse path should keep the
       // summary and stay clean.
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1405,11 +1405,11 @@ describe("DataMerger", () => {
 
       const countingSummary = createCountingSummaryGenerator();
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: countingSummary.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1426,8 +1426,8 @@ describe("DataMerger", () => {
       // carried forward from an earlier toolset. The reuse fast path
       // must skip, and the LLM must actually regenerate.
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1441,11 +1441,11 @@ describe("DataMerger", () => {
       previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: createStubSummaryGenerator("Fresh"),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1461,8 +1461,8 @@ describe("DataMerger", () => {
       // keeps flagging the toolkit until a working LLM run produces a
       // fresh one.
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1476,10 +1476,10 @@ describe("DataMerger", () => {
       previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1493,15 +1493,15 @@ describe("DataMerger", () => {
 
     it("runs the secret-coherence editor when a removed secret still appears in a toolkit documentation chunk", async () => {
       const toolWithSecret = createTool({
-        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
         secrets: ["GITHUB_SERVER_URL"],
       });
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([toolWithSecret]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
 
       const previousWithOldSecret = await mergeToolkit(
@@ -1524,11 +1524,11 @@ describe("DataMerger", () => {
       // regenerated when the signature changes.
       previousWithOldSecret.toolkit.documentationChunks = [
         {
-          content:
-            "| Secret | Required For |\n| `GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN` | Notifications |",
+          type: "section",
           location: "before_available_tools",
           position: "after",
-          type: "section",
+          content:
+            "| Secret | Required For |\n| `GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN` | Notifications |",
         },
       ];
 
@@ -1546,12 +1546,12 @@ describe("DataMerger", () => {
       };
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousWithOldSecret.toolkit]]),
-        secretEditGenerator,
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: createStubSummaryGenerator("Stub summary"),
+        secretEditGenerator,
+        previousToolkits: new Map([["github", previousWithOldSecret.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1580,9 +1580,9 @@ describe("DataMerger", () => {
 
     it("warns without rewriting an authoritative curation chunk", async () => {
       const currentTool = createTool({
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         secrets: [],
       });
       const previous = await mergeToolkit(
@@ -1594,28 +1594,28 @@ describe("DataMerger", () => {
       );
       const cleanupSpy = vi.fn(async () => "Rewritten content");
       const merger = new DataMerger({
+        toolkitDataSource: createCombinedToolkitDataSource({
+          toolSource: new InMemoryToolDataSource([currentTool]),
+          metadataSource: new InMemoryMetadataSource([githubMetadata]),
+        }),
         customSectionsSource: new InMemoryCustomSectionsSource({
           Github: createCustomSections({
             documentationChunks: [
               {
-                content: "Source still mentions OLD_SECRET.",
+                type: "warning",
                 location: "description",
                 position: "after",
-                type: "warning",
+                content: "Source still mentions OLD_SECRET.",
               },
             ],
           }),
         }),
-        previousToolkits: new Map([["github", previous.toolkit]]),
+        toolExampleGenerator: createStubGenerator(),
         secretEditGenerator: {
           cleanupStaleReferences: cleanupSpy,
           fillCoverageGaps: vi.fn(async ({ content }) => content),
         },
-        toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource: createCombinedToolkitDataSource({
-          metadataSource: new InMemoryMetadataSource([githubMetadata]),
-          toolSource: new InMemoryToolDataSource([currentTool]),
-        }),
+        previousToolkits: new Map([["github", previous.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1639,15 +1639,15 @@ describe("DataMerger", () => {
       // snapshot. This also demonstrates that re-detection uses the
       // updated toolkit state.
       const toolWithSecrets = createTool({
-        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
         secrets: ["GITHUB_SERVER_URL"],
       });
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([toolWithSecrets]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previous = await mergeToolkit(
         "Github",
@@ -1663,10 +1663,10 @@ describe("DataMerger", () => {
       );
       previous.toolkit.documentationChunks = [
         {
-          content: "Legacy note about OLD_SECRET.",
+          type: "markdown",
           location: "header",
           position: "after",
-          type: "markdown",
+          content: "Legacy note about OLD_SECRET.",
         },
       ];
 
@@ -1679,12 +1679,12 @@ describe("DataMerger", () => {
         fillCoverageGaps: coverageSpy,
       };
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previous.toolkit]]),
-        secretEditGenerator,
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: createStubSummaryGenerator("Stub summary"),
+        secretEditGenerator,
+        previousToolkits: new Map([["github", previous.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1709,15 +1709,15 @@ describe("DataMerger", () => {
 
     it("emits warnings but no LLM calls when no editor is configured", async () => {
       const toolWithSecret = createTool({
-        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
         secrets: ["GITHUB_SERVER_URL"],
       });
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([toolWithSecret]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousWithOldSecret = await mergeToolkit(
         "Github",
@@ -1733,19 +1733,19 @@ describe("DataMerger", () => {
       );
       previousWithOldSecret.toolkit.documentationChunks = [
         {
-          content: "Still references OLD_SECRET for legacy flows.",
+          type: "markdown",
           location: "header",
           position: "after",
-          type: "markdown",
+          content: "Still references OLD_SECRET for legacy flows.",
         },
       ];
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousWithOldSecret.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         toolkitSummaryGenerator: createStubSummaryGenerator("Stub summary"),
+        previousToolkits: new Map([["github", previousWithOldSecret.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1765,15 +1765,15 @@ describe("DataMerger", () => {
       // run log. A stale secret reference in a chunk must pass through
       // without any signal to the run log.
       const toolWithSecret = createTool({
-        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
         secrets: ["GITHUB_SERVER_URL"],
       });
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([toolWithSecret]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previous = await mergeToolkit(
         "Github",
@@ -1789,10 +1789,10 @@ describe("DataMerger", () => {
       );
       previous.toolkit.documentationChunks = [
         {
-          content: "Still references OLD_SECRET for legacy flows.",
+          type: "markdown",
           location: "header",
           position: "after",
-          type: "markdown",
+          content: "Still references OLD_SECRET for legacy flows.",
         },
       ];
 
@@ -1801,16 +1801,16 @@ describe("DataMerger", () => {
         async (input: { content: string }) => input.content
       );
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previous.toolkit]]),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Stub"),
         secretEditGenerator: {
           cleanupStaleReferences: cleanupSpy,
           fillCoverageGaps: coverageSpy,
         },
         skipSecretCoherence: true,
-        toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
-        toolkitSummaryGenerator: createStubSummaryGenerator("Stub"),
+        previousToolkits: new Map([["github", previous.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1826,8 +1826,8 @@ describe("DataMerger", () => {
 
     it("reuses previous examples when the tool is unchanged", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1838,10 +1838,10 @@ describe("DataMerger", () => {
       );
       const counting = createCountingGenerator();
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: counting.generator,
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: counting.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1854,19 +1854,19 @@ describe("DataMerger", () => {
 
     it("does not call the generator when only descriptions change", async () => {
       const updatedTool = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        description: "Updated description",
         auth: {
           providerId: "github",
           providerType: "oauth2",
           scopes: ["repo"],
         },
-        description: "Updated description",
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
-        name: "CreateIssue",
-        qualifiedName: "Github.CreateIssue",
       });
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([updatedTool]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1877,10 +1877,10 @@ describe("DataMerger", () => {
       );
       const counting = createCountingGenerator();
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: counting.generator,
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: counting.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1893,30 +1893,30 @@ describe("DataMerger", () => {
 
     it("calls the generator only for changed tools in mixed toolkits", async () => {
       const unchangedTool = createTool({
-        fullyQualifiedName: "Github.ListIssues@1.0.0",
         name: "ListIssues",
         qualifiedName: "Github.ListIssues",
+        fullyQualifiedName: "Github.ListIssues@1.0.0",
       });
       const changedToolPrevious = createTool({
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
       });
       const changedToolCurrent = createTool({
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         name: "CreateIssue",
-        output: {
-          description: "Result",
-          type: "array",
-        },
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        output: {
+          type: "array",
+          description: "Result",
+        },
       });
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([
           unchangedTool,
           changedToolCurrent,
         ]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const previousResult = await mergeToolkit(
         "Github",
@@ -1927,10 +1927,10 @@ describe("DataMerger", () => {
       );
       const counting = createCountingGenerator();
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: counting.generator,
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: counting.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1952,20 +1952,20 @@ describe("DataMerger", () => {
 
     it("should merge data using unified toolkit data source", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([
-          githubMetadata,
-          slackMetadata,
-        ]),
         toolSource: new InMemoryToolDataSource([
           githubTool1,
           githubTool2,
           slackTool,
         ]),
+        metadataSource: new InMemoryMetadataSource([
+          githubMetadata,
+          slackMetadata,
+        ]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -1980,23 +1980,23 @@ describe("DataMerger", () => {
     it("should filter by version when specified", async () => {
       const tools = [
         createTool({
-          fullyQualifiedName: "Test.Tool@1.0.0",
           qualifiedName: "Test.Tool",
+          fullyQualifiedName: "Test.Tool@1.0.0",
         }),
         createTool({
-          fullyQualifiedName: "Test.Tool@2.0.0",
           qualifiedName: "Test.Tool",
+          fullyQualifiedName: "Test.Tool@2.0.0",
         }),
       ];
 
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([]),
         toolSource: new InMemoryToolDataSource(tools),
+        metadataSource: new InMemoryMetadataSource([]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
       });
 
       const result = await merger.mergeToolkit("Test", "1.0.0");
@@ -2007,13 +2007,13 @@ describe("DataMerger", () => {
 
     it("should handle case-insensitive toolkit IDs", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
       });
 
       const result = await merger.mergeToolkit("github"); // lowercase
@@ -2025,18 +2025,18 @@ describe("DataMerger", () => {
 
   describe("curation configuration errors", () => {
     const makeFailingCustomSectionsSource = (): ICustomSectionsSource => ({
-      getAllCustomSections: async () => {
+      getCustomSections: async () => {
         throw new Error("Custom sections source unavailable");
       },
-      getCustomSections: async () => {
+      getAllCustomSections: async () => {
         throw new Error("Custom sections source unavailable");
       },
     });
 
     it("fails before recovery instead of preserving stale prose", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
 
       const previousResult = await mergeToolkit(
@@ -2044,24 +2044,24 @@ describe("DataMerger", () => {
         [githubTool1],
         githubMetadata,
         createCustomSections({
-          customImports: ['import { Callout } from "nextra/components";'],
           documentationChunks: [
             {
-              content: "Critical: GitHub Apps only.",
+              type: "warning",
               location: "description",
               position: "after",
-              type: "warning",
+              content: "Critical: GitHub Apps only.",
             },
           ],
+          customImports: ['import { Callout } from "nextra/components";'],
           subPages: ["setup-guide"],
         }),
         createStubGenerator()
       );
       const merger = new DataMerger({
-        customSectionsSource: makeFailingCustomSectionsSource(),
-        previousToolkits: new Map([["github", previousResult.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: makeFailingCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
       await expect(merger.mergeAllToolkits()).rejects.toThrow(
@@ -2073,20 +2073,20 @@ describe("DataMerger", () => {
   describe("mergeAllToolkits", () => {
     it("should merge all toolkits found in tools", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([
-          githubMetadata,
-          slackMetadata,
-        ]),
         toolSource: new InMemoryToolDataSource([
           githubTool1,
           githubTool2,
           slackTool,
         ]),
+        metadataSource: new InMemoryMetadataSource([
+          githubMetadata,
+          slackMetadata,
+        ]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
       });
 
       const results = await merger.mergeAllToolkits();
@@ -2102,20 +2102,15 @@ describe("DataMerger", () => {
 
     it("skips toolkits with no tools (but present metadata) when requireCompleteData is true", async () => {
       const completeToolkitData: ToolkitData = {
-        metadata: githubMetadata,
         tools: [githubTool1],
+        metadata: githubMetadata,
       };
       const missingToolsToolkitData: ToolkitData = {
-        metadata: slackMetadata,
         tools: [],
+        metadata: slackMetadata,
       };
 
       const toolkitDataSource: ToolkitDataSource = {
-        fetchAllToolkitsData: async () =>
-          new Map([
-            ["Github", completeToolkitData],
-            ["Slack", missingToolsToolkitData],
-          ]),
         fetchToolkitData: async (toolkitId: string) => {
           if (toolkitId === "Github") {
             return completeToolkitData;
@@ -2123,16 +2118,21 @@ describe("DataMerger", () => {
           if (toolkitId === "Slack") {
             return missingToolsToolkitData;
           }
-          return { metadata: null, tools: [] };
+          return { tools: [], metadata: null };
         },
+        fetchAllToolkitsData: async () =>
+          new Map([
+            ["Github", completeToolkitData],
+            ["Slack", missingToolsToolkitData],
+          ]),
         isAvailable: async () => true,
       };
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        requireCompleteData: true,
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
       });
 
       const count = await merger.getToolkitCount();
@@ -2154,15 +2154,15 @@ describe("DataMerger", () => {
         createStubGenerator()
       );
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
       });
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        preserveLastKnownGood: true,
-        previousToolkits: new Map([["github", previous.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
       });
 
       const [result] = await merger.mergeAllToolkits();
@@ -2178,23 +2178,23 @@ describe("DataMerger", () => {
         [githubTool1],
         githubMetadata,
         createCustomSections({
-          customImports: ["import Old from 'old';"],
           documentationChunks: [
             {
-              content: "Delete me",
+              type: "warning",
               location: "description",
               position: "after",
-              type: "warning",
+              content: "Delete me",
             },
           ],
+          customImports: ["import Old from 'old';"],
           subPages: ["old-page"],
           toolChunks: {
             CreateIssue: [
               {
-                content: "Delete this too",
+                type: "info",
                 location: "parameters",
                 position: "after",
-                type: "info",
+                content: "Delete this too",
               },
             ],
           },
@@ -2202,17 +2202,17 @@ describe("DataMerger", () => {
         createStubGenerator()
       );
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new InMemoryCustomSectionsSource({
           Github: createCustomSections(),
         }),
-        preserveLastKnownGood: true,
-        previousToolkits: new Map([["github", previous.toolkit]]),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
       });
 
       const [result] = await merger.mergeAllToolkits();
@@ -2239,10 +2239,10 @@ describe("DataMerger", () => {
         toolChunks: {
           SetStarred: [
             {
-              content: "Applies once the prior artifact catches up.",
+              type: "info",
               location: "parameters",
               position: "after",
-              type: "info",
+              content: "Applies once the prior artifact catches up.",
             },
           ],
         },
@@ -2250,17 +2250,17 @@ describe("DataMerger", () => {
       // The API exposes SetStarred, so the curation is valid; only the
       // preserved artifact predates it.
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([]),
         toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new InMemoryCustomSectionsSource({
           Github: curation,
         }),
-        preserveLastKnownGood: true,
-        previousToolkits: new Map([["github", previous.toolkit]]),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
       });
 
       const [result] = await merger.mergeAllToolkits();
@@ -2284,28 +2284,28 @@ describe("DataMerger", () => {
         createStubGenerator()
       );
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new InMemoryCustomSectionsSource({
           Github: createCustomSections({
             toolChunks: {
               CreateIsue: [
                 {
-                  content: "Typo in the target tool name.",
+                  type: "info",
                   location: "parameters",
                   position: "after",
-                  type: "info",
+                  content: "Typo in the target tool name.",
                 },
               ],
             },
           }),
         }),
-        preserveLastKnownGood: true,
-        previousToolkits: new Map([["github", previous.toolkit]]),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
       });
 
       await expect(merger.mergeAllToolkits()).rejects.toThrow(
@@ -2322,15 +2322,15 @@ describe("DataMerger", () => {
         createStubGenerator()
       );
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
       });
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        preserveLastKnownGood: true,
-        previousToolkits: new Map([["github", previous.toolkit]]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previous.toolkit]]),
+        preserveLastKnownGood: true,
       });
 
       const result = await merger.mergeToolkit("Github");
@@ -2342,14 +2342,14 @@ describe("DataMerger", () => {
 
     it("omits a new toolkit when metadata is missing in resilient publishing mode", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([]),
       });
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        preserveLastKnownGood: true,
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        preserveLastKnownGood: true,
       });
 
       const [result] = await merger.mergeAllToolkits();
@@ -2366,48 +2366,48 @@ describe("DataMerger", () => {
       // affected toolkit, not just the first one found, so a single CI
       // failure is enough to fix the whole batch.
       const completeToolkitData: ToolkitData = {
-        metadata: githubMetadata,
         tools: [githubTool1],
+        metadata: githubMetadata,
       };
       const missingMetadataToolkitData: ToolkitData = {
-        metadata: null,
         tools: [
           createTool({
-            fullyQualifiedName: "Unknown.Lookup@1.0.0",
             name: "Lookup",
             qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
           }),
         ],
+        metadata: null,
       };
       const anotherMissingMetadataToolkitData: ToolkitData = {
-        metadata: null,
         tools: [
           createTool({
-            fullyQualifiedName: "AlsoUnknown.Ping@1.0.0",
             name: "Ping",
             qualifiedName: "AlsoUnknown.Ping",
+            fullyQualifiedName: "AlsoUnknown.Ping@1.0.0",
           }),
         ],
+        metadata: null,
       };
 
       const toolkitDataSource: ToolkitDataSource = {
+        fetchToolkitData: async () => {
+          throw new Error("not used by mergeAllToolkits");
+        },
         fetchAllToolkitsData: async () =>
           new Map([
             ["Github", completeToolkitData],
             ["Unknown", missingMetadataToolkitData],
             ["AlsoUnknown", anotherMissingMetadataToolkitData],
           ]),
-        fetchToolkitData: async () => {
-          throw new Error("not used by mergeAllToolkits");
-        },
         isAvailable: async () => true,
       };
 
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        requireCompleteData: true,
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
       });
 
       await expect(merger.mergeAllToolkits()).rejects.toThrow(
@@ -2420,29 +2420,29 @@ describe("DataMerger", () => {
 
     it("fails strict runs for toolkits in skipToolkitIds when metadata is missing", async () => {
       const missingMetadataToolkitData: ToolkitData = {
-        metadata: null,
         tools: [
           createTool({
-            fullyQualifiedName: "Unknown.Lookup@1.0.0",
             name: "Lookup",
             qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
           }),
         ],
+        metadata: null,
       };
 
       const toolkitDataSource: ToolkitDataSource = {
+        fetchToolkitData: async () => missingMetadataToolkitData,
         fetchAllToolkitsData: async () =>
           new Map([["Unknown", missingMetadataToolkitData]]),
-        fetchToolkitData: async () => missingMetadataToolkitData,
         isAvailable: async () => true,
       };
 
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
         requireCompleteData: true,
         skipToolkitIds: new Set(["unknown"]),
-        toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
       });
 
       await expect(merger.mergeAllToolkits()).rejects.toThrow(
@@ -2459,27 +2459,27 @@ describe("DataMerger", () => {
       // metadata) and usedDefaultMetadata reports the fact rather than the
       // omission disappearing entirely.
       const missingMetadataToolkitData: ToolkitData = {
-        metadata: null,
         tools: [
           createTool({
-            fullyQualifiedName: "Unknown.Lookup@1.0.0",
             name: "Lookup",
             qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
           }),
         ],
+        metadata: null,
       };
 
       const toolkitDataSource: ToolkitDataSource = {
+        fetchToolkitData: async () => missingMetadataToolkitData,
         fetchAllToolkitsData: async () =>
           new Map([["Unknown", missingMetadataToolkitData]]),
-        fetchToolkitData: async () => missingMetadataToolkitData,
         isAvailable: async () => true,
       };
 
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
       });
 
       const results = await merger.mergeAllToolkits();
@@ -2492,21 +2492,21 @@ describe("DataMerger", () => {
 
     it("fails strict runs when a complete toolkit cannot be merged", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([githubMetadata]),
         toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: {
-          getAllCustomSections: async () => {
-            throw new Error("Custom sections source unavailable");
-          },
           getCustomSections: async () => {
             throw new Error("Custom sections source unavailable");
           },
+          getAllCustomSections: async () => {
+            throw new Error("Custom sections source unavailable");
+          },
         },
-        requireCompleteData: true,
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
+        requireCompleteData: true,
       });
 
       await expect(merger.mergeAllToolkits()).rejects.toThrow(
@@ -2516,13 +2516,13 @@ describe("DataMerger", () => {
 
     it("should return empty array when no tools", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
-        metadataSource: new InMemoryMetadataSource([]),
         toolSource: new InMemoryToolDataSource([]),
+        metadataSource: new InMemoryMetadataSource([]),
       });
       const merger = new DataMerger({
+        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitDataSource,
       });
 
       const results = await merger.mergeAllToolkits();
@@ -2532,29 +2532,29 @@ describe("DataMerger", () => {
 
     it("skips toolkits listed in skipToolkitIds without affecting others", async () => {
       const googleTool = createTool({
-        auth: { providerId: "google", providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "Google.Search@1.0.0",
         name: "Search",
         qualifiedName: "Google.Search",
+        fullyQualifiedName: "Google.Search@1.0.0",
+        auth: { providerId: "google", providerType: "oauth2", scopes: [] },
       });
       const googleMetadata = createMetadata({
-        category: "search",
         id: "Google",
         label: "Google",
+        category: "search",
       });
 
       const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([googleTool, slackTool]),
         metadataSource: new InMemoryMetadataSource([
           googleMetadata,
           slackMetadata,
         ]),
-        toolSource: new InMemoryToolDataSource([googleTool, slackTool]),
       });
       const merger = new DataMerger({
-        customSectionsSource: new EmptyCustomSectionsSource(),
-        skipToolkitIds: new Set(["google"]),
-        toolExampleGenerator: createStubGenerator(),
         toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        skipToolkitIds: new Set(["google"]),
       });
 
       const count = await merger.getToolkitCount();

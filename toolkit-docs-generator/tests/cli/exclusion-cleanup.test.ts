@@ -8,7 +8,7 @@ let tmpDir: string;
 
 afterEach(async () => {
   if (tmpDir) {
-    await rm(tmpDir, { force: true, recursive: true });
+    await rm(tmpDir, { recursive: true, force: true });
   }
 });
 
@@ -23,8 +23,8 @@ const setupDir = async (files: Array<{ name: string; content: string }>) => {
 describe("cleanupExcludedToolkitOutput", () => {
   it("returns warning instead of throwing when index rebuild fails", async () => {
     const outputDir = await setupDir([
-      { content: "{}", name: "github.json" },
-      { content: "{}", name: "index.json" },
+      { name: "github.json", content: "{}" },
+      { name: "index.json", content: "{}" },
     ]);
     const generator = {
       rebuildIndexFromOutput: vi
@@ -33,9 +33,9 @@ describe("cleanupExcludedToolkitOutput", () => {
     };
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir,
       excludedToolkitIds: new Set(["github"]),
       generator,
-      outputDir,
       verbose: false,
     });
 
@@ -50,8 +50,8 @@ describe("cleanupExcludedToolkitOutput", () => {
 
   it("surfaces index rebuild read errors and warnings", async () => {
     const outputDir = await setupDir([
-      { content: "{}", name: "github.json" },
-      { content: "{}", name: "index.json" },
+      { name: "github.json", content: "{}" },
+      { name: "index.json", content: "{}" },
     ]);
     const generator = {
       rebuildIndexFromOutput: vi.fn().mockResolvedValue({
@@ -62,9 +62,9 @@ describe("cleanupExcludedToolkitOutput", () => {
     };
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir,
       excludedToolkitIds: new Set(["github"]),
       generator,
-      outputDir,
       verbose: false,
     });
 
@@ -77,8 +77,8 @@ describe("cleanupExcludedToolkitOutput", () => {
 
   it("includes detailed rebuild diagnostics in verbose mode", async () => {
     const outputDir = await setupDir([
-      { content: "{}", name: "github.json" },
-      { content: "{}", name: "index.json" },
+      { name: "github.json", content: "{}" },
+      { name: "index.json", content: "{}" },
     ]);
     const generator = {
       rebuildIndexFromOutput: vi.fn().mockResolvedValue({
@@ -89,9 +89,9 @@ describe("cleanupExcludedToolkitOutput", () => {
     };
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir,
       excludedToolkitIds: new Set(["github"]),
       generator,
-      outputDir,
       verbose: true,
     });
 
@@ -105,8 +105,8 @@ describe("cleanupExcludedToolkitOutput", () => {
 
   it("skips rebuild when no files were deleted", async () => {
     const outputDir = await setupDir([
-      { content: "{}", name: "slack.json" },
-      { content: "{}", name: "index.json" },
+      { name: "slack.json", content: "{}" },
+      { name: "index.json", content: "{}" },
     ]);
     const generator = {
       rebuildIndexFromOutput: vi.fn().mockResolvedValue({
@@ -117,9 +117,9 @@ describe("cleanupExcludedToolkitOutput", () => {
     };
 
     const result = await cleanupExcludedToolkitOutput({
+      outputDir,
       excludedToolkitIds: new Set(["github"]),
       generator,
-      outputDir,
       verbose: false,
     });
 

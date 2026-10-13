@@ -6,19 +6,19 @@ import { Navigation } from "./navigation";
 import { Progress } from "./progress";
 import { Question } from "./question";
 
-interface DynamicSurveyProps {
-  onBack: () => void;
+type DynamicSurveyProps = {
+  surveyData: Survey | null;
   /* eslint-disable no-unused-vars */
   onComplete: (data: Record<string, unknown>) => void;
-  surveyData: Survey | null;
-}
+  onBack: () => void;
+};
 
 export default function DynamicSurvey({
   surveyData,
   onComplete,
   onBack,
 }: DynamicSurveyProps) {
-  const surveyShown = useRef<boolean>(false);
+  const surveyShown = useRef(false);
 
   const {
     currentQuestion,
@@ -27,7 +27,7 @@ export default function DynamicSurvey({
     handleBack,
     currentQuestionIndex,
     totalQuestions,
-  } = useSurvey({ onComplete, surveyData });
+  } = useSurvey({ surveyData, onComplete });
 
   // Capture the survey shown event when the survey is loaded
   useEffect(() => {
@@ -80,11 +80,11 @@ export default function DynamicSurvey({
         totalQuestions={totalQuestions}
       />
       <span className="font-bold text-lg">{currentQuestion.question}</span>
-      {currentQuestion.description ? (
+      {currentQuestion.description && (
         <span className="text-muted-foreground text-sm">
           {currentQuestion.description}
         </span>
-      ) : null}
+      )}
 
       <form key={currentQuestionIndex} onSubmit={handleSubmitQuestion}>
         <div className="space-y-8">

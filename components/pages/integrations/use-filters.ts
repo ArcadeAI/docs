@@ -29,7 +29,7 @@ export function useFilters() {
   const pathname = usePathname();
 
   const state = useMemo<FilterState>(
-    () => parseFiltersFromParams(searchParams.toString()),
+    () => parseFiltersFromParams(searchParams?.toString() ?? ""),
     [searchParams]
   );
 
@@ -37,7 +37,7 @@ export function useFilters() {
     (next: FilterState, method: HistoryMethod = "push") => {
       const qs = serializeFiltersToParams(next);
       const url = qs ? `${pathname}?${qs}` : pathname;
-      const currentQs = searchParams.toString();
+      const currentQs = searchParams?.toString() ?? "";
       const current = currentQs ? `${pathname}?${currentQs}` : pathname;
 
       if (url === current) {
@@ -97,11 +97,11 @@ export function useFilters() {
 
   return {
     ...state,
-    clearAllFilters,
-    setFilterByByoc,
-    setFilterByPro,
-    setSearchQuery,
     setSelectedCategory,
     setSelectedType,
+    setFilterByPro,
+    setFilterByByoc,
+    setSearchQuery,
+    clearAllFilters,
   };
 }

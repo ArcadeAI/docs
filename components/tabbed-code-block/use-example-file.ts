@@ -60,5 +60,5 @@ export function useExampleFile(
     }
   }, [filePath]);
 
-  return { error, fileContent, loading, retry };
+  return { fileContent, loading, error, retry };
 }

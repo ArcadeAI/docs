@@ -32,9 +32,9 @@ function parseRepositoriesFromMDX(content) {
       if (githubMatch) {
         const [, repoName] = githubMatch;
         repositories.push({
-          href,
-          repo: repoName,
           title,
+          repo: repoName,
+          href,
         });
       }
     }
@@ -61,10 +61,10 @@ async function fetchRepoData(repoInfo) {
 
     const data = await response.json();
     return {
-      createdAt: new Date(data.created_at),
-      href: repoInfo.href,
       repo: repoInfo.repo,
       title: repoInfo.title,
+      href: repoInfo.href,
+      createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at),
     };
   } catch (error) {
@@ -147,10 +147,10 @@ async function updateExampleDates() {
     const before = content;
     content = content.replace(titleRegex, `$1date="${newDate}"`);
 
-    if (content === before) {
-      console.warn(`Could not find or update date for "${repo.title}"`);
-    } else {
+    if (content !== before) {
       console.log(`Updated date for "${repo.title}" to ${newDate}`);
+    } else {
+      console.warn(`Could not find or update date for "${repo.title}"`);
     }
   }
 

@@ -2,35 +2,16 @@
 
 import { Copy, Terminal } from "lucide-react";
 import type React from "react";
-import { useCallback } from "react";
 
-interface TerminalCodeBlockProps {
+type TerminalCodeBlockProps = {
   children: string;
   className?: string;
-}
+};
 
 const TerminalCodeBlock: React.FC<TerminalCodeBlockProps> = ({
   children,
   className = "",
 }) => {
-  const handleCopy = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(children);
-    } catch {
-      // Fallback: try to select the text for manual copying
-      const textArea = document.createElement("textarea");
-      textArea.value = children;
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand("copy");
-      } catch {
-        // Silent fallback failure
-      }
-      document.body.removeChild(textArea);
-    }
-  }, [children]);
-
   return (
     <div className="my-4 overflow-hidden rounded-lg border border-gray-300 bg-gray-900 dark:border-gray-700">
       {/* Terminal Header Bar */}
@@ -42,7 +23,23 @@ const TerminalCodeBlock: React.FC<TerminalCodeBlockProps> = ({
         <div className="flex items-center gap-2">
           <button
             className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-gray-300 text-xs transition-colors hover:bg-gray-700 hover:text-white"
-            onClick={handleCopy}
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(children);
+              } catch {
+                // Fallback: try to select the text for manual copying
+                const textArea = document.createElement("textarea");
+                textArea.value = children;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                  document.execCommand("copy");
+                } catch {
+                  // Silent fallback failure
+                }
+                document.body.removeChild(textArea);
+              }
+            }}
             type="button"
           >
             <Copy className="h-3 w-3" />

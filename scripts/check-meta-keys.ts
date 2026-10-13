@@ -24,11 +24,11 @@ import fg from "fast-glob";
 
 // Colors for terminal output
 const colors = {
+  red: (s: string) => `\x1b[0;31m${s}\x1b[0m`,
+  green: (s: string) => `\x1b[0;32m${s}\x1b[0m`,
+  yellow: (s: string) => `\x1b[1;33m${s}\x1b[0m`,
   blue: (s: string) => `\x1b[0;34m${s}\x1b[0m`,
   dim: (s: string) => `\x1b[2m${s}\x1b[0m`,
-  green: (s: string) => `\x1b[0;32m${s}\x1b[0m`,
-  red: (s: string) => `\x1b[0;31m${s}\x1b[0m`,
-  yellow: (s: string) => `\x1b[1;33m${s}\x1b[0m`,
 };
 
 // Parse command line arguments
@@ -46,11 +46,11 @@ const EXCLUDE_PREFIX = "!";
 const MDX_EXTENSION_REGEX = /\.mdx?$/;
 const NON_SLUG_CHARS_REGEX = /[-_]/g;
 
-interface MetaError {
+type MetaError = {
   file: string;
   key: string;
   message: string;
-}
+};
 
 interface ParsedMeta {
   excluded: Set<string>;

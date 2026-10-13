@@ -10,9 +10,9 @@ function buildGithubEditUrl(toolkitId: string): string {
   return `${GITHUB_JSON_BASE_URL}/${jsonFileName}`;
 }
 
-interface EditJsonOnGithubProps {
+type EditJsonOnGithubProps = {
   toolkitId: string;
-}
+};
 
 export function EditJsonOnGithub({ toolkitId }: EditJsonOnGithubProps) {
   const editUrl = buildGithubEditUrl(toolkitId);
@@ -31,9 +31,9 @@ export function EditJsonOnGithub({ toolkitId }: EditJsonOnGithubProps) {
   );
 }
 
-interface PageActionsBarProps {
+type PageActionsBarProps = {
   toolkitId: string;
-}
+};
 
 export function PageActionsBar({ toolkitId }: PageActionsBarProps) {
   return (
@@ -45,3 +45,5 @@ export function PageActionsBar({ toolkitId }: PageActionsBarProps) {
     </div>
   );
 }
+
+export default PageActionsBar;

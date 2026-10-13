@@ -7,47 +7,31 @@ export const TYPE_CONFIG: Record<
   { label: string; icon: React.ElementType; color: string }
 > = {
   arcade: {
-    color: "text-emerald-500",
-    icon: BadgeCheck,
     label: "Arcade Optimized",
+    icon: BadgeCheck,
+    color: "text-emerald-500",
   },
   arcade_starter: {
-    color: "text-orange-500",
-    icon: Terminal,
     label: "Arcade Unoptimized",
-  },
-  auth: {
-    color: "text-indigo-500",
-    icon: Key,
-    label: "Auth Provider",
-  },
-  community: {
-    color: "text-purple-500",
-    icon: Users,
-    label: "Community",
+    icon: Terminal,
+    color: "text-orange-500",
   },
   verified: {
-    color: "text-blue-500",
-    icon: CheckCircle,
     label: "Verified",
+    icon: CheckCircle,
+    color: "text-blue-500",
+  },
+  community: {
+    label: "Community",
+    icon: Users,
+    color: "text-purple-500",
+  },
+  auth: {
+    label: "Auth Provider",
+    icon: Key,
+    color: "text-indigo-500",
   },
 };
-
-/**
- * Display order of toolkit types in the catalog header and filters. Object
- * keys above are sorted alphabetically by the linter, so the order lives here.
- */
-export const TYPE_ORDER: readonly ToolkitType[] = [
-  "arcade",
-  "arcade_starter",
-  "verified",
-  "community",
-  "auth",
-];
-
-export const TYPE_CONFIG_ENTRIES = TYPE_ORDER.map(
-  (type) => [type, TYPE_CONFIG[type]] as const
-);
 
 export const TOOL_CARD_TYPE_CONFIG: Record<
   ToolkitType,
@@ -56,37 +40,37 @@ export const TOOL_CARD_TYPE_CONFIG: Record<
   arcade: {
     className:
       "border-emerald-600/20 hover:border-primary bg-emerald-600/[0.02] hover:bg-emerald-600/[0.03]",
-    color: "text-emerald-400",
-    icon: BadgeCheck,
     label: "Arcade Optimized MCP Server",
+    icon: BadgeCheck,
+    color: "text-emerald-400",
   },
   arcade_starter: {
     className:
       "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
-    color: "text-orange-400",
-    icon: Terminal,
     label: "Arcade Unoptimized MCP Server",
-  },
-  auth: {
-    className:
-      "border-purple-600/20 hover:border-primary bg-purple-600/[0.02] hover:bg-purple-600/[0.03]",
-    color: "text-purple-400",
-    icon: Key,
-    label: "Auth Provider",
-  },
-  community: {
-    className:
-      "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
+    icon: Terminal,
     color: "text-orange-400",
-    icon: Users,
-    label: "Community MCP Server",
   },
   verified: {
     className:
       "border-blue-600/20 hover:border-primary bg-blue-600/[0.02] hover:bg-blue-600/[0.03]",
-    color: "text-blue-400",
-    icon: CheckCircle,
     label: "Verified MCP Server",
+    icon: CheckCircle,
+    color: "text-blue-400",
+  },
+  community: {
+    className:
+      "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
+    label: "Community MCP Server",
+    icon: Users,
+    color: "text-orange-400",
+  },
+  auth: {
+    className:
+      "border-purple-600/20 hover:border-primary bg-purple-600/[0.02] hover:bg-purple-600/[0.03]",
+    label: "Auth Provider",
+    icon: Key,
+    color: "text-purple-400",
   },
 };
 
@@ -96,7 +80,6 @@ export const TYPE_DESCRIPTIONS: Record<ToolkitType, React.ReactNode> = {
       Official MCP Servers hand-crafted by Arcade that are ready for use and
       optimized for LLM-usage.{" "}
       <a
-        aria-label="Learn more about optimized tools"
         className="text-blue-600 underline decoration-blue-600/30 underline-offset-2 transition-colors hover:text-blue-700 hover:decoration-blue-700/50 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:text-blue-300 dark:hover:decoration-blue-300/50"
         href="/build/create-tools/improve/types-of-tools#optimized-tools"
       >
@@ -110,7 +93,6 @@ export const TYPE_DESCRIPTIONS: Record<ToolkitType, React.ReactNode> = {
       Unoptimized (auto-generated) MCP Servers developed by Arcade that may
       require customization.{" "}
       <a
-        aria-label="Learn more about unoptimized tools"
         className="text-blue-600 underline decoration-blue-600/30 underline-offset-2 transition-colors hover:text-blue-700 hover:decoration-blue-700/50 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:text-blue-300 dark:hover:decoration-blue-300/50"
         href="/build/create-tools/improve/types-of-tools#unoptimized-tools"
       >
@@ -119,9 +101,9 @@ export const TYPE_DESCRIPTIONS: Record<ToolkitType, React.ReactNode> = {
       .
     </>
   ),
-  auth: "Auth integrations allow you to develop custom tools that connect your agent APIs and services.",
-  community:
-    "Created and maintained by the Arcade community, offering a wide range of MCP Servers.",
   verified:
     "Community-created MCP Servers, thoroughly tested and verified by Arcade.",
+  community:
+    "Created and maintained by the Arcade community, offering a wide range of MCP Servers.",
+  auth: "Auth integrations allow you to develop custom tools that connect your agent APIs and services.",
 };

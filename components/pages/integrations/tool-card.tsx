@@ -13,21 +13,21 @@ import { Handshake, Package } from "lucide-react";
 import Link from "next/link";
 import posthog from "posthog-js";
 import type React from "react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { ComingSoonModal } from "./coming-soon-modal";
 import { TOOL_CARD_TYPE_CONFIG } from "./type-config";
 
-interface ToolCardProps {
+type ToolCardProps = {
+  name: string;
   icon?: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
   iconUrl?: string;
-  isByoc?: boolean;
-  isComingSoon?: boolean;
-  isPartner?: boolean;
-  isPro?: boolean;
   link?: string;
-  name: string;
   type: ToolkitType;
-}
+  isComingSoon?: boolean;
+  isByoc?: boolean;
+  isPro?: boolean;
+  isPartner?: boolean;
+};
 
 export const ToolCard: React.FC<ToolCardProps> = ({
   name: toolName,
@@ -49,42 +49,29 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   } = TOOL_CARD_TYPE_CONFIG[type];
   const showHeaderBadges = isByoc || isPro || isPartner || isComingSoon;
 
-  const trackToolCardClick = useCallback(() => {
+  const trackToolCardClick = () => {
     posthog.capture("Tool card clicked", {
-      is_byoc: isByoc,
-      is_coming_soon: isComingSoon,
-      is_partner: isPartner,
-      is_pro: isPro,
-      tool_link: link,
       tool_name: toolName,
       tool_type: type,
+      tool_link: link,
+      is_coming_soon: isComingSoon,
+      is_byoc: isByoc,
+      is_pro: isPro,
+      is_partner: isPartner,
     });
-  }, [isByoc, isComingSoon, isPartner, isPro, link, toolName, type]);
+  };
 
-  const handleCardClick = useCallback(
-    (e: React.MouseEvent | React.KeyboardEvent) => {
-      trackToolCardClick();
-      if (isComingSoon) {
-        e.preventDefault();
-        setIsModalOpen(true);
-      }
-    },
-    [isComingSoon, trackToolCardClick]
-  );
+  const handleCardClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    trackToolCardClick();
+    if (isComingSoon) {
+      e.preventDefault();
+      setIsModalOpen(true);
+    }
+  };
 
-  const handleCardKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handleCardClick(e);
-      }
-    },
-    [handleCardClick]
-  );
-
-  const handleModalClose = useCallback(() => {
+  const handleModalClose = () => {
     setIsModalOpen(false);
-  }, []);
+  };
 
   let iconNode: React.ReactNode;
   if (ToolkitIcon) {
@@ -127,7 +114,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
               </div>
             </div>
           </div>
-          {showHeaderBadges ? (
+          {showHeaderBadges && (
             <div
               className={cn(
                 "mt-1",
@@ -137,17 +124,17 @@ export const ToolCard: React.FC<ToolCardProps> = ({
                 "gap-1.5"
               )}
             >
-              {isComingSoon ? (
+              {isComingSoon && (
                 <Badge
                   className="shrink-0 whitespace-nowrap border-gray-400 bg-gray-200/70 text-gray-700 dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-300"
                   variant="outline"
                 >
                   Coming soon
                 </Badge>
-              ) : null}
-              {isByoc ? <ByocBadge className="gap-1.5 rounded-md" /> : null}
-              {isPro ? <ProBadge className="gap-1.5 rounded-md" /> : null}
-              {isPartner ? (
+              )}
+              {isByoc && <ByocBadge className="gap-1.5 rounded-md" />}
+              {isPro && <ProBadge className="gap-1.5 rounded-md" />}
+              {isPartner && (
                 <Badge
                   className="shrink-0 gap-1.5 whitespace-nowrap rounded-md border-pink-400/50 bg-pink-500/10 text-pink-700 dark:border-pink-400/50 dark:bg-pink-400/10 dark:text-pink-300"
                   variant="outline"
@@ -155,9 +142,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
                   <Handshake className="h-3 w-3" />
                   Partner
                 </Badge>
-              ) : null}
+              )}
             </div>
-          ) : null}
+          )}
         </div>
       </CardHeader>
     </Card>
@@ -170,7 +157,12 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           aria-label={`${toolName} - Coming Soon`}
           className="w-full cursor-pointer text-left"
           onClick={handleCardClick}
-          onKeyDown={handleCardKeyDown}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleCardClick(e);
+            }
+          }}
           type="button"
         >
           {cardContent}
@@ -181,13 +173,13 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         </Link>
       )}
 
-      {isComingSoon ? (
+      {isComingSoon && (
         <ComingSoonModal
           isOpen={isModalOpen}
           onClose={handleModalClose}
           toolkitName={toolName}
         />
-      ) : null}
+      )}
     </>
   );
 };

@@ -101,8 +101,8 @@ async function fetchWithTimeout(
   try {
     return await fetch(url, {
       method,
-      redirect: "follow",
       signal: controller.signal,
+      redirect: "follow",
     });
   } finally {
     clearTimeout(timer);
@@ -137,11 +137,11 @@ async function checkUrl(
         await sleep(RETRY_DELAY_MS * (attempt + 1));
         continue;
       }
-      return { error: message, ok: false };
+      return { ok: false, error: message };
     }
   }
 
-  return { error: "Unknown link check failure", ok: false };
+  return { ok: false, error: "Unknown link check failure" };
 }
 
 function pLimit(concurrency: number) {
@@ -175,7 +175,7 @@ function pLimit(concurrency: number) {
 test(
   "external URLs are reachable",
   async () => {
-    const files = await fg("content/docs/**/*.mdx", { cwd: process.cwd() });
+    const files = await fg("app/**/*.mdx", { cwd: process.cwd() });
     const urlMap = new Map<string, Set<string>>();
 
     for (const file of files) {
@@ -212,10 +212,10 @@ test(
         const result = await checkUrl(url);
         if (!result.ok) {
           failures.push({
+            url,
+            status: result.status,
             error: result.error,
             files: [...sources],
-            status: result.status,
-            url,
           });
         }
       })

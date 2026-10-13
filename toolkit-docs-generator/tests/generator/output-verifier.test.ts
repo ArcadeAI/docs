@@ -21,7 +21,7 @@ const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   try {
     await fn(dir);
   } finally {
-    await rm(dir, { force: true, recursive: true });
+    await rm(dir, { recursive: true, force: true });
   }
 };
 
@@ -51,9 +51,9 @@ describe("verifyOutputDir", () => {
         loadFixture("slack-toolkit.json"),
       ]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
 
       await generator.generateAll(toolkits);
@@ -72,9 +72,9 @@ describe("verifyOutputDir", () => {
         loadFixture("slack-toolkit.json"),
       ]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
 
       await generator.generateAll(toolkits);
@@ -96,9 +96,9 @@ describe("verifyOutputDir", () => {
         loadFixture("slack-toolkit.json"),
       ]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
 
       await generator.generateAll(toolkits);
@@ -155,9 +155,9 @@ describe("verifyOutputDir", () => {
         loadFixture("slack-toolkit.json"),
       ]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
 
       await generator.generateAll(toolkits);
@@ -167,13 +167,13 @@ describe("verifyOutputDir", () => {
         toolkits: Record<string, unknown>[];
       };
       index.toolkits.push({
-        authType: "none",
-        category: "development",
         id: "Ghost",
         label: "Ghost",
-        toolCount: 0,
-        type: "arcade",
         version: "1.0.0",
+        category: "development",
+        type: "arcade",
+        toolCount: 0,
+        authType: "none",
       });
       await writeFile(indexPath, JSON.stringify(index, null, 2), "utf-8");
 
@@ -192,9 +192,9 @@ describe("verifyOutputDir", () => {
     await withTempDir(async (dir) => {
       const toolkits = await Promise.all([loadFixture("github-toolkit.json")]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
 
       await generator.generateAll(toolkits);
@@ -216,9 +216,9 @@ describe("verifyOutputDir", () => {
     await withTempDir(async (dir) => {
       const toolkits = await Promise.all([loadFixture("github-toolkit.json")]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
 
       await generator.generateAll(toolkits);
@@ -242,9 +242,9 @@ describe("verifyOutputDir", () => {
         loadFixture("github-toolkit.json"),
       ]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
 
       await generator.generateAll([githubToolkit]);
@@ -296,9 +296,9 @@ describe("verifyOutputDir", () => {
         loadFixture("slack-toolkit.json"),
       ]);
       const baselineGenerator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
       await baselineGenerator.generateAll([githubToolkit, slackToolkit]);
 
@@ -322,10 +322,10 @@ describe("verifyOutputDir", () => {
       );
 
       const generator = createJsonGenerator({
-        generateIndex: true,
-        indexSource: "output",
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
+        indexSource: "output",
       });
       const result = await generator.generateAll([slackToolkit]);
 
@@ -351,9 +351,9 @@ describe("JsonGenerator.rebuildIndexFromOutput", () => {
         loadFixture("slack-toolkit.json"),
       ]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
       await generator.generateAll([githubToolkit, slackToolkit]);
 
@@ -375,9 +375,9 @@ describe("JsonGenerator.rebuildIndexFromOutput", () => {
         loadFixture("slack-toolkit.json"),
       ]);
       const generator = createJsonGenerator({
-        generateIndex: true,
         outputDir: dir,
         prettyPrint: false,
+        generateIndex: true,
       });
       await generator.generateAll([githubToolkit, slackToolkit]);
 

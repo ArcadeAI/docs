@@ -15,24 +15,24 @@ import type { MergedToolkit, MergedToolkitMetadata } from "../types/index";
 
 /** A single field that differs between previous and current metadata. */
 export interface MetadataFieldChange {
-  readonly current: unknown;
   readonly field: string;
   readonly previous: unknown;
+  readonly current: unknown;
 }
 
 /** Full result of a metadata freshness check for one toolkit. */
 export interface MetadataFreshnessResult {
-  readonly currentLabel: string | null;
-  /** Individual field diffs inside MergedToolkitMetadata. */
-  readonly fieldChanges: readonly MetadataFieldChange[];
+  readonly toolkitId: string;
   /** True when the toolkit transitioned from default metadata to real DS data. */
   readonly gainedDesignSystemMetadata: boolean;
-  /** True if there are any changes at all. */
-  readonly hasChanges: boolean;
   /** True when the toolkit label changed. */
   readonly labelChanged: boolean;
   readonly previousLabel: string | null;
-  readonly toolkitId: string;
+  readonly currentLabel: string | null;
+  /** Individual field diffs inside MergedToolkitMetadata. */
+  readonly fieldChanges: readonly MetadataFieldChange[];
+  /** True if there are any changes at all. */
+  readonly hasChanges: boolean;
 }
 
 // ============================================================================
@@ -98,7 +98,7 @@ export const detectMetadataChanges = (
     const prevValue = prev[field];
     const currValue = currentMetadata[field];
     if (prevValue !== currValue) {
-      fieldChanges.push({ current: currValue, field, previous: prevValue });
+      fieldChanges.push({ field, previous: prevValue, current: currValue });
     }
   }
 
@@ -112,13 +112,13 @@ export const detectMetadataChanges = (
     fieldChanges.length > 0 || labelChanged || gainedDesignSystemMetadata;
 
   return {
-    currentLabel,
-    fieldChanges,
+    toolkitId,
     gainedDesignSystemMetadata,
-    hasChanges,
     labelChanged,
     previousLabel: previousToolkit.label,
-    toolkitId,
+    currentLabel,
+    fieldChanges,
+    hasChanges,
   };
 };
 

@@ -19,6 +19,21 @@
  * Crawler ID: fe95aa31-abbb-40ea-a31b-04a9ccd176b4
  */
 export const crawlerConfig = {
+  appId: "BJB8PBSQ9T",
+  indexPrefix: "",
+  rateLimit: 8,
+  maxUrls: null,
+  // Weekly backstop only — freshness is driven by reindex-on-publish
+  // (.github/workflows/algolia-reindex.yml).
+  schedule: "every 1 week",
+  startUrls: ["https://docs.arcade.dev"],
+  sitemaps: ["https://docs.arcade.dev/sitemap.xml"],
+  saveBackup: false,
+  ignoreQueryParams: ["source", "utm_*"],
+  // llms.txt is markdown ("- [title](url): description" lines). Crawling it
+  // makes the crawler mis-parse those lines into bogus URLs that 404, so keep
+  // it out of the crawl — it's a machine-readable export, not a page.
+  exclusionPatterns: ["**/cdn-cgi/**", "**/llms.txt", "**/llms-full.txt"],
   actions: [
     {
       indexName: "docs_arcade_dev_bjb8pbsq9t_docsearch",
@@ -34,55 +49,38 @@ export const crawlerConfig = {
         ).remove();
 
         return helpers.docsearch({
-          aggregateContent: true,
-          indexHeadings: true,
           recordProps: {
-            // Include `pre` so terms that only appear in code samples
-            // (e.g. `arcade_api_key`, `tool_choice`, `chat.completions`) are
-            // searchable — several no-result queries were code-only terms.
-            content: "article p, article li, article td, article pre",
-            lvl0: { defaultValue: "Arcade Docs", selectors: "article h1" },
+            lvl0: { selectors: "article h1", defaultValue: "Arcade Docs" },
             lvl1: "article h2",
             lvl2: "article h3",
             lvl3: "article h4",
             lvl4: "article h5",
             lvl5: "article h6",
+            // Include `pre` so terms that only appear in code samples
+            // (e.g. `arcade_api_key`, `tool_choice`, `chat.completions`) are
+            // searchable — several no-result queries were code-only terms.
+            content: "article p, article li, article td, article pre",
           },
+          indexHeadings: true,
+          aggregateContent: true,
         });
       },
     },
   ],
-  appId: "BJB8PBSQ9T",
-  // llms.txt is markdown ("- [title](url): description" lines). Crawling it
-  // makes the crawler mis-parse those lines into bogus URLs that 404, so keep
-  // it out of the crawl — it's a machine-readable export, not a page.
-  exclusionPatterns: ["**/cdn-cgi/**", "**/llms.txt", "**/llms-full.txt"],
-  ignoreQueryParams: ["source", "utm_*"],
-  indexPrefix: "",
   // The crawler applies `initialIndexSettings` only when it *creates* an
   // index, so edits below never reach an existing production index by
   // themselves. `scripts/sync-crawler-config.ts` also pushes these via the
   // Search API when ALGOLIA_ADMIN_API_KEY is set; see algolia/README.md.
   initialIndexSettings: {
     docs_arcade_dev_bjb8pbsq9t_docsearch: {
-      attributeForDistinct: "url_without_anchor",
-      attributesForFaceting: ["type", "lang"],
-      attributesToRetrieve: [
-        "hierarchy",
-        "content",
-        "anchor",
-        "url",
-        "url_without_anchor",
-        "type",
-      ],
-      customRanking: ["asc(anchor)"],
       distinct: true,
-      ignorePlurals: true,
+      attributeForDistinct: "url_without_anchor",
       // Long, keyword-heavy queries (often from agents/LLMs) used to return
       // nothing because Algolia's default `removeWordsIfNoResults: "none"`
       // requires every word to match a single record. Relax to "allOptional"
       // so a query still surfaces its best partial matches instead of zero.
       removeWordsIfNoResults: "allOptional",
+      ignorePlurals: true,
       searchableAttributes: [
         "unordered(hierarchy.lvl0)",
         "unordered(hierarchy.lvl1)",
@@ -92,14 +90,16 @@ export const crawlerConfig = {
         "unordered(hierarchy.lvl5)",
         "content",
       ],
+      customRanking: ["asc(anchor)"],
+      attributesToRetrieve: [
+        "hierarchy",
+        "content",
+        "anchor",
+        "url",
+        "url_without_anchor",
+        "type",
+      ],
+      attributesForFaceting: ["type", "lang"],
     },
   },
-  maxUrls: null,
-  rateLimit: 8,
-  saveBackup: false,
-  // Weekly backstop only — freshness is driven by reindex-on-publish
-  // (.github/workflows/algolia-reindex.yml).
-  schedule: "every 1 week",
-  sitemaps: ["https://docs.arcade.dev/sitemap.xml"],
-  startUrls: ["https://docs.arcade.dev"],
 };

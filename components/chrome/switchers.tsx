@@ -25,7 +25,7 @@ const THEME_OPTIONS = [
 const LOCALES = [{ locale: "en", name: "English" }];
 const LOCALE_OPTIONS = LOCALES.map((l) => ({ id: l.locale, name: l.name }));
 const CURRENT_LOCALE = "en";
-const ONE_YEAR = 365 * 24 * 60 * 60 * 1000;
+const ONE_YEAR = 31_536_000_000;
 
 function useMounted(): boolean {
   const [mounted, setMounted] = useState(false);
@@ -39,11 +39,11 @@ function isThemeId(value: string | undefined): value is ThemeId {
   return value === "dark" || value === "light" || value === "system";
 }
 
-interface SwitchProps {
+type SwitchProps = {
   className?: string;
   /** Icon only, no label. */
   lite?: boolean;
-}
+};
 
 export function ThemeSwitch({ lite, className }: SwitchProps) {
   const { setTheme, resolvedTheme, theme } = useTheme();

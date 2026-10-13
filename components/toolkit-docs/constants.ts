@@ -65,11 +65,11 @@ export const DEFAULT_AUTHOR = "Arcade";
 // =============================================================================
 
 export const AUTH_TYPE_LABELS = {
+  oauth2: "User authorization",
   api_key: "API key authentication",
   mixed: "User authorization",
   mixedSuffix: "and API key authentication",
   none: "No authentication required",
-  oauth2: "User authorization",
 } as const;
 
 // =============================================================================
@@ -80,22 +80,22 @@ export const AUTH_TYPE_LABELS = {
  * Scrolling cell animation settings
  */
 export const SCROLLING_CELL = {
-  delayMs: 300,
-  extraPadding: 16,
-  minDurationMs: 1000,
   pixelsPerSecond: 50,
+  delayMs: 300,
+  minDurationMs: 1000,
   returnDurationMs: 300,
+  extraPadding: 16,
 } as const;
 
 /**
  * Icon sizes used throughout components
  */
 export const ICON_SIZES = {
-  badge: "h-3.5 w-3.5",
-  inline: "h-3 w-3",
-  stat: "h-4 w-4",
   toolkitHeader: "h-20 w-20",
   toolkitHeaderSmall: "h-16 w-16",
+  badge: "h-3.5 w-3.5",
+  stat: "h-4 w-4",
+  inline: "h-3 w-3",
 } as const;
 
 // =============================================================================
@@ -107,11 +107,11 @@ export const ICON_SIZES = {
  * Fallback to TOOL_METADATA_FALLBACK_STYLE for unknown values.
  */
 export const TOOL_METADATA_OPERATION_STYLES: Record<string, string> = {
+  read: "border-blue-500/40 bg-blue-500/10 text-blue-300",
   create: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300",
+  update: "border-amber-500/40 bg-amber-500/10 text-amber-300",
   delete: "border-rose-500/40 bg-rose-500/10 text-rose-300",
   opaque: "border-violet-500/40 bg-violet-500/10 text-violet-300",
-  read: "border-blue-500/40 bg-blue-500/10 text-blue-300",
-  update: "border-amber-500/40 bg-amber-500/10 text-amber-300",
 };
 
 /**

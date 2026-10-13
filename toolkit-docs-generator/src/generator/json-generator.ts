@@ -86,23 +86,23 @@ const writeFileAtomically = async (
 // ============================================================================
 
 export interface JsonGeneratorConfig {
-  /** Whether to generate an index file (default: true) */
-  generateIndex?: boolean;
-  /** Where to source toolkits for the index file */
-  indexSource?: "current" | "output";
   /** Output directory path */
   outputDir: string;
   /** Whether to pretty-print JSON (default: true) */
   prettyPrint?: boolean;
+  /** Whether to generate an index file (default: true) */
+  generateIndex?: boolean;
+  /** Where to source toolkits for the index file */
+  indexSource?: "current" | "output";
   /** Whether to validate output with Zod (default: true) */
   validateOutput?: boolean;
 }
 
 export interface GeneratorResult {
-  /** List of errors that occurred */
-  errors: string[];
   /** List of files that were written */
   filesWritten: string[];
+  /** List of errors that occurred */
+  errors: string[];
 }
 
 export interface RebuildIndexResult {
@@ -243,7 +243,7 @@ export class JsonGenerator {
     const filesWritten: string[] = [];
     const errors = validateToolkitFileNames(toolkits);
     if (errors.length > 0) {
-      return { errors, filesWritten };
+      return { filesWritten, errors };
     }
 
     // Generate per-toolkit files
@@ -274,7 +274,7 @@ export class JsonGenerator {
       }
     }
 
-    return { errors, filesWritten };
+    return { filesWritten, errors };
   }
 
   /**
@@ -285,20 +285,20 @@ export class JsonGenerator {
   ): Promise<string> {
     const entries: ToolkitIndexEntry[] = toolkits
       .map((t) => ({
-        authType: t.auth?.type ?? "none",
-        category: t.metadata.category,
         id: t.id,
         label: t.label,
-        toolCount: t.tools.length,
-        type: t.metadata.type,
         version: t.version,
+        category: t.metadata.category,
+        type: t.metadata.type,
+        toolCount: t.tools.length,
+        authType: t.auth?.type ?? "none",
       }))
       .sort((left, right) => compareToolkitIds(left.id, right.id));
 
     const index: ToolkitIndex = {
       generatedAt: new Date().toISOString(),
-      toolkits: entries,
       version: "1.0.0",
+      toolkits: entries,
     };
 
     const filePath = join(this.outputDir, "index.json");

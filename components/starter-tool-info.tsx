@@ -1,9 +1,9 @@
 import type React from "react";
 import { Callout } from "@/components/mdx/callout";
 
-interface StarterToolInfoProps {
+type StarterToolInfoProps = {
   toolkitName: string;
-}
+};
 
 const StarterToolInfo: React.FC<StarterToolInfoProps> = ({ toolkitName }) => (
   <Callout type="warning">

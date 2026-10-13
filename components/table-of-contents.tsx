@@ -1,7 +1,5 @@
 "use client";
 
-import type { MouseEvent } from "react";
-
 /**
  * DynamicTable Component
  *
@@ -9,25 +7,22 @@ import type { MouseEvent } from "react";
  *
  */
 
-interface TableOfContentsProps {
-  data: string[][];
+type TableOfContentsProps = {
   headers: string[];
-}
-
-const WHITESPACE_REGEX = /\s+/g;
-
-function handleRowClick(event: MouseEvent<HTMLTableRowElement>) {
-  const firstColumnValue = event.currentTarget.dataset.section ?? "";
-  // Convert first column value to a valid ID format
-  const sectionId = firstColumnValue
-    .toLowerCase()
-    .replace(WHITESPACE_REGEX, "-")
-    .replace(".", "");
-  // Update the URL hash to navigate to the section
-  window.location.hash = `#${sectionId}`;
-}
+  data: string[][];
+};
 
 function TableOfContents({ headers, data }: TableOfContentsProps) {
+  const handleRowClick = (firstColumnValue: string) => {
+    // Convert first column value to a valid ID format
+    const sectionId = firstColumnValue
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(".", "");
+    // Update the URL hash to navigate to the section
+    window.location.hash = `#${sectionId}`;
+  };
+
   return (
     <table className="my-4 w-full border-collapse overflow-hidden rounded-lg border-2 border-neutral-dark-high shadow-sm sm:text-sm">
       <thead>
@@ -50,9 +45,8 @@ function TableOfContents({ headers, data }: TableOfContentsProps) {
                 ? "bg-neutral-dark"
                 : "border-neutral-dark-medium border-b bg-transparent"
             }`}
-            data-section={row[0]}
             key={String(row[0])}
-            onClick={handleRowClick}
+            onClick={() => handleRowClick(row[0])}
           >
             {row.map((cell, cellIndex) => (
               <td

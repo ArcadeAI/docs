@@ -17,22 +17,22 @@ import { readToolkitData, readToolkitIndex } from "@/lib/toolkit-data";
 
 const validToolkitJson = (id: string, docsSlug: string): string =>
   JSON.stringify({
-    auth: null,
-    description: "A test toolkit fixture.",
     id,
     label: id,
+    version: "1.0.0",
+    description: "A test toolkit fixture.",
     metadata: {
       category: "development",
-      docsLink: `https://docs.arcade.dev/en/resources/integrations/development/${docsSlug}`,
       iconUrl: "https://example.com/icon.svg",
       isBYOC: false,
-      isComingSoon: false,
-      isHidden: false,
       isPro: false,
       type: "arcade",
+      docsLink: `https://docs.arcade.dev/en/resources/integrations/development/${docsSlug}`,
+      isComingSoon: false,
+      isHidden: false,
     },
+    auth: null,
     tools: [],
-    version: "1.0.0",
   });
 
 const makeFixtureDir = (): string => {
@@ -52,7 +52,7 @@ const dirsToClean: string[] = [];
 
 afterAll(() => {
   for (const dir of dirsToClean) {
-    rmSync(dir, { force: true, recursive: true });
+    rmSync(dir, { recursive: true, force: true });
   }
 });
 
@@ -194,23 +194,23 @@ describe("readToolkitData production lookup cache", () => {
 describe("readToolkitData cache keys distinguish slug variants", () => {
   const notionToolkit = () =>
     JSON.stringify({
-      auth: null,
-      description: "A test toolkit fixture.",
       id: "NotionToolkit",
       label: "Notion",
+      version: "1.0.0",
+      description: "A test toolkit fixture.",
       metadata: {
         category: "productivity",
-        docsLink:
-          "https://docs.arcade.dev/en/resources/integrations/productivity/notion",
         iconUrl: "https://example.com/icon.svg",
         isBYOC: false,
-        isComingSoon: false,
-        isHidden: false,
         isPro: false,
         type: "arcade",
+        docsLink:
+          "https://docs.arcade.dev/en/resources/integrations/productivity/notion",
+        isComingSoon: false,
+        isHidden: false,
       },
+      auth: null,
       tools: [],
-      version: "1.0.0",
     });
 
   const makeNotionDir = (): string => {
@@ -278,8 +278,8 @@ describe("readToolkitIndex schema validation", () => {
       join(dataDir, "index.json"),
       JSON.stringify({
         generatedAt: "2026-01-01T00:00:00Z",
-        toolkits: [{ id: "missing-required-fields" }],
         version: "1",
+        toolkits: [{ id: "missing-required-fields" }],
       })
     );
 

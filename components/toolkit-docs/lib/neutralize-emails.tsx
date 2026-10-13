@@ -55,7 +55,7 @@ export function splitEmailText(value: string): Array<Text | Element> {
   let cursor = 0;
   for (const offset of breaks) {
     out.push({ type: "text", value: value.slice(cursor, offset) });
-    out.push({ children: [], properties: {}, tagName: "wbr", type: "element" });
+    out.push({ type: "element", tagName: "wbr", properties: {}, children: [] });
     cursor = offset;
   }
   out.push({ type: "text", value: value.slice(cursor) });

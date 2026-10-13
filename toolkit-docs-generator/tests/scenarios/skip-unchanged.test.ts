@@ -16,52 +16,52 @@ import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
-  auth: null,
-  description: "A test tool",
-  fullyQualifiedName: "TestKit.TestTool@1.0.0",
   name: "TestTool",
-  output: null,
-  parameters: [],
   qualifiedName: "TestKit.TestTool",
-  secrets: [],
+  fullyQualifiedName: "TestKit.TestTool@1.0.0",
+  description: "A test tool",
   toolkitDescription: "Test toolkit",
+  parameters: [],
+  auth: null,
+  secrets: [],
+  output: null,
   ...overrides,
 });
 
 const createMergedToolkit = (id: string, version = "1.0.0"): MergedToolkit => ({
-  auth: null,
-  customImports: [],
-  description: "A toolkit",
-  documentationChunks: [],
-  generatedAt: new Date().toISOString(),
   id,
   label: id,
+  version,
+  description: "A toolkit",
   metadata: {
     category: "development",
-    docsLink: "https://docs.example.com",
     iconUrl: "https://example.com/icon.svg",
     isBYOC: false,
-    isComingSoon: false,
-    isHidden: false,
     isPro: false,
     type: "arcade",
+    docsLink: "https://docs.example.com",
+    isComingSoon: false,
+    isHidden: false,
   },
-  subPages: [],
+  auth: null,
   tools: [
     {
-      auth: null,
-      description: "A test tool", // Must match createTool description
-      documentationChunks: [],
-      fullyQualifiedName: `${id}.Tool1@${version}`,
       name: "Tool1",
-      output: null,
-      parameters: [],
       qualifiedName: `${id}.Tool1`,
+      fullyQualifiedName: `${id}.Tool1@${version}`,
+      description: "A test tool", // Must match createTool description
+      parameters: [],
+      auth: null,
       secrets: [],
       secretsInfo: [],
+      output: null,
+      documentationChunks: [],
     },
   ],
-  version,
+  documentationChunks: [],
+  customImports: [],
+  subPages: [],
+  generatedAt: new Date().toISOString(),
 });
 
 describe("Scenario: Skip unchanged toolkits", () => {
@@ -93,11 +93,11 @@ describe("Scenario: Skip unchanged toolkits", () => {
         [
           createTool({
             name: "Tool1",
-            output: {
-              description: null,
-              type: "array",
-            },
             qualifiedName: "Github.Tool1",
+            output: {
+              type: "array",
+              description: null,
+            },
           }),
         ],
       ],
@@ -142,45 +142,45 @@ describe("Scenario: Skip unchanged toolkits", () => {
   it("includes version-only changes in changed IDs", () => {
     // Create a toolkit where only the version changed (tool signature is identical)
     const currentTool = createTool({
-      fullyQualifiedName: "Github.Tool1@2.0.0",
       name: "Tool1",
       qualifiedName: "Github.Tool1",
+      fullyQualifiedName: "Github.Tool1@2.0.0",
     });
 
     const previousToolkit: MergedToolkit = {
-      auth: null,
-      customImports: [],
-      description: "A toolkit",
-      documentationChunks: [],
-      generatedAt: new Date().toISOString(),
       id: "Github",
       label: "Github",
+      version: "1.0.0", // Old version
+      description: "A toolkit",
       metadata: {
         category: "development",
-        docsLink: "https://docs.example.com",
         iconUrl: "https://example.com/icon.svg",
         isBYOC: false,
-        isComingSoon: false,
-        isHidden: false,
         isPro: false,
         type: "arcade",
+        docsLink: "https://docs.example.com",
+        isComingSoon: false,
+        isHidden: false,
       },
-      subPages: [],
+      auth: null,
       tools: [
         {
-          auth: null,
-          description: "A test tool", // Must match createTool default description
-          documentationChunks: [],
-          fullyQualifiedName: "Github.Tool1@1.0.0", // Old version in fullyQualifiedName
           name: "Tool1",
-          output: null,
-          parameters: [], // Same parameters
           qualifiedName: "Github.Tool1",
+          fullyQualifiedName: "Github.Tool1@1.0.0", // Old version in fullyQualifiedName
+          description: "A test tool", // Must match createTool default description
+          parameters: [], // Same parameters
+          auth: null,
           secrets: [],
           secretsInfo: [],
+          output: null,
+          documentationChunks: [],
         },
       ],
-      version: "1.0.0", // Old version
+      documentationChunks: [],
+      customImports: [],
+      subPages: [],
+      generatedAt: new Date().toISOString(),
     };
 
     const currentToolkitTools = new Map([["Github", [currentTool]]]);
@@ -202,19 +202,19 @@ describe("Scenario: Skip unchanged toolkits", () => {
       [
         "Github",
         {
+          tools: [createTool({ name: "Tool1", qualifiedName: "Github.Tool1" })],
           metadata: {
-            category: "databases",
-            docsLink: "https://docs.example.com/databases/github",
-            iconUrl: "https://example.com/icon.svg",
             id: "Github",
+            label: "Github",
+            category: "databases",
+            iconUrl: "https://example.com/icon.svg",
             isBYOC: false,
+            isPro: false,
+            type: "arcade",
+            docsLink: "https://docs.example.com/databases/github",
             isComingSoon: false,
             isHidden: false,
-            isPro: false,
-            label: "Github",
-            type: "arcade",
           },
-          tools: [createTool({ name: "Tool1", qualifiedName: "Github.Tool1" })],
         },
       ],
     ]);

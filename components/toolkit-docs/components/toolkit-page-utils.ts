@@ -15,11 +15,11 @@ export function getSharedServiceDomain(
 
   for (const tool of tools) {
     const serviceDomains = tool.metadata?.classification?.serviceDomains;
-    if (serviceDomains?.length !== 1) {
+    if (!serviceDomains || serviceDomains.length !== 1) {
       return null;
     }
 
-    const [domain] = serviceDomains;
+    const domain = serviceDomains[0];
     if (!domain || typeof domain !== "string") {
       return null;
     }

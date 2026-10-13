@@ -7,7 +7,7 @@ const TIMEOUT = 30_000;
 test(
   "check for absolute links to docs.arcade.dev",
   async () => {
-    const files = await fg("content/docs/**/*.{md,mdx}");
+    const files = await fg("app/**/*.{md,mdx}");
     const absoluteLinkRegex = /https?:\/\/docs\.arcade\.dev\//gi;
     const errors: Array<{ file: string; line: number; match: string }> = [];
 

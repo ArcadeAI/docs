@@ -8,7 +8,7 @@ import {
   isToolkitType,
   parseFiltersFromParams,
   serializeFiltersToParams,
-} from "@/components/pages/integrations/filter-params";
+} from "../components/pages/integrations/filter-params";
 
 describe("isToolkitType", () => {
   test("accepts known toolkit types", () => {
@@ -80,16 +80,16 @@ describe("parseFiltersFromParams", () => {
   test("parses pro + byoc together (repeated key)", () => {
     expect(parseFiltersFromParams("?label=pro&label=byoc")).toEqual({
       ...DEFAULT_FILTER_STATE,
-      filterByByoc: true,
       filterByPro: true,
+      filterByByoc: true,
     });
   });
 
   test("label order does not matter", () => {
     expect(parseFiltersFromParams("?label=byoc&label=pro")).toEqual({
       ...DEFAULT_FILTER_STATE,
-      filterByByoc: true,
       filterByPro: true,
+      filterByByoc: true,
     });
   });
 
@@ -120,11 +120,11 @@ describe("parseFiltersFromParams", () => {
         "?category=productivity&type=verified&label=pro&label=byoc&q=slack"
       )
     ).toEqual({
-      filterByByoc: true,
-      filterByPro: true,
-      searchQuery: "slack",
       selectedCategory: "productivity",
       selectedType: "verified",
+      filterByPro: true,
+      filterByByoc: true,
+      searchQuery: "slack",
     });
   });
 
@@ -216,8 +216,8 @@ describe("serializeFiltersToParams", () => {
     expect(
       serializeFiltersToParams({
         ...DEFAULT_FILTER_STATE,
-        filterByByoc: true,
         filterByPro: true,
+        filterByByoc: true,
       })
     ).toBe("label=pro&label=byoc");
   });
@@ -251,11 +251,11 @@ describe("serializeFiltersToParams", () => {
 
   test("serializes all filters at once", () => {
     const qs = serializeFiltersToParams({
-      filterByByoc: true,
-      filterByPro: true,
-      searchQuery: "slack",
       selectedCategory: "productivity",
       selectedType: "verified",
+      filterByPro: true,
+      filterByByoc: true,
+      searchQuery: "slack",
     });
     const params = new URLSearchParams(qs);
     expect(params.get("category")).toBe("productivity");
@@ -268,11 +268,11 @@ describe("serializeFiltersToParams", () => {
 describe("round-trip", () => {
   test("serialize then parse produces equivalent filters", () => {
     const state: FilterState = {
-      filterByByoc: false,
-      filterByPro: true,
-      searchQuery: "twitter",
       selectedCategory: "social",
       selectedType: "community",
+      filterByPro: true,
+      filterByByoc: false,
+      searchQuery: "twitter",
     };
     const qs = serializeFiltersToParams(state);
     expect(parseFiltersFromParams(`?${qs}`)).toEqual(state);
@@ -281,8 +281,8 @@ describe("round-trip", () => {
   test("both labels round-trip", () => {
     const state: FilterState = {
       ...DEFAULT_FILTER_STATE,
-      filterByByoc: true,
       filterByPro: true,
+      filterByByoc: true,
     };
     const qs = serializeFiltersToParams(state);
     expect(qs).toBe("label=pro&label=byoc");

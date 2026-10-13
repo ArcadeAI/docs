@@ -51,17 +51,17 @@ const makeToolkit = (
   isHidden = false
 ): ToolkitWithDocsLink =>
   ({
+    id,
+    label: id,
+    type: "arcade",
     category,
+    isHidden,
+    isComingSoon: false,
+    isBYOC: false,
+    isPro: false,
     docsLink: category
       ? `https://docs.arcade.dev${INTEGRATIONS}/${category}/${slug}`
       : undefined,
-    id,
-    isBYOC: false,
-    isComingSoon: false,
-    isHidden,
-    isPro: false,
-    label: id,
-    type: "arcade",
   }) as unknown as ToolkitWithDocsLink;
 
 describe("resolveIndexToolkits (logic)", () => {
@@ -374,9 +374,9 @@ describe("toolkit page canonical hygiene", () => {
           continue;
         }
         const canonical = getToolkitCanonicalPath({
+          id: parsed.id,
           category: parsed.metadata?.category,
           docsLink: parsed.metadata?.docsLink,
-          id: parsed.id,
         });
         if (!validLinks.has(canonical)) {
           orphans.push(`${file} → ${canonical}`);

@@ -8,17 +8,17 @@ import {
   getQuestionResponse,
 } from "../utils";
 
-interface UseSurveyProps {
+type UseSurveyProps = {
+  surveyData: Survey | null;
   /* eslint-disable no-unused-vars */
   onComplete: (data: Record<string, unknown>) => void;
-  surveyData: Survey | null;
-}
+};
 
 export const useSurvey = ({ surveyData, onComplete }: UseSurveyProps) => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [responses, setResponses] = useState<Record<number, unknown>>({});
   const [questionPath, setQuestionPath] = useState<number[]>([0]);
-  const submitted = useRef<boolean>(false);
+  const submitted = useRef(false);
 
   const handleSubmitQuestion = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -81,10 +81,10 @@ export const useSurvey = ({ surveyData, onComplete }: UseSurveyProps) => {
 
   return {
     currentQuestion,
-    currentQuestionIndex,
-    handleBack,
-    handleSubmitQuestion,
     responses,
+    handleSubmitQuestion,
+    handleBack,
+    currentQuestionIndex,
     totalQuestions: surveyData?.questions.length ?? 0,
   };
 };

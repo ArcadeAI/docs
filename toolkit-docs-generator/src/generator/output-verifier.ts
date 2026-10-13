@@ -5,22 +5,22 @@ import type { MergedToolkit, ToolkitIndex } from "../types/index";
 import { MergedToolkitSchema, ToolkitIndexSchema } from "../types/index";
 
 export interface OutputVerificationResult {
-  errors: string[];
   valid: boolean;
+  errors: string[];
   warnings: string[];
 }
 
 export interface ToolkitReadResult {
-  errors: string[];
   toolkits: MergedToolkit[];
+  errors: string[];
   warnings: string[];
 }
 
 export interface VerificationProgress {
-  current: number;
-  fileName?: string;
   phase: "reading" | "validating" | "cross-referencing";
+  current: number;
   total: number;
+  fileName?: string;
 }
 
 export type VerificationProgressCallback = (
@@ -58,8 +58,8 @@ const readToolkitFile = async (
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return {
-      error: `Failed to read ${fileName}: ${message}`,
       toolkit: null,
+      error: `Failed to read ${fileName}: ${message}`,
     };
   }
 
@@ -69,8 +69,8 @@ const readToolkitFile = async (
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return {
-      error: `Invalid JSON in ${fileName}: ${message}`,
       toolkit: null,
+      error: `Invalid JSON in ${fileName}: ${message}`,
     };
   }
 
@@ -93,8 +93,8 @@ const readToolkitFile = async (
   }
 
   return {
-    error: `Invalid toolkit schema in ${fileName}: ${result.error.message}`,
     toolkit: null,
+    error: `Invalid toolkit schema in ${fileName}: ${result.error.message}`,
   };
 };
 
@@ -113,8 +113,8 @@ export const readToolkitsFromDir = async (
     entries = await readdir(dir);
   } catch (error) {
     return {
-      errors: [`Failed to read output directory: ${error}`],
       toolkits: [],
+      errors: [`Failed to read output directory: ${error}`],
       warnings: [],
     };
   }
@@ -127,10 +127,10 @@ export const readToolkitsFromDir = async (
     if (!fileName) continue;
 
     onProgress?.({
-      current: i + 1,
-      fileName,
       phase: "reading",
+      current: i + 1,
       total,
+      fileName,
     });
 
     const filePath = join(dir, fileName);
@@ -145,7 +145,7 @@ export const readToolkitsFromDir = async (
     toolkits.push(result.toolkit);
   }
 
-  return { errors, toolkits, warnings };
+  return { toolkits, errors, warnings };
 };
 
 const readIndexFile = async (dir: string): Promise<ToolkitIndex | null> => {
@@ -223,10 +223,10 @@ const validateIndex = async (
   const errors: string[] = [];
 
   reportProgress(onProgress, {
-    current: 0,
-    fileName: "index.json",
     phase: "validating",
+    current: 0,
     total: 1,
+    fileName: "index.json",
   });
 
   const index = await readIndexFile(dir);
@@ -250,10 +250,10 @@ const validateIndex = async (
     const [toolkitId, toolkit] = entry;
 
     reportProgress(onProgress, {
-      current: i + 1,
-      fileName: `${toolkit.id}.json`,
       phase: "cross-referencing",
+      current: i + 1,
       total: totalEntries,
+      fileName: `${toolkit.id}.json`,
     });
 
     if (!indexIds.has(toolkitId)) {
@@ -329,8 +329,8 @@ export const verifyOutputDir = async (
   errors.push(...(await validateFileNames(dir, toolkitById)));
 
   return {
-    errors,
     valid: errors.length === 0,
+    errors,
     warnings,
   };
 };

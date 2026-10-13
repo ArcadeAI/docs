@@ -5,23 +5,23 @@ import { type RetryOptions, withRetry } from "../utils/retry";
 export type LlmProvider = "openai" | "anthropic";
 
 export interface LlmRequest {
-  readonly maxTokens?: number;
   readonly model: string;
   readonly prompt: string;
   readonly system?: string;
   readonly temperature?: number;
+  readonly maxTokens?: number;
 }
 
 export interface LlmClient {
-  readonly generateText: (request: LlmRequest) => Promise<string>;
   readonly provider: LlmProvider;
+  readonly generateText: (request: LlmRequest) => Promise<string>;
 }
 
 export interface LlmClientRetryConfig {
-  /** Initial retry delay in ms (default: 1000) */
-  readonly initialDelayMs?: number;
   /** Maximum number of retries (default: 3) */
   readonly maxRetries?: number;
+  /** Initial retry delay in ms (default: 1000) */
+  readonly initialDelayMs?: number;
   /** Callback for retry events */
   readonly onRetry?:
     | ((attempt: number, error: Error, delayMs: number) => void)
@@ -45,8 +45,8 @@ export class OpenAiClient implements LlmClient {
       baseURL: config.baseUrl,
     });
     this.retryOptions = {
-      initialDelayMs: config.retry?.initialDelayMs ?? 1000,
       maxRetries: config.retry?.maxRetries ?? 3,
+      initialDelayMs: config.retry?.initialDelayMs ?? 1000,
       onRetry: config.retry?.onRetry,
     };
   }
@@ -54,8 +54,8 @@ export class OpenAiClient implements LlmClient {
   async generateText(request: LlmRequest): Promise<string> {
     return withRetry(async () => {
       const payload: OpenAI.Responses.ResponseCreateParamsNonStreaming = {
-        input: request.prompt,
         model: request.model,
+        input: request.prompt,
       };
 
       if (request.system !== undefined) {
@@ -96,8 +96,8 @@ export class AnthropicClient implements LlmClient {
       baseURL: config.baseUrl,
     });
     this.retryOptions = {
-      initialDelayMs: config.retry?.initialDelayMs ?? 1000,
       maxRetries: config.retry?.maxRetries ?? 3,
+      initialDelayMs: config.retry?.initialDelayMs ?? 1000,
       onRetry: config.retry?.onRetry,
     };
   }
@@ -105,9 +105,9 @@ export class AnthropicClient implements LlmClient {
   async generateText(request: LlmRequest): Promise<string> {
     return withRetry(async () => {
       const payload: Anthropic.MessageCreateParamsNonStreaming = {
-        max_tokens: request.maxTokens ?? 512,
-        messages: [{ content: request.prompt, role: "user" }],
         model: request.model,
+        max_tokens: request.maxTokens ?? 512,
+        messages: [{ role: "user", content: request.prompt }],
       };
 
       if (request.temperature !== undefined) {

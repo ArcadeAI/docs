@@ -2,19 +2,19 @@
 import { Badge, ByocBadge, ProBadge } from "@arcadeai/design-system";
 import { usePathname } from "next/navigation";
 import type React from "react";
-import { findToolkitFromPath } from "@/components/pages/integrations/toolkit-utils";
-import { TYPE_CONFIG } from "@/components/pages/integrations/type-config";
+import { findToolkitFromPath } from "./pages/integrations/toolkit-utils";
+import { TYPE_CONFIG } from "./pages/integrations/type-config";
 
-interface ToolInfoProps {
-  author: string;
-  authProviderDocsUrl?: string;
-  authProviderName?: string;
-  authType: "oauth2";
-  codeLink: string;
+type ToolInfoProps = {
   description: string;
-  note?: string;
+  author: string;
+  codeLink: string;
+  authType: "oauth2";
+  authProviderName?: string;
+  authProviderDocsUrl?: string;
   versions: string[];
-}
+  note?: string;
+};
 
 // Render toolkit badges
 const ToolkitBadges: React.FC<{
@@ -26,7 +26,7 @@ const ToolkitBadges: React.FC<{
 
   return (
     <div className="mt-3 flex flex-wrap items-center gap-1.5">
-      {typeInfo && TypeIcon ? (
+      {typeInfo && TypeIcon && (
         <Badge
           className="gap-1 border-gray-300 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
           variant="outline"
@@ -34,9 +34,9 @@ const ToolkitBadges: React.FC<{
           <TypeIcon className={`h-3.5 w-3.5 ${typeInfo.color}`} />
           {typeInfo.label}
         </Badge>
-      ) : null}
-      {isByoc ? <ByocBadge className="gap-1.5 rounded-md" /> : null}
-      {isPro ? <ProBadge className="gap-1.5 rounded-md" /> : null}
+      )}
+      {isByoc && <ByocBadge className="gap-1.5 rounded-md" />}
+      {isPro && <ProBadge className="gap-1.5 rounded-md" />}
     </div>
   );
 };
@@ -72,7 +72,7 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
   return (
     <div className="mt-5 mb-6 rounded-lg border-4 border-neutral-dark-medium p-6 text-text-color shadow-lg sm:p-3">
       <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-        {iconUrl ? (
+        {iconUrl && (
           <div className="flex items-center justify-center sm:justify-start">
             <div className="rounded-lg bg-neutral-light p-3 dark:bg-neutral-dark-medium">
               <img
@@ -84,11 +84,11 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
               />
             </div>
           </div>
-        ) : null}
+        )}
         <div className="min-w-0 flex-1">
-          {showBadges ? (
+          {showBadges && (
             <ToolkitBadges isByoc={isByoc} isPro={isPro} typeInfo={typeInfo} />
-          ) : null}
+          )}
           <p className="my-1.5 text-base text-text-color sm:text-sm">
             <strong className="text-text-color">Description: </strong>{" "}
             {description}
@@ -96,7 +96,7 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
           <p className="my-1.5 text-base text-text-color sm:text-sm">
             <strong className="text-text-color">Author: </strong> {author}
           </p>
-          {codeLink ? (
+          {codeLink && (
             <p className="my-1.5 text-base text-text-color sm:text-sm">
               <strong className="text-text-color">Code: </strong>
               <a
@@ -108,13 +108,13 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
                 GitHub
               </a>
             </p>
-          ) : null}
+          )}
           <p className="my-1.5 text-base text-text-color sm:text-sm">
             <strong className="text-text-color">Auth: </strong>
             {authType.toLowerCase() === "oauth2" ? (
               <>
                 User authorization
-                {authProviderName && resolvedAuthDocsUrl ? (
+                {authProviderName && resolvedAuthDocsUrl && (
                   <>
                     {" "}
                     via the{" "}
@@ -125,18 +125,18 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
                       {authProviderName} auth provider
                     </a>
                   </>
-                ) : null}
+                )}
               </>
             ) : (
               authType
             )}
           </p>
-          {note ? (
+          {note && (
             <p className="my-1.5 text-base text-text-color sm:text-sm">
               <strong className="text-text-color">Note: </strong>
               {note}
             </p>
-          ) : null}
+          )}
         </div>
       </div>
     </div>

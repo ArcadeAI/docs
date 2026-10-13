@@ -1,9 +1,9 @@
-export interface MdxCache<T> {
+export type MdxCache<T> = {
   get: (key: string) => T | undefined;
-  has: (key: string) => boolean;
   set: (key: string, value: T) => void;
+  has: (key: string) => boolean;
   size: () => number;
-}
+};
 
 export const createMdxCache = <T>(maxSize = 100): MdxCache<T> => {
   const limit = Math.max(1, Math.floor(maxSize));
@@ -23,7 +23,6 @@ export const createMdxCache = <T>(maxSize = 100): MdxCache<T> => {
       touch(key, value);
       return value;
     },
-    has: (key: string) => cache.has(key),
     set: (key: string, value: T) => {
       if (cache.has(key)) {
         cache.delete(key);
@@ -36,6 +35,7 @@ export const createMdxCache = <T>(maxSize = 100): MdxCache<T> => {
         }
       }
     },
+    has: (key: string) => cache.has(key),
     size: () => cache.size,
   };
 };

@@ -1,8 +1,8 @@
 import type React from "react";
 
-interface BadgesProps {
+type BadgesProps = {
   repo: string; // Format: "org/repo"
-}
+};
 
 const Badges: React.FC<BadgesProps> = ({ repo }) => {
   let packageName: string;
@@ -13,29 +13,29 @@ const Badges: React.FC<BadgesProps> = ({ repo }) => {
   }
   const badges = [
     {
-      alt: "PyPI Version",
       href: `https://pypi.org/project/${packageName}/`,
       src: `https://img.shields.io/pypi/v/${packageName}`,
+      alt: "PyPI Version",
     },
     {
-      alt: "License",
       href: "https://github.com/arcadeai/arcade-ai/blob/main/LICENSE",
       src: "https://img.shields.io/badge/License-MIT-yellow.svg",
+      alt: "License",
     },
     {
-      alt: "Python Versions",
       href: `https://pypi.org/project/${packageName}/`,
       src: `https://img.shields.io/pypi/pyversions/${packageName}`,
+      alt: "Python Versions",
     },
     {
-      alt: "Wheel Status",
       href: `https://pypi.org/project/${packageName}/`,
       src: `https://img.shields.io/pypi/wheel/${packageName}`,
+      alt: "Wheel Status",
     },
     {
-      alt: "Downloads",
       href: `https://pypi.org/project/${packageName}/`,
       src: `https://img.shields.io/pypi/dm/${packageName}`,
+      alt: "Downloads",
     },
   ];
 

@@ -15,24 +15,24 @@ import {
   readToolkitIndex,
 } from "./toolkit-data";
 
-export interface ToolkitCatalogEntry {
-  category?: string;
-  docsLink?: string;
+export type ToolkitCatalogEntry = {
   id: string;
+  category?: string;
   isHidden?: boolean;
-}
+  docsLink?: string;
+};
 
-export interface ToolkitRouteEntry {
-  category: IntegrationCategory;
+export type ToolkitRouteEntry = {
   toolkitId: string; // docs slug (e.g. "github-api") or normalized id
-}
+  category: IntegrationCategory;
+};
 
 const DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES: ToolkitCatalogEntry[] =
   DESIGN_SYSTEM_TOOLKITS.map((toolkit) => ({
-    category: toolkit.category,
-    docsLink: toolkit.docsLink,
     id: toolkit.id,
+    category: toolkit.category,
     isHidden: toolkit.isHidden,
+    docsLink: toolkit.docsLink,
   }));
 
 const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> =>
@@ -99,7 +99,7 @@ export function getToolkitCanonicalPath(toolkit: {
       `Cannot build a canonical path for toolkit "${toolkit.id}": it has no integration category.`
     );
   }
-  const slug = getToolkitSlug({ docsLink: toolkit.docsLink, id: toolkit.id });
+  const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
   return `/en/resources/integrations/${category}/${slug}`;
 }
 
@@ -125,14 +125,14 @@ const listToolkitRoutesFromDataDir = async (options?: {
     }
 
     const slug = getToolkitSlug({
-      docsLink: data.metadata?.docsLink,
       id: data.id,
+      docsLink: data.metadata?.docsLink,
     });
     const category = normalizeCategory(data.metadata?.category);
     if (!category) {
       continue;
     }
-    unique.set(slug, { category, toolkitId: slug });
+    unique.set(slug, { toolkitId: slug, category });
   }
 
   return [...unique.values()];
@@ -159,8 +159,8 @@ const resolveToolkitRoute = async (
   }
 
   const slug = getToolkitSlug({
-    docsLink: data?.metadata?.docsLink ?? catalogEntry?.docsLink,
     id: toolkit.id,
+    docsLink: data?.metadata?.docsLink ?? catalogEntry?.docsLink,
   });
   // JSON file is the source of truth for category. The generator is responsible
   // for writing the correct value; the design system catalog and index.json are
@@ -174,7 +174,7 @@ const resolveToolkitRoute = async (
   if (!category) {
     return null;
   }
-  return { category, toolkitId: slug };
+  return { toolkitId: slug, category };
 };
 
 export async function listToolkitRoutes(options?: {

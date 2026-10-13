@@ -6,25 +6,25 @@ import {
   sortTermsByLength,
 } from "./glossary-parser";
 
-interface RemarkGlossaryOptions {
-  caseSensitive?: boolean;
+type RemarkGlossaryOptions = {
   glossaryPath: string;
   maxOccurrencesPerPage?: number;
-}
+  caseSensitive?: boolean;
+};
 
 /** The subset of a `VFile` this plugin reads. */
-interface FileLike {
+type FileLike = {
   history?: string[];
   path?: string;
-}
+};
 
 /** Minimal shape of an `mdxJsxTextElement` (from mdast-util-mdx-jsx). */
-interface MdxJsxTextElement {
+type MdxJsxTextElement = {
   attributes: { type: "mdxJsxAttribute"; name: string; value: string }[];
   children: PhrasingContent[];
   name: string;
   type: "mdxJsxTextElement";
-}
+};
 
 // Cache for parsed glossary terms
 let cachedTerms: GlossaryTerm[] | null = null;
@@ -93,11 +93,11 @@ function glossaryNode(
   return node as unknown as PhrasingContent;
 }
 
-interface Match {
+type Match = {
   index: number;
   length: number;
   term: GlossaryTerm;
-}
+};
 
 /** Split `textNode` around `match`: text before, the GlossaryTerm element, text after. */
 function splitTextNode(textNode: Text, match: Match): PhrasingContent[] {

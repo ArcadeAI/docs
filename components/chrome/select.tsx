@@ -16,12 +16,12 @@ import {
 import { createPortal } from "react-dom";
 import { CheckIcon } from "@/components/chrome/icons";
 
-export interface SelectOption {
+export type SelectOption = {
   id: string;
   name: ReactNode;
-}
+};
 
-interface SelectProps {
+type SelectProps = {
   /** Where the options open relative to the button. */
   anchor: "top start" | "bottom start" | "bottom end";
   className?: string;
@@ -32,19 +32,19 @@ interface SelectProps {
   title?: string;
   /** Selected option id. Leave empty for menus that only run an action. */
   value: string;
-}
+};
 
 /** Distance between the trigger and the options. */
 const ANCHOR_GAP = 10;
 const VIEWPORT_PADDING = 0;
 const NAVIGATION_KEYS = new Set(["ArrowDown", "ArrowUp", "Home", "End"]);
 
-interface Position {
+type Position = {
   left: number;
   maxHeight: number;
   top: number;
   width: number;
-}
+};
 
 function nextIndex(key: string, current: number, count: number): number {
   if (key === "Home") {

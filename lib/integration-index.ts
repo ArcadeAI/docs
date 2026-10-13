@@ -13,8 +13,8 @@ export function toIntegrationLink(toolkit: {
   docsLink?: string | null;
   category?: string | null;
 }): string | null {
-  const slug = getToolkitSlug({ docsLink: toolkit.docsLink, id: toolkit.id });
-  const { category } = toolkit;
+  const slug = getToolkitSlug({ id: toolkit.id, docsLink: toolkit.docsLink });
+  const category = toolkit.category;
   if (!category) {
     return null;
   }

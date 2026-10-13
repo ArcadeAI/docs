@@ -34,7 +34,7 @@ describe("validateMergedCustomSections", () => {
 
   afterEach(async () => {
     await Promise.all(
-      tempDirs.map((dir) => rm(dir, { force: true, recursive: true }))
+      tempDirs.map((dir) => rm(dir, { recursive: true, force: true }))
     );
     tempDirs.length = ZERO;
   });
@@ -48,10 +48,10 @@ describe("validateMergedCustomSections", () => {
       "alpha.json",
       JSON.stringify(
         {
-          customImports: ["import A from 'a';"],
-          documentationChunks: [{ content: "alpha-doc" }],
           id: "Alpha",
           label: "Alpha",
+          documentationChunks: [{ content: "alpha-doc" }],
+          customImports: ["import A from 'a';"],
         },
         null,
         JSON_INDENT_SPACES
@@ -101,7 +101,7 @@ describe("validateMergedCustomSections", () => {
       dataDir,
       "good.json",
       JSON.stringify(
-        { customImports: ["x"], id: "Good", label: "Good" },
+        { id: "Good", label: "Good", customImports: ["x"] },
         null,
         JSON_INDENT_SPACES
       )
@@ -121,19 +121,17 @@ describe("validateMergedCustomSections", () => {
 describe("buildValidationOutputLines", () => {
   it("renders no-custom-sections guidance when details are empty", () => {
     const lines = buildValidationOutputLines({
+      totalToolkits: TWO,
+      withDocChunks: ZERO,
+      withCustomImports: ZERO,
+      withSubPages: ZERO,
       detailedResults: [],
       errors: [],
-      totalToolkits: TWO,
-      withCustomImports: ZERO,
-      withDocChunks: ZERO,
-      withSubPages: ZERO,
     });
 
     expect(lines.join("\n")).toContain(
       "No toolkits found with custom sections."
     );
-    expect(lines.join("\n")).toContain(
-      "bun toolkit-docs-generator/scripts/merge-custom-sections.ts"
-    );
+    expect(lines.join("\n")).toContain("run merge-custom-sections");
   });
 });

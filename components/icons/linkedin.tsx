@@ -16,3 +16,4 @@ export const LinkedIn = (props: SVGProps<SVGSVGElement>) => (
     />
   </svg>
 );
+export default LinkedIn;

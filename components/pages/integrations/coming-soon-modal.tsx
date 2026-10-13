@@ -10,14 +10,14 @@ import {
 } from "@arcadeai/design-system";
 import posthog from "posthog-js";
 import type React from "react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useComingSoon } from "@/components/coming-soon-context";
 
-interface ComingSoonModalProps {
+type ComingSoonModalProps = {
   isOpen: boolean;
   onClose: () => void;
   toolkitName: string;
-}
+};
 
 export function ComingSoonModal({
   isOpen,
@@ -29,60 +29,43 @@ export function ComingSoonModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-      if (!email?.includes("@")) {
-        setError("Please enter a valid email address");
-        return;
-      }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email?.includes("@")) {
+      setError("Please enter a valid email address");
+      return;
+    }
 
-      setIsSubmitting(true);
-      setError("");
+    setIsSubmitting(true);
+    setError("");
 
-      try {
-        posthog.capture("Notify me clicked", {
-          notify_email: email,
-          toolkit_name: toolkitName,
-        });
-        setIsSubmitted(true);
-      } catch {
-        setError("Failed to submit. Please try again.");
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [email, toolkitName]
-  );
+    try {
+      posthog.capture("Notify me clicked", {
+        toolkit_name: toolkitName,
+        notify_email: email,
+      });
+      setIsSubmitted(true);
+    } catch {
+      setError("Failed to submit. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     setIsSubmitted(false);
     setError("");
     onClose();
-  }, [onClose]);
-
-  const handleOpenChange = useCallback(
-    (open: boolean) => {
-      if (!open) {
-        handleClose();
-      }
-    },
-    [handleClose]
-  );
-
-  const handleEmailChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value),
-    [setEmail]
-  );
+  };
 
   return (
-    <Dialog onOpenChange={handleOpenChange} open={isOpen}>
+    <Dialog onOpenChange={(open) => !open && handleClose()} open={isOpen}>
       <DialogContent className="border-gray-800 bg-gray-900 sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-gray-100">
             {toolkitName} is coming soon
           </DialogTitle>
-          {isSubmitted ? null : (
+          {!isSubmitted && (
             <DialogDescription className="pt-6 text-gray-400">
               This toolkit is coming to Arcade soon. Sign up to be notified when
               it's available.
@@ -99,13 +82,13 @@ export function ComingSoonModal({
                 className="w-full bg-gray-800/50 text-white"
                 disabled={isSubmitting}
                 id="email"
-                onChange={handleEmailChange}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
                 type="email"
                 value={email}
               />
-              {error ? <p className="text-red-500 text-xs">{error}</p> : null}
+              {error && <p className="text-red-500 text-xs">{error}</p>}
             </div>
             <Button className="w-full" disabled={isSubmitting} type="submit">
               {isSubmitting ? "Submitting..." : "Notify me"}

@@ -3,17 +3,17 @@ import { Checkbox, Input, Label } from "@arcadeai/design-system";
 import type { MultipleSurveyQuestion } from "posthog-js";
 import { useCallback, useMemo, useState } from "react";
 
-interface MultipleChoiceQuestionProps {
+type MultipleChoiceQuestionProps = {
   previousResponse?: string[];
   question: MultipleSurveyQuestion;
-}
+};
 
-interface ChoiceCheckboxProps {
+type ChoiceCheckboxProps = {
   choice: string;
   defaultChecked?: boolean;
   onChange: (choice: string, checked: boolean) => void;
   required: boolean;
-}
+};
 
 function ChoiceCheckbox({
   choice,

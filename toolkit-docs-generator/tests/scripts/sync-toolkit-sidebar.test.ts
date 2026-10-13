@@ -32,21 +32,21 @@ import {
 import { INTEGRATION_CATEGORIES } from "../../src/shared/toolkit-primitives";
 
 setToolkitsForTesting([
-  { category: "productivity", id: "Gmail", label: "Gmail" },
-  { category: "social", id: "Slack", label: "Slack" },
-  { category: "development", id: "Github", label: "GitHub" },
-  { category: "payments", id: "Stripe", label: "Stripe" },
-  { category: "customer-support", id: "Zendesk", label: "Zendesk" },
-  { category: "search", id: "GoogleSearch", label: "Google Search" },
-  { category: "sales", id: "Hubspot", label: "HubSpot" },
-  { category: "entertainment", id: "Spotify", label: "Spotify" },
-  { category: "databases", id: "Postgres", label: "Postgres" },
-  { category: "development", id: "WeaviateApi", label: "Weaviate API" },
+  { id: "Gmail", label: "Gmail", category: "productivity" },
+  { id: "Slack", label: "Slack", category: "social" },
+  { id: "Github", label: "GitHub", category: "development" },
+  { id: "Stripe", label: "Stripe", category: "payments" },
+  { id: "Zendesk", label: "Zendesk", category: "customer-support" },
+  { id: "GoogleSearch", label: "Google Search", category: "search" },
+  { id: "Hubspot", label: "HubSpot", category: "sales" },
+  { id: "Spotify", label: "Spotify", category: "entertainment" },
+  { id: "Postgres", label: "Postgres", category: "databases" },
+  { id: "WeaviateApi", label: "Weaviate API", category: "development" },
   {
-    category: "productivity",
     id: "HiddenToolkit",
-    isHidden: true,
     label: "Hidden",
+    category: "productivity",
+    isHidden: true,
   },
 ]);
 
@@ -330,23 +330,23 @@ describe("buildToolkitInfoList", () => {
     // unlike the other fixtures in this file, it needs every required field,
     // not just the ones buildToolkitInfoList itself reads.
     createToolkitJson("weaviateapi", {
-      auth: null,
-      description: null,
       id: "WeaviateApi",
       label: "Weaviate API",
+      version: "1.0.0",
+      description: null,
+      auth: null,
+      tools: [],
       metadata: {
         category: "databases",
         docsLink:
           "https://docs.arcade.dev/en/mcp-servers/databases/weaviate-api",
         iconUrl: "https://design-system.arcade.dev/icons/placeholder.svg",
         isBYOC: false,
-        isComingSoon: false,
-        isHidden: false,
         isPro: false,
         type: "arcade",
+        isComingSoon: false,
+        isHidden: false,
       },
-      tools: [],
-      version: "1.0.0",
     });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
@@ -368,7 +368,7 @@ describe("buildToolkitInfoList", () => {
     );
 
     const toolkitsCatalog = [
-      { category: "development", docsLink: undefined, id: "WeaviateApi" },
+      { id: "WeaviateApi", category: "development", docsLink: undefined },
     ];
     const databasesParams = await getToolkitStaticParamsForCategory(
       "databases",
@@ -400,25 +400,25 @@ describe("groupByCategory", () => {
   it("should group toolkits by category", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "productivity",
         id: "gmail",
+        slug: "gmail",
         label: "Gmail",
         navGroup: "optimized",
-        slug: "gmail",
+        category: "productivity",
       },
       {
-        category: "social",
         id: "slack",
+        slug: "slack",
         label: "Slack",
         navGroup: "optimized",
-        slug: "slack",
+        category: "social",
       },
       {
-        category: "productivity",
         id: "dropbox",
+        slug: "dropbox",
         label: "Dropbox",
         navGroup: "optimized",
-        slug: "dropbox",
+        category: "productivity",
       },
     ];
 
@@ -432,25 +432,25 @@ describe("groupByCategory", () => {
   it("should sort toolkits alphabetically by label", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "social",
         id: "zoom",
+        slug: "zoom",
         label: "Zoom",
         navGroup: "optimized",
-        slug: "zoom",
+        category: "social",
       },
       {
-        category: "social",
         id: "slack",
+        slug: "slack",
         label: "Slack",
         navGroup: "optimized",
-        slug: "slack",
+        category: "social",
       },
       {
-        category: "social",
         id: "discord",
+        slug: "discord",
         label: "Discord",
         navGroup: "optimized",
-        slug: "discord",
+        category: "social",
       },
     ];
 
@@ -470,11 +470,11 @@ describe("groupByCategory", () => {
   it("should group toolkits by category", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "payments",
         id: "custom",
+        slug: "custom",
         label: "Custom",
         navGroup: "optimized",
-        slug: "custom",
+        category: "payments",
       },
     ];
 
@@ -509,10 +509,10 @@ describe("remove empty section flags", () => {
 
   it("prefers removeEmptySections over prune when both are set", () => {
     expect(
-      resolveRemoveEmptySections({ prune: true, removeEmptySections: false })
+      resolveRemoveEmptySections({ removeEmptySections: false, prune: true })
     ).toBe(false);
     expect(
-      resolveRemoveEmptySections({ prune: false, removeEmptySections: true })
+      resolveRemoveEmptySections({ removeEmptySections: true, prune: false })
     ).toBe(true);
   });
 
@@ -546,18 +546,18 @@ describe("generateCategoryMeta", () => {
   it("should generate valid Fumadocs meta.json content", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "productivity",
         id: "gmail",
+        slug: "gmail",
         label: "Gmail",
         navGroup: "optimized",
-        slug: "gmail",
+        category: "productivity",
       },
       {
-        category: "productivity",
         id: "dropbox",
+        slug: "dropbox",
         label: "Dropbox",
         navGroup: "optimized",
-        slug: "dropbox",
+        category: "productivity",
       },
     ];
 
@@ -597,11 +597,11 @@ describe("generateCategoryMeta", () => {
   it("keeps quotes in labels intact through JSON encoding", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "productivity",
         id: "test",
+        slug: "test",
         label: 'Test "Quoted" Label',
         navGroup: "optimized",
-        slug: "test",
+        category: "productivity",
       },
     ];
 
@@ -628,11 +628,11 @@ describe("generateCategoryMeta", () => {
   it("should handle single toolkit", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "productivity",
         id: "gmail",
+        slug: "gmail",
         label: "Gmail",
         navGroup: "optimized",
-        slug: "gmail",
+        category: "productivity",
       },
     ];
 
@@ -647,18 +647,18 @@ describe("generateCategoryMeta", () => {
   it("adds Optimized separator even when no starter entries exist", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "entertainment",
         id: "imgflip",
-        label: "Imgflip",
-        navGroup: "optimized",
         slug: "imgflip",
+        label: "Imgflip",
+        category: "entertainment",
+        navGroup: "optimized",
       },
       {
-        category: "entertainment",
         id: "spotify",
-        label: "Spotify",
-        navGroup: "optimized",
         slug: "spotify",
+        label: "Spotify",
+        category: "entertainment",
+        navGroup: "optimized",
       },
     ];
 
@@ -681,11 +681,11 @@ describe("generateCategoryMeta", () => {
   it("adds Starter separator even when no optimized entries exist", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "productivity",
         id: "my-api",
-        label: "My API",
-        navGroup: "starter",
         slug: "my-api",
+        label: "My API",
+        category: "productivity",
+        navGroup: "starter",
       },
     ];
 
@@ -705,18 +705,18 @@ describe("generateCategoryMeta", () => {
   it("adds both separators when both optimized and starter entries exist", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "productivity",
         id: "gmail",
-        label: "Gmail",
-        navGroup: "optimized",
         slug: "gmail",
+        label: "Gmail",
+        category: "productivity",
+        navGroup: "optimized",
       },
       {
-        category: "productivity",
         id: "airtable-api",
-        label: "Airtable API",
-        navGroup: "starter",
         slug: "airtable-api",
+        label: "Airtable API",
+        category: "productivity",
+        navGroup: "starter",
       },
     ];
 
@@ -735,18 +735,18 @@ describe("generateCategoryMeta", () => {
   it("does not mutate the input array", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "social",
         id: "zoom",
-        label: "Zoom",
-        navGroup: "optimized",
         slug: "zoom",
+        label: "Zoom",
+        category: "social",
+        navGroup: "optimized",
       },
       {
-        category: "social",
         id: "slack",
-        label: "Slack",
-        navGroup: "optimized",
         slug: "slack",
+        label: "Slack",
+        category: "social",
+        navGroup: "optimized",
       },
     ];
     const originalOrder = [...toolkits];
@@ -836,12 +836,12 @@ describe("syncToolkitSidebar", () => {
     const result = syncToolkitSidebar({ dryRun: true });
 
     expect(result).toEqual({
+      categoriesUpdated: expect.any(Array),
       categoriesCreated: expect.any(Array),
       categoriesRemoved: expect.any(Array),
-      categoriesUpdated: expect.any(Array),
-      errors: expect.any(Array),
-      partnerCount: expect.any(Number),
       toolkitCount: expect.any(Number),
+      partnerCount: expect.any(Number),
+      errors: expect.any(Array),
     });
   });
 });
@@ -855,18 +855,18 @@ describe("category move cleanup logic", () => {
     // Simulate: Pylon was in "others", now design system says "development"
     const toolkits: ToolkitInfo[] = [
       {
-        category: "development",
         id: "Pylon",
-        label: "Pylon",
-        navGroup: "optimized",
         slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
       },
       {
-        category: "development",
         id: "Github",
-        label: "GitHub",
-        navGroup: "optimized",
         slug: "github",
+        label: "GitHub",
+        category: "development",
+        navGroup: "optimized",
       },
     ];
 
@@ -885,11 +885,11 @@ describe("category move cleanup logic", () => {
   it("old category directory is identified for removal when empty", () => {
     const toolkits: ToolkitInfo[] = [
       {
-        category: "development",
         id: "Pylon",
-        label: "Pylon",
-        navGroup: "optimized",
         slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
       },
     ];
 
@@ -913,18 +913,18 @@ describe("category move cleanup logic", () => {
     // "others" still has CustomTool, even though Pylon moved to "development"
     const toolkits: ToolkitInfo[] = [
       {
-        category: "development",
         id: "Pylon",
-        label: "Pylon",
-        navGroup: "optimized",
         slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
       },
       {
-        category: "others",
         id: "CustomTool",
-        label: "Custom Tool",
-        navGroup: "optimized",
         slug: "custom-tool",
+        label: "Custom Tool",
+        category: "others",
+        navGroup: "optimized",
       },
     ];
 
@@ -946,11 +946,11 @@ describe("category move cleanup logic", () => {
     // After Pylon moves, the "others" meta.json should only contain remaining toolkits
     const othersToolkits: ToolkitInfo[] = [
       {
-        category: "others",
         id: "CustomTool",
-        label: "Custom Tool",
-        navGroup: "optimized",
         slug: "custom-tool",
+        label: "Custom Tool",
+        category: "others",
+        navGroup: "optimized",
       },
     ];
 
@@ -981,9 +981,9 @@ describe("category move cleanup logic", () => {
 // ============================================================================
 
 const tavilyPartner: PartnerNavSource = {
-  category: "search",
   id: "Tavily",
   label: "Tavily",
+  category: "search",
   relativeDocsLink: "/en/resources/integrations/search/tavily",
 };
 
@@ -993,11 +993,11 @@ describe("buildPartnerToolkitInfoList", () => {
 
     expect(result).toEqual([
       {
-        category: "search",
         id: "Tavily",
-        label: "Tavily",
-        navGroup: "partner",
         slug: "tavily",
+        label: "Tavily",
+        category: "search",
+        navGroup: "partner",
       },
     ]);
   });
@@ -1023,18 +1023,18 @@ describe("buildPartnerToolkitInfoList", () => {
 
 describe("mergeToolkitAndPartnerInfo", () => {
   const searchToolkit: ToolkitInfo = {
-    category: "search",
     id: "GoogleSearch",
-    label: "Google Search",
-    navGroup: "optimized",
     slug: "google-search",
+    label: "Google Search",
+    category: "search",
+    navGroup: "optimized",
   };
   const searchPartner: ToolkitInfo = {
-    category: "search",
     id: "Tavily",
-    label: "Tavily",
-    navGroup: "partner",
     slug: "tavily",
+    label: "Tavily",
+    category: "search",
+    navGroup: "partner",
   };
 
   it("appends the partners to the toolkits", () => {
@@ -1055,7 +1055,7 @@ describe("mergeToolkitAndPartnerInfo", () => {
   it("allows the same slug in different categories", () => {
     expect(() =>
       mergeToolkitAndPartnerInfo(
-        [{ ...searchToolkit, category: "development", slug: "tavily" }],
+        [{ ...searchToolkit, slug: "tavily", category: "development" }],
         [searchPartner]
       )
     ).not.toThrow();
@@ -1065,25 +1065,25 @@ describe("mergeToolkitAndPartnerInfo", () => {
 describe("generateCategoryMeta partner section", () => {
   const toolkits: ToolkitInfo[] = [
     {
-      category: "search",
       id: "GoogleSearch",
-      label: "Google Search",
-      navGroup: "optimized",
       slug: "google-search",
+      label: "Google Search",
+      category: "search",
+      navGroup: "optimized",
     },
     {
-      category: "search",
       id: "ExaApi",
-      label: "Exa API",
-      navGroup: "starter",
       slug: "exa-api",
+      label: "Exa API",
+      category: "search",
+      navGroup: "starter",
     },
     {
-      category: "search",
       id: "Tavily",
-      label: "Tavily",
-      navGroup: "partner",
       slug: "tavily",
+      label: "Tavily",
+      category: "search",
+      navGroup: "partner",
     },
   ];
 

@@ -13,7 +13,7 @@ const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   try {
     await fn(dir);
   } finally {
-    await rm(dir, { force: true, recursive: true });
+    await rm(dir, { recursive: true, force: true });
   }
 };
 
@@ -22,15 +22,15 @@ describe("run-logs", () => {
     await withTempDir(async (dir) => {
       const filePath = join(dir, "failed-tools.json");
       const report = {
-        failedToolkits: ["Slack"],
         generatedAt: "2026-01-26T00:00:00.000Z",
         toolkits: ["Github"],
+        failedToolkits: ["Slack"],
         tools: [
           {
-            qualifiedName: "Github.CreateIssue",
-            reason: "LLM error",
             toolkitId: "Github",
             toolName: "CreateIssue",
+            qualifiedName: "Github.CreateIssue",
+            reason: "LLM error",
           },
         ],
       };

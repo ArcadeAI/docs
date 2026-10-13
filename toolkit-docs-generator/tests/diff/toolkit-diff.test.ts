@@ -25,107 +25,107 @@ import type {
 const createToolDefinition = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
+  name: "TestTool",
+  qualifiedName: "TestKit.TestTool",
+  fullyQualifiedName: "TestKit.TestTool@1.0.0",
+  description: "A test tool",
+  toolkitDescription: "A test toolkit",
+  parameters: [
+    {
+      name: "param1",
+      type: "string",
+      required: true,
+      description: "First parameter",
+      enum: null,
+      inferrable: true,
+    },
+  ],
   auth: {
     providerId: "test",
     providerType: "oauth2",
     scopes: ["read", "write"],
   },
-  description: "A test tool",
-  fullyQualifiedName: "TestKit.TestTool@1.0.0",
-  name: "TestTool",
-  output: {
-    description: "Result",
-    type: "object",
-  },
-  parameters: [
-    {
-      description: "First parameter",
-      enum: null,
-      inferrable: true,
-      name: "param1",
-      required: true,
-      type: "string",
-    },
-  ],
-  qualifiedName: "TestKit.TestTool",
   secrets: [],
-  toolkitDescription: "A test toolkit",
+  output: {
+    type: "object",
+    description: "Result",
+  },
   ...overrides,
 });
 
 const createMergedTool = (overrides: Partial<MergedTool> = {}): MergedTool => ({
+  name: "TestTool",
+  qualifiedName: "TestKit.TestTool",
+  fullyQualifiedName: "TestKit.TestTool@1.0.0",
+  description: "A test tool",
+  parameters: [
+    {
+      name: "param1",
+      type: "string",
+      required: true,
+      description: "First parameter",
+      enum: null,
+      inferrable: true,
+    },
+  ],
   auth: {
     providerId: "test",
     providerType: "oauth2",
     scopes: ["read", "write"],
   },
-  description: "A test tool",
-  documentationChunks: [],
-  fullyQualifiedName: "TestKit.TestTool@1.0.0",
-  name: "TestTool",
-  output: {
-    description: "Result",
-    type: "object",
-  },
-  parameters: [
-    {
-      description: "First parameter",
-      enum: null,
-      inferrable: true,
-      name: "param1",
-      required: true,
-      type: "string",
-    },
-  ],
-  qualifiedName: "TestKit.TestTool",
   secrets: [],
   secretsInfo: [],
+  output: {
+    type: "object",
+    description: "Result",
+  },
+  documentationChunks: [],
   ...overrides,
 });
 
 const createMergedToolkit = (
   overrides: Partial<MergedToolkit> = {}
 ): MergedToolkit => ({
-  auth: {
-    allScopes: ["read", "write"],
-    providerId: "test",
-    type: "oauth2",
-  },
-  customImports: [],
-  description: "A test toolkit",
-  documentationChunks: [],
-  generatedAt: new Date().toISOString(),
   id: "TestKit",
   label: "Test Kit",
+  version: "1.0.0",
+  description: "A test toolkit",
   metadata: {
     category: "development",
-    docsLink: "https://docs.example.com/test",
     iconUrl: "https://example.com/icon.svg",
     isBYOC: false,
-    isComingSoon: false,
-    isHidden: false,
     isPro: false,
     type: "arcade",
+    docsLink: "https://docs.example.com/test",
+    isComingSoon: false,
+    isHidden: false,
   },
-  subPages: [],
+  auth: {
+    type: "oauth2",
+    providerId: "test",
+    allScopes: ["read", "write"],
+  },
   tools: [createMergedTool()],
-  version: "1.0.0",
+  documentationChunks: [],
+  customImports: [],
+  subPages: [],
+  generatedAt: new Date().toISOString(),
   ...overrides,
 });
 
 const createToolkitMetadata = (
   overrides: Partial<ToolkitMetadata> = {}
 ): ToolkitMetadata => ({
-  category: "development",
-  docsLink: "https://docs.example.com/test",
-  iconUrl: "https://example.com/icon.svg",
   id: "TestKit",
+  label: "Test Kit",
+  category: "development",
+  iconUrl: "https://example.com/icon.svg",
   isBYOC: false,
+  isPro: false,
+  type: "arcade",
+  docsLink: "https://docs.example.com/test",
   isComingSoon: false,
   isHidden: false,
-  isPro: false,
-  label: "Test Kit",
-  type: "arcade",
   ...overrides,
 });
 
@@ -158,10 +158,10 @@ describe("compareTools", () => {
 
     expect(changes).toHaveLength(1);
     expect(changes[0]).toEqual({
-      changeType: "added",
-      metadataOnly: false,
       qualifiedName: "TestKit.Tool2",
+      changeType: "added",
       toolName: "Tool2",
+      metadataOnly: false,
     });
   });
 
@@ -180,10 +180,10 @@ describe("compareTools", () => {
 
     expect(changes).toHaveLength(1);
     expect(changes[0]).toEqual({
-      changeType: "removed",
-      metadataOnly: false,
       qualifiedName: "TestKit.Tool2",
+      changeType: "removed",
       toolName: "Tool2",
+      metadataOnly: false,
     });
   });
 
@@ -191,22 +191,22 @@ describe("compareTools", () => {
     const currentTools = [
       createToolDefinition({
         name: "Tool1",
-        output: {
-          description: "Result",
-          type: "array",
-        },
         qualifiedName: "TestKit.Tool1",
+        output: {
+          type: "array",
+          description: "Result",
+        },
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
           name: "Tool1",
-          output: {
-            description: "Result",
-            type: "object",
-          },
           qualifiedName: "TestKit.Tool1",
+          output: {
+            type: "object",
+            description: "Result",
+          },
         }),
       ],
     });
@@ -215,55 +215,55 @@ describe("compareTools", () => {
 
     expect(changes).toHaveLength(1);
     expect(changes[0]).toEqual({
-      changeType: "modified",
-      metadataOnly: false,
       qualifiedName: "TestKit.Tool1",
+      changeType: "modified",
       toolName: "Tool1",
+      metadataOnly: false,
     });
   });
 
   it("ignores description-only differences", () => {
     const currentTools = [
       createToolDefinition({
-        description: "Updated description text",
         name: "Tool1",
-        output: {
-          description: "Updated output description",
-          type: "object",
-        },
+        qualifiedName: "TestKit.Tool1",
+        description: "Updated description text",
         parameters: [
           {
+            name: "param1",
+            type: "string",
+            required: true,
             description: "Updated parameter description",
             enum: null,
             inferrable: true,
-            name: "param1",
-            required: true,
-            type: "string",
           },
         ],
-        qualifiedName: "TestKit.Tool1",
+        output: {
+          type: "object",
+          description: "Updated output description",
+        },
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
-          description: "Original description text",
           name: "Tool1",
-          output: {
-            description: "Original output description",
-            type: "object",
-          },
+          qualifiedName: "TestKit.Tool1",
+          description: "Original description text",
           parameters: [
             {
+              name: "param1",
+              type: "string",
+              required: true,
               description: "Original parameter description",
               enum: null,
               inferrable: true,
-              name: "param1",
-              required: true,
-              type: "string",
             },
           ],
-          qualifiedName: "TestKit.Tool1",
+          output: {
+            type: "object",
+            description: "Original output description",
+          },
         }),
       ],
     });
@@ -277,42 +277,42 @@ describe("compareTools", () => {
     const currentTools = [
       createToolDefinition({
         name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
         parameters: [
           {
+            name: "param1",
+            type: "string",
+            required: true, // Changed from original
             description: "Parameter",
             enum: null,
             inferrable: true,
-            name: "param1",
-            required: true, // Changed from original
-            type: "string",
           },
           {
+            name: "newParam",
+            type: "integer",
+            required: false,
             description: "New parameter",
             enum: null,
             inferrable: true,
-            name: "newParam",
-            required: false,
-            type: "integer",
           },
         ],
-        qualifiedName: "TestKit.Tool1",
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
           name: "Tool1",
+          qualifiedName: "TestKit.Tool1",
           parameters: [
             {
+              name: "param1",
+              type: "string",
+              required: false, // Original
               description: "Parameter",
               enum: null,
               inferrable: true,
-              name: "param1",
-              required: false, // Original
-              type: "string",
             },
           ],
-          qualifiedName: "TestKit.Tool1",
         }),
       ],
     });
@@ -326,25 +326,25 @@ describe("compareTools", () => {
   it("should detect auth scope changes as modifications", () => {
     const currentTools = [
       createToolDefinition({
+        name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
         auth: {
           providerId: "github",
           providerType: "oauth2",
           scopes: ["repo", "user"], // Added 'user' scope
         },
-        name: "Tool1",
-        qualifiedName: "TestKit.Tool1",
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
+          name: "Tool1",
+          qualifiedName: "TestKit.Tool1",
           auth: {
             providerId: "github",
             providerType: "oauth2",
             scopes: ["repo"],
           },
-          name: "Tool1",
-          qualifiedName: "TestKit.Tool1",
         }),
       ],
     });
@@ -358,25 +358,25 @@ describe("compareTools", () => {
   it("ignores oauth provider ID differences across sources", () => {
     const currentTools = [
       createToolDefinition({
+        name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
         auth: {
           providerId: null,
           providerType: "oauth2",
           scopes: ["repo"],
         },
-        name: "Tool1",
-        qualifiedName: "TestKit.Tool1",
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
+          name: "Tool1",
+          qualifiedName: "TestKit.Tool1",
           auth: {
             providerId: "github",
             providerType: "oauth2",
             scopes: ["repo"],
           },
-          name: "Tool1",
-          qualifiedName: "TestKit.Tool1",
         }),
       ],
     });
@@ -390,22 +390,22 @@ describe("compareTools", () => {
     const currentTools = [
       createToolDefinition({
         name: "Tool1",
-        output: {
-          description: "Result",
-          type: "unknown",
-        },
         qualifiedName: "TestKit.Tool1",
+        output: {
+          type: "unknown",
+          description: "Result",
+        },
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
           name: "Tool1",
-          output: {
-            description: "Result",
-            type: "string",
-          },
           qualifiedName: "TestKit.Tool1",
+          output: {
+            type: "string",
+            description: "Result",
+          },
         }),
       ],
     });
@@ -419,34 +419,34 @@ describe("compareTools", () => {
     const currentTools = [
       createToolDefinition({
         name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
         parameters: [
           {
+            name: "mode",
+            type: "string",
+            required: true,
             description: "Mode",
             enum: [],
             inferrable: true,
-            name: "mode",
-            required: true,
-            type: "string",
           },
         ],
-        qualifiedName: "TestKit.Tool1",
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
           name: "Tool1",
+          qualifiedName: "TestKit.Tool1",
           parameters: [
             {
+              name: "mode",
+              type: "string",
+              required: true,
               description: "Mode",
               enum: null,
               inferrable: true,
-              name: "mode",
-              required: true,
-              type: "string",
             },
           ],
-          qualifiedName: "TestKit.Tool1",
         }),
       ],
     });
@@ -465,30 +465,30 @@ describe("compareTools", () => {
 
     expect(changes).toHaveLength(1);
     expect(changes[0]).toEqual({
-      changeType: "added",
-      metadataOnly: false,
       qualifiedName: "TestKit.Tool1",
+      changeType: "added",
       toolName: "Tool1",
+      metadataOnly: false,
     });
   });
 
   it("detects metadata-only change when definition is unchanged but metadata differs", () => {
     const currentTools = [
       createToolDefinition({
-        metadata: {
-          behavior: { operations: ["read"] },
-          classification: { serviceDomains: ["github"] },
-        },
         name: "Tool1",
         qualifiedName: "TestKit.Tool1",
+        metadata: {
+          classification: { serviceDomains: ["github"] },
+          behavior: { operations: ["read"] },
+        },
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
-          metadata: null,
           name: "Tool1",
           qualifiedName: "TestKit.Tool1",
+          metadata: null,
         }),
       ],
     });
@@ -497,41 +497,41 @@ describe("compareTools", () => {
 
     expect(changes).toHaveLength(1);
     expect(changes[0]).toEqual({
-      changeType: "modified",
-      metadataOnly: true,
       qualifiedName: "TestKit.Tool1",
+      changeType: "modified",
       toolName: "Tool1",
+      metadataOnly: true,
     });
   });
 
   it("does not flag metadataOnly when definition also changed", () => {
     const currentTools = [
       createToolDefinition({
-        metadata: {
-          behavior: { operations: ["read"] },
-          classification: { serviceDomains: ["github"] },
-        },
         name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
         parameters: [
           {
+            name: "newParam",
+            type: "string",
+            required: true,
             description: null,
             enum: null,
             inferrable: true,
-            name: "newParam",
-            required: true,
-            type: "string",
           },
         ],
-        qualifiedName: "TestKit.Tool1",
+        metadata: {
+          classification: { serviceDomains: ["github"] },
+          behavior: { operations: ["read"] },
+        },
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
-          metadata: null,
           name: "Tool1",
-          parameters: [],
           qualifiedName: "TestKit.Tool1",
+          parameters: [],
+          metadata: null,
         }),
       ],
     });
@@ -545,23 +545,23 @@ describe("compareTools", () => {
   it("ignores metadata array order when values are equivalent", () => {
     const currentTools = [
       createToolDefinition({
-        metadata: {
-          behavior: { operations: ["write", "read"] },
-          classification: { serviceDomains: ["git", "github"] },
-        },
         name: "Tool1",
         qualifiedName: "TestKit.Tool1",
+        metadata: {
+          classification: { serviceDomains: ["git", "github"] },
+          behavior: { operations: ["write", "read"] },
+        },
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
-          metadata: {
-            behavior: { operations: ["read", "write"] },
-            classification: { serviceDomains: ["github", "git"] },
-          },
           name: "Tool1",
           qualifiedName: "TestKit.Tool1",
+          metadata: {
+            classification: { serviceDomains: ["github", "git"] },
+            behavior: { operations: ["read", "write"] },
+          },
         }),
       ],
     });
@@ -572,22 +572,22 @@ describe("compareTools", () => {
 
   it("reports no change when both definition and metadata are identical", () => {
     const sharedMetadata = {
-      behavior: { operations: ["read"], readOnly: true },
       classification: { serviceDomains: ["github"] },
+      behavior: { operations: ["read"], readOnly: true },
     };
     const currentTools = [
       createToolDefinition({
-        metadata: sharedMetadata,
         name: "Tool1",
         qualifiedName: "TestKit.Tool1",
+        metadata: sharedMetadata,
       }),
     ];
     const previousToolkit = createMergedToolkit({
       tools: [
         createMergedTool({
-          metadata: sharedMetadata,
           name: "Tool1",
           qualifiedName: "TestKit.Tool1",
+          metadata: sharedMetadata,
         }),
       ],
     });
@@ -630,8 +630,8 @@ describe("compareToolkit", () => {
     const currentTools = [
       createToolDefinition({
         output: {
-          description: "Result",
           type: "array",
+          description: "Result",
         },
       }),
     ];
@@ -650,12 +650,12 @@ describe("compareToolkit", () => {
       }),
     ];
     const previousToolkit = createMergedToolkit({
+      version: "1.0.0",
       tools: [
         createMergedTool({
           fullyQualifiedName: "TestKit.TestTool@1.0.0",
         }),
       ],
-      version: "1.0.0",
     });
 
     const change = compareToolkit("TestKit", currentTools, previousToolkit);
@@ -728,8 +728,8 @@ describe("detectChanges", () => {
         [
           createToolDefinition({
             output: {
-              description: "Result",
               type: "array",
+              description: "Result",
             },
           }),
         ],
@@ -792,11 +792,11 @@ describe("detectChanges", () => {
           tools: [
             createMergedTool({
               name: "CreateIssue",
-              output: {
-                description: "Result",
-                type: "array",
-              },
               qualifiedName: "Github.CreateIssue",
+              output: {
+                type: "array",
+                description: "Result",
+              },
             }),
             createMergedTool({
               name: "RemovedTool",
@@ -820,8 +820,8 @@ describe("detectChanges", () => {
         "Versioned",
         [
           createToolDefinition({
-            fullyQualifiedName: "Versioned.Tool@2.0.0",
             qualifiedName: "Versioned.Tool",
+            fullyQualifiedName: "Versioned.Tool@2.0.0",
           }),
         ],
       ],
@@ -831,13 +831,13 @@ describe("detectChanges", () => {
         "Versioned",
         createMergedToolkit({
           id: "Versioned",
+          version: "1.0.0",
           tools: [
             createMergedTool({
-              fullyQualifiedName: "Versioned.Tool@1.0.0",
               qualifiedName: "Versioned.Tool",
+              fullyQualifiedName: "Versioned.Tool@1.0.0",
             }),
           ],
-          version: "1.0.0",
         }),
       ],
     ]);
@@ -853,11 +853,11 @@ describe("detectChanges", () => {
       [
         "TestKit",
         {
+          tools: [createToolDefinition()],
           metadata: createToolkitMetadata({
             category: "databases",
             docsLink: "https://docs.example.com/databases/test-kit",
           }),
-          tools: [createToolDefinition()],
         },
       ],
     ]);
@@ -906,8 +906,8 @@ describe("hasChanges", () => {
           [
             createToolDefinition({
               output: {
-                description: "Result",
                 type: "array",
+                description: "Result",
               },
             }),
           ],
@@ -941,11 +941,11 @@ describe("getChangedToolkitIds", () => {
           "Changed",
           [
             createToolDefinition({
-              output: {
-                description: "Result",
-                type: "array",
-              },
               qualifiedName: "Changed.Tool",
+              output: {
+                type: "array",
+                description: "Result",
+              },
             }),
           ],
         ],
@@ -989,11 +989,11 @@ describe("formatChangeSummary", () => {
           "Modified",
           [
             createToolDefinition({
-              output: {
-                description: "Result",
-                type: "array",
-              },
               qualifiedName: "Modified.Tool",
+              output: {
+                type: "array",
+                description: "Result",
+              },
             }),
           ],
         ],
@@ -1036,8 +1036,8 @@ describe("formatDetailedChanges", () => {
           "Github",
           [
             createToolDefinition({
-              name: "NewTool",
               qualifiedName: "Github.NewTool",
+              name: "NewTool",
             }),
           ],
         ],
@@ -1059,8 +1059,8 @@ describe("formatDetailedChanges", () => {
           "Versioned",
           [
             createToolDefinition({
-              fullyQualifiedName: "Versioned.Tool@2.0.0",
               qualifiedName: "Versioned.Tool",
+              fullyQualifiedName: "Versioned.Tool@2.0.0",
             }),
           ],
         ],
@@ -1070,13 +1070,13 @@ describe("formatDetailedChanges", () => {
           "Versioned",
           createMergedToolkit({
             id: "Versioned",
+            version: "1.0.0",
             tools: [
               createMergedTool({
-                fullyQualifiedName: "Versioned.Tool@1.0.0",
                 qualifiedName: "Versioned.Tool",
+                fullyQualifiedName: "Versioned.Tool@1.0.0",
               }),
             ],
-            version: "1.0.0",
           }),
         ],
       ])
@@ -1094,11 +1094,11 @@ describe("formatDetailedChanges", () => {
         [
           "TestKit",
           {
+            tools: [createToolDefinition()],
             metadata: createToolkitMetadata({
               category: "databases",
               docsLink: "https://docs.example.com/databases/test-kit",
             }),
-            tools: [createToolDefinition()],
           },
         ],
       ]),
@@ -1115,17 +1115,17 @@ describe("formatDetailedChanges", () => {
         [
           "TestKit",
           {
-            metadata: createToolkitMetadata(),
             tools: [
               createToolDefinition({
-                metadata: {
-                  behavior: { operations: ["read"] },
-                  classification: { serviceDomains: ["github"] },
-                },
                 name: "Tool1",
                 qualifiedName: "TestKit.Tool1",
+                metadata: {
+                  classification: { serviceDomains: ["github"] },
+                  behavior: { operations: ["read"] },
+                },
               }),
             ],
+            metadata: createToolkitMetadata(),
           },
         ],
       ]),
@@ -1135,9 +1135,9 @@ describe("formatDetailedChanges", () => {
           createMergedToolkit({
             tools: [
               createMergedTool({
-                metadata: null,
                 name: "Tool1",
                 qualifiedName: "TestKit.Tool1",
+                metadata: null,
               }),
             ],
           }),

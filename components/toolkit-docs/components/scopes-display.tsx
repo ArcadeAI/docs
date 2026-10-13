@@ -92,3 +92,5 @@ export function ScopesDisplay({
 
   return <ScopesInline scopes={normalizedScopes} />;
 }
+
+export default ScopesDisplay;

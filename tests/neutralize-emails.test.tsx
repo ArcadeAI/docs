@@ -55,9 +55,9 @@ describe("splitEmailText", () => {
 
     expect(nodes).toEqual([
       { type: "text", value: "contact jane" },
-      { children: [], properties: {}, tagName: "wbr", type: "element" },
+      { type: "element", tagName: "wbr", properties: {}, children: [] },
       { type: "text", value: "@example.com or sam" },
-      { children: [], properties: {}, tagName: "wbr", type: "element" },
+      { type: "element", tagName: "wbr", properties: {}, children: [] },
       { type: "text", value: "@example.org today" },
     ]);
     expect(
@@ -86,15 +86,15 @@ const hasContiguousEmail = (node: Root | RootContent): boolean => {
 describe("rehypeNeutralizeEmails", () => {
   test("splits email text nodes and inserts a <wbr>, losslessly", () => {
     const tree: Root = {
+      type: "root",
       children: [
         {
-          children: [{ type: "text", value: "reach user@example.com now" }],
-          properties: {},
-          tagName: "p",
           type: "element",
+          tagName: "p",
+          properties: {},
+          children: [{ type: "text", value: "reach user@example.com now" }],
         },
       ],
-      type: "root",
     };
 
     rehypeNeutralizeEmails()(tree);
@@ -113,23 +113,23 @@ describe("rehypeNeutralizeEmails", () => {
 
   test("visits nested elements and every matching text node", () => {
     const tree: Root = {
+      type: "root",
       children: [
         {
+          type: "element",
+          tagName: "blockquote",
+          properties: {},
           children: [
             {
-              children: [{ type: "text", value: "jane@example.com" }],
-              properties: {},
-              tagName: "em",
               type: "element",
+              tagName: "em",
+              properties: {},
+              children: [{ type: "text", value: "jane@example.com" }],
             },
             { type: "text", value: " and sam@example.org" },
           ],
-          properties: {},
-          tagName: "blockquote",
-          type: "element",
         },
       ],
-      type: "root",
     };
 
     rehypeNeutralizeEmails()(tree);

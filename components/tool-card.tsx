@@ -1,12 +1,12 @@
 import type React from "react";
 
-interface ToolCardProps {
-  category: string;
-  image: string;
-  link: string;
+type ToolCardProps = {
   name: string;
+  image: string;
   summary: string;
-}
+  link: string;
+  category: string;
+};
 
 export const ToolCard: React.FC<ToolCardProps> = ({
   name,
@@ -21,9 +21,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   >
     <div
       style={{
-        alignItems: "center",
         display: "flex",
         flexDirection: "row",
+        alignItems: "center",
         gap: "0.5rem",
       }}
     >
@@ -32,29 +32,29 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         className="mb-4 h-5 w-5 object-contain"
         height={20}
         src={`/images/icons/${image}${image.includes(".") ? "" : ".png"}`}
-        style={{ height: "1.3rem", width: "1.3rem" }}
+        style={{ width: "1.3rem", height: "1.3rem" }}
         width={20}
       />
       <div
         style={{
-          alignItems: "flex-start",
           display: "flex",
           flexDirection: "column",
+          alignItems: "flex-start",
           marginTop: "-1rem",
         }}
       >
-        <h2 style={{ fontSize: "1.1rem", fontWeight: "bold" }}>{name}</h2>
+        <h2 style={{ fontWeight: "bold", fontSize: "1.1rem" }}>{name}</h2>
       </div>
     </div>
     <div
       style={{
-        alignItems: "flex-start",
         display: "flex",
         flexDirection: "column",
+        alignItems: "flex-start",
         marginTop: "-0.8rem",
       }}
     >
-      <h4 style={{ color: "gray", fontSize: "0.80rem" }}>{category}</h4>
+      <h4 style={{ fontSize: "0.80rem", color: "gray" }}>{category}</h4>
       <p style={{ fontSize: "0.70rem", textAlign: "left" }}>{summary}</p>
     </div>
   </a>

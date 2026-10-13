@@ -33,10 +33,10 @@ const CALLOUT_TYPE_MAP: Record<
   "default" | "info" | "warning" | "error"
 > = {
   callout: "default",
-  error: "error",
   info: "info",
   tip: "info",
   warning: "warning",
+  error: "error",
 };
 
 /**
@@ -47,10 +47,10 @@ const VARIANT_TYPE_MAP: Record<
   "default" | "info" | "warning" | "error"
 > = {
   default: "default",
-  destructive: "error",
   info: "info",
   success: "info",
   warning: "warning",
+  destructive: "error",
 };
 
 // Regex patterns for detecting JSX/HTML content
@@ -102,13 +102,13 @@ function stripMdxImports(content: string): string {
 
 const MDX_COMPONENTS = {
   Callout,
-  DataTable,
-  SignupLink,
   Steps,
+  Tabs,
   TabbedCodeBlock,
   TableOfContents,
-  Tabs,
   ToolFooter,
+  SignupLink,
+  DataTable,
 };
 
 // Maximum number of MDX components to cache to prevent unbounded memory growth

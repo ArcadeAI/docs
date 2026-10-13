@@ -72,12 +72,12 @@ export const detectSummaryChanges = (
       : "added";
 
     toolkitChanges.push({
+      toolkitId: toolkit.name,
       changeType,
-      currentToolCount: toolkit.toolCount,
       currentVersion: toolkit.version,
       previousVersion,
-      toolkitId: toolkit.name,
       versionChanged,
+      currentToolCount: toolkit.toolCount,
     });
   }
 
@@ -85,12 +85,12 @@ export const detectSummaryChanges = (
     const normalizedId = normalizeKey(id);
     if (!seenPreviousIds.has(normalizedId)) {
       toolkitChanges.push({
+        toolkitId: toolkit.id,
         changeType: "removed",
-        currentToolCount: 0,
         currentVersion: "0.0.0",
         previousVersion: toolkit.version,
-        toolkitId: toolkit.id,
         versionChanged: false,
+        currentToolCount: 0,
       });
     }
   }
@@ -118,14 +118,14 @@ export const detectSummaryChanges = (
       return acc;
     },
     {
-      modifiedToolkits: 0,
       newToolkits: 0,
       removedToolkits: 0,
+      modifiedToolkits: 0,
       unchangedToolkits: 0,
     }
   );
 
-  return { summary, toolkitChanges };
+  return { toolkitChanges, summary };
 };
 
 export const getChangedToolkitIdsFromSummary = (

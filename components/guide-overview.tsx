@@ -1,14 +1,14 @@
 import { cn } from "@arcadeai/design-system/lib/utils";
 import React from "react";
 
-interface GuideOverviewProps {
+type GuideOverviewProps = {
   children: React.ReactNode;
   className?: string;
-}
+};
 
-interface SectionProps {
+type SectionProps = {
   children: React.ReactNode;
-}
+};
 
 export function GuideOverview({ children, className }: GuideOverviewProps) {
   const childrenArray = React.Children.toArray(children);

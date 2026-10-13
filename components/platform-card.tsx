@@ -4,13 +4,13 @@ import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import type React from "react";
 
-interface PlatformCardProps {
-  icon: string;
-  invertInDark?: boolean;
-  link: string;
+type PlatformCardProps = {
   name: string;
+  icon: string;
+  link: string;
   type: "Agent Framework" | "MCP Client";
-}
+  invertInDark?: boolean;
+};
 
 export const PlatformCard: React.FC<PlatformCardProps> = ({
   name,

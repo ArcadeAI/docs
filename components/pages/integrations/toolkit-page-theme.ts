@@ -6,6 +6,6 @@
  */
 export const toolkitPageTheme = {
   breadcrumb: false,
-  copyPage: true,
   toc: false,
+  copyPage: true,
 } as const;

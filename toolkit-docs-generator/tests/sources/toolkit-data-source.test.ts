@@ -21,30 +21,30 @@ import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index";
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
-  auth: null,
-  description: "A test tool",
-  fullyQualifiedName: "Github.TestTool@1.0.0",
   name: "TestTool",
-  output: null,
-  parameters: [],
   qualifiedName: "Github.TestTool",
+  fullyQualifiedName: "Github.TestTool@1.0.0",
+  description: "A test tool",
+  parameters: [],
+  auth: null,
   secrets: [],
+  output: null,
   ...overrides,
 });
 
 const createMetadata = (
   overrides: Partial<ToolkitMetadata> = {}
 ): ToolkitMetadata => ({
-  category: "development",
-  docsLink: "https://docs.example.com/github",
-  iconUrl: "https://example.com/github.svg",
   id: "Github",
+  label: "GitHub",
+  category: "development",
+  iconUrl: "https://example.com/github.svg",
   isBYOC: false,
+  isPro: false,
+  type: "arcade",
+  docsLink: "https://docs.example.com/github",
   isComingSoon: false,
   isHidden: false,
-  isPro: false,
-  label: "GitHub",
-  type: "arcade",
   ...overrides,
 });
 
@@ -56,8 +56,8 @@ describe("CombinedToolkitDataSource", () => {
     ]);
     const metadataSource = new InMemoryMetadataSource([createMetadata()]);
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchToolkitData("Github");
@@ -69,18 +69,18 @@ describe("CombinedToolkitDataSource", () => {
   it("should filter tools by version when provided", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
       }),
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@2.0.0",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@2.0.0",
       }),
     ]);
     const metadataSource = new InMemoryMetadataSource([createMetadata()]);
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchToolkitData("Github", "1.0.0");
@@ -95,8 +95,8 @@ describe("CombinedToolkitDataSource", () => {
     ]);
     const metadataSource = new InMemoryMetadataSource([]);
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchToolkitData("Github");
@@ -107,21 +107,21 @@ describe("CombinedToolkitDataSource", () => {
   it("should return all toolkits with metadata when available", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
       }),
       createTool({
-        fullyQualifiedName: "Slack.SendMessage@1.2.0",
         qualifiedName: "Slack.SendMessage",
+        fullyQualifiedName: "Slack.SendMessage@1.2.0",
       }),
     ]);
     const metadataSource = new InMemoryMetadataSource([
       createMetadata(),
-      createMetadata({ category: "social", id: "Slack", label: "Slack" }),
+      createMetadata({ id: "Slack", label: "Slack", category: "social" }),
     ]);
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchAllToolkitsData();
@@ -138,23 +138,23 @@ describe("CombinedToolkitDataSource", () => {
     // getToolkitMetadata which has the "api" suffix fallback.
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "WeaviateApi.ActivateUser@2.0.0",
         qualifiedName: "WeaviateApi.ActivateUser",
+        fullyQualifiedName: "WeaviateApi.ActivateUser@2.0.0",
       }),
     ]);
 
     const metadataSource = createDesignSystemMetadataSourceFromToolkits([
       createMetadata({
-        category: "databases",
-        iconUrl: "https://design-system.arcade.dev/icons/weaviate.svg",
         id: "Weaviate",
         label: "Weaviate",
+        category: "databases",
+        iconUrl: "https://design-system.arcade.dev/icons/weaviate.svg",
       }),
     ]);
 
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchAllToolkitsData();
@@ -168,25 +168,25 @@ describe("CombinedToolkitDataSource", () => {
   it("should filter out stale tools at older versions in fetchAllToolkitsData", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@3.1.3",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@3.1.3",
       }),
       createTool({
-        fullyQualifiedName: "Github.ListPullRequests@3.1.3",
         name: "ListPullRequests",
         qualifiedName: "Github.ListPullRequests",
+        fullyQualifiedName: "Github.ListPullRequests@3.1.3",
       }),
       createTool({
-        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
         name: "GetNotificationSummary",
         qualifiedName: "Github.GetNotificationSummary",
+        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
       }),
     ]);
     const metadataSource = new InMemoryMetadataSource([createMetadata()]);
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchAllToolkitsData();
@@ -201,25 +201,25 @@ describe("CombinedToolkitDataSource", () => {
   it("should apply highest-version filter in fetchToolkitData when no version specified", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@3.1.3",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@3.1.3",
       }),
       createTool({
-        fullyQualifiedName: "Github.ListPullRequests@3.1.3",
         name: "ListPullRequests",
         qualifiedName: "Github.ListPullRequests",
+        fullyQualifiedName: "Github.ListPullRequests@3.1.3",
       }),
       createTool({
-        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
         name: "GetNotificationSummary",
         qualifiedName: "Github.GetNotificationSummary",
+        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
       }),
     ]);
     const metadataSource = new InMemoryMetadataSource([createMetadata()]);
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchToolkitData("Github");
@@ -233,20 +233,20 @@ describe("CombinedToolkitDataSource", () => {
   it("should still allow explicit version filter in fetchToolkitData", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@3.1.3",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@3.1.3",
       }),
       createTool({
-        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
         name: "GetNotificationSummary",
         qualifiedName: "Github.GetNotificationSummary",
+        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
       }),
     ]);
     const metadataSource = new InMemoryMetadataSource([createMetadata()]);
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     // Explicit version bypasses highest-version filter
@@ -259,24 +259,24 @@ describe("CombinedToolkitDataSource", () => {
   it("should fall back to providerId metadata for *Api toolkits", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        auth: { providerId: "mailchimp", providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "MailchimpMarketingApi.CreateCampaign@1.0.0",
         qualifiedName: "MailchimpMarketingApi.CreateCampaign",
+        fullyQualifiedName: "MailchimpMarketingApi.CreateCampaign@1.0.0",
+        auth: { providerId: "mailchimp", providerType: "oauth2", scopes: [] },
       }),
     ]);
 
     const metadataSource = new InMemoryMetadataSource([
       createMetadata({
-        category: "productivity",
         id: "MailchimpApi",
         label: "Mailchimp API",
+        category: "productivity",
         type: "arcade_starter",
       }),
     ]);
 
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchToolkitData("MailchimpMarketingApi");
@@ -286,24 +286,24 @@ describe("CombinedToolkitDataSource", () => {
   it("should use providerId fallback consistently in fetchAllToolkitsData", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        auth: { providerId: "mailchimp", providerType: "oauth2", scopes: [] },
-        fullyQualifiedName: "MailchimpMarketingApi.CreateCampaign@1.0.0",
         qualifiedName: "MailchimpMarketingApi.CreateCampaign",
+        fullyQualifiedName: "MailchimpMarketingApi.CreateCampaign@1.0.0",
+        auth: { providerId: "mailchimp", providerType: "oauth2", scopes: [] },
       }),
     ]);
 
     const metadataSource = new InMemoryMetadataSource([
       createMetadata({
-        category: "productivity",
         id: "MailchimpApi",
         label: "Mailchimp API",
+        category: "productivity",
         type: "arcade_starter",
       }),
     ]);
 
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const single = await dataSource.fetchToolkitData("MailchimpMarketingApi");
@@ -317,19 +317,19 @@ describe("CombinedToolkitDataSource", () => {
   it("fetchToolkitData does not re-fetch metadata when direct lookup is already null", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
       }),
     ]);
 
     let metadataLookupCalls = 0;
     const metadataSource = {
-      async getAllToolkitsMetadata() {
-        return [];
-      },
       async getToolkitMetadata(_toolkitId) {
         metadataLookupCalls += 1;
         return null;
+      },
+      async getAllToolkitsMetadata() {
+        return [];
       },
       async listToolkitIds() {
         return [];
@@ -337,8 +337,8 @@ describe("CombinedToolkitDataSource", () => {
     } satisfies MetadataSource;
 
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     await dataSource.fetchToolkitData("Github");
@@ -348,21 +348,21 @@ describe("CombinedToolkitDataSource", () => {
   it("fetchAllToolkitsData performs toolkit-id lookup when metadata map misses", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
       }),
     ]);
 
     const lookedUpIds: string[] = [];
     const metadataSource = {
-      async getAllToolkitsMetadata() {
-        return [
-          createMetadata({ category: "social", id: "Slack", label: "Slack" }),
-        ];
-      },
       async getToolkitMetadata(toolkitId) {
         lookedUpIds.push(toolkitId);
         return null;
+      },
+      async getAllToolkitsMetadata() {
+        return [
+          createMetadata({ id: "Slack", label: "Slack", category: "social" }),
+        ];
       },
       async listToolkitIds() {
         return ["Slack"];
@@ -370,8 +370,8 @@ describe("CombinedToolkitDataSource", () => {
     } satisfies MetadataSource;
 
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     await dataSource.fetchAllToolkitsData();
@@ -381,19 +381,19 @@ describe("CombinedToolkitDataSource", () => {
   it("fetchAllToolkitsData does not re-lookup metadata when the map already has a direct hit", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
         qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
       }),
     ]);
 
     const lookedUpIds: string[] = [];
     const metadataSource = {
-      async getAllToolkitsMetadata() {
-        return [createMetadata()];
-      },
       async getToolkitMetadata(toolkitId) {
         lookedUpIds.push(toolkitId);
         return null;
+      },
+      async getAllToolkitsMetadata() {
+        return [createMetadata()];
       },
       async listToolkitIds() {
         return ["Github"];
@@ -401,8 +401,8 @@ describe("CombinedToolkitDataSource", () => {
     } satisfies MetadataSource;
 
     const dataSource = createCombinedToolkitDataSource({
-      metadataSource,
       toolSource,
+      metadataSource,
     });
 
     const result = await dataSource.fetchAllToolkitsData();
@@ -417,8 +417,8 @@ describe("createCachedToolkitDataSource", () => {
       [
         "Github",
         {
-          metadata: createMetadata(),
           tools: [createTool()],
+          metadata: createMetadata(),
         },
       ],
     ]);
@@ -428,11 +428,11 @@ describe("createCachedToolkitDataSource", () => {
     }
     let fetchAllCalls = 0;
     const source: ToolkitDataSource = {
+      fetchToolkitData: async () => githubData,
       fetchAllToolkitsData: async () => {
         fetchAllCalls += 1;
         return snapshot;
       },
-      fetchToolkitData: async () => githubData,
       isAvailable: async () => true,
     };
     const cached = createCachedToolkitDataSource(source);
