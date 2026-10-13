@@ -252,8 +252,6 @@ With the chart, each pod's requests equal its limits, so pods run in the Guarant
 
 #### Resource requests and ephemeral storage
 
-{/* TODO(DEP-454): These keys landed in the Arcade Engine with monorepo PR #5306 (merged 2026-10-09). They aren't in a released chart yet (chart 1.11.1 ships appVersion f0ceab0, which predates #5306), and the chart has no values for them: it renders only instances, cpu_limit and memory_limit, and engine.extraConfig can't set `deployments:`. Replace this subsection with deployments.sizing.* chart values once the chart exposes them and a chart release carries them. */}
-
 <Callout type="warning">
 Not yet available in a released chart. Newer Arcade Engine builds can reserve less than the limit for each deployed server. The chart doesn't expose these settings yet.
 </Callout>
@@ -317,8 +315,6 @@ If the chart already rendered its quota, only a `helm upgrade` with `deployments
 
 `external` DNS mode also needs a bundle endpoint the pod can reach without cluster DNS. Existing deployed servers pick up a DNS mode change only after a redeploy.
 
-{/* TODO(DEP-371): Sterling's split into use-case guides (internal networking, IPv6, a different registry) fits here. The egress rules today are written against IPv4 ranges; confirm IPv6 behavior before writing an IPv6 guide. */}
-
 ## Deploy a server
 
 Developers use the same workflow as on Arcade Cloud. They sign in to your installation once, then deploy from the project directory:
@@ -334,8 +330,6 @@ arcade deploy -e src/my_server/server.py
 - The Arcade Engine refuses a changed redeploy while the previous one is still rolling out.
 - The Arcade Engine also refuses a bundle over its 16 MiB limit or one that unpacks past 256 MiB, and discards a virtual environment that the bundle ships. The 16 MiB limit caps the upload request, with a little headroom for encoding. Both limits are built into the Arcade Engine; no chart or configuration value changes them.
 - A redeploy that changes the server's code or secrets replaces the release under the same name and gateway URL. A redeploy of a running release that changes nothing is a no-op. Deploying again after a failed release rolls it out again, even if nothing changed.
-
-{/* TODO(DEP-371): The sign-in and deploy flow is covered on the owned test stack, with browser sign-in and the cluster stubbed and `arcade deploy --skip-validate` (monorepo #5382, arcade-mcp 1.16.2). Still unproven: that the first deploy needs no post-install onboarding (SVD1.R6 first_deploy_needs_no_post_install_onboarding, @wip pending DEP-248), and that the CLI or Engine refuses a server not built with the Arcade MCP framework (SVD1.R4 has only the accepted-server scenario). */}
 
 For non-interactive CI deploys, set `ARCADE_URL` and `ARCADE_API_KEY` (a project API key) in the CI environment, then run `arcade deploy`. With both set, the CLI skips the saved context and browser sign-in and uses `ARCADE_URL` directly as the Arcade Engine's URL, without discovery. This needs `arcade-mcp` 1.16.0 or later.
 
