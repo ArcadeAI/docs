@@ -30,7 +30,7 @@ global:
 You usually need both halves:
 
 - `global.bindAddress` sets the address the HTTP servers of the Arcade Engine, coordinator, Experience API, and workers listen on. The dashboard and OpenFGA don't read it; the dashboard already listens on both IPv4 and IPv6. The default `0.0.0.0` listens on IPv4 only. `::` listens on IPv6 and, on Linux, also accepts IPv4 through IPv4-mapped addresses. Brackets are stripped, so `[::]` works too.
-- `global.ipFamilyPolicy` and `global.ipFamilies` set `spec.ipFamilyPolicy` and `spec.ipFamilies` on the Arcade Engine, coordinator, dashboard, Experience API, OpenFGA, and worker Services. The bundled PostgreSQL and Redis Services ignore them and stay on the cluster's default family; the bundled PostgreSQL Service is headless, so it has no ClusterIP at all. `ipFamilyPolicy` takes `SingleStack`, `PreferDualStack`, or `RequireDualStack`. The first entry in `ipFamilies` picks the Service's primary ClusterIP. If you leave both unset, Services get your cluster's default, usually IPv4 single-stack.
+- `global.ipFamilyPolicy` and `global.ipFamilies` set `spec.ipFamilyPolicy` and `spec.ipFamilies` on the Arcade Engine, coordinator, dashboard, Experience API, OpenFGA, worker, and worker-peers Services. The bundled PostgreSQL and Redis Services ignore them and stay on the cluster's default family; the bundled PostgreSQL Service is headless, so it has no ClusterIP at all. `ipFamilyPolicy` takes `SingleStack`, `PreferDualStack`, or `RequireDualStack`. The first entry in `ipFamilies` picks the Service's primary ClusterIP. If you leave both unset, Services get your cluster's default, usually IPv4 single-stack.
 
 `PreferDualStack` falls back to a single family on a cluster that isn't dual-stack. Use `RequireDualStack` if you'd rather the install fail there.
 
@@ -73,6 +73,6 @@ The Arcade Engine's private-address block (for worker, MCP server, and OAuth URL
 | You | The chart |
 | --- | --- |
 | A dual-stack cluster: pod and Service CIDRs for both families, and a CNI that routes IPv6 | Bind address for Arcade pods (`global.bindAddress`) |
-| IPv6 load balancing, DNS `AAAA` records, and your Gateway or ingress listeners | `ipFamilyPolicy` and `ipFamilies` on every chart-rendered Service |
+| IPv6 load balancing, DNS `AAAA` records, and your Gateway or ingress listeners | `ipFamilyPolicy` and `ipFamilies` on the Arcade Engine, coordinator, dashboard, Experience API, OpenFGA, worker, and worker-peers Services (not bundled PostgreSQL/Redis or subcharts) |
 | IPv6 reachability of the bundled PostgreSQL and Redis, or external data stores | IPv6 ranges you list in `networkPolicy.egressCIDRs` |
 | Keeping Arcade Deploy egress needs on IPv4 until IPv6 is supported | |
