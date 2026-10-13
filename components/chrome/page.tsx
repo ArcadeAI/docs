@@ -380,6 +380,8 @@ function useHeadingObserver(toc: TocEntry[]) {
 const DATE_FORMAT = new Intl.DateTimeFormat("en", {
   day: "numeric",
   month: "long",
+  // Production renders the date on its UTC servers and never reformats it.
+  timeZone: "UTC",
   year: "numeric",
 });
 

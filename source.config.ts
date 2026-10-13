@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { transformerMetaHighlight } from "@shikijs/transformers";
 import {
   type RehypeCodeOptions,
   rehypeCodeDefaultOptions,
@@ -66,7 +65,10 @@ type ShikiTransformer = NonNullable<RehypeCodeOptions["transformers"]>[number];
 
 const LANGUAGE_CLASS_PREFIX = "language-";
 const COPY_DISABLED_REGEX = /( |^)copy=false($| )/;
-const HIGHLIGHTED_CLASS = "highlighted";
+const HIGHLIGHT_GROUP_REGEX = /\B\{(.*?)\}\B/g;
+const SINGLE_NUMBER_REGEX = /^-?\d+$/;
+const NUMBER_RANGE_REGEX = /^(-?\d+)(-|\.\.\.?|\u2025|\u2026|\u22EF)(-?\d+)$/;
+const INCLUSIVE_SEPARATORS = new Set(["-", "..", "\u2025"]);
 
 /** Languages Nextra rendered without token colours. */
 const PLAIN_LANGUAGES = new Set(["plaintext", "text", "txt", "plain"]);
@@ -83,6 +85,45 @@ function classList(value: unknown): string[] {
     return value.map(String);
   }
   return typeof value === "string" ? value.split(" ") : [];
+}
+
+/** `parse-numeric-range`, as used by rehype-pretty-code: "1-3, 7" → 1,2,3,7. */
+function parseNumericRange(input: string): number[] {
+  const result: number[] = [];
+  for (const part of input.split(",").map((value) => value.trim())) {
+    if (SINGLE_NUMBER_REGEX.test(part)) {
+      result.push(Number.parseInt(part, 10));
+      continue;
+    }
+    const match = part.match(NUMBER_RANGE_REGEX);
+    if (!match) {
+      continue;
+    }
+    const start = Number.parseInt(match[1] ?? "", 10);
+    const step = start < Number.parseInt(match[3] ?? "", 10) ? 1 : -1;
+    let end = Number.parseInt(match[3] ?? "", 10);
+    if (INCLUSIVE_SEPARATORS.has(match[2] ?? "")) {
+      end += step;
+    }
+    for (let line = start; line !== end; line += step) {
+      result.push(line);
+    }
+  }
+  return result;
+}
+
+/**
+ * Lines to highlight: every `{…}` group of the fence meta, the way Nextra's
+ * rehype-pretty-code read them (`{1-5} {16}`, `{9-18, 20, 24}` with spaces).
+ */
+function highlightedLines(meta: string): Set<number> {
+  const lines = new Set<number>();
+  for (const match of meta.matchAll(HIGHLIGHT_GROUP_REGEX)) {
+    for (const line of parseNumericRange(match[1] ?? "")) {
+      lines.add(line);
+    }
+  }
+  return lines;
 }
 
 /** The language written on the fence, before any fallback to plain text. */
@@ -116,8 +157,9 @@ const transformerNextraShape: ShikiTransformer = {
     }
   },
   enforce: "post",
-  line(node) {
-    if (classList(node.properties.class).includes(HIGHLIGHTED_CLASS)) {
+  line(node, line) {
+    const meta = this.options.meta as FenceMeta | undefined;
+    if (highlightedLines(meta?.__raw ?? "").has(line)) {
       node.properties["data-highlighted-line"] = "";
     }
     node.properties.class = undefined;
@@ -168,12 +210,9 @@ export default defineConfig({
         };
       },
       tab: false,
-      transformers: [
-        ...(rehypeCodeDefaultOptions.transformers ?? []),
-        // Supports Nextra-style `{1,3-5}` line highlighting in code fence meta.
-        transformerMetaHighlight(),
-        transformerNextraShape,
-      ],
+      // Only the Nextra-shaped output; Fumadocs' `// [!code …]` comment
+      // notations are left out because production prints such comments as-is.
+      transformers: [transformerNextraShape],
     },
     remarkPlugins: (plugins) => {
       // remarkMdxMermaid turns ```mermaid fences into <Mermaid chart /> (see

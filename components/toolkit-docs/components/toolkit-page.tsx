@@ -7,7 +7,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 import ToolFooter from "@/components/tool-footer";
-import "../toolkit-page.css";
 import {
   getPackageName,
   TOOL_METADATA_FALLBACK_STYLE,
@@ -626,7 +625,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
   }, []);
 
   return (
-    <div className="toolkit-page-column preflight-borders w-full">
+    <div className="preflight-borders w-full">
       {/* Overview section */}
       <section id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
         <BreadcrumbBar category={data.metadata?.category} label={data.label} />

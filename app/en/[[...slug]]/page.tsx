@@ -1,9 +1,10 @@
 import type { MDXComponents } from "mdx/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { isValidElement, type ReactNode } from "react";
+import { Children, cloneElement, isValidElement, type ReactNode } from "react";
 import { DocsPageShell } from "@/components/chrome/page";
 import type { TocEntry } from "@/components/chrome/stores";
+import { pageLastModified, toolkitPageLastModified } from "@/lib/last-modified";
 import { DOCS_REPOSITORY_BASE } from "@/lib/layout.shared";
 import { source } from "@/lib/source";
 import {
@@ -28,9 +29,6 @@ const PAGES_WITHOUT_TITLE = new Set([
   "get-started/agent-frameworks/mastra",
   "resources/examples",
 ]);
-
-/** Shown as "Last updated on" for pages generated at build time. */
-const BUILD_DATE = new Date().toISOString();
 
 function githubEditUrl(filePath: string): string {
   return `${DOCS_REPOSITORY_BASE}/content/docs/${filePath}`;
@@ -76,6 +74,29 @@ function inlineCode(
 }
 
 /**
+ * Table-of-contents titles come from the headings as plain elements. Inline
+ * code in them is rendered with the content's own `code` component, so an
+ * entry shows the same boxed code as the heading it points to.
+ */
+function tocTitle(node: ReactNode, Code: MDXComponents["code"]): ReactNode {
+  if (typeof Code !== "function") {
+    return node;
+  }
+  return Children.map(node, (child) => {
+    if (!isValidElement<{ children?: ReactNode }>(child)) {
+      return child;
+    }
+    if (child.type === "code") {
+      return <Code>{child.props.children}</Code>;
+    }
+    // Fragments and other inline wrappers: look inside them.
+    return child.props.children === undefined
+      ? child
+      : cloneElement(child, undefined, tocTitle(child.props.children, Code));
+  });
+}
+
+/**
  * Children of the element returned by `ToolkitRoutePage`. Its own page
  * wrapper is replaced by the docs shell.
  */
@@ -103,7 +124,7 @@ export default async function Page(props: Props) {
         // the table of contents column but has no headings to show in it.
         return (
           <DocsPageShell
-            lastModified={BUILD_DATE}
+            lastModified={toolkitPageLastModified()}
             markdownUrl={toolkitMarkdownUrl(match)}
           >
             {innerChildren(toolkitPage)}
@@ -129,7 +150,7 @@ export default async function Page(props: Props) {
     ? (headings as typeof page.data.toc).map((item) => ({
         depth: item.depth,
         id: item.url.slice(1),
-        title: item.title,
+        title: tocTitle(item.title, components.code),
       }))
     : [];
 
@@ -148,7 +169,7 @@ export default async function Page(props: Props) {
     <DocsPageShell
       breadcrumb={breadcrumb !== false && !landing}
       editUrl={githubEditUrl(page.path)}
-      lastModified={lastModifiedDate(page.data)}
+      lastModified={pageLastModified(page.path, lastModifiedDate(page.data))}
       layout={full || landing ? "full" : "default"}
       markdownUrl={showToc ? markdownUrl(params.slug) : undefined}
       toc={showToc}
