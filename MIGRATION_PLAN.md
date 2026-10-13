@@ -1,7 +1,7 @@
 # Nextra → Fumadocs migration plan (contract for all workstreams)
 
-Source repo (read-only): `/home/sergio/docs` (Next 16 + Nextra 4, pnpm).
-Target repo (this one): `/home/sergio/arcade-docs-fumadocs` (Next 16.3.8 Turbopack, fumadocs-core/ui 16.15.18, fumadocs-mdx 15.4.6, React 19.3, Tailwind 4.3, TypeScript 7.0.2, **bun 1.4.2** as package manager + script runner).
+Source (read-only): the Nextra site, `ArcadeAI/docs` main (Next 16 + Nextra 4, pnpm).
+Target (this branch): (Next 16.3.8 Turbopack, fumadocs-core/ui 16.15.18, fumadocs-mdx 15.4.6, React 19.3, Tailwind 4.3, TypeScript 7.0.2, **bun 1.4.2** as package manager + script runner).
 
 Non-negotiables
 - Every page, example, image, video, toolkit page and script of the source repo must exist here. URLs stay identical (`/en/...`). Do not drop content to make a build pass; port it.

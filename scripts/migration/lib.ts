@@ -21,7 +21,10 @@ export const TARGET_ROOT = resolve(import.meta.dirname, "..", "..");
 export function resolveSourceRoot(argv: string[] = process.argv.slice(2)): string {
   const flag = argv.find((a) => a.startsWith("--source="));
   const fromFlag = flag?.slice("--source=".length);
-  const root = fromFlag ?? process.env.MIGRATION_SOURCE ?? "/home/sergio/docs";
+  const root = fromFlag ?? process.env.MIGRATION_SOURCE;
+  if (!root) {
+    throw new Error("Pass --source=<path to the Nextra docs repo> or set MIGRATION_SOURCE.");
+  }
   if (!existsSync(join(root, "app", "en"))) {
     throw new Error(`Source repo not found at ${root} (expected app/en). Pass --source=<path>.`);
   }
