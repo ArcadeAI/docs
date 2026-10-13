@@ -267,7 +267,7 @@ export function ContactCards() {
   // Assemble the support mailto only after mount so the SSR/crawled markup
   // shows a plain contact-page link — Cloudflare's email obfuscation then has
   // nothing to rewrite into a broken /cdn-cgi/l/email-protection link. Mirrors
-  // <ContactEmail> (see app/_components/contact-email.tsx).
+  // <ContactEmail> (see components/contact-email.tsx).
   const [supportHref, setSupportHref] = useState("/en/resources/contact-us");
   useEffect(() => {
     setSupportHref("mailto:support@arcade.dev");

@@ -181,7 +181,7 @@ describe("parsePreviousToolkitForDiff", () => {
             header: "## GitHub Enterprise Support",
           },
         ],
-        customImports: ['import { Callout } from "nextra/components";'],
+        customImports: ['import { Callout } from "@/components/mdx/callout";'],
         subPages: [],
       },
       "github"
@@ -197,7 +197,7 @@ describe("parsePreviousToolkitForDiff", () => {
     );
     expect(result.toolkit?.customImports).toHaveLength(1);
     expect(result.toolkit?.customImports[0]).toBe(
-      'import { Callout } from "nextra/components";'
+      'import { Callout } from "@/components/mdx/callout";'
     );
     expect(result.toolkit?.subPages).toHaveLength(0);
   });
