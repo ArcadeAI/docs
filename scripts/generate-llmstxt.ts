@@ -1,48 +1,50 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
+import Anthropic from "@anthropic-ai/sdk";
 import chalk from "chalk";
 import glob from "fast-glob";
-import Anthropic from "@anthropic-ai/sdk";
-import { getToolkitCanonicalPath } from "../app/_lib/toolkit-static-params";
+import { getToolkitCanonicalPath } from "../lib/toolkit-static-params";
 import { resolveToolkitDataDir } from "../toolkit-docs-generator/src/shared/toolkit-data-dir";
 import type {
   MergedToolkit,
   MergedToolkitMetadata,
 } from "../toolkit-docs-generator/src/shared/toolkit-schemas";
 
-type PageMetadata = {
+interface PageMetadata {
+  content: string;
   path: string;
   url: string;
-  content: string;
-};
+}
 
-type Section = {
+interface Section {
   name: string;
   pages: Array<{
     title: string;
     url: string;
     description: string;
   }>;
-};
+}
 
-type LlmsTxtMetadata = {
-  gitSha: string;
+interface LlmsTxtMetadata {
   generationDate: string;
-};
+  gitSha: string;
+}
 
 const BASE_URL = "https://docs.arcade.dev";
 const OUTPUT_PATH = path.join(process.cwd(), "public", "llms.txt");
 
 // Regex patterns used in path processing
-const APP_EN_PREFIX_REGEX = /^app\/en\//;
-const PAGE_MDX_SUFFIX_REGEX = /\/page\.mdx$/;
+const CONTENT_ROOT = "content/docs";
+const CONTENT_PREFIX_REGEX = /^content\/docs\//;
+// `content/docs/a/b/index.mdx` and `content/docs/a/b.mdx` both map to /en/a/b.
+const INDEX_FILE_SUFFIX_REGEX = /(^|\/)index\.mdx$/;
 const MDX_SUFFIX_REGEX = /\.mdx$/;
-// Matches a Next.js dynamic route segment, e.g. "[toolkitId]".
-const DYNAMIC_SEGMENT_REGEX = /\[[^/]+\]/;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
 const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
 const FRONTMATTER_TITLE_REGEX = /^title:\s*(.+)$/m;
+const QUOTED_VALUE_REGEX = /^['"](.*)['"]$/;
 const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const METADATA_REGEX =
   /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
@@ -67,11 +69,13 @@ const anthropic = new Anthropic({
 function getCurrentGitSha(): string {
   try {
     return execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
-  } catch (_error) {
+  } catch (error) {
     console.error(
-      chalk.red("✗ Could not get git SHA. Make sure you're in a git repository.")
+      chalk.red(
+        "✗ Could not get git SHA. Make sure you're in a git repository."
+      )
     );
-    throw new Error("Failed to get git SHA");
+    throw new Error("Failed to get git SHA", { cause: error });
   }
 }
 
@@ -84,11 +88,11 @@ async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
     const metadataMatch = content.match(METADATA_REGEX);
     if (metadataMatch) {
       return {
-        gitSha: metadataMatch[1],
         generationDate: metadataMatch[2],
+        gitSha: metadataMatch[1],
       };
     }
-  } catch (_error) {
+  } catch {
     // File doesn't exist or can't be read - that's okay
   }
   return null;
@@ -130,7 +134,7 @@ function getChangedFilesSince(lastSha: string): Set<string> {
 
     const allChanged = new Set([...added, ...modified, ...deleted]);
     return allChanged;
-  } catch (_error) {
+  } catch {
     console.warn(
       chalk.yellow(
         `⚠ Could not get changed files since ${lastSha}, processing all files`
@@ -150,15 +154,10 @@ async function extractExistingSummaries(): Promise<
   try {
     const content = await fs.readFile(OUTPUT_PATH, "utf-8");
     // Match markdown links with descriptions: - [title](url): description
-    let match: RegExpExecArray | null;
-    // biome-ignore lint/suspicious/noAssignInExpressions: needed for regex.exec loop
-    while ((match = LINK_REGEX.exec(content)) !== null) {
-      const title = match[1];
-      const url = match[2];
-      const description = match[3].trim();
-      summaries.set(url, { title, description });
+    for (const [, title, url, rawDescription] of content.matchAll(LINK_REGEX)) {
+      summaries.set(url, { description: rawDescription.trim(), title });
     }
-  } catch (_error) {
+  } catch {
     // File doesn't exist or can't be read - that's okay
   }
   return summaries;
@@ -167,23 +166,34 @@ async function extractExistingSummaries(): Promise<
 /**
  * Discovers all pages in the documentation
  */
-async function discoverPages(): Promise<PageMetadata[]> {
+function discoverPages(): Promise<PageMetadata[]> {
   console.log(chalk.blue("📄 Discovering pages from raw MDX..."));
   return discoverMdxPages();
 }
 
 /**
- * Discovers pages from raw MDX files (fallback)
+ * Converts a content file path to its public URL.
+ * e.g. content/docs/build/tools.mdx       -> https://docs.arcade.dev/en/build/tools
+ *      content/docs/build/tools/index.mdx -> https://docs.arcade.dev/en/build/tools
+ *      content/docs/index.mdx             -> https://docs.arcade.dev/en
+ */
+export function contentFileToUrl(filePath: string): string {
+  const relativePath = filePath
+    .replace(CONTENT_PREFIX_REGEX, "")
+    .replace(INDEX_FILE_SUFFIX_REGEX, "")
+    .replace(MDX_SUFFIX_REGEX, "");
+
+  return relativePath ? `${BASE_URL}/en/${relativePath}` : `${BASE_URL}/en`;
+}
+
+/**
+ * Discovers pages from raw MDX files under content/docs
  */
 async function discoverMdxPages(): Promise<PageMetadata[]> {
-  const mdxFiles = glob
-    .sync("app/en/**/*.mdx", {
-      cwd: process.cwd(),
-      ignore: ["**/node_modules/**", "**/_*.mdx"],
-    })
-    // Skip dynamic-route templates (e.g. ".../[toolkitId]/page.mdx"): their
-    // path isn't a real URL, so they'd produce dead "[toolkitId]" links.
-    .filter((filePath) => !DYNAMIC_SEGMENT_REGEX.test(filePath));
+  const mdxFiles = glob.sync(`${CONTENT_ROOT}/**/*.mdx`, {
+    cwd: process.cwd(),
+    ignore: ["**/node_modules/**", "**/_*.mdx"],
+  });
 
   const pages: PageMetadata[] = [];
 
@@ -191,18 +201,12 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
     const fullPath = path.join(process.cwd(), filePath);
     const content = await fs.readFile(fullPath, "utf-8");
 
-    // Convert file path to URL
-    const relativePath = filePath
-      .replace(APP_EN_PREFIX_REGEX, "")
-      .replace(PAGE_MDX_SUFFIX_REGEX, "")
-      .replace(MDX_SUFFIX_REGEX, "");
-
-    const url = `${BASE_URL}/en/${relativePath}`;
+    const url = contentFileToUrl(filePath);
 
     pages.push({
+      content,
       path: filePath,
       url,
-      content,
     });
   }
 
@@ -287,9 +291,9 @@ async function discoverToolkitPages(): Promise<
   let allowedIds: Set<string> | null = null;
   try {
     const indexPath = path.join(TOOLKIT_DATA_DIR, "index.json");
-    const indexData = JSON.parse(
-      await fs.readFile(indexPath, "utf-8")
-    ) as { toolkits?: Array<{ id: string }> };
+    const indexData = JSON.parse(await fs.readFile(indexPath, "utf-8")) as {
+      toolkits?: Array<{ id: string }>;
+    };
     if (indexData.toolkits && indexData.toolkits.length > 0) {
       allowedIds = new Set(indexData.toolkits.map((t) => t.id));
     }
@@ -321,16 +325,16 @@ async function discoverToolkitPages(): Promise<
         continue;
       }
       const url = `${BASE_URL}${getToolkitCanonicalPath({
-        id: data.id,
         category: data.metadata?.category,
         docsLink: data.metadata?.docsLink,
+        id: data.id,
       })}`;
       pagesByUrl.set(url, {
-        path: path.relative(process.cwd(), filePath),
-        url,
         content: "",
-        title: (data.label || data.id).trim(),
         description: buildToolkitDescription(data),
+        path: path.relative(process.cwd(), filePath),
+        title: (data.label || data.id).trim(),
+        url,
       });
     } catch {
       // Ignore malformed toolkit data files.
@@ -364,17 +368,17 @@ async function summarizePage(
     contentForSummary = contentForSummary.slice(0, MAX_CONTENT_LENGTH);
 
     const response = await anthropic.messages.create({
+      max_tokens: 200,
+      messages: [
+        {
+          content: `Summarize this documentation page:\n\nTitle: ${title}\n\nContent:\n${contentForSummary}`,
+          role: "user",
+        },
+      ],
       model: "claude-haiku-4-5-20251001",
       system:
         "You are a technical documentation summarizer. Create a single, concise description (max 3 sentences) that captures the main purpose of this documentation page. Focus on what the page helps users accomplish or learn. Reply with one or two plain sentences only: no headings, no markdown, no line breaks.",
-      messages: [
-        {
-          role: "user",
-          content: `Summarize this documentation page:\n\nTitle: ${title}\n\nContent:\n${contentForSummary}`,
-        },
-      ],
       temperature: 0.3,
-      max_tokens: 200,
     });
 
     const text = response.content
@@ -387,12 +391,12 @@ async function summarizePage(
         .replace(WHITESPACE_RUN_REGEX, " ")
         .trim() || PLACEHOLDER_DESCRIPTION;
 
-    return { title, description };
+    return { description, title };
   } catch (error) {
     console.error(chalk.red(`✗ Error summarizing ${page.path}:`), error);
     return {
-      title: extractPageTitle(page.content, page.path),
       description: PLACEHOLDER_DESCRIPTION,
+      title: extractPageTitle(page.content, page.path),
     };
   }
 }
@@ -445,9 +449,9 @@ function organizeSections(
     const section = sectionMap.get(sectionName);
     if (section) {
       section.pages.push({
+        description: page.description,
         title: page.title,
         url: page.url,
-        description: page.description,
       });
     }
   }
@@ -484,29 +488,34 @@ function formatSectionName(segment: string): string {
 
 /**
  * Derives a readable title from a page's file path, used when the MDX has no
- * H1. For ".../<slug>/page.mdx" this title-cases the parent directory
- * (e.g. "examples" -> "Examples") instead of the literal filename "page".
+ * title. For ".../<slug>/index.mdx" this title-cases the parent directory
+ * (e.g. "examples" -> "Examples") instead of the literal filename "index".
  */
 function deriveTitleFromPath(filePath: string): string {
   const base = path.basename(filePath, ".mdx");
-  const slug = base === "page" ? path.basename(path.dirname(filePath)) : base;
+  const slug = base === "index" ? path.basename(path.dirname(filePath)) : base;
   return formatSectionName(slug);
 }
 
 /**
- * Resolves a page title from MDX content: H1 > frontmatter title > path fallback.
+ * Resolves a page title from MDX content: frontmatter title > H1 > path
+ * fallback. Fumadocs renders the frontmatter `title` as the page heading, so
+ * it is the canonical source; an H1 only remains in legacy bodies.
  */
-function extractPageTitle(content: string, filePath: string): string {
-  const titleMatch = content.match(TITLE_H1_REGEX);
-  if (titleMatch) {
-    return titleMatch[1].trim();
-  }
+export function extractPageTitle(content: string, filePath: string): string {
   const frontmatterTitle = content
     .match(FRONTMATTER_REGEX)?.[1]
     ?.match(FRONTMATTER_TITLE_REGEX)?.[1]
     ?.trim()
-    ?.replace(/^['"](.*)['"]$/, "$1");
-  return frontmatterTitle ?? deriveTitleFromPath(filePath);
+    ?.replace(QUOTED_VALUE_REGEX, "$1");
+  if (frontmatterTitle) {
+    return frontmatterTitle;
+  }
+  const titleMatch = content.match(TITLE_H1_REGEX);
+  if (titleMatch) {
+    return titleMatch[1].trim();
+  }
+  return deriveTitleFromPath(filePath);
 }
 
 /**
@@ -583,11 +592,80 @@ function generateLlmsTxt(
   return lines.join("\n");
 }
 
+type SummarizedPage = PageMetadata & { title: string; description: string };
+type SummaryMap = Map<string, { title: string; description: string }>;
+
 /**
- * True when two llms.txt contents differ at most in their git-sha/date header
+ * Splits MDX pages into those whose summary must be regenerated (new or
+ * changed since the last run) and those whose existing summary can be kept.
+ * Repairs the stale "page"/"index" fallback title that older generations
+ * produced for pages without a title.
  */
-function hasSameBody(a: string, b: string): boolean {
-  return a.replace(METADATA_REGEX, "") === b.replace(METADATA_REGEX, "");
+function partitionMdxPages(
+  pages: PageMetadata[],
+  changedFiles: Set<string>,
+  existingSummaries: SummaryMap
+): {
+  pagesToSummarize: PageMetadata[];
+  pagesToKeep: SummarizedPage[];
+  repairedTitles: number;
+} {
+  const pagesToSummarize: PageMetadata[] = [];
+  const pagesToKeep: SummarizedPage[] = [];
+  let repairedTitles = 0;
+
+  for (const page of pages) {
+    const { url } = page;
+    const existingSummary = existingSummaries.get(url);
+
+    if (
+      changedFiles.has(page.path) ||
+      !existingSummary ||
+      existingSummary.description === PLACEHOLDER_DESCRIPTION
+    ) {
+      pagesToSummarize.push(page);
+      continue;
+    }
+
+    const title =
+      existingSummary.title === "page" || existingSummary.title === "index"
+        ? extractPageTitle(page.content, page.path)
+        : existingSummary.title;
+    if (title !== existingSummary.title) {
+      repairedTitles += 1;
+    }
+    pagesToKeep.push({
+      ...page,
+      description: existingSummary.description,
+      title,
+    });
+  }
+
+  return { pagesToKeep, pagesToSummarize, repairedTitles };
+}
+
+/**
+ * Toolkit pages are rebuilt every run (no Claude). A change is any toolkit
+ * page that is new or whose title/description differs from the previous
+ * output. URLs already covered by MDX pages are skipped: those win at merge
+ * and their summaries are tracked by `partitionMdxPages`.
+ */
+function toolkitPagesChanged(
+  toolkitPages: SummarizedPage[],
+  mdxPageUrls: Set<string>,
+  existingSummaries: SummaryMap
+): boolean {
+  return toolkitPages.some((toolkitPage) => {
+    if (mdxPageUrls.has(toolkitPage.url)) {
+      return false;
+    }
+    const existing = existingSummaries.get(toolkitPage.url);
+    return (
+      !existing ||
+      existing.title !== toolkitPage.title ||
+      existing.description !== toolkitPage.description
+    );
+  });
 }
 
 /**
@@ -596,118 +674,70 @@ function hasSameBody(a: string, b: string): boolean {
 function determinePagesToSummarize(
   pages: PageMetadata[],
   previousMetadata: LlmsTxtMetadata | null,
-  existingSummaries: Map<string, { title: string; description: string }>,
-  toolkitPages: Array<PageMetadata & { title: string; description: string }>
+  existingSummaries: SummaryMap,
+  toolkitPages: SummarizedPage[]
 ): {
   pagesToSummarize: PageMetadata[];
-  pagesToKeep: Array<PageMetadata & { title: string; description: string }>;
+  pagesToKeep: SummarizedPage[];
   hasChanges: boolean;
 } {
-  const pagesToSummarize: PageMetadata[] = [];
-  const pagesToKeep: Array<
-    PageMetadata & { title: string; description: string }
-  > = [];
-  let hasChanges = false;
-
-  if (previousMetadata && previousMetadata.gitSha !== "unknown") {
-    // Get changed files since last generation
-    const changedFiles = getChangedFilesSince(previousMetadata.gitSha);
-    console.log(
-      chalk.blue(
-        `\n📊 Found ${changedFiles.size} changed files since last generation`
-      )
-    );
-
-    // MDX-authored pages take precedence over toolkit JSON at merge time.
-    const mdxPageUrls = new Set(pages.map((page) => page.url));
-
-    // Create a set of current page URLs for quick lookup. Include toolkit pages
-    // so they aren't mistaken for deleted pages (they aren't in `pages`).
-    const currentPageUrls = new Set(
-      [...pages, ...toolkitPages].map((page) => page.url)
-    );
-
-    // Identify deleted pages (pages that exist in previous llms.txt but not in current filesystem)
-    const deletedPageUrls = Array.from(existingSummaries.keys()).filter(
-      (url) => !currentPageUrls.has(url)
-    );
-
-    if (deletedPageUrls.length > 0) {
-      hasChanges = true;
-      console.log(
-        chalk.yellow(
-          `\n🗑️  Found ${deletedPageUrls.length} deleted pages (will be removed from output)`
-        )
-      );
-    }
-
-    // Filter pages based on changes
-    for (const page of pages) {
-      const url = page.url;
-      const existingSummary = existingSummaries.get(url);
-
-      // Check if this page's file was changed
-      const isChanged = changedFiles.has(page.path);
-
-      if (
-        isChanged ||
-        !existingSummary ||
-        existingSummary.description === PLACEHOLDER_DESCRIPTION
-      ) {
-        // Need to summarize this page
-        pagesToSummarize.push(page);
-        hasChanges = true;
-      } else {
-        // Keep existing summary, but repair the stale "page" fallback title
-        // that older generations produced for pages without an H1.
-        const title =
-          existingSummary.title === "page"
-            ? extractPageTitle(page.content, page.path)
-            : existingSummary.title;
-        if (title !== existingSummary.title) {
-          hasChanges = true;
-        }
-        pagesToKeep.push({
-          ...page,
-          title,
-          description: existingSummary.description,
-        });
-      }
-    }
-
-    // Toolkit pages are rebuilt every run (no Claude). Flag a change if any is
-    // new or its title/description differs from the previous output. Skip URLs
-    // already covered by MDX pages — those win at merge and their summaries
-    // are tracked in the MDX loop above.
-    for (const toolkitPage of toolkitPages) {
-      if (mdxPageUrls.has(toolkitPage.url)) {
-        continue;
-      }
-      const existing = existingSummaries.get(toolkitPage.url);
-      if (
-        !existing ||
-        existing.title !== toolkitPage.title ||
-        existing.description !== toolkitPage.description
-      ) {
-        hasChanges = true;
-      }
-    }
-
-    console.log(
-      chalk.green(
-        `✓ ${pagesToKeep.length} pages unchanged, ${pagesToSummarize.length} pages to summarize${deletedPageUrls.length > 0 ? `, ${deletedPageUrls.length} pages deleted` : ""}`
-      )
-    );
-  } else {
+  if (!previousMetadata || previousMetadata.gitSha === "unknown") {
     // No previous generation or can't determine, summarize all pages
     console.log(
       chalk.yellow("⚠ No previous generation found, summarizing all pages")
     );
-    pagesToSummarize.push(...pages);
-    hasChanges = true; // Always regenerate if no previous metadata
+    return { hasChanges: true, pagesToKeep: [], pagesToSummarize: [...pages] };
   }
 
-  return { pagesToSummarize, pagesToKeep, hasChanges };
+  // Get changed files since last generation
+  const changedFiles = getChangedFilesSince(previousMetadata.gitSha);
+  console.log(
+    chalk.blue(
+      `\n📊 Found ${changedFiles.size} changed files since last generation`
+    )
+  );
+
+  // MDX-authored pages take precedence over toolkit JSON at merge time.
+  const mdxPageUrls = new Set(pages.map((page) => page.url));
+
+  // Create a set of current page URLs for quick lookup. Include toolkit pages
+  // so they aren't mistaken for deleted pages (they aren't in `pages`).
+  const currentPageUrls = new Set(
+    [...pages, ...toolkitPages].map((page) => page.url)
+  );
+
+  // Identify deleted pages (pages that exist in previous llms.txt but not in current filesystem)
+  const deletedPageUrls = Array.from(existingSummaries.keys()).filter(
+    (url) => !currentPageUrls.has(url)
+  );
+
+  if (deletedPageUrls.length > 0) {
+    console.log(
+      chalk.yellow(
+        `\n🗑️  Found ${deletedPageUrls.length} deleted pages (will be removed from output)`
+      )
+    );
+  }
+
+  const { pagesToSummarize, pagesToKeep, repairedTitles } = partitionMdxPages(
+    pages,
+    changedFiles,
+    existingSummaries
+  );
+
+  const hasChanges =
+    deletedPageUrls.length > 0 ||
+    pagesToSummarize.length > 0 ||
+    repairedTitles > 0 ||
+    toolkitPagesChanged(toolkitPages, mdxPageUrls, existingSummaries);
+
+  console.log(
+    chalk.green(
+      `✓ ${pagesToKeep.length} pages unchanged, ${pagesToSummarize.length} pages to summarize${deletedPageUrls.length > 0 ? `, ${deletedPageUrls.length} pages deleted` : ""}`
+    )
+  );
+
+  return { hasChanges, pagesToKeep, pagesToSummarize };
 }
 
 /**
@@ -764,6 +794,13 @@ async function summarizePagesInBatches(
 }
 
 /**
+ * True when two llms.txt contents differ at most in their git-sha/date header
+ */
+function hasSameBody(a: string, b: string): boolean {
+  return a.replace(METADATA_REGEX, "") === b.replace(METADATA_REGEX, "");
+}
+
+/**
  * Main execution function
  */
 async function main() {
@@ -787,7 +824,7 @@ async function main() {
     if (previousMetadata) {
       console.log(
         chalk.gray(
-          `   Previous generation: ${previousMetadata.generationDate} (SHA: ${previousMetadata.gitSha.substring(0, SHA_SHORT_LENGTH)})`
+          `   Previous generation: ${previousMetadata.generationDate} (SHA: ${previousMetadata.gitSha.slice(0, SHA_SHORT_LENGTH)})`
         )
       );
     }
@@ -816,7 +853,9 @@ async function main() {
     // pages so a static page (e.g. resources/integrations/search/tavily) that
     // appears in both sets doesn't emit two entries in llms.txt.
     const seenUrls = new Set<string>();
-    const allPages: Array<PageMetadata & { title: string; description: string }> = [];
+    const allPages: Array<
+      PageMetadata & { title: string; description: string }
+    > = [];
     for (const page of [...summarizedPages, ...toolkitPages]) {
       if (!seenUrls.has(page.url)) {
         seenUrls.add(page.url);
@@ -834,12 +873,12 @@ async function main() {
     // Only update metadata if there are changes, otherwise keep previous metadata
     const metadata: LlmsTxtMetadata = hasChanges
       ? {
-          gitSha: currentSha,
           generationDate: new Date().toISOString(),
+          gitSha: currentSha,
         }
       : previousMetadata || {
-          gitSha: currentSha,
           generationDate: new Date().toISOString(),
+          gitSha: currentSha,
         };
     const content = generateLlmsTxt(sections, metadata);
 
@@ -866,8 +905,12 @@ async function main() {
   }
 }
 
-// Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run if called directly (`bun scripts/generate-llmstxt.ts`), not when imported
+// by tests.
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   main();
 }
 

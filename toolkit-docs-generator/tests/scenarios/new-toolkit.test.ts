@@ -24,15 +24,15 @@ import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index";
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
-  name: "TestTool",
-  qualifiedName: "NewKit.TestTool",
-  fullyQualifiedName: "NewKit.TestTool@1.0.0",
-  description: "A test tool",
-  toolkitDescription: "A new toolkit",
-  parameters: [],
   auth: null,
-  secrets: [],
+  description: "A test tool",
+  fullyQualifiedName: "NewKit.TestTool@1.0.0",
+  name: "TestTool",
   output: null,
+  parameters: [],
+  qualifiedName: "NewKit.TestTool",
+  secrets: [],
+  toolkitDescription: "A new toolkit",
   ...overrides,
 });
 
@@ -41,7 +41,7 @@ const withTempDir = async (fn: (dir: string) => Promise<void>) => {
   try {
     await fn(dir);
   } finally {
-    await rm(dir, { recursive: true, force: true });
+    await rm(dir, { force: true, recursive: true });
   }
 };
 
@@ -50,19 +50,19 @@ describe("Scenario: New toolkit is added", () => {
     await withTempDir(async (outputDir) => {
       const newTool = createTool();
       const toolkitDataSource = createCombinedToolkitDataSource({
-        toolSource: new InMemoryToolDataSource([newTool]),
         metadataSource: new InMemoryMetadataSource([]),
+        toolSource: new InMemoryToolDataSource([newTool]),
       });
 
       const merger = createDataMerger({
-        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
+        toolkitDataSource,
       });
 
       const generator = createJsonGenerator({
+        generateIndex: true,
         outputDir,
         prettyPrint: true,
-        generateIndex: true,
       });
 
       const results = await merger.mergeAllToolkits();
@@ -95,13 +95,13 @@ describe("Scenario: New toolkit is added", () => {
     await withTempDir(async (_outputDir) => {
       const newTool = createTool();
       const toolkitDataSource = createCombinedToolkitDataSource({
-        toolSource: new InMemoryToolDataSource([newTool]),
         metadataSource: new InMemoryMetadataSource([]),
+        toolSource: new InMemoryToolDataSource([newTool]),
       });
 
       const merger = createDataMerger({
-        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
+        toolkitDataSource,
       });
 
       const results = await merger.mergeAllToolkits();
@@ -118,26 +118,26 @@ describe("Scenario: New toolkit is added", () => {
     await withTempDir(async (_outputDir) => {
       const newTool = createTool();
       const metadata: ToolkitMetadata = {
-        id: "NewKit",
-        label: "New Kit",
         category: "productivity",
-        iconUrl: "https://example.com/icon.svg",
-        isBYOC: false,
-        isPro: false,
-        type: "arcade",
         docsLink: "https://docs.example.com",
+        iconUrl: "https://example.com/icon.svg",
+        id: "NewKit",
+        isBYOC: false,
         isComingSoon: false,
         isHidden: false,
+        isPro: false,
+        label: "New Kit",
+        type: "arcade",
       };
 
       const toolkitDataSource = createCombinedToolkitDataSource({
-        toolSource: new InMemoryToolDataSource([newTool]),
         metadataSource: new InMemoryMetadataSource([metadata]),
+        toolSource: new InMemoryToolDataSource([newTool]),
       });
 
       const merger = createDataMerger({
-        toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
+        toolkitDataSource,
       });
 
       const results = await merger.mergeAllToolkits();

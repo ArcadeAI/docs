@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getSharedServiceDomain } from "@/app/_components/toolkit-docs/components/toolkit-page-utils";
+import { getSharedServiceDomain } from "@/components/toolkit-docs/components/toolkit-page-utils";
 
 const makeTool = (domains: string[]) => ({
   metadata: {
-    classification: { serviceDomains: domains },
     behavior: { operations: [] },
+    classification: { serviceDomains: domains },
     extras: null,
   },
 });
@@ -46,8 +46,8 @@ describe("getSharedServiceDomain", () => {
     const tools = [
       {
         metadata: {
-          classification: { serviceDomains: [123] },
           behavior: { operations: [] },
+          classification: { serviceDomains: [123] },
           extras: null,
         },
       },

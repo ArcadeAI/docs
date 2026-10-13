@@ -40,11 +40,11 @@ export const ProviderVersionSchema = z.object({
 export type ProviderVersion = z.infer<typeof ProviderVersionSchema>;
 
 export const GenerateInputSchema = z.object({
-  providers: z.array(ProviderVersionSchema).min(1),
+  customSectionsFile: z.string().optional(),
   outputDir: z.string().default("./output"),
+  providers: z.array(ProviderVersionSchema).min(1),
   skipExamples: z.boolean().default(false),
   skipSummary: z.boolean().default(false),
-  customSectionsFile: z.string().optional(),
 });
 
 export type GenerateInput = z.infer<typeof GenerateInputSchema>;
@@ -54,16 +54,16 @@ export type GenerateInput = z.infer<typeof GenerateInputSchema>;
 // ============================================================================
 
 export const ToolDefinitionSchema = z.object({
-  name: z.string(),
-  qualifiedName: z.string(),
-  fullyQualifiedName: z.string(),
-  description: z.string().nullable(),
-  toolkitDescription: z.string().nullable().optional(),
-  parameters: z.array(ToolParameterSchema),
   auth: ToolAuthSchema.nullable(),
-  secrets: z.array(z.string()),
-  output: ToolOutputSchema.nullable(),
+  description: z.string().nullable(),
+  fullyQualifiedName: z.string(),
   metadata: ToolMetadataSchema.nullable().optional(),
+  name: z.string(),
+  output: ToolOutputSchema.nullable(),
+  parameters: z.array(ToolParameterSchema),
+  qualifiedName: z.string(),
+  secrets: z.array(z.string()),
+  toolkitDescription: z.string().nullable().optional(),
 });
 
 export type ToolDefinition = z.infer<typeof ToolDefinitionSchema>;
@@ -73,16 +73,16 @@ export type ToolDefinition = z.infer<typeof ToolDefinitionSchema>;
 // ============================================================================
 
 export const ToolkitMetadataSchema = z.object({
-  id: z.string(),
-  label: z.string(),
   category: ToolkitCategorySchema,
-  iconUrl: z.string(),
-  isBYOC: z.boolean(),
-  isPro: z.boolean(),
-  type: ToolkitTypeSchema,
   docsLink: z.string(),
+  iconUrl: z.string(),
+  id: z.string(),
+  isBYOC: z.boolean(),
   isComingSoon: z.boolean(),
   isHidden: z.boolean(),
+  isPro: z.boolean(),
+  label: z.string(),
+  type: ToolkitTypeSchema,
 });
 
 export type ToolkitMetadata = z.infer<typeof ToolkitMetadataSchema>;
@@ -92,10 +92,10 @@ export type ToolkitMetadata = z.infer<typeof ToolkitMetadataSchema>;
 // ============================================================================
 
 export const CustomSectionsSchema = z.object({
-  /** Toolkit-level documentation chunks */
-  documentationChunks: z.array(DocumentationChunkSchema).default([]),
   /** Custom imports needed for the MDX file */
   customImports: z.array(z.string()).default([]),
+  /** Toolkit-level documentation chunks */
+  documentationChunks: z.array(DocumentationChunkSchema).default([]),
   /** Sub-pages that exist for this toolkit */
   subPages: z.array(ToolkitSubPageSchema).default([]),
   /** Per-tool documentation chunks (keyed by tool name) */

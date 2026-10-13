@@ -25,68 +25,68 @@ export type ToolChangeType = "added" | "removed" | "modified";
 export type ToolkitChangeType = "added" | "removed" | "modified" | "unchanged";
 
 export interface ToolChange {
-  /** Tool qualified name (e.g., "Github.CreateIssue") */
-  readonly qualifiedName: string;
   /** Type of change */
   readonly changeType: ToolChangeType;
-  /** Tool name (e.g., "CreateIssue") */
-  readonly toolName: string;
   /** True when only per-tool metadata changed (definition signature identical). */
   readonly metadataOnly: boolean;
+  /** Tool qualified name (e.g., "Github.CreateIssue") */
+  readonly qualifiedName: string;
+  /** Tool name (e.g., "CreateIssue") */
+  readonly toolName: string;
 }
 
 export interface ToolkitChange {
-  /** Toolkit ID (e.g., "Github") */
-  readonly toolkitId: string;
   /** Type of change */
   readonly changeType: ToolkitChangeType;
-  /** List of tool changes within this toolkit */
-  readonly toolChanges: readonly ToolChange[];
-  /** Toolkit version derived from current tool definitions */
-  readonly currentVersion: string;
-  /** Toolkit version from previous output (if available) */
-  readonly previousVersion: string;
-  /** Whether the toolkit version changed */
-  readonly versionChanged: boolean;
-  /** Whether relevant metadata fields changed */
-  readonly metadataChanged: boolean;
   /** Current tool count (0 if removed) */
   readonly currentToolCount: number;
+  /** Toolkit version derived from current tool definitions */
+  readonly currentVersion: string;
+  /** Whether relevant metadata fields changed */
+  readonly metadataChanged: boolean;
   /** Previous tool count (0 if new) */
   readonly previousToolCount: number;
+  /** Toolkit version from previous output (if available) */
+  readonly previousVersion: string;
+  /** List of tool changes within this toolkit */
+  readonly toolChanges: readonly ToolChange[];
+  /** Toolkit ID (e.g., "Github") */
+  readonly toolkitId: string;
+  /** Whether the toolkit version changed */
+  readonly versionChanged: boolean;
 }
 
 export interface ChangeDetectionResult {
-  /** List of toolkit changes */
-  readonly toolkitChanges: readonly ToolkitChange[];
   /** Summary statistics */
   readonly summary: ChangeSummary;
+  /** List of toolkit changes */
+  readonly toolkitChanges: readonly ToolkitChange[];
 }
 
 export interface ChangeSummary {
-  /** Number of new toolkits */
-  readonly newToolkits: number;
-  /** Number of removed toolkits */
-  readonly removedToolkits: number;
   /** Number of modified toolkits */
   readonly modifiedToolkits: number;
-  /** Number of toolkits with version-only changes */
-  readonly versionOnlyToolkits: number;
-  /** Number of unchanged toolkits */
-  readonly unchangedToolkits: number;
-  /** Total number of new tools */
-  readonly newTools: number;
-  /** Total number of removed tools */
-  readonly removedTools: number;
   /** Total number of modified tools */
   readonly modifiedTools: number;
+  /** Number of new toolkits */
+  readonly newToolkits: number;
+  /** Total number of new tools */
+  readonly newTools: number;
+  /** Number of removed toolkits */
+  readonly removedToolkits: number;
+  /** Total number of removed tools */
+  readonly removedTools: number;
+  /** Number of unchanged toolkits */
+  readonly unchangedToolkits: number;
+  /** Number of toolkits with version-only changes */
+  readonly versionOnlyToolkits: number;
 }
 
 export interface CurrentToolkitData {
-  /** Tool definitions fetched from the API */
-  readonly tools: readonly ToolDefinition[];
   /** Toolkit metadata fetched from Design System */
   readonly metadata: ToolkitMetadata | null | undefined;
+  /** Tool definitions fetched from the API */
+  readonly tools: readonly ToolDefinition[];
 }
 
 export type CurrentToolkitDiffInput =
@@ -122,13 +122,13 @@ const normalizeToolMetadataForSignature = (
 
   return {
     ...metadata,
-    classification: {
-      ...metadata.classification,
-      serviceDomains: [...metadata.classification.serviceDomains].sort(),
-    },
     behavior: {
       ...metadata.behavior,
       operations: [...metadata.behavior.operations].sort(),
+    },
+    classification: {
+      ...metadata.classification,
+      serviceDomains: [...metadata.classification.serviceDomains].sort(),
     },
   };
 };
@@ -187,7 +187,7 @@ const buildMergedToolSignatureMap = (
  * Extract toolkit version from current tool definitions
  */
 const getToolkitVersion = (tools: readonly ToolDefinition[]): string => {
-  const firstTool = tools[0];
+  const [firstTool] = tools;
   return firstTool ? extractVersion(firstTool.fullyQualifiedName) : "0.0.0";
 };
 
@@ -206,9 +206,9 @@ const buildCurrentMetadataSnapshot = (
   }
 
   return {
-    label: metadata.label,
     category: metadata.category,
     isHidden: metadata.isHidden,
+    label: metadata.label,
     type: metadata.type,
   };
 };
@@ -221,9 +221,9 @@ const buildPreviousMetadataSnapshot = (
   }
 
   return {
-    label: toolkit.label,
     category: toolkit.metadata.category,
     isHidden: toolkit.metadata.isHidden,
+    label: toolkit.label,
     type: toolkit.metadata.type,
   };
 };
@@ -319,10 +319,10 @@ export const compareTools = (
     if (!currentSignatures.has(qualifiedName)) {
       const toolName = previousToolNames.get(qualifiedName) ?? qualifiedName;
       changes.push({
-        qualifiedName,
         changeType: "removed",
-        toolName,
         metadataOnly: false,
+        qualifiedName,
+        toolName,
       });
     }
   }
@@ -363,15 +363,15 @@ export const compareToolkit = (
   }
 
   return {
-    toolkitId,
     changeType,
-    toolChanges,
-    currentVersion,
-    previousVersion,
-    versionChanged,
-    metadataChanged,
     currentToolCount: currentTools.length,
+    currentVersion,
+    metadataChanged,
     previousToolCount: previousToolkit?.tools.length ?? 0,
+    previousVersion,
+    toolChanges,
+    toolkitId,
+    versionChanged,
   };
 };
 
@@ -379,11 +379,11 @@ const normalizeCurrentToolkitData = (
   value: CurrentToolkitDiffInput
 ): CurrentToolkitData => {
   if (isCurrentToolkitData(value)) {
-    return { tools: value.tools, metadata: value.metadata };
+    return { metadata: value.metadata, tools: value.tools };
   }
   // A bare tools map is the legacy API and has no metadata source. Preserve
   // that distinction from an explicit null returned by the metadata source.
-  return { tools: value, metadata: undefined };
+  return { metadata: undefined, tools: value };
 };
 
 /**
@@ -434,20 +434,20 @@ export const detectChanges = (
     const normalizedId = normalizeKey(id);
     if (!seenPreviousIds.has(normalizedId)) {
       toolkitChanges.push({
-        toolkitId: toolkit.id,
         changeType: "removed",
-        toolChanges: toolkit.tools.map((tool) => ({
-          qualifiedName: tool.qualifiedName,
-          changeType: "removed" as const,
-          toolName: tool.name,
-          metadataOnly: false,
-        })),
-        currentVersion: "0.0.0",
-        previousVersion: toolkit.version,
-        versionChanged: false,
-        metadataChanged: false,
         currentToolCount: 0,
+        currentVersion: "0.0.0",
+        metadataChanged: false,
         previousToolCount: toolkit.tools.length,
+        previousVersion: toolkit.version,
+        toolChanges: toolkit.tools.map((tool) => ({
+          changeType: "removed" as const,
+          metadataOnly: false,
+          qualifiedName: tool.qualifiedName,
+          toolName: tool.name,
+        })),
+        toolkitId: toolkit.id,
+        versionChanged: false,
       });
     }
   }
@@ -459,8 +459,8 @@ export const detectChanges = (
   const summary = calculateSummary(toolkitChanges);
 
   return {
-    toolkitChanges,
     summary,
+    toolkitChanges,
   };
 };
 
@@ -527,14 +527,14 @@ const calculateSummary = (
   }
 
   return {
-    newToolkits,
-    removedToolkits,
     modifiedToolkits,
-    versionOnlyToolkits,
-    unchangedToolkits,
-    newTools,
-    removedTools,
     modifiedTools,
+    newToolkits,
+    newTools,
+    removedToolkits,
+    removedTools,
+    unchangedToolkits,
+    versionOnlyToolkits,
   };
 };
 
@@ -589,24 +589,24 @@ export const formatChangeSummary = (result: ChangeDetectionResult): string => {
 
 const TOOLKIT_CHANGE_LABELS: Record<ToolkitChange["changeType"], string> = {
   added: "[NEW]",
-  removed: "[REMOVED]",
   modified: "[MODIFIED]",
+  removed: "[REMOVED]",
   unchanged: "",
 };
 
 const TOOL_CHANGE_LABELS: Record<ToolChange["changeType"], string> = {
   added: "  + ",
-  removed: "  - ",
   modified: "  ~ ",
+  removed: "  - ",
 };
 
 const buildVersionSuffix = (toolkitChange: ToolkitChange): string => {
   if (!toolkitChange.versionChanged) {
     return "";
   }
-  return toolkitChange.previousVersion !== "0.0.0"
-    ? ` (version ${toolkitChange.previousVersion} -> ${toolkitChange.currentVersion})`
-    : ` (version -> ${toolkitChange.currentVersion})`;
+  return toolkitChange.previousVersion === "0.0.0"
+    ? ` (version -> ${toolkitChange.currentVersion})`
+    : ` (version ${toolkitChange.previousVersion} -> ${toolkitChange.currentVersion})`;
 };
 
 const shouldListToolChanges = (toolkitChange: ToolkitChange): boolean =>

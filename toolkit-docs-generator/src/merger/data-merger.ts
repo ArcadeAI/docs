@@ -48,10 +48,26 @@ import {
 // ============================================================================
 
 export interface DataMergerConfig {
-  toolkitDataSource: ToolkitDataSource;
   customSectionsSource: ICustomSectionsSource;
-  toolExampleGenerator?: ToolExampleGenerator;
-  toolkitSummaryGenerator?: ToolkitSummaryGenerator;
+  /** Maximum concurrent LLM calls for tool examples (default: 5) */
+  llmConcurrency?: number;
+  /** Callback when a toolkit is completed - for incremental writes */
+  onToolkitComplete?: ((result: MergeResult) => Promise<void>) | undefined;
+  /** Progress callback for toolkit processing (extended with tool count) */
+  onToolkitProgress?:
+    | ((
+        toolkitId: string,
+        status: "start" | "done",
+        toolCount?: number
+      ) => void)
+    | undefined;
+  /** Preserve previous output for a broken toolkit instead of failing the run. */
+  preserveLastKnownGood?: boolean;
+  previousToolkits?: ReadonlyMap<string, MergedToolkit>;
+  /** When true, only process toolkits with metadata and tools */
+  requireCompleteData?: boolean;
+  /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
+  resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
   /**
    * Optional editor used to repair stale secret references and fill
    * coverage gaps in summary / documentation chunks. When omitted the
@@ -64,45 +80,28 @@ export interface DataMergerConfig {
    * from the CLI's `--skip-secret-coherence` flag.
    */
   skipSecretCoherence?: boolean;
-  previousToolkits?: ReadonlyMap<string, MergedToolkit>;
-  /** Maximum concurrent LLM calls for tool examples (default: 5) */
-  llmConcurrency?: number;
-  /** Maximum concurrent toolkit processing (default: 3) */
-  toolkitConcurrency?: number;
-  /** Progress callback for toolkit processing (extended with tool count) */
-  onToolkitProgress?:
-    | ((
-        toolkitId: string,
-        status: "start" | "done",
-        toolCount?: number
-      ) => void)
-    | undefined;
-  /** Callback when a toolkit is completed - for incremental writes */
-  onToolkitComplete?: ((result: MergeResult) => Promise<void>) | undefined;
   /** Set of toolkit IDs to skip (for resume support) */
   skipToolkitIds?: ReadonlySet<string> | undefined;
-  /** When true, only process toolkits with metadata and tools */
-  requireCompleteData?: boolean;
-  /** Preserve previous output for a broken toolkit instead of failing the run. */
-  preserveLastKnownGood?: boolean;
-  /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
-  resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
+  toolExampleGenerator?: ToolExampleGenerator;
+  /** Maximum concurrent toolkit processing (default: 3) */
+  toolkitConcurrency?: number;
+  toolkitDataSource: ToolkitDataSource;
+  toolkitSummaryGenerator?: ToolkitSummaryGenerator;
 }
 
 export interface FailedTool {
-  readonly toolkitId: string;
-  readonly toolName: string;
   readonly qualifiedName: string;
   readonly reason: string;
+  readonly toolkitId: string;
+  readonly toolName: string;
 }
 
 export interface MergeResult {
-  toolkit: MergedToolkit;
-  warnings: string[];
-  failedTools: FailedTool[];
   error?: string;
+  failedTools: FailedTool[];
   /** A recoverable failure retained prior output or omitted a new toolkit. */
   recovery?: "preserved" | "omitted";
+  toolkit: MergedToolkit;
   /**
    * True when the design system had no metadata for this toolkit and
    * `getDefaultMetadata`'s placeholder (category, icon, docsLink, and
@@ -112,6 +111,7 @@ export interface MergeResult {
    * since that's easy to miss in a warnings list read only on failure.
    */
   usedDefaultMetadata: boolean;
+  warnings: string[];
 }
 
 export interface ToolExampleResult {
@@ -147,9 +147,9 @@ export const assertRequireCompleteMetadata = (
 };
 
 interface MergeToolkitOptions {
-  previousToolkit?: MergedToolkit | undefined;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
+  previousToolkit?: MergedToolkit | undefined;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
   resolveProviderId?: (toolkitId: string) => string | null;
 }
@@ -167,7 +167,7 @@ export const groupToolsByToolkit = (
   const groups = new Map<string, ToolDefinition[]>();
 
   for (const tool of tools) {
-    const toolkitName = tool.qualifiedName.split(".")[0];
+    const [toolkitName] = tool.qualifiedName.split(".");
     if (!toolkitName) continue;
 
     const existing = groups.get(toolkitName) ?? [];
@@ -251,20 +251,6 @@ export type ToolSignatureInput = {
 export const buildToolSignatureInput = (
   tool: ToolDefinition | MergedTool
 ): ToolSignatureInput => ({
-  name: tool.name,
-  qualifiedName: tool.qualifiedName,
-  description: tool.description ?? null,
-  parameters: tool.parameters
-    .map((param) => ({
-      name: param.name,
-      type: param.type,
-      innerType: param.innerType ?? null,
-      required: param.required,
-      description: param.description ?? null,
-      enum: param.enum ? normalizeList(param.enum) : null,
-      inferrable: param.inferrable ?? true,
-    }))
-    .sort((left, right) => left.name.localeCompare(right.name)),
   auth: tool.auth
     ? {
         providerId: tool.auth.providerId ?? null,
@@ -272,13 +258,27 @@ export const buildToolSignatureInput = (
         scopes: normalizeList(tool.auth.scopes),
       }
     : null,
-  secrets: normalizeList(tool.secrets),
+  description: tool.description ?? null,
+  name: tool.name,
   output: tool.output
     ? {
-        type: tool.output.type,
         description: tool.output.description ?? null,
+        type: tool.output.type,
       }
     : null,
+  parameters: tool.parameters
+    .map((param) => ({
+      description: param.description ?? null,
+      enum: param.enum ? normalizeList(param.enum) : null,
+      inferrable: param.inferrable ?? true,
+      innerType: param.innerType ?? null,
+      name: param.name,
+      required: param.required,
+      type: param.type,
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name)),
+  qualifiedName: tool.qualifiedName,
+  secrets: normalizeList(tool.secrets),
 });
 
 export const buildToolSignature = (tool: ToolDefinition | MergedTool): string =>
@@ -311,19 +311,19 @@ export const buildComparableToolSignatureInput = (
   const output = signatureInput.output
     ? {
         ...signatureInput.output,
-        type: normalizeOutputTypeForComparison(signatureInput.output.type),
         // Output descriptions vary by source and should not force regeneration.
         description: null,
+        type: normalizeOutputTypeForComparison(signatureInput.output.type),
       }
     : null;
 
   return {
     ...signatureInput,
+    auth,
     // Tool descriptions are metadata and should not force regeneration.
     description: null,
-    parameters,
-    auth,
     output,
+    parameters,
   };
 };
 
@@ -336,16 +336,16 @@ const buildToolReuseSignature = (tool: ToolDefinition | MergedTool): string =>
 
 export const buildToolkitSummarySignature = (toolkit: MergedToolkit): string =>
   stableStringify({
-    id: toolkit.id,
-    label: toolkit.label,
-    description: toolkit.description ?? null,
     auth: toolkit.auth
       ? {
-          type: toolkit.auth.type,
-          providerId: toolkit.auth.providerId ?? null,
           allScopes: normalizeList(toolkit.auth.allScopes),
+          providerId: toolkit.auth.providerId ?? null,
+          type: toolkit.auth.type,
         }
       : null,
+    description: toolkit.description ?? null,
+    id: toolkit.id,
+    label: toolkit.label,
     tools: toolkit.tools
       .map((tool) => ({
         qualifiedName: tool.qualifiedName,
@@ -499,7 +499,7 @@ const DEFAULT_METADATA_CATEGORY: MergedToolkitMetadata["category"] =
  * closed enum with no catch-all — so a wrong-but-valid category would
  * otherwise file the toolkit under the wrong sidebar section with a
  * canonical URL nobody chose. `isHidden: true` is what actually neutralizes
- * that: `app/_lib/toolkit-static-params.ts` drops hidden toolkits from
+ * that: `lib/toolkit-static-params.ts` drops hidden toolkits from
  * routing entirely, so this placeholder record can exist on disk (and keep
  * CI green when metadata truly is optional) without ever rendering under
  * the wrong category. Real metadata — pulled in the next successful design
@@ -514,13 +514,13 @@ const DEFAULT_METADATA_CATEGORY: MergedToolkitMetadata["category"] =
 const getDefaultMetadata = (toolkitId: string): MergedToolkitMetadata =>
   applyToolkitTypeOverrides(toolkitId, {
     category: DEFAULT_METADATA_CATEGORY,
+    docsLink: `https://docs.arcade.dev/en/resources/integrations/${DEFAULT_METADATA_CATEGORY}/${getDefaultDocsSlug(toolkitId)}`,
     iconUrl: `https://design-system.arcade.dev/icons/${getDefaultIconId(toolkitId)}.svg`,
     isBYOC: false,
-    isPro: false,
-    type: "arcade",
-    docsLink: `https://docs.arcade.dev/en/resources/integrations/${DEFAULT_METADATA_CATEGORY}/${getDefaultDocsSlug(toolkitId)}`,
     isComingSoon: false,
     isHidden: true,
+    isPro: false,
+    type: "arcade",
   });
 
 /**
@@ -530,13 +530,13 @@ const transformMetadata = (
   metadata: ToolkitMetadata
 ): MergedToolkitMetadata => ({
   category: metadata.category,
+  docsLink: metadata.docsLink,
   iconUrl: metadata.iconUrl,
   isBYOC: metadata.isBYOC,
-  isPro: metadata.isPro,
-  type: metadata.type,
-  docsLink: metadata.docsLink,
   isComingSoon: metadata.isComingSoon,
   isHidden: metadata.isHidden,
+  isPro: metadata.isPro,
+  type: metadata.type,
 });
 
 /**
@@ -697,14 +697,14 @@ const appendMergeWarnings = (
 };
 
 const getToolkitVersion = (tools: readonly ToolDefinition[]): string => {
-  const firstTool = tools[0];
+  const [firstTool] = tools;
   return firstTool ? extractVersion(firstTool.fullyQualifiedName) : "0.0.0";
 };
 
 const getToolkitDescription = (
   tools: readonly ToolDefinition[]
 ): string | null => {
-  const firstTool = tools[0];
+  const [firstTool] = tools;
   return firstTool?.toolkitDescription ?? firstTool?.description ?? null;
 };
 
@@ -717,9 +717,9 @@ const buildToolkitAuth = (
   }
 
   return {
-    type: authType,
-    providerId: getProviderId(tools),
     allScopes: computeAllScopes(tools),
+    providerId: getProviderId(tools),
+    type: authType,
   };
 };
 
@@ -781,32 +781,32 @@ const buildMergedToolkit = (options: {
   );
 
   return {
-    id: options.toolkitId,
-    label: resolveToolkitLabel({
-      toolkitId: options.toolkitId,
-      metadata: options.metadata,
-      description: options.description,
-    }),
-    version: options.version,
-    description: options.description,
-    metadata: mergedMetadata,
     auth: options.auth,
-    tools: options.tools,
-    documentationChunks: mergeCustomSectionsArrays(
-      options.customSections?.documentationChunks,
-      options.previousToolkit?.documentationChunks,
-      customSectionsAuthoritative
-    ),
     customImports: mergeCustomSectionsArrays(
       options.customSections?.customImports,
       options.previousToolkit?.customImports,
       customSectionsAuthoritative
     ),
+    description: options.description,
+    documentationChunks: mergeCustomSectionsArrays(
+      options.customSections?.documentationChunks,
+      options.previousToolkit?.documentationChunks,
+      customSectionsAuthoritative
+    ),
+    id: options.toolkitId,
+    label: resolveToolkitLabel({
+      description: options.description,
+      metadata: options.metadata,
+      toolkitId: options.toolkitId,
+    }),
+    metadata: mergedMetadata,
     subPages: mergeCustomSectionsArrays(
       options.customSections?.subPages,
       options.previousToolkit?.subPages,
       customSectionsAuthoritative
     ),
+    tools: options.tools,
+    version: options.version,
     ...(options.customSections
       ? {
           curationSourceHash: getCustomSectionsSourceHash(
@@ -853,10 +853,10 @@ export const applyCustomSectionsToToolkit = (
 
   return {
     ...toolkit,
-    documentationChunks: customSections.documentationChunks,
-    customImports: customSections.customImports,
-    subPages: customSections.subPages,
     curationSourceHash: getCustomSectionsSourceHash(customSections),
+    customImports: customSections.customImports,
+    documentationChunks: customSections.documentationChunks,
+    subPages: customSections.subPages,
     tools: toolkit.tools.map((tool) => ({
       ...tool,
       documentationChunks: customSections.toolChunks[tool.name] ?? [],
@@ -885,34 +885,34 @@ const transformTool = async (
 
   if (previousTool && shouldReuseExample(tool, previousTool)) {
     return {
-      name: tool.name,
-      qualifiedName: tool.qualifiedName,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      description: tool.description,
-      parameters: tool.parameters,
       auth: tool.auth,
+      codeExample: previousTool.codeExample,
+      description: tool.description,
+      documentationChunks,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      metadata: tool.metadata ?? null,
+      name: tool.name,
+      output: tool.output,
+      parameters: tool.parameters,
+      qualifiedName: tool.qualifiedName,
       secrets: tool.secrets,
       secretsInfo: previousTool.secretsInfo ?? [],
-      output: tool.output,
-      documentationChunks,
-      codeExample: previousTool.codeExample,
-      metadata: tool.metadata ?? null,
     };
   }
 
   if (!toolExampleGenerator) {
     return {
-      name: tool.name,
-      qualifiedName: tool.qualifiedName,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      description: tool.description,
-      parameters: tool.parameters,
       auth: tool.auth,
+      description: tool.description,
+      documentationChunks,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      metadata: tool.metadata ?? null,
+      name: tool.name,
+      output: tool.output,
+      parameters: tool.parameters,
+      qualifiedName: tool.qualifiedName,
       secrets: tool.secrets,
       secretsInfo: [],
-      output: tool.output,
-      documentationChunks,
-      metadata: tool.metadata ?? null,
     };
   }
 
@@ -920,18 +920,18 @@ const transformTool = async (
     const exampleResult = await toolExampleGenerator.generate(tool);
 
     return {
-      name: tool.name,
-      qualifiedName: tool.qualifiedName,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      description: tool.description,
-      parameters: tool.parameters,
       auth: tool.auth,
+      codeExample: exampleResult.codeExample,
+      description: tool.description,
+      documentationChunks,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      metadata: tool.metadata ?? null,
+      name: tool.name,
+      output: tool.output,
+      parameters: tool.parameters,
+      qualifiedName: tool.qualifiedName,
       secrets: tool.secrets,
       secretsInfo: exampleResult.secretsInfo,
-      output: tool.output,
-      documentationChunks,
-      codeExample: exampleResult.codeExample,
-      metadata: tool.metadata ?? null,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -939,24 +939,24 @@ const transformTool = async (
       `Example generation failed for ${tool.qualifiedName}: ${message}`
     );
     failedTools.push({
-      toolkitId: tool.qualifiedName.split(".")[0] ?? tool.qualifiedName,
-      toolName: tool.name,
       qualifiedName: tool.qualifiedName,
       reason: message,
+      toolkitId: tool.qualifiedName.split(".")[0] ?? tool.qualifiedName,
+      toolName: tool.name,
     });
 
     return {
-      name: tool.name,
-      qualifiedName: tool.qualifiedName,
-      fullyQualifiedName: tool.fullyQualifiedName,
-      description: tool.description,
-      parameters: tool.parameters,
       auth: tool.auth,
+      description: tool.description,
+      documentationChunks,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      metadata: tool.metadata ?? null,
+      name: tool.name,
+      output: tool.output,
+      parameters: tool.parameters,
+      qualifiedName: tool.qualifiedName,
       secrets: tool.secrets,
       secretsInfo: previousTool?.secretsInfo ?? [],
-      output: tool.output,
-      documentationChunks,
-      metadata: tool.metadata ?? null,
     };
   }
 };
@@ -994,17 +994,20 @@ export const mergeToolkit = async (
     options.resolveProviderId &&
     tools.some(
       (tool) =>
-        tool.auth?.providerType === "oauth2" && tool.auth.providerId == null
+        tool.auth?.providerType === "oauth2" &&
+        (tool.auth.providerId === null || tool.auth.providerId === undefined)
     )
       ? options.resolveProviderId(toolkitId)
       : null;
 
   const toolsWithResolvedProviderId =
-    resolvedProviderId !== null
-      ? tools.map((tool) => {
+    resolvedProviderId === null
+      ? tools
+      : tools.map((tool) => {
           if (
             tool.auth?.providerType === "oauth2" &&
-            tool.auth.providerId == null
+            (tool.auth.providerId === null ||
+              tool.auth.providerId === undefined)
           ) {
             return {
               ...tool,
@@ -1012,8 +1015,7 @@ export const mergeToolkit = async (
             };
           }
           return tool;
-        })
-      : tools;
+        });
 
   let auth = buildToolkitAuth(toolsWithResolvedProviderId);
 
@@ -1031,25 +1033,25 @@ export const mergeToolkit = async (
     options.previousToolkit
   );
   const mergedTools = await buildMergedTools({
-    tools: toolsWithResolvedProviderId,
+    customSectionsAuthoritative,
+    failedTools,
+    llmConcurrency,
+    previousToolByQualifiedName,
     toolChunks,
     toolExampleGenerator,
+    tools: toolsWithResolvedProviderId,
     warnings,
-    failedTools,
-    previousToolByQualifiedName,
-    llmConcurrency,
-    customSectionsAuthoritative,
   });
 
   const toolkit = buildMergedToolkit({
-    toolkitId,
-    metadata,
-    version,
-    description,
     auth,
-    tools: mergedTools,
     customSections,
+    description,
+    metadata,
     previousToolkit: options.previousToolkit,
+    toolkitId,
+    tools: mergedTools,
+    version,
   });
 
   // Modular step: detect design system metadata drifts
@@ -1064,10 +1066,10 @@ export const mergeToolkit = async (
   }
 
   return {
-    toolkit,
-    warnings,
     failedTools,
+    toolkit,
     usedDefaultMetadata: metadata === null,
+    warnings,
   };
 };
 
@@ -1144,16 +1146,16 @@ export class DataMerger {
   ): MergeResult {
     if (previousToolkit) {
       return {
+        error: message,
+        failedTools: [],
+        recovery: "preserved",
         toolkit: applyCustomSectionsToToolkit(previousToolkit, customSections, {
           // A previous artifact can legitimately predate a newly curated tool.
           // Preserve it while applying the curation that still has a target.
           ignoreUnknownToolChunks: true,
         }),
-        warnings: [`Error processing toolkit: ${message}`],
-        failedTools: [],
-        error: message,
-        recovery: "preserved",
         usedDefaultMetadata: false,
+        warnings: [`Error processing toolkit: ${message}`],
       };
     }
 
@@ -1163,33 +1165,33 @@ export class DataMerger {
     // `isHidden: true` as `getDefaultMetadata` and for the same reason —
     // it's a guess, not a fact, so it must not be routable.
     return {
+      error: message,
+      failedTools: [],
+      recovery: "omitted",
       toolkit: {
+        auth: null,
+        customImports: [],
+        description: null,
+        documentationChunks: [],
+        generatedAt: new Date().toISOString(),
         id: toolkitId,
         label: toolkitId,
-        version: "0.0.0",
-        description: null,
         metadata: {
           category: DEFAULT_METADATA_CATEGORY,
+          docsLink: "",
           iconUrl: "",
           isBYOC: false,
-          isPro: false,
-          type: isApiSuffixedToolkitId(toolkitId) ? "arcade_starter" : "arcade",
-          docsLink: "",
           isComingSoon: false,
           isHidden: true,
+          isPro: false,
+          type: isApiSuffixedToolkitId(toolkitId) ? "arcade_starter" : "arcade",
         },
-        auth: null,
-        tools: [],
-        documentationChunks: [],
-        customImports: [],
         subPages: [],
-        generatedAt: new Date().toISOString(),
+        tools: [],
+        version: "0.0.0",
       },
-      warnings: [`Error processing toolkit: ${message}`],
-      failedTools: [],
-      error: message,
-      recovery: "omitted",
       usedDefaultMetadata: true,
+      warnings: [`Error processing toolkit: ${message}`],
     };
   }
 
@@ -1453,10 +1455,10 @@ export class DataMerger {
     for (const target of targets) {
       try {
         const edited = await editor.cleanupStaleReferences({
-          kind: target.kind === "summary" ? "summary" : "documentation_chunk",
           content: target.content,
-          removedSecrets: target.removedSecrets,
           currentSecrets,
+          kind: target.kind === "summary" ? "summary" : "documentation_chunk",
+          removedSecrets: target.removedSecrets,
           toolkitLabel: result.toolkit.label,
         });
         applyEditedContent(result.toolkit, target, edited);
@@ -1477,7 +1479,7 @@ export class DataMerger {
     if (!editor) {
       return;
     }
-    const summary = result.toolkit.summary;
+    const { summary } = result.toolkit;
     if (!summary) {
       return;
     }
@@ -1496,10 +1498,10 @@ export class DataMerger {
     try {
       const edited = await editor.fillCoverageGaps({
         content: summary,
-        missingSecretNames: missing,
         currentSecrets,
-        toolkitLabel: result.toolkit.label,
+        missingSecretNames: missing,
         requireConfigLink: needsLink,
+        toolkitLabel: result.toolkit.label,
       });
       result.toolkit.summary = edited;
     } catch (error) {
@@ -1638,9 +1640,9 @@ export class DataMerger {
         (this.requireCompleteData && toolkitData.tools.length === 0)
     ).length;
     return {
-      total,
-      toProcess: total - skipped,
       skipped,
+      toProcess: total - skipped,
+      total,
     };
   }
 }

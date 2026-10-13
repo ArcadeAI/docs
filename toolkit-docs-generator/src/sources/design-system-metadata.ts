@@ -20,17 +20,17 @@ import type { MetadataSource } from "./internal";
 // Keep this intentionally loose: the design system can evolve without breaking
 // compilation here. We validate after mapping.
 const DesignSystemToolkitSchema = z.object({
-  id: z.string(),
-  label: z.string(),
   category: z.string(),
-  type: z.string(),
   docsLink: z.string(),
-  publicIconUrl: z.string().optional(),
   iconUrl: z.string().optional(),
+  id: z.string(),
   isBYOC: z.boolean(),
-  isPro: z.boolean(),
   isComingSoon: z.boolean(),
   isHidden: z.boolean(),
+  isPro: z.boolean(),
+  label: z.string(),
+  publicIconUrl: z.string().optional(),
+  type: z.string(),
 });
 
 type DesignSystemToolkit = z.infer<typeof DesignSystemToolkitSchema>;
@@ -44,16 +44,16 @@ function toToolkitMetadata(entry: DesignSystemToolkit): ToolkitMetadata | null {
   if (!iconUrl) return null;
 
   const parsed = ToolkitMetadataSchema.safeParse({
-    id: entry.id,
-    label: entry.label,
     category: entry.category,
-    iconUrl,
-    isBYOC: entry.isBYOC,
-    isPro: entry.isPro,
-    type: entry.type,
     docsLink: entry.docsLink,
+    iconUrl,
+    id: entry.id,
+    isBYOC: entry.isBYOC,
     isComingSoon: entry.isComingSoon,
     isHidden: entry.isHidden,
+    isPro: entry.isPro,
+    label: entry.label,
+    type: entry.type,
   });
 
   return parsed.success ? parsed.data : null;

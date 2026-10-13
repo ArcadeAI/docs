@@ -20,18 +20,18 @@ const makeResult = (
   changes: Array<{ toolkitId: string; changeType: string }>
 ): ChangeDetectionResult =>
   ({
-    toolkitChanges: changes.map((c) => ({ ...c })),
     summary: {
-      newToolkits: 0,
-      removedToolkits: 0,
       modifiedToolkits: 0,
+      modifiedTools: 0,
+      newToolkits: 0,
+      newTools: 0,
+      removedToolkits: 0,
+      removedTools: 0,
+      totalToolkits: 0,
       unchangedToolkits: 0,
       versionOnlyToolkits: 0,
-      totalToolkits: 0,
-      newTools: 0,
-      removedTools: 0,
-      modifiedTools: 0,
     },
+    toolkitChanges: changes.map((c) => ({ ...c })),
   }) as unknown as ChangeDetectionResult;
 
 // ── collectRemovedToolkitIds ───────────────────────────────────────────────────
@@ -39,8 +39,8 @@ const makeResult = (
 describe("collectRemovedToolkitIds", () => {
   it("returns IDs of removed toolkits as a lowercase set", () => {
     const result = makeResult([
-      { toolkitId: "Github", changeType: "removed" },
-      { toolkitId: "Slack", changeType: "removed" },
+      { changeType: "removed", toolkitId: "Github" },
+      { changeType: "removed", toolkitId: "Slack" },
     ]);
     const ids = collectRemovedToolkitIds(result);
     expect(ids).toEqual(new Set(["github", "slack"]));
@@ -48,18 +48,18 @@ describe("collectRemovedToolkitIds", () => {
 
   it("returns empty set when no toolkits are removed", () => {
     const result = makeResult([
-      { toolkitId: "Github", changeType: "modified" },
-      { toolkitId: "Slack", changeType: "unchanged" },
+      { changeType: "modified", toolkitId: "Github" },
+      { changeType: "unchanged", toolkitId: "Slack" },
     ]);
     expect(collectRemovedToolkitIds(result).size).toBe(0);
   });
 
   it("excludes added, modified, and unchanged toolkits", () => {
     const result = makeResult([
-      { toolkitId: "Added", changeType: "added" },
-      { toolkitId: "Modified", changeType: "modified" },
-      { toolkitId: "Unchanged", changeType: "unchanged" },
-      { toolkitId: "Removed", changeType: "removed" },
+      { changeType: "added", toolkitId: "Added" },
+      { changeType: "modified", toolkitId: "Modified" },
+      { changeType: "unchanged", toolkitId: "Unchanged" },
+      { changeType: "removed", toolkitId: "Removed" },
     ]);
     const ids = collectRemovedToolkitIds(result);
     expect(ids).toEqual(new Set(["removed"]));
@@ -67,8 +67,8 @@ describe("collectRemovedToolkitIds", () => {
 
   it("lowercases toolkit IDs regardless of original casing", () => {
     const result = makeResult([
-      { toolkitId: "GoogleCalendar", changeType: "removed" },
-      { toolkitId: "SLACK", changeType: "removed" },
+      { changeType: "removed", toolkitId: "GoogleCalendar" },
+      { changeType: "removed", toolkitId: "SLACK" },
     ]);
     const ids = collectRemovedToolkitIds(result);
     expect(ids).toContain("googlecalendar");
@@ -84,7 +84,7 @@ describe("getCombinedChangedToolkitIds", () => {
   it("deduplicates API and curation changes case-insensitively", () => {
     expect(
       getCombinedChangedToolkitIds(
-        makeResult([{ toolkitId: "Github", changeType: "modified" }]),
+        makeResult([{ changeType: "modified", toolkitId: "Github" }]),
         ["github"]
       )
     ).toEqual(["github"]);
@@ -263,21 +263,21 @@ describe("filterProvidersBySkipIds", () => {
 describe("assertRequireCompleteMetadata", () => {
   it("throws when any toolkit is missing design-system metadata", () => {
     const complete: ToolkitData = {
-      tools: [],
       metadata: {
-        id: "Github",
-        label: "Github",
         category: "development",
-        iconUrl: "https://example.com/icon.svg",
-        isBYOC: false,
-        isPro: false,
-        type: "arcade",
         docsLink: "https://docs.example.com",
+        iconUrl: "https://example.com/icon.svg",
+        id: "Github",
+        isBYOC: false,
         isComingSoon: false,
         isHidden: false,
+        isPro: false,
+        label: "Github",
+        type: "arcade",
       },
+      tools: [],
     };
-    const missing: ToolkitData = { tools: [], metadata: null };
+    const missing: ToolkitData = { metadata: null, tools: [] };
 
     expect(() =>
       assertRequireCompleteMetadata([
@@ -289,19 +289,19 @@ describe("assertRequireCompleteMetadata", () => {
 
   it("passes when every toolkit has metadata", () => {
     const complete: ToolkitData = {
-      tools: [],
       metadata: {
-        id: "Github",
-        label: "Github",
         category: "development",
-        iconUrl: "https://example.com/icon.svg",
-        isBYOC: false,
-        isPro: false,
-        type: "arcade",
         docsLink: "https://docs.example.com",
+        iconUrl: "https://example.com/icon.svg",
+        id: "Github",
+        isBYOC: false,
         isComingSoon: false,
         isHidden: false,
+        isPro: false,
+        label: "Github",
+        type: "arcade",
       },
+      tools: [],
     };
 
     expect(() =>

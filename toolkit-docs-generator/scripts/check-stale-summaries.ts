@@ -1,4 +1,4 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env bun
 
 /**
  * Check stale summaries
@@ -9,7 +9,7 @@
  * the script can gate CI or a local sanity check.
  *
  * Usage:
- *   pnpm dlx tsx toolkit-docs-generator/scripts/check-stale-summaries.ts
+ *   bun toolkit-docs-generator/scripts/check-stale-summaries.ts
  */
 
 import { readdirSync, readFileSync } from "node:fs";
@@ -61,7 +61,7 @@ const collectStaleSummaries = (
       console.error(`✗ Cannot parse ${file}: ${result.error}`);
       throw new Error(`Cannot parse ${file}`);
     }
-    const toolkit = result.toolkit;
+    const { toolkit } = result;
     if (toolkit.summaryStale === true) {
       stale.push({
         file,

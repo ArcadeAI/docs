@@ -18,41 +18,41 @@ if [ -n "$STAGED_DOCS" ]; then
   # Run vale-fix script in staged mode (interactive)
   if [ -t 0 ]; then
     # Terminal is interactive - run the fix script
-    pnpm vale:fix --staged
+    bun run vale:fix --staged
   else
     # Non-interactive (CI) - just run vale and report
     echo "$STAGED_DOCS" | xargs vale --output=line || {
-      echo "⚠️  Vale found style issues. Run 'pnpm vale:fix <file>' to fix."
+      echo "⚠️  Vale found style issues. Run 'bun run vale:fix <file>' to fix."
       # Don't block commit for style issues in CI, only toxic language
       # The GitHub Action (Option 1) will handle this later
     }
   fi
 fi
 
-# --- Check Meta Keys (when _meta.tsx files are changed) ---
-STAGED_META=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '_meta\.tsx$' || true)
+# --- Check Meta Keys (when content/docs meta.json files are changed) ---
+STAGED_META=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^content/docs/.*/meta\.json$' || true)
 
 if [ -n "$STAGED_META" ]; then
-  echo "🔍 Checking _meta.tsx keys..."
+  echo "🔍 Checking meta.json pages..."
 
-  if ! pnpm check-meta --staged-only; then
+  if ! bun run check-meta --staged-only; then
     echo ""
-    echo "❌ Commit blocked: _meta.tsx keys must match sibling directories or files."
+    echo "❌ Commit blocked: meta.json \"pages\" entries must match sibling pages or folders."
     exit 1
   fi
 fi
 
-# --- Check Redirects (when markdown pages are deleted or renamed) ---
+# --- Check Redirects (when content pages are deleted or renamed) ---
 # Detect deleted pages (D status) and renamed pages (R status - old path needs redirect)
-DELETED_PAGES=$(git diff --cached --name-status | grep -E "^D.*page\.(md|mdx)$" | cut -f2 || true)
-RENAMED_PAGES=$(git diff --cached --name-status | grep -E "^R.*page\.(md|mdx)$" | cut -f2 || true)
+DELETED_PAGES=$(git diff --cached --name-status | grep -E "^D.*content/docs/.*\.(md|mdx)$" | cut -f2 || true)
+RENAMED_PAGES=$(git diff --cached --name-status | grep -E "^R.*content/docs/.*\.(md|mdx)$" | cut -f2 || true)
 
 if [ -n "$DELETED_PAGES" ] || [ -n "$RENAMED_PAGES" ]; then
   echo "🔗 Detected deleted/renamed page(s), checking for redirects..."
 
   # Run the TypeScript redirect checker with auto-fix (only checks staged changes)
   # This will add redirect entries to redirects.ts if missing
-  if ! pnpm check-redirects --auto-fix --staged-only 2>&1; then
+  if ! bun run check-redirects --auto-fix --staged-only 2>&1; then
     # Stage redirects.ts if it was modified
     if git diff --name-only redirects.ts 2>/dev/null | grep -q "redirects.ts"; then
       git add redirects.ts
@@ -76,14 +76,19 @@ fi
 if git diff --cached --name-only | grep -q "redirects.ts"; then
   echo "🔗 Updating internal links for new redirects..."
 
+  # Files scanned by scripts/update-internal-links.ts (keep in sync with LINK_FILE_GLOBS there)
+  LINK_PATHS="content/docs/**/*.mdx content/docs/**/*.md components/**/*.tsx app/**/*.tsx lib/**/*.ts lib/**/*.tsx data/**/*.ts"
+
   # Capture files already modified in working directory BEFORE running update-links
   # This prevents accidentally staging unrelated changes the user has in progress
-  ALREADY_MODIFIED=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
+  # shellcheck disable=SC2086
+  ALREADY_MODIFIED=$(git diff --name-only -- $LINK_PATHS 2>/dev/null || true)
 
   # Run the TypeScript update script
-  if pnpm update-links 2>/dev/null; then
+  if bun run update-links 2>/dev/null; then
     # Find files modified AFTER running update-links
-    NOW_MODIFIED=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
+    # shellcheck disable=SC2086
+    NOW_MODIFIED=$(git diff --name-only -- $LINK_PATHS 2>/dev/null || true)
 
     # Only stage files that were NOT already modified (i.e., newly modified by update-links)
     STAGED_COUNT=0
@@ -122,4 +127,4 @@ if git diff --cached --name-only | grep -q "redirects.ts"; then
 fi
 
 # --- Lint Staged (formatting) ---
-pnpm exec lint-staged
+bunx lint-staged

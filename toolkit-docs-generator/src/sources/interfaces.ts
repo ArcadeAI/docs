@@ -18,17 +18,16 @@ import type { CustomSections } from "../types/index";
  */
 export interface ICustomSectionsSource {
   /**
+   * Get all custom sections
+   */
+  readonly getAllCustomSections: () => Promise<
+    Readonly<Record<string, CustomSections>>
+  >;
+  /**
    * Get custom sections for a specific toolkit
    * @param toolkitId - The toolkit identifier
    */
   readonly getCustomSections: (
     toolkitId: string
   ) => Promise<CustomSections | null>;
-
-  /**
-   * Get all custom sections
-   */
-  readonly getAllCustomSections: () => Promise<
-    Readonly<Record<string, CustomSections>>
-  >;
 }

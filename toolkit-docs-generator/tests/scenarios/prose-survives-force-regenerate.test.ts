@@ -20,15 +20,15 @@ import { createMarkdownCurationSource } from "../../src/sources/markdown-curatio
 import type { ToolDefinition } from "../../src/types/index";
 
 const createTool = (): ToolDefinition => ({
-  name: "TestTool",
-  qualifiedName: "TestKit.TestTool",
-  fullyQualifiedName: "TestKit.TestTool@1.0.0",
-  description: "A test tool",
-  toolkitDescription: "Toolkit description",
-  parameters: [],
   auth: null,
+  description: "A test tool",
+  fullyQualifiedName: "TestKit.TestTool@1.0.0",
+  name: "TestTool",
+  output: { description: "Result", type: "object" },
+  parameters: [],
+  qualifiedName: "TestKit.TestTool",
   secrets: [],
-  output: { type: "object", description: "Result" },
+  toolkitDescription: "Toolkit description",
 });
 
 const writeCuration = async (root: string): Promise<void> => {
@@ -70,7 +70,7 @@ describe("prose survives --force-regenerate", () => {
 
   afterEach(async () => {
     if (tempDir) {
-      await rm(tempDir, { recursive: true, force: true });
+      await rm(tempDir, { force: true, recursive: true });
       tempDir = null;
     }
   });
@@ -102,9 +102,9 @@ describe("prose survives --force-regenerate", () => {
     ]);
     expect(result.toolkit.subPages).toEqual([
       {
-        type: "environment-variables",
         content: "# Environment Variables",
         relativePath: "environment-variables/page.mdx",
+        type: "environment-variables",
       },
     ]);
   });
@@ -162,7 +162,7 @@ Prose
     );
     expect(previousResult.toolkit.documentationChunks).toHaveLength(1);
 
-    await rm(join(tempDir, "testkit"), { recursive: true, force: true });
+    await rm(join(tempDir, "testkit"), { force: true, recursive: true });
     const clearedCuration =
       await createMarkdownCurationSource(tempDir).getCustomSections("TestKit");
 

@@ -4,51 +4,51 @@ import { parsePreviousToolkitForDiff } from "../../src/diff/previous-output";
 import type { MergedToolkit } from "../../src/types/index";
 
 const createValidToolkit = (): MergedToolkit => ({
+  auth: null,
+  customImports: [],
+  description: "GitHub toolkit",
+  documentationChunks: [],
+  generatedAt: "2026-01-01T00:00:00.000Z",
   id: "Github",
   label: "GitHub",
-  version: "1.0.0",
-  description: "GitHub toolkit",
   metadata: {
     category: "development",
+    docsLink: "https://docs.example.com/github",
     iconUrl: "https://example.com/github.svg",
     isBYOC: false,
-    isPro: false,
-    type: "arcade",
-    docsLink: "https://docs.example.com/github",
     isComingSoon: false,
     isHidden: false,
+    isPro: false,
+    type: "arcade",
   },
-  auth: null,
+  subPages: [],
   tools: [
     {
-      name: "CreateIssue",
-      qualifiedName: "Github.CreateIssue",
-      fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      auth: null,
       description: null,
+      documentationChunks: [],
+      fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      name: "CreateIssue",
+      output: {
+        description: null,
+        type: "json",
+      },
       parameters: [
         {
-          name: "title",
-          type: "string",
-          required: true,
           description: "Issue title",
           enum: null,
           inferrable: true,
+          name: "title",
+          required: true,
+          type: "string",
         },
       ],
-      auth: null,
+      qualifiedName: "Github.CreateIssue",
       secrets: [],
-      output: {
-        type: "json",
-        description: null,
-      },
       secretsInfo: [],
-      documentationChunks: [],
     },
   ],
-  documentationChunks: [],
-  customImports: [],
-  subPages: [],
-  generatedAt: "2026-01-01T00:00:00.000Z",
+  version: "1.0.0",
 });
 
 describe("parsePreviousToolkitForDiff", () => {
@@ -63,56 +63,56 @@ describe("parsePreviousToolkitForDiff", () => {
   it("falls back for legacy page fields and preserves tool signature fields", () => {
     const result = parsePreviousToolkitForDiff(
       {
-        id: "Jira",
-        label: "Jira",
-        version: "2.4.0",
-        description: "Jira toolkit",
-        metadata: {
-          category: "development",
-          iconUrl: "https://example.com/jira.svg",
-          isBYOC: false,
-          isPro: false,
-          type: "arcade",
-          docsLink: "https://docs.example.com/jira",
-          isComingSoon: false,
-          isHidden: false,
-        },
         auth: null,
-        tools: [
-          {
-            name: "CreateIssue",
-            qualifiedName: "Jira.CreateIssue",
-            fullyQualifiedName: "Jira.CreateIssue@2.4.0",
-            description: null,
-            parameters: [
-              {
-                name: "title",
-                type: "string",
-                required: true,
-                description: "Issue title",
-                enum: null,
-              },
-            ],
-            auth: {
-              provider_type: "oauth2",
-              provider_id: null,
-              scopes: ["write:jira-work"],
-            },
-            secrets: [],
-            output: {
-              value_schema: {
-                val_type: "json",
-              },
-            },
-          },
-        ],
+        customImports: [{ component: "JiraOverview" }],
+        description: "Jira toolkit",
         documentationChunks: [
           {
             heading: "How to use Jira",
           },
         ],
-        customImports: [{ component: "JiraOverview" }],
+        id: "Jira",
+        label: "Jira",
+        metadata: {
+          category: "development",
+          docsLink: "https://docs.example.com/jira",
+          iconUrl: "https://example.com/jira.svg",
+          isBYOC: false,
+          isComingSoon: false,
+          isHidden: false,
+          isPro: false,
+          type: "arcade",
+        },
         subPages: [{ slug: "advanced" }],
+        tools: [
+          {
+            auth: {
+              provider_id: null,
+              provider_type: "oauth2",
+              scopes: ["write:jira-work"],
+            },
+            description: null,
+            fullyQualifiedName: "Jira.CreateIssue@2.4.0",
+            name: "CreateIssue",
+            output: {
+              value_schema: {
+                val_type: "json",
+              },
+            },
+            parameters: [
+              {
+                description: "Issue title",
+                enum: null,
+                name: "title",
+                required: true,
+                type: "string",
+              },
+            ],
+            qualifiedName: "Jira.CreateIssue",
+            secrets: [],
+          },
+        ],
+        version: "2.4.0",
       },
       "jira"
     );
@@ -121,8 +121,8 @@ describe("parsePreviousToolkitForDiff", () => {
     expect(result.toolkit?.id).toBe("Jira");
     expect(result.toolkit?.tools).toHaveLength(1);
     expect(result.toolkit?.tools[0]?.output).toEqual({
-      type: "json",
       description: null,
+      type: "json",
     });
     expect(result.toolkit?.tools[0]?.parameters[0]?.inferrable).toBe(true);
     expect(result.toolkit?.tools[0]?.auth).toEqual({
@@ -138,51 +138,51 @@ describe("parsePreviousToolkitForDiff", () => {
     // but the surrounding toolkit object has a legacy field that fails strict parse.
     const result = parsePreviousToolkitForDiff(
       {
-        id: "Github",
-        label: "GitHub",
-        version: "3.0.0",
-        description: "GitHub toolkit",
-        metadata: {
-          category: "development",
-          iconUrl: "https://example.com/github.svg",
-          isBYOC: false,
-          isPro: false,
-          type: "arcade",
-          docsLink: "https://docs.example.com/github",
-          isComingSoon: false,
-          isHidden: false,
-        },
         auth: null,
-        tools: [
-          {
-            name: "CreateIssue",
-            qualifiedName: "Github.CreateIssue",
-            fullyQualifiedName: "Github.CreateIssue@3.0.0",
-            description: null,
-            parameters: [],
-            auth: null,
-            secrets: [],
-            // Legacy field that causes strict parse to fail
-            output: { value_schema: { val_type: "json" } },
-          },
-        ],
+        customImports: ['import { Callout } from "nextra/components";'],
+        description: "GitHub toolkit",
         documentationChunks: [
           {
-            type: "warning",
+            content: "Critical: GitHub Apps only, not OAuth Apps.",
             location: "description",
             position: "after",
-            content: "Critical: GitHub Apps only, not OAuth Apps.",
+            type: "warning",
           },
           {
-            type: "info",
-            location: "before_available_tools",
-            position: "after",
             content: "## GitHub Enterprise Support",
             header: "## GitHub Enterprise Support",
+            location: "before_available_tools",
+            position: "after",
+            type: "info",
           },
         ],
-        customImports: ['import { Callout } from "nextra/components";'],
+        id: "Github",
+        label: "GitHub",
+        metadata: {
+          category: "development",
+          docsLink: "https://docs.example.com/github",
+          iconUrl: "https://example.com/github.svg",
+          isBYOC: false,
+          isComingSoon: false,
+          isHidden: false,
+          isPro: false,
+          type: "arcade",
+        },
         subPages: [],
+        tools: [
+          {
+            auth: null,
+            description: null,
+            fullyQualifiedName: "Github.CreateIssue@3.0.0",
+            name: "CreateIssue",
+            // Legacy field that causes strict parse to fail
+            output: { value_schema: { val_type: "json" } },
+            parameters: [],
+            qualifiedName: "Github.CreateIssue",
+            secrets: [],
+          },
+        ],
+        version: "3.0.0",
       },
       "github"
     );
@@ -205,43 +205,43 @@ describe("parsePreviousToolkitForDiff", () => {
   it("preserves subPages on schema fallback", () => {
     const result = parsePreviousToolkitForDiff(
       {
-        id: "Zoom",
-        label: "Zoom",
-        version: "1.0.0",
-        description: null,
-        metadata: {
-          category: "productivity",
-          iconUrl: "https://example.com/zoom.svg",
-          isBYOC: false,
-          isPro: false,
-          type: "arcade",
-          docsLink: "https://docs.example.com/zoom",
-          isComingSoon: false,
-          isHidden: false,
-        },
         auth: null,
-        tools: [
-          {
-            name: "CreateMeeting",
-            qualifiedName: "Zoom.CreateMeeting",
-            // Missing fullyQualifiedName — causes strict parse to fail
-            description: null,
-            parameters: [],
-            auth: null,
-            secrets: [],
-            output: null,
-          },
-        ],
+        customImports: [],
+        description: null,
         documentationChunks: [
           {
-            type: "info",
+            content: "Zoom requires admin approval.",
             location: "header",
             position: "after",
-            content: "Zoom requires admin approval.",
+            type: "info",
           },
         ],
-        customImports: [],
+        id: "Zoom",
+        label: "Zoom",
+        metadata: {
+          category: "productivity",
+          docsLink: "https://docs.example.com/zoom",
+          iconUrl: "https://example.com/zoom.svg",
+          isBYOC: false,
+          isComingSoon: false,
+          isHidden: false,
+          isPro: false,
+          type: "arcade",
+        },
         subPages: ["environment-setup", "rate-limits"],
+        tools: [
+          {
+            auth: null,
+            // Missing fullyQualifiedName — causes strict parse to fail
+            description: null,
+            name: "CreateMeeting",
+            output: null,
+            parameters: [],
+            qualifiedName: "Zoom.CreateMeeting",
+            secrets: [],
+          },
+        ],
+        version: "1.0.0",
       },
       "zoom"
     );
@@ -258,31 +258,31 @@ describe("parsePreviousToolkitForDiff", () => {
   it("derives missing qualified names from toolkit and tool names", () => {
     const result = parsePreviousToolkitForDiff(
       {
+        auth: null,
+        description: null,
         id: "Notion",
         label: "Notion",
-        version: "3.0.0",
-        description: null,
         metadata: {
           category: "productivity",
+          docsLink: "https://docs.example.com/notion",
           iconUrl: "https://example.com/notion.svg",
           isBYOC: false,
-          isPro: false,
-          type: "arcade",
-          docsLink: "https://docs.example.com/notion",
           isComingSoon: false,
           isHidden: false,
+          isPro: false,
+          type: "arcade",
         },
-        auth: null,
         tools: [
           {
-            name: "CreatePage",
-            description: null,
-            parameters: [],
             auth: null,
-            secrets: [],
+            description: null,
+            name: "CreatePage",
             output: null,
+            parameters: [],
+            secrets: [],
           },
         ],
+        version: "3.0.0",
       },
       "notion"
     );

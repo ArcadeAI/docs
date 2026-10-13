@@ -10,10 +10,10 @@ import type { LlmClient } from "./client";
 
 export interface LlmToolkitSummaryGeneratorConfig {
   readonly client: LlmClient;
-  readonly model: string;
-  readonly temperature?: number;
   readonly maxTokens?: number;
+  readonly model: string;
   readonly systemPrompt?: string;
+  readonly temperature?: number;
 }
 
 const defaultSystemPrompt =
@@ -147,14 +147,14 @@ export class LlmToolkitSummaryGenerator implements ToolkitSummaryGenerator {
       model: this.model,
       prompt,
       system: this.systemPrompt,
-      ...(this.temperature !== undefined
-        ? { temperature: this.temperature }
-        : {}),
-      ...(this.maxTokens !== undefined ? { maxTokens: this.maxTokens } : {}),
+      ...(this.temperature === undefined
+        ? {}
+        : { temperature: this.temperature }),
+      ...(this.maxTokens === undefined ? {} : { maxTokens: this.maxTokens }),
     });
 
     const payload = parseJsonObject(response);
-    const summary = payload.summary;
+    const { summary } = payload;
 
     if (typeof summary !== "string" || summary.trim().length === 0) {
       throw new Error("LLM response missing summary");

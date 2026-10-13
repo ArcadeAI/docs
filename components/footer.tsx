@@ -1,0 +1,183 @@
+import { Discord, Github } from "@arcadeai/design-system";
+import { Mail } from "lucide-react";
+import type React from "react";
+import { urlConfig } from "@/lib/config";
+import { LinkedIn as Linkedin } from "./icons/linkedin";
+
+const ArcadeLogo = () => (
+  <div>
+    <img
+      alt=" Arcade Logo"
+      className="w-42 pr-4 grayscale dark:hidden"
+      height={40}
+      loading="lazy"
+      src={"/images/logo/arcade-logo.png"}
+      width={168}
+    />
+    <img
+      alt="Arcade Logo"
+      className="hidden w-42 pr-4 grayscale dark:block"
+      height={40}
+      loading="lazy"
+      src={"/images/logo/arcade-title-dark.png"}
+      width={168}
+    />
+  </div>
+);
+
+const Socials = () => (
+  <div className="mt-4 flex gap-6">
+    <a
+      href={urlConfig.company.github}
+      rel="noreferrer"
+      target="_blank"
+      title="View Engine Github"
+    >
+      <Github className="h-6 w-6 text-gray-400 transition-colors duration-150 ease-in-out hover:text-gray-900" />
+    </a>
+    <a
+      href={urlConfig.company.discord}
+      rel="noreferrer"
+      target="_blank"
+      title="Join us in Discord"
+    >
+      <Discord
+        className="h-6 w-6 text-gray-400 transition-colors duration-150 ease-in-out hover:text-gray-900 [&>path]:fill-current"
+        fill="currentColor"
+      />
+    </a>
+    <a
+      href={urlConfig.company.linkedIn}
+      rel="noreferrer"
+      target="_blank"
+      title="View Arcade-ai LinkedIn"
+    >
+      <Linkedin className="h-6 w-6 text-gray-400 transition-colors duration-150 ease-in-out hover:text-gray-900" />
+    </a>
+    <a href="/en/resources/contact-us" title="Contact us">
+      <Mail className="h-6 w-6 text-gray-400 transition-colors duration-150 ease-in-out hover:text-gray-900" />
+    </a>
+  </div>
+);
+
+interface Resource {
+  external: boolean;
+  title: string;
+  url: string;
+}
+
+interface ResourceColProps {
+  resources: Resource[];
+  title: string;
+}
+
+const ResourceCol: React.FC<ResourceColProps> = ({ title, resources }) => (
+  <div className="mb-6 pr-14 md:mb-0">
+    <h3 className="pb-1 font-semibold text-base text-black dark:text-white">
+      {title}
+    </h3>
+    <ul className="mt-2 list-none space-y-4 p-0">
+      {resources?.map((resource) => (
+        <li key={resource.url}>
+          <a
+            className="text-gray-500 no-underline transition-colors duration-150 ease-in-out hover:text-brand-accent"
+            href={resource.url}
+            rel="noreferrer"
+            target={resource.external ? "_blank" : "_self"}
+          >
+            {resource.title} {resource.external ? "" : ""}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
+const Footer: React.FC = () => {
+  const projectResources: Resource[] = [
+    {
+      external: true,
+      title: "GitHub",
+      url: "https://github.com/ArcadeAI/arcade-ai",
+    },
+    {
+      external: true,
+      title: "GitHub Container Registry",
+      url: "https://github.com/orgs/ArcadeAI/packages",
+    },
+    {
+      external: true,
+      title: "Status",
+      url: "https://status.arcade.dev/",
+    },
+  ];
+
+  const resources: Resource[] = [
+    {
+      external: false,
+      title: "Documentation",
+      url: "/",
+    },
+    {
+      external: true,
+      title: "Releases",
+      url: "https://github.com/ArcadeAI/arcade-ai/releases",
+    },
+    {
+      external: true,
+      title: "Examples",
+      url: "https://github.com/ArcadeAI/arcade-ai/tree/main/examples",
+    },
+  ];
+
+  const feedbackResources: Resource[] = [
+    {
+      external: true,
+      title: "Discord",
+      url: urlConfig.company.discord,
+    },
+    {
+      external: true,
+      title: "Report an issue on GitHub",
+      url: "https://github.com/ArcadeAI/arcade-ai/issues/new/choose",
+    },
+  ];
+
+  return (
+    <div className="flex w-full flex-col p-4 text-sm">
+      <div className="flex flex-col md:flex-row md:items-start md:justify-between md:gap-40 lg:gap-24">
+        <div className="flex flex-col items-start">
+          <a className="flex flex-col items-start" href={urlConfig.company.url}>
+            <ArcadeLogo />
+            <span className="mt-2 text-base transition-colors duration-150 ease-in-out hover:text-gray-900 dark:hover:text-gray-300">
+              Making AI take action
+            </span>
+          </a>
+          <Socials />
+        </div>
+        <div className="flex w-full flex-col gap-4 md:mt-0 md:flex-row md:gap-8">
+          <ResourceCol resources={projectResources} title={"Project"} />
+          <ResourceCol resources={resources} title={"Resources"} />
+          <ResourceCol resources={feedbackResources} title={"Feedback"} />
+        </div>
+      </div>
+      <div className="mt-16 flex flex-row items-center justify-between border-black/10 border-t pt-8 sm:mt-20 lg:mt-24 dark:border-white/10">
+        <div className="text-gray-400 text-xs leading-5">
+          <p>&copy; 2024 &mdash; present Arcade AI, Inc.</p>
+        </div>
+        <div>
+          <a
+            className="text-gray-400 text-xs leading-5 no-underline transition-colors duration-150 ease-in-out hover:text-gray-600 hover:underline dark:hover:text-gray-300"
+            href="https://www.arcade.dev/privacy-policy"
+            rel="noreferrer"
+            target="_blank"
+          >
+            Privacy Policy
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export { Footer };

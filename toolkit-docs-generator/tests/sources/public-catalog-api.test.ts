@@ -9,24 +9,23 @@ import {
 import { createPublicCatalogSources } from "../../src/sources/toolkit-data-source";
 
 const githubBranding = {
-  id: "GitHub",
-  label: "GitHub",
   category: "development",
-  type: "arcade",
   docsLink:
     "https://docs.arcade.dev/en/resources/integrations/development/github",
-  publicIconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  id: "GitHub",
   isBYOC: false,
-  isPro: false,
   isComingSoon: false,
   isHidden: false,
+  isPro: false,
+  label: "GitHub",
+  publicIconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  type: "arcade",
 };
 
 const githubCatalogEntry = {
-  name: "Github",
   description: "Arcade.dev LLM tools for Github",
-  version: "4.1.1",
-  tool_count: 2,
+  metadata: githubBranding,
+  name: "Github",
   requirements: {
     authorization: {
       items: {
@@ -42,21 +41,26 @@ const githubCatalogEntry = {
       },
     },
   },
-  metadata: githubBranding,
+  tool_count: 2,
+  version: "4.1.1",
 };
 
 const githubTool = {
-  fully_qualified_name: "Github.CreateIssue@4.1.1",
-  qualified_name: "Github.CreateIssue",
-  name: "CreateIssue",
   description: "Create issue",
-  toolkit: {
-    name: "Github",
-    version: "4.1.1",
-    description: "GitHub toolkit",
-  },
+  fully_qualified_name: "Github.CreateIssue@4.1.1",
   input: { parameters: [] },
+  metadata: {
+    behavior: {
+      destructive: false,
+      idempotent: false,
+      open_world: true,
+      operations: ["create"],
+      read_only: false,
+    },
+  },
+  name: "CreateIssue",
   output: null,
+  qualified_name: "Github.CreateIssue",
   requirements: {
     authorization: [
       {
@@ -67,14 +71,10 @@ const githubTool = {
     ],
     secrets: [{ key: "GITHUB_SERVER_URL" }],
   },
-  metadata: {
-    behavior: {
-      operations: ["create"],
-      read_only: false,
-      destructive: false,
-      idempotent: false,
-      open_world: true,
-    },
+  toolkit: {
+    description: "GitHub toolkit",
+    name: "Github",
+    version: "4.1.1",
   },
 };
 
@@ -165,7 +165,9 @@ describe("fetchAllPages", () => {
 
   it("includes the response body, capped at 500 characters, when the API rejects a page", async () => {
     const fetchFn = (async () =>
-      new Response("x".repeat(2000), { status: 400 })) as typeof fetch;
+      new Response("x".repeat(2000), {
+        status: 400,
+      })) as unknown as typeof fetch;
 
     await expect(
       fetchAllPages("https://api.example/v1/public/tools", fetchFn)
@@ -185,10 +187,10 @@ const toolWithRequirements = (
 ) => ({
   ...githubTool,
   fully_qualified_name: `${toolkit}.${name}@1.0.0`,
-  qualified_name: `${toolkit}.${name}`,
   name,
-  toolkit: { name: toolkit, version: "1.0.0", description: null },
+  qualified_name: `${toolkit}.${name}`,
   requirements,
+  toolkit: { description: null, name: toolkit, version: "1.0.0" },
 });
 
 const oauth = (providerId: string, scopes: string[]) => ({
@@ -339,12 +341,12 @@ describe("PublicCatalogApiSource", () => {
     const daytonaCatalogEntry = {
       ...githubCatalogEntry,
       name: "Daytona",
-      tool_count: 2,
       requirements: {
         authorization: {
           items: { github: { provider_id: "arcade-github", scopes: ["repo"] } },
         },
       },
+      tool_count: 2,
     };
     const gitClone = toolWithRequirements(
       "Daytona",
@@ -434,17 +436,17 @@ describe("PublicCatalogApiSource", () => {
 
     expect(tools).toHaveLength(1);
     expect(metadata).toEqual({
-      id: "Github",
-      label: "GitHub",
       category: "development",
-      iconUrl: "https://design-system.arcade.dev/icons/github.svg",
-      isBYOC: false,
-      isPro: false,
-      type: "arcade",
       docsLink:
         "https://docs.arcade.dev/en/resources/integrations/development/github",
+      iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+      id: "Github",
+      isBYOC: false,
       isComingSoon: false,
       isHidden: false,
+      isPro: false,
+      label: "GitHub",
+      type: "arcade",
     });
     expect(catalogCalls).toBe(1);
   });

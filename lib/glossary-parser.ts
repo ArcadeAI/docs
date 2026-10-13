@@ -1,15 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
 
-export type GlossaryTerm = {
-  term: string;
+export interface GlossaryTerm {
   aliases: string[];
   definition: string;
-  section: string;
-  link: string;
   isSubTerm: boolean;
+  link: string;
   parentTerm?: string;
-};
+  section: string;
+  term: string;
+}
 
 // Regex patterns for parsing markdown headers
 const SECTION_HEADER_REGEX = /^## /;
@@ -17,11 +17,27 @@ const MAIN_TERM_HEADER_REGEX = /^### /;
 const SUB_TERM_HEADER_REGEX = /^#### /;
 const ACRONYM_REGEX = /^([A-Z]+)\s*\(([^)]+)\)/;
 const QUOTED_TERM_REGEX = /^['"](.+)['"]$/;
+const SURROUNDING_QUOTES_REGEX = /^['"]|['"]$/g;
+const NON_ANCHOR_CHARS_REGEX = /[^a-z0-9\s-]/g;
+const WHITESPACE_REGEX = /\s+/g;
+
+interface ParserState {
+  definition: string[];
+  inCodeBlock: boolean;
+  isSubTerm: boolean;
+  parentTerm: string | null;
+  section: string;
+  term: string | null;
+}
+
+type TermDraft = Pick<
+  ParserState,
+  "section" | "parentTerm" | "definition" | "isSubTerm"
+> & { term: string };
 
 /**
  * Parse the glossary MDX file and extract all terms with their definitions
  */
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: parsing markdown structure requires complex logic
 export function parseGlossary(glossaryPath: string): GlossaryTerm[] {
   const absolutePath = path.isAbsolute(glossaryPath)
     ? glossaryPath
@@ -29,163 +45,127 @@ export function parseGlossary(glossaryPath: string): GlossaryTerm[] {
 
   const content = fs.readFileSync(absolutePath, "utf-8");
   const terms: GlossaryTerm[] = [];
+  const state: ParserState = {
+    definition: [],
+    inCodeBlock: false,
+    isSubTerm: false,
+    parentTerm: null,
+    section: "",
+    term: null,
+  };
 
-  // Split content by lines
-  const lines = content.split("\n");
-
-  let currentSection = "";
-  let currentTerm: string | null = null;
-  let currentParentTerm: string | null = null;
-  let currentDefinition: string[] = [];
-  let isSubTerm = false;
-  let inCodeBlock = false;
-
-  for (const line of lines) {
+  for (const line of content.split("\n")) {
     // Track code blocks to skip them
     if (line.trim().startsWith("```")) {
-      inCodeBlock = !inCodeBlock;
+      state.inCodeBlock = !state.inCodeBlock;
       continue;
     }
-
-    if (inCodeBlock) {
+    if (state.inCodeBlock) {
       continue;
     }
-
-    // Check for section headers (## Section)
-    if (line.startsWith("## ") && !line.startsWith("### ")) {
-      // Save previous term if exists
-      if (currentTerm) {
-        terms.push(
-          createGlossaryTerm(
-            currentTerm,
-            currentDefinition,
-            currentSection,
-            isSubTerm,
-            currentParentTerm
-          )
-        );
-      }
-
-      currentSection = line.replace(SECTION_HEADER_REGEX, "").trim();
-      currentTerm = null;
-      currentDefinition = [];
-      isSubTerm = false;
-      currentParentTerm = null;
-      continue;
-    }
-
-    // Check for main term headers (### Term)
-    if (line.startsWith("### ")) {
-      // Save previous term if exists
-      if (currentTerm) {
-        terms.push(
-          createGlossaryTerm(
-            currentTerm,
-            currentDefinition,
-            currentSection,
-            isSubTerm,
-            currentParentTerm
-          )
-        );
-      }
-
-      currentTerm = line.replace(MAIN_TERM_HEADER_REGEX, "").trim();
-      currentDefinition = [];
-      isSubTerm = false;
-      currentParentTerm = null;
-      continue;
-    }
-
-    // Check for sub-term headers (#### Sub-term)
-    if (line.startsWith("#### ")) {
-      // Save previous term if exists
-      if (currentTerm) {
-        terms.push(
-          createGlossaryTerm(
-            currentTerm,
-            currentDefinition,
-            currentSection,
-            isSubTerm,
-            currentParentTerm
-          )
-        );
-      }
-
-      const parentTerm = currentTerm;
-      currentTerm = line.replace(SUB_TERM_HEADER_REGEX, "").trim();
-      currentDefinition = [];
-      isSubTerm = true;
-      currentParentTerm = parentTerm;
-      continue;
-    }
-
-    // Collect definition content
-    if (
-      currentTerm &&
-      line.trim() &&
-      !line.startsWith("#") &&
-      !(
-        line.trim().startsWith("```") ||
-        line.trim().startsWith("graph ") ||
-        line.trim().startsWith("_Learn more")
-      )
-    ) {
-      currentDefinition.push(line.trim());
-    }
+    processLine(line, state, terms);
   }
 
   // Save the last term
-  if (currentTerm) {
-    terms.push(
-      createGlossaryTerm(
-        currentTerm,
-        currentDefinition,
-        currentSection,
-        isSubTerm,
-        currentParentTerm
-      )
-    );
-  }
+  flushTerm(state, terms);
 
   return terms;
+}
+
+function processLine(line: string, state: ParserState, terms: GlossaryTerm[]) {
+  // Section headers (## Section)
+  if (line.startsWith("## ") && !line.startsWith("### ")) {
+    flushTerm(state, terms);
+    state.section = line.replace(SECTION_HEADER_REGEX, "").trim();
+    state.term = null;
+    state.definition = [];
+    state.isSubTerm = false;
+    state.parentTerm = null;
+    return;
+  }
+
+  // Main term headers (### Term)
+  if (line.startsWith("### ")) {
+    flushTerm(state, terms);
+    state.term = line.replace(MAIN_TERM_HEADER_REGEX, "").trim();
+    state.definition = [];
+    state.isSubTerm = false;
+    state.parentTerm = null;
+    return;
+  }
+
+  // Sub-term headers (#### Sub-term)
+  if (line.startsWith("#### ")) {
+    flushTerm(state, terms);
+    const parentTerm = state.term;
+    state.term = line.replace(SUB_TERM_HEADER_REGEX, "").trim();
+    state.definition = [];
+    state.isSubTerm = true;
+    state.parentTerm = parentTerm;
+    return;
+  }
+
+  if (state.term && isDefinitionLine(line)) {
+    state.definition.push(line.trim());
+  }
+}
+
+function isDefinitionLine(line: string): boolean {
+  const trimmed = line.trim();
+  if (!trimmed || line.startsWith("#")) {
+    return false;
+  }
+  return !(
+    trimmed.startsWith("```") ||
+    trimmed.startsWith("graph ") ||
+    trimmed.startsWith("_Learn more")
+  );
+}
+
+function flushTerm(state: ParserState, terms: GlossaryTerm[]) {
+  if (!state.term) {
+    return;
+  }
+  terms.push(
+    createGlossaryTerm({
+      definition: state.definition,
+      isSubTerm: state.isSubTerm,
+      parentTerm: state.parentTerm,
+      section: state.section,
+      term: state.term,
+    })
+  );
 }
 
 /**
  * Create a glossary term object with all metadata
  */
-// biome-ignore lint/nursery/useMaxParams: all parameters necessary for term metadata
-function createGlossaryTerm(
-  term: string,
-  definitionLines: string[],
-  section: string,
-  isSubTerm: boolean,
-  parentTerm: string | null
-): GlossaryTerm {
+function createGlossaryTerm(draft: TermDraft): GlossaryTerm {
   // Clean up the term (remove quotes, parentheses content for main term)
-  const cleanTerm = term.replace(/^['"]|['"]$/g, "");
+  const cleanTerm = draft.term.replace(SURROUNDING_QUOTES_REGEX, "");
 
   // Extract aliases
   const aliases = generateAliases(cleanTerm);
 
   // Create definition from collected lines
-  const definition = definitionLines.join(" ").trim();
+  const definition = draft.definition.join(" ").trim();
 
   // Generate anchor link
   const anchor = cleanTerm
     .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, "")
-    .replace(/\s+/g, "-");
+    .replace(NON_ANCHOR_CHARS_REGEX, "")
+    .replace(WHITESPACE_REGEX, "-");
 
-  const link = `/home/glossary#${anchor}`;
+  const link = `/resources/glossary#${anchor}`;
 
   return {
-    term: cleanTerm,
     aliases,
     definition,
-    section,
+    isSubTerm: draft.isSubTerm,
     link,
-    isSubTerm,
-    parentTerm: parentTerm || undefined,
+    parentTerm: draft.parentTerm || undefined,
+    section: draft.section,
+    term: cleanTerm,
   };
 }
 
@@ -213,7 +193,7 @@ function generateAliases(term: string): string[] {
   // Handle quoted terms (e.g., 'agent' or "tool")
   const quotedMatch = term.match(QUOTED_TERM_REGEX);
   if (quotedMatch) {
-    const unquoted = quotedMatch[1];
+    const [, unquoted] = quotedMatch;
     aliases.add(unquoted);
     aliases.add(unquoted.toLowerCase());
   }

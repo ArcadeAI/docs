@@ -79,7 +79,7 @@ function pathnameIsMissingLocale(pathname: string): boolean {
 }
 
 export function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
+  const { pathname } = request.nextUrl;
 
   const englishLocaleRedirectPath = getEnglishLocaleRedirectPath(pathname);
   if (englishLocaleRedirectPath) {
@@ -119,10 +119,10 @@ export function proxy(request: NextRequest) {
   );
   if (currentLocale) {
     response.cookies.set("NEXT_LOCALE", currentLocale, {
+      httpOnly: false,
       maxAge: 31_536_000,
       path: "/",
       sameSite: "lax",
-      httpOnly: false,
     });
   }
 
@@ -140,6 +140,6 @@ export function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon\\.ico|manifest|public|.*\\.svg$|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.webp$|.*\\.ico$|.*\\.webmanifest$|.*\\.css$|.*\\.js$|.*\\.woff$|.*\\.woff2$|.*\\.ttf$|.*\\.eot$|.*\\.otf$|.*\\.pdf$|.*\\.txt$|.*\\.xml$|.*\\.json$|.*\\.py$|.*\\.mp4$).*)",
+    "/((?!api|llms\\.mdx|_next/static|_next/image|favicon\\.ico|manifest|public|.*\\.svg$|.*\\.png$|.*\\.jpg$|.*\\.jpeg$|.*\\.gif$|.*\\.webp$|.*\\.ico$|.*\\.webmanifest$|.*\\.css$|.*\\.js$|.*\\.woff$|.*\\.woff2$|.*\\.ttf$|.*\\.eot$|.*\\.otf$|.*\\.pdf$|.*\\.yaml$|.*\\.yml$|.*\\.txt$|.*\\.xml$|.*\\.json$|.*\\.py$|.*\\.mp4$).*)",
   ],
 };

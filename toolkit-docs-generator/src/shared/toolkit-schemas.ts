@@ -1,12 +1,12 @@
 /**
  * Zod schemas for the merged toolkit JSON contract, shared by the Next.js
- * docs app (app/_lib and app/_components/toolkit-docs) and
+ * docs app (lib/ and components/toolkit-docs) and
  * toolkit-docs-generator. The generator validates its own output against
  * these schemas on write (see src/generator/json-generator.ts); the app
- * validates on read (see app/_lib/toolkit-data.ts) so a file that doesn't
+ * validates on read (see lib/toolkit-data.ts) so a file that doesn't
  * match this shape is rejected instead of crashing mid-render.
  *
- * This lives under toolkit-docs-generator/src/ (not app/_lib or a repo-root
+ * This lives under toolkit-docs-generator/src/ (not lib/ or a repo-root
  * shared/ directory) because the generator's tsconfig pins `rootDir` to its
  * own `src/`, so a shared module outside that directory fails the
  * generator's build (`TS6059: File '...' is not under 'rootDir'`). The app
@@ -26,13 +26,13 @@ import { INTEGRATION_CATEGORIES } from "./toolkit-primitives";
 // ============================================================================
 
 export const ToolParameterSchema = z.object({
-  name: z.string(),
-  type: z.string(),
-  innerType: z.string().optional(),
-  required: z.boolean(),
   description: z.string().nullable(),
   enum: z.array(z.string()).nullable(),
   inferrable: z.boolean().default(true),
+  innerType: z.string().optional(),
+  name: z.string(),
+  required: z.boolean(),
+  type: z.string(),
 });
 
 export type ToolParameter = z.infer<typeof ToolParameterSchema>;
@@ -54,8 +54,8 @@ export type ToolAuth = z.infer<typeof ToolAuthSchema>;
 // ============================================================================
 
 export const ToolOutputSchema = z.object({
-  type: z.string(),
   description: z.string().nullable(),
+  type: z.string(),
 });
 
 export type ToolOutput = z.infer<typeof ToolOutputSchema>;
@@ -95,17 +95,17 @@ export type ToolMetadataClassification = z.infer<
 >;
 
 export const ToolMetadataBehaviorSchema = z.object({
-  operations: z.array(z.string()).default([]),
-  readOnly: z.boolean().optional(),
   destructive: z.boolean().optional(),
   idempotent: z.boolean().optional(),
   openWorld: z.boolean().optional(),
+  operations: z.array(z.string()).default([]),
+  readOnly: z.boolean().optional(),
 });
 export type ToolMetadataBehavior = z.infer<typeof ToolMetadataBehaviorSchema>;
 
 export const ToolMetadataSchema = z.object({
-  classification: ToolMetadataClassificationSchema,
   behavior: ToolMetadataBehaviorSchema,
+  classification: ToolMetadataClassificationSchema,
   extras: z.record(z.string(), z.unknown()).optional().nullable(),
 });
 export type ToolMetadata = z.infer<typeof ToolMetadataSchema>;
@@ -206,24 +206,24 @@ export type DocumentationChunkPosition = z.infer<
  * A documentation chunk represents custom content to inject into docs
  */
 export const DocumentationChunkSchema = z.object({
-  /** Type of content */
-  type: DocumentationChunkTypeSchema,
+  /** The actual content (markdown string) */
+  content: z.string(),
+  /** Optional section header for sidebar navigation (e.g., "## Auth Setup") */
+  header: z.string().optional(),
   /** Where to inject the content */
   location: DocumentationChunkLocationSchema,
   /** Position relative to location (before, after, replace) */
   position: DocumentationChunkPositionSchema,
-  /** The actual content (markdown string) */
-  content: z.string(),
+  /** Optional priority for ordering (lower = earlier, default = 100) */
+  priority: z.number().optional(),
   /** Optional title for callouts */
   title: z.string().optional(),
+  /** Type of content */
+  type: DocumentationChunkTypeSchema,
   /** Optional variant for styling (e.g., "destructive" for warnings) */
   variant: z
     .enum(["default", "destructive", "warning", "info", "success"])
     .optional(),
-  /** Optional section header for sidebar navigation (e.g., "## Auth Setup") */
-  header: z.string().optional(),
-  /** Optional priority for ordering (lower = earlier, default = 100) */
-  priority: z.number().optional(),
 });
 
 export type DocumentationChunk = z.infer<typeof DocumentationChunkSchema>;
@@ -236,12 +236,12 @@ export type DocumentationChunk = z.infer<typeof DocumentationChunkSchema>;
  * Parameter value with type information for code generation
  */
 export const ExampleParameterValueSchema = z.object({
-  /** The example value to use in code */
-  value: z.unknown(),
-  /** Parameter type */
-  type: z.enum(["string", "integer", "boolean", "array", "object"]),
   /** Whether this parameter is required */
   required: z.boolean(),
+  /** Parameter type */
+  type: z.enum(["string", "integer", "boolean", "array", "object"]),
+  /** The example value to use in code */
+  value: z.unknown(),
 });
 
 export type ExampleParameterValue = z.infer<typeof ExampleParameterValueSchema>;
@@ -251,16 +251,16 @@ export type ExampleParameterValue = z.infer<typeof ExampleParameterValueSchema>;
  * Used to generate Python/JavaScript example code
  */
 export const ToolCodeExampleSchema = z.object({
-  /** Full tool name (e.g., "Github.SetStarred") */
-  toolName: z.string(),
+  /** Auth provider ID if auth is required */
+  authProvider: z.string().optional(),
   /** Parameter values with type info */
   parameters: z.record(z.string(), ExampleParameterValueSchema),
   /** Whether this tool requires user authorization */
   requiresAuth: z.boolean(),
-  /** Auth provider ID if auth is required */
-  authProvider: z.string().optional(),
   /** Optional tab label for the code example */
   tabLabel: z.string().optional(),
+  /** Full tool name (e.g., "Github.SetStarred") */
+  toolName: z.string(),
 });
 
 export type ToolCodeExample = z.infer<typeof ToolCodeExampleSchema>;
@@ -276,9 +276,9 @@ export type ToolCodeExample = z.infer<typeof ToolCodeExampleSchema>;
 export const ToolkitSubPageSchema = z.union([
   z.string(),
   z.object({
-    type: z.string().min(1),
     content: z.string(),
     relativePath: z.string().min(1),
+    type: z.string().min(1),
   }),
 ]);
 
@@ -289,20 +289,20 @@ export type ToolkitSubPage = z.infer<typeof ToolkitSubPageSchema>;
 // ============================================================================
 
 export const MergedToolSchema = z.object({
-  name: z.string(),
-  qualifiedName: z.string(),
-  fullyQualifiedName: z.string(),
-  description: z.string().nullable(),
-  parameters: z.array(ToolParameterSchema),
   auth: ToolAuthSchema.nullable(),
-  secrets: z.array(z.string()),
-  secretsInfo: z.array(ToolSecretSchema).default([]),
-  output: ToolOutputSchema.nullable(),
-  /** Custom documentation chunks for this tool */
-  documentationChunks: z.array(DocumentationChunkSchema).default([]),
   /** Generated code example configuration */
   codeExample: ToolCodeExampleSchema.optional(),
+  description: z.string().nullable(),
+  /** Custom documentation chunks for this tool */
+  documentationChunks: z.array(DocumentationChunkSchema).default([]),
+  fullyQualifiedName: z.string(),
   metadata: ToolMetadataSchema.nullable().optional(),
+  name: z.string(),
+  output: ToolOutputSchema.nullable(),
+  parameters: z.array(ToolParameterSchema),
+  qualifiedName: z.string(),
+  secrets: z.array(z.string()),
+  secretsInfo: z.array(ToolSecretSchema).default([]),
 });
 
 export type MergedTool = z.infer<typeof MergedToolSchema>;
@@ -322,34 +322,60 @@ export type ToolkitAuthType = z.infer<typeof ToolkitAuthTypeSchema>;
 
 export const MergedToolkitMetadataSchema = z.object({
   category: ToolkitCategorySchema,
+  docsLink: z.string(),
   iconUrl: z.string(),
   isBYOC: z.boolean(),
-  isPro: z.boolean(),
-  type: ToolkitTypeSchema,
-  docsLink: z.string(),
   isComingSoon: z.boolean(),
   isHidden: z.boolean(),
+  isPro: z.boolean(),
+  type: ToolkitTypeSchema,
 });
 
 export type MergedToolkitMetadata = z.infer<typeof MergedToolkitMetadataSchema>;
 
 export const MergedToolkitAuthSchema = z.object({
-  type: ToolkitAuthTypeSchema,
-  providerId: z.string().nullable(),
   allScopes: z.array(z.string()),
+  providerId: z.string().nullable(),
+  type: ToolkitAuthTypeSchema,
 });
 
 export type MergedToolkitAuth = z.infer<typeof MergedToolkitAuthSchema>;
 
 export const MergedToolkitSchema = z.object({
+  /** Authentication requirements */
+  auth: MergedToolkitAuthSchema.nullable(),
+  /**
+   * SHA-256 fingerprint of hand-authored curation before generated
+   * post-processing edits. Used only for incremental generation.
+   */
+  curationSourceHash: z.string().optional(),
+  /** Custom imports for MDX */
+  customImports: z.array(z.string()).default([]),
+  /** Toolkit description */
+  description: z.string().nullable(),
+  /** Toolkit-level documentation chunks */
+  documentationChunks: z.array(DocumentationChunkSchema).default([]),
+  /** Generation metadata */
+  generatedAt: z.string().optional(),
   /** Unique toolkit ID (e.g., "Github") */
   id: z.string(),
   /** Human-readable label (e.g., "GitHub") */
   label: z.string(),
-  /** Toolkit version (e.g., "1.0.0") */
-  version: z.string(),
-  /** Toolkit description */
-  description: z.string().nullable(),
+  /** Metadata from Design System */
+  metadata: MergedToolkitMetadataSchema,
+  /**
+   * Optional override for the pip package name shown in the install
+   * snippet. Not currently emitted by the generator (toolkits derive it
+   * from `id` via `buildPipPackageName`), but the docs app has always
+   * accepted an explicit override here, so it stays part of the contract.
+   */
+  pipPackageName: z.string().optional(),
+  /**
+   * Sub-pages that exist for this toolkit.
+   * Each entry is either a string (legacy slug) or a rich object with
+   * { type, content, relativePath } for inline MDX sub-page content.
+   */
+  subPages: z.array(ToolkitSubPageSchema).default([]),
   /** LLM-generated summary (optional) */
   summary: z.string().optional(),
   /**
@@ -366,36 +392,10 @@ export const MergedToolkitSchema = z.object({
    * together with `summaryStale: true`. Cleared together with it.
    */
   summaryStaleReason: z.string().optional(),
-  /** Metadata from Design System */
-  metadata: MergedToolkitMetadataSchema,
-  /** Authentication requirements */
-  auth: MergedToolkitAuthSchema.nullable(),
   /** All tools in this toolkit */
   tools: z.array(MergedToolSchema),
-  /** Toolkit-level documentation chunks */
-  documentationChunks: z.array(DocumentationChunkSchema).default([]),
-  /** Custom imports for MDX */
-  customImports: z.array(z.string()).default([]),
-  /**
-   * Sub-pages that exist for this toolkit.
-   * Each entry is either a string (legacy slug) or a rich object with
-   * { type, content, relativePath } for inline MDX sub-page content.
-   */
-  subPages: z.array(ToolkitSubPageSchema).default([]),
-  /**
-   * Optional override for the pip package name shown in the install
-   * snippet. Not currently emitted by the generator (toolkits derive it
-   * from `id` via `buildPipPackageName`), but the docs app has always
-   * accepted an explicit override here, so it stays part of the contract.
-   */
-  pipPackageName: z.string().optional(),
-  /**
-   * SHA-256 fingerprint of hand-authored curation before generated
-   * post-processing edits. Used only for incremental generation.
-   */
-  curationSourceHash: z.string().optional(),
-  /** Generation metadata */
-  generatedAt: z.string().optional(),
+  /** Toolkit version (e.g., "1.0.0") */
+  version: z.string(),
 });
 
 export type MergedToolkit = z.infer<typeof MergedToolkitSchema>;
@@ -405,21 +405,21 @@ export type MergedToolkit = z.infer<typeof MergedToolkitSchema>;
 // ============================================================================
 
 export const ToolkitIndexEntrySchema = z.object({
+  authType: ToolkitAuthTypeSchema,
+  category: ToolkitCategorySchema,
   id: z.string(),
   label: z.string(),
-  version: z.string(),
-  category: ToolkitCategorySchema,
-  type: ToolkitTypeSchema,
   toolCount: z.number(),
-  authType: ToolkitAuthTypeSchema,
+  type: ToolkitTypeSchema,
+  version: z.string(),
 });
 
 export type ToolkitIndexEntry = z.infer<typeof ToolkitIndexEntrySchema>;
 
 export const ToolkitIndexSchema = z.object({
   generatedAt: z.string(),
-  version: z.string(),
   toolkits: z.array(ToolkitIndexEntrySchema),
+  version: z.string(),
 });
 
 export type ToolkitIndex = z.infer<typeof ToolkitIndexSchema>;

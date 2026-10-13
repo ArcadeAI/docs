@@ -8,6 +8,9 @@ on:
 
 jobs:
   update-dates:
+    # Scheduled runs need the upstream repo's secrets; forks and demo copies
+    # only run this when triggered manually.
+    if: github.repository == 'ArcadeAI/docs' || github.event_name != 'schedule'
     runs-on: ubuntu-latest
 
     steps:
@@ -17,16 +20,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: '22.x'
+          bun-version-file: package.json
 
       - name: Update repository dates
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          node .github/scripts/update-example-dates.js
+          bun .github/scripts/update-example-dates.js
 
       - name: Check for changes
         id: check-changes

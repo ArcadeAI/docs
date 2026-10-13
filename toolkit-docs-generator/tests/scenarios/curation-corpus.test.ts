@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createMarkdownCurationSource } from "../../src/sources/markdown-curation";
 import type { MergedToolkit } from "../../src/types/index";
 
-const GENERATOR_ROOT = join(__dirname, "../..");
+const GENERATOR_ROOT = join(import.meta.dirname, "../..");
 const CURATION_DIR = join(GENERATOR_ROOT, "curation");
 const TOOLKITS_DIR = join(GENERATOR_ROOT, "data", "toolkits");
 

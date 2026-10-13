@@ -20,7 +20,7 @@ import { join } from "node:path";
  * repo root during `next build`/`next dev` and the function root at runtime,
  * and Next.js file tracing recognizes it well enough to ship the JSON.
  *
- * Every entry point here (root `pnpm` scripts, CI workflows, Vitest) runs from
+ * Every entry point here (root `bun run` scripts, CI workflows, Vitest) runs from
  * the repo root; anything that doesn't can set `TOOLKIT_DATA_DIR`.
  */
 export const DEFAULT_TOOLKIT_DATA_DIR = join(

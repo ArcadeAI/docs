@@ -1,36 +1,36 @@
 import { describe, expect, it } from "vitest";
-import { filterTools } from "@/app/_components/toolkit-docs/components/available-tools-filter";
+import { filterTools } from "@/components/toolkit-docs/components/available-tools-filter";
 
 const makeTool = (
   name: string,
   behavior: Record<string, boolean | undefined>
 ) => ({
-  name,
-  qualifiedName: `Test.${name}`,
   description: null,
   metadata: {
-    classification: { serviceDomains: [] },
     behavior: {
-      operations: [],
-      readOnly: behavior.readOnly,
       destructive: behavior.destructive,
       idempotent: behavior.idempotent,
       openWorld: behavior.openWorld,
+      operations: [],
+      readOnly: behavior.readOnly,
     },
+    classification: { serviceDomains: [] },
     extras: null,
   },
+  name,
+  qualifiedName: `Test.${name}`,
 });
 
 describe("filterTools — behavior flags", () => {
   const tools = [
-    makeTool("ReadOnly", { readOnly: true, destructive: false }),
-    makeTool("Destructive", { readOnly: false, destructive: true }),
-    makeTool("Safe", { readOnly: false, destructive: false }),
+    makeTool("ReadOnly", { destructive: false, readOnly: true }),
+    makeTool("Destructive", { destructive: true, readOnly: false }),
+    makeTool("Safe", { destructive: false, readOnly: false }),
     {
-      name: "NoMeta",
-      qualifiedName: "Test.NoMeta",
       description: null,
       metadata: null,
+      name: "NoMeta",
+      qualifiedName: "Test.NoMeta",
     },
   ];
 
@@ -54,7 +54,7 @@ describe("filterTools — behavior flags", () => {
 
   it("ANDs multiple flags together", () => {
     const result = filterTools(tools, "", "all", {
-      behaviorFlags: { readOnly: true, destructive: true },
+      behaviorFlags: { destructive: true, readOnly: true },
     });
     expect(result).toHaveLength(0);
   });

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
-import { toToolkitMarkdown } from "@/app/_lib/toolkit-markdown";
+import type { ToolkitData } from "@/components/toolkit-docs/types";
+import { toToolkitMarkdown } from "@/lib/toolkit-markdown";
 
 /**
  * MARTECH-17 follow-up: toolkit pages render per-tool detail client-only, so the
@@ -9,54 +9,54 @@ import { toToolkitMarkdown } from "@/app/_lib/toolkit-markdown";
  * serializer emits that detail.
  */
 const fixture: ToolkitData = {
+  auth: null,
+  customImports: [],
+  description: "A demo toolkit.",
+  documentationChunks: [],
   id: "Demo",
   label: "Demo",
-  version: "1.0.0",
-  description: "A demo toolkit.",
   metadata: {
     category: "development",
+    docsLink: "",
     iconUrl: "",
     isBYOC: false,
-    isPro: false,
-    type: "arcade",
-    docsLink: "",
     isComingSoon: false,
     isHidden: false,
+    isPro: false,
+    type: "arcade",
   },
-  auth: null,
-  documentationChunks: [],
-  customImports: [],
   subPages: [],
   tools: [
     {
-      name: "DoThing",
-      qualifiedName: "Demo.DoThing",
-      fullyQualifiedName: "Demo.DoThing@1.0.0",
+      auth: { providerId: "demo", providerType: "oauth2", scopes: ["scope.a"] },
+      codeExample: {
+        parameters: {
+          recipient: { required: true, type: "string", value: "someone" },
+        },
+        requiresAuth: true,
+        toolName: "Demo.DoThing",
+      },
       description: "Does a thing.",
+      documentationChunks: [],
+      fullyQualifiedName: "Demo.DoThing@1.0.0",
+      name: "DoThing",
+      output: { description: "The result", type: "json" },
       parameters: [
         {
-          name: "recipient",
-          type: "string",
-          required: true,
           description: "Who to do the thing for",
           enum: null,
           inferrable: true,
+          name: "recipient",
+          required: true,
+          type: "string",
         },
       ],
-      auth: { providerId: "demo", providerType: "oauth2", scopes: ["scope.a"] },
+      qualifiedName: "Demo.DoThing",
       secrets: ["API_KEY"],
       secretsInfo: [],
-      output: { type: "json", description: "The result" },
-      documentationChunks: [],
-      codeExample: {
-        toolName: "Demo.DoThing",
-        parameters: {
-          recipient: { value: "someone", type: "string", required: true },
-        },
-        requiresAuth: true,
-      },
     },
   ],
+  version: "1.0.0",
 };
 
 describe("toToolkitMarkdown", () => {

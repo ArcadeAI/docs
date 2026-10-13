@@ -1,8 +1,17 @@
 import { readFileSync } from "node:fs";
 import { readdir, stat } from "node:fs/promises";
 import { join } from "node:path";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 import { redirects } from "../redirects";
+
+// app/sitemap.ts reads the page list from lib/source.ts, whose generated
+// `.source` module imports every MDX page (and its components) into the test
+// process. Build the same loader from the files on disk instead; see
+// tests/helpers/fs-source.ts.
+vi.mock("@/lib/source", async () => {
+  const { createFsSource } = await import("./helpers/fs-source");
+  return { source: createFsSource() };
+});
 
 const toolkitDataDir = join(
   process.cwd(),
@@ -31,10 +40,13 @@ test("sitemap lists expected URLs", async () => {
     // Known page should be present
     expect(urls).toContain("https://example.test/en/references/changelog");
 
-    // Generated toolkit pages (served by the `[toolkitId]` dynamic route,
-    // which the directory walk above can't see) must still make it into the
-    // sitemap. This fails if the toolkit-route merge in app/sitemap.ts is
-    // reverted.
+    // The published sitemap has never listed the API reference page (the old
+    // directory walk skipped every folder named "api"); keep the URL set equal.
+    expect(urls).not.toContain("https://example.test/en/references/api");
+
+    // Generated toolkit pages (served by lib/toolkit-route.tsx, which the
+    // content page tree can't see) must still make it into the sitemap. This
+    // fails if the toolkit-route merge in app/sitemap.ts is reverted.
     expect(urls).toContain(
       "https://example.test/en/resources/integrations/development/github"
     );

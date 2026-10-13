@@ -16,47 +16,47 @@ import type {
 const chunk = (
   overrides: Partial<DocumentationChunk> = {}
 ): DocumentationChunk => ({
-  type: "markdown",
+  content: "",
   location: "header",
   position: "before",
-  content: "",
+  type: "markdown",
   ...overrides,
 });
 
 const tool = (overrides: Partial<MergedTool> = {}): MergedTool => ({
-  name: "Example",
-  qualifiedName: "Github.Example",
-  fullyQualifiedName: "Github.Example@1.0.0",
-  description: "desc",
-  parameters: [],
   auth: null,
+  description: "desc",
+  documentationChunks: [],
+  fullyQualifiedName: "Github.Example@1.0.0",
+  name: "Example",
+  output: null,
+  parameters: [],
+  qualifiedName: "Github.Example",
   secrets: [],
   secretsInfo: [],
-  output: null,
-  documentationChunks: [],
   ...overrides,
 });
 
 const toolkit = (overrides: Partial<MergedToolkit> = {}): MergedToolkit => ({
+  auth: null,
+  customImports: [],
+  description: null,
+  documentationChunks: [],
   id: "github",
   label: "GitHub",
-  version: "1.0.0",
-  description: null,
   metadata: {
     category: "development",
+    docsLink: "",
     iconUrl: "",
     isBYOC: false,
-    isPro: false,
-    type: "arcade",
-    docsLink: "",
     isComingSoon: false,
     isHidden: false,
+    isPro: false,
+    type: "arcade",
   },
-  auth: null,
-  tools: [],
-  documentationChunks: [],
-  customImports: [],
   subPages: [],
+  tools: [],
+  version: "1.0.0",
   ...overrides,
 });
 
@@ -112,20 +112,20 @@ describe("detectStaleSecretReferences", () => {
       ],
     });
     const current = toolkit({
-      tools: [tool({ secrets: ["GITHUB_SERVER_URL"] })],
       documentationChunks: [
         chunk({
-          location: "before_available_tools",
           content:
             "| Secret | Required |\n| `GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN` | Notifications |",
+          location: "before_available_tools",
         }),
       ],
+      tools: [tool({ secrets: ["GITHUB_SERVER_URL"] })],
     });
     const result = detectStaleSecretReferences(current, previous);
     expect(result).toHaveLength(1);
     expect(result[0]?.location).toEqual({
-      kind: "toolkit_chunk",
       chunkIndex: 0,
+      kind: "toolkit_chunk",
     });
   });
 
@@ -144,23 +144,23 @@ describe("detectStaleSecretReferences", () => {
     const current = toolkit({
       tools: [
         tool({
-          qualifiedName: "Github.GetNotificationSummary",
-          secrets: ["GITHUB_SERVER_URL"],
           documentationChunks: [
             chunk({
               content:
                 "Requires GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN for notifications.",
             }),
           ],
+          qualifiedName: "Github.GetNotificationSummary",
+          secrets: ["GITHUB_SERVER_URL"],
         }),
       ],
     });
     const result = detectStaleSecretReferences(current, previous);
     expect(result).toHaveLength(1);
     expect(result[0]?.location).toEqual({
+      chunkIndex: 0,
       kind: "tool_chunk",
       toolQualifiedName: "Github.GetNotificationSummary",
-      chunkIndex: 0,
     });
   });
 });

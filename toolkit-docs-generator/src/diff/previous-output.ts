@@ -9,13 +9,13 @@ import {
 
 const DEFAULT_PREVIOUS_TOOLKIT_METADATA = {
   category: "development" as const,
+  docsLink: "",
   iconUrl: "",
   isBYOC: false,
-  isPro: false,
-  type: "arcade" as const,
-  docsLink: "",
   isComingSoon: false,
   isHidden: false,
+  isPro: false,
+  type: "arcade" as const,
 };
 
 const toRecord = (value: unknown): Record<string, unknown> | null =>
@@ -36,12 +36,12 @@ const deriveQualifiedName = (
   fallbackToolkitId: string,
   fallbackIndex: number
 ): string => {
-  const qualifiedName = raw.qualifiedName;
+  const { qualifiedName } = raw;
   if (typeof qualifiedName === "string" && qualifiedName.length > 0) {
     return qualifiedName;
   }
 
-  const fullyQualifiedName = raw.fullyQualifiedName;
+  const { fullyQualifiedName } = raw;
   if (typeof fullyQualifiedName === "string" && fullyQualifiedName.length > 0) {
     return (
       fullyQualifiedName.split("@")[0] ??
@@ -49,7 +49,7 @@ const deriveQualifiedName = (
     );
   }
 
-  const name = raw.name;
+  const { name } = raw;
   if (typeof name === "string" && name.length > 0) {
     return `${fallbackToolkitId}.${name}`;
   }
@@ -61,14 +61,14 @@ const deriveVersion = (
   raw: Record<string, unknown>,
   fallbackVersion: string
 ): string => {
-  const fullyQualifiedName = raw.fullyQualifiedName;
+  const { fullyQualifiedName } = raw;
   if (
     typeof fullyQualifiedName !== "string" ||
     fullyQualifiedName.length === 0
   ) {
     return fallbackVersion;
   }
-  const version = fullyQualifiedName.split("@")[1];
+  const [, version] = fullyQualifiedName.split("@");
   return version && version.length > 0 ? version : fallbackVersion;
 };
 
@@ -78,7 +78,7 @@ const normalizeParameter = (
   const record = toRecord(value);
   if (!record) return null;
 
-  const name = record.name;
+  const { name } = record;
   if (typeof name !== "string" || name.length === 0) {
     return null;
   }
@@ -93,11 +93,11 @@ const normalizeParameter = (
     ...(typeof record.innerType === "string"
       ? { innerType: record.innerType }
       : {}),
-    required: Boolean(record.required),
     description: toStringOrNull(record.description),
     enum: enumValues,
     inferrable:
       typeof record.inferrable === "boolean" ? record.inferrable : true,
+    required: Boolean(record.required),
   };
 };
 
@@ -131,7 +131,7 @@ const normalizeAuth = (value: unknown): ToolDefinition["auth"] => {
 };
 
 const normalizeOutput = (value: unknown): ToolDefinition["output"] => {
-  if (value == null) return null;
+  if (value === null || value === undefined) return null;
   const record = toRecord(value);
   if (!record) return null;
 
@@ -146,8 +146,8 @@ const normalizeOutput = (value: unknown): ToolDefinition["output"] => {
         })();
 
   return {
-    type: outputType,
     description: toStringOrNull(record.description),
+    type: outputType,
   };
 };
 
@@ -168,24 +168,24 @@ const normalizeTool = (
   const toolVersion = deriveVersion(record, toolkitVersion);
 
   const candidate: ToolDefinition = {
-    name: toolName,
-    qualifiedName,
+    auth: normalizeAuth(record.auth),
+    description: toStringOrNull(record.description),
     fullyQualifiedName:
       typeof record.fullyQualifiedName === "string" &&
       record.fullyQualifiedName.length > 0
         ? record.fullyQualifiedName
         : `${qualifiedName}@${toolVersion}`,
-    description: toStringOrNull(record.description),
-    toolkitDescription: toStringOrNull(record.toolkitDescription),
+    name: toolName,
+    output: normalizeOutput(record.output),
     parameters: Array.isArray(record.parameters)
       ? record.parameters.flatMap((parameter) => {
           const normalized = normalizeParameter(parameter);
           return normalized ? [normalized] : [];
         })
       : [],
-    auth: normalizeAuth(record.auth),
+    qualifiedName,
     secrets: toStringArray(record.secrets),
-    output: normalizeOutput(record.output),
+    toolkitDescription: toStringOrNull(record.toolkitDescription),
   };
 
   const parsed = ToolDefinitionSchema.safeParse(candidate);
@@ -196,7 +196,7 @@ const getVersionFromTool = (
   tool: ToolDefinition | undefined
 ): string | undefined => {
   if (!tool) return;
-  const version = tool.fullyQualifiedName.split("@")[1];
+  const [, version] = tool.fullyQualifiedName.split("@");
   return version && version.length > 0 ? version : undefined;
 };
 
@@ -207,7 +207,7 @@ const getFallbackReason = (error: {
   issues: ReadonlyArray<{ path: readonly PropertyKey[]; message: string }>;
   message: string;
 }): string => {
-  const firstIssue = error.issues[0];
+  const [firstIssue] = error.issues;
   return firstIssue
     ? `${firstIssue.path.map(String).join(".")}: ${firstIssue.message}`
     : error.message;
@@ -250,7 +250,7 @@ const normalizeFallbackTools = (
     return [normalized];
   });
 
-  return { tools, droppedToolCount, droppedParameterCount };
+  return { droppedParameterCount, droppedToolCount, tools };
 };
 
 type FallbackToolkitResult = {
@@ -287,11 +287,11 @@ const readFallbackCustomSections = (
   MergedToolkit,
   "documentationChunks" | "customImports" | "subPages"
 > => ({
-  documentationChunks: Array.isArray(record.documentationChunks)
-    ? (record.documentationChunks as MergedToolkit["documentationChunks"])
-    : [],
   customImports: Array.isArray(record.customImports)
     ? (record.customImports as MergedToolkit["customImports"])
+    : [],
+  documentationChunks: Array.isArray(record.documentationChunks)
+    ? (record.documentationChunks as MergedToolkit["documentationChunks"])
     : [],
   subPages: Array.isArray(record.subPages)
     ? (record.subPages as MergedToolkit["subPages"])
@@ -317,25 +317,25 @@ const buildFallbackToolkit = (
   const customSections = readFallbackCustomSections(record);
 
   return {
+    droppedParameterCount,
+    droppedToolCount,
     toolkit: {
+      description,
       id: toolkitId,
       label,
       version,
-      description,
       ...summaryFields,
+      auth: authResult.success ? authResult.data : null,
       metadata: metadataResult.success
         ? metadataResult.data
         : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
-      auth: authResult.success ? authResult.data : null,
       tools: tools.map((tool) => ({
         ...tool,
-        secretsInfo: [],
         documentationChunks: [],
+        secretsInfo: [],
       })),
       ...customSections,
     },
-    droppedToolCount,
-    droppedParameterCount,
   };
 };
 
@@ -359,9 +359,9 @@ export const parsePreviousToolkitForDiff = (
   const record = toRecord(payload);
   if (!record) {
     return {
+      reason: "Previous output file is not a JSON object",
       toolkit: null,
       usedFallback: true,
-      reason: "Previous output file is not a JSON object",
     };
   }
 
@@ -369,10 +369,10 @@ export const parsePreviousToolkitForDiff = (
   const { toolkit, droppedToolCount, droppedParameterCount } =
     buildFallbackToolkit(record, fallbackId);
   return {
+    droppedParameterCount,
+    droppedToolCount,
+    reason: fallbackReason,
     toolkit,
     usedFallback: true,
-    reason: fallbackReason,
-    droppedToolCount,
-    droppedParameterCount,
   };
 };

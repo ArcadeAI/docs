@@ -86,7 +86,7 @@ const findSummaryStaleRefs = (
   toolkit: MergedToolkit,
   removedSecrets: readonly string[]
 ): StaleSecretReference[] => {
-  const summary = toolkit.summary;
+  const { summary } = toolkit;
   if (!summary) {
     return [];
   }
@@ -95,9 +95,9 @@ const findSummaryStaleRefs = (
   for (const removedSecret of removedSecrets) {
     if (contentMentionsSecret(summary, removedSecret)) {
       refs.push({
-        removedSecret,
-        location: { kind: "summary" },
         content: summary,
+        location: { kind: "summary" },
+        removedSecret,
       });
     }
   }
@@ -116,9 +116,9 @@ const findToolkitChunkStaleRefs = (
     for (const removedSecret of removedSecrets) {
       if (contentMentionsSecret(chunk.content, removedSecret)) {
         refs.push({
-          removedSecret,
-          location: { kind: "toolkit_chunk", chunkIndex },
           content: chunk.content,
+          location: { chunkIndex, kind: "toolkit_chunk" },
+          removedSecret,
         });
       }
     }
@@ -139,13 +139,13 @@ const findToolChunkStaleRefs = (
       for (const removedSecret of removedSecrets) {
         if (contentMentionsSecret(chunk.content, removedSecret)) {
           refs.push({
-            removedSecret,
+            content: chunk.content,
             location: {
+              chunkIndex,
               kind: "tool_chunk",
               toolQualifiedName: tool.qualifiedName,
-              chunkIndex,
             },
-            content: chunk.content,
+            removedSecret,
           });
         }
       }
@@ -202,7 +202,7 @@ const summaryHasConfigLink = (summary: string): boolean =>
 export const detectSecretCoverageGaps = (
   toolkit: MergedToolkit
 ): SecretCoverageGap[] => {
-  const summary = toolkit.summary;
+  const { summary } = toolkit;
   if (!summary) {
     return [];
   }
@@ -228,8 +228,8 @@ export const detectSecretCoherenceIssues = (
   toolkit: MergedToolkit,
   previousToolkit?: MergedToolkit
 ): SecretCoherenceIssues => ({
-  staleReferences: detectStaleSecretReferences(toolkit, previousToolkit),
   coverageGaps: detectSecretCoverageGaps(toolkit),
+  staleReferences: detectStaleSecretReferences(toolkit, previousToolkit),
 });
 
 export const hasCoherenceIssues = (issues: SecretCoherenceIssues): boolean =>
@@ -257,7 +257,7 @@ export type StaleSecretEditTarget =
     };
 
 const locationKey = (ref: StaleSecretReference): string => {
-  const location = ref.location;
+  const { location } = ref;
   switch (location.kind) {
     case "summary":
       return "summary";
@@ -292,29 +292,29 @@ export const groupStaleRefsByTarget = (
   }
 
   return Array.from(byKey.values()).map(({ ref, removedSecrets }) => {
-    const location = ref.location;
+    const { location } = ref;
     const sortedRemovedSecrets = Array.from(removedSecrets).sort();
     switch (location.kind) {
       case "summary":
         return {
+          content: ref.content,
           kind: "summary",
           removedSecrets: sortedRemovedSecrets,
-          content: ref.content,
         };
       case "toolkit_chunk":
         return {
-          kind: "toolkit_chunk",
           chunkIndex: location.chunkIndex,
-          removedSecrets: sortedRemovedSecrets,
           content: ref.content,
+          kind: "toolkit_chunk",
+          removedSecrets: sortedRemovedSecrets,
         };
       case "tool_chunk":
         return {
-          kind: "tool_chunk",
-          toolQualifiedName: location.toolQualifiedName,
           chunkIndex: location.chunkIndex,
-          removedSecrets: sortedRemovedSecrets,
           content: ref.content,
+          kind: "tool_chunk",
+          removedSecrets: sortedRemovedSecrets,
+          toolQualifiedName: location.toolQualifiedName,
         };
       default:
         throw new Error("Unknown stale secret location kind");

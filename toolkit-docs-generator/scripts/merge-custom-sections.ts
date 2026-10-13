@@ -1,8 +1,8 @@
-#!/usr/bin/env npx ts-node
+#!/usr/bin/env bun
 /**
  * Script to merge custom sections into existing toolkit JSON files.
  *
- * Usage: npx ts-node scripts/merge-custom-sections.ts \
+ * Usage: bun scripts/merge-custom-sections.ts \
  *   --custom-sections ../data/custom_sections_for_merge.json \
  *   --toolkits-dir data/toolkits
  */
@@ -180,7 +180,7 @@ const mergeToolkitFile = async (
 
     return { merged: true, skipped: false };
   } catch (error) {
-    return { merged: false, skipped: false, error: String(error) };
+    return { error: String(error), merged: false, skipped: false };
   }
 };
 
@@ -259,7 +259,7 @@ async function main() {
     }
   }
 
-  logSummary({ mergedCount, skippedCount, errors });
+  logSummary({ errors, mergedCount, skippedCount });
 }
 
 main().catch((error) => {

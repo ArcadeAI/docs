@@ -94,47 +94,47 @@ describe("ProgressTracker", () => {
 
   it("calls onUpdate callback on start", () => {
     const onUpdate = vi.fn();
-    const tracker = createProgressTracker({ total: 2, onUpdate });
+    const tracker = createProgressTracker({ onUpdate, total: 2 });
 
     tracker.start("Toolkit1");
 
     expect(onUpdate).toHaveBeenCalledWith({
-      type: "start",
-      toolkitId: "Toolkit1",
       current: 0,
+      toolkitId: "Toolkit1",
       total: 2,
+      type: "start",
     });
   });
 
   it("calls onUpdate callback on complete with tool count", () => {
     const onUpdate = vi.fn();
-    const tracker = createProgressTracker({ total: 2, onUpdate });
+    const tracker = createProgressTracker({ onUpdate, total: 2 });
 
     tracker.start("Toolkit1");
     tracker.complete("Toolkit1", 15);
 
     expect(onUpdate).toHaveBeenCalledWith({
-      type: "complete",
-      toolkitId: "Toolkit1",
       current: 1,
-      total: 2,
       toolCount: 15,
+      toolkitId: "Toolkit1",
+      total: 2,
+      type: "complete",
     });
   });
 
   it("calls onUpdate callback on error", () => {
     const onUpdate = vi.fn();
-    const tracker = createProgressTracker({ total: 2, onUpdate });
+    const tracker = createProgressTracker({ onUpdate, total: 2 });
 
     tracker.start("Toolkit1");
     tracker.error("Toolkit1", "Failed!");
 
     expect(onUpdate).toHaveBeenCalledWith({
-      type: "error",
-      toolkitId: "Toolkit1",
       current: 1,
-      total: 2,
       message: "Failed!",
+      toolkitId: "Toolkit1",
+      total: 2,
+      type: "error",
     });
   });
 
@@ -166,11 +166,11 @@ describe("ProgressTracker", () => {
 
   it("generates progress string with all components", () => {
     const tracker = createProgressTracker({
-      total: 10,
       barWidth: 10,
-      showPercentage: true,
       showCount: true,
       showElapsed: true,
+      showPercentage: true,
+      total: 10,
     });
 
     tracker.start("TestToolkit");

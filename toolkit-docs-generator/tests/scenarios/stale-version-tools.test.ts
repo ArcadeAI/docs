@@ -22,14 +22,14 @@ import type { MergedToolkit, ToolDefinition } from "../../src/types/index";
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
-  name: "TestTool",
-  qualifiedName: "Github.TestTool",
-  fullyQualifiedName: "Github.TestTool@3.1.3",
-  description: "A test tool",
-  parameters: [],
   auth: null,
-  secrets: [],
+  description: "A test tool",
+  fullyQualifiedName: "Github.TestTool@3.1.3",
+  name: "TestTool",
   output: null,
+  parameters: [],
+  qualifiedName: "Github.TestTool",
+  secrets: [],
   ...overrides,
 });
 
@@ -38,37 +38,37 @@ const createMergedToolkit = (
   version: string,
   toolNames: string[]
 ): MergedToolkit => ({
+  auth: null,
+  customImports: [],
+  description: "A toolkit",
+  documentationChunks: [],
+  generatedAt: new Date().toISOString(),
   id,
   label: id,
-  version,
-  description: "A toolkit",
   metadata: {
     category: "development",
+    docsLink: "https://docs.example.com",
     iconUrl: "https://example.com/icon.svg",
     isBYOC: false,
-    isPro: false,
-    type: "arcade",
-    docsLink: "https://docs.example.com",
     isComingSoon: false,
     isHidden: false,
+    isPro: false,
+    type: "arcade",
   },
-  auth: null,
+  subPages: [],
   tools: toolNames.map((name) => ({
-    name,
-    qualifiedName: `${id}.${name}`,
-    fullyQualifiedName: `${id}.${name}@${version}`,
-    description: "A test tool",
-    parameters: [],
     auth: null,
+    description: "A test tool",
+    documentationChunks: [],
+    fullyQualifiedName: `${id}.${name}@${version}`,
+    name,
+    output: null,
+    parameters: [],
+    qualifiedName: `${id}.${name}`,
     secrets: [],
     secretsInfo: [],
-    output: null,
-    documentationChunks: [],
   })),
-  documentationChunks: [],
-  customImports: [],
-  subPages: [],
-  generatedAt: new Date().toISOString(),
+  version,
 });
 
 describe("Scenario: Stale version tools filtered by highest-version coherence", () => {
@@ -76,36 +76,36 @@ describe("Scenario: Stale version tools filtered by highest-version coherence", 
     // Simulate Engine API returning mixed-version Github tools
     const toolSource = new InMemoryToolDataSource([
       createTool({
+        fullyQualifiedName: "Github.CreateIssue@3.1.3",
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
-        fullyQualifiedName: "Github.CreateIssue@3.1.3",
       }),
       createTool({
+        fullyQualifiedName: "Github.ListPullRequests@3.1.3",
         name: "ListPullRequests",
         qualifiedName: "Github.ListPullRequests",
-        fullyQualifiedName: "Github.ListPullRequests@3.1.3",
       }),
       createTool({
+        fullyQualifiedName: "Github.SetStarred@3.1.3",
         name: "SetStarred",
         qualifiedName: "Github.SetStarred",
-        fullyQualifiedName: "Github.SetStarred@3.1.3",
       }),
       // Stale tools from older version
       createTool({
+        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
         name: "GetNotificationSummary",
         qualifiedName: "Github.GetNotificationSummary",
-        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
       }),
       createTool({
+        fullyQualifiedName: "Github.ListNotifications@2.0.1",
         name: "ListNotifications",
         qualifiedName: "Github.ListNotifications",
-        fullyQualifiedName: "Github.ListNotifications@2.0.1",
       }),
     ]);
     const metadataSource = new InMemoryMetadataSource([]);
     const dataSource = createCombinedToolkitDataSource({
-      toolSource,
       metadataSource,
+      toolSource,
     });
 
     const result = await dataSource.fetchAllToolkitsData();
@@ -125,19 +125,19 @@ describe("Scenario: Stale version tools filtered by highest-version coherence", 
         "Github",
         [
           createTool({
+            fullyQualifiedName: "Github.CreateIssue@3.1.3",
             name: "CreateIssue",
             qualifiedName: "Github.CreateIssue",
-            fullyQualifiedName: "Github.CreateIssue@3.1.3",
           }),
           createTool({
+            fullyQualifiedName: "Github.ListPullRequests@3.1.3",
             name: "ListPullRequests",
             qualifiedName: "Github.ListPullRequests",
-            fullyQualifiedName: "Github.ListPullRequests@3.1.3",
           }),
           createTool({
+            fullyQualifiedName: "Github.SetStarred@3.1.3",
             name: "SetStarred",
             qualifiedName: "Github.SetStarred",
-            fullyQualifiedName: "Github.SetStarred@3.1.3",
           }),
         ],
       ],
@@ -173,14 +173,14 @@ describe("Scenario: Stale version tools filtered by highest-version coherence", 
         "Github",
         [
           createTool({
+            fullyQualifiedName: "Github.CreateIssue@3.1.3",
             name: "CreateIssue",
             qualifiedName: "Github.CreateIssue",
-            fullyQualifiedName: "Github.CreateIssue@3.1.3",
           }),
           createTool({
+            fullyQualifiedName: "Github.ListPullRequests@3.1.3",
             name: "ListPullRequests",
             qualifiedName: "Github.ListPullRequests",
-            fullyQualifiedName: "Github.ListPullRequests@3.1.3",
           }),
         ],
       ],

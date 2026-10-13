@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { readToolkitData } from "@/app/_lib/toolkit-data";
-import { toToolkitMarkdown } from "@/app/_lib/toolkit-markdown";
+import { readToolkitData } from "@/lib/toolkit-data";
+import { toToolkitMarkdown } from "@/lib/toolkit-markdown";
 
 // Cache headers for toolkit data responses. This route content-negotiates on
 // Accept (JSON vs. text/markdown), so Vary: Accept is required — without it a
@@ -19,7 +19,7 @@ export async function GET(
     const { toolkitId } = await params;
 
     // Validate toolkitId is not empty
-    if (!toolkitId?.trim()) {
+    if (!toolkitId.trim()) {
       return NextResponse.json(
         { error: "Toolkit ID is required" },
         { status: 400 }
@@ -49,7 +49,6 @@ export async function GET(
 
     return NextResponse.json(data, { headers: CACHE_HEADERS });
   } catch (error) {
-    // biome-ignore lint/suspicious/noConsole: Server-side error logging is appropriate
     console.error("Error fetching toolkit data:", error);
     return NextResponse.json(
       { error: "Internal server error" },

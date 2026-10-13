@@ -5,35 +5,35 @@
 import chalk from "chalk";
 
 export interface ProgressEvent {
-  readonly type: "start" | "update" | "complete" | "error";
-  readonly toolkitId: string;
   readonly current: number;
-  readonly total: number;
-  readonly toolCount?: number | undefined;
   readonly message?: string | undefined;
+  readonly toolCount?: number | undefined;
+  readonly toolkitId: string;
+  readonly total: number;
+  readonly type: "start" | "update" | "complete" | "error";
 }
 
 export interface ProgressTrackerConfig {
-  /** Total number of items to process */
-  readonly total: number;
   /** Progress bar width in characters (default: 30) */
   readonly barWidth?: number;
-  /** Show percentage (default: true) */
-  readonly showPercentage?: boolean;
+  /** Callback when progress updates */
+  readonly onUpdate?: ((event: ProgressEvent) => void) | undefined;
   /** Show count (default: true) */
   readonly showCount?: boolean;
   /** Show elapsed time (default: true) */
   readonly showElapsed?: boolean;
-  /** Callback when progress updates */
-  readonly onUpdate?: ((event: ProgressEvent) => void) | undefined;
+  /** Show percentage (default: true) */
+  readonly showPercentage?: boolean;
+  /** Total number of items to process */
+  readonly total: number;
 }
 
 interface ToolkitProgress {
-  readonly toolkitId: string;
+  readonly completedAt?: number | undefined;
+  readonly startedAt?: number | undefined;
   readonly status: "pending" | "in_progress" | "done" | "error";
   readonly toolCount?: number | undefined;
-  readonly startedAt?: number | undefined;
-  readonly completedAt?: number | undefined;
+  readonly toolkitId: string;
 }
 
 /**
@@ -106,16 +106,16 @@ export class ProgressTracker {
    */
   start(toolkitId: string): void {
     this.toolkitProgress.set(toolkitId, {
-      toolkitId,
-      status: "in_progress",
       startedAt: Date.now(),
+      status: "in_progress",
+      toolkitId,
     });
 
     this.onUpdate?.({
-      type: "start",
-      toolkitId,
       current: this.completed,
+      toolkitId,
       total: this.total,
+      type: "start",
     });
   }
 
@@ -125,21 +125,21 @@ export class ProgressTracker {
   complete(toolkitId: string, toolCount?: number): void {
     const existing = this.toolkitProgress.get(toolkitId);
     this.toolkitProgress.set(toolkitId, {
-      toolkitId,
+      completedAt: Date.now(),
+      startedAt: existing?.startedAt,
       status: "done",
       toolCount,
-      startedAt: existing?.startedAt,
-      completedAt: Date.now(),
+      toolkitId,
     });
 
     this.completed += 1;
 
     this.onUpdate?.({
-      type: "complete",
-      toolkitId,
       current: this.completed,
-      total: this.total,
       toolCount,
+      toolkitId,
+      total: this.total,
+      type: "complete",
     });
   }
 
@@ -149,20 +149,20 @@ export class ProgressTracker {
   error(toolkitId: string, message: string): void {
     const existing = this.toolkitProgress.get(toolkitId);
     this.toolkitProgress.set(toolkitId, {
-      toolkitId,
-      status: "error",
-      startedAt: existing?.startedAt,
       completedAt: Date.now(),
+      startedAt: existing?.startedAt,
+      status: "error",
+      toolkitId,
     });
 
     this.completed += 1;
 
     this.onUpdate?.({
-      type: "error",
-      toolkitId,
       current: this.completed,
-      total: this.total,
       message,
+      toolkitId,
+      total: this.total,
+      type: "error",
     });
   }
 
@@ -262,12 +262,12 @@ export class ProgressTracker {
     const avgTime = this.completed > 0 ? elapsed / this.completed : 0;
 
     return {
-      total: this.total,
-      completed: this.completed,
-      errors,
-      totalTools,
-      elapsed: formatDuration(elapsed),
       avgTimePerToolkit: formatDuration(avgTime),
+      completed: this.completed,
+      elapsed: formatDuration(elapsed),
+      errors,
+      total: this.total,
+      totalTools,
     };
   }
 }

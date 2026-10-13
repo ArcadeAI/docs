@@ -10,7 +10,7 @@ Behavior below comes from `src/sources/markdown-curation.ts` (compiles the
 directory), `src/shared/toolkit-schemas.ts` (schemas),
 `src/merger/data-merger.ts` (attaches curation to toolkits and tools), and, in
 the app, `toolkit-page.tsx`, `tool-section.tsx`, and
-`documentation-chunk-renderer.tsx` under `app/_components/toolkit-docs/`.
+`documentation-chunk-renderer.tsx` under `components/toolkit-docs/`.
 
 ## Directory layout
 
@@ -232,8 +232,8 @@ detectable offline.
 
 ```bash
 cd toolkit-docs-generator
-../node_modules/.bin/tsx src/cli/index.ts validate-curation
-../node_modules/.bin/tsx src/cli/index.ts validate-curation --toolkit GoogleFlights
+bun src/cli/index.ts validate-curation
+bun src/cli/index.ts validate-curation --toolkit GoogleFlights
 ```
 
 This needs no credentials. It reports per-toolkit counts, prints each failing
@@ -241,15 +241,14 @@ toolkit with its message, and exits non-zero on failure. It runs the same
 compiler generation uses, so a pass means kinds, frontmatter, and MDX are all
 valid. It cannot check `tool:` targets.
 
-Invoke `tsx` by path because `toolkit-docs-generator` has no package for
-`pnpm exec`.
+`bun` runs TypeScript directly, so no `tsx` install is needed.
 
 Seeing a chunk on a page needs generated JSON. Either wait for the automated
 generation PR, or generate that one toolkit with Engine credentials and run
-`pnpm dev` from the repo root:
+`bun run dev` from the repo root:
 
 ```bash
-../node_modules/.bin/tsx src/cli/index.ts generate \
+bun src/cli/index.ts generate \
   --providers "GoogleFlights" \
   --api-url "$ARCADE_API_URL" \
   --custom-sections ./curation \

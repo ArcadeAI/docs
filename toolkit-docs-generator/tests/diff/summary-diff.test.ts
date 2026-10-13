@@ -10,26 +10,26 @@ import {
 import type { MergedToolkit } from "../../src/types/index";
 
 const createMergedToolkit = (id: string, version: string): MergedToolkit => ({
+  auth: null,
+  customImports: [],
+  description: "A toolkit",
+  documentationChunks: [],
+  generatedAt: new Date().toISOString(),
   id,
   label: id,
-  version,
-  description: "A toolkit",
   metadata: {
     category: "development",
+    docsLink: "https://docs.example.com",
     iconUrl: "https://example.com/icon.svg",
     isBYOC: false,
-    isPro: false,
-    type: "arcade",
-    docsLink: "https://docs.example.com",
     isComingSoon: false,
     isHidden: false,
+    isPro: false,
+    type: "arcade",
   },
-  auth: null,
-  tools: [],
-  documentationChunks: [],
-  customImports: [],
   subPages: [],
-  generatedAt: new Date().toISOString(),
+  tools: [],
+  version,
 });
 
 describe("detectSummaryChanges", () => {
@@ -37,17 +37,17 @@ describe("detectSummaryChanges", () => {
     const summary: SummaryToolkit[] = [
       {
         name: "Github",
-        version: "1.0.1",
-        toolCount: 10,
-        requiresSecrets: true,
         requiresOauth: true,
+        requiresSecrets: true,
+        toolCount: 10,
+        version: "1.0.1",
       },
       {
         name: "Slack",
-        version: "1.0.0",
-        toolCount: 8,
-        requiresSecrets: false,
         requiresOauth: true,
+        requiresSecrets: false,
+        toolCount: 8,
+        version: "1.0.0",
       },
     ];
 
@@ -67,17 +67,17 @@ describe("detectSummaryChanges", () => {
     const summary: SummaryToolkit[] = [
       {
         name: "Github",
-        version: "1.0.0",
-        toolCount: 10,
-        requiresSecrets: true,
         requiresOauth: true,
+        requiresSecrets: true,
+        toolCount: 10,
+        version: "1.0.0",
       },
       {
         name: "Jira",
-        version: "2.0.0",
-        toolCount: 5,
-        requiresSecrets: false,
         requiresOauth: false,
+        requiresSecrets: false,
+        toolCount: 5,
+        version: "2.0.0",
       },
     ];
 
@@ -96,17 +96,17 @@ describe("detectSummaryChanges", () => {
     const summary: SummaryToolkit[] = [
       {
         name: "Github",
-        version: "1.0.1",
-        toolCount: 10,
-        requiresSecrets: true,
         requiresOauth: true,
+        requiresSecrets: true,
+        toolCount: 10,
+        version: "1.0.1",
       },
       {
         name: "Jira",
-        version: "2.0.0",
-        toolCount: 5,
-        requiresSecrets: false,
         requiresOauth: false,
+        requiresSecrets: false,
+        toolCount: 5,
+        version: "2.0.0",
       },
     ];
 
@@ -124,10 +124,10 @@ describe("detectSummaryChanges", () => {
     const summary: SummaryToolkit[] = [
       {
         name: "Google Calendar",
-        version: "2.0.0",
-        toolCount: 12,
-        requiresSecrets: true,
         requiresOauth: true,
+        requiresSecrets: true,
+        toolCount: 12,
+        version: "2.0.0",
       },
     ];
 
@@ -145,10 +145,10 @@ describe("detectSummaryChanges", () => {
     const summary: SummaryToolkit[] = [
       {
         name: "Github",
-        version: "1.0.1",
-        toolCount: 10,
-        requiresSecrets: true,
         requiresOauth: true,
+        requiresSecrets: true,
+        toolCount: 10,
+        version: "1.0.1",
       },
     ];
 

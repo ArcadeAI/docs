@@ -1,58 +1,61 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { MetadataRoute } from "next";
+import { source } from "@/lib/source";
+import { listValidIntegrationLinks } from "@/lib/toolkit-static-params";
 import { resolveToolkitDataDir } from "@/toolkit-docs-generator/src/shared/toolkit-data-dir";
-import { listValidIntegrationLinks } from "./_lib/toolkit-static-params";
 
 const SITE_URL = process.env.SITE_URL ?? "https://docs.arcade.dev";
 const NORMALIZED_SITE_URL = SITE_URL.replace(/\/+$/, "");
-const APP_DIR = path.join(process.cwd(), "app");
+const CONTENT_DIR = path.join(process.cwd(), "content", "docs");
 const TOOLKIT_DATA_DIR = resolveToolkitDataDir();
-const SKIP_DIRS = new Set(["_meta", "_api", "_redirects", "api"]);
-const INDEX_SUFFIX_REGEX = /\/index$/;
 let cachedRoutes: Promise<MetadataRoute.Sitemap> | null = null;
 
-async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
-  const dirs = await fs.readdir(dir, { withFileTypes: true });
-  const entries: MetadataRoute.Sitemap = [];
+/**
+ * Path segments the old `app/en/**` directory walk never descended into.
+ * "api" was there to keep route handlers out, but it also matched the page at
+ * /en/references/api, so the published sitemap has never listed that page.
+ * The same rule is applied to page slugs here so the URL set stays identical;
+ * remove "api" from this set to start listing the page.
+ */
+const SKIPPED_SEGMENTS = new Set(["_meta", "_api", "_redirects", "api"]);
 
-  for (const entry of dirs) {
-    if (entry.isDirectory()) {
-      if (SKIP_DIRS.has(entry.name) || entry.name.includes("[")) {
-        continue;
+/**
+ * One entry per MDX page known to the Fumadocs source. `lastModified` comes
+ * from the file's mtime, like the old `app/en/**` directory walk did; when the
+ * file cannot be stat-ed (for example a virtual page) the entry is emitted
+ * without a date rather than dropped.
+ */
+async function collectRoutes(): Promise<MetadataRoute.Sitemap> {
+  const pages = source
+    .getPages()
+    .filter(
+      (page) => !page.slugs.some((segment) => SKIPPED_SEGMENTS.has(segment))
+    );
+
+  return await Promise.all(
+    pages.map(async (page) => {
+      const entry: MetadataRoute.Sitemap[number] = {
+        url: `${NORMALIZED_SITE_URL}${page.url}`,
+      };
+      try {
+        const stats = await fs.stat(path.join(CONTENT_DIR, page.path));
+        entry.lastModified = stats.mtime;
+      } catch {
+        // No file on disk for this page; leave lastModified unset.
       }
-      const childRoutes = await collectRoutes(path.join(dir, entry.name));
-      entries.push(...childRoutes);
-      continue;
-    }
-
-    if (entry.isFile() && entry.name === "page.mdx") {
-      const filePath = path.join(dir, entry.name);
-      const stats = await fs.stat(filePath);
-
-      const relativeDir = path
-        .relative(APP_DIR, dir)
-        .replace(/\\/g, "/")
-        .replace(INDEX_SUFFIX_REGEX, "");
-
-      const routePath = relativeDir ? `/${relativeDir}` : "/";
-      entries.push({
-        url: `${NORMALIZED_SITE_URL}${routePath}`,
-        lastModified: stats.mtime,
-      });
-    }
-  }
-
-  return entries;
+      return entry;
+    })
+  );
 }
 
 /**
- * `[toolkitId]` directories are skipped above because they aren't literal
- * URLs — but `listValidIntegrationLinks()` (the same enumeration the
- * integrations index page uses) already resolves every toolkit that dynamic
- * route serves, plus a handful of authored static partner pages living
- * alongside it. Skip any link the directory walk already found (the static
- * ones) so it isn't listed twice.
+ * Toolkit pages are rendered from JSON, not MDX, so the Fumadocs source never
+ * sees them — but `listValidIntegrationLinks()` (the same enumeration the
+ * integrations index page uses) resolves every toolkit the catch-all route
+ * serves, plus a handful of authored static partner pages living alongside
+ * them. Skip any link the MDX walk already found (the static ones) so it isn't
+ * listed twice.
  */
 async function collectToolkitRoutes(
   existingPaths: Set<string>
@@ -64,7 +67,6 @@ async function collectToolkitRoutes(
     // The sitemap is an auxiliary artifact. Keep static pages available if a
     // malformed toolkit prevents the generated catalog from being enumerated;
     // the normal page/static-param validation still fails the build loudly.
-    // biome-ignore lint/suspicious/noConsole: surface a best-effort sitemap degradation
     console.warn("Unable to enumerate generated toolkit sitemap routes", error);
     return [];
   }
@@ -78,10 +80,10 @@ async function collectToolkitRoutes(
     }
 
     entries.push({
-      url: `${NORMALIZED_SITE_URL}${link}`,
-      lastModified: toolkitDataMtime,
       changeFrequency: "weekly",
+      lastModified: toolkitDataMtime,
       priority: 0.7,
+      url: `${NORMALIZED_SITE_URL}${link}`,
     });
   }
 
@@ -108,7 +110,7 @@ async function getToolkitDataMtime(): Promise<Date> {
 export default function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!cachedRoutes) {
     cachedRoutes = (async () => {
-      const routes = await collectRoutes(APP_DIR);
+      const routes = await collectRoutes();
       const existingPaths = new Set(
         routes.map((route) => route.url.slice(NORMALIZED_SITE_URL.length))
       );

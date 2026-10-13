@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Editorial Review for Merged Pull Requests
@@ -7,8 +7,8 @@
  * and create a follow-up PR with structural improvements.
  *
  * Usage:
- *   pnpm vale:editorial --pr 123
- *   GITHUB_TOKEN=xxx ANTHROPIC_API_KEY=xxx pnpm vale:editorial --pr 123
+ *   bun run vale:editorial --pr 123
+ *   GITHUB_TOKEN=xxx ANTHROPIC_API_KEY=xxx bun run vale:editorial --pr 123
  *
  * Prefers Anthropic (Claude) if ANTHROPIC_API_KEY is set, falls back to OpenAI.
  */
@@ -59,30 +59,30 @@ const STYLE_GUIDE = existsSync(STYLE_GUIDE_PATH)
   : "";
 
 // Types
-type PRInfo = {
-  number: number;
+interface PRInfo {
   author: string;
-  title: string;
   files: string[];
-};
+  number: number;
+  title: string;
+}
 
-type EditorialSuggestion = {
+interface EditorialSuggestion {
   filename: string;
   originalContent: string;
   revisedContent: string;
   summary: string;
-};
+}
 
 // AI client type
 type AIClient =
   | { type: "anthropic"; client: Anthropic }
   | { type: "openai"; client: OpenAI };
 
-type ValeIssue = {
+interface ValeIssue {
   line: number;
   message: string;
   rule: string;
-};
+}
 
 type ValeOutput = Record<string, ValeIssue[]>;
 
@@ -161,9 +161,9 @@ async function fixValeIssues(
   try {
     if (ai.type === "anthropic") {
       const response = await ai.client.messages.create({
-        model: "claude-sonnet-4-20250514",
         max_tokens: MAX_AI_TOKENS,
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ content: prompt, role: "user" }],
+        model: "claude-sonnet-5-5",
       });
       const textBlock = response.content.find((b) => b.type === "text");
       return textBlock?.type === "text"
@@ -172,9 +172,9 @@ async function fixValeIssues(
     }
 
     const response = await ai.client.chat.completions.create({
-      model: "gpt-4-turbo",
       max_tokens: MAX_AI_TOKENS,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ content: prompt, role: "user" }],
+      model: "gpt-4-turbo",
     });
     const result = response.choices[0]?.message?.content;
     return result ? stripCodeFences(result) : content;
@@ -199,8 +199,8 @@ function parseArgs(): { prNumber: number } {
 async function getPRInfo(octokit: Octokit, prNumber: number): Promise<PRInfo> {
   const { data: pr } = await octokit.rest.pulls.get({
     owner: OWNER,
-    repo: REPO,
     pull_number: prNumber,
+    repo: REPO,
   });
 
   if (!pr.merged) {
@@ -210,22 +210,22 @@ async function getPRInfo(octokit: Octokit, prNumber: number): Promise<PRInfo> {
 
   const { data: files } = await octokit.rest.pulls.listFiles({
     owner: OWNER,
-    repo: REPO,
     pull_number: prNumber,
+    repo: REPO,
   });
 
   const docFiles = files
-    .filter((f) => f.filename.startsWith("app/en/"))
+    .filter((f) => f.filename.startsWith("content/docs/"))
     .filter((f) => f.filename.endsWith(".md") || f.filename.endsWith(".mdx"))
     .filter((f) => f.status !== "removed")
     .slice(0, MAX_FILES)
     .map((f) => f.filename);
 
   return {
-    number: prNumber,
     author: pr.user?.login ?? "unknown",
-    title: pr.title,
     files: docFiles,
+    number: prNumber,
+    title: pr.title,
   };
 }
 
@@ -294,13 +294,13 @@ async function getEditorialFromAnthropic(
   const prompt = buildEditorialPrompt(filename, content);
 
   const response = await client.messages.create({
-    model: "claude-sonnet-4-20250514",
     max_tokens: MAX_AI_TOKENS,
-    messages: [{ role: "user", content: prompt }],
+    messages: [{ content: prompt, role: "user" }],
+    model: "claude-sonnet-5-5",
   });
 
   const textBlock = response.content.find((block) => block.type === "text");
-  if (!textBlock || textBlock.type !== "text") {
+  if (textBlock?.type !== "text") {
     return null;
   }
 
@@ -330,9 +330,9 @@ async function getEditorialFromOpenAI(
   const prompt = buildEditorialPrompt(filename, content);
 
   const response = await client.chat.completions.create({
-    model: "gpt-4-turbo",
     max_tokens: MAX_AI_TOKENS,
-    messages: [{ role: "user", content: prompt }],
+    messages: [{ content: prompt, role: "user" }],
+    model: "gpt-4-turbo",
   });
 
   const rawResponse = response.choices[0]?.message?.content;
@@ -390,16 +390,16 @@ async function createEditorialPR(
 
   const { data: ref } = await octokit.rest.git.getRef({
     owner: OWNER,
-    repo: REPO,
     ref: `heads/${repo.default_branch}`,
+    repo: REPO,
   });
 
   // Create new branch
   try {
     await octokit.rest.git.createRef({
       owner: OWNER,
-      repo: REPO,
       ref: `refs/heads/${branchName}`,
+      repo: REPO,
       sha: ref.object.sha,
     });
   } catch (error: unknown) {
@@ -407,11 +407,11 @@ async function createEditorialPR(
     const apiError = error as { status?: number };
     if (apiError.status === HTTP_UNPROCESSABLE_ENTITY) {
       await octokit.rest.git.updateRef({
-        owner: OWNER,
-        repo: REPO,
-        ref: `heads/${branchName}`,
-        sha: ref.object.sha,
         force: true,
+        owner: OWNER,
+        ref: `heads/${branchName}`,
+        repo: REPO,
+        sha: ref.object.sha,
       });
     } else {
       throw error;
@@ -434,9 +434,9 @@ async function createEditorialPR(
     // Get the current file to get its SHA
     const { data: currentFile } = await octokit.rest.repos.getContent({
       owner: OWNER,
-      repo: REPO,
       path: suggestion.filename,
       ref: branchName,
+      repo: REPO,
     });
 
     if (Array.isArray(currentFile) || currentFile.type !== "file") {
@@ -446,13 +446,13 @@ async function createEditorialPR(
 
     // Update the file
     await octokit.rest.repos.createOrUpdateFileContents({
-      owner: OWNER,
-      repo: REPO,
-      path: suggestion.filename,
-      message: `Editorial: ${suggestion.summary}`,
-      content: Buffer.from(finalContent).toString("base64"),
-      sha: currentFile.sha,
       branch: branchName,
+      content: Buffer.from(finalContent).toString("base64"),
+      message: `Editorial: ${suggestion.summary}`,
+      owner: OWNER,
+      path: suggestion.filename,
+      repo: REPO,
+      sha: currentFile.sha,
     });
   }
 
@@ -463,10 +463,6 @@ async function createEditorialPR(
 
   // Create PR
   const { data: newPR } = await octokit.rest.pulls.create({
-    owner: OWNER,
-    repo: REPO,
-    title: `Editorial improvements for #${prInfo.number}`,
-    head: branchName,
     base: repo.default_branch,
     body: `## Editorial Review
 
@@ -484,14 +480,18 @@ Review each change carefully - accept what improves the docs, modify what needs 
 
 ---
 _Generated by editorial review using ${providerName}_`,
+    head: branchName,
+    owner: OWNER,
+    repo: REPO,
+    title: `Editorial improvements for #${prInfo.number}`,
   });
 
   // Assign to original author
   await octokit.rest.issues.addAssignees({
+    assignees: [prInfo.author],
+    issue_number: newPR.number,
     owner: OWNER,
     repo: REPO,
-    issue_number: newPR.number,
-    assignees: [prInfo.author],
   });
 
   return newPR.html_url;
@@ -505,12 +505,12 @@ function initializeAIClient(
   if (anthropicKey) {
     console.log("Using Claude (Anthropic) for editorial review");
     return {
-      type: "anthropic",
       client: new Anthropic({ apiKey: anthropicKey }),
+      type: "anthropic",
     };
   }
   console.log("Using GPT-4 Turbo (OpenAI) for editorial review");
-  return { type: "openai", client: new OpenAI({ apiKey: openaiKey }) };
+  return { client: new OpenAI({ apiKey: openaiKey }), type: "openai" };
 }
 
 // Process a single file and return editorial suggestion if any
@@ -521,8 +521,8 @@ async function processFile(
 ): Promise<EditorialSuggestion | null> {
   const { data: fileData } = await octokit.rest.repos.getContent({
     owner: OWNER,
-    repo: REPO,
     path: filename,
+    repo: REPO,
   });
 
   if (Array.isArray(fileData) || fileData.type !== "file") {

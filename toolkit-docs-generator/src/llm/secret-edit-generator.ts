@@ -17,26 +17,26 @@ import type { LlmClient } from "./client";
 
 export interface SecretEditGeneratorConfig {
   readonly client: LlmClient;
-  readonly model: string;
-  readonly temperature?: number;
   readonly maxTokens?: number;
+  readonly model: string;
   readonly systemPrompt?: string;
+  readonly temperature?: number;
 }
 
 export interface SecretCleanupEditInput {
-  readonly kind: "summary" | "documentation_chunk";
   readonly content: string;
-  readonly removedSecrets: readonly string[];
   readonly currentSecrets: readonly string[];
+  readonly kind: "summary" | "documentation_chunk";
+  readonly removedSecrets: readonly string[];
   readonly toolkitLabel: string;
 }
 
 export interface SecretCoverageEditInput {
   readonly content: string;
-  readonly missingSecretNames: readonly string[];
   readonly currentSecrets: readonly string[];
-  readonly toolkitLabel: string;
+  readonly missingSecretNames: readonly string[];
   readonly requireConfigLink: boolean;
+  readonly toolkitLabel: string;
 }
 
 export interface SecretEditGenerator {
@@ -166,10 +166,10 @@ export class LlmSecretEditGenerator implements SecretEditGenerator {
       model: this.model,
       prompt,
       system: this.systemPrompt,
-      ...(this.temperature !== undefined
-        ? { temperature: this.temperature }
-        : {}),
-      ...(this.maxTokens !== undefined ? { maxTokens: this.maxTokens } : {}),
+      ...(this.temperature === undefined
+        ? {}
+        : { temperature: this.temperature }),
+      ...(this.maxTokens === undefined ? {} : { maxTokens: this.maxTokens }),
     });
     const trimmed = stripOptionalFence(response);
     if (trimmed.length === 0) {

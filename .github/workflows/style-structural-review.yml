@@ -10,8 +10,8 @@ on:
   pull_request:
     types: [closed]
     paths:
-      - "app/en/**/*.md"
-      - "app/en/**/*.mdx"
+      - "content/docs/**/*.md"
+      - "content/docs/**/*.mdx"
 
 permissions:
   contents: write
@@ -30,16 +30,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: "22.x"
-
-      - name: Install pnpm
-        run: npm install -g pnpm
+          bun-version-file: package.json
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install --frozen-lockfile
 
       - name: Install Vale
         run: |
@@ -49,7 +46,7 @@ jobs:
         run: vale sync
 
       - name: Run editorial review
-        run: pnpm vale:editorial --pr ${{ github.event.pull_request.number || inputs.pr_number }}
+        run: bun run vale:editorial --pr ${{ github.event.pull_request.number || inputs.pr_number }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

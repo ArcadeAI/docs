@@ -1,12 +1,17 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import fg from "fast-glob";
 import { scanURLs, validateFiles } from "next-validate-link";
 import { expect, test } from "vitest";
 import {
   INTEGRATION_CATEGORIES,
   normalizeToolkitId,
 } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import {
+  contentFileToUrl,
+  listContentFiles,
+  resolveContentFile,
+  toContentRelativePath,
+} from "./helpers/content-paths";
 
 const TIMEOUT = 30_000;
 
@@ -36,10 +41,10 @@ function getDocsLinkSlug(docsLink?: string | null): string | null {
   }
 }
 
-type ToolkitMetadataFile = {
+interface ToolkitMetadataFile {
   id?: string;
   metadata?: { docsLink?: string };
-};
+}
 
 function readToolkitMetadataFile(filePath: string): ToolkitMetadataFile | null {
   try {
@@ -105,7 +110,7 @@ function validateAnchorFragment(filePath: string, fragment: string): boolean {
     }
 
     return headings.includes(fragment.toLowerCase());
-  } catch (_error) {
+  } catch {
     // If we can't read the file, assume the fragment is invalid
     return false;
   }
@@ -182,7 +187,22 @@ function validateToolkitIntegrationRoute(
 test(
   "check for broken links",
   async () => {
+    // Every MDX file under content/docs is served by the optional catch-all
+    // route app/en/[[...slug]]/page.tsx. next-validate-link only sees that
+    // route file, so populate the `slug` param with each content page's URL
+    // segments (content/docs/a/b.mdx and content/docs/a/b/index.mdx both map
+    // to /en/a/b; content/docs/index.mdx maps to /en).
+    const contentFiles = await listContentFiles();
+    const slugValues = contentFiles.map((file) => ({
+      value: toContentRelativePath(contentFileToUrl(file))
+        .split("/")
+        .filter(Boolean),
+    }));
+
     const scanned = await scanURLs({
+      populate: {
+        "en/[[...slug]]": slugValues,
+      },
       preset: "next",
     });
 
@@ -230,7 +250,7 @@ test(
         }
 
         // Check if the base path exists with locale prefix
-        const baseExists = scanned.urls?.has(localeUrl);
+        const baseExists = scanned.urls.has(localeUrl);
 
         if (!baseExists) {
           return false;
@@ -238,15 +258,10 @@ test(
 
         // If there's a fragment, validate it by checking the actual file content
         if (fragment) {
-          // Convert URL path to file path
-          const filePath = join(
-            process.cwd(),
-            "app",
-            "en",
-            path.slice(1),
-            "page.mdx"
+          const filePath = resolveContentFile(path);
+          return (
+            filePath !== null && validateAnchorFragment(filePath, fragment)
           );
-          return validateAnchorFragment(filePath, fragment);
         }
 
         // If no fragment, the base path exists so it's valid
@@ -256,7 +271,15 @@ test(
       return false;
     };
 
-    const found = await validateFiles(await fg("app/**/*.{md,mdx}"), {
+    // Pass each page's own URL so relative links (`./sibling`) resolve
+    // against the page, not against the file system path.
+    const files = contentFiles.map((file) => ({
+      content: readFileSync(file, "utf-8"),
+      path: file,
+      url: contentFileToUrl(file),
+    }));
+
+    const found = await validateFiles(files, {
       scanned,
       whitelist,
     });

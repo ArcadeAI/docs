@@ -4,14 +4,14 @@ import { buildDocsAlert } from "../../src/alerts/docs-alert";
 
 const omittedMicrosoftUsers = {
   id: "MicrosoftUsers",
-  recovery: "omitted" as const,
   reason: "missing design-system metadata",
+  recovery: "omitted" as const,
 };
 
 const preservedGithub = {
   id: "Github",
-  recovery: "preserved" as const,
   reason: "Curation for Github targets unknown tool(s): CreateIsue",
+  recovery: "preserved" as const,
 };
 
 describe("buildDocsAlert", () => {
@@ -57,7 +57,7 @@ describe("buildDocsAlert", () => {
   it("falls back to the log for an unrecognized reason", () => {
     const message = buildDocsAlert({
       recoveredToolkits: [
-        { id: "Slack", recovery: "preserved", reason: "socket hang up" },
+        { id: "Slack", reason: "socket hang up", recovery: "preserved" },
       ],
     });
 

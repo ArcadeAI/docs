@@ -1,5 +1,5 @@
 /**
- * Auth provider pages that exist under app/en/references/auth-providers/,
+ * Auth provider pages that exist under content/docs/references/auth-providers/,
  * shared by the toolkit page header and the toolkit summary prompt so neither
  * links to a provider that has no page (for example `box`).
  *

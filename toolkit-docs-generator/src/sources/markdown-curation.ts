@@ -85,7 +85,8 @@ const parseMarkdownDocument = (
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Curation frontmatter is invalid (${sourcePath}): ${message}`
+      `Curation frontmatter is invalid (${sourcePath}): ${message}`,
+      { cause: error }
     );
   }
 
@@ -103,7 +104,8 @@ const validateMdx = async (body: string, sourcePath: string): Promise<void> => {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     throw new Error(
-      `Curation document has invalid MDX (${sourcePath}): ${message}`
+      `Curation document has invalid MDX (${sourcePath}): ${message}`,
+      { cause: error }
     );
   }
 };
@@ -182,9 +184,9 @@ const parsePage = async (
   }
   await validateMdx(document.body, sourcePath);
   return {
-    type: parsed.data.type,
     content: document.body,
     relativePath,
+    type: parsed.data.type,
   };
 };
 
@@ -293,8 +295,8 @@ const loadToolkitDirectory = async (
   );
 
   return CustomSectionsSchema.parse({
-    documentationChunks,
     customImports,
+    documentationChunks,
     subPages,
     toolChunks,
   });
@@ -317,7 +319,8 @@ const assertCurationRoot = async (rootPath: string): Promise<void> => {
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       throw new Error(
-        `Configured curation directory does not exist: ${rootPath}`
+        `Configured curation directory does not exist: ${rootPath}`,
+        { cause: error }
       );
     }
     throw error;
@@ -389,16 +392,16 @@ export const compileCurationDirectory = async (
   for (const toolkitId of toolkitIds) {
     try {
       results.push({
-        toolkitId,
         sections: await loadToolkitDirectory(
           join(rootPath, toolkitId),
           toolkitId
         ),
+        toolkitId,
       });
     } catch (error) {
       results.push({
-        toolkitId,
         error: error instanceof Error ? error : new Error(String(error)),
+        toolkitId,
       });
     }
   }

@@ -5,16 +5,16 @@ import type { ToolkitMetadata } from "../../src/types/index";
 const createMetadata = (
   overrides: Partial<ToolkitMetadata> = {}
 ): ToolkitMetadata => ({
-  id: "Github",
-  label: "GitHub",
   category: "development",
-  iconUrl: "https://design-system.arcade.dev/icons/github.svg",
-  isBYOC: false,
-  isPro: false,
-  type: "arcade",
   docsLink: "https://docs.arcade.dev/en/mcp-servers/development/github",
+  iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  id: "Github",
+  isBYOC: false,
   isComingSoon: false,
   isHidden: false,
+  isPro: false,
+  label: "GitHub",
+  type: "arcade",
   ...overrides,
 });
 
@@ -48,9 +48,9 @@ describe("DesignSystemMetadataSource", () => {
   it("does not map non-api toolkits to an Api variant", async () => {
     const source = createDesignSystemMetadataSourceFromToolkits([
       createMetadata({
+        category: "productivity",
         id: "FigmaApi",
         label: "Figma API",
-        category: "productivity",
         type: "arcade_starter",
       }),
     ]);

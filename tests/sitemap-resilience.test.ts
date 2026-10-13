@@ -2,7 +2,16 @@ import { beforeEach, expect, test, vi } from "vitest";
 
 const listValidIntegrationLinks = vi.fn();
 
-vi.mock("../app/_lib/toolkit-static-params", () => ({
+// app/sitemap.ts reads the page list from lib/source.ts, whose generated
+// `.source` module imports every MDX page (and its components) into the test
+// process. Build the same loader from the files on disk instead; see
+// tests/helpers/fs-source.ts.
+vi.mock("@/lib/source", async () => {
+  const { createFsSource } = await import("./helpers/fs-source");
+  return { source: createFsSource() };
+});
+
+vi.mock("../lib/toolkit-static-params", () => ({
   listValidIntegrationLinks,
 }));
 

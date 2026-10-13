@@ -39,7 +39,7 @@ It runs these steps:
 
 1. Type-check and test the toolkit docs generator.
 2. Generate toolkit JSON using `toolkit-docs-generator` and the public tool catalog.
-3. Sync sidebar navigation from `toolkit-docs-generator/data/toolkits` to the `_meta.tsx` files.
+3. Sync sidebar navigation from `toolkit-docs-generator/data/toolkits` to the category `meta.json` files.
 4. Create or update a pull request if there are changes.
 
 Required secrets:
@@ -57,11 +57,11 @@ Optional secrets:
 
 The docs site consumes the generated JSON directly:
 
-- `app/_lib/toolkit-data.ts` reads `toolkit-docs-generator/data/toolkits/<toolkit>.json`.
-- `app/_lib/toolkit-static-params.ts` builds routes from `index.json` and the design system catalog.
-- `app/_components/toolkit-docs` renders the toolkit page using `metadata.iconUrl`, `metadata.type`, and auth fields.
-- `app/en/resources/integrations/preview` uses the design system catalog for preview pages.
-- `app/en/resources/integrations/*/_meta.tsx` controls sidebar navigation for each category.
+- `lib/toolkit-data.ts` reads `toolkit-docs-generator/data/toolkits/<toolkit>.json`.
+- `lib/toolkit-static-params.ts` builds routes from `index.json` and the design system catalog.
+- `components/toolkit-docs` renders the toolkit page using `metadata.iconUrl`, `metadata.type`, and auth fields.
+- `lib/toolkit-route.tsx` serves every `/en/resources/integrations/<category>/<toolkit>` page from the JSON when no MDX page matches (the docs catch-all route falls back to it).
+- `content/docs/resources/integrations/<category>/meta.json` controls sidebar navigation for each category (Fumadocs folder meta).
 
 ## Sidebar sync step (required for navigation)
 
@@ -69,7 +69,7 @@ The docs site consumes the generated JSON directly:
 
 - Reads `toolkit-docs-generator/data/toolkits` for available toolkits.
 - Uses the design system for category and label, with JSON label fallback.
-- Groups toolkits by category and writes `_meta.tsx` files per category.
+- Groups toolkits by category and writes a Fumadocs `meta.json` per category.
 - Uses a fixed category order and alphabetical label order within each nav group.
 - Splits `optimized` vs `starter` using `metadata.type` (or an `*Api` fallback).
 - Does not prune categories unless you pass `--prune` (not used in the workflow).
@@ -114,7 +114,7 @@ The summary generator is configured to **never list OAuth scopes** in the genera
 ### Local example (editor on)
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate \
+bun src/cli/index.ts generate \
   --providers "Github" \
   --api-source public-catalog \
   --llm-provider openai \
@@ -137,9 +137,9 @@ pnpm dlx tsx src/cli/index.ts generate \
 
 ## Local usage
 
-Run these commands from the `toolkit-docs-generator` directory. Invoke `tsx` by
-path because this directory has no package for `pnpm exec`; the sidebar sync
-command below runs from the repo root instead.
+Run these commands from the `toolkit-docs-generator` directory with `bun`,
+which executes TypeScript directly (no `tsx` needed); the sidebar sync command
+below runs from the repo root instead.
 
 `--api-source public-catalog` is spelled out below because a bare run with no
 catalog or engine environment variables falls back to the mock fixtures.
@@ -147,7 +147,7 @@ catalog or engine environment variables falls back to the mock fixtures.
 Generate a single toolkit:
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate \
+bun src/cli/index.ts generate \
   --providers "Github:1.0.0" \
   --api-source public-catalog \
   --llm-provider openai \
@@ -159,7 +159,7 @@ pnpm dlx tsx src/cli/index.ts generate \
 Generate all toolkits:
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate \
+bun src/cli/index.ts generate \
   --all \
   --skip-unchanged \
   --api-source public-catalog \
@@ -172,7 +172,7 @@ pnpm dlx tsx src/cli/index.ts generate \
 Generate without LLM output:
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate \
+bun src/cli/index.ts generate \
   --providers "Asana:0.1.3" \
   --api-source public-catalog \
   --skip-examples \
@@ -183,7 +183,7 @@ pnpm dlx tsx src/cli/index.ts generate \
 Sync sidebar navigation locally:
 
 ```bash
-pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
+bun toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
 ```
 
 ## Ignoring toolkits
@@ -200,7 +200,7 @@ SomeInternalTool
 ```
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate --all \
+bun src/cli/index.ts generate --all \
   --ignore-file ./skip-toolkits.txt
 ```
 
@@ -227,7 +227,7 @@ SomeInternalTool
 The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
 
 ```bash
-pnpm dlx tsx src/cli/index.ts generate --all \
+bun src/cli/index.ts generate --all \
   --exclude-file ./remove-toolkits.txt
 ```
 
@@ -269,7 +269,7 @@ which `location` and `position` combinations actually render, and the full list
 of failure messages. Before writing a curation file, check your work with:
 
 ```bash
-pnpm dlx tsx src/cli/index.ts validate-curation --toolkit GoogleFlights
+bun src/cli/index.ts validate-curation --toolkit GoogleFlights
 ```
 
 That compiles the directory with the same code generation uses and needs no
@@ -287,7 +287,7 @@ from it. Two outcomes, and the difference matters:
 
 Each entry names the reason and the fix. Every run attaches the full report as
 its `failed-tools` artifact. Build the message locally against any report with
-`pnpm dlx tsx src/cli/index.ts alert --report <file>`. It prints nothing when a
+`bun src/cli/index.ts alert --report <file>`. It prints nothing when a
 run has nothing to report.
 
 No red run stays quiet. Three messages can arrive, and they answer different
@@ -309,4 +309,4 @@ message and the third, because those are two separate things to fix.
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
 - **Missing metadata**: when the catalog returns `metadata: null` for a toolkit the merger substitutes defaults and warns. Re-run once the experience API's design-system read recovers, or use `--require-complete` to fail instead of publishing defaults.
-- **Verify output fails**: run `pnpm dlx tsx src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.
+- **Verify output fails**: run `bun src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.

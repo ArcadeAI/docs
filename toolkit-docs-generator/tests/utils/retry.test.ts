@@ -17,7 +17,7 @@ describe("withRetry", () => {
       .mockRejectedValueOnce(new Error("timeout"))
       .mockResolvedValue("success");
 
-    const result = await withRetry(fn, { maxRetries: 3, initialDelayMs: 10 });
+    const result = await withRetry(fn, { initialDelayMs: 10, maxRetries: 3 });
 
     expect(result).toBe("success");
     expect(fn).toHaveBeenCalledTimes(2);
@@ -27,7 +27,7 @@ describe("withRetry", () => {
     const fn = vi.fn().mockRejectedValue(new Error("timeout"));
 
     await expect(
-      withRetry(fn, { maxRetries: 2, initialDelayMs: 10 })
+      withRetry(fn, { initialDelayMs: 10, maxRetries: 2 })
     ).rejects.toThrow("timeout");
 
     expect(fn).toHaveBeenCalledTimes(3); // Initial + 2 retries
@@ -37,7 +37,7 @@ describe("withRetry", () => {
     const fn = vi.fn().mockRejectedValue(new Error("invalid input"));
 
     await expect(
-      withRetry(fn, { maxRetries: 3, initialDelayMs: 10 })
+      withRetry(fn, { initialDelayMs: 10, maxRetries: 3 })
     ).rejects.toThrow("invalid input");
 
     expect(fn).toHaveBeenCalledTimes(1);
@@ -51,7 +51,7 @@ describe("withRetry", () => {
       .mockRejectedValueOnce(new Error("timeout 2"))
       .mockResolvedValue("success");
 
-    await withRetry(fn, { maxRetries: 3, initialDelayMs: 10, onRetry });
+    await withRetry(fn, { initialDelayMs: 10, maxRetries: 3, onRetry });
 
     expect(onRetry).toHaveBeenCalledTimes(2);
     expect(onRetry).toHaveBeenNthCalledWith(
@@ -73,7 +73,7 @@ describe("withRetry", () => {
     const fn = vi.fn().mockRejectedValue(new Error("dont-retry"));
 
     await expect(
-      withRetry(fn, { maxRetries: 3, initialDelayMs: 10, shouldRetry })
+      withRetry(fn, { initialDelayMs: 10, maxRetries: 3, shouldRetry })
     ).rejects.toThrow("dont-retry");
 
     expect(fn).toHaveBeenCalledTimes(1);
@@ -87,11 +87,11 @@ describe("withRetry", () => {
       .mockResolvedValue("success");
 
     await withRetry(fn, {
-      maxRetries: 3,
-      initialDelayMs: 100,
-      maxDelayMs: 50, // Cap at 50ms
       backoffMultiplier: 10,
+      initialDelayMs: 100,
       jitter: false,
+      maxDelayMs: 50, // Cap at 50ms
+      maxRetries: 3,
       onRetry,
     });
 
@@ -113,7 +113,7 @@ describe("withRetry", () => {
         .mockRejectedValueOnce(new Error(errorMsg))
         .mockResolvedValue("success");
 
-      const result = await withRetry(fn, { maxRetries: 1, initialDelayMs: 10 });
+      const result = await withRetry(fn, { initialDelayMs: 10, maxRetries: 1 });
       expect(result).toBe("success");
       expect(fn).toHaveBeenCalledTimes(2);
     }
@@ -146,8 +146,8 @@ describe("createRetryWrapper", () => {
       .mockRejectedValueOnce(new Error("timeout"))
       .mockResolvedValue("success");
     const wrapped = createRetryWrapper(fn, {
-      maxRetries: 2,
       initialDelayMs: 10,
+      maxRetries: 2,
     });
 
     const result = await wrapped();

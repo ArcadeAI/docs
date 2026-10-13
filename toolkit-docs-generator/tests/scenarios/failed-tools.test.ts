@@ -24,15 +24,15 @@ import type { ToolDefinition } from "../../src/types/index";
 const createTool = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
-  name: "TestTool",
-  qualifiedName: "TestKit.TestTool",
-  fullyQualifiedName: "TestKit.TestTool@1.0.0",
-  description: "A test tool",
-  toolkitDescription: "Test toolkit",
-  parameters: [],
   auth: null,
-  secrets: [],
+  description: "A test tool",
+  fullyQualifiedName: "TestKit.TestTool@1.0.0",
+  name: "TestTool",
   output: null,
+  parameters: [],
+  qualifiedName: "TestKit.TestTool",
+  secrets: [],
+  toolkitDescription: "Test toolkit",
   ...overrides,
 });
 
@@ -54,9 +54,9 @@ describe("Scenario: Failed tool example generation", () => {
         }
         return {
           codeExample: {
-            toolName: tool.qualifiedName,
             parameters: {},
             requiresAuth: false,
+            toolName: tool.qualifiedName,
           },
           secretsInfo: [],
         };
@@ -64,20 +64,20 @@ describe("Scenario: Failed tool example generation", () => {
     };
 
     const toolkitDataSource = createCombinedToolkitDataSource({
-      toolSource: new InMemoryToolDataSource(tools),
       metadataSource: new InMemoryMetadataSource([]),
+      toolSource: new InMemoryToolDataSource(tools),
     });
 
     const merger = createDataMerger({
-      toolkitDataSource,
       customSectionsSource: new EmptyCustomSectionsSource(),
       toolExampleGenerator: failingGenerator,
+      toolkitDataSource,
     });
 
     const results = await merger.mergeAllToolkits();
 
     expect(results).toHaveLength(1);
-    const result = results[0];
+    const [result] = results;
 
     expect(result?.toolkit.tools).toHaveLength(3);
     expect(result?.failedTools).toHaveLength(1);
@@ -106,14 +106,14 @@ describe("Scenario: Failed tool example generation", () => {
     };
 
     const toolkitDataSource = createCombinedToolkitDataSource({
-      toolSource: new InMemoryToolDataSource(tools),
       metadataSource: new InMemoryMetadataSource([]),
+      toolSource: new InMemoryToolDataSource(tools),
     });
 
     const merger = createDataMerger({
-      toolkitDataSource,
       customSectionsSource: new EmptyCustomSectionsSource(),
       toolExampleGenerator: failingGenerator,
+      toolkitDataSource,
     });
 
     const results = await merger.mergeAllToolkits();

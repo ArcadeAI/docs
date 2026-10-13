@@ -74,34 +74,34 @@ describe("toKebabCase", () => {
 describe("getToolkitSlug", () => {
   it("extracts slug from a full docsLink URL", () => {
     const source: ToolkitSlugSource = {
-      id: "PosthogApi",
       docsLink:
         "https://docs.arcade.dev/en/mcp-servers/development/posthog-api",
+      id: "PosthogApi",
     };
     expect(getToolkitSlug(source)).toBe("posthog-api");
   });
 
   it("extracts slug preserving hyphens from docsLink", () => {
     const source: ToolkitSlugSource = {
-      id: "HubspotConversationsApi",
       docsLink:
         "https://docs.arcade.dev/en/mcp-servers/sales/hubspot-conversations-api",
+      id: "HubspotConversationsApi",
     };
     expect(getToolkitSlug(source)).toBe("hubspot-conversations-api");
   });
 
   it("extracts slug preserving underscores from docsLink", () => {
     const source: ToolkitSlugSource = {
-      id: "StripeApi",
       docsLink: "https://docs.arcade.dev/en/mcp-servers/payments/stripe_api",
+      id: "StripeApi",
     };
     expect(getToolkitSlug(source)).toBe("stripe_api");
   });
 
   it("falls back to kebab-case ID when docsLink is null", () => {
     const source: ToolkitSlugSource = {
-      id: "PosthogApi",
       docsLink: null,
+      id: "PosthogApi",
     };
     expect(getToolkitSlug(source)).toBe("posthog-api");
   });
@@ -115,24 +115,24 @@ describe("getToolkitSlug", () => {
 
   it("falls back to kebab-case ID when docsLink is empty string", () => {
     const source: ToolkitSlugSource = {
-      id: "PosthogApi",
       docsLink: "",
+      id: "PosthogApi",
     };
     expect(getToolkitSlug(source)).toBe("posthog-api");
   });
 
   it("handles docsLink as a relative path (not a URL)", () => {
     const source: ToolkitSlugSource = {
-      id: "GoogleCalendar",
       docsLink: "/en/mcp-servers/productivity/google-calendar",
+      id: "GoogleCalendar",
     };
     expect(getToolkitSlug(source)).toBe("google-calendar");
   });
 
   it("handles docsLink with trailing slash", () => {
     const source: ToolkitSlugSource = {
-      id: "Gmail",
       docsLink: "https://docs.arcade.dev/en/mcp-servers/productivity/gmail/",
+      id: "Gmail",
     };
     // Trailing slash creates empty last segment; extractSlugFromPath filters it
     expect(getToolkitSlug(source)).toBe("gmail");
@@ -140,24 +140,24 @@ describe("getToolkitSlug", () => {
 
   it("handles simple single-segment docsLink", () => {
     const source: ToolkitSlugSource = {
-      id: "Gmail",
       docsLink: "gmail",
+      id: "Gmail",
     };
     expect(getToolkitSlug(source)).toBe("gmail");
   });
 
   it("converts mixed-case IDs to kebab-case in fallback", () => {
     const source: ToolkitSlugSource = {
-      id: "GoogleDrive",
       docsLink: null,
+      id: "GoogleDrive",
     };
     expect(getToolkitSlug(source)).toBe("google-drive");
   });
 
   it("handles docsLink with only a domain (no path)", () => {
     const source: ToolkitSlugSource = {
-      id: "Slack",
       docsLink: "https://docs.arcade.dev",
+      id: "Slack",
     };
     // No path segments → falls back to normalizeToolkitId
     expect(getToolkitSlug(source)).toBe("slack");
@@ -165,8 +165,8 @@ describe("getToolkitSlug", () => {
 
   it("handles docsLink with domain and trailing slash only", () => {
     const source: ToolkitSlugSource = {
-      id: "Slack",
       docsLink: "https://docs.arcade.dev/",
+      id: "Slack",
     };
     expect(getToolkitSlug(source)).toBe("slack");
   });

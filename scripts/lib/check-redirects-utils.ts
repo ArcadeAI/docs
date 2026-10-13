@@ -5,6 +5,14 @@
  * page still exists on disk, and matches redirects against moved files can
  * be unit tested without shelling out to git or touching the real
  * filesystem.
+ *
+ * Content layout (Fumadocs):
+ *   content/docs/<path>.mdx        -> /:locale/<path>
+ *   content/docs/<path>/index.mdx  -> /:locale/<path>
+ *   content/docs/index.mdx         -> /:locale
+ *
+ * Toolkit (MCP server) pages are not files: `lib/toolkit-route.tsx` renders
+ * `/:locale/resources/integrations/<category>/<toolkitId>` from JSON data.
  */
 
 import { existsSync } from "node:fs";
@@ -12,74 +20,107 @@ import { existsSync } from "node:fs";
 // `permanent` is optional here (unlike redirects.ts's `Redirect`, where it's
 // required) because none of these helpers read it — they only match on
 // `source`/`destination`. A `redirects.ts` entry satisfies this type as-is.
-export type Redirect = {
-  source: string;
+export interface Redirect {
   destination: string;
   permanent?: boolean;
-};
+  source: string;
+}
 
-const APP_LOCALE_PREFIX_REGEX = /^app\/[a-z]{2}\//;
-const PAGE_FILE_SUFFIX_REGEX = /\/?page\.mdx?$/;
+export const CONTENT_ROOT = "content/docs";
+export const TOOLKIT_ROUTE_MODULE = "lib/toolkit-route.tsx";
+
+/** Matches a docs content file, e.g. `content/docs/guides/foo.mdx`. */
+export const CONTENT_FILE_REGEX = /^content\/docs\/.*\.mdx?$/;
+
+const CONTENT_PREFIX_REGEX = /^content\/docs\//;
+const INDEX_FILE_REGEX = /(^|\/)index\.mdx?$/;
+const MDX_EXTENSION_REGEX = /\.mdx?$/;
 const LOCALE_PREFIX_REGEX = /^\/:locale\/?/;
-const PAGE_FILE_MATCH_REGEX = /page\.mdx?$/;
 const LOCALE_PATH_PREFIX_REGEX = /^\/:locale\//;
 const WILDCARD_PATH_REGEX = /\/:path\*.*$/;
-const MDX_EXTENSION_REGEX = /\.mdx$/;
 const DYNAMIC_ROUTE_REGEX = /\[[^\]]+\]/;
+const CATCH_ALL_SEGMENT_REGEX = /\[\.\.\.([^\]]+)\]/g;
+const DYNAMIC_SEGMENT_REGEX = /\[([^\]]+)\]/g;
 
-export type DynamicRouteMove = {
-  oldPath: string;
+const TOOLKIT_ROUTE_PREFIX = ["resources", "integrations"];
+const TOOLKIT_ROUTE_SEGMENT_COUNT = 4;
+
+export interface DynamicRouteMove {
   newPath: string;
-  oldUrl: string;
   newUrl: string;
-};
+  oldPath: string;
+  oldUrl: string;
+}
+
+/**
+ * Strip the content root and the `.mdx`/`index.mdx` suffix from a file path,
+ * leaving the URL path without a leading slash (empty for the root page).
+ */
+function fileToRelativeUrlPath(filePath: string): string {
+  return filePath
+    .replace(CONTENT_PREFIX_REGEX, "")
+    .replace(INDEX_FILE_REGEX, "")
+    .replace(MDX_EXTENSION_REGEX, "");
+}
 
 /**
  * Convert file path to URL path
- * e.g., app/en/guides/foo/page.mdx -> /:locale/guides/foo
+ * e.g., content/docs/guides/foo.mdx       -> /:locale/guides/foo
+ *       content/docs/guides/foo/index.mdx -> /:locale/guides/foo
  */
 export function fileToUrl(filePath: string): string {
-  const urlPath = filePath
-    .replace(APP_LOCALE_PREFIX_REGEX, "")
-    .replace(PAGE_FILE_SUFFIX_REGEX, "");
-
+  const urlPath = fileToRelativeUrlPath(filePath);
   return urlPath ? `/:locale/${urlPath}` : "/:locale";
 }
 
 /**
- * Convert URL path to file path
- * e.g., /:locale/guides/foo -> app/en/guides/foo/page.mdx
+ * Convert URL path to the primary file path (the flat `<path>.mdx` form).
+ * e.g., /:locale/guides/foo -> content/docs/guides/foo.mdx
+ *
+ * A page may also live at `<path>/index.mdx`; use `urlToFileCandidates` when
+ * checking existence.
  */
 export function urlToFile(urlPath: string): string {
+  return urlToFileCandidates(urlPath)[0];
+}
+
+/**
+ * All file paths that would serve a URL, in order of preference:
+ * `<path>.mdx`, `<path>/index.mdx`, then their `.md` variants.
+ * e.g., /:locale/guides/foo -> [content/docs/guides/foo.mdx,
+ *                              content/docs/guides/foo/index.mdx, ...]
+ */
+export function urlToFileCandidates(urlPath: string): string[] {
   const pathWithoutLocale = urlPath.replace(LOCALE_PREFIX_REGEX, "");
-  return pathWithoutLocale
-    ? `app/en/${pathWithoutLocale}/page.mdx`
-    : "app/en/page.mdx";
+  if (!pathWithoutLocale) {
+    return [`${CONTENT_ROOT}/index.mdx`, `${CONTENT_ROOT}/index.md`];
+  }
+  const base = `${CONTENT_ROOT}/${pathWithoutLocale}`;
+  return [`${base}.mdx`, `${base}/index.mdx`, `${base}.md`, `${base}/index.md`];
 }
 
 /**
  * Convert a file path containing a dynamic route to a URL pattern.
  * Replaces [param] with :param and [...param] with :param*
- * e.g., app/en/resources/[toolkitId]/page.mdx -> /:locale/resources/:toolkitId
+ * e.g., content/docs/resources/[toolkitId].mdx -> /:locale/resources/:toolkitId
  */
 export function dynamicFileToUrlPattern(filePath: string): string {
-  const urlPath = filePath
-    .replace(APP_LOCALE_PREFIX_REGEX, "")
-    .replace(PAGE_FILE_SUFFIX_REGEX, "");
+  const urlPath = fileToRelativeUrlPath(filePath);
 
   // Replace [...param] with :param* (catch-all routes)
   // Replace [param] with :param (dynamic segments)
   const patternPath = urlPath
-    .replace(/\[\.\.\.([^\]]+)\]/g, ":$1*")
-    .replace(/\[([^\]]+)\]/g, ":$1");
+    .replace(CATCH_ALL_SEGMENT_REGEX, ":$1*")
+    .replace(DYNAMIC_SEGMENT_REGEX, ":$1");
 
   return patternPath ? `/:locale/${patternPath}` : "/:locale";
 }
 
 /**
- * Check if a dynamic route exists that could serve this URL path.
- * e.g., for /resources/integrations/productivity/gmail,
- * check if /resources/integrations/productivity/[toolkitId]/page.mdx exists
+ * Check if the toolkit route could serve this URL path.
+ * `lib/toolkit-route.tsx` renders every
+ * `/resources/integrations/<category>/<toolkitId>` URL from toolkit JSON, so
+ * such a URL stays reachable without an MDX file as long as that module exists.
  *
  * @param urlPath - The URL path to check
  * @param checkExists - Function to check if a file exists (defaults to fs.existsSync)
@@ -91,25 +132,17 @@ export function dynamicRouteExists(
   const pathWithoutLocale = urlPath.replace(LOCALE_PREFIX_REGEX, "");
   const segments = pathWithoutLocale.split("/").filter(Boolean);
 
-  // Try replacing segments with common dynamic route patterns
-  const dynamicPatterns = ["[toolkitId]", "[slug]", "[id]", "[...slug]"];
-
-  for (let i = segments.length - 1; i >= 0; i--) {
-    for (const pattern of dynamicPatterns) {
-      const testSegments = [...segments];
-      testSegments[i] = pattern;
-      const testPath = `app/en/${testSegments.join("/")}/page.mdx`;
-      if (checkExists(testPath)) {
-        return true;
-      }
-      const testPathMd = testPath.replace(MDX_EXTENSION_REGEX, ".md");
-      if (checkExists(testPathMd)) {
-        return true;
-      }
-    }
+  if (segments.length !== TOOLKIT_ROUTE_SEGMENT_COUNT) {
+    return false;
+  }
+  if (
+    segments[0] !== TOOLKIT_ROUTE_PREFIX[0] ||
+    segments[1] !== TOOLKIT_ROUTE_PREFIX[1]
+  ) {
+    return false;
   }
 
-  return false;
+  return checkExists(TOOLKIT_ROUTE_MODULE);
 }
 
 /**
@@ -126,27 +159,19 @@ export function pageExists(
     return true;
   }
 
-  const filePath = urlToFile(urlPath);
-  if (checkExists(filePath)) {
+  if (
+    urlToFileCandidates(urlPath).some((candidate) => checkExists(candidate))
+  ) {
     return true;
   }
 
-  const mdPath = filePath.replace(MDX_EXTENSION_REGEX, ".md");
-  if (checkExists(mdPath)) {
-    return true;
-  }
-
-  // Check if a dynamic route could serve this URL
-  if (dynamicRouteExists(urlPath, checkExists)) {
-    return true;
-  }
-
-  return false;
+  // Check if the toolkit route could serve this URL
+  return dynamicRouteExists(urlPath, checkExists);
 }
 
 /**
- * Parse git diff output for renamed dynamic route page files.
- * Detects when a page.mdx inside a dynamic route folder is moved.
+ * Parse git diff output for renamed dynamic route content files.
+ * Detects when a content file inside a dynamic route folder is moved.
  */
 export function parseDynamicRouteMoves(output: string): DynamicRouteMove[] {
   const moves: DynamicRouteMove[] = [];
@@ -155,16 +180,12 @@ export function parseDynamicRouteMoves(output: string): DynamicRouteMove[] {
     if (!line) {
       continue;
     }
-    const parts = line.split("\t");
-    const status = parts[0];
+    const [status, oldPath, newPath] = line.split("\t");
 
     // Only look at renames (R followed by similarity percentage)
     if (!status?.startsWith("R")) {
       continue;
     }
-
-    const oldPath = parts[1];
-    const newPath = parts[2];
 
     if (!(oldPath && newPath)) {
       continue;
@@ -175,7 +196,7 @@ export function parseDynamicRouteMoves(output: string): DynamicRouteMove[] {
     const newHasDynamic = DYNAMIC_ROUTE_REGEX.test(newPath);
 
     // We care about moves where the URL pattern changes
-    if (!PAGE_FILE_MATCH_REGEX.test(oldPath)) {
+    if (!CONTENT_FILE_REGEX.test(oldPath)) {
       continue;
     }
 
@@ -190,7 +211,7 @@ export function parseDynamicRouteMoves(output: string): DynamicRouteMove[] {
     // Record the move if either path has a dynamic route
     // or if the directory structure changed significantly
     if (oldHasDynamic || newHasDynamic) {
-      moves.push({ oldPath, newPath, oldUrl, newUrl });
+      moves.push({ newPath, newUrl, oldPath, oldUrl });
     }
   }
 

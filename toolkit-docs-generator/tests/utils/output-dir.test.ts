@@ -40,11 +40,11 @@ describe("resolveSafeOutputDir", () => {
   afterEach(async () => {
     process.chdir(originalCwd);
     if (repoRoot) {
-      await rm(repoRoot, { recursive: true, force: true });
+      await rm(repoRoot, { force: true, recursive: true });
       repoRoot = null;
     }
     if (homeDir) {
-      await rm(homeDir, { recursive: true, force: true });
+      await rm(homeDir, { force: true, recursive: true });
       homeDir = null;
     }
   });
@@ -134,7 +134,7 @@ describe("resolveSafeOutputDir", () => {
       ).rejects.toThrow("outside repo root");
       expect(await realpath(outsideDir)).toContain(outsideName);
     } finally {
-      await rm(outsideDir, { recursive: true, force: true });
+      await rm(outsideDir, { force: true, recursive: true });
     }
   });
 });

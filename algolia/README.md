@@ -23,7 +23,7 @@ Two GitHub Actions workflows keep the index fresh. They never overlap.
 
 | When | Workflow | What happens |
 | --- | --- | --- |
-| Docs content is published (production deploy) | `algolia-reindex.yml` | Triggers a reindex, but only when the deploy touched `app/en/**` or `toolkit-docs-generator/data/toolkits/**` |
+| Docs content is published (production deploy) | `algolia-reindex.yml` | Triggers a reindex, but only when the deploy touched `content/docs/**` or `toolkit-docs-generator/data/toolkits/**` |
 | `crawler-config.js` changes on `main` | `sync-crawler-config.yml` | Pushes the config to the Crawler API, then triggers a reindex |
 
 The crawler also runs on a weekly schedule as a backstop.
@@ -37,7 +37,7 @@ The crawler also runs on a weekly schedule as a backstop.
 3. Open a PR. On merge, `sync-crawler-config.yml` applies it and reindexes.
 
 To apply the config without a merge, run the sync workflow manually from the
-Actions tab (`workflow_dispatch`), or run `pnpm sync-crawler-config` locally with
+Actions tab (`workflow_dispatch`), or run `bun run sync-crawler-config` locally with
 the crawler credentials set as environment variables.
 
 ## Configuration and secrets
@@ -66,7 +66,7 @@ using this key. Without the key the config still syncs and a reindex still
 runs, but the index-settings step is skipped with a warning.
 
 The public search credentials used by the frontend widget
-(`app/_components/algolia-search.tsx`) are separate `NEXT_PUBLIC_ALGOLIA_*`
+(`components/algolia-search.tsx`) are separate `NEXT_PUBLIC_ALGOLIA_*`
 environment variables.
 
 ## Troubleshooting

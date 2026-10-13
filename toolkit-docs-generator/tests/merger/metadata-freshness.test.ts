@@ -23,13 +23,13 @@ const createMetadata = (
   overrides: Partial<MergedToolkitMetadata> = {}
 ): MergedToolkitMetadata => ({
   category: "development",
+  docsLink: "https://docs.arcade.dev/en/mcp-servers/development/github",
   iconUrl: "https://design-system.arcade.dev/icons/github.svg",
   isBYOC: false,
-  isPro: false,
-  type: "arcade",
-  docsLink: "https://docs.arcade.dev/en/mcp-servers/development/github",
   isComingSoon: false,
   isHidden: false,
+  isPro: false,
+  type: "arcade",
   ...overrides,
 });
 
@@ -41,17 +41,17 @@ const createPreviousToolkit = (
 ): MergedToolkit => {
   const { metadata: metaOverrides, ...rest } = overrides;
   return {
+    auth: null,
+    customImports: [],
+    description: "Test toolkit",
+    documentationChunks: [],
+    generatedAt: new Date().toISOString(),
     id: "Github",
     label: "GitHub",
-    version: "2.0.1",
-    description: "Test toolkit",
     metadata: createMetadata(metaOverrides),
-    auth: null,
-    tools: [],
-    documentationChunks: [],
-    customImports: [],
     subPages: [],
-    generatedAt: new Date().toISOString(),
+    tools: [],
+    version: "2.0.1",
     ...rest,
   };
 };
@@ -103,9 +103,9 @@ describe("detectMetadataChanges", () => {
     expect(result.hasChanges).toBe(true);
     expect(result.fieldChanges).toHaveLength(1);
     expect(result.fieldChanges[0]).toEqual({
+      current: "https://design-system.arcade.dev/icons/github.svg",
       field: "iconUrl",
       previous: "https://old-cdn.example.com/github.svg",
-      current: "https://design-system.arcade.dev/icons/github.svg",
     });
   });
 
@@ -113,15 +113,15 @@ describe("detectMetadataChanges", () => {
     const previous = createPreviousToolkit({
       metadata: {
         category: "social",
-        isPro: true,
         isHidden: true,
+        isPro: true,
       },
     });
 
     const current = createMetadata({
       category: "development",
-      isPro: false,
       isHidden: false,
+      isPro: false,
     });
 
     const result = assertNonNull(
@@ -158,16 +158,16 @@ describe("detectMetadataChanges", () => {
       label: "Pylon",
       metadata: {
         category: "development",
-        iconUrl: "https://design-system.arcade.dev/icons/pylon.svg",
         docsLink: "https://docs.arcade.dev/en/mcp-servers/development/pylon",
+        iconUrl: "https://design-system.arcade.dev/icons/pylon.svg",
       },
     });
 
     // Now has real DS metadata with correct category and icon
     const current = createMetadata({
       category: "customer-support",
-      iconUrl: "https://design-system.arcade.dev/icons/pylon.svg",
       docsLink: "https://docs.arcade.dev/en/mcp-servers/customer-support/pylon",
+      iconUrl: "https://design-system.arcade.dev/icons/pylon.svg",
     });
 
     const result = assertNonNull(
@@ -250,13 +250,13 @@ describe("detectMetadataChanges", () => {
 describe("formatFreshnessWarnings", () => {
   it("returns empty array when there are no changes", () => {
     const result: MetadataFreshnessResult = {
-      toolkitId: "Github",
-      gainedDesignSystemMetadata: false,
-      labelChanged: false,
-      previousLabel: "GitHub",
       currentLabel: "GitHub",
       fieldChanges: [],
+      gainedDesignSystemMetadata: false,
       hasChanges: false,
+      labelChanged: false,
+      previousLabel: "GitHub",
+      toolkitId: "Github",
     };
 
     expect(formatFreshnessWarnings(result)).toEqual([]);
@@ -264,13 +264,13 @@ describe("formatFreshnessWarnings", () => {
 
   it("formats gained DS metadata warning", () => {
     const result: MetadataFreshnessResult = {
-      toolkitId: "Pylon",
-      gainedDesignSystemMetadata: true,
-      labelChanged: false,
-      previousLabel: "Pylon",
       currentLabel: "Pylon",
       fieldChanges: [],
+      gainedDesignSystemMetadata: true,
       hasChanges: true,
+      labelChanged: false,
+      previousLabel: "Pylon",
+      toolkitId: "Pylon",
     };
 
     const warnings = formatFreshnessWarnings(result);
@@ -282,13 +282,13 @@ describe("formatFreshnessWarnings", () => {
 
   it("formats label change warning", () => {
     const result: MetadataFreshnessResult = {
-      toolkitId: "Github",
-      gainedDesignSystemMetadata: false,
-      labelChanged: true,
-      previousLabel: "Github",
       currentLabel: "GitHub",
       fieldChanges: [],
+      gainedDesignSystemMetadata: false,
       hasChanges: true,
+      labelChanged: true,
+      previousLabel: "Github",
+      toolkitId: "Github",
     };
 
     const warnings = formatFreshnessWarnings(result);
@@ -298,16 +298,16 @@ describe("formatFreshnessWarnings", () => {
 
   it("formats field change warnings", () => {
     const result: MetadataFreshnessResult = {
-      toolkitId: "Salesforce",
-      gainedDesignSystemMetadata: false,
-      labelChanged: false,
-      previousLabel: "Salesforce",
       currentLabel: "Salesforce",
       fieldChanges: [
-        { field: "iconUrl", previous: "old.svg", current: "new.svg" },
-        { field: "category", previous: "development", current: "sales" },
+        { current: "new.svg", field: "iconUrl", previous: "old.svg" },
+        { current: "sales", field: "category", previous: "development" },
       ],
+      gainedDesignSystemMetadata: false,
       hasChanges: true,
+      labelChanged: false,
+      previousLabel: "Salesforce",
+      toolkitId: "Salesforce",
     };
 
     const warnings = formatFreshnessWarnings(result);
@@ -318,19 +318,19 @@ describe("formatFreshnessWarnings", () => {
 
   it("combines all warning types", () => {
     const result: MetadataFreshnessResult = {
-      toolkitId: "Pylon",
-      gainedDesignSystemMetadata: true,
-      labelChanged: true,
-      previousLabel: "Pylon",
       currentLabel: "Pylon Support",
       fieldChanges: [
         {
+          current: "customer-support",
           field: "category",
           previous: "development",
-          current: "customer-support",
         },
       ],
+      gainedDesignSystemMetadata: true,
       hasChanges: true,
+      labelChanged: true,
+      previousLabel: "Pylon",
+      toolkitId: "Pylon",
     };
 
     const warnings = formatFreshnessWarnings(result);
@@ -352,52 +352,52 @@ describe("mergeToolkit metadata freshness integration", () => {
     const { mergeToolkit } = await import("../../src/merger/data-merger");
 
     const tool = {
-      name: "TestTool",
-      qualifiedName: "TestKit.TestTool",
-      fullyQualifiedName: "TestKit.TestTool@1.0.0",
-      description: "A test tool",
-      toolkitDescription: "Toolkit",
-      parameters: [],
       auth: null,
-      secrets: [],
+      description: "A test tool",
+      fullyQualifiedName: "TestKit.TestTool@1.0.0",
+      name: "TestTool",
       output: null,
+      parameters: [],
+      qualifiedName: "TestKit.TestTool",
+      secrets: [],
+      toolkitDescription: "Toolkit",
     };
 
     const metadata = {
-      id: "TestKit",
-      label: "Test Kit",
       category: "sales" as const,
-      iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
-      isBYOC: false,
-      isPro: false,
-      type: "arcade" as const,
       docsLink: "https://docs.arcade.dev/en/mcp-servers/sales/testkit",
+      iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
+      id: "TestKit",
+      isBYOC: false,
       isComingSoon: false,
       isHidden: false,
+      isPro: false,
+      label: "Test Kit",
+      type: "arcade" as const,
     };
 
     // Previous toolkit had category "development"
     const previousToolkit = {
+      auth: null,
+      customImports: [],
+      description: "Old",
+      documentationChunks: [],
+      generatedAt: new Date().toISOString(),
       id: "TestKit",
       label: "Test Kit",
-      version: "1.0.0",
-      description: "Old",
       metadata: {
         category: "development" as const,
+        docsLink: "https://docs.arcade.dev/en/mcp-servers/development/testkit",
         iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
         isBYOC: false,
-        isPro: false,
-        type: "arcade" as const,
-        docsLink: "https://docs.arcade.dev/en/mcp-servers/development/testkit",
         isComingSoon: false,
         isHidden: false,
+        isPro: false,
+        type: "arcade" as const,
       },
-      auth: null,
-      tools: [],
-      documentationChunks: [],
-      customImports: [],
       subPages: [],
-      generatedAt: new Date().toISOString(),
+      tools: [],
+      version: "1.0.0",
     };
 
     const result = await mergeToolkit(
@@ -427,51 +427,51 @@ describe("mergeToolkit metadata freshness integration", () => {
     const { mergeToolkit } = await import("../../src/merger/data-merger");
 
     const tool = {
-      name: "TestTool",
-      qualifiedName: "TestKit.TestTool",
-      fullyQualifiedName: "TestKit.TestTool@1.0.0",
-      description: "A test tool",
-      toolkitDescription: "Toolkit",
-      parameters: [],
       auth: null,
-      secrets: [],
+      description: "A test tool",
+      fullyQualifiedName: "TestKit.TestTool@1.0.0",
+      name: "TestTool",
       output: null,
+      parameters: [],
+      qualifiedName: "TestKit.TestTool",
+      secrets: [],
+      toolkitDescription: "Toolkit",
     };
 
     const metadata = {
-      id: "TestKit",
-      label: "Test Kit",
       category: "development" as const,
-      iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
-      isBYOC: false,
-      isPro: false,
-      type: "arcade" as const,
       docsLink: "https://docs.arcade.dev/en/mcp-servers/development/testkit",
+      iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
+      id: "TestKit",
+      isBYOC: false,
       isComingSoon: false,
       isHidden: false,
+      isPro: false,
+      label: "Test Kit",
+      type: "arcade" as const,
     };
 
     const previousToolkit = {
+      auth: null,
+      customImports: [],
+      description: "Same",
+      documentationChunks: [],
+      generatedAt: new Date().toISOString(),
       id: "TestKit",
       label: "Test Kit",
-      version: "1.0.0",
-      description: "Same",
       metadata: {
         category: "development" as const,
+        docsLink: "https://docs.arcade.dev/en/mcp-servers/development/testkit",
         iconUrl: "https://design-system.arcade.dev/icons/testkit.svg",
         isBYOC: false,
-        isPro: false,
-        type: "arcade" as const,
-        docsLink: "https://docs.arcade.dev/en/mcp-servers/development/testkit",
         isComingSoon: false,
         isHidden: false,
+        isPro: false,
+        type: "arcade" as const,
       },
-      auth: null,
-      tools: [],
-      documentationChunks: [],
-      customImports: [],
       subPages: [],
-      generatedAt: new Date().toISOString(),
+      tools: [],
+      version: "1.0.0",
     };
 
     const result = await mergeToolkit(

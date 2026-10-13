@@ -12,14 +12,14 @@ const createTool = (
   fullyQualifiedName: string,
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
-  name: fullyQualifiedName.split("@")[0]?.split(".")[1] ?? "Tool",
-  qualifiedName: fullyQualifiedName.split("@")[0] ?? "",
-  fullyQualifiedName,
-  description: "A test tool",
-  parameters: [],
   auth: null,
-  secrets: [],
+  description: "A test tool",
+  fullyQualifiedName,
+  name: fullyQualifiedName.split("@")[0]?.split(".")[1] ?? "Tool",
   output: null,
+  parameters: [],
+  qualifiedName: fullyQualifiedName.split("@")[0] ?? "",
+  secrets: [],
   ...overrides,
 });
 

@@ -7,19 +7,19 @@ help:
 
 
 install: ## Install the dependencies
-	@pnpm install
+	@bun install
 
 build: ## Build the docs site
-	@pnpm build
+	@bun run build
 
 lint: ## Lint the codebase
-	@pnpm run lint
+	@bun run lint
 
 test: ## Run the tests
-	@pnpm test -- --run
+	@bun run test
 
 run: ## Run the docs site locally
-	@pnpm dev
+	@bun run dev
 
 ruin:
 	@echo "\033[31m\033[1m💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️\033[0m"

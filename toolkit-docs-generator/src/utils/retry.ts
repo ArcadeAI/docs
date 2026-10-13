@@ -3,16 +3,16 @@
  */
 
 export interface RetryOptions {
-  /** Maximum number of retry attempts (default: 3) */
-  readonly maxRetries?: number | undefined;
-  /** Initial delay in milliseconds (default: 1000) */
-  readonly initialDelayMs?: number | undefined;
-  /** Maximum delay in milliseconds (default: 30000) */
-  readonly maxDelayMs?: number | undefined;
   /** Multiplier for exponential backoff (default: 2) */
   readonly backoffMultiplier?: number | undefined;
+  /** Initial delay in milliseconds (default: 1000) */
+  readonly initialDelayMs?: number | undefined;
   /** Whether to add jitter to delays (default: true) */
   readonly jitter?: boolean | undefined;
+  /** Maximum delay in milliseconds (default: 30000) */
+  readonly maxDelayMs?: number | undefined;
+  /** Maximum number of retry attempts (default: 3) */
+  readonly maxRetries?: number | undefined;
   /** Optional callback for logging retry attempts */
   readonly onRetry?:
     | ((attempt: number, error: Error, delayMs: number) => void)
@@ -22,31 +22,31 @@ export interface RetryOptions {
 }
 
 interface ResolvedRetryOptions {
-  maxRetries: number;
-  initialDelayMs: number;
-  maxDelayMs: number;
   backoffMultiplier: number;
+  initialDelayMs: number;
   jitter: boolean;
+  maxDelayMs: number;
+  maxRetries: number;
 }
 
 const DEFAULT_OPTIONS: ResolvedRetryOptions = {
-  maxRetries: 3,
-  initialDelayMs: 1000,
-  maxDelayMs: 30_000,
   backoffMultiplier: 2,
+  initialDelayMs: 1000,
   jitter: true,
+  maxDelayMs: 30_000,
+  maxRetries: 3,
 };
 
 const sleep = (ms: number): Promise<void> =>
   new Promise((resolve) => setTimeout(resolve, ms));
 
 const resolveOptions = (options?: RetryOptions): ResolvedRetryOptions => ({
-  maxRetries: options?.maxRetries ?? DEFAULT_OPTIONS.maxRetries,
-  initialDelayMs: options?.initialDelayMs ?? DEFAULT_OPTIONS.initialDelayMs,
-  maxDelayMs: options?.maxDelayMs ?? DEFAULT_OPTIONS.maxDelayMs,
   backoffMultiplier:
     options?.backoffMultiplier ?? DEFAULT_OPTIONS.backoffMultiplier,
+  initialDelayMs: options?.initialDelayMs ?? DEFAULT_OPTIONS.initialDelayMs,
   jitter: options?.jitter ?? DEFAULT_OPTIONS.jitter,
+  maxDelayMs: options?.maxDelayMs ?? DEFAULT_OPTIONS.maxDelayMs,
+  maxRetries: options?.maxRetries ?? DEFAULT_OPTIONS.maxRetries,
 });
 
 const calculateDelay = (

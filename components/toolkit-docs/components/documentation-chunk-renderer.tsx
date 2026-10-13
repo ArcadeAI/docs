@@ -1,0 +1,386 @@
+"use client";
+
+import { evaluate } from "@mdx-js/mdx";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+import remarkGfm from "remark-gfm";
+
+import { SignupLink } from "@/components/analytics";
+import { Callout } from "@/components/mdx/callout";
+import { Steps } from "@/components/mdx/steps";
+import { Tabs } from "@/components/mdx/tabs";
+import TabbedCodeBlock from "@/components/tabbed-code-block";
+import TableOfContents from "@/components/table-of-contents";
+import ToolFooter from "@/components/tool-footer";
+import type {
+  DocumentationChunk,
+  DocumentationChunkLocation,
+  DocumentationChunkPosition,
+  DocumentationChunkRendererProps,
+} from "../types";
+import { DataTable } from "./data-table";
+import { createMdxCache } from "./mdx-cache";
+
+// Regex for removing leading ## from headers (defined at top level for performance)
+const HEADER_PREFIX_REGEX = /^#+\s*/;
+
+/**
+ * Maps chunk types to Callout types
+ */
+const CALLOUT_TYPE_MAP: Record<
+  string,
+  "default" | "info" | "warning" | "error"
+> = {
+  callout: "default",
+  error: "error",
+  info: "info",
+  tip: "info",
+  warning: "warning",
+};
+
+/**
+ * Maps chunk variants to Callout types
+ */
+const VARIANT_TYPE_MAP: Record<
+  string,
+  "default" | "info" | "warning" | "error"
+> = {
+  default: "default",
+  destructive: "error",
+  info: "info",
+  success: "info",
+  warning: "warning",
+};
+
+// Regex patterns for detecting JSX/HTML content
+const COMPONENT_TAG_REGEX = /<[A-Z][a-zA-Z]*[\s>]/;
+const DETAILS_TAG_REGEX = /<details/;
+const SUMMARY_TAG_REGEX = /<summary/;
+
+/**
+ * Checks if content contains JSX/HTML tags
+ */
+function hasJSXContent(content: string): boolean {
+  // Check for common JSX/HTML patterns
+  return (
+    COMPONENT_TAG_REGEX.test(content) || // Component tags like <Callout>
+    DETAILS_TAG_REGEX.test(content) || // HTML details tag
+    SUMMARY_TAG_REGEX.test(content)
+  ); // HTML summary tag
+}
+
+/**
+ * Strip top-level MDX import/export lines from a content block.
+ */
+function stripMdxImports(content: string): string {
+  const lines = content.split("\n");
+  const result: string[] = [];
+  let inCodeFence = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith("```")) {
+      inCodeFence = !inCodeFence;
+      result.push(line);
+      continue;
+    }
+
+    if (
+      !inCodeFence &&
+      (trimmed.startsWith("import ") || trimmed.startsWith("export "))
+    ) {
+      continue;
+    }
+
+    result.push(line);
+  }
+
+  return result.join("\n");
+}
+
+const MDX_COMPONENTS = {
+  Callout,
+  DataTable,
+  SignupLink,
+  Steps,
+  TabbedCodeBlock,
+  TableOfContents,
+  Tabs,
+  ToolFooter,
+};
+
+// Maximum number of MDX components to cache to prevent unbounded memory growth
+const MDX_CACHE_MAX_SIZE = 100;
+
+const mdxCache = createMdxCache<React.ElementType>(MDX_CACHE_MAX_SIZE);
+
+/**
+ * Renders MDX content from a string with custom components.
+ */
+function MdxContent({ content }: { content: string }) {
+  const source = useMemo(() => stripMdxImports(content), [content]);
+  const [Component, setComponent] = useState<React.ElementType | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mdxCache.has(source)) {
+      const cached = mdxCache.get(source);
+      if (cached) {
+        setError(null);
+        setComponent(() => cached);
+        return;
+      }
+    }
+
+    let cancelled = false;
+    setError(null);
+    setComponent(null);
+
+    evaluate(source, {
+      Fragment,
+      jsx,
+      jsxs,
+      remarkPlugins: [remarkGfm],
+    })
+      .then((result) => {
+        if (cancelled) {
+          return;
+        }
+        mdxCache.set(source, result.default);
+        setComponent(() => result.default);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to render MDX");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [source]);
+
+  if (error) {
+    return (
+      <div className="my-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-red-300 text-sm">
+        Failed to render section: {error}
+      </div>
+    );
+  }
+
+  if (!Component) {
+    return null;
+  }
+
+  return (
+    <div className="tk-prose tk-prose-sm dark:tk-prose-invert max-w-none">
+      <Component components={MDX_COMPONENTS} />
+    </div>
+  );
+}
+
+/**
+ * Converts a header string to a URL-friendly anchor ID.
+ * E.g., "## Auth Setup" -> "auth-setup"
+ */
+export function headerToAnchorId(header: string): string {
+  return header
+    .replace(HEADER_PREFIX_REGEX, "") // Remove leading ##
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-"); // Collapse multiple hyphens
+}
+
+/**
+ * Renders a single documentation chunk
+ */
+function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
+  const { type, content, title, variant, header } = chunk;
+
+  // Generate anchor ID from header if present
+  const anchorId = header ? headerToAnchorId(header) : undefined;
+
+  // Handle code blocks
+  if (type === "code") {
+    return (
+      <pre className="my-3 overflow-x-auto rounded-md bg-gray-900 p-4">
+        <code className="font-mono text-gray-100 text-sm">{content}</code>
+      </pre>
+    );
+  }
+
+  // Render complex MDX content directly
+  if (type === "markdown" || hasJSXContent(content)) {
+    return (
+      <section className="my-3" id={anchorId}>
+        <MdxContent content={content} />
+      </section>
+    );
+  }
+
+  // Handle callout types (callout, info, tip, warning, error)
+  // Determine the callout type from chunk type or variant
+  let calloutType: "default" | "info" | "warning" | "error" = "default";
+
+  if (variant && VARIANT_TYPE_MAP[variant]) {
+    calloutType = VARIANT_TYPE_MAP[variant];
+  } else if (CALLOUT_TYPE_MAP[type]) {
+    calloutType = CALLOUT_TYPE_MAP[type];
+  }
+
+  return (
+    <section id={anchorId}>
+      <Callout title={title} type={calloutType}>
+        <MdxContent content={content} />
+      </Callout>
+    </section>
+  );
+}
+
+/**
+ * Default priority for chunks without an explicit priority
+ */
+const DEFAULT_CHUNK_PRIORITY = 100;
+
+/**
+ * Compare two chunks by header alphabetically.
+ * Returns a negative/positive number if both have headers,
+ * -1 if only a has a header, 1 if only b has a header,
+ * or null if neither has a header (fall through to next criterion).
+ */
+function compareByHeader(
+  a: DocumentationChunk,
+  b: DocumentationChunk
+): number | null {
+  const headerA = (a.header ?? "").replace(HEADER_PREFIX_REGEX, "").trim();
+  const headerB = (b.header ?? "").replace(HEADER_PREFIX_REGEX, "").trim();
+
+  if (headerA && headerB) {
+    return headerA.localeCompare(headerB);
+  }
+  if (headerA) {
+    return -1;
+  }
+  if (headerB) {
+    return 1;
+  }
+  return null;
+}
+
+/**
+ * Sorts documentation chunks deterministically by:
+ * 1. Priority (lower = earlier)
+ * 2. Header alphabetically (for chunks with same priority)
+ * 3. Content string (for chunks with same priority and no header)
+ */
+export function sortChunksDeterministically(
+  chunks: readonly DocumentationChunk[]
+): DocumentationChunk[] {
+  return [...chunks].sort((a, b) => {
+    const priorityDiff =
+      (a.priority ?? DEFAULT_CHUNK_PRIORITY) -
+      (b.priority ?? DEFAULT_CHUNK_PRIORITY);
+
+    if (priorityDiff !== 0) {
+      return priorityDiff;
+    }
+
+    const headerResult = compareByHeader(a, b);
+    if (headerResult !== null) {
+      return headerResult;
+    }
+
+    // Finally, sort by content for stability.
+    // Some call sites pass lightweight chunk objects where content is optional.
+    return (a.content ?? "").localeCompare(b.content ?? "");
+  });
+}
+
+/**
+ * Chunks carry no id, so key them by their identifying content (the same
+ * fields the deterministic sort uses). Exact duplicates get a running suffix
+ * so keys stay unique without depending on array position.
+ */
+function withChunkKeys(
+  chunks: readonly DocumentationChunk[]
+): Array<{ chunk: DocumentationChunk; key: string }> {
+  const seen = new Map<string, number>();
+  return chunks.map((chunk) => {
+    const base = `${chunk.type}:${chunk.header ?? ""}:${chunk.content}`;
+    const occurrence = seen.get(base) ?? 0;
+    seen.set(base, occurrence + 1);
+    return { chunk, key: occurrence === 0 ? base : `${base}#${occurrence}` };
+  });
+}
+
+/**
+ * DocumentationChunkRenderer
+ *
+ * A generic component for rendering custom documentation content at specified
+ * injection points. Filters chunks by location and position, then renders
+ * the appropriate component based on chunk type.
+ *
+ * Chunks are sorted deterministically by priority, then header, then content.
+ *
+ * @example
+ * ```tsx
+ * <DocumentationChunkRenderer
+ *   chunks={tool.documentationChunks}
+ *   location="parameters"
+ *   position="after"
+ * />
+ * ```
+ *
+ * Supported chunk types:
+ * - `callout`: Default callout box
+ * - `info`: Blue info callout
+ * - `tip`: Blue tip callout
+ * - `warning`: Yellow warning callout
+ * - `markdown`: Raw markdown content
+ * - `code`: Code block
+ */
+export function DocumentationChunkRenderer({
+  chunks,
+  location,
+  position,
+  className,
+}: DocumentationChunkRendererProps): React.ReactElement | null {
+  // Filter chunks that match the specified location and position
+  const matchingChunks = (chunks ?? []).filter(
+    (chunk) => chunk.location === location && chunk.position === position
+  );
+
+  // Return null if no matching chunks
+  if (matchingChunks.length === 0) {
+    return null;
+  }
+
+  // Sort chunks deterministically
+  const sortedChunks = sortChunksDeterministically(matchingChunks);
+
+  return (
+    <div className={className} data-testid="documentation-chunk-renderer">
+      {withChunkKeys(sortedChunks).map(({ chunk, key }) => (
+        <ChunkContent chunk={chunk} key={key} />
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Helper function to check if chunks exist for a given location and position
+ * Useful for conditional rendering
+ */
+export function hasChunksAt(
+  chunks: DocumentationChunk[] | null | undefined,
+  location: DocumentationChunkLocation,
+  position: DocumentationChunkPosition
+): boolean {
+  return (chunks ?? []).some(
+    (chunk) => chunk.location === location && chunk.position === position
+  );
+}

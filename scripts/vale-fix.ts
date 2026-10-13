@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Vale + AI Fix Script (Interactive)
@@ -7,9 +7,9 @@
  * with AI assistance. Supports feedback loops for iterative refinement.
  *
  * Usage:
- *   pnpm vale:fix [files...]        # Fix specific files
- *   pnpm vale:fix --staged          # Fix staged files only
- *   pnpm vale:fix app/en/guides/    # Fix all files in directory
+ *   bun run vale:fix [files...]        # Fix specific files
+ *   bun run vale:fix --staged          # Fix staged files only
+ *   bun run vale:fix content/docs/guides/    # Fix all files in directory
  */
 
 import { execSync, spawnSync } from "node:child_process";
@@ -49,14 +49,14 @@ const STYLE_GUIDE = existsSync(STYLE_GUIDE_PATH)
   ? readFileSync(STYLE_GUIDE_PATH, "utf-8")
   : "";
 
-type ValeIssue = {
+interface ValeIssue {
+  column: number;
   file: string;
   line: number;
-  column: number;
-  severity: "error" | "warning" | "suggestion";
   message: string;
   rule: string;
-};
+  severity: "error" | "warning" | "suggestion";
+}
 
 type UserChoice = "yes" | "no" | "edit" | "feedback" | "skip";
 
@@ -81,18 +81,18 @@ const NON_WHITESPACE_REGEX = /\S/;
 
 // ANSI color codes for terminal output
 const colors = {
-  reset: "\x1b[0m",
-  red: "\x1b[31m",
-  green: "\x1b[32m",
-  yellow: "\x1b[33m",
-  blue: "\x1b[34m",
-  magenta: "\x1b[35m",
-  cyan: "\x1b[36m",
-  dim: "\x1b[2m",
-  bold: "\x1b[1m",
-  underline: "\x1b[4m",
   bgYellow: "\x1b[43m",
   black: "\x1b[30m",
+  blue: "\x1b[34m",
+  bold: "\x1b[1m",
+  cyan: "\x1b[36m",
+  dim: "\x1b[2m",
+  green: "\x1b[32m",
+  magenta: "\x1b[35m",
+  red: "\x1b[31m",
+  reset: "\x1b[0m",
+  underline: "\x1b[4m",
+  yellow: "\x1b[33m",
 };
 
 function getSeverity(
@@ -123,12 +123,12 @@ function parseValeOutput(output: string): Map<string, ValeIssue[]> {
 
       const issues = issuesByFile.get(file) ?? [];
       issues.push({
+        column: Number.parseInt(col, 10),
         file,
         line: Number.parseInt(lineNum, 10),
-        column: Number.parseInt(col, 10),
-        severity,
         message: message.trim(),
         rule,
+        severity,
       });
       issuesByFile.set(file, issues);
     }
@@ -289,9 +289,9 @@ async function fixSingleIssueWithAI(
     if (AI_PROVIDER === "anthropic") {
       const client = new Anthropic();
       const response = await client.messages.create({
-        model: "claude-sonnet-4-20250514",
         max_tokens: MAX_AI_TOKENS,
-        messages: [{ role: "user", content: promptText }],
+        messages: [{ content: promptText, role: "user" }],
+        model: "claude-sonnet-5-5",
       });
 
       const textBlock = response.content.find((block) => block.type === "text");
@@ -303,9 +303,9 @@ async function fixSingleIssueWithAI(
     } else if (AI_PROVIDER === "openai") {
       const client = new OpenAI();
       const response = await client.chat.completions.create({
-        model: "gpt-4-turbo",
         max_tokens: MAX_AI_TOKENS,
-        messages: [{ role: "user", content: promptText }],
+        messages: [{ content: promptText, role: "user" }],
+        model: "gpt-4-turbo",
       });
 
       const text = response.choices[0]?.message?.content;
@@ -426,7 +426,7 @@ function getFilesToCheck(args: string[]): string[] {
       .filter(Boolean);
   }
   if (args.length === 0) {
-    console.log("Usage: pnpm vale:fix [--staged | files...]");
+    console.log("Usage: bun run vale:fix [--staged | files...]");
     process.exit(0);
   }
   return args;
@@ -469,18 +469,18 @@ function getProviderName(): string {
   return AI_PROVIDER === "anthropic" ? "Claude" : "GPT-4 Turbo";
 }
 
-type ProcessIssueResult = {
-  content: string;
+interface ProcessIssueResult {
   action: "fixed" | "skipped" | "skipfile";
-};
+  content: string;
+}
 
-type ProcessIssueOptions = {
+interface ProcessIssueOptions {
+  currentContent: string;
   file: string;
   issue: ValeIssue;
   issueNum: number;
   totalIssues: number;
-  currentContent: string;
-};
+}
 
 async function handleNoAIFix(
   opts: ProcessIssueOptions
@@ -492,12 +492,12 @@ async function handleNoAIFix(
     writeFileSync(opts.file, opts.currentContent);
     openInEditor(opts.file);
     await prompt("   Press Enter when done editing...");
-    return { content: readFileSync(opts.file, "utf-8"), action: "fixed" };
+    return { action: "fixed", content: readFileSync(opts.file, "utf-8") };
   }
   if (choice === "skip") {
-    return { content: opts.currentContent, action: "skipfile" };
+    return { action: "skipfile", content: opts.currentContent };
   }
-  return { content: opts.currentContent, action: "skipped" };
+  return { action: "skipped", content: opts.currentContent };
 }
 
 async function handleEditChoice(
@@ -507,7 +507,7 @@ async function handleEditChoice(
   writeFileSync(file, fixedContent);
   openInEditor(file);
   await prompt("   Press Enter when done editing...");
-  return { content: readFileSync(file, "utf-8"), action: "fixed" };
+  return { action: "fixed", content: readFileSync(file, "utf-8") };
 }
 
 async function handleFeedbackChoice(
@@ -556,8 +556,8 @@ async function processIssue(
 
   showIssueDiff(currentContent, fixed, issue);
 
-  const iterating = true;
-  while (iterating) {
+  // Loops until the user picks an action that resolves the issue.
+  for (;;) {
     const answer = await prompt(
       `\n   ${colors.green}[y]es${colors.reset} / ${colors.red}[n]o${colors.reset} / ${colors.blue}[e]dit${colors.reset} / ${colors.yellow}[f]eedback${colors.reset} / ${colors.dim}[s]kip file${colors.reset}: `
     );
@@ -565,22 +565,20 @@ async function processIssue(
 
     switch (choice) {
       case "yes":
-        return { content: fixed, action: "fixed" };
+        return { action: "fixed", content: fixed };
       case "no":
-        return { content: currentContent, action: "skipped" };
+        return { action: "skipped", content: currentContent };
       case "edit":
         return handleEditChoice(file, fixed);
       case "feedback":
         fixed = await handleFeedbackChoice(currentContent, issue, fixed);
         break;
       case "skip":
-        return { content: currentContent, action: "skipfile" };
+        return { action: "skipfile", content: currentContent };
       default:
-        return { content: currentContent, action: "skipped" };
+        return { action: "skipped", content: currentContent };
     }
   }
-
-  return { content: currentContent, action: "skipped" };
 }
 
 /**
@@ -624,11 +622,11 @@ async function processFile(
 
     const contentBeforeFix = currentContent;
     const result = await processIssue({
+      currentContent,
       file,
       issue,
       issueNum: i + 1,
       totalIssues: issues.length,
-      currentContent,
     });
 
     currentContent = result.content;

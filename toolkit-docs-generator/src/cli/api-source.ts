@@ -6,9 +6,9 @@ type ApiSourceOptions = {
 };
 
 const EXPLICIT_API_SOURCES: Record<string, ApiSource> = {
-  "public-catalog": "public-catalog",
-  public: "public-catalog",
   mock: "mock",
+  public: "public-catalog",
+  "public-catalog": "public-catalog",
 };
 
 const resolveExplicitApiSource = (apiSource: string): ApiSource => {

@@ -13,10 +13,10 @@ import type { LlmClient } from "./client";
 
 export interface LlmToolExampleGeneratorConfig {
   readonly client: LlmClient;
-  readonly model: string;
-  readonly temperature?: number;
   readonly maxTokens?: number;
+  readonly model: string;
   readonly systemPrompt?: string;
+  readonly temperature?: number;
 }
 
 const defaultSystemPrompt =
@@ -144,10 +144,10 @@ export class LlmToolExampleGenerator implements ToolExampleGenerator {
 
     const response = await this.client.generateText({
       ...request,
-      ...(this.temperature !== undefined
-        ? { temperature: this.temperature }
-        : {}),
-      ...(this.maxTokens !== undefined ? { maxTokens: this.maxTokens } : {}),
+      ...(this.temperature === undefined
+        ? {}
+        : { temperature: this.temperature }),
+      ...(this.maxTokens === undefined ? {} : { maxTokens: this.maxTokens }),
     });
 
     const payload = parseJsonObject(response);
@@ -160,9 +160,9 @@ export class LlmToolExampleGenerator implements ToolExampleGenerator {
     for (const param of tool.parameters) {
       const rawValue = rawParameters[param.name];
       parameters[param.name] = {
-        value: normalizeExampleValue(param.type, rawValue),
-        type: mapParamType(param.type),
         required: param.required,
+        type: mapParamType(param.type),
+        value: normalizeExampleValue(param.type, rawValue),
       };
     }
 
@@ -184,13 +184,13 @@ export class LlmToolExampleGenerator implements ToolExampleGenerator {
 
     return {
       codeExample: {
-        toolName: tool.qualifiedName,
+        authProvider: tool.auth?.providerId ?? undefined,
         parameters,
         requiresAuth: tool.auth !== null,
-        authProvider: tool.auth?.providerId ?? undefined,
         tabLabel: tool.auth
           ? "Call the Tool with User Authorization"
           : "Call the Tool",
+        toolName: tool.qualifiedName,
       },
       secretsInfo,
     };

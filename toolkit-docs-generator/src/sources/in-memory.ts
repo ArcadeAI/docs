@@ -45,7 +45,7 @@ export class InMemoryToolDataSource implements ToolDataSource {
   ): Promise<readonly ToolDefinition[]> {
     const normalizedId = normalizeId(toolkitId);
     return this.tools.filter((tool) => {
-      const toolToolkitId = tool.qualifiedName.split(".")[0];
+      const [toolToolkitId] = tool.qualifiedName.split(".");
       return toolToolkitId && normalizeId(toolToolkitId) === normalizedId;
     });
   }
@@ -58,14 +58,14 @@ export class InMemoryToolDataSource implements ToolDataSource {
     if (options?.toolkitId) {
       const normalizedId = normalizeId(options.toolkitId);
       result = result.filter((tool) => {
-        const toolToolkitId = tool.qualifiedName.split(".")[0];
+        const [toolToolkitId] = tool.qualifiedName.split(".");
         return toolToolkitId && normalizeId(toolToolkitId) === normalizedId;
       });
     }
 
     if (options?.version) {
       result = result.filter((tool) => {
-        const version = tool.fullyQualifiedName.split("@")[1];
+        const [, version] = tool.fullyQualifiedName.split("@");
         return version === options.version;
       });
     }

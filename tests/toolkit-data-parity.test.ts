@@ -1,8 +1,8 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import { readToolkitFile, readToolkitIndex } from "@/app/_lib/toolkit-data";
-import { listToolkitRoutes } from "@/app/_lib/toolkit-static-params";
+import { readToolkitFile, readToolkitIndex } from "@/lib/toolkit-data";
+import { listToolkitRoutes } from "@/lib/toolkit-static-params";
 import { resolveToolkitDataDir } from "@/toolkit-docs-generator/src/shared/toolkit-data-dir";
 import { getToolkitSlug } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 
@@ -28,7 +28,7 @@ describe("toolkit data parity", () => {
       (file) => file.endsWith(".json") && file !== "index.json"
     );
 
-    // readToolkitFile throws on a corrupt file (see app/_lib/toolkit-data.ts),
+    // readToolkitFile throws on a corrupt file (see lib/toolkit-data.ts),
     // so a bad file fails this test loudly instead of quietly shrinking the
     // "parseable" count below.
     const toolkits = await Promise.all(
@@ -55,8 +55,8 @@ describe("toolkit data parity", () => {
         .filter((toolkit) => !toolkit.metadata.isHidden)
         .map((toolkit) => {
           const slug = getToolkitSlug({
-            id: toolkit.id,
             docsLink: toolkit.metadata.docsLink,
+            id: toolkit.id,
           });
           return `${toolkit.metadata.category}/${slug}`;
         })

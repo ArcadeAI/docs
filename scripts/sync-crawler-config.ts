@@ -1,10 +1,10 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Push algolia/crawler-config.js to the Algolia Crawler, then trigger a reindex.
  *
  * Usage:
- *   pnpm sync-crawler-config
+ *   bun run sync-crawler-config
  *
  * `PATCH /1/crawlers/{id}/config` is a top-level merge, so this only sends the
  * fields we manage. We deliberately do NOT send `apiKey`: the crawler's index
@@ -61,11 +61,14 @@ const payload = {
   })),
 };
 
-const configResponse = await fetch(`${API_BASE}/crawlers/${CRAWLER_ID}/config`, {
-  method: "PATCH",
-  headers: { Authorization: authHeader, "Content-Type": "application/json" },
-  body: JSON.stringify(payload),
-});
+const configResponse = await fetch(
+  `${API_BASE}/crawlers/${CRAWLER_ID}/config`,
+  {
+    body: JSON.stringify(payload),
+    headers: { Authorization: authHeader, "Content-Type": "application/json" },
+    method: "PATCH",
+  }
+);
 
 if (!configResponse.ok) {
   console.error(
@@ -80,18 +83,18 @@ console.log("Crawler config updated.");
 // (e.g. removeWordsIfNoResults) never reaches an existing production index
 // otherwise, and no-result rates stay high for compound agent queries.
 if (ADMIN_API_KEY) {
-  const settingsByIndex = crawlerConfig.initialIndexSettings ?? {};
+  const settingsByIndex = crawlerConfig.initialIndexSettings;
   for (const [indexName, settings] of Object.entries(settingsByIndex)) {
     const response = await fetch(
       `https://${crawlerConfig.appId}-dsn.algolia.net/1/indexes/${encodeURIComponent(indexName)}/settings`,
       {
-        method: "PUT",
-        headers: {
-          "X-Algolia-Application-Id": crawlerConfig.appId,
-          "X-Algolia-API-Key": ADMIN_API_KEY,
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(settings),
+        headers: {
+          "Content-Type": "application/json",
+          "X-Algolia-API-Key": ADMIN_API_KEY,
+          "X-Algolia-Application-Id": crawlerConfig.appId,
+        },
+        method: "PUT",
       }
     );
     if (!response.ok) {
@@ -118,7 +121,7 @@ if (process.env.SKIP_REINDEX === "true") {
 
 const reindexResponse = await fetch(
   `${API_BASE}/crawlers/${CRAWLER_ID}/reindex`,
-  { method: "POST", headers: { Authorization: authHeader } }
+  { headers: { Authorization: authHeader }, method: "POST" }
 );
 
 if (!reindexResponse.ok) {

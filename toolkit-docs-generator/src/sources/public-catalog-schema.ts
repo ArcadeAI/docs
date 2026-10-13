@@ -43,28 +43,28 @@ const PublicCatalogRequirementsSchema = z
  */
 const PublicCatalogToolkitMetadataSchema = z
   .object({
-    id: z.string(),
-    label: z.string(),
     category: z.string(),
-    type: z.string(),
     docsLink: z.string(),
-    publicIconUrl: z.string().optional(),
     iconUrl: z.string().optional(),
+    id: z.string(),
     isBYOC: z.boolean(),
-    isPro: z.boolean(),
     isComingSoon: z.boolean(),
     isHidden: z.boolean(),
+    isPro: z.boolean(),
+    label: z.string(),
+    publicIconUrl: z.string().optional(),
+    type: z.string(),
   })
   .nullable()
   .optional();
 
 export const PublicCatalogToolkitSchema = z.object({
-  name: z.string(),
   description: z.string(),
-  version: z.string(),
-  tool_count: z.number(),
-  requirements: PublicCatalogRequirementsSchema,
   metadata: PublicCatalogToolkitMetadataSchema,
+  name: z.string(),
+  requirements: PublicCatalogRequirementsSchema,
+  tool_count: z.number(),
+  version: z.string(),
 });
 
 export const PublicCatalogToolkitResponseSchema = z.object({
@@ -100,7 +100,7 @@ export type PublicCatalogToolkit = z.infer<typeof PublicCatalogToolkitSchema>;
 export const transformPublicToolkitMetadata = (
   toolkit: PublicCatalogToolkit
 ): ToolkitMetadata | null => {
-  const metadata = toolkit.metadata;
+  const { metadata } = toolkit;
   if (!metadata) {
     return null;
   }
@@ -111,16 +111,16 @@ export const transformPublicToolkitMetadata = (
   }
 
   const parsed = ToolkitMetadataSchema.safeParse({
-    id: toolkit.name,
-    label: metadata.label,
     category: metadata.category,
-    iconUrl,
-    isBYOC: metadata.isBYOC,
-    isPro: metadata.isPro,
-    type: metadata.type,
     docsLink: metadata.docsLink,
+    iconUrl,
+    id: toolkit.name,
+    isBYOC: metadata.isBYOC,
     isComingSoon: metadata.isComingSoon,
     isHidden: metadata.isHidden,
+    isPro: metadata.isPro,
+    label: metadata.label,
+    type: metadata.type,
   });
 
   return parsed.success ? parsed.data : null;

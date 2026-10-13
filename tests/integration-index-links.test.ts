@@ -1,25 +1,30 @@
-import { existsSync, readdirSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { beforeAll, describe, expect, test } from "vitest";
-import { getToolkitsWithDocsLinks } from "@/app/_lib/integration-catalog";
+import { getToolkitsWithDocsLinks } from "@/lib/integration-catalog";
 import {
   type ResolvedIndexToolkit,
   resolveIndexToolkits,
   toIntegrationLink,
-} from "@/app/_lib/integration-index";
-import { readToolkitData } from "@/app/_lib/toolkit-data";
-import type { ToolkitWithDocsLink } from "@/app/_lib/toolkit-slug";
+} from "@/lib/integration-index";
+import { readToolkitData } from "@/lib/toolkit-data";
+import type { ToolkitWithDocsLink } from "@/lib/toolkit-slug";
 import {
   getToolkitCanonicalPath,
   listToolkitRoutes,
   listValidIntegrationLinks,
-} from "@/app/_lib/toolkit-static-params";
+} from "@/lib/toolkit-static-params";
 import {
   getToolkitSlug,
   INTEGRATION_CATEGORIES,
 } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 import { redirects } from "../redirects";
+import {
+  CONTENT_ROOT,
+  contentPageExists,
+  listChildSlugs,
+} from "./helpers/content-paths";
 
 const TIMEOUT = 30_000;
 const ROOT = process.cwd();
@@ -46,17 +51,17 @@ const makeToolkit = (
   isHidden = false
 ): ToolkitWithDocsLink =>
   ({
-    id,
-    label: id,
-    type: "arcade",
     category,
-    isHidden,
-    isComingSoon: false,
-    isBYOC: false,
-    isPro: false,
     docsLink: category
       ? `https://docs.arcade.dev${INTEGRATIONS}/${category}/${slug}`
       : undefined,
+    id,
+    isBYOC: false,
+    isComingSoon: false,
+    isHidden,
+    isPro: false,
+    label: id,
+    type: "arcade",
   }) as unknown as ToolkitWithDocsLink;
 
 describe("resolveIndexToolkits (logic)", () => {
@@ -157,31 +162,21 @@ describe("integrations index links (live data)", () => {
 });
 
 // Independently enumerate authored static pages under each integration category
-// (a `<category>/<slug>/page.{mdx,tsx}` that isn't the dynamic [toolkitId] route).
+// (a `content/docs/resources/integrations/<category>/<slug>.mdx` or
+// `<slug>/index.mdx`; toolkit pages have no file and are served by
+// lib/toolkit-route.tsx).
 const listStaticCategoryPageLinks = (): string[] => {
   const links: string[] = [];
   for (const category of INTEGRATION_CATEGORIES) {
     const categoryDir = join(
-      ROOT,
-      "app",
-      "en",
+      CONTENT_ROOT,
       "resources",
       "integrations",
       category
     );
-    if (!existsSync(categoryDir)) {
-      continue;
-    }
-    for (const entry of readdirSync(categoryDir, { withFileTypes: true })) {
-      if (!entry.isDirectory() || entry.name.startsWith("[")) {
-        continue;
-      }
-      const pageDir = join(categoryDir, entry.name);
-      if (
-        existsSync(join(pageDir, "page.mdx")) ||
-        existsSync(join(pageDir, "page.tsx"))
-      ) {
-        links.push(`${INTEGRATIONS}/${category}/${entry.name}`);
+    for (const slug of listChildSlugs(categoryDir)) {
+      if (contentPageExists(`${INTEGRATIONS}/${category}/${slug}`)) {
+        links.push(`${INTEGRATIONS}/${category}/${slug}`);
       }
     }
   }
@@ -197,17 +192,8 @@ const withEnLocale = (path: string): string =>
 const toLocaleParam = (path: string): string =>
   withEnLocale(path).replace(LOCALE_PREFIX, "/:locale");
 
-const pageFileExists = (path: string): boolean => {
-  // withEnLocale guarantees a leading "/en"; drop the leading slash to get an
-  // app-relative path like "en/resources/integrations".
-  const rel = withEnLocale(path).slice(1);
-  const base = join(ROOT, "app", rel);
-  return (
-    existsSync(join(base, "page.mdx")) ||
-    existsSync(join(base, "page.tsx")) ||
-    existsSync(`${base}.mdx`)
-  );
-};
+const pageFileExists = (path: string): boolean =>
+  contentPageExists(withEnLocale(path));
 
 const readRedirectSources = (): Set<string> =>
   new Set(redirects.map((redirect) => redirect.source));
@@ -222,8 +208,8 @@ const extractInternalHrefs = async (relPath: string): Promise<string[]> => {
 // Component files whose hardcoded internal links are not covered by the
 // MDX-only broken-link scan.
 const COMPONENT_FILES = [
-  "app/_components/toolkit-docs/components/toolkit-page.tsx",
-  "app/en/resources/integrations/components/toolkits-client.tsx",
+  "components/toolkit-docs/components/toolkit-page.tsx",
+  "components/pages/integrations/toolkits-client.tsx",
 ];
 
 describe("hardcoded internal links in toolkit components resolve", () => {
@@ -273,7 +259,7 @@ describe("hardcoded internal links in toolkit components resolve", () => {
 // page uses (listToolkitRoutes + readToolkitData + getToolkitSlug) rather than
 // importing the page module, which pulls in browser-only render code.
 //
-// (The docs sitemap — app/sitemap.ts, static MDX pages only — is guarded in
+// (The docs sitemap — app/sitemap.ts, MDX pages plus toolkit routes — is guarded in
 // tests/sitemap.test.ts: no redirect-source URLs, no duplicates.)
 // ---------------------------------------------------------------------------
 
@@ -287,24 +273,26 @@ describe("toolkit page canonical hygiene", () => {
       listValidIntegrationLinks(),
       readRedirectSources(),
     ]);
-    canonicals = [];
     // Fetch the route list ONCE. getToolkitStaticParamsForCategory() recomputes
     // listToolkitRoutes() (toolkit index + every data file) internally, so
     // looping it over all categories re-read the whole catalog once per category.
     // listToolkitRoutes() already yields both category and toolkitId.
-    for (const { category, toolkitId } of await listToolkitRoutes()) {
-      const data = await readToolkitData(toolkitId);
-      const canonical = data
-        ? `${INTEGRATIONS}/${category}/${getToolkitSlug({
-            id: data.id,
-            docsLink: data.metadata?.docsLink,
-          })}`
-        : "";
-      canonicals.push({
-        page: `${INTEGRATIONS}/${category}/${toolkitId}`,
-        canonical,
-      });
-    }
+    const routes = await listToolkitRoutes();
+    canonicals = await Promise.all(
+      routes.map(async ({ category, toolkitId }) => {
+        const data = await readToolkitData(toolkitId);
+        const canonical = data
+          ? `${INTEGRATIONS}/${category}/${getToolkitSlug({
+              docsLink: data.metadata?.docsLink,
+              id: data.id,
+            })}`
+          : "";
+        return {
+          canonical,
+          page: `${INTEGRATIONS}/${category}/${toolkitId}`,
+        };
+      })
+    );
   }, TIMEOUT);
 
   test("every generated toolkit page emits a canonical", () => {
@@ -353,7 +341,7 @@ describe("toolkit page canonical hygiene", () => {
     expect(offenders).toEqual([]);
   });
 
-  // MARTECH-17: the dynamic [toolkitId] route accepts ANY category segment, so a
+  // MARTECH-17: the toolkit route (lib/toolkit-route.tsx) accepts ANY category segment, so a
   // toolkit is reachable at wrong-category aliases (a docsLink/category mismatch
   // produced development/pagerduty-api). generateMetadata canonicalizes every
   // such page to getToolkitCanonicalPath(data) — the toolkit's own category +
@@ -368,24 +356,27 @@ describe("toolkit page canonical hygiene", () => {
         (file) => file.endsWith(".json") && file !== "index.json"
       );
       const orphans: string[] = [];
-      for (const file of files) {
-        const parsed = JSON.parse(
-          await readFile(join(dataDir, file), "utf-8")
-        ) as {
-          id?: string;
-          metadata?: {
-            category?: string;
-            docsLink?: string;
-            isHidden?: boolean;
-          };
-        };
+      const parsedFiles = await Promise.all(
+        files.map(async (file) => ({
+          file,
+          parsed: JSON.parse(await readFile(join(dataDir, file), "utf-8")) as {
+            id?: string;
+            metadata?: {
+              category?: string;
+              docsLink?: string;
+              isHidden?: boolean;
+            };
+          },
+        }))
+      );
+      for (const { file, parsed } of parsedFiles) {
         if (!parsed.id || parsed.metadata?.isHidden) {
           continue;
         }
         const canonical = getToolkitCanonicalPath({
-          id: parsed.id,
           category: parsed.metadata?.category,
           docsLink: parsed.metadata?.docsLink,
+          id: parsed.id,
         });
         if (!validLinks.has(canonical)) {
           orphans.push(`${file} → ${canonical}`);

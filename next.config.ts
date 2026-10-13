@@ -1,51 +1,14 @@
+import { createMDX } from "fumadocs-mdx/next";
 import type { NextConfig } from "next";
-import nextra from "nextra";
-import { withLlmsTxt } from "./lib/next-plugin-llmstxt";
-import { remarkGlossary } from "./lib/remark-glossary";
-import { stripMarkdownFromSwcPageExtensions } from "./lib/swc-page-extensions";
 import { redirects } from "./redirects";
 
-// Set up Nextra with its configuration
-const withNextra = nextra({
-  defaultShowCopyCode: true,
-  codeHighlight: true,
-  search: false,
-  mdxOptions: {
-    remarkPlugins: [
-      [
-        remarkGlossary,
-        { glossaryPath: "./app/en/resources/glossary/page.mdx" },
-      ],
-    ],
-  },
-});
-
-const nextConfig: NextConfig = withLlmsTxt({
-  enabled: false, // disabled for now, we will recreate this every week
-})(
-  withNextra({
-    async redirects() {
-      return redirects;
-    },
-    // The app imports shared modules out of toolkit-docs-generator/src/shared/,
-    // which compiles under "moduleResolution": "NodeNext" and therefore writes
-    // its internal relative imports with a ".js" extension. Webpack resolves
-    // with bundler semantics and would look for a literal ".js" file that
-    // never exists on disk, so teach it to try ".ts" first.
-    webpack: (config) => {
-      config.resolve.extensionAlias = {
-        ...config.resolve.extensionAlias,
-        ".js": [".ts", ".tsx", ".js"],
-      };
-      // Keeps `page.mdx` out of Next 16.2's new SWC app-entry check, which
-      // otherwise rejects the `metadata` export Nextra generates. See
-      // lib/swc-page-extensions.ts for the full story.
-      stripMarkdownFromSwcPageExtensions(config.module.rules);
-      return config;
-    },
-    headers: async () => [
+const config: NextConfig = {
+  // Parallel builds (CI matrix, multiple agents) can each use their own output
+  // directory: NEXT_DIST_DIR=.next-foo bun run build
+  distDir: process.env.NEXT_DIST_DIR ?? ".next",
+  headers: () =>
+    Promise.resolve([
       {
-        source: "/(.*)",
         headers: [
           {
             key: "X-Frame-Options",
@@ -64,9 +27,16 @@ const nextConfig: NextConfig = withLlmsTxt({
             value: "strict-origin-when-cross-origin",
           },
         ],
+        source: "/(.*)",
       },
-    ],
-  })
-);
+    ]),
+  reactStrictMode: true,
+  // Redirect rules for renamed, merged, or deleted pages live in redirects.ts
+  // (a plain data module) so scripts/check-redirects.ts and the tests can
+  // import them without parsing this file.
+  redirects: () => Promise.resolve(redirects),
+};
 
-export default nextConfig;
+const withMDX = createMDX();
+
+export default withMDX(config);

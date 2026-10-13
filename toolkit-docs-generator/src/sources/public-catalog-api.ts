@@ -16,10 +16,10 @@ export interface PublicCatalogApiSourceConfig {
    * (e.g. https://experience.arcade.dev/api).
    */
   readonly baseUrl: string;
-  /** Optional fetch implementation for testing */
-  readonly fetchFn?: typeof fetch;
   /** Page size for toolkit catalog pagination */
   readonly catalogPageSize?: number;
+  /** Optional fetch implementation for testing */
+  readonly fetchFn?: typeof fetch;
   /** Page size for the flat tools read */
   readonly toolsPageSize?: number;
 }
@@ -96,9 +96,9 @@ export class PublicCatalogApiSource implements ToolDataSource, MetadataSource {
     );
 
     return {
+      metadataByToolkit: indexMetadata(catalogItems),
       toolkits: catalogItems,
       tools,
-      metadataByToolkit: indexMetadata(catalogItems),
     };
   }
 
@@ -122,13 +122,13 @@ export class PublicCatalogApiSource implements ToolDataSource, MetadataSource {
     const { tools } = await this.getSnapshot();
 
     return tools.filter((tool) => {
-      const toolkitId = tool.qualifiedName.split(".")[0];
+      const [toolkitId] = tool.qualifiedName.split(".");
       if (options?.toolkitId && toolkitId !== options.toolkitId) {
         return false;
       }
 
       if (options?.version) {
-        const toolVersion = tool.fullyQualifiedName.split("@")[1];
+        const [, toolVersion] = tool.fullyQualifiedName.split("@");
         if (toolVersion !== options.version) {
           return false;
         }

@@ -26,69 +26,69 @@ import type {
 const createTestTool = (
   overrides: Partial<ToolDefinition> = {}
 ): ToolDefinition => ({
-  name: "CreateIssue",
-  qualifiedName: "Github.CreateIssue",
-  fullyQualifiedName: "Github.CreateIssue@1.0.0",
-  description: "Create a new issue in a GitHub repository",
-  parameters: [
-    {
-      name: "owner",
-      type: "string",
-      required: true,
-      description: "Repository owner",
-      enum: null,
-      inferrable: true,
-    },
-    {
-      name: "repo",
-      type: "string",
-      required: true,
-      description: "Repository name",
-      enum: null,
-      inferrable: true,
-    },
-  ],
   auth: {
     providerId: "github",
     providerType: "oauth2",
     scopes: ["repo"],
   },
-  secrets: [],
+  description: "Create a new issue in a GitHub repository",
+  fullyQualifiedName: "Github.CreateIssue@1.0.0",
+  name: "CreateIssue",
   output: {
-    type: "object",
     description: "Created issue details",
+    type: "object",
   },
+  parameters: [
+    {
+      description: "Repository owner",
+      enum: null,
+      inferrable: true,
+      name: "owner",
+      required: true,
+      type: "string",
+    },
+    {
+      description: "Repository name",
+      enum: null,
+      inferrable: true,
+      name: "repo",
+      required: true,
+      type: "string",
+    },
+  ],
+  qualifiedName: "Github.CreateIssue",
+  secrets: [],
   ...overrides,
 });
 
 const createTestMetadata = (
   overrides: Partial<ToolkitMetadata> = {}
 ): ToolkitMetadata => ({
-  id: "Github",
-  label: "GitHub",
   category: "development",
-  iconUrl: "https://design-system.arcade.dev/icons/github.svg",
-  isBYOC: false,
-  isPro: false,
-  type: "arcade",
   docsLink: "https://docs.arcade.dev/en/mcp-servers/development/github",
+  iconUrl: "https://design-system.arcade.dev/icons/github.svg",
+  id: "Github",
+  isBYOC: false,
   isComingSoon: false,
   isHidden: false,
+  isPro: false,
+  label: "GitHub",
+  type: "arcade",
   ...overrides,
 });
 
 const createTestCustomSections = (
   overrides: Partial<CustomSections> = {}
 ): CustomSections => ({
+  customImports: [],
   documentationChunks: [
     {
-      type: "warning",
+      content: "This toolkit requires OAuth2 authentication.",
       location: "header",
       position: "after",
-      content: "This toolkit requires OAuth2 authentication.",
+      type: "warning",
     },
   ],
-  customImports: [],
   subPages: [],
   toolChunks: {},
   ...overrides,
@@ -100,26 +100,26 @@ const createTestCustomSections = (
 
 describe("InMemoryToolDataSource", () => {
   const githubTool1 = createTestTool({
+    fullyQualifiedName: "Github.CreateIssue@1.0.0",
     name: "CreateIssue",
     qualifiedName: "Github.CreateIssue",
-    fullyQualifiedName: "Github.CreateIssue@1.0.0",
   });
 
   const githubTool2 = createTestTool({
+    fullyQualifiedName: "Github.SetStarred@1.0.0",
     name: "SetStarred",
     qualifiedName: "Github.SetStarred",
-    fullyQualifiedName: "Github.SetStarred@1.0.0",
   });
 
   const slackTool = createTestTool({
-    name: "SendMessage",
-    qualifiedName: "Slack.SendMessage",
-    fullyQualifiedName: "Slack.SendMessage@1.2.0",
     auth: {
       providerId: "slack",
       providerType: "oauth2",
       scopes: ["chat:write"],
     },
+    fullyQualifiedName: "Slack.SendMessage@1.2.0",
+    name: "SendMessage",
+    qualifiedName: "Slack.SendMessage",
   });
 
   const testTools = [githubTool1, githubTool2, slackTool];
@@ -217,15 +217,15 @@ describe("InMemoryToolDataSource", () => {
 
 describe("InMemoryMetadataSource", () => {
   const githubMetadata = createTestMetadata({
+    category: "development",
     id: "Github",
     label: "GitHub",
-    category: "development",
   });
 
   const slackMetadata = createTestMetadata({
+    category: "social",
     id: "Slack",
     label: "Slack",
-    category: "social",
   });
 
   const testMetadata = [githubMetadata, slackMetadata];
@@ -292,10 +292,10 @@ describe("InMemoryCustomSectionsSource", () => {
   const githubSections = createTestCustomSections({
     documentationChunks: [
       {
-        type: "warning",
+        content: "GitHub OAuth required",
         location: "header",
         position: "after",
-        content: "GitHub OAuth required",
+        type: "warning",
       },
     ],
   });
