@@ -60,6 +60,10 @@ export function Mermaid({ chart }: MermaidProps) {
       try {
         mermaid.initialize({
           fontFamily: "inherit",
+          // Mermaid 12 defaults to the ELK layout and the "neo" look; keep the
+          // layout and look the diagrams were written for.
+          layout: "dagre",
+          look: "classic",
           securityLevel: "loose",
           startOnLoad: false,
           theme: isDarkTheme ? "dark" : "default",
