@@ -179,7 +179,12 @@ With the defaults, this creates the `arcade-workers` namespace, a default-deny N
 
 ### Deploy a test server
 
-Ask a developer to [deploy a server](#deploy-a-server) and check that it reaches **Running**.
+Before the first deploy, make sure the developer has:
+
+- An account in your installation, and a project in it they can deploy to.
+- Signed in with `arcade login --url https://arcade.example.com`, and selected that project with `arcade project set <project-id>` if it isn't the default.
+
+Then ask them to [deploy a server](#deploy-a-server) and check that it reaches **Running**. If the deploy fails, check the Arcade Engine logs and the pod events in the workers namespace.
 
 </Steps>
 
@@ -250,37 +255,6 @@ Every deployed server gets the same size.
 
 With the chart, each pod's requests equal its limits, so pods run in the Guaranteed QoS class. Each pod also has a fixed ephemeral-storage request and limit of `6Gi`, which covers a `5Gi` volume for the bundle and its virtual environment.
 
-#### Resource requests and ephemeral storage
-
-<Callout type="warning">
-Not yet available in a released chart. Newer Arcade Engine builds can reserve less than the limit for each deployed server. The chart doesn't expose these settings yet.
-</Callout>
-
-The Arcade Engine reads these settings from `deployments.kubernetes.instance` in its own configuration:
-
-| Resource | Request | Limit | Default |
-| --- | --- | --- | --- |
-| CPU | `cpu_request` (cores) | `cpu_limit` (cores) | Request equals the limit |
-| Memory | `memory_request` (mebibytes) | `memory_limit` (mebibytes) | Request equals the limit |
-| Ephemeral storage | `ephemeral_storage_request` (quantity) | `ephemeral_storage_limit` (quantity) | Request equals the limit; limit `6Gi` |
-
-```yaml filename="engine.yaml"
-deployments:
-  kubernetes:
-    instance:
-      cpu_request: 0.1
-      memory_request: 256
-      ephemeral_storage_request: 512Mi
-      cpu_limit: 1
-      memory_limit: 512
-      ephemeral_storage_limit: 6Gi
-```
-
-- A request below its limit puts the pod in the Burstable QoS class. Under node pressure, the kubelet evicts Burstable pods before Guaranteed pods.
-- The Arcade Engine refuses to start when a request exceeds its limit, a request is negative, or an ephemeral-storage value isn't a Kubernetes quantity.
-- Keep `ephemeral_storage_limit` at `6Gi` or higher. The bundle, temporary, and home volumes add up to `6Gi`.
-- The Arcade Engine sizes the namespace quota from limits, not requests.
-
 ### Workers namespace
 
 | Value | Default | Description |
@@ -297,7 +271,7 @@ To use a namespace you manage yourself, set `deployments.createNamespace: false`
 
 When the reconciler is on, the Arcade Engine also applies its own ResourceQuota, `arcade-deployments-budget`, in the workers namespace. It limits `pods`, `limits.cpu`, and `limits.memory`, and the reconciler re-applies it on every pass, so manual edits to it don't last. A pod has to fit every quota in the namespace.
 
-When the reconciler is on (the default), set `deployments.resourceQuota.enabled: false` and size capacity with `deployments.budget.default`. The Arcade Engine's `arcade-deployments-budget` quota already caps pods and CPU/memory limits from the budget; a second quota only refuses pods earlier, with no clear error. Keep the chart quota, sized to your budget, only when `deployments.reconciler.enabled` is `false`.
+Size `deployments.resourceQuota.hard` for the number of servers you expect, at `deployments.sizing.cpuLimit` and `deployments.sizing.memoryLimit` each, and make sure your nodes can hold them. If deploys stop creating pods while the chart quota still has room, check `arcade-deployments-budget` with `kubectl -n arcade-workers get resourcequota`.
 
 If the chart already rendered its quota, only a `helm upgrade` with `deployments.resourceQuota.enabled: false` removes it. The Arcade Engine's Role can't delete ResourceQuotas.
 
@@ -317,7 +291,7 @@ If the chart already rendered its quota, only a `helm upgrade` with `deployments
 
 ## Deploy a server
 
-Developers use the same workflow as on Arcade Cloud. They sign in to your installation once, then deploy from the project directory:
+Developers use the same CLI as on Arcade Cloud. Each developer needs an account and a project in your installation first. They sign in to your installation once, select the project if needed, then deploy from the project directory:
 
 ```bash
 arcade login --url https://arcade.example.com
@@ -392,7 +366,7 @@ When an upgrade changes the runner image tag, the reconciler moves running deplo
 | `helm upgrade` fails with `engine.extraConfig sets deployments:` | The chart owns the `deployments:` block in the Arcade Engine's configuration. Use `deployments.*` chart values instead of `engine.extraConfig`. |
 | The Arcade Engine doesn't start and names an unsupported scheme | Use an `s3://`, `gs://`, or `azblob://` URL in `deployments.artifacts.url`. |
 | A deploy fails because the server never became healthy | The pod started but didn't answer its health check within `deployments.timeout`. Read the server's logs, and check that it binds the port the platform probes. If many servers fail at once, suspect the runner image. If start-up is just slow, raise `deployments.timeout`. |
-| Deploys stop creating pods | A ResourceQuota in the workers namespace is full. Run `kubectl -n arcade-workers get resourcequota` to see which one. For `arcade-deployments-budget`, raise `deployments.budget.default`. For `<release>-workers-quota`, raise `deployments.resourceQuota.hard`. Either way, make sure your nodes can hold the extra servers. |
+| Deploys stop creating pods | A ResourceQuota in the workers namespace is full. Run `kubectl -n arcade-workers get resourcequota` to see which one. For `<release>-workers-quota`, raise `deployments.resourceQuota.hard` and make sure your nodes can hold the extra servers. If `arcade-deployments-budget` is full, the Arcade Engine's own cap is reached; remove deployed servers you no longer need. |
 | A deployed server can't reach an internal service | Add the service's CIDR to `deployments.egressAllowlist`. |
 | NetworkPolicies stay behind after you remove servers | With `deployments.reconciler.enabled: false`, nothing removes them. Delete NetworkPolicies labeled `app.kubernetes.io/managed-by=arcade-engine` by hand, or turn the reconciler back on. |
 
