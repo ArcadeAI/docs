@@ -252,9 +252,7 @@ function SuccessMessage({ onClose }: { onClose: () => void }) {
       <div className="mb-4 rounded-full bg-green-500/10 p-3">
         <CheckCircle className="h-6 w-6 text-green-500" />
       </div>
-      <h3 className="mt-0 mb-1 font-semibold text-gray-100 text-lg">
-        Thank you!
-      </h3>
+      <h3 className="mb-1 font-semibold text-gray-100 text-lg">Thank you!</h3>
       <p className="text-gray-400 text-sm">We'll be in touch shortly.</p>
       <Button className="mt-6 w-full" onClick={onClose} variant="default">
         Close

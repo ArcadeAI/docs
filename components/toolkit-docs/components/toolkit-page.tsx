@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 import ToolFooter from "@/components/tool-footer";
+import "../toolkit-page.css";
 import {
   getPackageName,
   TOOL_METADATA_FALLBACK_STYLE,
@@ -625,7 +626,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
   }, []);
 
   return (
-    <div className="w-full">
+    <div className="toolkit-page-column preflight-borders w-full">
       {/* Overview section */}
       <section id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
         <BreadcrumbBar category={data.metadata?.category} label={data.label} />
@@ -684,7 +685,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         />
 
         {data.summary ? (
-          <div className="prose mt-6 max-w-none text-foreground text-sm">
+          <div className="tk-prose tk-prose-sm dark:tk-prose-invert mt-6 max-w-none text-foreground">
             <ReactMarkdown
               components={{ h1: "h2" }}
               rehypePlugins={[rehypeNeutralizeEmails]}

@@ -175,7 +175,7 @@ function MdxContent({ content }: { content: string }) {
   }
 
   return (
-    <div className="prose max-w-none text-sm">
+    <div className="tk-prose tk-prose-sm dark:tk-prose-invert max-w-none">
       <Component components={MDX_COMPONENTS} />
     </div>
   );

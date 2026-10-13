@@ -40,6 +40,10 @@ test("sitemap lists expected URLs", async () => {
     // Known page should be present
     expect(urls).toContain("https://example.test/en/references/changelog");
 
+    // The published sitemap has never listed the API reference page (the old
+    // directory walk skipped every folder named "api"); keep the URL set equal.
+    expect(urls).not.toContain("https://example.test/en/references/api");
+
     // Generated toolkit pages (served by lib/toolkit-route.tsx, which the
     // content page tree can't see) must still make it into the sitemap. This
     // fails if the toolkit-route merge in app/sitemap.ts is reverted.

@@ -60,7 +60,7 @@ export function SampleAppCard({
             ) : null}
             <div className="space-y-2 p-4 min-[1062px]:p-6">
               <div className="flex items-start justify-between gap-2">
-                <h3 className="mt-0 font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
+                <h3 className="font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
                   {title}
                 </h3>
                 {date ? (

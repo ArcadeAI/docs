@@ -1,58 +1,96 @@
 "use client";
 
-import { useTheme } from "next-themes";
-import { useEffect, useRef } from "react";
+import { type RefObject, useEffect, useId, useRef, useState } from "react";
 
 interface MermaidProps {
   chart: string;
 }
 
-/**
- * Renders a Mermaid diagram client-side. `remarkMdxMermaid` (source.config.ts)
- * rewrites ```mermaid fences into `<Mermaid chart="..." />`, which replaces the
- * diagram rendering Nextra provided out of the box. Mermaid draws straight into
- * the container element, so no HTML string is injected from React.
- */
-export function Mermaid({ chart }: MermaidProps) {
-  const container = useRef<HTMLDivElement>(null);
-  const { resolvedTheme } = useTheme();
+function useIsVisible(ref: RefObject<HTMLDivElement | null>): boolean {
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   useEffect(() => {
-    const element = container.current;
+    const element = ref.current;
     if (!element) {
       return;
     }
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry?.isIntersecting) {
+        observer.disconnect();
+        setIsIntersecting(true);
+      }
+    });
+    observer.observe(element);
+    return () => {
+      observer.disconnect();
+    };
+  }, [ref]);
+
+  return isIntersecting;
+}
+
+/**
+ * The Mermaid renderer Nextra used (`@theguild/remark-mermaid`), ported: the
+ * diagram is drawn the first time its container scrolls into view, with the
+ * same Mermaid config, and redrawn when the `<html>` theme class changes.
+ * `remarkMdxMermaid` (source.config.ts) turns ```mermaid fences into
+ * `<Mermaid chart="..." />`.
+ */
+export function Mermaid({ chart }: MermaidProps) {
+  const id = useId();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isVisible = useIsVisible(containerRef);
+
+  useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+    const htmlElement = document.documentElement;
     let cancelled = false;
-    const render = async () => {
-      const { default: mermaid } = await import("mermaid");
-      if (cancelled) {
+
+    async function renderChart() {
+      const container = containerRef.current;
+      if (!container) {
         return;
       }
-      mermaid.initialize({
-        fontFamily: "inherit",
-        securityLevel: "strict",
-        startOnLoad: false,
-        theme: resolvedTheme === "dark" ? "dark" : "default",
-      });
-      element.textContent = chart.replaceAll("\\n", "\n");
-      element.removeAttribute("data-processed");
+      const isDarkTheme =
+        htmlElement.classList.contains("dark") ||
+        htmlElement.getAttribute("data-theme") === "dark";
+      const { default: mermaid } = await import("mermaid");
       try {
-        await mermaid.run({ nodes: [element] });
-      } catch (error) {
-        element.textContent =
-          error instanceof Error ? error.message : String(error);
+        mermaid.initialize({
+          fontFamily: "inherit",
+          securityLevel: "loose",
+          startOnLoad: false,
+          theme: isDarkTheme ? "dark" : "default",
+          themeCSS: "margin: 1.5rem auto 0;",
+        });
+        const scratch = document.createElement("div");
+        container.append(scratch);
+        const { svg } = await mermaid.render(
+          // strip invalid characters for `id` attribute
+          id.replaceAll(":", ""),
+          chart.replaceAll("\\n", "\n"),
+          scratch
+        );
+        if (!cancelled) {
+          container.replaceChildren(
+            document.createRange().createContextualFragment(svg)
+          );
+        }
+      } catch {
+        // Invalid diagram source: leave the container empty, as Nextra did.
       }
-    };
-    render();
+    }
+
+    const observer = new MutationObserver(renderChart);
+    observer.observe(htmlElement, { attributes: true });
+    renderChart();
     return () => {
       cancelled = true;
+      observer.disconnect();
     };
-  }, [chart, resolvedTheme]);
+  }, [chart, id, isVisible]);
 
-  return (
-    <div
-      className="mermaid my-6 flex justify-center overflow-x-auto [&>svg]:max-w-full"
-      ref={container}
-    />
-  );
+  return <div ref={containerRef} />;
 }

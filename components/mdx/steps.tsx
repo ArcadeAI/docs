@@ -1,18 +1,34 @@
-import {
-  Step as FumadocsStep,
-  Steps as FumadocsSteps,
-} from "fumadocs-ui/components/steps";
-import type { ReactNode } from "react";
+import { type ComponentProps, type CSSProperties, useId } from "react";
+import { cx } from "./elements";
 
 /**
- * Nextra numbered `###` headings inside `<Steps>` automatically. Fumadocs
- * needs each step wrapped in `<Step>`; `lib/remark-nextra-steps.ts` performs
- * that wrapping at compile time, so MDX authored for Nextra keeps working.
+ * Nextra's `<Steps>` (nextra/components): a left rule, with every `h3` inside
+ * numbered by a CSS counter (`.nextra-steps` in app/global.css). No `<Step>`
+ * wrappers are needed, exactly as in the Nextra-authored MDX.
  */
-export function Steps({ children }: { children: ReactNode }) {
-  return <FumadocsSteps>{children}</FumadocsSteps>;
+export function Steps({
+  children,
+  className,
+  style,
+  ...props
+}: ComponentProps<"div">) {
+  const id = useId().replaceAll(":", "");
+  return (
+    <div
+      className={cx(
+        "nextra-steps ms-4 mb-12 border-gray-200 border-s ps-6",
+        "dark:border-neutral-800",
+        className
+      )}
+      style={{ ...style, "--counter-id": id } as CSSProperties}
+      {...props}
+    >
+      {children}
+    </div>
+  );
 }
 
-export function Step({ children }: { children: ReactNode }) {
-  return <FumadocsStep>{children}</FumadocsStep>;
+/** Kept for MDX that wraps a step explicitly; renders its children as-is. */
+export function Step({ children }: ComponentProps<"div">) {
+  return <>{children}</>;
 }

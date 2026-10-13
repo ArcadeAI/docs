@@ -96,10 +96,11 @@ export const TYPE_DESCRIPTIONS: Record<ToolkitType, React.ReactNode> = {
       Official MCP Servers hand-crafted by Arcade that are ready for use and
       optimized for LLM-usage.{" "}
       <a
+        aria-label="Learn more about optimized tools"
         className="text-blue-600 underline decoration-blue-600/30 underline-offset-2 transition-colors hover:text-blue-700 hover:decoration-blue-700/50 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:text-blue-300 dark:hover:decoration-blue-300/50"
         href="/build/create-tools/improve/types-of-tools#optimized-tools"
       >
-        Learn more about optimized tools
+        Learn more
       </a>
       .
     </>
@@ -109,10 +110,11 @@ export const TYPE_DESCRIPTIONS: Record<ToolkitType, React.ReactNode> = {
       Unoptimized (auto-generated) MCP Servers developed by Arcade that may
       require customization.{" "}
       <a
+        aria-label="Learn more about unoptimized tools"
         className="text-blue-600 underline decoration-blue-600/30 underline-offset-2 transition-colors hover:text-blue-700 hover:decoration-blue-700/50 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:text-blue-300 dark:hover:decoration-blue-300/50"
         href="/build/create-tools/improve/types-of-tools#unoptimized-tools"
       >
-        Learn more about unoptimized tools
+        Learn more
       </a>
       .
     </>

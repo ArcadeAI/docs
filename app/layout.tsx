@@ -57,8 +57,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   initialScale: 1,
   themeColor: [
-    { color: "#ffffff", media: "(prefers-color-scheme: light)" },
-    { color: "#0a0a0a", media: "(prefers-color-scheme: dark)" },
+    { color: "rgb(255,255,255)", media: "(prefers-color-scheme: light)" },
+    { color: "rgb(10,10,10)", media: "(prefers-color-scheme: dark)" },
   ],
   width: "device-width",
 };
@@ -80,10 +80,11 @@ export default function RootLayout({
     >
       <head>
         <meta content={lang} httpEquiv="Content-Language" />
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
         <link href="https://www.googletagmanager.com" rel="preconnect" />
         <link href="https://www.googletagmanager.com" rel="dns-prefetch" />
       </head>
-      <body className="flex min-h-screen flex-col">
+      <body>
         {/*
           swagger-ui-react bundles zenscroll, which installs a document-wide
           click handler as soon as its module is evaluated. That handler

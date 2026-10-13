@@ -38,10 +38,7 @@ export async function GET(
     // Content-negotiate markdown: the toolkit page renders per-tool detail
     // client-only, so the "copy as markdown" / agent view builds full markdown
     // straight from the data here instead of from the slimmed HTML.
-    const wantsMarkdown =
-      (request.headers.get("accept") ?? "").includes("text/markdown") ||
-      new URL(request.url).searchParams.get("format") === "markdown";
-    if (wantsMarkdown) {
+    if ((request.headers.get("accept") ?? "").includes("text/markdown")) {
       return new NextResponse(toToolkitMarkdown(data), {
         headers: {
           ...CACHE_HEADERS,

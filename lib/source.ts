@@ -6,7 +6,7 @@ import { docs } from "@/.source/server";
  * Nextra let `_meta.tsx` give a page a sidebar label that differed from its H1
  * (e.g. index pages labelled "Overview"). Those labels now live in the page
  * frontmatter as `sidebarTitle`; this plugin shows them in the sidebar while
- * `<DocsTitle>` keeps rendering `title`.
+ * the page keeps rendering `title`.
  */
 const sidebarTitlePlugin: LoaderPlugin = {
   name: "arcade:sidebar-title",

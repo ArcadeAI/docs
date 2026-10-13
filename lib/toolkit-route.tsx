@@ -15,7 +15,6 @@
 import { DocsPage } from "fumadocs-ui/layouts/notebook/page";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { PageActions } from "@/components/page-actions";
 import { ToolkitPage } from "@/components/toolkit-docs";
 import { source } from "@/lib/source";
 import { readToolkitData, toToolkitSummary } from "@/lib/toolkit-data";
@@ -117,6 +116,16 @@ export async function toolkitRouteMetadata(
 }
 
 /**
+ * URL the "Copy page" action requests for a toolkit page. Sent with
+ * `Accept: text/markdown`, the data route answers with the full page as
+ * Markdown (the page itself loads per-tool detail on demand, so its HTML does
+ * not contain it).
+ */
+export function toolkitMarkdownUrl(match: ToolkitRouteMatch): string {
+  return `/api/toolkit-data/${encodeURIComponent(match.toolkitId)}`;
+}
+
+/**
  * Renders the full toolkit page (DocsPage chrome included), or null when the
  * toolkit does not exist. `ToolkitPage` is a client component that ships its
  * own "On this page" sidebar and scroll controls, so Fumadocs' table of
@@ -140,13 +149,7 @@ export async function ToolkitRoutePage(props: {
       tableOfContent={{ enabled: false }}
       toc={[]}
     >
-      <PageActions
-        markdownUrl={`/api/toolkit-data/${encodeURIComponent(data.id)}?format=markdown`}
-      />
-      {/* The toolkit TOC is a fixed 20rem panel on xl+; keep content clear of it. */}
-      <div className="xl:pe-80">
-        <ToolkitPage data={toToolkitSummary(data)} />
-      </div>
+      <ToolkitPage data={toToolkitSummary(data)} />
     </DocsPage>
   );
 }

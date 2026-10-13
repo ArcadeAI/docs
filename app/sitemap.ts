@@ -12,13 +12,26 @@ const TOOLKIT_DATA_DIR = resolveToolkitDataDir();
 let cachedRoutes: Promise<MetadataRoute.Sitemap> | null = null;
 
 /**
+ * Path segments the old `app/en/**` directory walk never descended into.
+ * "api" was there to keep route handlers out, but it also matched the page at
+ * /en/references/api, so the published sitemap has never listed that page.
+ * The same rule is applied to page slugs here so the URL set stays identical;
+ * remove "api" from this set to start listing the page.
+ */
+const SKIPPED_SEGMENTS = new Set(["_meta", "_api", "_redirects", "api"]);
+
+/**
  * One entry per MDX page known to the Fumadocs source. `lastModified` comes
  * from the file's mtime, like the old `app/en/**` directory walk did; when the
  * file cannot be stat-ed (for example a virtual page) the entry is emitted
  * without a date rather than dropped.
  */
 async function collectRoutes(): Promise<MetadataRoute.Sitemap> {
-  const pages = source.getPages();
+  const pages = source
+    .getPages()
+    .filter(
+      (page) => !page.slugs.some((segment) => SKIPPED_SEGMENTS.has(segment))
+    );
 
   return await Promise.all(
     pages.map(async (page) => {

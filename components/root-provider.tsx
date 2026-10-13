@@ -2,20 +2,17 @@
 
 import { RootProvider } from "fumadocs-ui/provider/next";
 import type { ReactNode } from "react";
-import {
-  AlgoliaSearch,
-  isAlgoliaConfigured,
-} from "@/components/algolia-search";
 
 /**
- * Fumadocs root provider with the site defaults: dark theme by default and
- * Algolia search when configured (Orama via /api/search otherwise).
+ * Fumadocs root provider with the site defaults: dark theme by default and no
+ * theme hotkey. Fumadocs' own search is off; the docs search lives in
+ * components/algolia-search.tsx and handles its own shortcut.
  */
 export function AppRootProvider({ children }: { children: ReactNode }) {
   return (
     <RootProvider
-      search={isAlgoliaConfigured ? { SearchDialog: AlgoliaSearch } : undefined}
-      theme={{ defaultTheme: "dark" }}
+      search={{ enabled: false }}
+      theme={{ defaultTheme: "dark", hotKey: false }}
     >
       {children}
     </RootProvider>

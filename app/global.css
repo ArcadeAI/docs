@@ -54,6 +54,255 @@
   --color-fd-ring: var(--primary);
 }
 
+/*
+ * Docs chrome (navbar, sidebar, table of contents, page shell, footer band).
+ *
+ * The chrome components in components/chrome/ are a port of the previous docs
+ * theme and keep its measurements: a 64px navbar, 256px sidebar and table of
+ * contents columns, and a 90rem content width. The variables and helper
+ * classes below are the ones that theme defined.
+ */
+:root {
+  --nextra-navbar-height: 64px;
+  --nextra-content-width: 90rem;
+  --nextra-bg: 255, 255, 255;
+
+  /*
+   * Primary scale derived from the design-system --primary token. Light mode:
+   * lower shades fade toward white, higher shades toward black so they stay
+   * readable as text. Dark mode: lower shades fade toward black, higher shades
+   * stay near full primary.
+   */
+  --x-color-primary-50: color-mix(in oklch, var(--primary) 12%, white);
+  --x-color-primary-100: color-mix(in oklch, var(--primary) 22%, white);
+  --x-color-primary-200: color-mix(in oklch, var(--primary) 40%, white);
+  --x-color-primary-300: color-mix(in oklch, var(--primary) 60%, white);
+  --x-color-primary-400: color-mix(in oklch, var(--primary) 80%, white);
+  --x-color-primary-500: var(--primary);
+  --x-color-primary-600: color-mix(in oklch, var(--primary) 70%, black);
+  --x-color-primary-700: color-mix(in oklch, var(--primary) 55%, black);
+  --x-color-primary-800: color-mix(in oklch, var(--primary) 45%, black);
+}
+
+.dark {
+  --nextra-bg: 10, 10, 10;
+  --x-color-primary-50: color-mix(in oklch, var(--primary) 12%, black);
+  --x-color-primary-100: color-mix(in oklch, var(--primary) 22%, black);
+  --x-color-primary-200: color-mix(in oklch, var(--primary) 35%, black);
+  --x-color-primary-300: color-mix(in oklch, var(--primary) 55%, black);
+  --x-color-primary-400: var(--primary);
+  --x-color-primary-500: var(--primary);
+  --x-color-primary-600: var(--primary);
+  --x-color-primary-700: color-mix(in oklch, var(--primary) 85%, white);
+  --x-color-primary-800: color-mix(in oklch, var(--primary) 70%, white);
+}
+
+@theme inline {
+  --color-nextra-bg: rgb(var(--nextra-bg));
+  --color-primary-50: var(--x-color-primary-50);
+  --color-primary-100: var(--x-color-primary-100);
+  --color-primary-200: var(--x-color-primary-200);
+  --color-primary-300: var(--x-color-primary-300);
+  --color-primary-400: var(--x-color-primary-400);
+  --color-primary-500: var(--x-color-primary-500);
+  --color-primary-600: var(--x-color-primary-600);
+  --color-primary-700: var(--x-color-primary-700);
+  --color-primary-800: var(--x-color-primary-800);
+}
+
+@layer base {
+  html {
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1,
+      "ss01" 1;
+    color: #000;
+    background: rgb(var(--nextra-bg));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html.dark {
+    color: #fff;
+  }
+
+  body {
+    color: inherit;
+    background: transparent;
+  }
+}
+
+@utility nextra-focus {
+  @apply ring-2 ring-primary-200 ring-offset-1 ring-offset-primary-300 dark:ring-primary-800;
+
+  &:focus-visible {
+    outline-style: none;
+  }
+}
+
+/* Nextra had no default border colour (Tailwind's `currentColor`); Fumadocs
+   sets one on `*`. In the base layer so colour utilities still win. */
+@layer base {
+  .nextra-content *,
+  .nextra-content ::before,
+  .nextra-content ::after {
+    border-color: currentColor;
+  }
+}
+
+/* GFM task lists */
+.nextra-content .contains-task-list {
+  margin-top: 1.25em;
+
+  input[type="checkbox"] {
+    margin-inline-end: 0.25rem;
+  }
+}
+
+.nextra-border {
+  border-color: var(--color-gray-200);
+
+  @media (prefers-contrast: more) {
+    border-color: var(--color-neutral-400) !important;
+  }
+
+  &:where(.dark *) {
+    border-color: var(--color-neutral-800);
+  }
+}
+
+.nextra-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+
+/* Doubled selector: must win over later `.nextra-scrollbar` rules. */
+.no-scrollbar,
+.nextra-scrollbar.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.nextra-mask {
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 20px, transparent 100%),
+    linear-gradient(to top, transparent, #000 20px, transparent 100%);
+
+  @media (prefers-contrast: more) {
+    mask-image: none;
+  }
+}
+
+.nextra-breadcrumb {
+  margin-bottom: 1.5rem;
+}
+
+/* "Skip to Content" is only visible while it has keyboard focus. */
+.nextra-skip-nav:not(:focus-visible) {
+  @apply sr-only;
+}
+
+.nextra-skip-nav:focus-visible {
+  @apply nextra-focus fixed z-50 mx-4 my-3 rounded-[8px] border border-current bg-nextra-bg px-3 py-2 font-bold text-sm;
+}
+
+.nextra-hamburger svg {
+  --animation: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+
+  g,
+  path {
+    @media (prefers-reduced-motion: reduce) {
+      transition-property: none !important;
+    }
+  }
+
+  g {
+    transform-origin: center;
+    transition: var(--animation);
+  }
+
+  path {
+    opacity: 1;
+    transition:
+      var(--animation) 0.15s,
+      opacity 0.15s ease 0.15s;
+  }
+
+  &.open {
+    path {
+      transition:
+        var(--animation),
+        opacity 0s ease 0.15s;
+    }
+
+    & > path {
+      opacity: 0;
+    }
+
+    g {
+      transition: var(--animation) 0.15s;
+
+      &:nth-of-type(1) {
+        transform: rotate(45deg);
+
+        path {
+          transform: translate3d(0, 6px, 0);
+        }
+      }
+
+      &:nth-of-type(2) {
+        transform: rotate(-45deg);
+
+        path {
+          transform: translate3d(0, -6px, 0);
+        }
+      }
+    }
+  }
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in2 {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Position search next to logo */
+.nextra-navbar nav > a[aria-label="Home page"] {
+  order: -2;
+  margin-inline-end: 3.5rem !important;
+}
+
+.nextra-navbar nav > div:has(.algolia-search-button) {
+  order: -1;
+  margin-inline: 1rem auto;
+}
+
+@media (max-width: 1024px) {
+  .nextra-navbar nav > a[aria-label="Home page"] {
+    margin-inline-end: auto !important;
+  }
+}
+
 .text-text-color {
   color: var(--color-foreground);
 }
@@ -169,12 +418,6 @@ html.dark[data-page-kind="toolkit"] [data-callout][data-type="idea"] {
   border-color: rgb(34 197 94 / 0.4) !important;
 }
 
-/*
- * Nextra-only rules dropped: the "position search next to logo" navbar hacks
- * (`nav > a[aria-label="Home page"]`, `.algolia-search-button`) — Fumadocs
- * places the search trigger in the sidebar/navbar itself.
- */
-
 /* Algolia search hit highlight — brand color */
 .ais-Highlight-highlighted,
 .ais-Snippet-highlighted,
@@ -202,27 +445,6 @@ html.dark[data-page-kind="toolkit"] [data-callout][data-type="idea"] {
     var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow) !important;
 }
 
-/* Terminal-style code blocks (components/mdx/pre.tsx) */
-.terminal-code-block {
-  background-color: var(--color-gray-100);
-  border-color: var(--color-gray-300);
-}
-
-.terminal-code-block > div:first-child {
-  color: var(--color-gray-700);
-  background-color: var(--color-gray-200);
-}
-
-.dark .terminal-code-block {
-  background-color: var(--color-gray-900);
-  border-color: var(--color-gray-700);
-}
-
-.dark .terminal-code-block > div:first-child {
-  color: var(--color-gray-300);
-  background-color: var(--color-gray-800);
-}
-
 /* Remove top margin from nested lists in GuideOverview component */
 .guide-overview ul ul {
   margin-top: 0;
@@ -238,22 +460,12 @@ html.dark[data-page-kind="toolkit"] [data-callout][data-type="idea"] {
 }
 
 /*
- * Steps: Nextra numbered `###` headings with CSS counters and the rules below
- * suppressed numbering on deeper headings. Fumadocs numbers `<Step>` wrappers
- * (produced by lib/remark-nextra-steps.ts) instead, so nested headings never
- * get a number. Headings inside a step should not carry the prose top margin.
- */
-.fd-step > :is(h2, h3, h4, h5, h6):first-child {
-  margin-top: 0;
-}
-
-/*
  * Anchor scroll offset. Set it unconditionally, with room to breathe, so a
  * heading never lands hidden under the sticky navbar. Headings and sections
  * should not add their own `scroll-mt-*`; it stacks on top of this.
  */
 html:root {
-  scroll-padding-top: calc(var(--fd-nav-height, 3.5rem) + 1.5rem);
+  scroll-padding-top: calc(var(--nextra-navbar-height) + 1.5rem);
 }
 
 /*
@@ -272,90 +484,490 @@ html {
   }
 }
 
+/* ==========================================================================
+ * pages parity — START
+ * Styles for the component-built pages (toolkit pages, integrations catalog,
+ * home, contact, surveys). Edit only between START and END.
+ * ========================================================================== */
+
 /*
- * Nextra-style callouts: coloured border, tinted background and coloured text
- * per type, instead of Fumadocs' neutral card. `data-callout-type` is set by
- * components/mdx/callout.tsx (info | warn | error | success | idea).
+ * `dark:` variant specificity.
+ *
+ * The design-system tokens define the variant as `&:is(.dark *)`, which adds
+ * a class to the specificity of every `dark:` utility. The docs redefine it
+ * as `&:where(.dark *)`, which adds nothing, and the design-system components
+ * are tuned for that: a state variant such as `aria-expanded:bg-muted` or
+ * `hover:bg-muted` has to beat a plain `dark:bg-input/30` on the same element.
+ * With the `:is()` form the dark utility wins instead, so an open "Hide
+ * details" button, for example, loses its filled background in dark mode.
+ *
+ * The last definition wins, so this must stay after the tokens import. It
+ * applies to every `dark:` utility on the site.
  */
-[data-callout-type] {
-  --callout-tint: var(--callout-color);
-  border-color: color-mix(in oklab, var(--callout-tint) 55%, transparent);
-  background-color: color-mix(in oklab, var(--callout-tint) 10%, transparent);
-  box-shadow: none;
+@variant dark (&:where(.dark *));
+
+/*
+ * Typography for toolkit pages.
+ *
+ * The toolkit summary and documentation chunks are styled with
+ * @tailwindcss/typography (`prose prose-sm dark:prose-invert`). Fumadocs'
+ * preset registers its own, different typography under the same `prose`
+ * names, so the plugin is registered here under `tk-prose`: the classes are
+ * `tk-prose tk-prose-sm dark:tk-prose-invert`, the rules are the plugin's.
+ */
+@plugin "@tailwindcss/typography" {
+  className: tk-prose;
 }
 
-[data-callout-type] > div[role="none"] {
-  display: none;
+/*
+ * Default border colour for component-built pages.
+ *
+ * These components were written against Tailwind's preflight, where a border
+ * without a colour utility is drawn in the text colour. Several of their
+ * colour utilities do not exist (`divide-neutral-dark-high/30`,
+ * `border-neutral-dark-high/20`), so those dividers and section borders are
+ * meant to be drawn in the text colour. Fumadocs' preset changes the default
+ * to its own border token, which makes them near-invisible. `.preflight-borders`
+ * restores the preflight default for a subtree. MDX content rendered inside
+ * `.tk-prose` (callouts, tabs, code blocks) is left alone: those components
+ * rely on the Fumadocs default.
+ *
+ * The rule is in the components layer so colour utilities still win.
+ */
+@layer components {
+  .preflight-borders,
+  .preflight-borders *:not(.tk-prose *),
+  .preflight-borders *:not(.tk-prose *)::before,
+  .preflight-borders *:not(.tk-prose *)::after {
+    border-color: currentcolor;
+  }
 }
 
-[data-callout-type="info"] {
-  --callout-color: var(--color-blue-500);
+/* pages parity — END */
+
+/* ==========================================================================
+ * content parity — BEGIN
+ * Owner: MDX content components (components/mdx/**, mdx-components.tsx).
+ * The named classes of the Nextra docs theme (nextra-theme-docs 4.6
+ * style.css), copied so the ported element renderers look exactly as they do
+ * on the Nextra-built production site. Unlayered on purpose: in Nextra these
+ * rules also sat outside the Tailwind layers and beat utility classes.
+ * ========================================================================== */
+
+/* Nextra's primary scale, derived from the design-system primary exactly as
+   the production globals.css derived it. */
+:root {
+  --x-color-primary-50: color-mix(in oklch, var(--primary) 12%, white);
+  --x-color-primary-100: color-mix(in oklch, var(--primary) 22%, white);
+  --x-color-primary-200: color-mix(in oklch, var(--primary) 40%, white);
+  --x-color-primary-300: color-mix(in oklch, var(--primary) 60%, white);
+  --x-color-primary-400: color-mix(in oklch, var(--primary) 80%, white);
+  --x-color-primary-500: var(--primary);
+  --x-color-primary-600: color-mix(in oklch, var(--primary) 70%, black);
+  --x-color-primary-700: color-mix(in oklch, var(--primary) 55%, black);
+  --x-color-primary-800: color-mix(in oklch, var(--primary) 45%, black);
+  --nextra-content-bg: #fff;
 }
 
-[data-callout-type="warn"] {
-  --callout-color: var(--color-yellow-500);
+.dark {
+  --x-color-primary-50: color-mix(in oklch, var(--primary) 12%, black);
+  --x-color-primary-100: color-mix(in oklch, var(--primary) 22%, black);
+  --x-color-primary-200: color-mix(in oklch, var(--primary) 35%, black);
+  --x-color-primary-300: color-mix(in oklch, var(--primary) 55%, black);
+  --x-color-primary-400: var(--primary);
+  --x-color-primary-500: var(--primary);
+  --x-color-primary-600: var(--primary);
+  --x-color-primary-700: color-mix(in oklch, var(--primary) 85%, white);
+  --x-color-primary-800: color-mix(in oklch, var(--primary) 70%, white);
+  --nextra-content-bg: #0a0a0a;
 }
 
-[data-callout-type="error"] {
-  --callout-color: var(--color-red-500);
+@utility nextra-focus {
+  --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0
+    calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+  box-shadow:
+    var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+    var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+  --tw-ring-color: var(--x-color-primary-200);
+  --tw-ring-offset-width: 1px;
+  --tw-ring-offset-shadow: var(--tw-ring-inset,) 0 0 0
+    var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+  --tw-ring-offset-color: var(--x-color-primary-300);
+
+  &:focus-visible {
+    outline-style: none;
+  }
+
+  /* `:is` (not `:where`) so this outranks the second `nextra-focus`
+     definition earlier in this file, which has no dark offset colour. */
+  &:is(.dark *) {
+    --tw-ring-color: var(--x-color-primary-800);
+    --tw-ring-offset-color: var(--x-color-primary-700);
+  }
 }
 
-[data-callout-type="success"] {
-  --callout-color: var(--color-green-500);
+/* Nextra set these on <html>; scoped here to the MDX body. */
+.nextra-content {
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1,
+    "ss01" 1;
 }
 
-[data-callout-type="idea"] {
-  --callout-color: var(--color-orange-500);
+.nextra-border {
+  border-color: var(--color-gray-200);
+
+  @media (prefers-contrast: more) {
+    border-color: var(--color-neutral-400) !important;
+  }
+
+  &:where(.dark *) {
+    border-color: var(--color-neutral-800);
+  }
 }
 
-[data-callout-type] a {
-  color: inherit;
-  text-decoration-color: currentColor;
+.nextra-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
 }
 
-[data-callout-type="info"] {
-  color: var(--color-blue-800);
+/* Heading permalink: the "#" shown on hover, focus and :target. */
+:hover > .subheading-anchor {
+  opacity: 100%;
 }
 
-.dark [data-callout-type="info"] {
-  color: var(--color-blue-200);
+.subheading-anchor {
+  margin-inline-start: 0.25rem;
+  opacity: 0%;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+  transition-property:
+    color, background-color, border-color, outline-color, text-decoration-color,
+    fill, stroke, opacity, box-shadow, transform, translate, scale, rotate,
+    filter, backdrop-filter;
+
+  :target > &,
+  &:focus {
+    opacity: 100%;
+  }
+
+  &::after {
+    padding-inline: 0.25rem;
+    color: var(--color-gray-600);
+    content: "#";
+  }
+
+  &:where(.dark *)::after {
+    color: var(--color-neutral-400);
+  }
+
+  :target > &::after {
+    color: var(--color-gray-600);
+  }
+
+  :target > &:where(.dark *)::after {
+    color: var(--color-neutral-400);
+  }
 }
 
-[data-callout-type="warn"] {
-  color: var(--color-yellow-800);
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
 }
 
-.dark [data-callout-type="warn"] {
-  color: var(--color-yellow-200);
+/* Code: token colours, inline code, line grid, numbers, highlights. */
+.nextra-code span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+
+  &:where(.dark *) {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
 }
 
-[data-callout-type="error"] {
-  color: var(--color-red-800);
+code.nextra-code {
+  box-decoration-break: slice;
+  font-size: 0.875rem;
+  line-height: var(--tw-leading, calc(1.25 / 0.875));
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1,
+    "ss01" 1;
+
+  :not(pre) > & {
+    padding: 0.12em 0.25em;
+    overflow-wrap: break-word;
+    font-size: 0.9em;
+    background-color: color-mix(in oklab, #000 3%, transparent);
+    border: 1px solid color-mix(in oklab, #000 4%, transparent);
+    border-radius: 0.375em;
+
+    &:where(.dark *) {
+      background-color: color-mix(in oklab, #fff 10%, transparent);
+      border-color: color-mix(in oklab, #fff 10%, transparent);
+    }
+  }
 }
 
-.dark [data-callout-type="error"] {
-  color: var(--color-red-200);
+pre code.nextra-code {
+  display: grid;
+  counter-reset: line;
+
+  &[data-line-numbers] > span {
+    padding-left: 0.5rem;
+
+    &::before {
+      display: inline-block;
+      min-width: 2.6rem;
+      padding-right: 1rem;
+      color: var(--color-gray-600);
+      text-align: right;
+      content: counter(line);
+      counter-increment: line;
+    }
+
+    &:where(.dark *)::before {
+      color: var(--color-gray-400);
+    }
+  }
+
+  & > span {
+    padding-inline: 1rem;
+
+    &[data-highlighted-line] {
+      --tw-shadow: 2px 0 var(--tw-shadow-color, currentColor) inset;
+      color: color-mix(
+        in oklab,
+        var(--x-color-primary-600) 80%,
+        transparent
+      ) !important;
+      background-color: color-mix(
+        in oklab,
+        var(--x-color-primary-600) 10%,
+        transparent
+      );
+      box-shadow:
+        var(--tw-inset-shadow), var(--tw-inset-ring-shadow),
+        var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+
+      &:where(.dark *) {
+        background-color: color-mix(
+          in oklab,
+          var(--x-color-primary-600) 20%,
+          transparent
+        );
+      }
+    }
+  }
+
+  html[data-nextra-word-wrap] & {
+    @media (width < 48rem) {
+      white-space: pre-wrap;
+    }
+  }
 }
 
-[data-callout-type="idea"] {
-  color: var(--color-orange-800);
+.nextra-copy-icon {
+  animation: fade-in 0.3s ease forwards;
 }
 
-.dark [data-callout-type="idea"] {
-  color: var(--color-orange-200);
+/* The hidden tab-label heading must not push the panel's first block down. */
+[role="tabpanel"][data-selected] > h3[style^="visibility:"] + * {
+  margin-top: 0;
 }
 
-[data-callout-type="success"] {
-  color: var(--color-green-800);
+/* Steps: every h3 inside is numbered by a CSS counter (h4–h6 are not, as in
+   the production globals.css). */
+.nextra-steps {
+  h2,
+  h3:not([style^="visibility:"]),
+  h4,
+  h5,
+  h6 {
+    padding-bottom: 0;
+    margin-top: 2rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: var(--tw-leading, calc(2 / 1.5));
+    letter-spacing: -0.025em;
+    counter-increment: var(--counter-id);
+    border-style: solid;
+    border-width: 0;
+
+    &::before {
+      position: absolute;
+      width: 33px;
+      height: 33px;
+      margin-inline-start: -41px;
+      font-size: 1rem;
+      font-weight: 400;
+      line-height: var(--tw-leading, 1.5);
+      color: var(--color-neutral-800);
+      text-align: center;
+      text-indent: -1px;
+      content: counter(var(--counter-id));
+      background-color: var(--color-gray-200);
+      border: 4px solid var(--nextra-content-bg);
+      border-radius: calc(infinity * 1px);
+    }
+
+    &:where(.dark *)::before {
+      color: var(--color-neutral-300);
+      background-color: var(--color-neutral-800);
+    }
+  }
+
+  h4,
+  h5,
+  h6 {
+    counter-increment: none !important;
+
+    &::before {
+      display: none !important;
+      content: none !important;
+    }
+  }
 }
 
-.dark [data-callout-type="success"] {
-  color: var(--color-green-200);
+/* Cards */
+.nextra-cards {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(max(250px, calc((100% - 1rem * 2) / var(--rows))), 1fr)
+  );
 }
 
-/* Callout body text follows the callout colour, like Nextra (no muted grey). */
-[data-callout-type] p,
-[data-callout-type] li,
-[data-callout-type] .text-fd-muted-foreground {
-  color: inherit;
+.nextra-card {
+  img {
+    user-select: none;
+  }
+
+  & > span > svg {
+    flex-shrink: 0;
+    width: 1.5rem;
+    height: auto;
+    color: color-mix(in oklab, #000 50%, transparent);
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+    transition-property: color, background-color, border-color, fill, stroke;
+
+    &:where(.dark *) {
+      color: color-mix(in oklab, #fff 50%, transparent);
+    }
+  }
+
+  &:hover > span > svg {
+    color: currentcolor !important;
+  }
+
+  p {
+    margin-top: 0.5rem;
+  }
 }
+
+/* Image zoom (react-medium-image-zoom), Nextra's rules. The `html` prefix
+   outranks the Fumadocs image-zoom stylesheet, which loads later. */
+.nextra-content [data-rmiz] {
+  display: inline;
+  position: static;
+}
+
+html [data-rmiz-ghost] {
+  position: absolute;
+  pointer-events: none;
+}
+
+html [data-rmiz-btn-zoom],
+html [data-rmiz-btn-unzoom] {
+  display: inline-block;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 9px;
+  color: #fff;
+  touch-action: manipulation;
+  appearance: none;
+  outline-offset: 2px;
+  background-color: color-mix(in oklab, #000 70%, transparent);
+  border-radius: calc(infinity * 1px);
+
+  &:where(.dark *) {
+    color: #000;
+    background-color: color-mix(in oklab, #fff 70%, transparent);
+  }
+}
+
+html [data-rmiz-btn-zoom] {
+  position: absolute;
+  inset: 10px 10px auto auto;
+  cursor: zoom-in;
+
+  &:not(:focus):not(:active) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    pointer-events: none;
+    clip-path: inset(50%);
+  }
+}
+
+html [data-rmiz-btn-unzoom] {
+  position: absolute;
+  inset: 20px 20px auto auto;
+  z-index: 1;
+  cursor: zoom-out;
+}
+
+html [data-rmiz-content="found"] {
+  img,
+  svg,
+  [role="img"],
+  [data-zoom] {
+    cursor: zoom-in;
+  }
+}
+
+html [data-rmiz-modal-overlay] {
+  position: absolute;
+  inset: 0;
+  transition: opacity 0.3s;
+}
+
+html [data-rmiz-modal-overlay="hidden"] {
+  background: color-mix(in srgb, var(--nextra-content-bg) 80%, transparent);
+  opacity: 0%;
+}
+
+html [data-rmiz-modal-overlay="visible"] {
+  background: color-mix(in srgb, var(--nextra-content-bg) 80%, transparent);
+  opacity: 100%;
+}
+
+html [data-rmiz-modal-img] {
+  position: absolute;
+  cursor: zoom-out;
+  image-rendering: high-quality;
+  transition: transform 0.3s;
+  transform-origin: top left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html [data-rmiz-modal-overlay],
+  html [data-rmiz-modal-img] {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* content parity — END */

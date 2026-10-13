@@ -1,19 +1,16 @@
-import {
-  DocsBody,
-  DocsPage,
-  DocsTitle,
-  EditOnGitHub,
-  PageLastUpdate,
-} from "fumadocs-ui/layouts/notebook/page";
-import { createRelativeLink } from "fumadocs-ui/mdx";
+import type { MDXComponents } from "mdx/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { PageActions } from "@/components/page-actions";
+import { isValidElement, type ReactNode } from "react";
+import { DocsPageShell } from "@/components/chrome/page";
+import type { TocEntry } from "@/components/chrome/stores";
+import { DOCS_REPOSITORY_BASE } from "@/lib/layout.shared";
 import { source } from "@/lib/source";
 import {
   generateToolkitParams,
   matchToolkitRoute,
   ToolkitRoutePage,
+  toolkitMarkdownUrl,
   toolkitRouteMetadata,
 } from "@/lib/toolkit-route";
 import { getMDXComponents } from "@/mdx-components";
@@ -22,26 +19,71 @@ interface Props {
   params: Promise<{ slug?: string[] }>;
 }
 
-const DOCS_REPO_TREE = "https://github.com/ArcadeAI/docs/tree/main";
+/**
+ * Pages that open with a second-level heading and show no page title. Their
+ * frontmatter `title` only feeds `<title>` and the sidebar.
+ */
+const PAGES_WITHOUT_TITLE = new Set([
+  "get-started/agent-frameworks/langchain/auth-langchain-tools",
+  "get-started/agent-frameworks/mastra",
+  "resources/examples",
+]);
+
+/** Shown as "Last updated on" for pages generated at build time. */
+const BUILD_DATE = new Date().toISOString();
 
 function githubEditUrl(filePath: string): string {
-  return `${DOCS_REPO_TREE}/content/docs/${filePath}`;
+  return `${DOCS_REPOSITORY_BASE}/content/docs/${filePath}`;
 }
 
 function markdownUrl(slug: string[] | undefined): string {
   return `/llms.mdx/${(slug ?? []).join("/")}`;
 }
 
-function lastModifiedDate(data: unknown): Date | null {
+function lastModifiedDate(data: unknown): string | null {
   const value = (data as { lastModified?: unknown }).lastModified;
   if (value instanceof Date) {
-    return value;
+    return value.toISOString();
   }
   if (typeof value === "string" || typeof value === "number") {
     const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date;
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
   }
   return null;
+}
+
+const INLINE_CODE = /`([^`]+)`/;
+
+/** Renders `code` spans in a frontmatter title the way the MDX body renders them. */
+function inlineCode(
+  title: string,
+  Code: MDXComponents["code"] | undefined
+): ReactNode {
+  const parts = title.split(INLINE_CODE);
+  if (parts.length === 1 || typeof Code !== "function") {
+    return title;
+  }
+  // Odd parts are the text between backticks.
+  let offset = 0;
+  let isCode = false;
+  const nodes: ReactNode[] = [];
+  for (const part of parts) {
+    nodes.push(isCode ? <Code key={`code-${offset}`}>{part}</Code> : part);
+    offset += part.length + 1;
+    isCode = !isCode;
+  }
+  return nodes;
+}
+
+/**
+ * Children of the element returned by `ToolkitRoutePage`. Its own page
+ * wrapper is replaced by the docs shell.
+ */
+function innerChildren(node: ReactNode): ReactNode {
+  if (isValidElement<{ children?: ReactNode }>(node)) {
+    return node.props.children;
+  }
+  return node;
 }
 
 // Every route is known at build time (MDX pages + generated toolkit pages);
@@ -57,59 +99,73 @@ export default async function Page(props: Props) {
     if (match) {
       const toolkitPage = await ToolkitRoutePage({ match });
       if (toolkitPage) {
-        return toolkitPage;
+        // Toolkit pages list their tools in their own panel: the shell keeps
+        // the table of contents column but has no headings to show in it.
+        return (
+          <DocsPageShell
+            lastModified={BUILD_DATE}
+            markdownUrl={toolkitMarkdownUrl(match)}
+          >
+            {innerChildren(toolkitPage)}
+          </DocsPageShell>
+        );
       }
     }
     notFound();
   }
 
-  const MDX = page.data.body;
-  const { full, toc, breadcrumb, landing } = page.data;
-  const lastModified = lastModifiedDate(page.data);
-  const editUrl = githubEditUrl(page.path);
-  const mdxComponents = getMDXComponents({
-    a: createRelativeLink(source, page),
-  });
+  const { body: MDX, full, breadcrumb, landing, title } = page.data;
+  const components = getMDXComponents();
+  const Wrapper = components.wrapper;
+  const Heading = components.h1;
+  // A `toc: false` frontmatter value replaces the generated heading list.
+  const headings: unknown = page.data.toc;
+  const showToc = headings !== false && !landing;
+  const showTitle =
+    !(landing || PAGES_WITHOUT_TITLE.has(page.slugs.join("/"))) &&
+    typeof Heading === "function";
 
-  if (landing) {
-    return (
-      <DocsPage
-        breadcrumb={{ enabled: false }}
-        footer={{ enabled: false }}
-        full
-        tableOfContent={{ enabled: false }}
-        tableOfContentPopover={{ enabled: false }}
-        toc={[]}
-      >
-        <MDX components={mdxComponents} />
-      </DocsPage>
-    );
-  }
+  const tocItems: TocEntry[] = Array.isArray(headings)
+    ? (headings as typeof page.data.toc).map((item) => ({
+        depth: item.depth,
+        id: item.url.slice(1),
+        title: item.title,
+      }))
+    : [];
+
+  // The page title is the first element of the content, so the spacing rules
+  // between it and what follows are the content's own.
+  const content = (children: ReactNode) => (
+    <>
+      {showTitle ? (
+        <Heading>{inlineCode(title, components.code)}</Heading>
+      ) : null}
+      {children}
+    </>
+  );
 
   return (
-    <DocsPage
-      breadcrumb={{ enabled: breadcrumb !== false, includeRoot: false }}
-      footer={{ enabled: true }}
-      full={full}
-      tableOfContent={{
-        enabled: toc !== false,
-        footer: <EditOnGitHub href={editUrl} />,
-        style: "clerk",
-      }}
-      tableOfContentPopover={{ enabled: toc !== false }}
-      toc={toc === false ? [] : page.data.toc}
+    <DocsPageShell
+      breadcrumb={breadcrumb !== false && !landing}
+      editUrl={githubEditUrl(page.path)}
+      lastModified={lastModifiedDate(page.data)}
+      layout={full || landing ? "full" : "default"}
+      markdownUrl={showToc ? markdownUrl(params.slug) : undefined}
+      toc={showToc}
+      tocItems={tocItems}
     >
-      <DocsTitle>{page.data.title}</DocsTitle>
-      <PageActions githubUrl={editUrl} markdownUrl={markdownUrl(params.slug)} />
-      <DocsBody>
-        <MDX components={mdxComponents} />
-      </DocsBody>
-      {lastModified ? (
-        <div className="flex flex-row flex-wrap items-center justify-end gap-4 pt-4 text-fd-muted-foreground text-sm">
-          <PageLastUpdate date={lastModified} />
-        </div>
-      ) : null}
-    </DocsPage>
+      <MDX
+        components={{
+          ...components,
+          wrapper: ({ children }: { children?: ReactNode }) =>
+            typeof Wrapper === "function" ? (
+              <Wrapper>{content(children)}</Wrapper>
+            ) : (
+              content(children)
+            ),
+        }}
+      />
+    </DocsPageShell>
   );
 }
 
@@ -133,14 +189,14 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound();
   }
 
-  return {
-    alternates: { canonical: page.url },
-    description: page.data.description,
-    openGraph: {
-      description: page.data.description,
-      title: page.data.metaTitle ?? page.data.title,
-      url: page.url,
-    },
+  // Open Graph and Twitter tags are derived from the title and description;
+  // pages without a description fall back to the site description
+  // (app/layout.tsx).
+  const metadata: Metadata = {
     title: page.data.metaTitle ?? page.data.title,
   };
+  if (page.data.description) {
+    metadata.description = page.data.description;
+  }
+  return metadata;
 }

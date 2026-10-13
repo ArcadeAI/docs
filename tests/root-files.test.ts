@@ -12,11 +12,11 @@ const SCOPED_LOCALE_ROOT = /^\/:locale\(en\|es\|pt-BR\)$/;
  * `/llms.txt` to `/llms.txt/home`.
  */
 describe("root files stay reachable", () => {
-  it("the locale-root redirect only matches real locales", () => {
+  it("any locale-root redirect only matches real locales", () => {
+    // The locale root itself is redirected by proxy.ts, as in production.
     const localeRoot = redirects.filter((r) =>
       LOCALE_ROOT_SOURCE.test(r.source)
     );
-    expect(localeRoot.length).toBeGreaterThan(0);
     for (const r of localeRoot) {
       expect(r.source).toMatch(SCOPED_LOCALE_ROOT);
     }

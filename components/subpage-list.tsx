@@ -109,11 +109,11 @@ export function SubpageList({ basePath }: SubpageListProps) {
   }
 
   return (
-    <ul className="my-6 ms-6 list-disc">
+    <ul className="ms-[1.5em] not-first:mt-[1.25em] list-disc [:is(ol,ul)_&]:my-[.75em]">
       {links.map((link) => (
-        <li className="my-2" key={link.url}>
+        <li className="my-[.5em]" key={link.url}>
           <Link
-            className="text-fd-primary underline decoration-from-font [text-underline-position:from-font] hover:no-underline"
+            className="text-(--x-color-primary-600) underline decoration-from-font [text-underline-position:from-font] hover:no-underline focus-visible:nextra-focus"
             href={link.url}
           >
             {link.name}

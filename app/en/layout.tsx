@@ -1,37 +1,21 @@
-import { DocsLayout } from "fumadocs-ui/layouts/notebook";
 import type { ReactNode } from "react";
-import { Footer } from "@/components/footer";
-import { baseOptions } from "@/lib/layout.shared";
+import { ChromeLayout } from "@/components/chrome/docs-layout";
+import { buildSidebarModel } from "@/components/chrome/sidebar-model";
+import { SiteFooter } from "@/components/chrome/site-footer";
 import { source } from "@/lib/source";
 
 /**
- * Notebook layout = top navbar (logo, search, links) + sidebar, the same
- * structure as the Nextra docs theme this site migrated from.
+ * Docs layout: navbar, sidebar and page area (components/chrome/), followed
+ * by the site footer band.
  */
 export default function Layout({ children }: { children: ReactNode }) {
-  const base = baseOptions();
+  const tree = source.getPageTree();
   return (
     <>
-      <DocsLayout
-        {...base}
-        nav={{ ...base.nav, mode: "top" }}
-        sidebar={{
-          collapsible: true,
-          defaultOpenLevel: 1,
-          prefetch: false,
-        }}
-        tabMode="sidebar"
-        themeSwitch={{ enabled: true, mode: "light-dark-system" }}
-        tree={source.getPageTree()}
-      >
+      <ChromeLayout directories={buildSidebarModel(tree, "/en")} tree={tree}>
         {children}
-      </DocsLayout>
-      {/* Rendered after the docs grid so the sidebar/TOC columns stay intact. */}
-      <footer className="border-t bg-fd-card">
-        <div className="mx-auto w-full max-w-[97rem] px-4 py-8 md:px-8">
-          <Footer />
-        </div>
-      </footer>
+      </ChromeLayout>
+      <SiteFooter />
     </>
   );
 }

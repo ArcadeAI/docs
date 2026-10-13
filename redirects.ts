@@ -16,13 +16,6 @@ export interface Redirect {
 }
 
 export const redirects: Redirect[] = [
-  // The locale root has no index page; send it to the docs home (proxy.ts does
-  // the same for requests that reach it, this keeps `check-redirects` honest).
-  {
-    destination: "/:locale/home",
-    permanent: true,
-    source: "/:locale(en|es|pt-BR)",
-  },
   // The toolkit-page breadcrumb links "Resources" -> /resources, which has
   // no index page. Send it to the integrations registry instead of 404ing.
   {
