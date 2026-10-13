@@ -29,7 +29,9 @@ test("sitemap lists expected URLs", async () => {
     );
 
     // Known page should be present
-    expect(urls).toContain("https://example.test/en/references/changelog");
+    expect(urls).toContain(
+      "https://example.test/en/references/cli-cheat-sheet"
+    );
 
     // Generated toolkit pages (served by the `[toolkitId]` dynamic route,
     // which the directory walk above can't see) must still make it into the

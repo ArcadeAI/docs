@@ -701,10 +701,10 @@ export function LandingPage() {
             </Link>
             <Link
               className="flex items-center gap-2 text-gray-600 hover:text-brand-accent dark:text-gray-400 dark:hover:text-brand-accent"
-              href="/references/changelog"
+              href="https://releases.arcade.dev/"
               onClick={trackClick(
                 "quick_link_changelog_clicked",
-                "/references/changelog"
+                "https://releases.arcade.dev/"
               )}
             >
               <FileText className="h-5 w-5" />

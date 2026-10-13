@@ -6,6 +6,7 @@ export const meta: MetaRecord = {
   },
   changelog: {
     title: "Changelog",
+    href: "https://releases.arcade.dev/",
   },
   api: {
     title: "API",
