@@ -11,10 +11,12 @@ This page is for platform operators who manage MCP Gateways. It shows how to tur
 
 Tool Recommendation is a setting on each gateway. Turning it on for one gateway does not change any other gateway in the project.
 
+New gateways have Tool Recommendation on by default, whether you create them in the dashboard or through the API. Gateways that already exist keep their current setting. Arcade does not turn Tool Recommendation on for them, so turn it on yourself for each existing gateway that should use it.
+
 ## Prerequisites
 
 - An MCP Gateway, or permission to create one. See [Create via Dashboard](/operate/governance/mcp-gateways/create-via-dashboard).
-- Tool Recommendation available for your organization. If the **Tool Recommendations** option does not appear on the gateway form, it is not available for your organization yet. [Contact Arcade](/resources/contact-us) to request access.
+- Tool Recommendation on for your organization. It is on for every organization by default. If the **Tool Recommendations** option does not appear on the gateway form, it is off for your organization. [Contact Arcade](/resources/contact-us) to turn it on.
 
 ## Turn it on in the dashboard
 
@@ -23,7 +25,7 @@ Tool Recommendation is a setting on each gateway. Turning it on for one gateway 
 3. In the **Select apps** step, select the **Tool Recommendations** card so that it shows as on.
 4. Save the gateway.
 
-When Tool Recommendation is available for your organization, the dashboard turns it on by default for new gateways. To turn it off, clear the **Tool Recommendations** card, and then save the gateway.
+The **Tool Recommendations** card is on by default when you create a gateway. An existing gateway shows the setting it already has. To turn Tool Recommendation off, clear the card, and then save the gateway.
 
 ## Turn it on with the API
 
@@ -39,7 +41,7 @@ curl -X PATCH \
 
 Set `enabled` to `false` to turn it off. A `PATCH` that leaves out `discovery` keeps the current setting, and a `PATCH` that leaves out `allowed_tools` keeps the current allowed tools.
 
-The gateway response reports the current setting in `tool_filter.discovery.enabled`. Gateways that you create through the API start with Tool Recommendation off.
+The gateway response reports the current setting in `tool_filter.discovery.enabled`. Gateways that you create through the API start with Tool Recommendation on, unless the create request sets `tool_filter.discovery.enabled` to `false`.
 
 <Callout type="warning">
   A `PUT` request replaces the whole gateway. If the body includes a
@@ -48,7 +50,7 @@ The gateway response reports the current setting in `tool_filter.discovery.enabl
   should keep it on, or use `PATCH`.
 </Callout>
 
-The gateway accepts this setting even when Tool Recommendation is not available for your organization. In that case the setting has no effect, and the gateway behaves as if it were off.
+The gateway accepts this setting even when Tool Recommendation is off for your organization. In that case the setting has no effect, and the gateway behaves as if it were off.
 
 See the [Arcade API reference](/references/api) for the full gateway schema.
 
@@ -76,12 +78,12 @@ These parameters can only narrow what a connection gets. `?tool_recommendation=t
 
 ## What a caller gets when it is off
 
-When Tool Recommendation is off for a gateway, or is not available for your organization:
+When Tool Recommendation is off for a gateway, or is off for your organization:
 
 - The tool list contains every allowed tool, plus `Arcade.ListApps`.
 - `Arcade.SelectTools`, `Arcade.UseTool`, and `Arcade.SearchTools` do not appear in the tool list. Calling any of them returns the error `tool not enabled for this gateway`.
 
-If Arcade cannot confirm whether Tool Recommendation is available for your organization, for example during a brief service disruption, the gateway keeps listing the Arcade tools. Calls to them return a message saying that Tool Recommendation is temporarily unavailable and that retrying may succeed.
+If Arcade cannot confirm whether Tool Recommendation is on for your organization, for example during a brief service disruption, the gateway keeps listing the Arcade tools. Calls to them return a message saying that Tool Recommendation is temporarily unavailable and that retrying may succeed.
 
 ## Check that it works
 
