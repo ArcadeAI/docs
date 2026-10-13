@@ -345,7 +345,7 @@ async function getSuggestionsFromAnthropic(
   const response = await client.messages.create({
     max_tokens: MAX_AI_TOKENS,
     messages: [{ content: prompt, role: "user" }],
-    model: "claude-sonnet-5-5",
+    model: "claude-sonnet-4-20250514",
   });
 
   const textBlock = response.content.find((block) => block.type === "text");
