@@ -21,7 +21,7 @@ The chart doesn't create a load balancer itself. Every Arcade Service is `Cluste
 
 ### Gateway API (recommended)
 
-The chart renders `HTTPRoute`s, never the `Gateway`; you run that. When the AWS Load Balancer Controller's `TargetGroupConfiguration` CRD (`gateway.k8s.aws/v1beta1`) is installed, the chart also renders one per service to set its health check path. Point the routes at an internal Gateway, one whose listener is backed by an internal load balancer in your environment:
+The chart renders `HTTPRoute`s, never the `Gateway`; you run that. Whenever `gateway.enabled` is `true` and parent refs are set, the chart also renders an AWS Load Balancer Controller `TargetGroupConfiguration` (`gateway.k8s.aws/v1beta1`) per service to set its health check path. It doesn't check whether that CRD is installed, so on a cluster without the AWS Load Balancer Controller (GKE, AKS, on-premises), `helm install` and `helm upgrade` fail with `no matches for kind TargetGroupConfiguration`. Charts up to 1.11.1 behave this way; a future chart release renders it only when the cluster serves the CRD. Point the routes at an internal Gateway, one whose listener is backed by an internal load balancer in your environment:
 
 ```yaml
 gateway:

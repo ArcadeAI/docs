@@ -43,9 +43,6 @@ rbac:
   openfga:
     image:
       repository: registry.example.com/arcadedev/openfga
-redis:
-  image:
-    repository: registry.example.com/redis
 postgres:
   image: registry.example.com/postgres:17-alpine
 
@@ -76,7 +73,9 @@ deployments:
 - Without `existingSecret`, the chart generates a Secret named `dockerRegistry.secretName` from `dockerRegistry.server`, `dockerRegistry.username`, and `dockerRegistry.token` (a Docker Hub access token).
 
 <Callout type="warning">
-The bundled PostgreSQL and Redis StatefulSets don't get a pull Secret. If your mirror requires authentication, they can't pull from it. Mirror `postgres.image` and `redis.image` to a path your nodes can pull without credentials (for example, through node-level registry credentials), or use external PostgreSQL and Redis.
+The bundled PostgreSQL and Redis StatefulSets don't get a pull Secret. If your mirror requires authentication, they can't pull from it. Mirror `postgres.image` to a path your nodes can pull without credentials (for example, through node-level registry credentials), or use external PostgreSQL.
+
+The bundled Redis image is fixed at `docker.io/library/redis:8-alpine`; the chart has no value to change it. To avoid pulling it from Docker Hub, configure a node-level mirror for `docker.io` in your container runtime, or use external Redis (`redis.enabled: false`).
 </Callout>
 
 ### Support images
@@ -119,7 +118,7 @@ For Arcade Deploy, deploy a test server and run the same image check in the work
 | --- | --- |
 | `ImagePullBackOff` on one component | Its `image.repository` still points at Docker Hub, or the tag isn't mirrored. Check the pod's image and mirror the missing tag. |
 | `ImagePullBackOff` on init containers | `supportImages.*` still point at Docker Hub. Override them. |
-| `401` or `unauthorized` pulling PostgreSQL or Redis | The bundled StatefulSets have no pull Secret. See the warning under [Pull credentials](#pull-credentials). |
+| `401` or `unauthorized` pulling PostgreSQL or Redis | The bundled StatefulSets have no pull Secret, and Redis always pulls from Docker Hub. See the warning under [Pull credentials](#pull-credentials). |
 | `401` or `unauthorized` pulling | The pull Secret is missing, in the wrong namespace, or not `kubernetes.io/dockerconfigjson`. Check `dockerRegistry.existingSecret`. |
 | Deployed servers fail to pull the runner image | The Secret isn't in the workers namespace, or isn't listed in `deployments.registry.imagePullSecrets`. |
 | The runner image path is doubled, for example `registry.example.com/registry.example.com/...` | `deployments.image.repository` includes the registry host while `deployments.registry.server` is also set. Set the host in one place. |
