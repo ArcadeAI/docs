@@ -114,7 +114,7 @@ The summary generator is configured to **never list OAuth scopes** in the genera
 ### Local example (editor on)
 
 ```bash
-bun src/cli/index.ts generate \
+bunx tsx src/cli/index.ts generate \
   --providers "Github" \
   --api-source public-catalog \
   --llm-provider openai \
@@ -147,7 +147,7 @@ catalog or engine environment variables falls back to the mock fixtures.
 Generate a single toolkit:
 
 ```bash
-bun src/cli/index.ts generate \
+bunx tsx src/cli/index.ts generate \
   --providers "Github:1.0.0" \
   --api-source public-catalog \
   --llm-provider openai \
@@ -159,7 +159,7 @@ bun src/cli/index.ts generate \
 Generate all toolkits:
 
 ```bash
-bun src/cli/index.ts generate \
+bunx tsx src/cli/index.ts generate \
   --all \
   --skip-unchanged \
   --api-source public-catalog \
@@ -172,7 +172,7 @@ bun src/cli/index.ts generate \
 Generate without LLM output:
 
 ```bash
-bun src/cli/index.ts generate \
+bunx tsx src/cli/index.ts generate \
   --providers "Asana:0.1.3" \
   --api-source public-catalog \
   --skip-examples \
@@ -200,7 +200,7 @@ SomeInternalTool
 ```
 
 ```bash
-bun src/cli/index.ts generate --all \
+bunx tsx src/cli/index.ts generate --all \
   --ignore-file ./skip-toolkits.txt
 ```
 
@@ -227,7 +227,7 @@ SomeInternalTool
 The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
 
 ```bash
-bun src/cli/index.ts generate --all \
+bunx tsx src/cli/index.ts generate --all \
   --exclude-file ./remove-toolkits.txt
 ```
 
@@ -269,7 +269,7 @@ which `location` and `position` combinations actually render, and the full list
 of failure messages. Before writing a curation file, check your work with:
 
 ```bash
-bun src/cli/index.ts validate-curation --toolkit GoogleFlights
+bunx tsx src/cli/index.ts validate-curation --toolkit GoogleFlights
 ```
 
 That compiles the directory with the same code generation uses and needs no
@@ -287,7 +287,7 @@ from it. Two outcomes, and the difference matters:
 
 Each entry names the reason and the fix. Every run attaches the full report as
 its `failed-tools` artifact. Build the message locally against any report with
-`bun src/cli/index.ts alert --report <file>`. It prints nothing when a
+`bunx tsx src/cli/index.ts alert --report <file>`. It prints nothing when a
 run has nothing to report.
 
 No red run stays quiet. Three messages can arrive, and they answer different
@@ -309,4 +309,4 @@ message and the third, because those are two separate things to fix.
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
 - **Missing metadata**: when the catalog returns `metadata: null` for a toolkit the merger substitutes defaults and warns. Re-run once the experience API's design-system read recovers, or use `--require-complete` to fail instead of publishing defaults.
-- **Verify output fails**: run `bun src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.
+- **Verify output fails**: run `bunx tsx src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.

@@ -50,8 +50,7 @@ import ToggleContent from "@/components/toggle-content";
 import { ToolCard } from "@/components/tool-card";
 
 /**
- * Components available in every MDX page without an import. Keep this list in
- * sync with the "Nextra-compat component API" section of MIGRATION_PLAN.md.
+ * Components available in every MDX page without an import.
  *
  * The lowercase entries are the Nextra docs theme's element renderers, ported
  * in components/mdx so the article looks exactly like the production site.

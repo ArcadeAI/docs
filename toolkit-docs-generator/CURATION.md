@@ -232,8 +232,8 @@ detectable offline.
 
 ```bash
 cd toolkit-docs-generator
-bun src/cli/index.ts validate-curation
-bun src/cli/index.ts validate-curation --toolkit GoogleFlights
+bunx tsx src/cli/index.ts validate-curation
+bunx tsx src/cli/index.ts validate-curation --toolkit GoogleFlights
 ```
 
 This needs no credentials. It reports per-toolkit counts, prints each failing
@@ -248,7 +248,7 @@ generation PR, or generate that one toolkit with Engine credentials and run
 `bun run dev` from the repo root:
 
 ```bash
-bun src/cli/index.ts generate \
+bunx tsx src/cli/index.ts generate \
   --providers "GoogleFlights" \
   --api-url "$ARCADE_API_URL" \
   --custom-sections ./curation \

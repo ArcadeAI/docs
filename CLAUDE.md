@@ -33,10 +33,10 @@ Run a script directly with `bun scripts/<name>.ts` (never `tsx`, `npx`, `pnpm`, 
 - **`app/en/[[...slug]]/page.tsx`** — Renders MDX pages from `lib/source.ts`; falls back to `lib/toolkit-route.tsx` for generated toolkit (MCP server) pages at `/en/resources/integrations/<category>/<toolkitId>`.
 - **`components/mdx/`** — Nextra-compatible MDX components (`Callout`, `Tabs`, `Steps`, `Cards`, ...) registered globally in `mdx-components.tsx`; MDX files need no imports for them.
 - **`components/pages/<section>/`** — Page-local components that used to sit beside a page; **`components/toolkit-docs/`** — toolkit reference page UI; other shared components live directly in `components/`.
-- **`lib/`** — fumadocs source/layout config, toolkit data/slug/static-param helpers, integration catalog, glossary remark plugin, `remark-nextra-steps`, config and dictionaries.
+- **`lib/`** — fumadocs source/layout config, toolkit data/slug/static-param helpers, integration catalog, glossary remark plugin, `remark-nextra-compat`, config and dictionaries.
 - **`data/partner-toolkits.ts`** — Hand-authored partner integrations (no toolkit JSON).
 - **`toolkit-docs-generator/`** — Generates MCP toolkit JSON into `toolkit-docs-generator/data/toolkits/`; `scripts/sync-toolkit-sidebar.ts` emits the nine integration category `meta.json` files.
-- **`scripts/`** — Build/CI scripts (Vale style fixes/reviews, redirect checking, meta.json validation, internal link updates, llms.txt generation, Algolia crawler config sync). `scripts/migration/` holds the re-runnable Nextra → Fumadocs codemod.
+- **`scripts/`** — Build/CI scripts (Vale style fixes/reviews, redirect checking, meta.json validation, internal link updates, llms.txt generation, Algolia crawler config sync).
 - **`tests/`** — Vitest tests (broken links, internal links, frontmatter, sitemap, toolkit data, navigation contracts). `tests/helpers/content-paths.ts` maps content files ↔ URLs.
 - **`redirects.ts`** — Redirect data module (~215 rules) imported by `next.config.ts`, the redirect checker, and tests.
 - **`source.config.ts`** — fumadocs-mdx config (frontmatter schema, Shiki transformers). `proxy.ts` redirects locale-less and non-English paths to `/en`.

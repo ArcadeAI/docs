@@ -1,7 +1,7 @@
 /**
  * Shared helpers for tests that walk the Fumadocs content tree.
  *
- * Layout (see MIGRATION_PLAN.md):
+ * Layout:
  *   content/docs/<path>.mdx        -> /en/<path>
  *   content/docs/<path>/index.mdx  -> /en/<path>
  *   content/docs/index.mdx         -> /en

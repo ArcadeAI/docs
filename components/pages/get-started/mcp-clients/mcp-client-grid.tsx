@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import meta from "./nextra-meta";
+import meta from "./client-titles";
 
 // MCP Client data with logos and descriptions
 const mcpClients = [

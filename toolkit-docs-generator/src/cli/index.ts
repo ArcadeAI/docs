@@ -4,7 +4,7 @@
  * Toolkit Docs Generator CLI
  *
  * Entry point for the CLI application.
- * Run with: bun src/cli/index.ts <command>
+ * Run with: bunx tsx src/cli/index.ts <command>
  *
  * Input format for providers:
  *   --providers "Github:1.0.0,Slack:2.1.0"

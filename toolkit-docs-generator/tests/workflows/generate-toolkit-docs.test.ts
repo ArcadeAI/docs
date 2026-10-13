@@ -22,10 +22,12 @@ test("porter workflow includes required triggers", () => {
 });
 
 test("porter workflow generates docs and opens a PR", () => {
-  expect(workflowContents).toContain("bun src/cli/index.ts generate");
-  // `bun` runs TypeScript directly from the pinned toolchain. `pnpm dlx` /
-  // `bunx tsx` would resolve an unpinned tsx from the registry on every run,
-  // so the nightly's TypeScript runtime would drift outside the lockfile.
+  expect(workflowContents).toContain(
+    "../node_modules/.bin/tsx src/cli/index.ts generate"
+  );
+  // The workflow calls the tsx pinned in the lockfile. `pnpm dlx` / `bunx tsx`
+  // could resolve an unpinned tsx from the registry, so the nightly's
+  // TypeScript runtime would drift outside the lockfile.
   expect(workflowContents).not.toContain("pnpm dlx");
   expect(workflowContents).not.toContain("bunx tsx");
   expect(workflowContents).not.toContain("pnpm");

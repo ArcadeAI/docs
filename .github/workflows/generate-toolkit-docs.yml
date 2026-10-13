@@ -60,15 +60,22 @@ jobs:
         with:
           bun-version-file: package.json
 
+      # The generator runs on Node through tsx: Bun resolves the design system's
+      # `bun` export condition, which points at sources the package does not ship.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
       - name: Generate toolkit docs
         id: generate-docs
-        # Invoked with `bun` from the generator directory so the relative paths
+        # Invoked by path from the generator directory so the relative paths
         # below resolve against it.
         run: |
-          bun src/cli/index.ts generate \
+          ../node_modules/.bin/tsx src/cli/index.ts generate \
             --all \
             --skip-unchanged \
             --preserve-last-known-good \
@@ -172,7 +179,7 @@ jobs:
           job_url=$(gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/jobs" \
             --jq '[.jobs[] | select(.name == "generate") | .html_url] | .[0] // empty') || job_url=""
 
-          payload=$(bun src/cli/index.ts alert \
+          payload=$(../node_modules/.bin/tsx src/cli/index.ts alert \
             --report ../toolkit-docs-generator-verification/logs/failed-tools.json \
             --log-url "${job_url:-$RUN_URL}")
 
