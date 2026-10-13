@@ -56,14 +56,7 @@ See the [Arcade API reference](/references/api) for the full gateway schema.
 
 ## Choose which tools Arcade can recommend
 
-Tool Recommendation searches only the gateway's **Allowed Tools**. To make a tool recommendable, add it to the gateway. To keep Arcade from ever recommending a tool or running it through the gateway, leave it out.
-
-A few consequences follow from that:
-
-- Adding a large set of tools to a gateway with Tool Recommendation on does not add those tools to the model's context. The model only receives the tools the agent asks for.
-- Tool Recommendation does not widen access. `Arcade.UseTool` refuses any tool that is not on the allowed list, with an error that starts `tool not found`.
-- A gateway with no allowed tools has nothing to recommend. `Arcade.SelectTools` returns an error that starts `no tools are eligible for discovery`.
-- A tool you add to a gateway is not recommendable the moment you save. Arcade indexes new tools in the background, so allow a short delay before you test a newly added tool. An agent can still run it by name through `Arcade.UseTool` in the meantime.
+Tool Recommendation searches only the tools the gateway allows. To make a tool recommendable, allow it on the gateway. To keep Arcade from ever recommending a tool or running it through the gateway, don't allow it.
 
 ## Opt out for one connection
 
@@ -72,7 +65,7 @@ A single MCP client can opt out of Tool Recommendation without changing the gate
 | URL | Effect |
 | --- | --- |
 | `https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}?tool_recommendation=false` | The tool list contains every allowed tool, as if Tool Recommendation were off. |
-| `https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}?arcade_tools=false` | The tool list contains every allowed tool and none of the Arcade tools, not even `Arcade.ListApps`. |
+| `https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}?arcade_tools=false` | The tool list contains every allowed tool and none of the Arcade tools. |
 
 These parameters can only narrow what a connection gets. `?tool_recommendation=true` does not turn Tool Recommendation on for a gateway that has it off.
 
@@ -80,14 +73,12 @@ These parameters can only narrow what a connection gets. `?tool_recommendation=t
 
 When Tool Recommendation is off for a gateway, or is off for your organization:
 
-- The tool list contains every allowed tool, plus `Arcade.ListApps`.
-- `Arcade.SelectTools`, `Arcade.UseTool`, and `Arcade.SearchTools` do not appear in the tool list. Calling any of them returns the error `tool not enabled for this gateway`.
-
-If Arcade cannot confirm whether Tool Recommendation is on for your organization, for example during a brief service disruption, the gateway keeps listing the Arcade tools. Calls to them return a message saying that Tool Recommendation is temporarily unavailable and that retrying may succeed.
+- The tool list contains every allowed tool.
+- `Arcade.SelectTools` and `Arcade.UseTool` do not appear in the tool list. Calling either of them returns the error `tool not enabled for this gateway`.
 
 ## Check that it works
 
-Connect an MCP client to the gateway and list its tools. With Tool Recommendation on, the list contains only `Arcade.SelectTools`, `Arcade.UseTool`, and `Arcade.ListApps`, and it stays that way after the agent selects tools. Ask the agent to do something that one of your allowed tools handles, and confirm that it calls `Arcade.SelectTools` and then `Arcade.UseTool`.
+Connect an MCP client to the gateway and list its tools. With Tool Recommendation on, the list contains `Arcade.SelectTools` and `Arcade.UseTool` instead of your allowed tools, and it stays that way after the agent selects tools. Ask the agent to do something that one of your allowed tools handles, and confirm that it calls `Arcade.SelectTools` and then `Arcade.UseTool`.
 
 If the list still shows every allowed tool:
 

@@ -17,19 +17,14 @@ With Tool Recommendation on, the gateway lists a small, fixed set of Arcade tool
 
 ## What an MCP client gets
 
-When Tool Recommendation is on for a gateway, the gateway's tool list contains only these Arcade tools:
+When Tool Recommendation is on for a gateway, the gateway's tool list contains these Arcade tools instead of the allowed tools:
 
 | Tool | What it does |
 | --- | --- |
 | `Arcade.SelectTools` | Takes one or more task descriptions and returns the tools that match each task most closely, with their full input schemas. |
 | `Arcade.UseTool` | Runs a tool by name with the inputs you pass. |
-| `Arcade.ListApps` | Lists the apps the caller can act on and whether the caller has connected each one. |
 
 The MCP tool list spells these names with an underscore separator, for example `Arcade_SelectTools`. Arcade accepts either form in a tool call.
-
-The gateway also serves `Arcade.SearchTools`, a keyword search over the same tools. It does not appear in the tool list, but an agent can call it by name. See [Selection and search](#selection-and-search).
-
-The tool list doesn't grow as the agent works. Tools that `Arcade.SelectTools` returns are not added to it, so listing tools again later returns the same Arcade tools. The agent gets each recommended tool's input schema in the `Arcade.SelectTools` response and runs the tool through `Arcade.UseTool`.
 
 ## How an agent finds and calls a tool
 
@@ -68,29 +63,15 @@ Second, the agent calls `Arcade.UseTool` with the tool it picked and that tool's
 
 The tool descriptions that Arcade serves tell the model how to use this flow, so most agents need no extra prompting.
 
-## Selection and search
+## How selection works
 
-Arcade offers two ways to find tools, and they answer different questions.
-
-| | `Arcade.SelectTools` | `Arcade.SearchTools` |
-| --- | --- | --- |
-| Name of the capability | Tool Recommendation | Tool Search |
-| How it matches | Semantic. It compares the meaning of a task with the meaning of each tool. | Keyword. It ranks tools by the words they share with the query, using BM25. |
-| Input | One or more task descriptions | A keyword query and an optional result count (`top_k`, default 10, maximum 25) |
-| Returns | Up to five tools per task, with full input schemas | Tool names and descriptions |
-| Use it to | Find the tool to call for a specific task | Browse what tools exist, or look up a tool whose name you already know |
-
-Semantic selection finds a tool even when the task shares no words with the tool's name, for example "let the team know the deploy finished" matching a Slack tool. Keyword search is more predictable when the agent already knows a product or tool name.
+`Arcade.SelectTools` matches each task against the tools the gateway allows, using both the words in the task and its meaning, and returns the closest matches first. Matching on meaning finds a tool even when the task shares no words with it, for example "let the team know the deploy finished" matching a Slack tool. The optional `context` helps Arcade rank the matches.
 
 ## What Arcade can recommend
 
-Tool Recommendation only works within the tools the gateway already allows. `Arcade.SelectTools` and `Arcade.SearchTools` return only tools that are in the gateway's **Allowed Tools** list, and `Arcade.UseTool` runs only those tools. Turning on Tool Recommendation never gives an agent access to a tool the gateway does not allow.
+Tool Recommendation doesn't change which tools an agent can use. `Arcade.SelectTools` returns only tools that the gateway allows, and `Arcade.UseTool` runs any tool that the gateway allows, whether or not `Arcade.SelectTools` returned it.
 
-`Arcade.UseTool` decides whether to run a tool from the gateway's allowed list and your governance rules, not from what `Arcade.SelectTools` returned earlier. If a tool is on the allowed list, an agent can run it through `Arcade.UseTool` even if `Arcade.SelectTools` never returned it.
-
-[Contextual Access](/operate/governance/contextual-access) rules still apply. A tool that your access rules hide from a user is not recommended to that user, and your access rules still govern every call through `Arcade.UseTool`.
-
-`Arcade.UseTool` runs each tool as the end user. Provider credentials stay with Arcade and never enter the agent's context. If a tool needs authorization that the user hasn't given, the agent receives an authorization link instead of a result, and can repeat the call after the user approves.
+Policy enforcement and authorization work the same way with Tool Recommendation on or off. See [Contextual Access](/operate/governance/contextual-access) for how access rules decide which tools each user can see and use, and [Authorized Tool Calling](/build/tool-calling/custom-apps/auth-tool-calling) for how tools run as the end user.
 
 ## How it works with MCP clients
 
