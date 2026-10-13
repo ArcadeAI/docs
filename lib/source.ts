@@ -3,10 +3,10 @@ import { lucideIconsPlugin } from "fumadocs-core/source/plugins/lucide-icons";
 import { docs } from "@/.source/server";
 
 /**
- * Nextra let `_meta.tsx` give a page a sidebar label that differed from its H1
- * (e.g. index pages labelled "Overview"). Those labels now live in the page
- * frontmatter as `sidebarTitle`; this plugin shows them in the sidebar while
- * the page keeps rendering `title`.
+ * A page can have a sidebar label that differs from its H1 (e.g. index pages
+ * labelled "Overview"). The label lives in the page frontmatter as
+ * `sidebarTitle`; this plugin shows it in the sidebar while the page keeps
+ * rendering `title`.
  */
 const sidebarTitlePlugin: LoaderPlugin = {
   name: "arcade:sidebar-title",

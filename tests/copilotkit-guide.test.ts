@@ -42,9 +42,9 @@ describe("CopilotKit agent-framework guide", () => {
     const filePath = resolveContentFile(GUIDE_URL);
     expect(filePath, `Expected a content page for ${GUIDE_URL}`).not.toBeNull();
     const content = read(filePath ?? "");
-    // Frontmatter keys must carry real values, not just be present. The
-    // sidebar label used to live in _meta.tsx; Fumadocs reads it from
-    // `sidebarTitle` (falling back to `title`).
+    // Frontmatter keys must carry real values, not just be present.
+    // Fumadocs reads the sidebar label from `sidebarTitle` (falling back to
+    // `title`).
     expect(readFrontmatterValue(content, "title")).toBeTruthy();
     const sidebarLabel =
       readFrontmatterValue(content, "sidebarTitle") ??
@@ -83,7 +83,7 @@ describe("CopilotKit guide content reflects the validated fixes", () => {
   });
 
   test("shows the client-side CopilotKit provider wiring", () => {
-    // Fumadocs code-fence meta uses `title=` where Nextra used `filename=`.
+    // Fumadocs code-fence meta names the file with `title=`.
     expect(content).toContain('title="app/providers.tsx"');
     expect(content).toContain("useSingleEndpoint");
   });

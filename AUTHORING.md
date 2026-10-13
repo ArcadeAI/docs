@@ -124,7 +124,7 @@ from arcadepy import Arcade
 ```
 ````
 
-- `title="path/to/file"` shows a filename header (was `filename=` in Nextra).
+- `title="path/to/file"` shows a filename header.
 - `lineNumbers` shows line numbers (was `showLineNumbers`).
 - `{1,3-5}` highlights lines (was `highlightLines={...}`).
 

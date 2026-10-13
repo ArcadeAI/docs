@@ -10,8 +10,7 @@ import {
  * Fumadocs renders the frontmatter `title` as the page heading (<DocsTitle>)
  * and uses it for the sidebar label and <title>. A page without one renders an
  * empty heading and an unnamed sidebar entry, and a body that still opens with
- * a `# Title` H1 renders the heading twice. Nextra pages used to carry the H1
- * in the body; the migration moved it into frontmatter.
+ * a `# Title` H1 renders the heading twice.
  */
 
 const IMPORT_LINE_REGEX = /^import\s[^\n]*$/;

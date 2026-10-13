@@ -8,9 +8,8 @@
  *   ToolkitRoutePage(match)  -> rendered page, or null when no toolkit exists
  *
  * `generateToolkitParams` feeds `generateStaticParams` so every toolkit page is
- * prerendered; `toolkitRouteMetadata` mirrors the per-toolkit metadata the
- * Nextra `[toolkitId]` route used to emit (title, description, canonical, and
- * `noindex` for hidden toolkits).
+ * prerendered; `toolkitRouteMetadata` builds the per-toolkit metadata (title,
+ * description, canonical, and `noindex` for hidden toolkits).
  */
 import { DocsPage } from "fumadocs-ui/layouts/notebook/page";
 import type { Metadata } from "next";

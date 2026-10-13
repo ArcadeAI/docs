@@ -94,9 +94,8 @@ function nodeName(name: PageTree.Node["name"]): string {
 }
 
 /**
- * Lists the child pages of a docs folder as a bullet list. Replaces the Nextra
- * version that received the folder's `_meta` object: children are now read from
- * the Fumadocs page tree, so only `basePath` is needed.
+ * Lists the child pages of a docs folder as a bullet list. Children are read
+ * from the Fumadocs page tree, so only `basePath` is needed.
  */
 export function SubpageList({ basePath }: SubpageListProps) {
   const target = normalizeUrl(basePath);

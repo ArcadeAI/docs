@@ -18,7 +18,7 @@ import { remarkSmartypants } from "./lib/remark-smartypants";
 /**
  * Frontmatter accepted on every docs page. `metaTitle` overrides the `<title>`
  * when it differs from the rendered H1; `sidebarTitle` is the sidebar label;
- * `toc`/`breadcrumb` mirror Nextra's `_meta.tsx` theme options; `icon` is a
+ * `toc`/`breadcrumb` hide the table of contents or breadcrumb; `icon` is a
  * Lucide icon name (resolved by `lucideIconsPlugin` in lib/source.ts).
  */
 const docsFrontmatterSchema = frontmatterSchema.extend({
@@ -48,7 +48,7 @@ export const docs = defineDocs({
   },
 });
 
-/** The glossary page moved from app/en/resources/glossary/page.mdx. */
+/** Finds the glossary page, which may be a file or a folder index. */
 function resolveGlossaryPath(): string {
   const candidates = [
     "content/docs/resources/glossary.mdx",
