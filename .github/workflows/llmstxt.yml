@@ -48,6 +48,14 @@ jobs:
         with:
           bun-version-file: package.json
 
+      # The script runs on Node through tsx: Bun resolves the design system's
+      # `bun` export condition, which points at sources the package does not ship.
+      - name: Setup Node.js
+        if: env.HAS_ANTHROPIC_API_KEY == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
       - name: Install dependencies
         if: env.HAS_ANTHROPIC_API_KEY == 'true'
         run: bun install --frozen-lockfile
