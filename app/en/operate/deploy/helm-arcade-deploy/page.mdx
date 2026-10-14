@@ -29,8 +29,6 @@ The Arcade Engine's service account gets a namespaced Role in the workers namesp
 - Access from your cluster to the runner image, either `arcadedev/runner` on Docker Hub or a copy in your own registry
 - A CNI plugin that enforces Kubernetes NetworkPolicies, so the per-server isolation takes effect
 
-metrics-server is optional. The Arcade Engine's Role may read pod metrics, but the Arcade Engine doesn't query them yet, so nothing breaks without it.
-
 ## Bucket credentials
 
 The Arcade Engine opens the artifact store with each cloud SDK's default credential lookup. Give credentials to the Arcade Engine's ServiceAccount, `<release>-engine` in the release namespace, or put them in its environment. Pick one method:
@@ -39,10 +37,10 @@ The Arcade Engine opens the artifact store with each cloud SDK's default credent
 | --- | --- | --- |
 | [EKS Pod Identity](#eks-pod-identity) | S3 | 1.11.1 or later |
 | [Static keys in a Secret](#static-keys) | S3, Azure Blob | 1.11.1 or later |
-| [EKS IRSA](#workload-identity-and-key-files) | S3 | The first chart release after 1.11.1 |
-| [Azure Workload Identity](#workload-identity-and-key-files) | Azure Blob | The first chart release after 1.11.1 |
-| [GKE Workload Identity](#workload-identity-and-key-files) | GCS | The first chart release after 1.11.1 |
-| [GCP service account key file](#workload-identity-and-key-files) | GCS | The first chart release after 1.11.1 |
+| [EKS IRSA](#workload-identity-and-key-files) | S3 | 1.11.2 or later |
+| [Azure Workload Identity](#workload-identity-and-key-files) | Azure Blob | 1.11.2 or later |
+| [GKE Workload Identity](#workload-identity-and-key-files) | GCS | 1.11.2 or later |
+| [GCP service account key file](#workload-identity-and-key-files) | GCS | 1.11.2 or later |
 
 The identity you give the Arcade Engine needs to read and write objects in the bucket. Deployed servers don't need bucket credentials as long as the Arcade Engine can sign download URLs. See [Artifact store](#artifact-store).
 
@@ -83,7 +81,7 @@ engine:
 ### Workload identity and key files
 
 <Callout type="warning">
-These methods need the first chart release after 1.11.1. Chart 1.11.1 has no values for ServiceAccount annotations, pod labels, or extra volumes.
+Workload identity isn't available before chart 1.11.2.
 </Callout>
 
 Set up the identity on the cloud side first, following [EKS IRSA](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html), [Azure Workload Identity](https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview), or [GKE Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity) for the Arcade Engine's ServiceAccount. Then set the matching values:
@@ -150,7 +148,7 @@ engine:
 
 ### Add the deployments values
 
-Deployments are off by default. Turn them on and name your artifact store:
+Deployments are off by default. Turn them on and configure your artifact store:
 
 ```yaml filename="values.yaml"
 deployments:
@@ -160,9 +158,10 @@ deployments:
     url: s3://arcade-bundles?region=us-east-1
 ```
 
-Use an `s3://`, `gs://`, or `azblob://` URL. The chart refuses to render when `deployments.enabled` is `true` and `deployments.artifacts.url` is empty. The Arcade Engine refuses to start when the URL scheme isn't one it supports, and names the supported schemes.
-
-The Arcade Engine also accepts `mem://` and `file://`, but only its tests use them. They don't work in a cluster, because a deployed server's pod can't read the Arcade Engine's memory or local disk.
+Required schemes are one of:
+- `s3://`
+- `gs://`
+- `azblob://`
 
 ### Upgrade the release
 
@@ -219,7 +218,7 @@ Deployed servers' pods get no bucket credentials: their ServiceAccount mounts no
 | GCS | A key file is configured, or the Arcade Engine's service account holds `iam.serviceAccounts.signBlob`. | The pod falls back to the store URL, which it has no credentials for. |
 | Azure Blob | A shared key is configured (`AZURE_STORAGE_KEY`). | Workload and managed identities can't sign, so the pod falls back to the store URL, which it has no credentials for. |
 
-A signing failure doesn't fail the deploy, but when no valid signed URL remains, the pod can't fetch its bundle. With Azure Workload Identity or GKE Workload Identity, make sure signing works as described above.
+Arcade will fail to pull the server bundle if the signed URL is invalid. With Azure Workload Identity or GKE Workload Identity, make sure signing works as described above.
 
 ### Runner image and registry
 
@@ -298,7 +297,7 @@ arcade login --url https://arcade.example.com
 arcade deploy -e src/my_server/server.py
 ```
 
-`arcade login --url` signs the developer in and saves a context for your installation, and `arcade deploy` targets that context with no `--host` or other target argument. `arcade project set <project-id>` switches the project the context selects. An `arcade deploy` without a saved context exits with an error that names the `arcade login` command to run first, and uploads nothing, unless `ARCADE_URL` and `ARCADE_API_KEY` are set (see the CI deploys below). See [Arcade Deploy](/build/arcade-deploy) for the full developer guide and the [CLI cheat sheet](/references/cli-cheat-sheet) for every flag.
+See [Arcade Deploy](/build/arcade-deploy) for signing in, picking a project and deploying, and the [CLI cheat sheet](/references/cli-cheat-sheet) for every flag.
 
 - Deploy MCP servers built with the Arcade MCP framework for Python. The Arcade Engine refuses a bundle without a Python project definition or with a missing entrypoint.
 - The Arcade Engine refuses a changed redeploy while the previous one is still rolling out.
