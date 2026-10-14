@@ -1,11 +1,14 @@
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
+  index: {
+    title: "Overview",
+  },
   configure: {
     title: "Configure",
   },
   limitations: {
-    title: "When not to use it",
+    title: "Limitations",
   },
 };
 

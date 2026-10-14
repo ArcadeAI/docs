@@ -1,25 +1,27 @@
 ---
-title: "When not to use Tool Recommendation"
+title: "Tool Recommendation limitations"
 description: "Cases where Tool Recommendation does not help, and the limits to plan around when you turn it on"
 ---
 
-# When not to use Tool Recommendation
+# Tool Recommendation limitations
 
 [Tool Recommendation](/operate/governance/mcp-gateways/tool-recommendation) helps when a gateway has more tools than an agent can reasonably hold in context. It is not the right choice for every gateway. This page is for platform operators and agent developers deciding whether to turn it on. It covers the cases where it costs more than it saves, and the limits to plan around when you do use it.
 
-## Gateways with few tools
+## When to turn it off
+
+### Gateways with few tools
 
 Below roughly ten tools, Tool Recommendation tends to cost more than it saves. The agent spends a round trip calling `Arcade.SelectTools` to learn about tools that would have fit in its context from the start, and every new task adds another call before any work happens.
 
 For a small gateway, turn Tool Recommendation off and let the MCP client list every tool directly. Revisit the choice as the gateway grows.
 
-## Agents that already know their tools
+### Agents that already know their tools
 
-Some agents run a fixed workflow: the same few tools, called in a known order. Asking Arcade to recommend tools that the agent's code or prompt already names adds latency and a chance of a worse match, and gains nothing.
+Some agents run a fixed workflow using a small, known set of tools. If those tool definitions already fit comfortably in the model’s context, discovering them through Tool Recommendation can add an unnecessary round trip. Providing the tools directly may be simpler and faster.
 
 For those agents, either use a gateway with Tool Recommendation off, or connect that one agent with `?tool_recommendation=false` on the gateway URL so that its tool list contains every allowed tool. See [Opt out for one connection](/operate/governance/mcp-gateways/tool-recommendation/configure#opt-out-for-one-connection).
 
-## Tools with thin descriptions
+### Tools with thin descriptions
 
 Arcade recommends tools by matching a task against each tool's name and the first line of its description. A toolset with short, vague, or near-identical descriptions produces poor recommendations: the right tool ranks low, or a similar-sounding tool outranks it.
 
