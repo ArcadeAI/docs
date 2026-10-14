@@ -174,7 +174,7 @@ helm upgrade arcade \
   -f values.yaml
 ```
 
-With the defaults, this creates the `arcade-workers` namespace, a default-deny NetworkPolicy for it, a ResourceQuota and LimitRange, and the Arcade Engine's Role in that namespace.
+With the defaults, this creates the `arcade-workers` namespace, a default-deny NetworkPolicy for it, a ResourceQuota and LimitRange, and the Arcade Engine's Role in that namespace. To use a namespace you manage yourself, see [Workers namespace](#workers-namespace) (`deployments.createNamespace: false`).
 
 ### Deploy a test server
 
@@ -198,7 +198,7 @@ All settings live under `deployments.*` in the chart values. Leave a value at it
 | `deployments.enabled` | `false` | Turns deployments on. |
 | `deployments.provider` | `kubernetes` | The deployment provider. `kubernetes` runs deployed servers in your cluster. |
 | `deployments.mutationsAllowed` | `true` | When `false`, the Arcade Engine blocks creating and updating deployments. |
-| `deployments.domain` | `""` | Root domain for deployments, passed to the Arcade Engine. Falls back to `gateway.hostname`, then `ingress.hostname`. The chart refuses to render if none of them is set. In the platform's own cluster, the Arcade Engine reaches deployed servers on their in-cluster Service address. |
+| `deployments.domain` | `""` | Root domain for deployments, passed to the Arcade Engine. Falls back to `gateway.hostname`, then `ingress.hostname`, and the chart refuses to render if none is set. |
 | `deployments.timeout` | `5m` | How long a deploy may take to become healthy before it's marked failed. |
 | `deployments.autoRoll` | `true` | When `true`, the reconciler moves deployed servers onto a new runner image one at a time (see [Upgrades](#upgrades)). When `false`, the move is deferred and deployed servers stay on the runner image they already run until they're redeployed. A redeploy picks up the configured runner image. |
 | `deployments.reconciler.enabled` | `true` | Runs the deployment reconciler. It moves deployed servers onto a new runner image and removes NetworkPolicies left behind by removed servers. |
