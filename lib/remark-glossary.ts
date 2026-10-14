@@ -74,7 +74,12 @@ export function remarkGlossary(options: RemarkGlossaryOptions) {
           }
 
           // Skip if parent is a link or other special node
-          if (parent.type === "link" || parent.type === "inlineCode") {
+          if (
+            parent.type === "link" ||
+            parent.type === "inlineCode" ||
+            (parent.type === "mdxJsxTextElement" &&
+              parent.name === "GlossaryTerm")
+          ) {
             return SKIP;
           }
 
