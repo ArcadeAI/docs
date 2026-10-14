@@ -3,9 +3,6 @@ import type { NextConfig } from "next";
 import { redirects } from "./redirects";
 
 const config: NextConfig = {
-  // Parallel builds (CI matrix, multiple agents) can each use their own output
-  // directory: NEXT_DIST_DIR=.next-foo bun run build
-  distDir: process.env.NEXT_DIST_DIR ?? ".next",
   headers: () =>
     Promise.resolve([
       {

@@ -40,12 +40,8 @@ export const crawlerConfig = {
       pathsToMatch: ["https://docs.arcade.dev/**"],
       recordExtractor: ({ $, helpers }) => {
         // Strip site chrome so nav/sidebar/toc are not indexed as content.
-        // Fumadocs DOM: the page body is `#nd-page > article`; the sidebar,
-        // table of contents, and nav bars carry `#nd-sidebar`, `#nd-toc`,
-        // `#nd-nav`, and `#nd-subnav` ids. The `article h1..h6` / `article p`
-        // selectors below therefore target the page content only.
         $(
-          "nav, header, footer, aside, #nd-nav, #nd-subnav, #nd-sidebar, #nd-sidebar-mobile, #nd-toc, #nd-toc-placeholder"
+          "nav, header, footer, aside, .nextra-navbar, .nextra-sidebar, .nextra-toc, .nextra-banner, .nextra-mobile-nav, .nextra-skip-nav"
         ).remove();
 
         return helpers.docsearch({

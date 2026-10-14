@@ -26,24 +26,14 @@ jobs:
   llmstxt:
     name: Generate LLMSTXT
     runs-on: ubuntu-latest
-    # Generation calls Claude for page summaries. Forks and demo repos without
-    # the secret skip the run instead of failing.
-    env:
-      HAS_ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY != '' }}
 
     steps:
-      - name: Skip without ANTHROPIC_API_KEY
-        if: env.HAS_ANTHROPIC_API_KEY != 'true'
-        run: echo "::notice::ANTHROPIC_API_KEY is not configured; skipping llms.txt generation."
-
       - name: Checkout code
-        if: env.HAS_ANTHROPIC_API_KEY == 'true'
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref || github.ref }}
 
       - name: Setup Bun
-        if: env.HAS_ANTHROPIC_API_KEY == 'true'
         uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
@@ -51,23 +41,19 @@ jobs:
       # The script runs on Node through tsx: Bun resolves the design system's
       # `bun` export condition, which points at sources the package does not ship.
       - name: Setup Node.js
-        if: env.HAS_ANTHROPIC_API_KEY == 'true'
         uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
 
       - name: Install dependencies
-        if: env.HAS_ANTHROPIC_API_KEY == 'true'
         run: bun install --frozen-lockfile
 
       - name: generate LLMs.txt
-        if: env.HAS_ANTHROPIC_API_KEY == 'true'
         run: bun run llmstxt
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Check for changes
-        if: env.HAS_ANTHROPIC_API_KEY == 'true'
         id: check-changes
         run: |
           if [ -n "$(git status --porcelain)" ]; then
@@ -80,7 +66,7 @@ jobs:
       # here: Test already ran on the author's commit, and llms.txt is a
       # generated artifact.
       - name: Commit changes to PR
-        if: env.HAS_ANTHROPIC_API_KEY == 'true' && steps.check-changes.outputs.has_changes == 'true' && github.event_name == 'pull_request'
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name == 'pull_request'
         env:
           HEAD_REF: ${{ github.event.pull_request.head.ref }}
         run: |
@@ -91,7 +77,7 @@ jobs:
           git push origin "HEAD:${HEAD_REF}"
 
       - name: Create Pull Request (for scheduled/manual runs)
-        if: env.HAS_ANTHROPIC_API_KEY == 'true' && steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
@@ -105,14 +91,14 @@ jobs:
             torresmateo
 
       - name: Request team review
-        if: env.HAS_ANTHROPIC_API_KEY == 'true' && steps.check-changes.outputs.has_changes == 'true' && steps.cpr.outputs.pull-request-number != ''
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.cpr.outputs.pull-request-number != ''
         continue-on-error: true
         run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
         env:
           GH_TOKEN: ${{ github.token }}
 
       - name: Enable Pull Request Automerge
-        if: env.HAS_ANTHROPIC_API_KEY == 'true' && steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request' && steps.cpr.outputs.pull-request-number != ''
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request' && steps.cpr.outputs.pull-request-number != ''
         continue-on-error: true
         run: gh pr merge --squash --auto ${{ steps.cpr.outputs.pull-request-number }}
         env:
