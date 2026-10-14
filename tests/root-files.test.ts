@@ -6,8 +6,8 @@ const LOCALE_ROOT_SOURCE = /^\/:locale(\([^)]*\))?$/;
 const SCOPED_LOCALE_ROOT = /^\/:locale\(en\|es\|pt-BR\)$/;
 
 /**
- * Root-level files (`/llms.txt`, `/robots.txt`, `/sitemap.xml`, `/specs/*.yaml`)
- * must never be caught by the locale redirect or the locale proxy. A bare
+ * Root-level files (`/llms.txt`, `/robots.txt`, `/sitemap.xml`) must never be
+ * caught by the locale redirect or the locale proxy. A bare
  * `/:locale` redirect source matched every single-segment path and sent
  * `/llms.txt` to `/llms.txt/home`.
  */
@@ -22,9 +22,9 @@ describe("root files stay reachable", () => {
     }
   });
 
-  it("the proxy matcher excludes spec and text files", () => {
+  it("the proxy matcher excludes text files", () => {
     const matcher = proxyConfig.matcher.join(" ");
-    for (const ext of ["yaml", "yml", "txt", "xml", "json"]) {
+    for (const ext of ["txt", "xml", "json"]) {
       expect(matcher).toContain(`\\.${ext}$`);
     }
   });
