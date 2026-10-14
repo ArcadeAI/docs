@@ -73,6 +73,96 @@ Tool Recommendation doesn't change which tools an agent can use. `Arcade.SelectT
 
 Policy enforcement and authorization work the same way with Tool Recommendation on or off. See [Contextual Access](/operate/governance/contextual-access) for how access rules decide which tools each user can see and use, and [Authorized Tool Calling](/build/tool-calling/custom-apps/auth-tool-calling) for how tools run as the end user.
 
+## Use it over the REST API
+
+Agents and apps that don't connect through MCP can call the same operations as REST endpoints of the [Arcade API](/references/api):
+
+| Endpoint | MCP tool | What it does |
+| --- | --- | --- |
+| `POST /v1/tools/select` | `Arcade.SelectTools` | Returns the tools that match each task. |
+| `POST /v1/tools/search` | None | Ranks tools by how well their words match a keyword query. |
+| `POST /v1/tools/execute` | `Arcade.UseTool` | Runs a tool by name. |
+| `GET /v1/apps` | `Arcade.ListApps` | Lists the apps the user can act on, and whether each is connected. |
+
+Authenticate with your Arcade API key as a bearer token. With an API key, name the end user Arcade acts for in `user_id`. These endpoints don't read a gateway's Tool Recommendation setting. If Tool Recommendation isn't available in your deployment, `select` and `search` return `503`.
+
+### Select tools
+
+```bash
+curl -X POST "https://api.arcade.dev/v1/tools/select" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tasks": ["send a Slack message to a channel", "create a GitHub issue"],
+    "context": "The user is triaging a production incident",
+    "user_id": "{user_id}",
+    "gateway_id": "{gateway_id}",
+    "top_k": 3
+  }'
+```
+
+- `tasks` is required. Each task gets one entry in `results`, in the order you sent them.
+- `top_k` sets the number of tools per task. It defaults to 5, and values above 20 return 20.
+- `gateway_id` is optional. With it, Arcade considers only the tools that gateway allows. Without it, Arcade considers every tool the user can access in the project.
+
+```json
+{
+  "query_id": "8b0f6a52-3c1e-4d4e-9a57-2f1c0e6d9b21",
+  "results": [
+    {
+      "task": "send a Slack message to a channel",
+      "suggestions": [
+        {
+          "tool_name": "Slack.SendMessage",
+          "description": "Send a message to a Slack channel or user.",
+          "input_schema": {
+            "type": "object",
+            "properties": {
+              "channel_name": { "type": "string" },
+              "message": { "type": "string" }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "task": "create a GitHub issue",
+      "suggestions": []
+    }
+  ]
+}
+```
+
+An empty `suggestions` list means no tool the user may use matched that task. If the lookup fails for any task, the whole request fails: `503` means the service is temporarily unavailable and a retry may succeed.
+
+### Search tools
+
+`POST /v1/tools/search` takes a `query` and returns `results`, a list of tools in the same shape as `suggestions`, ranked by keyword match. `top_k` defaults to 10, and values above 50 return 50. It accepts the same `user_id` and `gateway_id` as `select`.
+
+### Run a tool
+
+`POST /v1/tools/execute` runs a tool by `tool_name` with its arguments in `input`. Pass the `query_id` from `select` to connect the execution to the recommendation that surfaced it:
+
+```json
+{
+  "tool_name": "Slack.SendMessage",
+  "input": {
+    "channel_name": "incidents",
+    "message": "Investigating elevated error rates on checkout."
+  },
+  "user_id": "{user_id}",
+  "query_id": "8b0f6a52-3c1e-4d4e-9a57-2f1c0e6d9b21"
+}
+```
+
+This endpoint doesn't take a gateway, so it isn't limited to what `select` returned or to one gateway's tools. It can run any tool in the project that the user can access, and your access rules apply to every call. See [Authorized Tool Calling](/build/tool-calling/custom-apps/auth-tool-calling) for what happens when a tool needs the user to authorize first.
+
+### List apps
+
+`GET /v1/apps?user_id={user_id}` returns one entry per app the user can act on through the project, sorted by `app_id`, with `limit` and `offset` for paging. `connected` is `true` when the user can call the app's tools without authorizing first. When it is, `account` and `permissions` show the account the user connected and the scopes that connection grants. It reports the same apps as `Arcade.ListApps`.
+
+Errors from these endpoints use the Arcade API's error body, with a `name` such as `service_unavailable` and a `message`. A request that fails validation also lists `field_errors`.
+
 ## How it works with MCP clients
 
 Tool Recommendation runs inside the gateway and speaks standard MCP. The Arcade tools are ordinary MCP tools, so any MCP client that can connect to an Arcade MCP Gateway can use them. You don't need an Arcade SDK, a client plugin, or code changes in your agent.
