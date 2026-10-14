@@ -176,7 +176,7 @@ function createGlossaryTerm(
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-");
 
-  const link = `/resources/glossary#${anchor}`;
+  const link = `/home/glossary#${anchor}`;
 
   return {
     term: cleanTerm,
