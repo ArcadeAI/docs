@@ -54,12 +54,19 @@ An Okta API token has the same permissions as the administrator who creates it. 
 
 ### Entra ID app permissions
 
-Register an app in Entra ID and give it the `GroupMember.Read.All` **application** permission (not delegated), then grant administrator consent. Until consent is granted, the app can still sign in but every membership lookup fails.
+Register an app in Entra ID and give it both of these **application** permissions (not delegated), then grant administrator consent:
+
+| Permission | Why it's needed |
+| --- | --- |
+| `User.Read.All` | Look up the caller and read their group memberships. Without it, every membership lookup fails, so Arcade hides every gated tool from every caller. |
+| `GroupMember.Read.All` | Read the names and types of those groups. Without it, Microsoft Graph returns a user's groups with their IDs only, so every rule that names a group by display name matches nothing. |
+
+Until consent is granted, the app can still sign in but every membership lookup fails.
 
 <Callout type="warning">
-  `User.Read.All` alone is not enough. Without permission to read groups,
-  Microsoft Graph returns a user's groups with their IDs but not their names or
-  types, so every rule that names a group by display name matches nothing.
+  Neither permission is enough on its own. With only `GroupMember.Read.All`,
+  Microsoft Graph refuses to look up the caller's memberships, and every gated
+  tool disappears for everyone.
 </Callout>
 
 ### Entra ID group names
