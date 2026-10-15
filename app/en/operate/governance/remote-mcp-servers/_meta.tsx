@@ -31,6 +31,9 @@ const meta: MetaRecord = {
   aws: {
     title: "AWS",
   },
+  specstream: {
+    title: "SpecStream",
+  },
 };
 
 export default meta;
