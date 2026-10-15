@@ -19,7 +19,7 @@ The `deployments.*` values first shipped in chart 1.11.0. Use chart 1.11.1 or la
 - The Arcade Engine creates the server in the **workers namespace** (`arcade-workers` by default). Each deployed server runs as a Kubernetes Deployment of the **runner image** (`arcadedev/runner`), one pod by default, and the pod fetches its bundle from the artifact store.
 - Every deployed server gets its own NetworkPolicy. It accepts traffic only from the Arcade Engine. Outbound, it reaches the public internet and cluster DNS, but not private address ranges, link-local addresses (including cloud metadata), or the cluster ranges you list, unless you allowlist a range.
 
-The Arcade Engine's service account gets a namespaced Role in the workers namespace. That Role covers Deployments, Services, Secrets, ServiceAccounts, NetworkPolicies, ResourceQuotas, Leases, read access to pods and pod logs, and read access to pod metrics. Developers never need cluster access.
+The Arcade Engine's service account gets a namespaced Role in the workers namespace. That Role covers Deployments, Services, Secrets, ServiceAccounts, NetworkPolicies, ResourceQuotas, Leases, read access to pods and pod logs, and read access to pod metrics. Developers never need cluster access. See [Engine service account permissions](#engine-service-account-permissions) for the full list and the bucket permissions.
 
 ## Prerequisites
 
@@ -42,7 +42,7 @@ The Arcade Engine opens the artifact store with each cloud SDK's default credent
 | [GKE Workload Identity](#workload-identity-and-key-files) | GCS | 1.11.2 or later |
 | [GCP service account key file](#workload-identity-and-key-files) | GCS | 1.11.2 or later |
 
-The identity you give the Arcade Engine needs to read and write objects in the bucket. Deployed servers don't need bucket credentials as long as the Arcade Engine can sign download URLs. See [Artifact store](#artifact-store).
+The identity you give the Arcade Engine needs to read and write objects in the bucket: it writes each bundle, and the download URL it signs is only valid if that identity can read the object. See [Engine service account permissions](#engine-service-account-permissions) for the exact permissions. Deployed servers don't need bucket credentials as long as the Arcade Engine can sign download URLs. See [Artifact store](#artifact-store).
 
 ### EKS Pod Identity
 
@@ -142,13 +142,72 @@ engine:
       value: /var/secrets/gcp/key.json
 ```
 
+## Engine service account permissions
+
+The Arcade Engine's ServiceAccount, `<release>-engine`, needs permissions in two places: the workers namespace in your cluster, and the artifact store bucket.
+
+### Kubernetes
+
+The chart creates all of this when `deployments.enabled` is `true`. You don't need to add anything. It renders a Role named `<release>-engine-workloads` in the workers namespace and a RoleBinding with the same name that binds it to the `<release>-engine` ServiceAccount in the release namespace. The Role applies to one namespace only: the chart creates no ClusterRole, and the Arcade Engine gets no permissions outside the workers namespace.
+
+| API group | Resources | Verbs |
+| --- | --- | --- |
+| `apps` | `deployments` | `get`, `list`, `watch`, `create`, `update`, `patch`, `delete` |
+| core (`""`) | `services`, `secrets`, `serviceaccounts` | `get`, `list`, `watch`, `create`, `update`, `patch`, `delete` |
+| `networking.k8s.io` | `networkpolicies` | `get`, `list`, `watch`, `create`, `update`, `patch`, `delete` |
+| `coordination.k8s.io` | `leases` | `get`, `list`, `watch`, `create`, `update`, `patch` |
+| core (`""`) | `resourcequotas` | `get`, `list`, `watch`, `create`, `update`, `patch` |
+| core (`""`) | `pods` | `get`, `list`, `watch` |
+| core (`""`) | `pods/log` | `get` |
+| `metrics.k8s.io` | `pods` | `get`, `list` |
+
+With `deployments.createNamespace: false`, the chart doesn't create the workers namespace, but it still renders the Role and RoleBinding into it. Create the namespace before you install or upgrade.
+
+### Bucket
+
+The Arcade Engine performs two operations on the bucket:
+
+- **Writes each bundle.** On `arcade deploy`, it uploads the bundle as one object at a key built from the tenant, project, server name, version, and the bundle's SHA-256. Deploying the same bundle again can write to the same key, so a write can replace an existing object.
+- **Signs a download URL for each bundle.** The Arcade Engine requests a 24-hour expiry, and temporary credentials can shorten it. The deployed server's pod uses the URL to fetch its bundle. See [Artifact store](#artifact-store).
+
+The Arcade Engine doesn't list or delete objects, and it doesn't read objects itself. It doesn't remove bundles from the bucket, so apply any retention you want with a bucket lifecycle rule. A signed URL only works if the identity that signed it can read the object, so the identity needs read access in practice. Read access lets a pod download its bundle.
+
+The table lists the permissions each cloud requires for those two calls.
+
+| Store | Write a bundle | Signed download URL |
+| --- | --- | --- |
+| S3 | `s3:PutObject`. Bundles of 16 MiB or more upload in parts, which `s3:PutObject` also covers. Add `s3:AbortMultipartUpload` so a failed upload cleans up. | `s3:GetObject`. Any credential that can sign works, including STS session credentials. |
+| GCS | `storage.objects.create`. Replacing an existing object also needs `storage.objects.delete`. | `storage.objects.get`. Without a key file, the service account also needs `iam.serviceAccounts.signBlob` on itself. |
+| Azure Blob | Role `Storage Blob Data Contributor`, or a shared key. | A shared key (`AZURE_STORAGE_KEY`). Workload and managed identities can't sign. |
+
+For GCS, the predefined role `roles/storage.objectUser` on the bucket includes `storage.objects.create`, `storage.objects.get`, and `storage.objects.delete`. Grant `roles/iam.serviceAccountTokenCreator` on the service account itself to cover `iam.serviceAccounts.signBlob`. For more on GCS permissions, see [IAM permissions for Cloud Storage](https://docs.cloud.google.com/storage/docs/access-control/iam-permissions).
+
+For S3, this policy covers both operations, scoped to one bucket. Replace `arcade-bundles` with your bucket name:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:AbortMultipartUpload"
+      ],
+      "Resource": "arn:aws:s3:::arcade-bundles/*"
+    }
+  ]
+}
+```
+
 ## Enable deployments
 
 <Steps>
 
 ### Add the deployments values
 
-Deployments are off by default. Turn them on and configure your artifact store:
+Deployments are off by default. Turn them on and configure your artifact store. For a complete `values.yaml` you can install, see [Minimal working configuration](#minimal-working-configuration):
 
 ```yaml filename="values.yaml"
 deployments:
@@ -186,6 +245,37 @@ Before the first deploy, make sure the developer has:
 Then ask them to [deploy a server](#deploy-a-server) and check that it reaches **Running**. If the deploy fails, check the Arcade Engine logs and the pod events in the workers namespace.
 
 </Steps>
+
+## Minimal working configuration
+
+This `values.yaml` installs Arcade with deployments on. It builds on the quickstart in the [Helm chart guide](/operate/deploy/helm). Before you install, create the Secrets it references in the release namespace (the image-pull, upstream identity provider, chat provider key, Postgres, and Redis Secrets from the chart's required setup), and a bucket the Arcade Engine can write to. Then replace the hostname, Gateway reference, and bucket name, and give the Arcade Engine credentials for the bucket as described in [Bucket credentials](#bucket-credentials).
+
+```yaml filename="values.yaml"
+gateway:
+  hostname: arcade.example.com
+  parentRefs:
+    - name: arcade-gateway
+      namespace: gateway-system
+      sectionName: https
+dockerRegistry:
+  existingSecret: arcade-image-pull
+postgres:
+  auth:
+    existingSecret: arcade-postgres
+redis:
+  auth:
+    existingSecret: arcade-redis
+playground:
+  existingAnthropicApiKeySecret: arcade-anthropic
+deployments:
+  enabled: true
+  artifacts:
+    # S3. For Google Cloud Storage use gs://arcade-bundles,
+    # for Azure Blob Storage use azblob://arcade-bundles
+    url: s3://arcade-bundles?region=us-east-1
+```
+
+Everything under `deployments` other than these two values keeps its default. The hostname comes from `gateway.hostname`, so you don't need `deployments.domain`.
 
 ## Configuration
 
