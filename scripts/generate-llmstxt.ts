@@ -97,29 +97,40 @@ async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
 /**
  * Gets changed files since the last git SHA. Includes uncommitted and
  * untracked files so pages written earlier in the same CI job (before any
- * commit) are summarized.
+ * commit) are summarized. If the SHA is unreachable (for example after a
+ * squash or rebase merge), falls back to uncommitted and untracked files only.
  */
 function getChangedFilesSince(lastSha: string, cwd?: string): Set<string> {
   const lines = (command: string) =>
-    execSync(command, { encoding: "utf-8", cwd })
+    execSync(command, { encoding: "utf-8", cwd, stdio: "pipe" })
       .trim()
       .split("\n")
       .filter((line) => line.length > 0);
+  const untracked = () => lines("git ls-files --others --exclude-standard");
 
   try {
     // Without a second revision, `git diff` compares against the working tree.
-    return new Set([
-      ...lines(`git diff --name-only ${lastSha}`),
-      ...lines("git ls-files --others --exclude-standard"),
-    ]);
+    return new Set([...lines(`git diff --name-only ${lastSha}`), ...untracked()]);
   } catch (_error) {
     console.warn(
       chalk.yellow(
-        `⚠ Could not get changed files since ${lastSha}, processing all files`
+        `⚠ Could not diff against ${lastSha}; using only uncommitted and untracked changes`
       )
     );
-    return new Set();
   }
+
+  // Each source is read independently so one failure doesn't drop the other.
+  const changed = new Set<string>();
+  for (const read of [() => lines("git diff --name-only HEAD"), untracked]) {
+    try {
+      for (const file of read()) {
+        changed.add(file);
+      }
+    } catch (_error) {
+      // Not a git repo or no HEAD yet - nothing to report from this source
+    }
+  }
+  return changed;
 }
 
 /**

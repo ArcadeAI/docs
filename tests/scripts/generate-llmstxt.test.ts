@@ -87,11 +87,15 @@ describe("getChangedFilesSince", () => {
     writeFileSync(path.join(repo, file), content);
   };
 
-  it("includes uncommitted and untracked changes", () => {
+  const initRepo = () => {
     repo = mkdtempSync(path.join(tmpdir(), "llmstxt-"));
     git("init", "-q");
     git("config", "user.email", "test@example.com");
     git("config", "user.name", "Test");
+  };
+
+  it("includes uncommitted and untracked changes", () => {
+    initRepo();
     write("committed.mdx", "one");
     write("edited.mdx", "one");
     write("removed.mdx", "one");
@@ -110,5 +114,28 @@ describe("getChangedFilesSince", () => {
     expect(getChangedFilesSince(base, repo)).toEqual(
       new Set(["later.mdx", "edited.mdx", "removed.mdx", "new/untracked.mdx"])
     );
+  });
+
+  it("still returns working-tree and untracked changes when the SHA is unreachable", () => {
+    initRepo();
+    write("edited.mdx", "one");
+    write("stable.mdx", "one");
+    git("add", ".");
+    git("commit", "-q", "-m", "base");
+
+    write("edited.mdx", "two");
+    write("new/untracked.mdx", "two");
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {
+      // silence the expected warning
+    });
+    try {
+      expect(getChangedFilesSince("0".repeat(40), repo)).toEqual(
+        new Set(["edited.mdx", "new/untracked.mdx"])
+      );
+      expect(warn).toHaveBeenCalledTimes(1);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });
