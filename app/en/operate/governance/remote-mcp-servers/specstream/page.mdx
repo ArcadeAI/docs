@@ -1,0 +1,121 @@
+---
+title: "Connect a SpecStream Remote MCP Server"
+description: "Connect Arcade to SpecStream's hosted MCP server so agents can ask for a finished list from the live web, with the page behind every row"
+---
+
+import { Callout, Steps } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Connect a SpecStream Remote MCP Server
+
+[SpecStream](https://specstream.ai) hosts a remote MCP server at `api.specstream.ai/mcp`. An agent asks for a list in plain words, such as "food banks in Texas, with their annual revenue," and gets every matching row, each with the page it came from. The agent gets the price first, pays only for the matches, and can keep the list current on a schedule. This guide covers the Arcade-side setup for connecting it as a [remote MCP server](/operate/governance/remote-mcp-servers), plus the SpecStream settings that most often trip people up.
+
+<Callout type="info">
+  Arcade doesn't ship a SpecStream toolkit. Reach for this remote server when
+  an agent needs a list, not a fact: many rows, conditions every row has to
+  meet, and the source for each. For a single fact, a search tool is the
+  better fit.
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect the SpecStream remote MCP server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-specstream">Arcade account</SignupLink>
+- A [SpecStream account](https://specstream.ai). New accounts start with $10 of work, once, with no card
+- For the API key path: a SpecStream API key from **Agents & API** in the SpecStream workspace
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Choose between a SpecStream API key and OAuth sign-in
+- Register the server in Arcade and confirm its tools appear
+- Keep an agent inside a spending limit
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## How SpecStream charges
+
+SpecStream prices a list before it runs. An agent calls `compile` to read the request, `quote_capacity_work` to get the price, and `authorize_capacity_work` with an approved maximum. SpecStream charges only for the matches: 10¢, 30¢ or $1 a match, depending on how much each row needs. A search that finds nothing is free. Reading, exporting, and sharing results cost nothing. The same balance serves people and agents.
+
+Give the agent a key with a spending limit. An API key has a total limit, and delegated access can add a per-run limit, a monthly limit, and an expiry.
+
+## Set up SpecStream
+
+### Option A: API key (quickest)
+
+Open the SpecStream workspace, go to **Agents & API** and create a key. Give it only the projects, operations, and spending limit the task needs. This path uses a static credential, so every user reaching SpecStream through the gateway shares one SpecStream account and balance.
+
+### Option B: OAuth sign-in (per user)
+
+SpecStream is an OAuth 2.1 protected resource. Its authorization server is `https://specstream.ai`, with dynamic client registration at `https://specstream.ai/oauth/register` and PKCE (S256). Each user signs in to their own SpecStream account, and their own balance and limits apply.
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, set the **ID** to `specstream` and the URI to:
+
+```text
+https://api.specstream.ai/mcp
+```
+
+### If using an API key
+
+Under **Advanced settings → Custom headers**, add:
+
+```text
+Authorization: Bearer ${secret:SPECSTREAM_API_KEY}
+```
+
+Store the key itself as a header secret.
+
+### If using OAuth
+
+Open **Advanced settings → OAuth2 authorization**. Copy the redirect URI Arcade generates, register a client with SpecStream, and enter the returned client ID in Arcade:
+
+```bash
+curl -X POST https://specstream.ai/oauth/register \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "client_name": "Arcade",
+    "redirect_uris": ["<the redirect URI Arcade generated>"],
+    "grant_types": ["authorization_code", "refresh_token"],
+    "response_types": ["code"],
+    "token_endpoint_auth_method": "none"
+  }'
+```
+
+Use `https://specstream.ai/oauth/authorize` as the authorization URL and `https://specstream.ai/oauth/token` as the token URL.
+
+### Verify the tools
+
+Save the server. Arcade discovers SpecStream's tools and lists them in the Playground. They cover requests (`compile`, `edit_spec`), quotes and approvals (`quote_capacity_work`, `authorize_capacity_work`), results (`list_find_rows`, `get_find_decisions`), exports and sharing (`export_find`, `share_find`), saved lists and schedules, projects, and balance.
+
+### Expose a curated set through a gateway
+
+Create or edit a gateway from [MCP Gateways](https://app.arcade.dev/mcp-gateways), open **Select tools** and filter by `specstream`. For a read-only agent, leave `authorize_capacity_work` off the gateway.
+
+</Steps>
+
+## Troubleshooting
+
+- **The tool list is empty after saving**: the key was rejected or the header is missing. Re-check the `Authorization` header and that the secret holds the key, not a placeholder.
+- **A run is refused with a spending-limit message**: the key's total, per-run or monthly limit is below the quote. Raise the limit in **Agents & API**, or ask for fewer rows.
+- **`authorize_capacity_work` fails with a stale quote**: quotes last 30 minutes. Ask for a new quote and retry with the same request key; nothing is bought twice.
+- **`redirect_uri_mismatch` during OAuth**: Arcade allocates the redirect URI when you save the server and changes it if you delete and recreate the server. Register a client with the URI Arcade shows now.
+
+## Next steps
+
+- [Create an MCP Gateway](/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [SpecStream MCP documentation](https://specstream.ai/docs/mcp)
+- [Connect to MCP clients](/get-started/mcp-clients)
