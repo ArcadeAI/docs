@@ -207,7 +207,7 @@ For S3, this policy covers both operations, scoped to one bucket. Replace `arcad
 
 ### Add the deployments values
 
-Deployments are off by default. Turn them on and configure your artifact store. For a complete `values.yaml` you can install, see [Minimal working configuration](#minimal-working-configuration):
+Deployments are off by default. Turn them on and configure your artifact store. These are the only values you must add. See [Minimal working configuration](#minimal-working-configuration):
 
 ```yaml filename="values.yaml"
 deployments:
@@ -248,25 +248,9 @@ Then ask them to [deploy a server](#deploy-a-server) and check that it reaches *
 
 ## Minimal working configuration
 
-This `values.yaml` installs Arcade with deployments on. It builds on the quickstart in the [Helm chart guide](/operate/deploy/helm). Before you install, create the Secrets it references in the release namespace (the image-pull, upstream identity provider, chat provider key, Postgres, and Redis Secrets from the chart's required setup), and a bucket the Arcade Engine can write to. Then replace the hostname, Gateway reference, and bucket name, and give the Arcade Engine credentials for the bucket as described in [Bucket credentials](#bucket-credentials).
+This is the only addition a working Arcade install needs to turn deployments on. The rest of the install comes from the [Helm chart guide](/operate/deploy/helm). The hostname must already be set through `gateway.hostname`, `ingress.hostname`, or `deployments.domain`, and the Arcade Engine needs credentials for the bucket as described in [Bucket credentials](#bucket-credentials).
 
 ```yaml filename="values.yaml"
-gateway:
-  hostname: arcade.example.com
-  parentRefs:
-    - name: arcade-gateway
-      namespace: gateway-system
-      sectionName: https
-dockerRegistry:
-  existingSecret: arcade-image-pull
-postgres:
-  auth:
-    existingSecret: arcade-postgres
-redis:
-  auth:
-    existingSecret: arcade-redis
-playground:
-  existingAnthropicApiKeySecret: arcade-anthropic
 deployments:
   enabled: true
   artifacts:
@@ -275,7 +259,7 @@ deployments:
     url: s3://arcade-bundles?region=us-east-1
 ```
 
-Everything under `deployments` other than these two values keeps its default. The hostname comes from `gateway.hostname`, so you don't need `deployments.domain`.
+Everything under `deployments` other than these two values keeps its default. The hostname comes from `gateway.hostname` or `ingress.hostname`, so you don't need `deployments.domain`.
 
 ## Configuration
 
