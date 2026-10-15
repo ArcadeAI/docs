@@ -95,41 +95,23 @@ async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
 }
 
 /**
- * Gets changed files since the last git SHA
+ * Gets changed files since the last git SHA. Includes uncommitted and
+ * untracked files so pages written earlier in the same CI job (before any
+ * commit) are summarized.
  */
-function getChangedFilesSince(lastSha: string): Set<string> {
+function getChangedFilesSince(lastSha: string, cwd?: string): Set<string> {
+  const lines = (command: string) =>
+    execSync(command, { encoding: "utf-8", cwd })
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
   try {
-    // Get files that were added, modified, or deleted
-    const added = execSync(
-      `git diff --name-only --diff-filter=A ${lastSha} HEAD`,
-      {
-        encoding: "utf-8",
-      }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const modified = execSync(
-      `git diff --name-only --diff-filter=M ${lastSha} HEAD`,
-      { encoding: "utf-8" }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const deleted = execSync(
-      `git diff --name-only --diff-filter=D ${lastSha} HEAD`,
-      {
-        encoding: "utf-8",
-      }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const allChanged = new Set([...added, ...modified, ...deleted]);
-    return allChanged;
+    // Without a second revision, `git diff` compares against the working tree.
+    return new Set([
+      ...lines(`git diff --name-only ${lastSha}`),
+      ...lines("git ls-files --others --exclude-standard"),
+    ]);
   } catch (_error) {
     console.warn(
       chalk.yellow(
@@ -871,4 +853,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export { hasSameBody, main as generateLlmsTxt, summarizePagesInBatches };
+export {
+  getChangedFilesSince,
+  hasSameBody,
+  main as generateLlmsTxt,
+  summarizePagesInBatches,
+};
