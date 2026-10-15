@@ -10,6 +10,9 @@ export const meta: MetaRecord = {
   "container-registry": {
     title: "Use a different container registry",
   },
+  "values-reference": {
+    title: "Values reference",
+  },
 };
 
 export default meta;
