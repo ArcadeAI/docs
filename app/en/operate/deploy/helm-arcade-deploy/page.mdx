@@ -102,7 +102,7 @@ EKS IRSA:
 engine:
   serviceAccount:
     annotations:
-      eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/arcade-engine
+      eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/arcade-engine
 ```
 
 Azure Workload Identity. Also name the storage account, with `AZURE_STORAGE_ACCOUNT` in `engine.extraEnv` or `storage_account=` in `deployments.artifacts.url`:
@@ -207,7 +207,7 @@ For S3, this policy covers both operations, scoped to one bucket. Replace `arcad
 
 ### Add the deployments values
 
-Deployments are off by default. Turn them on and configure your artifact store. These are the only values you must add. See [Minimal working configuration](#minimal-working-configuration):
+Deployments are off by default. Turn them on and configure your artifact store. The Arcade Engine also needs credentials for the bucket. See [Bucket credentials](#bucket-credentials) and [Minimal working configuration](#minimal-working-configuration):
 
 ```yaml filename="values.yaml"
 deployments:
@@ -260,6 +260,36 @@ deployments:
 ```
 
 Everything under `deployments` other than these two values keeps its default. The hostname comes from `gateway.hostname` or `ingress.hostname`, so you don't need `deployments.domain`.
+
+### S3 example with credentials
+
+Each option below combines the deployments values with credentials, and you merge it into your existing `values.yaml`, which already sets the hostname and the rest of your installation. For Pod Identity, Azure, and GCS, see [Bucket credentials](#bucket-credentials).
+
+Option 1, static keys. Use an existing Secret named `arcade-bundle-store` that holds `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`. See [Static keys](#static-keys) to create it. No keys go in `values.yaml`:
+
+```yaml filename="values.yaml"
+deployments:
+  enabled: true
+  artifacts:
+    url: s3://arcade-bundles?region=us-east-1
+engine:
+  extraEnvFrom:
+    - secretRef:
+        name: arcade-bundle-store
+```
+
+Option 2, EKS IRSA. Annotate the Arcade Engine's ServiceAccount with your IAM role. IRSA needs chart 1.11.2 or later:
+
+```yaml filename="values.yaml"
+deployments:
+  enabled: true
+  artifacts:
+    url: s3://arcade-bundles?region=us-east-1
+engine:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: arn:aws:iam::<ACCOUNT_ID>:role/arcade-engine
+```
 
 ## Configuration
 
@@ -435,7 +465,8 @@ When an upgrade changes the runner image tag, the reconciler moves running deplo
 | Symptom | Cause and fix |
 | --- | --- |
 | `helm upgrade` fails with `deployments.artifacts.url must name an S3-compatible artifact store when deployments.enabled is true` | Set `deployments.artifacts.url`. |
-| `helm upgrade` fails with `deployments.domain (or gateway.hostname / ingress.hostname) must be set when deployments.enabled is true` | Set `deployments.domain`, `gateway.hostname`, or `ingress.hostname`. |
+| `helm upgrade` fails with `Set either gateway.hostname or ingress.hostname.` | Set `gateway.hostname` or `ingress.hostname` to your real hostname. The chart's default is the placeholder `yourhostname.com`, so a render that works can still point at the wrong host. |
+| `helm upgrade` fails with `deployments.domain (or gateway.hostname / ingress.hostname) must be set when deployments.enabled is true` | Set `deployments.domain`, `gateway.hostname`, or `ingress.hostname`. The chart renders with the placeholder `yourhostname.com` unless you set a real hostname. |
 | `helm upgrade` fails with `engine.extraConfig sets deployments:` | The chart owns the `deployments:` block in the Arcade Engine's configuration. Use `deployments.*` chart values instead of `engine.extraConfig`. |
 | The Arcade Engine doesn't start and names an unsupported scheme | Use an `s3://`, `gs://`, or `azblob://` URL in `deployments.artifacts.url`. |
 | A deploy fails because the server never became healthy | The pod started but didn't answer its health check within `deployments.timeout`. Read the server's logs, and check that it binds the port the platform probes. If many servers fail at once, suspect the runner image. If start-up is just slow, raise `deployments.timeout`. |
