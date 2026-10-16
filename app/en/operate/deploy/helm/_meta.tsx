@@ -8,7 +8,7 @@ export const meta: MetaRecord = {
     title: "IPv6 and dual-stack",
   },
   "container-registry": {
-    title: "Use a different container registry",
+    title: "Use your own container registry",
   },
   "values-reference": {
     title: "Values reference",
