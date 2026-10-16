@@ -36,18 +36,33 @@ Install the Arcade agent plugin in a supported client and connect to its hosted 
   repository and are not pinned to a release.
 </Callout>
 
-<Tabs items={["Claude Code", "Codex", "Cursor", "VS Code", "Copilot CLI", "Claude Desktop"]}>
+<Tabs items={["Claude Code", "Codex", "Cursor", "VS Code", "Copilot CLI", "Claude Desktop", "Other"]}>
 <Tabs.Tab>
 
-1. Add the Arcade marketplace and install the plugin:
+Requires [Claude Code 2.1.292 or later](https://code.claude.com/docs/en/discover-plugins#add-and-install-from-your-shell).
+
+1. Install Arcade:
 
    ```bash
-   claude plugin marketplace add {{ARCADE_PLUGIN_REPO}}
-   claude plugin install arcade@arcade
+   claude plugin install arcade --marketplace {{ARCADE_PLUGIN_REPO}}
    ```
 
 2. Run `/reload-plugins` if Claude Code is already open.
-3. Verify the install with `claude plugin list` or `/plugin`.
+3. Run `/arcade:try-arcade` to start.
+
+<details>
+<summary>Earlier Claude Code versions</summary>
+
+Add the marketplace, then install the plugin:
+
+```bash
+claude plugin marketplace add {{ARCADE_PLUGIN_REPO}}
+claude plugin install arcade@arcade
+```
+
+Run `/reload-plugins` if Claude Code is already open.
+
+</details>
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -62,6 +77,7 @@ Install the Arcade agent plugin in a supported client and connect to its hosted 
 2. Start a new Codex session or ChatGPT desktop chat.
 3. Open `/plugins` and confirm **arcade** is installed and enabled.
 4. Confirm the **arcade** MCP server is connected.
+5. Choose `@Arcade` or invoke `$arcade:try-arcade` to start.
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -78,6 +94,7 @@ For an individual plan, or a Teams or Enterprise plan with **Allow Local Plugin 
 
 2. Run **Developer: Reload Window**.
 3. Open **Customize** and confirm the two Arcade skills, `arcade-operator`, rule, and MCP server are present.
+4. Run `/try-arcade` to start.
 
 Keep the clone inside `~/.cursor/plugins/local/`. Cursor ignores symlinks to folders outside that directory.
 
@@ -107,6 +124,7 @@ Enterprise turns **Allow Local Plugin Imports** off by default. When it is off, 
 4. Confirm **Arcade** appears under **Agent Plugins → Installed**.
 5. Run **MCP: List Servers**, select **arcade**, and choose **Start Server**.
 6. Sign in when prompted, then return to VS Code and continue the original task.
+7. Run `/arcade:try-arcade` to start.
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -118,16 +136,35 @@ Enterprise turns **Allow Local Plugin Imports** off by default. When it is off, 
    ```
 
 2. Restart the session or run `/restart`.
+3. Run `/try-arcade` to start.
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-1. Open **Customize → Plugins → Add marketplace → Add from a repository**.
-2. Paste `{{ARCADE_PLUGIN_REPO}}`.
-3. Install **Arcade** (`arcade@arcade`).
-4. Start a new conversation.
+Requires a [paid Claude plan](https://support.claude.com/en/articles/13837440-use-plugins-in-claude). On Team or Enterprise, your organization must allow this marketplace.
 
-For Claude Code inside the desktop app, you can also use the commands in the **Claude Code** tab.
+1. Open **Customize → Plugins → Add → Add marketplace → Add from a repository**.
+2. Paste `{{ARCADE_PLUGIN_REPO}}`.
+3. Add **Arcade** from the marketplace.
+4. Open **Arcade → Connectors**, then add and connect **arcade** if it is not connected. Sign in to Arcade when prompted.
+5. Start a new conversation and ask "What can Arcade do?"
+
+On Team or Enterprise, an Owner may need to [add the connector for your organization](https://claude.com/docs/plugins/overview#bundled-connectors) before you can connect it with your account.
+
+Use this flow for Desktop Chat and Cowork. [Installing from the Claude Code command line does not add the plugin to your Claude account](https://claude.com/docs/plugins/overview#find-the-plugin-in-each-app).
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+Your client must support remote HTTP MCP servers and browser sign-in. This connection includes tools only; it does not install the plugin's skills, subagent, or commands.
+
+1. Add an HTTP MCP server with this URL in your client's MCP settings:
+
+   ```text
+   {{ARCADE_PLUGIN_GATEWAY_URL}}
+   ```
+
+2. Sign in to Arcade in the browser when prompted, then return to your client.
 
 </Tabs.Tab>
 </Tabs>
