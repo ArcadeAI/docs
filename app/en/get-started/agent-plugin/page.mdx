@@ -8,14 +8,14 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Install the Arcade agent plugin
 
-This guide is for agent developers who want to use Arcade in their own coding agent or desktop client. Install the plugin, sign in, and run a task across your apps without creating API keys or configuring a gateway.
+This guide is for agent developers installing Arcade in their own coding agent or desktop client. Personal installs use Arcade's hosted gateway without creating API keys or configuring a gateway.
 
-The plugin bundles a connection to Arcade's hosted MCP gateway with two skills, three commands, and the `arcade-operator` subagent. The gateway provides tools for email, calendar, chat, issues, docs, and other apps. The skills and other components help your agent choose and use those tools. Each client loads the components it supports, as shown in the [support table](#what-you-get-in-each-agent).
+The plugin connects your agent to Arcade's hosted MCP gateway and bundles two skills, three command shortcuts, and the `arcade-operator` subagent. The gateway provides tools for email, calendar, chat, issues, docs, and other apps.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-Install the Arcade agent plugin in your agent and run your first task against a connected app.
+Install the Arcade agent plugin in a supported client and connect to its hosted gateway.
 
 </GuideOverview.Outcomes>
 
@@ -28,6 +28,19 @@ Install the Arcade agent plugin in your agent and run your first task against a 
 </GuideOverview.Prerequisites>
 
 </GuideOverview>
+
+## What's included
+
+### Skills
+
+- [`try-arcade`](https://github.com/ArcadeAI/arcade-plugin/blob/v0.3.0/skills/try-arcade/SKILL.md) guides tool selection, app sign-in, and tasks across connected apps.
+- [`scale-arcade`](https://github.com/ArcadeAI/arcade-plugin/blob/v0.3.0/skills/scale-arcade/SKILL.md) guides gateway, tool selection, and end-user identity decisions for a proven workflow.
+
+Skills load when relevant to your request. In Codex and the ChatGPT local runtime, choose `@Arcade` or invoke `$arcade:try-arcade` or `$arcade:scale-arcade`. Codex does not expose these skills as slash commands.
+
+### Subagent
+
+The `arcade-operator` subagent executes app tasks in a separate context and returns the outcome. The `try-arcade` skill delegates to it when the client exposes `arcade-operator`.
 
 ## Install
 
@@ -64,8 +77,6 @@ Install the Arcade agent plugin in your agent and run your first task against a 
 2. Start a new Codex session or ChatGPT desktop chat.
 3. Open `/plugins` and confirm **arcade** is installed and enabled.
 4. Confirm the **arcade** MCP server is connected.
-
-To invoke Arcade explicitly, choose `@Arcade` or use `$arcade:try-arcade`. For team-rollout guidance, use `$arcade:scale-arcade`. Codex does not expose these skills as slash commands.
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -191,17 +202,6 @@ Authorizes an app on demand, so you are not interrupted mid-task.
 #### `/arcade-apps`
 
 Lists the apps you have connected and lets you disconnect one.
-
-### Skills
-
-Skills are instructions your agent reads when relevant to a request:
-
-- `try-arcade` guides tasks across your connected apps, such as replying to a thread or checking your calendar.
-- `scale-arcade` guides decisions about using a workflow with a team, including gateway setup, tool selection, and end-user identity.
-
-### Subagent
-
-The `arcade-operator` subagent runs an app task in its own context and reports the result. It keeps tool searches and intermediate results out of your main conversation.
 
 ### Rule and hooks
 
