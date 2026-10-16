@@ -1,0 +1,144 @@
+---
+title: "What's included"
+description: "Components bundled with the Arcade agent plugin and support across clients."
+---
+
+import { Code, Table } from "nextra/components";
+
+# What's included
+
+For agent developers using the Arcade plugin, the package includes a connection to Arcade's hosted MCP gateway, two skills, three command shortcuts, and the `arcade-operator` subagent.
+
+## MCP server
+
+The plugin registers an MCP server named `arcade` at `{{ARCADE_PLUGIN_GATEWAY_URL}}`. The gateway provides tools for email, calendar, chat, issues, docs, and other apps.
+
+## Skills
+
+- [`try-arcade`](https://github.com/ArcadeAI/arcade-plugin/blob/v0.3.0/skills/try-arcade/SKILL.md) guides tool selection, app sign-in, and tasks across connected apps.
+- [`scale-arcade`](https://github.com/ArcadeAI/arcade-plugin/blob/v0.3.0/skills/scale-arcade/SKILL.md) guides gateway, tool selection, and end-user identity decisions for a proven workflow.
+
+Skills load when relevant to your request. In Codex and the ChatGPT local runtime, choose `@Arcade` or invoke `$arcade:try-arcade` or `$arcade:scale-arcade`. Codex does not expose these skills as slash commands.
+
+## Subagent
+
+The `arcade-operator` subagent executes app tasks in a separate context and returns the outcome. The `try-arcade` skill delegates to it when the client exposes `arcade-operator`.
+
+The plugin's subagent is [not supported in every client](#client-support).
+
+## Client support
+
+**Every plugin install includes the Arcade MCP server and both skills.** The clients below load those components. Subagent and command support varies by client.
+
+<Table aria-labelledby="client-support" className="mt-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-accent" tabIndex={0}>
+  <thead>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="col">Client</Table.Th>
+      <Table.Th scope="col">Subagent</Table.Th>
+      <Table.Th className="text-left" scope="col">Commands</Table.Th>
+    </Table.Tr>
+  </thead>
+  <tbody>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="row">Cursor IDE and Cloud Agents</Table.Th>
+      <Table.Td className="text-center">Yes</Table.Td>
+      <Table.Td>3 (IDE: plugin page, not <Code>/</Code> menu)</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="row">Cursor CLI</Table.Th>
+      <Table.Td className="text-center">Yes</Table.Td>
+      <Table.Td>3</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="row">Claude Code<br /><span className="font-normal">CLI and desktop Code tab</span></Table.Th>
+      <Table.Td className="text-center">Yes</Table.Td>
+      <Table.Td>3 (<Code>/arcade:</Code> prefix)</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="row">Claude Cowork<br /><span className="font-normal">No session-start text</span></Table.Th>
+      <Table.Td className="text-center">Yes</Table.Td>
+      <Table.Td>3 (<Code>/arcade:</Code> prefix)</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="row">GitHub Copilot CLI</Table.Th>
+      <Table.Td className="text-center">Yes</Table.Td>
+      <Table.Td>None</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="row">VS Code<br /><span className="font-normal">No lifecycle hooks</span></Table.Th>
+      <Table.Td className="text-center">Yes</Table.Td>
+      <Table.Td>None</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="row">Codex / ChatGPT (local)<br /><span className="font-normal">No lifecycle hooks.</span></Table.Th>
+      <Table.Td className="text-center">No</Table.Td>
+      <Table.Td>None</Table.Td>
+    </Table.Tr>
+    <Table.Tr>
+      <Table.Th className="text-left" scope="row">Claude Desktop Chat</Table.Th>
+      <Table.Td className="text-center">No</Table.Td>
+      <Table.Td>None</Table.Td>
+    </Table.Tr>
+  </tbody>
+</Table>
+
+<details>
+<summary>Routing details by client</summary>
+
+- **Cursor IDE and Cloud Agents:** the always-apply rule provides routing guidance; plugin hooks do not run.
+- **Cursor CLI:** only the session hook runs; the always-apply rule does not load.
+- **Claude Code:** the session, prompt, and subagent hooks run.
+- **Claude Cowork:** prompt and subagent hooks run, but session-start text does not reach the main conversation.
+- **GitHub Copilot CLI:** session and subagent hooks run; prompt-hook output from configuration files does not reach the model.
+- **VS Code:** reads the Copilot hook file but cannot run its Agent Plugins hook commands yet.
+- **Codex:** does not run Agent Plugins lifecycle hooks yet.
+- **Claude Desktop Chat:** loads neither the rule nor hooks.
+
+</details>
+
+## Commands
+
+Claude Code and Cowork namespace the commands as `/arcade:arcade-status`, `/arcade:arcade-connect`, and `/arcade:arcade-apps`.
+
+### `/arcade-status`
+
+Reports whether the gateway is reachable, whether you have signed in, and which apps you have authorized.
+
+### `/arcade-connect <app>`
+
+Authorizes an app on demand, so you are not interrupted mid-task.
+
+### `/arcade-apps`
+
+Lists the apps you have connected and lets you disconnect one.
+
+## Rule and hooks
+
+The rule and hooks tell your agent when to use Arcade for app tasks.
+
+The [Agent Plugins](https://agent-plugins.org) 1.0 specification makes only skills and MCP servers portable. Commands, subagents, hooks, and editor rules require client-specific support.
+
+## How Arcade chooses a connection
+
+Arcade prefers the plugin's gateway. If it cannot complete a task for a reason other than sign-in or permission denial, your agent may use another already-authorized connection within the task you approved. It checks the intended app account before using another Arcade gateway. Sign-in and permission failures require your attention. The agent does not switch connections to get around them. The plugin instructs your agent to confirm the action and destination before changing something in an app.
+
+`arcade-operator` falls back only to another authorized Arcade gateway. Fallback to any other tool belongs to the parent agent.
+
+## Privacy
+
+The released plugin turns client-side usage telemetry off in code. No environment setting turns collection on. Requests you make through Arcade still go to its hosted gateway and the apps you authorize. See [Arcade's privacy policy](https://www.arcade.dev/privacy-policy).
+
+## Example requests
+
+- "Send a summary of tomorrow's calendar events to me on Slack."
+- "Read my Granola notes from last week, check them against Linear, and file anything I promised that is not a ticket yet. Wait for me before creating anything."
+- "Find unread mail that needs a reply. Look the sender up in HubSpot if you can, draft a response, and Slack me the draft before sending."
+- "Pull my open GitHub pull requests, my Linear issues, and tomorrow's calendar. Write a standup update and send it to me on Slack."
+- "Search my Drive and Notion for the product spec my team uses, then drop a one-paragraph summary in Slack."
+
+Or ask "What can Arcade do?" and pick a workflow from the answer.
+
+## Next steps
+
+- [Install the Arcade agent plugin](/get-started/agent-plugin): client-native setup and gateway sign-in
+- [Integrations catalog](/resources/integrations): supported apps and toolkits
