@@ -16,7 +16,7 @@ test("keeps static sitemap routes when toolkit enumeration fails", async () => {
   const entries = await sitemap();
   const urls = entries.map((entry) => entry.url);
 
-  expect(urls).toContain("https://example.test/en/references/changelog");
+  expect(urls).toContain("https://example.test/en/references/cli-cheat-sheet");
   expect(urls).not.toContain(
     "https://example.test/en/resources/integrations/development/github"
   );

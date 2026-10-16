@@ -510,7 +510,12 @@ export const redirects: Redirect[] = [
   },
   {
     source: "/:locale/home/changelog",
-    destination: "/:locale/references/changelog",
+    destination: "https://releases.arcade.dev/preview/",
+    permanent: true,
+  },
+  {
+    source: "/:locale/references/changelog",
+    destination: "https://releases.arcade.dev/preview/",
     permanent: true,
   },
   {
