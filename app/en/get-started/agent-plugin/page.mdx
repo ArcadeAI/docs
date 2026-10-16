@@ -8,7 +8,9 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Install the Arcade agent plugin
 
-The Arcade agent plugin bundles a connection to Arcade's hosted MCP gateway with two skills, three commands, and the `arcade-operator` subagent. The gateway gives your agent thousands of tools for email, calendar, chat, issues, docs, and dozens of other apps. The rest of the plugin helps your agent choose and use those tools. You authorize each app in the browser the first time it comes up, with no API keys to create and no gateway to configure.
+This guide is for agent developers who want to use Arcade in their own coding agent or desktop client. Install the plugin, sign in, and run a task across your apps without creating API keys or configuring a gateway.
+
+The plugin bundles a connection to Arcade's hosted MCP gateway with two skills, three commands, and the `arcade-operator` subagent. The gateway provides tools for email, calendar, chat, issues, docs, and other apps. The skills and other components help your agent choose and use those tools. Each client loads the components it supports, as shown in the [support table](#what-you-get-in-each-agent).
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -21,19 +23,11 @@ Install the Arcade agent plugin in your agent and run your first task against a 
 
 1. A supported client: Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, or Claude Desktop
 2. An <SignupLink linkLocation="docs:agent-plugin-install">Arcade account</SignupLink>
-3. For Claude Code, Claude Cowork, Cursor CLI, and GitHub Copilot CLI: [Node.js](https://nodejs.org/) on the PATH of the host that launches their routing hooks. Those hooks run `node`. Cursor IDE, VS Code, Codex, Claude Desktop Chat, and tools-only MCP clients do not need Node.js.
+3. For Claude Code, Claude Cowork, Cursor CLI, and GitHub Copilot CLI: [Node.js](https://nodejs.org/) on the PATH of the host that launches their routing hooks. Those hooks run `node`. Cursor IDE, VS Code, Codex, and Claude Desktop Chat do not need Node.js.
 
 </GuideOverview.Prerequisites>
 
 </GuideOverview>
-
-<Callout type="info">
-  The plugin is built for personal use. For team use, consider a dedicated [MCP
-  Gateway](/operate/governance/mcp-gateways) with a curated tool list. Add a
-  [User Source](/operate/identity/user-sources) when end users should sign in
-  through your organization's identity provider. See [from personal use to team
-  rollout](/get-started/agent-plugin/team-rollout).
-</Callout>
 
 ## Install
 
@@ -49,83 +43,111 @@ Each client installs plugins differently. Use the path for yours.
 <Tabs items={["Claude Code", "Codex", "Cursor", "VS Code", "Copilot CLI", "Claude Desktop"]}>
 <Tabs.Tab>
 
-Add the Arcade marketplace, then install the plugin:
+1. Add the Arcade marketplace and install the plugin:
 
-```bash
-claude plugin marketplace add {{ARCADE_PLUGIN_REPO}}
-claude plugin install arcade@arcade
-```
+   ```bash
+   claude plugin marketplace add {{ARCADE_PLUGIN_REPO}}
+   claude plugin install arcade@arcade
+   ```
 
-Run `/reload-plugins` if Claude Code is already open. Verify the install with `claude plugin list` or `/plugin`.
+2. Run `/reload-plugins` if Claude Code is already open.
+3. Verify the install with `claude plugin list` or `/plugin`.
 
 Claude Code runs its routing hooks with `node`. The host that launches Claude Code must be able to find Node.js on its PATH.
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-Add the Arcade marketplace, then install the plugin:
+1. Add the Arcade marketplace and install the plugin:
 
-```bash
-codex plugin marketplace add {{ARCADE_PLUGIN_REPO}}
-codex plugin add arcade@arcade
-```
+   ```bash
+   codex plugin marketplace add {{ARCADE_PLUGIN_REPO}}
+   codex plugin add arcade@arcade
+   ```
 
-Start a new Codex session or ChatGPT desktop chat. Open `/plugins`, confirm **arcade** is installed and enabled, then confirm the **arcade** MCP server is connected.
+2. Start a new Codex session or ChatGPT desktop chat.
+3. Open `/plugins` and confirm **arcade** is installed and enabled.
+4. Confirm the **arcade** MCP server is connected.
 
 To invoke Arcade explicitly, choose `@Arcade` or use `$arcade:try-arcade`. For team-rollout guidance, use `$arcade:scale-arcade`. Codex does not expose these skills as slash commands.
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-For an individual plan, clone the plugin into Cursor's local plugin directory:
+**Local installation**
 
-```bash
-git clone https://github.com/{{ARCADE_PLUGIN_REPO}} ~/.cursor/plugins/local/arcade-plugin
-```
+For an individual plan, or a Teams or Enterprise plan with **Allow Local Plugin Imports** enabled:
 
-Keep the clone inside `~/.cursor/plugins/local/`. Cursor ignores a symlink whose target sits outside that directory. Run **Developer: Reload Window**, then open **Customize** and confirm the Arcade skills, `arcade-operator`, rule, and MCP server are present. To update later, run `git pull` in that folder and reload.
+1. Clone the plugin into Cursor's local plugin directory:
 
-On Teams and Enterprise, local plugins depend on **Allow Local Plugin Imports**. Enterprise turns this off by default. When it is off, Cursor ignores `~/.cursor/plugins/local`. Use a team marketplace instead. An admin opens **Dashboard → Plugins & MCPs → Team Marketplaces → Add Marketplace → Import from Repo** and pastes `https://github.com/{{ARCADE_PLUGIN_REPO}}`. Each person opens **Customize**, finds **Arcade**, and selects **Install**. When the setting is on, the local clone above works on these plans too.
+   ```bash
+   git clone https://github.com/{{ARCADE_PLUGIN_REPO}} ~/.cursor/plugins/local/arcade-plugin
+   ```
+
+2. Run **Developer: Reload Window**.
+3. Open **Customize** and confirm the two Arcade skills, `arcade-operator`, rule, and MCP server are present.
+
+Keep the clone inside `~/.cursor/plugins/local/`. Cursor ignores symlinks to folders outside that directory.
+
+To update the plugin later:
+
+1. Run `git pull` in `~/.cursor/plugins/local/arcade-plugin`.
+2. Run **Developer: Reload Window**.
+
+**Team marketplace alternative**
+
+Enterprise turns **Allow Local Plugin Imports** off by default. When it is off, Cursor ignores `~/.cursor/plugins/local`. Use a team marketplace:
+
+1. An admin opens **Dashboard → Plugins & MCPs → Team Marketplaces → Add Marketplace → Import from Repo** and pastes `https://github.com/{{ARCADE_PLUGIN_REPO}}`.
+2. Each person opens **Customize**, finds **Arcade**, and selects **Install**.
 
 Cursor CLI runs its session hook with `node`. The host that launches the CLI must be able to find Node.js on its PATH. Cursor IDE and Cloud Agents do not run that hook.
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-Open the Command Palette, select **Chat: Install Plugin From Source**, and paste:
+1. Open the Command Palette and select **Chat: Install Plugin From Source**.
+2. Paste the repository URL:
 
-```text
-https://github.com/{{ARCADE_PLUGIN_REPO}}
-```
+   ```text
+   https://github.com/{{ARCADE_PLUGIN_REPO}}
+   ```
 
-Turn on `chat.plugins.enabled` if needed, then reload VS Code. Run **MCP: List Servers**, select **arcade**, choose **Start Server**, and sign in when prompted. After you finish in the browser, return to VS Code and continue the original task. VS Code does not run Arcade's routing hooks, so this install does not need Node.js.
+3. Turn on `chat.plugins.enabled` if needed, then reload VS Code.
+4. Confirm **Arcade** appears under **Agent Plugins → Installed**.
+5. Run **MCP: List Servers**, select **arcade**, and choose **Start Server**.
+6. Sign in when prompted, then return to VS Code and continue the original task.
+
+VS Code does not run Arcade's routing hooks, so this install does not need Node.js.
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-Install with Copilot CLI's plugin command:
+1. Install with Copilot CLI's plugin command:
 
-```bash
-copilot plugin install {{ARCADE_PLUGIN_REPO}}
-```
+   ```bash
+   copilot plugin install {{ARCADE_PLUGIN_REPO}}
+   ```
 
-Restart the session or run `/restart`.
+2. Restart the session or run `/restart`.
 
 Copilot CLI runs its session and subagent hooks with `node`. The host that launches Copilot CLI must be able to find Node.js on its PATH.
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-Open **Customize → Plugins → Add marketplace → Add from a repository**, paste `{{ARCADE_PLUGIN_REPO}}`, then install **Arcade** (`arcade@arcade`).
+1. Open **Customize → Plugins → Add marketplace → Add from a repository**.
+2. Paste `{{ARCADE_PLUGIN_REPO}}`.
+3. Install **Arcade** (`arcade@arcade`).
 
 Cowork and Code run their supported routing hooks with `node`. The desktop app must be able to find Node.js on its PATH for those hooks. Chat does not run them.
 
-See the [Claude Desktop guide](/get-started/agent-plugin/tools-only/claude-desktop) for the terminal commands and tools-only connector option.
+For Claude Code inside the desktop app, you can also use the commands in the **Claude Code** tab.
 
 </Tabs.Tab>
 </Tabs>
 
-After installation, reload your agent or start a new session. Using another client that does not load plugins? Connect to the same gateway with the [tools-only Arcade bundle](/get-started/agent-plugin/tools-only).
+After installation, reload your agent or start a new session.
 
 ## Sign in
 
@@ -160,8 +182,6 @@ Every install connects to the same Arcade gateway and gets the same tools. What 
 | VS Code                             |  ✅   |   2    |    ✅    |    —     |  —   |    —⁶    |
 | Codex and ChatGPT local runtime     |  ✅   |   2    |    —     |    —     |  —   |    —⁷    |
 | Claude Desktop Chat                 |  ✅   |   2    |    —     |    —     |  —   |    —     |
-| OpenCode                            |  ✅   |   —    |    —     |    —     |  —   |    —     |
-| Any other Streamable HTTP MCP client |  ✅   |   —    |    —     |    —     |  —   |    —     |
 
 - ¹ Cursor IDE lists the commands on the plugin page but does not show them in the `/` menu.
 - ² Cursor IDE and Cloud Agents do not run plugin hooks. The always-apply rule carries the routing guidance instead.
@@ -170,8 +190,6 @@ Every install connects to the same Arcade gateway and gets the same tools. What 
 - ⁵ Copilot CLI runs session and subagent hooks, but drops prompt-hook output from configuration files.
 - ⁶ VS Code reads the Copilot hook file but cannot run its Agent Plugins hook commands yet.
 - ⁷ Codex does not run Agent Plugins lifecycle hooks yet.
-
-Here is what each of those is for.
 
 ### Commands
 
@@ -191,15 +209,18 @@ Lists the apps you have connected and lets you disconnect one.
 
 ### Skills
 
-Skills are instructions your agent reads on its own, so you do not have to invoke them in most clients. `try-arcade` teaches it to turn a request like "reply to that thread" into the right sequence of tool calls across your apps. `scale-arcade` handles the other kind of question, the one about moving a workflow onto a team gateway, and it walks you through the decisions on [this page](/get-started/agent-plugin/team-rollout) against your own project. Codex does not expose these skills as slash commands. Choose `@Arcade` or `$arcade:try-arcade`, and use `$arcade:scale-arcade` for team-rollout guidance.
+Skills are instructions your agent reads when relevant to a request:
+
+- `try-arcade` guides tasks across your connected apps, such as replying to a thread or checking your calendar.
+- `scale-arcade` guides decisions about using a workflow with a team, including gateway setup, tool selection, and end-user identity.
 
 ### Subagent
 
-The `arcade-operator` subagent runs an app task in its own context and reports back just the result. Arcade exposes a lot of tools, and searching them fills a conversation with noise that pushes out your actual work. The operator absorbs that. Cursor, Claude Code, Cowork, Copilot CLI, and VS Code load it. Codex and Claude Desktop Chat do not.
+The `arcade-operator` subagent runs an app task in its own context and reports the result. It keeps tool searches and intermediate results out of your main conversation. Cursor, Claude Code, Cowork, Copilot CLI, and VS Code load it. Codex and Claude Desktop Chat do not.
 
 ### Rule and hooks
 
-The rule and hooks tell your agent that Arcade exists and when reaching for it is the right move, which is the difference between a tool that sits unused and one your agent actually picks up. Cursor IDE and Cloud Agents use an always-apply rule. Cursor CLI, Claude Code, Cowork, and Copilot CLI run the hooks their hosts support. Those hooks run `node`. The host that launches them must be able to find Node.js on its PATH.
+The rule and hooks tell your agent when to use Arcade for app tasks. Cursor IDE and Cloud Agents use an always-apply rule. Cursor CLI, Claude Code, Cowork, and Copilot CLI run the hooks their hosts support. Those hooks run `node`. The host that launches them must be able to find Node.js on its PATH.
 
 The columns thin out because the [Agent Plugins](https://agent-plugins.org) 1.0 specification only makes skills and MCP servers portable. Commands, subagents, hooks, and editor rules are specific to each agent, so the plugin ships them where the agents that support them will find them.
 
@@ -223,7 +244,6 @@ Or ask "What can Arcade do?" and pick a workflow from the answer.
 
 ## Next steps
 
-- [From personal use to team rollout](/get-started/agent-plugin/team-rollout): move a workflow onto your own gateway
 - [Connect to MCP clients](/get-started/mcp-clients): configure a client against a gateway you control
 - [Integrations catalog](/resources/integrations): every app and toolkit Arcade supports
 - [Agentic development](/get-started/setup/connect-arcade-docs): point your agent at these docs with `llms.txt`
