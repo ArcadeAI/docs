@@ -1,0 +1,18 @@
+---
+type: markdown
+location: custom_section
+position: after
+header: "## How it works"
+priority: 20
+---
+## How it works
+
+The Arcade PagerDuty MCP server provides tools that call the [PagerDuty REST API](https://docs.pagerduty.com/developer/api/reference) as the PagerDuty user who authorized them.
+
+1. An agent calls a PagerDuty tool through Arcade, for example from an MCP client connected to an Arcade MCP gateway.
+2. If the user hasn't authorized PagerDuty yet, Arcade returns an authorization link instead of a result. The user opens the link, signs in to PagerDuty, and approves Arcade's PagerDuty app on PagerDuty's consent screen.
+3. Arcade stores the user's token, calls PagerDuty with it, and returns the result to the agent. Later calls reuse the stored authorization.
+
+Each tool can only do what both its scopes and the user's PagerDuty permissions allow, and PagerDuty records its actions as that user's. Arcade refreshes the token when it expires. Once PagerDuty's refresh window runs out, the next tool call asks the user to authorize again. See PagerDuty's [token lifetimes](https://docs.pagerduty.com/developer/private-apps#token-lifetimes).
+
+The tools only act when an agent calls them. The integration doesn't send events to PagerDuty, create incidents, or receive webhooks, so it doesn't need a PagerDuty service integration or an integration key.
