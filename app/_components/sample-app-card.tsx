@@ -12,7 +12,37 @@ type SampleAppCardProps = {
   blank?: boolean;
   tags?: string[];
   date?: string;
+  // When there's no `image`, render a generated gradient header with a monogram
+  // so cards still have a visual anchor. Opt-in so other usages stay unchanged.
+  fallbackVisual?: boolean;
 };
+
+// Tinted gradients that read well on both light and dark surfaces.
+const FALLBACK_GRADIENTS = [
+  "from-emerald-500/30 to-teal-600/10",
+  "from-violet-500/30 to-fuchsia-600/10",
+  "from-amber-500/30 to-orange-600/10",
+  "from-sky-500/30 to-blue-600/10",
+  "from-rose-500/30 to-pink-600/10",
+  "from-lime-500/30 to-green-600/10",
+];
+const MONOGRAM_WORDS = 2;
+const WHITESPACE = /\s+/;
+
+function monogram(title: string): string {
+  return title
+    .trim()
+    .split(WHITESPACE)
+    .slice(0, MONOGRAM_WORDS)
+    .map((word) => word.charAt(0))
+    .join("")
+    .toUpperCase();
+}
+
+function gradientFor(title: string): string {
+  const sum = [...title].reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return FALLBACK_GRADIENTS[sum % FALLBACK_GRADIENTS.length];
+}
 
 export function SampleAppCard({
   title,
@@ -22,6 +52,7 @@ export function SampleAppCard({
   blank = false,
   tags = [],
   date,
+  fallbackVisual = false,
 }: SampleAppCardProps) {
   const handleClick = () => {
     posthog.capture("Sample app clicked", {
@@ -55,6 +86,15 @@ export function SampleAppCard({
                   src={image}
                   width={640}
                 />
+              </div>
+            )}
+            {!image && fallbackVisual && (
+              <div
+                className={`relative flex aspect-[16/7] w-full items-center justify-center overflow-hidden rounded-t-lg bg-gradient-to-br ${gradientFor(title)}`}
+              >
+                <span className="font-semibold text-3xl text-gray-900/40 transition-transform duration-300 group-hover:scale-110 dark:text-white/60">
+                  {monogram(title)}
+                </span>
               </div>
             )}
             <div className="space-y-2 p-4 min-[1062px]:p-6">
