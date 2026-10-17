@@ -29,6 +29,10 @@ const meta: MetaRecord = {
     title: "Telegram",
     href: "/en/resources/integrations/social/telegram",
   },
+  twilio: {
+    title: "Twilio",
+    href: "/en/resources/integrations/social/twilio",
+  },
   x: {
     title: "X",
     href: "/en/resources/integrations/social/x",
