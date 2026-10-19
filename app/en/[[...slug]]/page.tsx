@@ -128,8 +128,11 @@ export default async function Page(props: Props) {
       if (toolkitPage) {
         // Toolkit pages list their tools in their own panel: the shell keeps
         // the table of contents column but has no headings to show in it.
+        // The sidebar breadcrumb stays above the toolkit's own breadcrumb, as
+        // on production.
         return (
           <DocsPageShell
+            breadcrumb
             lastModified={toolkitPageLastModified()}
             markdownUrl={toolkitMarkdownUrl(match)}
           >
