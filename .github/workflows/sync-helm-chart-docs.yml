@@ -48,17 +48,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
 
+      # llms.txt generation runs on Node through tsx: Bun resolves the design
+      # system's `bun` export condition, which points at sources the package
+      # does not ship.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: pnpm
+          node-version-file: .nvmrc
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Install Helm
         uses: azure/setup-helm@v4
@@ -79,11 +83,11 @@ jobs:
           exit 1
 
       - name: Sync values reference and examples
-        run: pnpm exec tsx scripts/sync-helm-chart-docs.ts --chart-dir "$RUNNER_TEMP/chart/arcade" --version "$VERSION"
+        run: bun scripts/sync-helm-chart-docs.ts --chart-dir "$RUNNER_TEMP/chart/arcade" --version "$VERSION"
 
       # GITHUB_TOKEN PRs do not start llmstxt.yml, so generate the file here.
       - name: Generate llms.txt
-        run: pnpm llmstxt
+        run: bun run llmstxt
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 

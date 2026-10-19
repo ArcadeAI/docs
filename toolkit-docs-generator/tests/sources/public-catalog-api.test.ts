@@ -165,7 +165,9 @@ describe("fetchAllPages", () => {
 
   it("includes the response body, capped at 500 characters, when the API rejects a page", async () => {
     const fetchFn = (async () =>
-      new Response("x".repeat(2000), { status: 400 })) as typeof fetch;
+      new Response("x".repeat(2000), {
+        status: 400,
+      })) as unknown as typeof fetch;
 
     await expect(
       fetchAllPages("https://api.example/v1/public/tools", fetchFn)

@@ -60,7 +60,7 @@ type: environment-variables
     `---
 type: import
 ---
-import StarterToolInfo from "@/app/_components/starter-tool-info";
+import StarterToolInfo from "@/components/starter-tool-info";
 `
   );
 };
@@ -98,7 +98,7 @@ describe("prose survives --force-regenerate", () => {
       "Hand-authored guidance that has no upstream source."
     );
     expect(result.toolkit.customImports).toEqual([
-      'import StarterToolInfo from "@/app/_components/starter-tool-info";',
+      'import StarterToolInfo from "@/components/starter-tool-info";',
     ]);
     expect(result.toolkit.subPages).toEqual([
       {

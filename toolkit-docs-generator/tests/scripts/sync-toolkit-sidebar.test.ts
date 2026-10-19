@@ -1,19 +1,21 @@
 /**
  * Tests for sync-toolkit-sidebar.ts
  *
- * Run with: npx vitest run tests/github-scripts/sync-toolkit-sidebar.test.ts
- * Or: npx vitest watch tests/github-scripts/sync-toolkit-sidebar.test.ts
+ * Run with: bunx vitest run toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts
+ * Or: bunx vitest watch toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts
  */
 
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params";
+import { getToolkitStaticParamsForCategory } from "../../../lib/toolkit-static-params";
 import {
+  buildCategoryMeta,
   buildPartnerToolkitInfoList,
   buildToolkitInfoList,
+  type CategoryMeta,
+  findMissingMainMetaCategories,
   generateCategoryMeta,
-  generateMainMeta,
   getToolkitCategory,
   getToolkitFiles,
   getToolkitLabel,
@@ -51,7 +53,10 @@ setToolkitsForTesting([
 // Test directory setup
 const TEST_DIR = join(process.cwd(), ".test-sync-sidebar");
 const TEST_DATA_DIR = join(TEST_DIR, "data/toolkits");
-const TEST_INTEGRATIONS_DIR = join(TEST_DIR, "app/en/resources/integrations");
+const TEST_INTEGRATIONS_DIR = join(
+  TEST_DIR,
+  "content/docs/resources/integrations"
+);
 
 function setupTestDirs() {
   mkdirSync(TEST_DATA_DIR, { recursive: true });
@@ -63,6 +68,15 @@ function cleanupTestDirs() {
     rmSync(TEST_DIR, { recursive: true });
   }
 }
+
+const parseMeta = (content: string): CategoryMeta =>
+  JSON.parse(content) as CategoryMeta;
+
+const BRACKET_LABEL_ERROR_REGEX = /contains "\]"/;
+const UNRECOGNIZED_ALL_CATEGORY_REGEX =
+  /Unrecognized integration category "all"/;
+const PARTNER_SLUG_COLLISION_REGEX =
+  /Partner "Tavily" and toolkit "GoogleSearch" both resolve to search\/tavily/;
 
 function createToolkitJson(slug: string, data: object = {}) {
   const filePath = join(TEST_DATA_DIR, `${slug}.json`);
@@ -349,8 +363,8 @@ describe("buildToolkitInfoList", () => {
       weaviate.category,
       "/en/resources/integrations"
     );
-    expect(sidebarMeta).toContain(
-      'href: "/en/resources/integrations/databases/weaviate-api"'
+    expect(parseMeta(sidebarMeta).pages).toContain(
+      "[Weaviate API](/en/resources/integrations/databases/weaviate-api)"
     );
 
     const toolkitsCatalog = [
@@ -529,7 +543,7 @@ describe("remove empty section flags", () => {
 // ============================================================================
 
 describe("generateCategoryMeta", () => {
-  it("should generate valid _meta.tsx content", () => {
+  it("should generate valid Fumadocs meta.json content", () => {
     const toolkits: ToolkitInfo[] = [
       {
         id: "gmail",
@@ -553,17 +567,34 @@ describe("generateCategoryMeta", () => {
       "/en/resources/integrations"
     );
 
-    expect(result).toContain('import type { MetaRecord } from "nextra"');
-    expect(result).toContain("gmail: {");
-    expect(result).toContain('title: "Gmail"');
-    expect(result).toContain(
-      'href: "/en/resources/integrations/productivity/gmail"'
-    );
-    expect(result).toContain("dropbox: {");
-    expect(result).toContain("export default meta");
+    expect(result.endsWith("\n")).toBe(true);
+    expect(parseMeta(result)).toEqual({
+      pages: [
+        "---Optimized---",
+        "[Dropbox](/en/resources/integrations/productivity/dropbox)",
+        "[Gmail](/en/resources/integrations/productivity/gmail)",
+      ],
+      title: "Productivity & Docs",
+    });
   });
 
-  it("should escape quotes in labels", () => {
+  it("rejects a label Fumadocs link syntax cannot encode", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        category: "productivity",
+        id: "test",
+        label: "Test [Bracketed] Label",
+        navGroup: "optimized",
+        slug: "test",
+      },
+    ];
+
+    expect(() =>
+      generateCategoryMeta(toolkits, "productivity", "/preview")
+    ).toThrow(BRACKET_LABEL_ERROR_REGEX);
+  });
+
+  it("keeps quotes in labels intact through JSON encoding", () => {
     const toolkits: ToolkitInfo[] = [
       {
         id: "test",
@@ -576,15 +607,22 @@ describe("generateCategoryMeta", () => {
 
     const result = generateCategoryMeta(toolkits, "productivity", "/preview");
 
-    expect(result).toContain('title: "Test \\"Quoted\\" Label"');
+    expect(parseMeta(result).pages).toContain(
+      '[Test "Quoted" Label](/preview/productivity/test)'
+    );
   });
 
   it("should handle empty array", () => {
     const result = generateCategoryMeta([], "productivity", "/preview");
 
-    expect(result).toContain("const meta: MetaRecord = {");
-    expect(result).toContain("};");
-    expect(result).toContain("export default meta");
+    expect(parseMeta(result)).toEqual({
+      pages: [],
+      title: "Productivity & Docs",
+    });
+  });
+
+  it("falls back to the category id when it has no display name", () => {
+    expect(buildCategoryMeta([], "others", "/preview").title).toBe("others");
   });
 
   it("should handle single toolkit", () => {
@@ -600,8 +638,10 @@ describe("generateCategoryMeta", () => {
 
     const result = generateCategoryMeta(toolkits, "productivity", "/preview");
 
-    expect(result).toContain("gmail: {");
-    expect(result).not.toContain(",\n,"); // No trailing comma issues
+    expect(parseMeta(result).pages).toEqual([
+      "---Optimized---",
+      "[Gmail](/preview/productivity/gmail)",
+    ]);
   });
 
   it("adds Optimized separator even when no starter entries exist", () => {
@@ -622,16 +662,20 @@ describe("generateCategoryMeta", () => {
       },
     ];
 
-    const result = generateCategoryMeta(
+    const { pages } = buildCategoryMeta(
       toolkits,
       "entertainment",
       "/en/resources/integrations"
     );
 
-    expect(result).toContain('"-- Optimized"');
-    expect(result).not.toContain('"-- Starter"');
-    expect(result).toContain("imgflip:");
-    expect(result).toContain("spotify:");
+    expect(pages).toContain("---Optimized---");
+    expect(pages).not.toContain("---Starter---");
+    expect(pages).toContain(
+      "[Imgflip](/en/resources/integrations/entertainment/imgflip)"
+    );
+    expect(pages).toContain(
+      "[Spotify](/en/resources/integrations/entertainment/spotify)"
+    );
   });
 
   it("adds Starter separator even when no optimized entries exist", () => {
@@ -645,15 +689,17 @@ describe("generateCategoryMeta", () => {
       },
     ];
 
-    const result = generateCategoryMeta(
+    const { pages } = buildCategoryMeta(
       toolkits,
       "productivity",
       "/en/resources/integrations"
     );
 
-    expect(result).not.toContain('"-- Optimized"');
-    expect(result).toContain('"-- Starter"');
-    expect(result).toContain('"my-api":');
+    expect(pages).not.toContain("---Optimized---");
+    expect(pages).toEqual([
+      "---Starter---",
+      "[My API](/en/resources/integrations/productivity/my-api)",
+    ]);
   });
 
   it("adds both separators when both optimized and starter entries exist", () => {
@@ -674,17 +720,16 @@ describe("generateCategoryMeta", () => {
       },
     ];
 
-    const result = generateCategoryMeta(
+    const { pages } = buildCategoryMeta(
       toolkits,
       "productivity",
       "/en/resources/integrations"
     );
 
-    expect(result).toContain('"-- Optimized"');
-    expect(result).toContain('"-- Starter"');
-    const optimizedIndex = result.indexOf('"-- Optimized"');
-    const starterIndex = result.indexOf('"-- Starter"');
-    expect(optimizedIndex).toBeLessThan(starterIndex);
+    const optimizedIndex = pages.indexOf("---Optimized---");
+    const starterIndex = pages.indexOf("---Starter---");
+    expect(optimizedIndex).toBeGreaterThan(-1);
+    expect(starterIndex).toBeGreaterThan(optimizedIndex);
   });
 
   it("does not mutate the input array", () => {
@@ -713,68 +758,69 @@ describe("generateCategoryMeta", () => {
 });
 
 // ============================================================================
-// Unit Tests: generateMainMeta
+// Unit Tests: findMissingMainMetaCategories
 // ============================================================================
 
-describe("generateMainMeta", () => {
-  it("should generate main _meta.tsx with active categories", () => {
-    const result = generateMainMeta(["productivity", "social"]);
+describe("findMissingMainMetaCategories", () => {
+  it("returns nothing when every active category is listed", () => {
+    const mainMeta = {
+      pages: [
+        "index",
+        "productivity",
+        "social",
+        "---Feedback---",
+        "tool-feedback",
+      ],
+    };
 
-    expect(result).toContain('import type { MetaRecord } from "nextra"');
-    expect(result).toContain("productivity: {");
-    expect(result).toContain('title: "Productivity & Docs"');
-    expect(result).toContain("social: {");
-    expect(result).toContain('title: "Social & Communication"');
-    expect(result).toContain('"tool-feedback"');
-    expect(result).not.toContain("preview:");
+    expect(
+      findMissingMainMetaCategories(mainMeta, ["productivity", "social"])
+    ).toEqual([]);
   });
 
-  it("should sort categories by defined order", () => {
-    const result = generateMainMeta(["sales", "productivity", "development"]);
+  it("names the active categories the main meta.json omits", () => {
+    const mainMeta = { pages: ["index", "productivity"] };
 
-    const productivityIndex = result.indexOf("productivity:");
-    const developmentIndex = result.indexOf("development:");
-    const salesIndex = result.indexOf("sales:");
-
-    expect(productivityIndex).toBeLessThan(developmentIndex);
-    expect(developmentIndex).toBeLessThan(salesIndex);
+    expect(
+      findMissingMainMetaCategories(mainMeta, [
+        "sales",
+        "productivity",
+        "development",
+      ])
+    ).toEqual(["sales", "development"]);
   });
 
-  it("should omit the removed 'others' category", () => {
-    const result = generateMainMeta(["productivity", "others"]);
-
-    const productivityIndex = result.indexOf("productivity:");
-    const othersIndex = result.indexOf("others:");
-
-    expect(productivityIndex).toBeGreaterThan(-1);
-    expect(othersIndex).toBe(-1);
+  it("treats a rest marker as listing every folder", () => {
+    expect(
+      findMissingMainMetaCategories({ pages: ["index", "..."] }, ["sales"])
+    ).toEqual([]);
   });
 
-  it("should handle empty categories", () => {
-    const result = generateMainMeta([]);
+  it("ignores categories that are not integration categories", () => {
+    expect(
+      findMissingMainMetaCategories({ pages: ["index"] }, [
+        "others",
+        "productivity",
+      ])
+    ).toEqual(["productivity"]);
+  });
 
-    expect(result).toContain("const meta: MetaRecord = {");
-    expect(result).toContain("index:");
-    expect(result).toContain('"tool-feedback"');
+  it("treats a missing or malformed pages list as listing nothing", () => {
+    expect(findMissingMainMetaCategories(null, ["productivity"])).toEqual([
+      "productivity",
+    ]);
+    expect(
+      findMissingMainMetaCategories({ pages: "productivity" }, ["productivity"])
+    ).toEqual(["productivity"]);
   });
 
   it("does not mutate the input array", () => {
     const categories = ["sales", "productivity", "development"];
     const originalOrder = [...categories];
 
-    generateMainMeta(categories);
+    findMissingMainMetaCategories({ pages: [] }, categories);
 
     expect(categories).toEqual(originalOrder);
-  });
-
-  it("should include required structure elements", () => {
-    const result = generateMainMeta(["productivity"]);
-
-    expect(result).toContain('"*":'); // Theme config
-    expect(result).toContain("index:"); // Overview
-    expect(result).toContain('"-- Feedback"'); // Separator
-    expect(result).toContain('"tool-feedback"'); // Feedback page
-    expect(result).not.toContain("preview:"); // Preview page removed
   });
 });
 
@@ -897,7 +943,7 @@ describe("category move cleanup logic", () => {
   });
 
   it("generateCategoryMeta only includes current toolkits (not stale ones)", () => {
-    // After Pylon moves, the "others" _meta.tsx should only contain remaining toolkits
+    // After Pylon moves, the "others" meta.json should only contain remaining toolkits
     const othersToolkits: ToolkitInfo[] = [
       {
         id: "CustomTool",
@@ -918,13 +964,15 @@ describe("category move cleanup logic", () => {
     expect(meta).not.toContain("pylon");
   });
 
-  it("main _meta.tsx excludes categories with zero toolkits", () => {
+  it("a category with zero toolkits is flagged only when the main meta.json still lists it", () => {
     const activeCategories = ["development", "productivity"];
-    const mainMeta = generateMainMeta(activeCategories);
 
-    expect(mainMeta).toContain("development:");
-    expect(mainMeta).toContain("productivity:");
-    expect(mainMeta).not.toContain("others:");
+    expect(
+      findMissingMainMetaCategories(
+        { pages: ["development", "productivity", "others"] },
+        activeCategories
+      )
+    ).toEqual([]);
   });
 });
 
@@ -959,7 +1007,7 @@ describe("buildPartnerToolkitInfoList", () => {
   it("throws on a category with no integrations route", () => {
     expect(() =>
       buildPartnerToolkitInfoList([{ ...tavilyPartner, category: "all" }])
-    ).toThrow(/Unrecognized integration category "all"/);
+    ).toThrow(UNRECOGNIZED_ALL_CATEGORY_REGEX);
   });
 
   it("keeps the real partner catalog routable", () => {
@@ -1001,9 +1049,7 @@ describe("mergeToolkitAndPartnerInfo", () => {
         [{ ...searchToolkit, slug: "tavily" }],
         [searchPartner]
       )
-    ).toThrow(
-      /Partner "Tavily" and toolkit "GoogleSearch" both resolve to search\/tavily/
-    );
+    ).toThrow(PARTNER_SLUG_COLLISION_REGEX);
   });
 
   it("allows the same slug in different categories", () => {
@@ -1048,13 +1094,20 @@ describe("generateCategoryMeta partner section", () => {
       "/en/resources/integrations"
     );
 
-    expect(result).toContain('"-- Partners"');
-    expect(result).toContain("tavily: {");
-    expect(result).toContain(
-      'href: "/en/resources/integrations/search/tavily"'
+    const { pages } = parseMeta(result);
+    expect(pages).toContain("---Partners---");
+    // Partner pages are authored MDX files in the category folder, so they
+    // are listed by slug (Fumadocs reads the title from the page), not as a
+    // link entry.
+    expect(pages).toContain("tavily");
+    expect(pages).not.toContain(
+      "[Tavily](/en/resources/integrations/search/tavily)"
     );
-    expect(result.indexOf('"-- Partners"')).toBeGreaterThan(
-      result.indexOf('"-- Starter"')
+    expect(pages.indexOf("---Partners---")).toBeGreaterThan(
+      pages.indexOf("---Starter---")
+    );
+    expect(pages.indexOf("tavily")).toBeGreaterThan(
+      pages.indexOf("---Partners---")
     );
   });
 
@@ -1065,8 +1118,9 @@ describe("generateCategoryMeta partner section", () => {
       "/en/resources/integrations"
     );
 
-    expect(result).not.toContain('"-- Partners"');
-    expect(result).not.toContain("tavily: {");
+    const { pages } = parseMeta(result);
+    expect(pages).not.toContain("---Partners---");
+    expect(pages).not.toContain("tavily");
   });
 
   it("renders a partner-only category without duplicating entries", () => {
@@ -1076,7 +1130,7 @@ describe("generateCategoryMeta partner section", () => {
       "/en/resources/integrations"
     );
 
-    expect(result).toContain('"-- Partners"');
-    expect(result.match(/tavily: \{/g)).toHaveLength(1);
+    const { pages } = parseMeta(result);
+    expect(pages).toEqual(["---Partners---", "tavily"]);
   });
 });

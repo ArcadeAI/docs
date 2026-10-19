@@ -16,21 +16,21 @@ function parseRepositoriesFromMDX(content) {
 
   let match = sampleAppCardRegex.exec(content);
   while (match !== null) {
-    const propsString = match[1];
+    const [, propsString] = match;
 
     // Extract title and href from props
     const titleMatch = propsString.match(TITLE_PATTERN);
     const hrefMatch = propsString.match(HREF_PATTERN);
 
     if (titleMatch && hrefMatch) {
-      const title = titleMatch[1];
-      const href = hrefMatch[1];
+      const [, title] = titleMatch;
+      const [, href] = hrefMatch;
 
       // Check if it's a GitHub URL and extract repo name
       const githubMatch = href.match(GITHUB_PATTERN);
 
       if (githubMatch) {
-        const repoName = githubMatch[1];
+        const [, repoName] = githubMatch;
         repositories.push({
           title,
           repo: repoName,
@@ -95,11 +95,18 @@ function formatDate(date) {
 async function updateExampleDates() {
   console.log("Parsing repositories from MDX file...");
 
-  // Read the current MDX file
-  const mdxPath = path.join(
-    import.meta.dirname,
-    "../../app/en/resources/examples/page.mdx"
-  );
+  // Read the current MDX file. The examples page is content/docs/resources/
+  // examples.mdx, or examples/index.mdx once it gains child pages.
+  const contentDir = path.join(import.meta.dirname, "../../content/docs");
+  const mdxPath = [
+    path.join(contentDir, "resources/examples.mdx"),
+    path.join(contentDir, "resources/examples/index.mdx"),
+  ].find((candidate) => fs.existsSync(candidate));
+  if (!mdxPath) {
+    throw new Error(
+      "Could not find the examples page under content/docs/resources/"
+    );
+  }
   let content = fs.readFileSync(mdxPath, "utf8");
 
   // Parse repositories from the MDX file

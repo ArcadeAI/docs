@@ -1,10 +1,10 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Push algolia/crawler-config.js to the Algolia Crawler, then trigger a reindex.
  *
  * Usage:
- *   pnpm sync-crawler-config
+ *   bun run sync-crawler-config
  *
  * `PATCH /1/crawlers/{id}/config` is a top-level merge, so this only sends the
  * fields we manage. We deliberately do NOT send `apiKey`: the crawler's index
@@ -80,7 +80,7 @@ console.log("Crawler config updated.");
 // (e.g. removeWordsIfNoResults) never reaches an existing production index
 // otherwise, and no-result rates stay high for compound agent queries.
 if (ADMIN_API_KEY) {
-  const settingsByIndex = crawlerConfig.initialIndexSettings ?? {};
+  const settingsByIndex = crawlerConfig.initialIndexSettings;
   for (const [indexName, settings] of Object.entries(settingsByIndex)) {
     const response = await fetch(
       `https://${crawlerConfig.appId}-dsn.algolia.net/1/indexes/${encodeURIComponent(indexName)}/settings`,

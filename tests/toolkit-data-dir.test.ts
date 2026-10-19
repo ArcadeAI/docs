@@ -21,8 +21,8 @@ afterEach(() => {
 
 /**
  * The default must be anchored on the working directory, not on this module's
- * own location. `app/_lib/toolkit-data.ts` imports it into the Next.js server
- * bundle, where webpack replaces `import.meta.url` with a compile-time
+ * own location. `lib/toolkit-data.ts` imports it into the Next.js server
+ * bundle, where the bundler replaces `import.meta.url` with a compile-time
  * constant: the source path on the build machine. A self-relative default
  * therefore resolves to a directory that does not exist inside the deployed
  * function, and `/api/toolkit-data/[toolkitId]` returns 500 in production while

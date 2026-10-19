@@ -2,10 +2,10 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, test, vi } from "vitest";
-import { readToolkitData, readToolkitIndex } from "@/app/_lib/toolkit-data";
+import { readToolkitData, readToolkitIndex } from "@/lib/toolkit-data";
 
 /**
- * loadAllToolkitData (app/_lib/toolkit-data.ts) reads and validates every
+ * loadAllToolkitData (lib/toolkit-data.ts) reads and validates every
  * toolkit file in a data directory once, then serves all lookups from the
  * resulting map. That eager read means one corrupt file can no longer be
  * skipped by requesting a different, healthy toolkit — the whole directory

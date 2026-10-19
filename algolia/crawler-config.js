@@ -7,7 +7,7 @@
  *
  * To apply a change to the live crawler, edit this file — merging it to main
  * runs `.github/workflows/sync-crawler-config.yml`, which pushes it via the
- * Crawler API and triggers a reindex (`pnpm sync-crawler-config`). To apply it
+ * Crawler API and triggers a reindex (`bun run sync-crawler-config`). To apply it
  * by hand instead, wrap the object below in `new Crawler({ ...crawlerConfig,
  * apiKey })` in the dashboard editor and run a crawl.
  *

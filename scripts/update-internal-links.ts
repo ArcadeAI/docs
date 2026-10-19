@@ -1,18 +1,23 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Update internal links to use redirect destinations instead of old paths
  *
  * Usage:
- *   pnpm update-links [--dry-run]
+ *   bun run update-links [--dry-run]
  *
  * This script reads redirects from redirects.ts and updates any internal links
- * in MDX/TSX files that point to redirected paths.
+ * in content (MDX) and component/route (TSX) files that point to redirected paths.
  */
 
 import { readFileSync, writeFileSync } from "node:fs";
 import fg from "fast-glob";
 import { redirects as configuredRedirects } from "../redirects";
+import {
+  getUpdatableRedirects,
+  redirectToLinkPatterns,
+  updateLinksInContent,
+} from "./lib/update-links-utils";
 
 // Colors for terminal output
 const colors = {
@@ -24,114 +29,6 @@ const colors = {
 
 // Parse command line arguments
 const dryRun = process.argv.includes("--dry-run");
-
-// Top-level regex patterns
-const LOCALE_PREFIX_REGEX = /^\/:locale/;
-const SPECIAL_REGEX_CHARS_REGEX = /[.*+?^${}()|[\]\\]/g;
-
-type Redirect = {
-  source: string;
-  destination: string;
-};
-
-/**
- * Filter redirects to only those that can be auto-updated
- */
-function getUpdatableRedirects(redirectList: Redirect[]): Redirect[] {
-  return redirectList.filter((r) => {
-    if (r.source.includes(":path*") || r.destination.includes(":path*")) {
-      return false;
-    }
-
-    const sourceWithoutLocale = r.source.replace(LOCALE_PREFIX_REGEX, "");
-    const destWithoutLocale = r.destination.replace(LOCALE_PREFIX_REGEX, "");
-
-    if (sourceWithoutLocale.includes(":") || destWithoutLocale.includes(":")) {
-      return false;
-    }
-
-    if (
-      r.destination.includes("REPLACE_WITH") ||
-      r.destination.includes("TODO")
-    ) {
-      return false;
-    }
-
-    return true;
-  });
-}
-
-/**
- * Convert redirect to link patterns (without :locale prefix)
- */
-function redirectToLinkPatterns(redirect: Redirect): {
-  oldPath: string;
-  newPath: string;
-} {
-  return {
-    oldPath: redirect.source.replace(LOCALE_PREFIX_REGEX, ""),
-    newPath: redirect.destination.replace(LOCALE_PREFIX_REGEX, ""),
-  };
-}
-
-/**
- * Escape special regex characters
- */
-function escapeRegex(str: string): string {
-  return str.replace(SPECIAL_REGEX_CHARS_REGEX, "\\$&");
-}
-
-/**
- * Update links in file content
- */
-function updateLinksInContent(
-  content: string,
-  oldPath: string,
-  newPath: string
-): string {
-  let updated = content;
-
-  // Markdown links: [text](/old-path) -> [text](/new-path)
-  // Using replacer function to avoid special replacement pattern interpretation
-  // (e.g., $1, $2, $& in newPath would be incorrectly expanded if using string)
-  const markdownLinkRegex = new RegExp(
-    `(\\]\\()${escapeRegex(oldPath)}([)"#\\s])`,
-    "g"
-  );
-  updated = updated.replace(
-    markdownLinkRegex,
-    (_, p1, p2) => `${p1}${newPath}${p2}`
-  );
-
-  // JSX href with double quotes: href="/old-path"
-  const jsxDoubleQuoteRegex = new RegExp(
-    `(href=")${escapeRegex(oldPath)}(["#])`,
-    "g"
-  );
-  updated = updated.replace(
-    jsxDoubleQuoteRegex,
-    (_, p1, p2) => `${p1}${newPath}${p2}`
-  );
-
-  // JSX href with single quotes: href='/old-path'
-  const jsxSingleQuoteRegex = new RegExp(
-    `(href=')${escapeRegex(oldPath)}(['#])`,
-    "g"
-  );
-  updated = updated.replace(
-    jsxSingleQuoteRegex,
-    (_, p1, p2) => `${p1}${newPath}${p2}`
-  );
-
-  // Paths in backticks (code blocks showing links)
-  const backtickRegex = new RegExp(`(\`)${escapeRegex(oldPath)}(\`|[#])`, "g");
-  updated = updated.replace(
-    backtickRegex,
-    (_, p1, p2) => `${p1}${newPath}${p2}`
-  );
-
-  return updated;
-}
 
 // ============================================================
 // Main script
@@ -161,8 +58,19 @@ if (redirects.length === 0) {
 console.log(colors.blue("Scanning files for internal links to update..."));
 console.log("");
 
-// Find all MDX, MD, and TSX files in app directory
-const files = fg.sync(["app/**/*.mdx", "app/**/*.md", "app/**/*.tsx"], {
+// Content pages plus the TS/TSX modules that render hardcoded internal links.
+// Keep in sync with the `update-links` globs in .husky/pre-commit.
+export const LINK_FILE_GLOBS = [
+  "content/docs/**/*.mdx",
+  "content/docs/**/*.md",
+  "components/**/*.tsx",
+  "app/**/*.tsx",
+  "lib/**/*.ts",
+  "lib/**/*.tsx",
+  "data/**/*.ts",
+];
+
+const files = fg.sync(LINK_FILE_GLOBS, {
   ignore: ["**/node_modules/**"],
 });
 

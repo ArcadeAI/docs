@@ -19,7 +19,7 @@ procedure.
 Curation is for prose bound to one toolkit or one tool: auth setup, enum value
 tables, parameter caveats, per-tool warnings. If the content is a standalone
 guide or concept explanation — anything a reader would reach from the sidebar
-on its own — it belongs in `app/en/` as a normal MDX page instead. Stop and
+on its own — it belongs in `content/docs/` as a normal MDX page instead. Stop and
 write that page.
 
 ## Step 2: read the neighbors
@@ -116,7 +116,7 @@ cd toolkit-docs-generator
 ../node_modules/.bin/tsx src/cli/index.ts validate-curation --toolkit <ToolkitId>
 ```
 
-Errors name the exact file and reason. Then `pnpm vale:check` from the repo
+Errors name the exact file and reason. Then `bun run vale:check` from the repo
 root.
 
 If you used `tool:`, confirm the value against the generated JSON, where

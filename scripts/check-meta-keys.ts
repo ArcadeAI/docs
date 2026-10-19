@@ -1,21 +1,25 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
- * Validate that _meta.tsx keys match existing filesystem entries
+ * Validate that meta.json `pages` entries match existing filesystem entries
  *
  * Usage:
- *   pnpm check-meta [--staged-only]
+ *   bun run check-meta [--staged-only]
  *
  * Features:
- * - Scans all _meta.tsx files in app/en/
- * - Validates that each key corresponds to a sibling directory or page file
- * - Skips special keys like "*", "index", "---", and external links
- * - --staged-only: Only check staged _meta.tsx files (for pre-commit hook)
+ * - Scans all meta.json files in content/docs/
+ * - Validates that each bare slug in `pages` corresponds to a sibling
+ *   `<slug>.mdx`, `<slug>/index.mdx`, or `<slug>/` directory
+ * - Validates that every sibling page/folder is listed, unless the file
+ *   declares a rest entry (`...` or `z...a`)
+ * - Skips separators (`---Title---`), links (`[Title](href)`), rest entries
+ *   (`...`), and exclusions (`!slug`)
+ * - --staged-only: Only check staged meta.json files (for pre-commit hook)
  */
 
 import { execSync } from "node:child_process";
-import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
 import fg from "fast-glob";
 
 // Colors for terminal output
@@ -31,31 +35,16 @@ const colors = {
 const args = process.argv.slice(2);
 const stagedOnly = args.includes("--staged-only");
 
-// Special keys that don't need filesystem entries
-const SPECIAL_KEYS = new Set(["*", "index", "---"]);
+const CONTENT_ROOT = "content/docs";
+const META_FILE_NAME = "meta.json";
 
-// Nested property names that should never be treated as page keys
-const NESTED_PROPERTIES = new Set([
-  "theme",
-  "title",
-  "display",
-  "href",
-  "newWindow",
-  "breadcrumb",
-  "toc",
-  "layout",
-  "copyPage",
-  "type",
-]);
-
-// Top-level regex patterns
-const META_OBJECT_REGEX =
-  /(?:const|export\s+const)\s+meta\s*(?::\s*\w+)?\s*=\s*\{/;
-const KEY_CHAR_REGEX = /[a-zA-Z0-9_-]/;
+// Entry forms that never map to a sibling page
+const SEPARATOR_REGEX = /^---.*---$/;
+const LINK_REGEX = /^\[.*\]\(.*\)$/;
+const REST_REGEX = /^(\.\.\.|z\.\.\.a)$/;
+const EXCLUDE_PREFIX = "!";
 const MDX_EXTENSION_REGEX = /\.mdx?$/;
-
-// Constants
-const LOOK_BEHIND_LENGTH = 15;
+const NON_SLUG_CHARS_REGEX = /[-_]/g;
 
 type MetaError = {
   file: string;
@@ -63,18 +52,14 @@ type MetaError = {
   message: string;
 };
 
-type ParserState = {
-  keys: string[];
-  depth: number;
-  index: number;
-  inString: boolean;
-  stringChar: string;
-  currentKey: string;
-  collectingKey: boolean;
-};
+interface ParsedMeta {
+  excluded: Set<string>;
+  hasRest: boolean;
+  pages: string[];
+}
 
 /**
- * Get list of staged _meta.tsx files
+ * Get list of staged meta.json files under content/docs
  */
 function getStagedMetaFiles(): string[] {
   try {
@@ -86,234 +71,102 @@ function getStagedMetaFiles(): string[] {
     );
     return output
       .split("\n")
-      .filter((f) => f.endsWith("_meta.tsx") && f.startsWith("app/"));
+      .filter(
+        (f) =>
+          f.endsWith(`/${META_FILE_NAME}`) && f.startsWith(`${CONTENT_ROOT}/`)
+      );
   } catch {
     return [];
   }
 }
 
 /**
- * Get all _meta.tsx files in app/en/
+ * Get all meta.json files in content/docs/
  */
 function getAllMetaFiles(): string[] {
-  return fg.sync("app/en/**/_meta.tsx", { onlyFiles: true });
+  return fg.sync(`${CONTENT_ROOT}/**/${META_FILE_NAME}`, { onlyFiles: true });
 }
 
 /**
- * Simple key extractor - finds keys at depth 1 of the meta object
+ * Parse a meta.json file and extract its `pages` entries.
+ * Returns an error when the file is not valid JSON or `pages` is malformed.
  */
-function extractMetaKeys(content: string): string[] {
-  const match = META_OBJECT_REGEX.exec(content);
-  if (!match) {
-    return [];
+function parseMetaFile(
+  filePath: string
+): { meta: ParsedMeta } | { error: MetaError } {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(readFileSync(filePath, "utf-8"));
+  } catch (error) {
+    return {
+      error: {
+        file: filePath,
+        key: "",
+        message: `Invalid JSON: ${error instanceof Error ? error.message : String(error)}`,
+      },
+    };
   }
 
-  const startIndex = (match.index ?? 0) + match[0].length;
-  const state: ParserState = {
-    keys: [],
-    depth: 1,
-    index: startIndex,
-    inString: false,
-    stringChar: "",
-    currentKey: "",
-    collectingKey: false,
+  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    return {
+      error: {
+        file: filePath,
+        key: "",
+        message: "meta.json must be a JSON object",
+      },
+    };
+  }
+
+  const pagesValue = (parsed as { pages?: unknown }).pages;
+  if (pagesValue === undefined) {
+    return { meta: { excluded: new Set(), hasRest: true, pages: [] } };
+  }
+
+  if (
+    !Array.isArray(pagesValue) ||
+    pagesValue.some((entry) => typeof entry !== "string")
+  ) {
+    return {
+      error: {
+        file: filePath,
+        key: "pages",
+        message: '"pages" must be an array of strings',
+      },
+    };
+  }
+
+  const pages = pagesValue as string[];
+  const excluded = new Set(
+    pages
+      .filter((entry) => entry.startsWith(EXCLUDE_PREFIX))
+      .map((entry) => entry.slice(EXCLUDE_PREFIX.length))
+  );
+
+  return {
+    meta: {
+      excluded,
+      hasRest: pages.some((entry) => REST_REGEX.test(entry)),
+      pages,
+    },
   };
-
-  while (state.index < content.length && state.depth > 0) {
-    parseNextChar(content, state);
-  }
-
-  return state.keys;
 }
 
 /**
- * Parse the next character in the content
+ * True when the entry is a separator, link, rest marker, or exclusion —
+ * none of which must match a sibling page.
  */
-function parseNextChar(content: string, state: ParserState): void {
-  const char = content[state.index];
-  const prevChar = state.index > 0 ? content[state.index - 1] : "";
-
-  if (handleStringBoundary(char, prevChar, state)) {
-    return;
-  }
-
-  if (state.inString) {
-    handleStringContent(char, state);
-    return;
-  }
-
-  if (char === "`") {
-    state.index = skipTemplateLiteral(content, state.index);
-    return;
-  }
-
-  if (handleBraceDepth(char, state)) {
-    return;
-  }
-
-  handleKeyParsing(content, char, state);
-  state.index += 1;
-}
-
-/**
- * Handle string boundary (quote characters)
- */
-function handleStringBoundary(
-  char: string,
-  prevChar: string,
-  state: ParserState
-): boolean {
-  if ((char !== '"' && char !== "'") || prevChar === "\\") {
-    return false;
-  }
-
-  if (!state.inString) {
-    state.inString = true;
-    state.stringChar = char;
-    if (state.depth === 1) {
-      state.collectingKey = true;
-      state.currentKey = "";
-    }
-  } else if (char === state.stringChar) {
-    state.inString = false;
-    state.collectingKey = false;
-  }
-  state.index += 1;
-  return true;
-}
-
-/**
- * Handle content inside a string
- */
-function handleStringContent(char: string, state: ParserState): void {
-  if (state.collectingKey) {
-    state.currentKey += char;
-  }
-  state.index += 1;
-}
-
-/**
- * Handle brace depth tracking
- */
-function handleBraceDepth(char: string, state: ParserState): boolean {
-  if (char === "{") {
-    state.depth += 1;
-    state.index += 1;
-    return true;
-  }
-
-  if (char === "}") {
-    state.depth -= 1;
-    state.index += 1;
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Handle key parsing logic
- */
-function handleKeyParsing(
-  content: string,
-  char: string,
-  state: ParserState
-): void {
-  // Start collecting unquoted key
-  if (state.depth === 1 && KEY_CHAR_REGEX.test(char) && !state.collectingKey) {
-    const start = Math.max(0, state.index - LOOK_BEHIND_LENGTH);
-    const lookBehind = content.slice(start, state.index).trim();
-    if (isKeyStart(lookBehind)) {
-      state.collectingKey = true;
-      state.currentKey = char;
-    }
-    return;
-  }
-
-  // Continue collecting unquoted key
-  if (state.collectingKey && KEY_CHAR_REGEX.test(char)) {
-    state.currentKey += char;
-    return;
-  }
-
-  // Key ends at colon
-  if (char === ":" && state.depth === 1 && state.currentKey) {
-    addKeyIfValid(state.keys, state.currentKey);
-    state.currentKey = "";
-    state.collectingKey = false;
-  }
-
-  // Reset on comma
-  if (char === "," && state.depth === 1) {
-    state.currentKey = "";
-    state.collectingKey = false;
-  }
-}
-
-/**
- * Skip over a template literal starting at index i
- */
-function skipTemplateLiteral(content: string, startIndex: number): number {
-  let i = startIndex + 1;
-  while (i < content.length && content[i] !== "`") {
-    if (content[i] === "\\" && i + 1 < content.length) {
-      i += 1;
-    }
-    i += 1;
-  }
-  return i + 1;
-}
-
-/**
- * Check if the lookBehind indicates start of a new key
- */
-function isKeyStart(lookBehind: string): boolean {
+function isSpecialEntry(entry: string): boolean {
   return (
-    lookBehind.endsWith("{") ||
-    lookBehind.endsWith(",") ||
-    lookBehind.endsWith("\n")
+    SEPARATOR_REGEX.test(entry) ||
+    LINK_REGEX.test(entry) ||
+    REST_REGEX.test(entry) ||
+    entry.startsWith(EXCLUDE_PREFIX)
   );
 }
 
 /**
- * Add key to list if it's valid (not special or nested property)
- */
-function addKeyIfValid(keys: string[], key: string): void {
-  if (!(SPECIAL_KEYS.has(key) || NESTED_PROPERTIES.has(key))) {
-    keys.push(key);
-  }
-}
-
-/**
- * Check if a key has an href property (making it an external link)
- */
-function keyHasHref(content: string, key: string): boolean {
-  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(
-    `["']?${escapedKey}["']?\\s*:\\s*\\{[^}]*href\\s*:`,
-    "s"
-  );
-  return pattern.test(content);
-}
-
-/**
- * Check if a key is a separator (type: "separator" or starts with --)
- */
-function keyIsSeparator(content: string, key: string): boolean {
-  if (key.startsWith("--")) {
-    return true;
-  }
-
-  const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const pattern = new RegExp(
-    `["']?${escapedKey}["']?\\s*:\\s*\\{[^}]*type\\s*:\\s*["']separator["']`,
-    "s"
-  );
-  return pattern.test(content);
-}
-
-/**
- * Get valid sibling names for a _meta.tsx file
+ * Get valid sibling names for a meta.json file: every `<name>.mdx`/`.md` file
+ * (including `index`) and every directory next to it.
  */
 function getValidSiblings(metaFilePath: string): Set<string> {
   const dir = dirname(metaFilePath);
@@ -323,7 +176,7 @@ function getValidSiblings(metaFilePath: string): Set<string> {
     const entries = readdirSync(dir, { withFileTypes: true });
 
     for (const entry of entries) {
-      if (entry.name === "_meta.tsx") {
+      if (entry.name === META_FILE_NAME || entry.name.startsWith(".")) {
         continue;
       }
 
@@ -332,11 +185,7 @@ function getValidSiblings(metaFilePath: string): Set<string> {
         continue;
       }
 
-      const isMarkdown =
-        entry.name.endsWith(".mdx") || entry.name.endsWith(".md");
-      const isPage = entry.name === "page.mdx" || entry.name === "page.md";
-
-      if (isMarkdown && !isPage) {
+      if (MDX_EXTENSION_REGEX.test(entry.name)) {
         siblings.add(entry.name.replace(MDX_EXTENSION_REGEX, ""));
       }
     }
@@ -348,32 +197,114 @@ function getValidSiblings(metaFilePath: string): Set<string> {
 }
 
 /**
- * Validate a single _meta.tsx file
+ * Resolve a path-like entry (containing "/") relative to the meta.json dir.
+ * Fumadocs accepts `folder/page` and `../other/page` forms.
  */
-function validateMetaFile(filePath: string): MetaError[] {
-  const errors: MetaError[] = [];
+function pathEntryExists(metaFilePath: string, entry: string): boolean {
+  const base = join(dirname(metaFilePath), entry);
+  if (existsSync(`${base}.mdx`) || existsSync(`${base}.md`)) {
+    return true;
+  }
+  if (existsSync(base)) {
+    try {
+      return statSync(base).isDirectory();
+    } catch {
+      return false;
+    }
+  }
+  return false;
+}
 
-  if (!existsSync(filePath)) {
-    return errors;
+/**
+ * Validate one bare or path-like `pages` entry against the siblings on disk.
+ * Returns the error to report, or null when the entry resolves.
+ */
+function validateEntry(
+  filePath: string,
+  entry: string,
+  validSiblings: Set<string>
+): MetaError | null {
+  if (entry.includes("/")) {
+    if (pathEntryExists(filePath, entry)) {
+      return null;
+    }
+    return {
+      file: filePath,
+      key: entry,
+      message: `Entry "${entry}" does not resolve to a page or folder relative to ${dirname(filePath)}`,
+    };
   }
 
-  const content = readFileSync(filePath, "utf-8");
-  const keys = extractMetaKeys(content);
-  const validSiblings = getValidSiblings(filePath);
+  if (validSiblings.has(entry)) {
+    return null;
+  }
 
-  for (const key of keys) {
-    if (keyHasHref(content, key) || keyIsSeparator(content, key)) {
+  const suggestions = findSimilarSiblings(entry, validSiblings);
+  let message = `Entry "${entry}" does not match any sibling page or folder`;
+  if (suggestions.length > 0) {
+    message += `. Did you mean: ${suggestions.map((s) => `"${s}"`).join(", ")}?`;
+  }
+  return { file: filePath, key: entry, message };
+}
+
+/**
+ * Report every sibling page/folder that `pages` neither lists nor excludes.
+ * `index` is the folder's own page; Fumadocs attaches it to the folder node,
+ * so it does not need to be listed.
+ */
+function findUnlistedSiblings(
+  filePath: string,
+  validSiblings: Set<string>,
+  listed: Set<string>,
+  excluded: Set<string>
+): MetaError[] {
+  return [...validSiblings]
+    .filter(
+      (sibling) =>
+        sibling !== "index" && !(listed.has(sibling) || excluded.has(sibling))
+    )
+    .map((sibling) => ({
+      file: filePath,
+      key: sibling,
+      message: `Sibling "${sibling}" is not listed in "pages" (add it, exclude it with "!${sibling}", or add "..." to include the rest)`,
+    }));
+}
+
+/**
+ * Validate a single meta.json file
+ */
+function validateMetaFile(filePath: string): MetaError[] {
+  if (!existsSync(filePath)) {
+    return [];
+  }
+
+  const result = parseMetaFile(filePath);
+  if ("error" in result) {
+    return [result.error];
+  }
+
+  const { pages, hasRest, excluded } = result.meta;
+  const validSiblings = getValidSiblings(filePath);
+  const errors: MetaError[] = [];
+  const listed = new Set<string>();
+
+  for (const entry of pages) {
+    if (isSpecialEntry(entry)) {
       continue;
     }
-
-    if (!validSiblings.has(key)) {
-      const suggestions = findSimilarSiblings(key, validSiblings);
-      let message = `Key "${key}" does not match any sibling directory or file`;
-      if (suggestions.length > 0) {
-        message += `. Did you mean: ${suggestions.map((s) => `"${s}"`).join(", ")}?`;
-      }
-      errors.push({ file: filePath, key, message });
+    if (!entry.includes("/")) {
+      listed.add(entry);
     }
+    const error = validateEntry(filePath, entry, validSiblings);
+    if (error) {
+      errors.push(error);
+    }
+  }
+
+  if (!hasRest) {
+    errors.push(
+      ...findUnlistedSiblings(filePath, validSiblings, listed, excluded)
+    );
   }
 
   return errors;
@@ -386,9 +317,9 @@ function findSimilarSiblings(
   key: string,
   validSiblings: Set<string>
 ): string[] {
-  const normalizedKey = key.replace(/[-_]/g, "");
+  const normalizedKey = key.replace(NON_SLUG_CHARS_REGEX, "").toLowerCase();
   return [...validSiblings].filter((s) => {
-    const normalizedSibling = s.replace(/[-_]/g, "");
+    const normalizedSibling = s.replace(NON_SLUG_CHARS_REGEX, "").toLowerCase();
     return normalizedKey === normalizedSibling;
   });
 }
@@ -397,21 +328,21 @@ function findSimilarSiblings(
  * Main function
  */
 function main(): void {
-  console.log(colors.blue("🔍 Checking _meta.tsx keys...\n"));
+  console.log(colors.blue("🔍 Checking meta.json pages...\n"));
 
   const metaFiles = stagedOnly ? getStagedMetaFiles() : getAllMetaFiles();
 
   if (metaFiles.length === 0) {
     if (stagedOnly) {
-      console.log(colors.dim("No staged _meta.tsx files to check"));
+      console.log(colors.dim("No staged meta.json files to check"));
     } else {
-      console.log(colors.yellow("No _meta.tsx files found"));
+      console.log(colors.yellow("No meta.json files found"));
     }
     process.exit(0);
   }
 
   console.log(
-    colors.dim(`Checking ${metaFiles.length} _meta.tsx file(s)...\n`)
+    colors.dim(`Checking ${metaFiles.length} meta.json file(s)...\n`)
   );
 
   const allErrors: MetaError[] = [];
@@ -422,11 +353,11 @@ function main(): void {
   }
 
   if (allErrors.length === 0) {
-    console.log(colors.green("✅ All _meta.tsx keys are valid\n"));
+    console.log(colors.green("✅ All meta.json entries are valid\n"));
     process.exit(0);
   }
 
-  console.log(colors.red(`❌ Found ${allErrors.length} invalid key(s):\n`));
+  console.log(colors.red(`❌ Found ${allErrors.length} problem(s):\n`));
 
   for (const error of allErrors) {
     console.log(colors.yellow(`  ${error.file}:`));
@@ -435,10 +366,19 @@ function main(): void {
 
   console.log(
     colors.dim(
-      "Meta keys must match sibling directories or page files (without extension)."
+      "Bare entries in `pages` must match a sibling `<slug>.mdx`, `<slug>/index.mdx`, or `<slug>/` folder,"
     )
   );
-  console.log(colors.dim("Special keys like *, index, and --- are allowed.\n"));
+  console.log(
+    colors.dim(
+      "and every sibling must be listed unless the file contains a `...` rest entry."
+    )
+  );
+  console.log(
+    colors.dim(
+      "Separators (`---Title---`), links (`[Title](href)`), and exclusions (`!slug`) are allowed.\n"
+    )
+  );
 
   process.exit(1);
 }

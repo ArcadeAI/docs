@@ -12,24 +12,36 @@ const LINE_COMMENT = /(^|[^:])\/\/.*$/;
 const NON_NEWLINE = /[^\n]/g;
 
 /**
- * Sitewide chrome (footer, navbar, etc. in app/_components) must not contain a
+ * Sitewide chrome (footer, navbar, etc. in components/) must not contain a
  * raw email link: Cloudflare Email Obfuscation rewrites it into a
  * /cdn-cgi/l/email-protection URL that returns 404 to crawlers, so one in
  * shared chrome becomes a broken link on every page. Link to
  * /en/resources/contact-us instead. In-content email links on individual pages
- * are fine and are not scanned here.
+ * are fine and are not scanned here, and neither are page-local components
+ * under components/pages/ (they render on one page only).
  *
- * Exception: app/_components/contact-email.tsx is the sanctioned helper that
+ * Exception: components/contact-email.tsx is the sanctioned helper that
  * assembles a mailto only on the client (after mount) and renders a plain
  * contact-page link in SSR, so it never emits a raw email link for crawlers.
  */
 test(
   "shared components contain no mailto: or email-protection links",
   async () => {
-    const files = await fg("app/_components/**/*.{ts,tsx}", {
-      // The sanctioned client-only mailto helper (see docstring) is exempt.
-      ignore: ["app/_components/contact-email.tsx"],
-    });
+    const files = await fg(
+      [
+        "components/**/*.{ts,tsx}",
+        "app/**/*.{ts,tsx}",
+        "lib/layout.shared.tsx",
+      ],
+      {
+        ignore: [
+          // The sanctioned client-only mailto helper (see docstring) is exempt.
+          "components/contact-email.tsx",
+          // Page-local components are not sitewide chrome.
+          "components/pages/**",
+        ],
+      }
+    );
     const offenders: Array<{ file: string; line: number; match: string }> = [];
 
     for (const file of files) {

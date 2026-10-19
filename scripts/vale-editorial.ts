@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Editorial Review for Merged Pull Requests
@@ -7,8 +7,8 @@
  * and create a follow-up PR with structural improvements.
  *
  * Usage:
- *   pnpm vale:editorial --pr 123
- *   GITHUB_TOKEN=xxx ANTHROPIC_API_KEY=xxx pnpm vale:editorial --pr 123
+ *   bun run vale:editorial --pr 123
+ *   GITHUB_TOKEN=xxx ANTHROPIC_API_KEY=xxx bun run vale:editorial --pr 123
  *
  * Prefers Anthropic (Claude) if ANTHROPIC_API_KEY is set, falls back to OpenAI.
  */
@@ -215,7 +215,7 @@ async function getPRInfo(octokit: Octokit, prNumber: number): Promise<PRInfo> {
   });
 
   const docFiles = files
-    .filter((f) => f.filename.startsWith("app/en/"))
+    .filter((f) => f.filename.startsWith("content/docs/"))
     .filter((f) => f.filename.endsWith(".md") || f.filename.endsWith(".mdx"))
     .filter((f) => f.status !== "removed")
     .slice(0, MAX_FILES)

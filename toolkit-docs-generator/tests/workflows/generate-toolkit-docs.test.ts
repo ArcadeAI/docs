@@ -10,6 +10,8 @@ const workflowPath = join(
 );
 
 const workflowContents = readFileSync(workflowPath, "utf-8");
+const GENERATOR_BUILD_STEP_REGEX =
+  /run: bun run build\s*\n\s*working-directory: toolkit-docs-generator/;
 
 test("porter workflow includes required triggers", () => {
   expect(workflowContents).toContain("repository_dispatch");
@@ -23,9 +25,12 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain(
     "../node_modules/.bin/tsx src/cli/index.ts generate"
   );
-  // pnpm dlx resolves an unpinned tsx from the registry on every run, so the
-  // nightly's TypeScript runtime would drift outside the lockfile.
+  // The workflow calls the tsx pinned in the lockfile. `pnpm dlx` / `bunx tsx`
+  // could resolve an unpinned tsx from the registry, so the nightly's
+  // TypeScript runtime would drift outside the lockfile.
   expect(workflowContents).not.toContain("pnpm dlx");
+  expect(workflowContents).not.toContain("bunx tsx");
+  expect(workflowContents).not.toContain("pnpm");
   expect(workflowContents).toContain("--skip-unchanged");
   expect(workflowContents).toContain("--preserve-last-known-good");
   expect(workflowContents).toContain("--verbose");
@@ -50,20 +55,18 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("pull-requests: write");
   // GITHUB_TOKEN PRs do not start other workflows. Generate llms.txt here
   // instead of depending on llmstxt.yml, and open the PR with github.token.
-  expect(workflowContents).toContain("pnpm llmstxt");
+  expect(workflowContents).toContain("bun run llmstxt");
   expect(workflowContents).toContain(`token: ${"${"}{ github.token }}`);
   expect(workflowContents).not.toContain("uses: ./.github/actions/app-token");
   expect(workflowContents).not.toContain("DOCS_BOT");
 });
 
 test("porter workflow does not build the docs generator before running it", () => {
-  // toolkit-docs-generator has no package.json, so a `pnpm build` step
-  // there resolves to the root manifest's `next build --webpack` — a full
-  // Next.js production build that the tsx-executed CLI below doesn't need.
+  // toolkit-docs-generator has no package.json, so a `bun run build` step
+  // there resolves to the root manifest's `next build` — a full Next.js
+  // production build that the bun-executed CLI below doesn't need.
   expect(workflowContents).not.toContain("Build toolkit docs generator");
-  expect(workflowContents).not.toMatch(
-    /run: pnpm build\s*\n\s*working-directory: toolkit-docs-generator/
-  );
+  expect(workflowContents).not.toMatch(GENERATOR_BUILD_STEP_REGEX);
 });
 
 test("porter workflow wires the secret-coherence editor", () => {

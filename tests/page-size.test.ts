@@ -1,8 +1,8 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
-import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
-import { toToolkitSummary } from "@/app/_lib/toolkit-data";
+import type { ToolkitData } from "@/components/toolkit-docs/types";
+import { toToolkitSummary } from "@/lib/toolkit-data";
 
 /**
  * MARTECH-17: auto-generated toolkit reference pages exceeded Googlebot's 2 MB

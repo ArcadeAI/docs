@@ -1,9 +1,17 @@
-import { existsSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { MetaRecord } from "nextra";
 import { describe, expect, test } from "vitest";
-import { PARTNER_TOOLKITS } from "@/app/_data/partner-toolkits";
+import { PARTNER_TOOLKITS } from "@/data/partner-toolkits";
 import { getToolkitSlug } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
+import {
+  CONTENT_ROOT,
+  contentPageExists,
+  parseLinkEntry,
+  parseSeparatorEntry,
+  readFrontmatterValue,
+  readMetaPages,
+  resolveContentFile,
+} from "./helpers/content-paths";
 
 /**
  * Partner integrations are hand-authored pages that no toolkit JSON file backs,
@@ -14,14 +22,14 @@ import { getToolkitSlug } from "@/toolkit-docs-generator/src/shared/toolkit-prim
  * here instead of shipping a sidebar link to a 404.
  *
  * The sidebar entries themselves are generated (see
- * toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts), so a missing entry
- * below means someone hand-edited a `_meta.tsx` and skipped the sync, or the
- * sync ran against a partner list the committed nav predates.
+ * toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts, which emits
+ * content/docs/resources/integrations/<category>/meta.json), so a missing
+ * entry below means someone hand-edited a `meta.json` and skipped the sync, or
+ * the sync ran against a partner list the committed nav predates.
  */
 
-const INTEGRATIONS_DIR = join(process.cwd(), "app/en/resources/integrations");
+const INTEGRATIONS_DIR = join(CONTENT_ROOT, "resources", "integrations");
 const INTEGRATIONS_BASE_PATH = "/en/resources/integrations";
-const PAGE_FILE_NAMES = ["page.mdx", "page.tsx"];
 
 const partnerCases = PARTNER_TOOLKITS.map((partner) => ({
   partner,
@@ -31,9 +39,35 @@ const partnerCases = PARTNER_TOOLKITS.map((partner) => ({
   }),
 }));
 
-const loadCategoryMeta = async (category: string): Promise<MetaRecord> => {
-  const meta = await import(join(INTEGRATIONS_DIR, category, "_meta.tsx"));
-  return meta.default as MetaRecord;
+const loadCategoryPages = (category: string): string[] =>
+  readMetaPages(join(INTEGRATIONS_DIR, category));
+
+/**
+ * The label a meta.json entry renders for a partner page. Generated toolkit
+ * entries are `[Label](href)` links; partner pages are real MDX files, so the
+ * sync emits their bare slug and Fumadocs reads the label from the page's
+ * frontmatter (`sidebarTitle`, else `title`).
+ */
+const sidebarLabelFor = (
+  pages: string[],
+  slug: string,
+  href: string
+): string | undefined => {
+  if (pages.includes(slug)) {
+    const file = resolveContentFile(href);
+    if (!file) {
+      return;
+    }
+    const content = readFileSync(file, "utf-8");
+    return (
+      readFrontmatterValue(content, "sidebarTitle") ??
+      readFrontmatterValue(content, "title") ??
+      undefined
+    );
+  }
+  return pages
+    .map(parseLinkEntry)
+    .find((entry) => entry !== null && entry.href === href)?.title;
 };
 
 describe("partner integrations", () => {
@@ -44,37 +78,34 @@ describe("partner integrations", () => {
   test.each(partnerCases)(
     "$partner.id has a page on disk",
     ({ partner, slug }) => {
-      const pageDir = join(INTEGRATIONS_DIR, partner.category, slug);
-      const hasPage = PAGE_FILE_NAMES.some((fileName) =>
-        existsSync(join(pageDir, fileName))
-      );
+      const url = `${INTEGRATIONS_BASE_PATH}/${partner.category}/${slug}`;
 
       expect(
-        hasPage,
-        `Expected a page for partner "${partner.id}" at ${pageDir}/page.mdx`
+        contentPageExists(url),
+        `Expected a page for partner "${partner.id}" at content/docs/resources/integrations/${partner.category}/${slug}.mdx (or ${slug}/index.mdx)`
       ).toBe(true);
     }
   );
 
   test.each(partnerCases)(
     "$partner.id has a sidebar entry pointing at its page",
-    async ({ partner, slug }) => {
-      const meta = await loadCategoryMeta(partner.category);
-      const entry = meta[slug];
+    ({ partner, slug }) => {
+      const pages = loadCategoryPages(partner.category);
+      const href = `${INTEGRATIONS_BASE_PATH}/${partner.category}/${slug}`;
+      const label = sidebarLabelFor(pages, slug, href);
 
       expect(
-        entry,
-        `Expected a "${slug}" key in app/en/resources/integrations/${partner.category}/_meta.tsx. ` +
-          "Run `npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts` to regenerate it."
+        label,
+        `Expected a "${slug}" (or "[${partner.label}](${href})") entry in content/docs/resources/integrations/${partner.category}/meta.json. ` +
+          "Run `bun run sync-toolkit-sidebar` to regenerate it."
       ).toBeDefined();
-      expect(entry).toMatchObject({
-        title: partner.label,
-        href: `${INTEGRATIONS_BASE_PATH}/${partner.category}/${slug}`,
-      });
-      expect(meta["-- Partners"]).toMatchObject({
-        type: "separator",
-        title: "Partners",
-      });
+      expect(label).toBe(partner.label);
+
+      const separators = pages
+        .map(parseSeparatorEntry)
+        .filter((separator) => separator !== null)
+        .map((separator) => separator.title);
+      expect(separators).toContain("Partners");
     }
   );
 
