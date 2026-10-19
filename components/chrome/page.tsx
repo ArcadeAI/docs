@@ -42,27 +42,28 @@ function nodeRoute(node: SidebarNode | undefined): string {
 }
 
 type ActiveInfo = {
-  /** Entries that can be paged through, in sidebar order. */
-  flat: SidebarPage[];
-  /** Position of the current page in `flat`. */
-  index: number;
+  /** The pages before and after the current one in the previous/next sequence. */
+  next?: SidebarPage;
   /** Sidebar entries from the top-level section down to the current page. */
   path: (SidebarFolder | SidebarPage)[];
+  prev?: SidebarPage;
 };
 
 /**
  * Walks the sidebar in display order. Link-only entries (toolkit pages, cross
  * links) are not part of the previous/next sequence; when one of them is the
- * current page it takes the position of the next real page.
+ * current page, its neighbours are the real pages around it.
  */
 function findActive(directories: SidebarNode[], route: string): ActiveInfo {
   const flat: SidebarPage[] = [];
   let index = -1;
+  let inSequence = false;
   let path: (SidebarFolder | SidebarPage)[] = [];
 
   const visitPage = (node: SidebarPage, parents: SidebarFolder[]) => {
     if (index === -1 && isActive(route, node.href)) {
       index = flat.length;
+      inSequence = !node.linkOnly;
       path = [...parents, node];
     }
     if (!node.linkOnly) {
@@ -79,7 +80,14 @@ function findActive(directories: SidebarNode[], route: string): ActiveInfo {
     }
   };
   walk(directories, []);
-  return { flat, index, path };
+  if (index === -1) {
+    return { path };
+  }
+  return {
+    next: flat[inSequence ? index + 1 : index],
+    path,
+    prev: flat[index - 1],
+  };
 }
 
 function Title({ node }: { node: SidebarFolder | SidebarPage }) {
@@ -153,9 +161,13 @@ const paginationLink = cn(
   "flex max-w-[50%] items-center gap-1 py-4 font-medium text-base transition-colors [word-break:break-word] md:text-lg"
 );
 
-function Pagination({ flat, index }: { flat: SidebarPage[]; index: number }) {
-  const prev = index > 0 ? flat[index - 1] : undefined;
-  const next = index >= 0 ? flat[index + 1] : undefined;
+function Pagination({
+  next,
+  prev,
+}: {
+  next?: SidebarPage;
+  prev?: SidebarPage;
+}) {
   if (!(prev || next)) {
     return null;
   }
@@ -467,7 +479,7 @@ export function DocsPageShell({
           <div className="mt-16" />
         )}
         {pagination ? (
-          <Pagination flat={active.flat} index={active.index} />
+          <Pagination next={active.next} prev={active.prev} />
         ) : null}
       </article>
     </>
