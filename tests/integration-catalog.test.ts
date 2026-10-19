@@ -46,7 +46,7 @@ const partner = {
 describe("toIntegrationCatalog", () => {
   test("lists a published toolkit with the card fields from its generated file", () => {
     const [toolkit] = toIntegrationCatalog(
-      [makeGenerated("Twilio", { isBYOC: true, type: "community" })],
+      [makeGenerated("Twilio", { isBYOC: true, type: "verified" })],
       []
     );
 
@@ -58,7 +58,7 @@ describe("toIntegrationCatalog", () => {
       publicIconUrl: "https://design-system.arcade.dev/icons/twilio.svg",
       docsLink: `${INTEGRATIONS}/social/twilio`,
       relativeDocsLink: "/en/resources/integrations/social/twilio",
-      type: "community",
+      type: "verified",
       category: "social",
       isComingSoon: false,
       isHidden: false,
