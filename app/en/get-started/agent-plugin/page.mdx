@@ -1,14 +1,14 @@
 ---
 title: "Install the Arcade agent plugin"
-description: "Install Arcade in Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, or Claude Desktop. Your agent gets tools for every app you connect, with browser sign-in and no API keys."
+description: "Install Arcade in Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, or Claude Desktop. Connect your agent to apps through Arcade with browser sign-in."
 ---
 
-import { Callout, Tabs } from "nextra/components";
+import { Tabs } from "nextra/components";
 import { SignupLink } from "@/app/_components/analytics";
 
 # Install the Arcade agent plugin
 
-This guide is for agent developers installing Arcade in their own coding agent or desktop client. Personal installs use Arcade's hosted gateway without creating API keys or configuring a gateway.
+For agent developers, the Arcade plugin connects your coding agent or desktop client to apps through Arcade's hosted gateway. Sign in with your Arcade account. You don't need an Arcade API key or a gateway configuration.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -21,7 +21,7 @@ Install the Arcade agent plugin in a supported client and connect to its hosted 
 
 - A [supported client](/get-started/agent-plugin/whats-included#client-support): Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, or Claude Desktop
 - An <SignupLink linkLocation="docs:agent-plugin-install">Arcade account</SignupLink>
-- For Claude Code, Claude Cowork, Cursor CLI, and GitHub Copilot CLI: [Node.js](https://nodejs.org/) on the PATH of the host that launches their routing hooks. Those hooks run `node`. Cursor IDE and Cloud Agents, VS Code, Codex, and Claude Desktop Chat do not need Node.js.
+- For Claude Code, Claude Cowork, Cursor CLI, and GitHub Copilot CLI: [Node.js](https://nodejs.org/) on the host's `PATH`
 
 </GuideOverview.Prerequisites>
 
@@ -29,86 +29,82 @@ Install the Arcade agent plugin in a supported client and connect to its hosted 
 
 ## Install
 
-<Callout type="info">
-  The cross-client `npx plugins add` command does not finish every client
-  install. Use the client-native steps below so the gateway and every supported
-  plugin component load together. The install commands below use the plugin
-  repository and are not pinned to a release.
-</Callout>
-
 <Tabs items={["Claude Code", "Codex", "Cursor", "VS Code", "Copilot CLI", "Claude Desktop", "Other"]}>
 <Tabs.Tab>
 
-Requires [Claude Code 2.1.292 or later](https://code.claude.com/docs/en/discover-plugins#add-and-install-from-your-shell).
+Use [Claude Code 2.1.292 or later](https://code.claude.com/docs/en/discover-plugins#add-and-install-from-your-shell), or expand the earlier-version instructions.
 
 1. Install Arcade:
 
    ```bash
-   claude plugin install arcade --marketplace {{ARCADE_PLUGIN_REPO}}
+   claude plugin install arcade --marketplace ArcadeAI/arcade-plugin
    ```
 
 2. Run `/reload-plugins` if Claude Code is already open.
-3. Run `/arcade:try-arcade` to start.
+3. Open `/mcp`, select **arcade**, and sign in to Arcade in the browser when prompted.
+4. Run `/arcade:try-arcade` to start.
 
 <details>
 <summary>Earlier Claude Code versions</summary>
 
-Add the marketplace, then install the plugin:
+Use these commands for step 1:
 
 ```bash
-claude plugin marketplace add {{ARCADE_PLUGIN_REPO}}
+claude plugin marketplace add ArcadeAI/arcade-plugin
 claude plugin install arcade@arcade
 ```
-
-Run `/reload-plugins` if Claude Code is already open.
 
 </details>
 
 </Tabs.Tab>
 <Tabs.Tab>
 
+Use this installation for a [Codex session in the CLI or ChatGPT desktop app](https://developers.openai.com/plugins/build/plugins#enable-or-disable-a-plugin-for-a-repo).
+
 1. Add the Arcade marketplace and install the plugin:
 
    ```bash
-   codex plugin marketplace add {{ARCADE_PLUGIN_REPO}}
+   codex plugin marketplace add ArcadeAI/arcade-plugin
    codex plugin add arcade@arcade
    ```
 
-2. Start a new Codex session or ChatGPT desktop chat.
+2. Start a new Codex session in the CLI or ChatGPT desktop app.
 3. Open `/plugins` and confirm **arcade** is installed and enabled.
-4. Confirm the **arcade** MCP server is connected.
+4. Connect the **arcade** MCP server and sign in to Arcade in the browser when prompted.
 5. Choose `@Arcade` or invoke `$arcade:try-arcade` to start.
 
 </Tabs.Tab>
 <Tabs.Tab>
 
-**Local installation**
+**Team marketplace**
+
+1. An admin opens **Dashboard → Plugins & MCPs → Team Marketplaces → Add Marketplace → Import from Repo** and pastes `https://github.com/ArcadeAI/arcade-plugin`.
+2. The admin adds Arcade to the marketplace and sets access in **Marketplace Settings**. To receive repository updates, enable **Auto Refresh**. GitHub imports require the Cursor GitHub App on the repository.
+3. Open **Customize**, find **Arcade**, and select **Install**.
+4. Connect the **arcade** MCP server and sign in to Arcade in the browser when prompted.
+5. Run `/try-arcade` to start.
+
+See [Cursor's marketplace instructions](https://cursor.com/docs/plugins#add-a-team-marketplace) for access and refresh settings.
+
+<details>
+<summary>Local installation</summary>
 
 For an individual plan, or a Teams or Enterprise plan with **Allow Local Plugin Imports** enabled:
 
 1. Clone the plugin into Cursor's local plugin directory:
 
    ```bash
-   git clone https://github.com/{{ARCADE_PLUGIN_REPO}} ~/.cursor/plugins/local/arcade-plugin
+   git clone https://github.com/ArcadeAI/arcade-plugin ~/.cursor/plugins/local/arcade-plugin
    ```
 
 2. Run **Developer: Reload Window**.
-3. Open **Customize** and confirm the two Arcade skills, `arcade-operator`, rule, and MCP server are present.
-4. Run `/try-arcade` to start.
+3. Open **Customize** and confirm Arcade is present.
+4. Connect the **arcade** MCP server and sign in to Arcade in the browser when prompted.
+5. Run `/try-arcade` to start.
 
-Keep the clone inside `~/.cursor/plugins/local/`. Cursor ignores symlinks to folders outside that directory.
+Keep the clone inside `~/.cursor/plugins/local/`. Cursor ignores symlinks to folders outside that directory. To update, run `git pull` in the clone and **Developer: Reload Window**.
 
-To update the plugin later:
-
-1. Run `git pull` in `~/.cursor/plugins/local/arcade-plugin`.
-2. Run **Developer: Reload Window**.
-
-**Team marketplace alternative**
-
-Enterprise turns **Allow Local Plugin Imports** off by default. When it is off, Cursor ignores `~/.cursor/plugins/local`. Use a team marketplace:
-
-1. An admin opens **Dashboard → Plugins & MCPs → Team Marketplaces → Add Marketplace → Import from Repo** and pastes `https://github.com/{{ARCADE_PLUGIN_REPO}}`.
-2. Each person opens **Customize**, finds **Arcade**, and selects **Install**.
+</details>
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -117,7 +113,7 @@ Enterprise turns **Allow Local Plugin Imports** off by default. When it is off, 
 2. Paste the repository URL:
 
    ```text
-   https://github.com/{{ARCADE_PLUGIN_REPO}}
+   https://github.com/ArcadeAI/arcade-plugin
    ```
 
 3. Turn on `chat.plugins.enabled` if needed, then reload VS Code.
@@ -132,11 +128,12 @@ Enterprise turns **Allow Local Plugin Imports** off by default. When it is off, 
 1. Install with Copilot CLI's plugin command:
 
    ```bash
-   copilot plugin install {{ARCADE_PLUGIN_REPO}}
+   copilot plugin install ArcadeAI/arcade-plugin
    ```
 
 2. Restart the session or run `/restart`.
-3. Run `/try-arcade` to start.
+3. Connect the **arcade** MCP server and sign in to Arcade in the browser when prompted.
+4. Run `/try-arcade` to start.
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -144,7 +141,7 @@ Enterprise turns **Allow Local Plugin Imports** off by default. When it is off, 
 Requires a [paid Claude plan](https://support.claude.com/en/articles/13837440-use-plugins-in-claude). On Team or Enterprise, your organization must allow this marketplace.
 
 1. Open **Customize → Plugins → Add → Add marketplace → Add from a repository**.
-2. Paste `{{ARCADE_PLUGIN_REPO}}`.
+2. Paste `ArcadeAI/arcade-plugin`.
 3. Add **Arcade** from the marketplace.
 4. Open **Arcade → Connectors**, then add and connect **arcade** if it is not connected. Sign in to Arcade when prompted.
 5. Start a new conversation and ask "What can Arcade do?"
@@ -161,7 +158,7 @@ Your client must support remote HTTP MCP servers and browser sign-in. This conne
 1. Add an HTTP MCP server with this URL in your client's MCP settings:
 
    ```text
-   {{ARCADE_PLUGIN_GATEWAY_URL}}
+   https://api.arcade.dev/mcp/arcade
    ```
 
 2. Sign in to Arcade in the browser when prompted, then return to your client.
@@ -169,36 +166,13 @@ Your client must support remote HTTP MCP servers and browser sign-in. This conne
 </Tabs.Tab>
 </Tabs>
 
-## Install the ChatGPT ZIP
+## Connect apps
 
-This path requires a ChatGPT account with plugin upload access. For a managed workspace, an eligible owner or admin uploads the plugin; members install it from their workspace's plugin directory.
+[Gateway sign-in and app authorization are separate](/learn/server-level-vs-tool-level-auth). After connecting the gateway during installation, ask your agent to use an app. If the app needs authorization, follow the browser sign-in link and approve the required permissions.
 
-1. Open [Arcade's official plugin releases](https://github.com/ArcadeAI/arcade-plugin/releases) in your browser.
-2. Expand **Assets** on a release that includes the ChatGPT plugin and download `arcade-chatgpt-{VERSION}.zip`. Do not use GitHub's **Source code (zip)** download. If the ChatGPT ZIP is absent, that release does not include it.
-3. Keep the file compressed. On iPhone, Safari downloads appear in **Files → Browse → iCloud Drive → Downloads**, unless you chose another download location. On Android, find the file in Chrome's **Downloads** or your Files app.
-4. Open [ChatGPT on the web](https://chatgpt.com) in the account and workspace where you want to install Arcade. Use the plugin upload option available to your account and select the downloaded ZIP. For eligible workspace owners and admins, the path is **Admin console → your workspace → Plugins → Add → Upload plugin**.
-5. Select **Install plugin** if prompted, then connect Arcade and sign in when prompted.
+Return to your agent after sign-in and continue the task. To manage connections, ask "Show my connected apps" or "Connect Google."
 
-If you don't see an upload option, check your account's access or ask your workspace admin. Uploading a ZIP to an ordinary chat does not install it. This installation flow is separate from submitting a plugin for public publication.
-
-**Using a phone:** OpenAI documents plugin-directory installation in the mobile apps, but does not document ZIP upload in those apps or guarantee it in a mobile browser. Use ChatGPT web on a computer if the upload control is unavailable on your phone. After a workspace admin makes Arcade available, install it from that workspace's plugin directory in the mobile app.
-
-Upload availability and where a plugin can run are separate. Plugins marked **Desktop only** require the ChatGPT desktop app.
-
-See [OpenAI's plugin installation guide](https://help.openai.com/en/articles/20001256-plugins-in-chatgpt), [Apple's download instructions](https://support.apple.com/en-us/102440), and [Chrome's Android download instructions](https://support.google.com/chrome/answer/95759?co=GENIE.Platform%3DAndroid&hl=en-GB).
-
-## Sign in
-
-Arcade separates [gateway sign-in from app authorization](/learn/server-level-vs-tool-level-auth):
-
-1. **Into the gateway.** Your client asks you to sign in when it first connects. Sign in to Arcade in the browser so your client can connect to the gateway.
-2. **Into each app.** When a task needs an app, your agent gives you a browser sign-in link for the required permissions. After approval, Arcade stores the authorization. You may need to reconnect if the connection expires or a later task needs additional permissions.
-
-After you finish in the browser, return to your agent and continue the original task. Arcade does not resume it for you.
-
-You never give your agent an API key or a password for either layer. To check or manage connections, ask your agent to "Check my Arcade connection," "Show my connected apps," or "Connect Google." You can connect an app before you need it. Clients that support Arcade commands also provide [command shortcuts](/get-started/agent-plugin/whats-included#commands).
-
-Arcade uses the app connections authorized for your signed-in identity. Authorize only the accounts you intend the agent to use.
+Some tools require a provider API key or another secret. See [default-project setup](/get-started/agent-plugin/whats-included#projects-and-secrets) before using those tools.
 
 ## Next steps
 
