@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { join, relative } from "node:path";
 import type { NextConfig } from "next";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, test } from "vitest";
 import { stripMarkdownFromSwcPageExtensions } from "../lib/swc-page-extensions";
 
@@ -228,7 +230,10 @@ describe("MDX pages", () => {
         }
         const renderedTitle =
           readFileSync(html, "utf8").match(HTML_TITLE_RE)?.[1] ?? "";
-        if (!renderedTitle.includes(frontmatterTitle)) {
+        const escapedTitle = renderToStaticMarkup(
+          createElement("title", null, frontmatterTitle)
+        ).match(HTML_TITLE_RE)?.[1];
+        if (!(escapedTitle && renderedTitle.includes(escapedTitle))) {
           mismatches.push(
             `${relative(process.cwd(), page)}: expected "${frontmatterTitle}" in "${renderedTitle}"`
           );
