@@ -9,6 +9,12 @@ const TOOLKIT_CATEGORIES: readonly ToolkitCategory[] = CATEGORIES.map(
   (category) => category.id
 );
 
+/**
+ * The designations the index presents. `community` is still a design-system
+ * ToolkitType, but no toolkit is assigned it.
+ */
+export type ListedToolkitType = Exclude<ToolkitType, "community">;
+
 // ToolkitType has no runtime export from the design system, so this list is
 // hand-maintained. `satisfies` turns a missing or extra entry into a
 // compile error the next time the union changes, instead of a silent drop.
@@ -16,11 +22,12 @@ const TOOLKIT_TYPE_MEMBERSHIP = {
   arcade: true,
   arcade_starter: true,
   verified: true,
-  community: true,
   auth: true,
-} satisfies Record<ToolkitType, true>;
+} satisfies Record<ListedToolkitType, true>;
 
-const TOOLKIT_TYPES = Object.keys(TOOLKIT_TYPE_MEMBERSHIP) as ToolkitType[];
+const TOOLKIT_TYPES = Object.keys(
+  TOOLKIT_TYPE_MEMBERSHIP
+) as ListedToolkitType[];
 
 export const PARAM_CATEGORY = "category";
 export const PARAM_TYPE = "type";
@@ -38,7 +45,7 @@ export function isLabel(value: string): value is Label {
 
 export type FilterState = {
   selectedCategory: ToolkitCategory;
-  selectedType: ToolkitType | "all";
+  selectedType: ListedToolkitType | "all";
   filterByPro: boolean;
   filterByByoc: boolean;
   searchQuery: string;
@@ -52,7 +59,7 @@ export const DEFAULT_FILTER_STATE: FilterState = {
   searchQuery: "",
 };
 
-export function isToolkitType(value: string): value is ToolkitType {
+export function isToolkitType(value: string): value is ListedToolkitType {
   return (TOOLKIT_TYPES as readonly string[]).includes(value);
 }
 

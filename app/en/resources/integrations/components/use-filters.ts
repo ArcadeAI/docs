@@ -1,11 +1,12 @@
 "use client";
 
-import type { ToolkitCategory, ToolkitType } from "@arcadeai/design-system";
+import type { ToolkitCategory } from "@arcadeai/design-system";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import {
   DEFAULT_FILTER_STATE,
   type FilterState,
+  type ListedToolkitType,
   parseFiltersFromParams,
   serializeFiltersToParams,
 } from "./filter-params";
@@ -61,7 +62,7 @@ export function useFilters() {
   );
 
   const setSelectedType = useCallback(
-    (type: ToolkitType | "all") => {
+    (type: ListedToolkitType | "all") => {
       writeState({ ...state, selectedType: type });
     },
     [state, writeState]
