@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 import nextra from "nextra";
 import { withLlmsTxt } from "./lib/next-plugin-llmstxt";
 import { remarkGlossary } from "./lib/remark-glossary";
-import { remarkSubstitute } from "./lib/remark-substitute";
 import { stripMarkdownFromSwcPageExtensions } from "./lib/swc-page-extensions";
 import { redirects } from "./redirects";
 
@@ -17,7 +16,6 @@ const withNextra = nextra({
         remarkGlossary,
         { glossaryPath: "./app/en/resources/glossary/page.mdx" },
       ],
-      remarkSubstitute,
     ],
   },
 });

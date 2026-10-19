@@ -16,27 +16,6 @@ export type Redirect = {
 };
 
 export const redirects: Redirect[] = [
-  // Retired agent-plugin guides.
-  {
-    source: "/:locale/get-started/agent-plugin/tools-only",
-    destination: "/:locale/get-started/agent-plugin",
-    permanent: true,
-  },
-  {
-    source: "/:locale/get-started/agent-plugin/tools-only/claude-desktop",
-    destination: "/:locale/get-started/agent-plugin",
-    permanent: true,
-  },
-  {
-    source: "/:locale/get-started/agent-plugin/tools-only/any-mcp-client",
-    destination: "/:locale/get-started/mcp-clients",
-    permanent: true,
-  },
-  {
-    source: "/:locale/get-started/agent-plugin/team-rollout",
-    destination: "/:locale/operate/governance/mcp-gateways",
-    permanent: true,
-  },
   // The toolkit-page breadcrumb links "Resources" -> /resources, which has
   // no index page. Send it to the integrations registry instead of 404ing.
   {
@@ -1194,16 +1173,6 @@ export const redirects: Redirect[] = [
   {
     source: "/:locale/guides",
     destination: "/:locale/build",
-    permanent: true,
-  },
-  {
-    source: "/:locale/get-started/agent-plugin/any-mcp-client",
-    destination: "/:locale/get-started/mcp-clients",
-    permanent: true,
-  },
-  {
-    source: "/:locale/get-started/agent-plugin/claude-desktop",
-    destination: "/:locale/get-started/agent-plugin",
     permanent: true,
   },
 ];
