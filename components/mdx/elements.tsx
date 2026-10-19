@@ -236,6 +236,9 @@ export function Td({ className, ...props }: ComponentProps<"td">) {
   );
 }
 
+/** Nextra's `<Table>` component, with its `Table.Tr`, `Table.Th` and `Table.Td` parts. */
+export const TableWithParts = Object.assign(Table, { Td, Th, Tr });
+
 /* ----------------------------------------------------------------- Summary */
 
 export function Summary({

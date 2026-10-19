@@ -125,6 +125,14 @@ export function educateQuotes(text: string): string {
   return tokens.map((token) => token.value).join("");
 }
 
+/**
+ * The same punctuation for a standalone string, such as a frontmatter title
+ * rendered as the page heading: production's heading was part of the MDX body.
+ */
+export function smartypants(text: string): string {
+  return educateQuotes(text).replace(DASHES, "—").replace(ELLIPSIS, "…");
+}
+
 function isVisited(node: { type: string }, parent: unknown): boolean {
   if (!parent) {
     return false;

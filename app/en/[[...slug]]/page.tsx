@@ -6,6 +6,7 @@ import { DocsPageShell } from "@/components/chrome/page";
 import type { TocEntry } from "@/components/chrome/stores";
 import { pageLastModified, toolkitPageLastModified } from "@/lib/last-modified";
 import { DOCS_REPOSITORY_BASE } from "@/lib/layout.shared";
+import { smartypants } from "@/lib/remark-smartypants";
 import { source } from "@/lib/source";
 import {
   generateToolkitParams,
@@ -52,21 +53,26 @@ function lastModifiedDate(data: unknown): string | null {
 
 const INLINE_CODE = /`([^`]+)`/;
 
-/** Renders `code` spans in a frontmatter title the way the MDX body renders them. */
+/**
+ * Renders a frontmatter title the way the MDX body renders it: `code` spans
+ * as code, and typographic punctuation in the text around them.
+ */
 function inlineCode(
   title: string,
   Code: MDXComponents["code"] | undefined
 ): ReactNode {
   const parts = title.split(INLINE_CODE);
   if (parts.length === 1 || typeof Code !== "function") {
-    return title;
+    return smartypants(title);
   }
   // Odd parts are the text between backticks.
   let offset = 0;
   let isCode = false;
   const nodes: ReactNode[] = [];
   for (const part of parts) {
-    nodes.push(isCode ? <Code key={`code-${offset}`}>{part}</Code> : part);
+    nodes.push(
+      isCode ? <Code key={`code-${offset}`}>{part}</Code> : smartypants(part)
+    );
     offset += part.length + 1;
     isCode = !isCode;
   }
