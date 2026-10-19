@@ -1,3 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const { create } = vi.hoisted(() => ({
@@ -10,9 +14,8 @@ vi.mock("@anthropic-ai/sdk", () => ({
   },
 }));
 
-const { hasSameBody, summarizePagesInBatches } = await import(
-  "../../scripts/generate-llmstxt"
-);
+const { getChangedFilesSince, hasSameBody, summarizePagesInBatches } =
+  await import("../../scripts/generate-llmstxt");
 
 const WARNING_REGEX = /^::warning::1 of 1 page summaries fell back/;
 
@@ -66,5 +69,73 @@ describe("placeholder retry that fails again", () => {
       "Walks through calling your first tool."
     );
     expect(hasSameBody(EXISTING, regenerated)).toBe(false);
+  });
+});
+
+describe("getChangedFilesSince", () => {
+  let repo = "";
+
+  afterEach(() => {
+    rmSync(repo, { recursive: true, force: true });
+  });
+
+  const git = (...args: string[]) =>
+    execFileSync("git", args, { cwd: repo, encoding: "utf-8" }).trim();
+
+  const write = (file: string, content: string) => {
+    mkdirSync(path.dirname(path.join(repo, file)), { recursive: true });
+    writeFileSync(path.join(repo, file), content);
+  };
+
+  const initRepo = () => {
+    repo = mkdtempSync(path.join(tmpdir(), "llmstxt-"));
+    git("init", "-q");
+    git("config", "user.email", "test@example.com");
+    git("config", "user.name", "Test");
+  };
+
+  it("includes uncommitted and untracked changes", () => {
+    initRepo();
+    write("committed.mdx", "one");
+    write("edited.mdx", "one");
+    write("removed.mdx", "one");
+    git("add", ".");
+    git("commit", "-q", "-m", "base");
+    const base = git("rev-parse", "HEAD");
+
+    write("later.mdx", "two");
+    git("add", ".");
+    git("commit", "-q", "-m", "later");
+
+    write("edited.mdx", "two");
+    rmSync(path.join(repo, "removed.mdx"));
+    write("new/untracked.mdx", "two");
+
+    expect(getChangedFilesSince(base, repo)).toEqual(
+      new Set(["later.mdx", "edited.mdx", "removed.mdx", "new/untracked.mdx"])
+    );
+  });
+
+  it("still returns working-tree and untracked changes when the SHA is unreachable", () => {
+    initRepo();
+    write("edited.mdx", "one");
+    write("stable.mdx", "one");
+    git("add", ".");
+    git("commit", "-q", "-m", "base");
+
+    write("edited.mdx", "two");
+    write("new/untracked.mdx", "two");
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {
+      // silence the expected warning
+    });
+    try {
+      expect(getChangedFilesSince("0".repeat(40), repo)).toEqual(
+        new Set(["edited.mdx", "new/untracked.mdx"])
+      );
+      expect(warn).toHaveBeenCalledTimes(1);
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

@@ -1,0 +1,118 @@
+name: Sync Helm chart docs
+# Description: Sync the generated Helm values reference for a released chart version.
+# Flow:
+# 1) Pull the published chart from the public OCI registry
+# 2) Extract the values reference and example overlays into the docs
+# 3) Regenerate public/llms.txt so the automation PR is self-contained
+# 4) Open a PR for that chart version
+#
+# Opens the PR with GITHUB_TOKEN. That does not start other workflows, so this
+# job generates llms.txt here instead of depending on llmstxt.yml to fire.
+
+on:
+  repository_dispatch:
+    types: [helm_chart_published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact Arcade Helm chart version to sync (for example 1.12.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: sync-helm-chart-docs-${{ github.event.client_payload.version || inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+      VERSION: ${{ github.event.client_payload.version || inputs.version }}
+      CHART_REF: oci://public.ecr.aws/s5i6x9d1/charts/arcade
+
+    steps:
+      - name: Validate version
+        run: |
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Invalid version: $VERSION"
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      # llms.txt generation runs on Node through tsx: Bun resolves the design
+      # system's `bun` export condition, which points at sources the package
+      # does not ship.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+
+      # The monorepo dispatches this workflow right after it pushes the chart,
+      # but the registry can take a few minutes to serve the new version.
+      - name: Pull chart
+        run: |
+          for attempt in $(seq 1 10); do
+            if helm pull "$CHART_REF" --version "$VERSION" --untar --untardir "$RUNNER_TEMP/chart"; then
+              echo "Pulled chart $VERSION"
+              exit 0
+            fi
+            echo "Attempt $attempt: chart $VERSION not available yet, retrying in 30s"
+            sleep 30
+          done
+          echo "::error::Chart $VERSION did not become available within 5 minutes"
+          exit 1
+
+      - name: Sync values reference and examples
+        run: bun scripts/sync-helm-chart-docs.ts --chart-dir "$RUNNER_TEMP/chart/arcade" --version "$VERSION"
+
+      # GITHUB_TOKEN PRs do not start llmstxt.yml, so generate the file here.
+      - name: Generate llms.txt
+        run: bun run llmstxt
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Create pull request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        env:
+          HUSKY: 0
+        with:
+          token: ${{ github.token }}
+          commit-message: "[AUTO] Helm chart ${{ env.VERSION }} values reference"
+          title: "[AUTO] Helm chart ${{ env.VERSION }} values reference"
+          body: |
+            This PR syncs the generated values reference for Arcade Helm chart `${{ env.VERSION }}`.
+
+            - Chart version: `${{ env.VERSION }}`
+            - Trigger: `${{ github.event_name }}`
+            - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          branch: automation/helm-chart-docs-${{ env.VERSION }}
+          delete-branch: true
+
+      - name: Request team review
+        if: steps.cpr.outputs.pull-request-number != ''
+        continue-on-error: true
+        run: gh pr edit "$PR_NUMBER" --add-reviewer ArcadeAI/engineering-tools-and-dx
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}

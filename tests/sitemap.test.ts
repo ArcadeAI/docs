@@ -38,7 +38,9 @@ test("sitemap lists expected URLs", async () => {
     );
 
     // Known page should be present
-    expect(urls).toContain("https://example.test/en/references/changelog");
+    expect(urls).toContain(
+      "https://example.test/en/references/cli-cheat-sheet"
+    );
 
     // The published sitemap has never listed the API reference page (the old
     // directory walk skipped every folder named "api"); keep the URL set equal.
