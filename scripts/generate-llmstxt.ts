@@ -17,6 +17,14 @@ type PageMetadata = {
   content: string;
 };
 
+type ListedPage = PageMetadata & {
+  title: string;
+  description: string;
+  // Overrides the section derived from the URL. Pages hosted outside
+  // docs.arcade.dev set this, since their URL says nothing about placement.
+  section?: string;
+};
+
 type Section = {
   name: string;
   pages: Array<{
@@ -55,6 +63,21 @@ const MAX_CONTENT_LENGTH = 4000;
 const BATCH_DELAY_MS = 1000;
 const SHA_SHORT_LENGTH = 7;
 const PLACEHOLDER_DESCRIPTION = "Documentation page";
+
+// Pages hosted outside docs.arcade.dev that llms.txt still lists. They have no
+// MDX source, so they carry a fixed title and description instead of a Claude
+// summary, and are rebuilt on every run like toolkit pages.
+const EXTERNAL_PAGES: ListedPage[] = [
+  {
+    path: "",
+    url: "https://releases.arcade.dev/preview/index.md",
+    content: "",
+    section: "API Reference",
+    title: "Changelog",
+    description:
+      "The Arcade changelog lists new features, improvements, and bug fixes across the Arcade platform, organized by release date.",
+  },
+];
 
 // Initialize Anthropic client
 const anthropic = new Anthropic({
@@ -95,49 +118,42 @@ async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
 }
 
 /**
- * Gets changed files since the last git SHA
+ * Gets changed files since the last git SHA. Includes uncommitted and
+ * untracked files so pages written earlier in the same CI job (before any
+ * commit) are summarized. If the SHA is unreachable (for example after a
+ * squash or rebase merge), falls back to uncommitted and untracked files only.
  */
-function getChangedFilesSince(lastSha: string): Set<string> {
+function getChangedFilesSince(lastSha: string, cwd?: string): Set<string> {
+  const lines = (command: string) =>
+    execSync(command, { encoding: "utf-8", cwd, stdio: "pipe" })
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+  const untracked = () => lines("git ls-files --others --exclude-standard");
+
   try {
-    // Get files that were added, modified, or deleted
-    const added = execSync(
-      `git diff --name-only --diff-filter=A ${lastSha} HEAD`,
-      {
-        encoding: "utf-8",
-      }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const modified = execSync(
-      `git diff --name-only --diff-filter=M ${lastSha} HEAD`,
-      { encoding: "utf-8" }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const deleted = execSync(
-      `git diff --name-only --diff-filter=D ${lastSha} HEAD`,
-      {
-        encoding: "utf-8",
-      }
-    )
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-
-    const allChanged = new Set([...added, ...modified, ...deleted]);
-    return allChanged;
+    // Without a second revision, `git diff` compares against the working tree.
+    return new Set([...lines(`git diff --name-only ${lastSha}`), ...untracked()]);
   } catch (_error) {
     console.warn(
       chalk.yellow(
-        `⚠ Could not get changed files since ${lastSha}, processing all files`
+        `⚠ Could not diff against ${lastSha}; using only uncommitted and untracked changes`
       )
     );
-    return new Set();
   }
+
+  // Each source is read independently so one failure doesn't drop the other.
+  const changed = new Set<string>();
+  for (const read of [() => lines("git diff --name-only HEAD"), untracked]) {
+    try {
+      for (const file of read()) {
+        changed.add(file);
+      }
+    } catch (_error) {
+      // Not a git repo or no HEAD yet - nothing to report from this source
+    }
+  }
+  return changed;
 }
 
 /**
@@ -400,9 +416,7 @@ async function summarizePage(
 /**
  * Organizes pages into sections based on their path
  */
-function organizeSections(
-  pages: Array<PageMetadata & { title: string; description: string }>
-): Section[] {
+function organizeSections(pages: ListedPage[]): Section[] {
   const sectionMap = new Map<string, Section>();
 
   for (const page of pages) {
@@ -413,7 +427,9 @@ function organizeSections(
     const parts = urlPath.split("/");
 
     let sectionName: string;
-    if (parts[0] === "home") {
+    if (page.section) {
+      sectionName = page.section;
+    } else if (parts[0] === "home") {
       // Organize home pages by subcategory
       if (parts.length > 1) {
         sectionName = formatSectionName(parts[1]);
@@ -792,9 +808,14 @@ async function main() {
       );
     }
 
-    // Step 1: Discover all pages (MDX pages, plus toolkit pages from data)
+    // Step 1: Discover all pages (MDX pages, toolkit pages from data, and
+    // external pages)
     const pages = await discoverPages();
-    const toolkitPages = await discoverToolkitPages();
+    // Toolkit and external pages have fixed titles/descriptions (no Claude).
+    const toolkitPages: ListedPage[] = [
+      ...(await discoverToolkitPages()),
+      ...EXTERNAL_PAGES,
+    ];
 
     // Step 2: Determine which pages need summarization and identify deleted pages
     const { pagesToSummarize, pagesToKeep, hasChanges } =
@@ -816,7 +837,7 @@ async function main() {
     // pages so a static page (e.g. resources/integrations/search/tavily) that
     // appears in both sets doesn't emit two entries in llms.txt.
     const seenUrls = new Set<string>();
-    const allPages: Array<PageMetadata & { title: string; description: string }> = [];
+    const allPages: ListedPage[] = [];
     for (const page of [...summarizedPages, ...toolkitPages]) {
       if (!seenUrls.has(page.url)) {
         seenUrls.add(page.url);
@@ -871,4 +892,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export { hasSameBody, main as generateLlmsTxt, summarizePagesInBatches };
+export {
+  getChangedFilesSince,
+  hasSameBody,
+  main as generateLlmsTxt,
+  summarizePagesInBatches,
+};

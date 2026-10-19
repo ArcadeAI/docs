@@ -1425,27 +1425,63 @@
   ],
   "documentationChunks": [
     {
-      "type": "warning",
-      "location": "description",
-      "position": "after",
-      "content": "<Callout type=\"warning\" title=\"Scoped PagerDuty OAuth\">\n  Register a **Scoped OAuth** PagerDuty app with the scopes listed in the\n  [PagerDuty auth provider](/references/auth-providers/pagerduty#permissions).\n  Classic OAuth apps don't support the per-resource scopes these tools\n  request.\n</Callout>"
-    },
-    {
       "type": "info",
       "location": "description",
       "position": "after",
-      "content": "<Callout type=\"info\">\n  Configure PagerDuty OAuth in the [PagerDuty auth\n  provider](/references/auth-providers/pagerduty) before using these tools.\n</Callout>"
+      "content": "<Callout type=\"info\">\n  On Arcade Cloud, these tools use Arcade's PagerDuty app, which a PagerDuty\n  administrator installs once per account. See the [integration\n  walkthrough](#integration-walkthrough). If you self-host the Arcade Engine, or\n  you're building an agent for people who aren't members of your Arcade\n  project, register your own **Scoped OAuth** app and configure the [PagerDuty\n  auth provider](/references/auth-providers/pagerduty). Classic OAuth apps\n  don't support the per-resource scopes these tools request.\n</Callout>"
     },
     {
       "type": "markdown",
-      "location": "auth",
+      "location": "after_available_tools",
       "position": "after",
-      "content": "PagerDuty requires OAuth2. Configure the PagerDuty auth provider and request the scopes shown above per tool. Tokens are passed as Bearer auth:\n```\nAuthorization: Bearer <token>\n```\nSee PagerDuty auth docs: [PagerDuty API Authentication](https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTYz-authentication)."
+      "content": "## PagerDuty + Arcade integration benefits\n\n- **Triage incidents from your agent:** list, read, acknowledge, resolve, reopen, and reassign incidents.\n- **Find out who's on call** from on-call entries, schedules, and escalation policies.\n- **Use the agent you already have:** any MCP client connected to an Arcade MCP gateway, such as Claude, Cursor, or VS Code.\n- **Least-privilege access:** each tool requests only the scopes it needs and acts as the user who authorized it. Arcade keeps the token away from the language model.",
+      "header": "## PagerDuty + Arcade integration benefits",
+      "priority": 10
+    },
+    {
+      "type": "markdown",
+      "location": "after_available_tools",
+      "position": "after",
+      "content": "## How it works\n\nThe first time a user calls a PagerDuty tool, Arcade returns an authorization link. The user approves Arcade's PagerDuty app on PagerDuty's consent screen, and Arcade stores and refreshes the token from then on. Each tool can only do what its scopes and the user's PagerDuty role allow, and PagerDuty records its actions as that user's.\n\nThe tools call the [PagerDuty REST API](https://docs.pagerduty.com/developer/api/reference) only when an agent uses them. The integration doesn't send events, create incidents, or need an integration key.",
+      "header": "## How it works",
+      "priority": 20
+    },
+    {
+      "type": "markdown",
+      "location": "after_available_tools",
+      "position": "after",
+      "content": "## Requirements\n\n- A PagerDuty account where an administrator has installed Arcade's PagerDuty app. See the [walkthrough](#integration-walkthrough).\n- An Arcade account in your Arcade project. <SignupLink linkLocation=\"docs:pagerduty-integration-guide\">Create one</SignupLink> if you don't have one.\n- An MCP client such as Claude, Cursor, or VS Code, or the Playground in the Arcade dashboard.\n\nIf you self-host Arcade, or you're building an agent for people outside your Arcade project, register your own Scoped OAuth app with the [PagerDuty auth provider](/references/auth-providers/pagerduty).",
+      "header": "## Requirements",
+      "priority": 30
+    },
+    {
+      "type": "markdown",
+      "location": "after_available_tools",
+      "position": "after",
+      "content": "## Support\n\n- Customers on paid plans can email Arcade support at support<wbr />@arcade.dev.\n- Anyone can ask in the [Arcade Discord community](https://discord.gg/GUZEMpEZ9p).\n\nThe [Arcade contact page](/resources/contact-us) lists every support channel.",
+      "header": "## Support",
+      "priority": 40
+    },
+    {
+      "type": "markdown",
+      "location": "after_available_tools",
+      "position": "after",
+      "content": "## Integration walkthrough\n\n### In PagerDuty\n\nA PagerDuty administrator installs Arcade's app once per account:\n\n1. Sign in as a user with the Admin or Account Owner role and go to `https://<your-subdomain>.pagerduty.com/oauth-apps/PHRMXL1`.\n2. Review the requested scopes and click **Install on your account**.\n\nIf you aren't an administrator, click **Copy install link** on that page and send the link to one. You don't need a service integration or an integration key.\n\n### In Arcade\n\n1. In the [Arcade dashboard](https://app.arcade.dev), go to **MCP gateways** and click **Create MCP gateway**. Under **Select apps**, select **PagerDuty**. Under **Choose who connects**, select **Members of this Project**. Then create the gateway. For the other options, see [Create via Dashboard](/operate/governance/mcp-gateways/create-via-dashboard).\n2. Open the gateway's actions menu, select **Connect to client**, and follow the steps for your MCP client.\n3. Ask your agent a PagerDuty question, such as \"Which incidents are open right now?\" Open the authorization link it returns, sign in to PagerDuty, and click **Submit Consent**.\n\nTo try the tools without an MCP client, open the Playground in the Arcade dashboard, click **Select Tools**, and add PagerDuty.",
+      "header": "## Integration walkthrough",
+      "priority": 50
+    },
+    {
+      "type": "markdown",
+      "location": "after_available_tools",
+      "position": "after",
+      "content": "## How to uninstall\n\nRevoking in Arcade deletes the stored token but leaves the authorization in PagerDuty, so do both:\n\n- **In Arcade:** edit the gateway and clear **PagerDuty** under **Select apps**, or delete the gateway. Then revoke the PagerDuty connections under **Connections** > **Connected users**.\n- **In PagerDuty:** go to **Integrations** > **OAuth Apps** > **Arcade.dev** and click **Revoke Your User Token**. Administrators can click **Revoke All User Tokens** instead, or **Uninstall** to remove the app from the account.",
+      "header": "## How to uninstall",
+      "priority": 60
     }
   ],
   "customImports": [],
   "subPages": [],
-  "curationSourceHash": "07d907a3da0482c380fb3d61f72187694ccac5f75c2461ccefd4a96be4674274",
+  "curationSourceHash": "a976f2f9feb1945c67a781a990b555a303121632269fcf100db4df8e358ac216",
   "generatedAt": "2026-10-07T21:25:50.988Z",
   "summary": "## PagerDuty Toolkit\n\nThe Arcade PagerDuty toolkit lets LLMs interact with PagerDuty to query and manage incidents, on-call schedules, teams, services, and escalation policies.\n\n## Capabilities\n\n- **Incident management** — retrieve, list (with filters for status, urgency, service, team, and time), update status (acknowledge, resolve, reopen), and reassign incidents to specific users.\n- **On-call & scheduling** — list on-call entries, schedules, and escalation policies; fetch individual policies by ID.\n- **Teams, users & services** — list and look up teams (with members and linked resources), users, and services; fuzzy-search users by name or email; retrieve individual records by ID.\n- **Activity feed** — list log entries showing incident triggers, acknowledgments, escalations, and resolutions across the account.\n- **Identity** — retrieve the authenticated user's PagerDuty profile including contact and notification summaries via `Whoami`.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **PagerDuty** Arcade auth provider. See the [PagerDuty provider docs](https://docs.arcade.dev/en/references/auth-providers/pagerduty) for configuration details."
 }
