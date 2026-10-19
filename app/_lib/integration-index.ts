@@ -21,22 +21,16 @@ export function toIntegrationLink(toolkit: {
   return `${INTEGRATIONS_BASE}/${category}/${slug}`;
 }
 
-export type ResolvedIndexToolkit = ToolkitWithDocsLink & { hasPage: boolean };
+export type ResolvedIndexToolkit = ToolkitWithDocsLink & { link: string };
 
 /**
- * Decide which catalog toolkits the integrations index should render, and
- * whether each one links to a real page.
+ * Decide which catalog toolkits the integrations index should render, and the
+ * page each card links to.
  *
- * The design-system catalog carries legacy bare-name entries (e.g. "Datadog"
- * alongside "DatadogApi") and doc-less placeholders (e.g. "Discord") that have
- * no generated docs page — linking to them 404s. Given the set of links that
- * actually resolve (`validLinks`: dynamic toolkit routes + authored static
- * pages), this:
- *   - drops a bare entry when its `-api` sibling owns the real page (collapses
- *     Datadog/DatadogApi, Vercel/VercelApi, Ashby/AshbyApi, Customerio/...),
- *   - de-dupes entries that resolve to the same URL (e.g. Notion/NotionToolkit),
- *   - flags the rest with `hasPage` so the caller can render doc-less toolkits
- *     as non-clickable cards instead of as broken links.
+ * Given the set of links that actually resolve (`validLinks`: dynamic toolkit
+ * routes + authored static pages), this:
+ *   - drops toolkits without a page, so no card links to a 404,
+ *   - de-dupes entries that resolve to the same URL (e.g. Notion/NotionToolkit).
  */
 export function resolveIndexToolkits(
   toolkits: ToolkitWithDocsLink[],
@@ -52,21 +46,11 @@ export function resolveIndexToolkits(
     }
 
     const link = toIntegrationLink(toolkit);
-    const hasPage = link !== null && validLinks.has(link);
-
-    // A bare duplicate of a real "-api" toolkit: drop it; the real card stays.
-    if (link && !hasPage && validLinks.has(`${link}-api`)) {
+    if (link === null || !validLinks.has(link) || seen.has(link)) {
       continue;
     }
-
-    // Collapse multiple catalog entries that point at the same URL.
-    if (link) {
-      if (seen.has(link)) {
-        continue;
-      }
-      seen.add(link);
-    }
-    resolved.push({ ...toolkit, hasPage });
+    seen.add(link);
+    resolved.push({ ...toolkit, link });
   }
 
   return resolved;

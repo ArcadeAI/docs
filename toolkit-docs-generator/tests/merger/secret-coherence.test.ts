@@ -49,7 +49,6 @@ const toolkit = (overrides: Partial<MergedToolkit> = {}): MergedToolkit => ({
     isPro: false,
     type: "arcade",
     docsLink: "",
-    isComingSoon: false,
     isHidden: false,
   },
   auth: null,

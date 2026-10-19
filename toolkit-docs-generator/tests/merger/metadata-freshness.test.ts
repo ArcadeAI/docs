@@ -28,7 +28,6 @@ const createMetadata = (
   isPro: false,
   type: "arcade",
   docsLink: "https://docs.arcade.dev/en/mcp-servers/development/github",
-  isComingSoon: false,
   isHidden: false,
   ...overrides,
 });
@@ -372,7 +371,6 @@ describe("mergeToolkit metadata freshness integration", () => {
       isPro: false,
       type: "arcade" as const,
       docsLink: "https://docs.arcade.dev/en/mcp-servers/sales/testkit",
-      isComingSoon: false,
       isHidden: false,
     };
 
@@ -389,7 +387,6 @@ describe("mergeToolkit metadata freshness integration", () => {
         isPro: false,
         type: "arcade" as const,
         docsLink: "https://docs.arcade.dev/en/mcp-servers/development/testkit",
-        isComingSoon: false,
         isHidden: false,
       },
       auth: null,
@@ -447,7 +444,6 @@ describe("mergeToolkit metadata freshness integration", () => {
       isPro: false,
       type: "arcade" as const,
       docsLink: "https://docs.arcade.dev/en/mcp-servers/development/testkit",
-      isComingSoon: false,
       isHidden: false,
     };
 
@@ -463,7 +459,6 @@ describe("mergeToolkit metadata freshness integration", () => {
         isPro: false,
         type: "arcade" as const,
         docsLink: "https://docs.arcade.dev/en/mcp-servers/development/testkit",
-        isComingSoon: false,
         isHidden: false,
       },
       auth: null,

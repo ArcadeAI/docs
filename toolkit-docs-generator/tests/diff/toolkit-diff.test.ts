@@ -97,7 +97,6 @@ const createMergedToolkit = (
     isPro: false,
     type: "arcade",
     docsLink: "https://docs.example.com/test",
-    isComingSoon: false,
     isHidden: false,
   },
   auth: {
@@ -124,7 +123,6 @@ const createToolkitMetadata = (
   isPro: false,
   type: "arcade",
   docsLink: "https://docs.example.com/test",
-  isComingSoon: false,
   isHidden: false,
   ...overrides,
 });

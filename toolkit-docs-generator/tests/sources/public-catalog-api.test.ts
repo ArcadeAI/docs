@@ -18,7 +18,6 @@ const githubBranding = {
   publicIconUrl: "https://design-system.arcade.dev/icons/github.svg",
   isBYOC: false,
   isPro: false,
-  isComingSoon: false,
   isHidden: false,
 };
 
@@ -443,7 +442,6 @@ describe("PublicCatalogApiSource", () => {
       type: "arcade",
       docsLink:
         "https://docs.arcade.dev/en/resources/integrations/development/github",
-      isComingSoon: false,
       isHidden: false,
     });
     expect(catalogCalls).toBe(1);
@@ -530,6 +528,21 @@ describe("createPublicCatalogSources", () => {
     const data = await toolkitDataSource.fetchToolkitData("Github");
 
     expect(data.tools).toHaveLength(1);
+    expect(data.metadata?.label).toBe("GitHub");
+  });
+
+  it("keeps branding that carries fields the generator no longer reads", async () => {
+    const brandingWithRetiredField = { ...githubBranding, isComingSoon: false };
+    const { toolkitDataSource } = createPublicCatalogSources({
+      baseUrl: "https://experience.example/api",
+      fetchFn: stubCatalogFetch(
+        [{ ...githubCatalogEntry, metadata: brandingWithRetiredField }],
+        [githubTool]
+      ),
+    });
+
+    const data = await toolkitDataSource.fetchToolkitData("Github");
+
     expect(data.metadata?.label).toBe("GitHub");
   });
 });

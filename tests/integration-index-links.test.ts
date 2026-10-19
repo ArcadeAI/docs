@@ -51,7 +51,6 @@ const makeToolkit = (
     type: "arcade",
     category,
     isHidden,
-    isComingSoon: false,
     isBYOC: false,
     isPro: false,
     docsLink: category
@@ -65,50 +64,47 @@ describe("resolveIndexToolkits (logic)", () => {
   const validLinks = new Set([
     `${INTEGRATIONS}/development/alpha-api`, // stands in for a generated route
     `${INTEGRATIONS}/search/gamma`, // stands in for an authored static page
+    `${INTEGRATIONS}/productivity/delta`,
   ]);
   const catalog: ToolkitWithDocsLink[] = [
     makeToolkit("AlphaApi", "development", "alpha-api"), // real page
-    makeToolkit("Alpha", "development", "alpha"), // bare, no page, has "-api" sibling -> drop
-    makeToolkit("Beta", "social", "beta"), // no page, no "-api" sibling -> non-clickable
-    makeToolkit("Gamma", "search", "gamma"), // page exists -> clickable
-    makeToolkit("Delta", "productivity", "delta"), // duplicate A (no page)
+    makeToolkit("Alpha", "development", "alpha"), // no page -> drop
+    makeToolkit("Gamma", "search", "gamma"), // page exists -> kept
+    makeToolkit("Delta", "productivity", "delta"), // duplicate A
     makeToolkit("DeltaPrime", "productivity", "delta"), // duplicate B, same link -> collapse
     makeToolkit("Zeta", "social", "zeta", true), // hidden -> excluded
   ];
   const resolved = resolveIndexToolkits(catalog, validLinks);
   const byId = (id: string) => resolved.find((toolkit) => toolkit.id === id);
-  const links = resolved.map(toIntegrationLink);
 
-  test("drops a bare entry when its '-api' sibling owns the page", () => {
-    expect(resolved.some((toolkit) => toolkit.id === "Alpha")).toBe(false);
-    expect(byId("AlphaApi")?.hasPage).toBe(true);
+  test("drops a toolkit without a page", () => {
+    expect(byId("Alpha")).toBeUndefined();
   });
 
-  test("keeps a toolkit without a page, but marks it non-clickable", () => {
-    expect(byId("Beta")?.hasPage).toBe(false);
-  });
-
-  test("keeps a toolkit whose page exists clickable", () => {
-    expect(byId("Gamma")?.hasPage).toBe(true);
+  test("keeps a toolkit whose page exists, with its link", () => {
+    expect(byId("AlphaApi")?.link).toBe(
+      `${INTEGRATIONS}/development/alpha-api`
+    );
+    expect(byId("Gamma")?.link).toBe(`${INTEGRATIONS}/search/gamma`);
   });
 
   test("excludes hidden toolkits entirely", () => {
-    expect(resolved.some((toolkit) => toolkit.id === "Zeta")).toBe(false);
+    expect(byId("Zeta")).toBeUndefined();
   });
 
   test("collapses entries that resolve to the same link", () => {
     expect(
-      links.filter((link) => link === `${INTEGRATIONS}/productivity/delta`)
+      resolved.filter(
+        (toolkit) => toolkit.link === `${INTEGRATIONS}/productivity/delta`
+      )
     ).toHaveLength(1);
-    expect(links.length).toBe(new Set(links).size);
   });
 
-  test("does not manufacture an others link for a missing category", () => {
+  test("drops a toolkit without a category", () => {
     const toolkit = makeToolkit("NoCategory", null, "no-category");
-    const [resolvedToolkit] = resolveIndexToolkits([toolkit], validLinks);
 
     expect(toIntegrationLink(toolkit)).toBeNull();
-    expect(resolvedToolkit?.hasPage).toBe(false);
+    expect(resolveIndexToolkits([toolkit], validLinks)).toEqual([]);
   });
 });
 
@@ -125,25 +121,23 @@ describe("integrations index links (live data)", () => {
     resolved = resolveIndexToolkits(toolkits, validLinks);
   }, TIMEOUT);
 
-  test("no clickable card links to a page that does not exist", () => {
-    const brokenClickable = resolved
-      .filter((toolkit) => toolkit.hasPage)
-      .map((toolkit) => toIntegrationLink(toolkit))
-      .filter((link): link is string => link !== null && !validLinks.has(link));
+  test("every card links to a page that exists", () => {
+    const broken = resolved
+      .map((toolkit) => toolkit.link)
+      .filter((link) => !validLinks.has(link));
 
-    expect(brokenClickable).toEqual([]);
+    expect(broken).toEqual([]);
   });
 
   test("every rendered card resolves to a unique link (duplicates collapse)", () => {
-    const links = resolved.map((toolkit) => toIntegrationLink(toolkit));
+    const links = resolved.map((toolkit) => toolkit.link);
     expect(links.length).toBe(new Set(links).size);
   });
 
-  test("the index renders cards and at least one links to a real page", () => {
-    // Guards total breakage (empty catalog, or a validLinks computation that
-    // matches nothing so every card is non-clickable).
+  test("the index renders cards", () => {
+    // Guards total breakage: an empty catalog, or a validLinks computation
+    // that matches nothing and so drops every card.
     expect(resolved.length).toBeGreaterThan(0);
-    expect(resolved.some((toolkit) => toolkit.hasPage)).toBe(true);
   });
 
   test("authored static integration pages are recognized as valid links", () => {

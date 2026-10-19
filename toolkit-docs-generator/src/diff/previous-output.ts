@@ -14,7 +14,6 @@ const DEFAULT_PREVIOUS_TOOLKIT_METADATA = {
   isPro: false,
   type: "arcade" as const,
   docsLink: "",
-  isComingSoon: false,
   isHidden: false,
 };
 

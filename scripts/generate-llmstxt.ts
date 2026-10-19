@@ -245,7 +245,7 @@ type ToolkitData = Partial<
   metadata?: Partial<
     Pick<
       MergedToolkitMetadata,
-      "category" | "docsLink" | "isHidden" | "isComingSoon"
+      "category" | "docsLink" | "isHidden"
     >
   >;
 };
@@ -330,7 +330,7 @@ async function discoverToolkitPages(): Promise<
       const data = JSON.parse(
         await fs.readFile(filePath, "utf-8")
       ) as ToolkitData;
-      if (!data.id || data.metadata?.isHidden || data.metadata?.isComingSoon) {
+      if (!data.id || data.metadata?.isHidden) {
         continue;
       }
       if (allowedIds && !allowedIds.has(data.id)) {

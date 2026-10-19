@@ -1,6 +1,7 @@
-import type { Toolkit, ToolkitType } from "@arcadeai/design-system";
+import type { ToolkitType } from "@arcadeai/design-system";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useMemo } from "react";
+import type { ToolkitWithDocsLink } from "@/app/_lib/toolkit-slug";
 import { useFilters } from "./use-filters";
 
 const DEFAULT_PRIORITY = 5;
@@ -25,27 +26,20 @@ const TYPE_LABELS: Record<ToolkitType, string> = {
 const getTypePriority = (type: string): number =>
   TYPE_PRIORITY[type as ToolkitType] ?? DEFAULT_PRIORITY;
 
-const compareToolkits = <T extends Toolkit>(a: T, b: T): number => {
-  // First prioritize available toolkits over coming soon toolkits
-  if (a.isComingSoon !== b.isComingSoon) {
-    return a.isComingSoon ? 1 : -1;
+const compareToolkits = <T extends ToolkitWithDocsLink>(a: T, b: T): number => {
+  const aPriority = getTypePriority(a.type);
+  const bPriority = getTypePriority(b.type);
+
+  if (aPriority !== bPriority) {
+    return aPriority - bPriority;
   }
 
-  // Within each availability group, prioritize by type
-  if (!(a.isComingSoon || b.isComingSoon)) {
-    const aPriority = getTypePriority(a.type);
-    const bPriority = getTypePriority(b.type);
-
-    if (aPriority !== bPriority) {
-      return aPriority - bPriority;
-    }
-  }
-
-  // Finally sort alphabetically within each group
   return a.label.localeCompare(b.label);
 };
 
-export function useToolkitFilters<T extends Toolkit>(toolkits: T[]) {
+export function useToolkitFilters<T extends ToolkitWithDocsLink>(
+  toolkits: T[]
+) {
   const {
     selectedCategory,
     selectedType,

@@ -45,7 +45,6 @@ const makeToolkit = (id: string): MergedToolkit => ({
     isPro: false,
     type: "arcade",
     docsLink: `https://docs.example.com/${id.toLowerCase()}`,
-    isComingSoon: false,
     isHidden: false,
   },
   auth: null,

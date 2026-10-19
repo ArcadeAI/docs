@@ -43,7 +43,6 @@ const createMetadata = (
   isPro: false,
   type: "arcade",
   docsLink: "https://docs.example.com/github",
-  isComingSoon: false,
   isHidden: false,
   ...overrides,
 });

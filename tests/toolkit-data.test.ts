@@ -93,7 +93,6 @@ describe("toolkit data loader", () => {
           type: "arcade_starter",
           docsLink:
             "https://docs.arcade.dev/en/mcp-servers/development/posthog-api",
-          isComingSoon: false,
           isHidden: false,
         },
       };

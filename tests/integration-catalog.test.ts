@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
-import type { PartnerToolkit } from "@/app/_data/partner-toolkits";
 import { toIntegrationCatalog } from "@/app/_lib/integration-catalog";
+import type { ToolkitWithDocsLink } from "@/app/_lib/toolkit-slug";
 
 const INTEGRATIONS = "https://docs.arcade.dev/en/resources/integrations";
 
@@ -21,7 +21,6 @@ const makeGenerated = (
       isPro: false,
       type: "arcade",
       docsLink: `${INTEGRATIONS}/social/${id.toLowerCase()}`,
-      isComingSoon: false,
       isHidden: false,
       ...metadata,
     },
@@ -39,9 +38,8 @@ const partner = {
   mcpUrl: "https://mcp.example.com/mcp",
   docsLink: `${INTEGRATIONS}/search/partner`,
   relativeDocsLink: "/en/resources/integrations/search/partner",
-  isComingSoon: false,
   isHidden: false,
-} satisfies PartnerToolkit;
+} satisfies ToolkitWithDocsLink & { mcpUrl: string };
 
 describe("toIntegrationCatalog", () => {
   test("lists a published toolkit with the card fields from its generated file", () => {
@@ -60,7 +58,6 @@ describe("toIntegrationCatalog", () => {
       relativeDocsLink: "/en/resources/integrations/social/twilio",
       type: "verified",
       category: "social",
-      isComingSoon: false,
       isHidden: false,
     });
   });

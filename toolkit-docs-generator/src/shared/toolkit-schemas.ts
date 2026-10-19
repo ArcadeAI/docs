@@ -327,7 +327,6 @@ export const MergedToolkitMetadataSchema = z.object({
   isPro: z.boolean(),
   type: ToolkitTypeSchema,
   docsLink: z.string(),
-  isComingSoon: z.boolean(),
   isHidden: z.boolean(),
 });
 

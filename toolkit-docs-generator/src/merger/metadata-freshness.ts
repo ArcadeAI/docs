@@ -47,7 +47,6 @@ const METADATA_FIELDS: ReadonlyArray<keyof MergedToolkitMetadata> = [
   "isPro",
   "type",
   "docsLink",
-  "isComingSoon",
   "isHidden",
 ];
 

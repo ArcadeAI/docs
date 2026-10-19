@@ -28,7 +28,6 @@ const toCatalogToolkit = ({
   relativeDocsLink: new URL(metadata.docsLink).pathname,
   type: metadata.type,
   category: metadata.category,
-  isComingSoon: metadata.isComingSoon,
   isHidden: metadata.isHidden,
 });
 

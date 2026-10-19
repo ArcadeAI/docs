@@ -52,7 +52,6 @@ const PublicCatalogToolkitMetadataSchema = z
     iconUrl: z.string().optional(),
     isBYOC: z.boolean(),
     isPro: z.boolean(),
-    isComingSoon: z.boolean(),
     isHidden: z.boolean(),
   })
   .nullable()
@@ -119,7 +118,6 @@ export const transformPublicToolkitMetadata = (
     isPro: metadata.isPro,
     type: metadata.type,
     docsLink: metadata.docsLink,
-    isComingSoon: metadata.isComingSoon,
     isHidden: metadata.isHidden,
   });
 

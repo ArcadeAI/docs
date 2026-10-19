@@ -519,7 +519,6 @@ const getDefaultMetadata = (toolkitId: string): MergedToolkitMetadata =>
     isPro: false,
     type: "arcade",
     docsLink: `https://docs.arcade.dev/en/resources/integrations/${DEFAULT_METADATA_CATEGORY}/${getDefaultDocsSlug(toolkitId)}`,
-    isComingSoon: false,
     isHidden: true,
   });
 
@@ -535,7 +534,6 @@ const transformMetadata = (
   isPro: metadata.isPro,
   type: metadata.type,
   docsLink: metadata.docsLink,
-  isComingSoon: metadata.isComingSoon,
   isHidden: metadata.isHidden,
 });
 
@@ -1175,7 +1173,6 @@ export class DataMerger {
           isPro: false,
           type: isApiSuffixedToolkitId(toolkitId) ? "arcade_starter" : "arcade",
           docsLink: "",
-          isComingSoon: false,
           isHidden: true,
         },
         auth: null,

@@ -7,7 +7,7 @@ import type { Toolkit } from "@arcadeai/design-system";
  * render a Partner badge on cards). This type makes the properties explicit
  * so both server and client code can share it.
  */
-export type ToolkitWithDocsLink = Toolkit & {
+export type ToolkitWithDocsLink = Omit<Toolkit, "isComingSoon"> & {
   docsLink?: string | null;
   isPartner?: boolean;
 };

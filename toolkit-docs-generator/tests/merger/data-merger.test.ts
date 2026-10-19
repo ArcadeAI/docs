@@ -82,7 +82,6 @@ const createMetadata = (
   isPro: false,
   type: "arcade",
   docsLink: "https://docs.example.com/test",
-  isComingSoon: false,
   isHidden: false,
   ...overrides,
 });

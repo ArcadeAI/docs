@@ -72,7 +72,6 @@ const writeToolkitData = async (
         isPro: false,
         type: "arcade",
         docsLink: "",
-        isComingSoon: false,
         isHidden: false,
         ...toolkit.metadata,
       },

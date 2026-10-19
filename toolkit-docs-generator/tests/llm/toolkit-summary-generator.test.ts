@@ -17,7 +17,6 @@ const createToolkit = (
     isPro: false,
     type: "arcade",
     docsLink: "https://docs.arcade.dev/en/mcp-servers/development/github",
-    isComingSoon: false,
     isHidden: false,
   },
   auth: {

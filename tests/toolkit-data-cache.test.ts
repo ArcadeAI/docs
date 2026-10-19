@@ -28,7 +28,6 @@ const validToolkitJson = (id: string, docsSlug: string): string =>
       isPro: false,
       type: "arcade",
       docsLink: `https://docs.arcade.dev/en/resources/integrations/development/${docsSlug}`,
-      isComingSoon: false,
       isHidden: false,
     },
     auth: null,
@@ -206,7 +205,6 @@ describe("readToolkitData cache keys distinguish slug variants", () => {
         type: "arcade",
         docsLink:
           "https://docs.arcade.dev/en/resources/integrations/productivity/notion",
-        isComingSoon: false,
         isHidden: false,
       },
       auth: null,

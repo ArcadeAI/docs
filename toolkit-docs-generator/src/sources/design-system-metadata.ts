@@ -29,7 +29,6 @@ const DesignSystemToolkitSchema = z.object({
   iconUrl: z.string().optional(),
   isBYOC: z.boolean(),
   isPro: z.boolean(),
-  isComingSoon: z.boolean(),
   isHidden: z.boolean(),
 });
 
@@ -52,7 +51,6 @@ function toToolkitMetadata(entry: DesignSystemToolkit): ToolkitMetadata | null {
     isPro: entry.isPro,
     type: entry.type,
     docsLink: entry.docsLink,
-    isComingSoon: entry.isComingSoon,
     isHidden: entry.isHidden,
   });
 

@@ -126,7 +126,6 @@ describe("Scenario: New toolkit is added", () => {
         isPro: false,
         type: "arcade",
         docsLink: "https://docs.example.com",
-        isComingSoon: false,
         isHidden: false,
       };
 

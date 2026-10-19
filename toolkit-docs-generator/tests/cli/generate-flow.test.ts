@@ -273,7 +273,6 @@ describe("assertRequireCompleteMetadata", () => {
         isPro: false,
         type: "arcade",
         docsLink: "https://docs.example.com",
-        isComingSoon: false,
         isHidden: false,
       },
     };
@@ -299,7 +298,6 @@ describe("assertRequireCompleteMetadata", () => {
         isPro: false,
         type: "arcade",
         docsLink: "https://docs.example.com",
-        isComingSoon: false,
         isHidden: false,
       },
     };

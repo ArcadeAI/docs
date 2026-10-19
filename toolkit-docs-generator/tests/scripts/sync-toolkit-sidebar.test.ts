@@ -330,7 +330,6 @@ describe("buildToolkitInfoList", () => {
         isBYOC: false,
         isPro: false,
         type: "arcade",
-        isComingSoon: false,
         isHidden: false,
       },
     });
