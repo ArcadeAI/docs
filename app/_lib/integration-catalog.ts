@@ -1,65 +1,58 @@
-import type { Toolkit } from "@arcadeai/design-system";
-import { TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
+import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
 import { PARTNER_TOOLKITS } from "@/app/_data/partner-toolkits";
-import { normalizeToolkitId } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
-import { readToolkitData } from "./toolkit-data";
+import { resolveToolkitDataDir } from "@/toolkit-docs-generator/src/shared/toolkit-data-dir";
+import { loadAllToolkitData } from "./toolkit-data";
 import type { ToolkitWithDocsLink } from "./toolkit-slug";
 
-const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
-  if ("docsLink" in toolkit) {
-    const value = (toolkit as ToolkitWithDocsLink).docsLink;
-    return value ?? undefined;
-  }
-  return;
-};
+/**
+ * Engine plumbing the public catalog lists like any other toolkit. Nothing in
+ * the catalog separates these from a product, so they are named here. Keep in
+ * step with arcade.dev/tools, which hides the same set.
+ */
+const INTERNAL_TOOLKIT_IDS: ReadonlySet<string> = new Set([
+  "Math",
+  "ArcadeEngineApi",
+]);
+
+const toCatalogToolkit = ({
+  id,
+  label,
+  metadata,
+}: ToolkitData): ToolkitWithDocsLink => ({
+  id,
+  label,
+  isBYOC: metadata.isBYOC,
+  isPro: metadata.isPro,
+  publicIconUrl: metadata.iconUrl,
+  docsLink: metadata.docsLink,
+  relativeDocsLink: new URL(metadata.docsLink).pathname,
+  type: metadata.type,
+  category: metadata.category,
+  isComingSoon: metadata.isComingSoon,
+  isHidden: metadata.isHidden,
+});
 
 /**
- * Toolkits that have launched but are still flagged `isComingSoon` in the
- * design-system catalog. Remove an entry once DS ships the flag as `false`.
+ * The integrations index: every toolkit the public catalog publishes, plus
+ * docs-local partner toolkits.
+ *
+ * `generated` is the nightly output of toolkit-docs-generator, which reads the
+ * same public catalog arcade.dev/tools is built from, so both list the same
+ * toolkits with the same badges.
  */
-const LAUNCHED_TOOLKIT_IDS = new Set(["workday"]);
+export const toIntegrationCatalog = (
+  generated: Iterable<ToolkitData>,
+  partners: readonly ToolkitWithDocsLink[]
+): ToolkitWithDocsLink[] => [
+  ...[...generated]
+    .filter((toolkit) => !INTERNAL_TOOLKIT_IDS.has(toolkit.id))
+    .map(toCatalogToolkit),
+  ...partners,
+];
 
-const clearLaunchedComingSoon = (toolkit: Toolkit): Toolkit =>
-  LAUNCHED_TOOLKIT_IDS.has(normalizeToolkitId(toolkit.id))
-    ? { ...toolkit, isComingSoon: false }
-    : toolkit;
-
-/**
- * The full integrations catalog the index renders: design-system toolkits
- * (enriched with a `docsLink` from their data file when the catalog entry
- * lacks one, so the card's slug matches the generated page) plus docs-local
- * partner toolkits.
- */
 export const getToolkitsWithDocsLinks = async (): Promise<
   ToolkitWithDocsLink[]
 > => {
-  const docsLinkById = new Map<string, string>();
-
-  await Promise.all(
-    TOOLKITS.map(async (toolkit) => {
-      const existing = getToolkitDocsLink(toolkit);
-      if (existing) {
-        return;
-      }
-
-      const data = await readToolkitData(toolkit.id);
-      if (data?.metadata?.docsLink) {
-        docsLinkById.set(
-          normalizeToolkitId(toolkit.id),
-          data.metadata.docsLink
-        );
-      }
-    })
-  );
-
-  const dsToolkits: ToolkitWithDocsLink[] = TOOLKITS.map((dsToolkit) => {
-    const toolkit = clearLaunchedComingSoon(dsToolkit);
-    const existing = getToolkitDocsLink(toolkit);
-    const docsLink =
-      existing ?? docsLinkById.get(normalizeToolkitId(toolkit.id));
-
-    return docsLink ? { ...toolkit, docsLink } : toolkit;
-  });
-
-  return [...dsToolkits, ...PARTNER_TOOLKITS];
+  const { byNormalizedId } = await loadAllToolkitData(resolveToolkitDataDir());
+  return toIntegrationCatalog(byNormalizedId.values(), PARTNER_TOOLKITS);
 };
