@@ -1,30 +1,17 @@
-import { type ComponentProps, type CSSProperties, useId } from "react";
-import { cx } from "./elements";
+import { cn } from "@arcadeai/design-system/lib/utils";
+import type { ComponentProps } from "react";
 
 /**
- * Nextra's `<Steps>` (nextra/components): a left rule, with every `h3` inside
- * numbered by a CSS counter (`.nextra-steps` in app/global.css). No `<Step>`
- * wrappers are needed, exactly as in the Nextra-authored MDX.
+ * Fumadocs' steps, numbering the `##` and `###` headings inside, so the MDX
+ * keeps its Nextra form (headings, no `<Step>` wrappers). The hidden tab-label
+ * headings (lib/remark-nextra-compat.ts) carry a `style` and are skipped.
  */
-export function Steps({
-  children,
-  className,
-  style,
-  ...props
-}: ComponentProps<"div">) {
-  const id = useId().replaceAll(":", "");
+export function Steps({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
-      className={cx(
-        "nextra-steps ms-4 mb-12 border-gray-200 border-s ps-6",
-        "dark:border-neutral-800",
-        className
-      )}
-      style={{ ...style, "--counter-id": id } as CSSProperties}
+      className={cn("fd-steps [&_:is(h2,h3):not([style])]:fd-step", className)}
       {...props}
-    >
-      {children}
-    </div>
+    />
   );
 }
 

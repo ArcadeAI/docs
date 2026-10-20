@@ -1,11 +1,11 @@
 import {
+  DocsBody,
   DocsPage,
   DocsTitle,
   EditOnGitHub,
   MarkdownCopyButton,
   ViewOptionsPopover,
 } from "fumadocs-ui/layouts/notebook/page";
-import type { MDXComponents } from "mdx/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
@@ -64,12 +64,9 @@ const INLINE_CODE = /`([^`]+)`/;
  * Renders a frontmatter title the way the MDX body renders it: `code` spans
  * as code, and typographic punctuation in the text around them.
  */
-function inlineCode(
-  title: string,
-  Code: MDXComponents["code"] | undefined
-): ReactNode {
+function inlineCode(title: string): ReactNode {
   const parts = title.split(INLINE_CODE);
-  if (parts.length === 1 || typeof Code !== "function") {
+  if (parts.length === 1) {
     return smartypants(title);
   }
   // Odd parts are the text between backticks.
@@ -78,7 +75,7 @@ function inlineCode(
   const nodes: ReactNode[] = [];
   for (const part of parts) {
     nodes.push(
-      isCode ? <Code key={`code-${offset}`}>{part}</Code> : smartypants(part)
+      isCode ? <code key={`code-${offset}`}>{part}</code> : smartypants(part)
     );
     offset += part.length + 1;
     isCode = !isCode;
@@ -134,6 +131,20 @@ function PageMeta({
       ) : null}
     </div>
   );
+}
+
+/**
+ * The MDX body in Fumadocs' typography (`DocsBody`). A landing page (home) is
+ * built from its own components and laid out without it.
+ */
+function PageBody({
+  children,
+  landing,
+}: {
+  children: ReactNode;
+  landing?: boolean;
+}) {
+  return landing ? children : <DocsBody>{children}</DocsBody>;
 }
 
 // Every route is known at build time (MDX pages + generated toolkit pages);
@@ -199,15 +210,15 @@ export default async function Page(props: Props) {
       tableOfContentPopover={{ enabled: showToc }}
       toc={Array.isArray(page.data.toc) ? page.data.toc : []}
     >
-      {showTitle ? (
-        <DocsTitle>{inlineCode(title, components.code)}</DocsTitle>
-      ) : null}
+      {showTitle ? <DocsTitle>{inlineCode(title)}</DocsTitle> : null}
       {showToc ? (
         <div className="flex flex-row flex-wrap items-center gap-2 border-fd-border border-b pb-6">
           <PageActions editUrl={editUrl} url={markdownUrl(params.slug)} />
         </div>
       ) : null}
-      <MDX components={components} />
+      <PageBody landing={landing}>
+        <MDX components={components} />
+      </PageBody>
       {landing ? null : (
         <PageMeta
           editUrl={editUrl}

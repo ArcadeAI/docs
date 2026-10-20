@@ -47,7 +47,7 @@ export function MCPClientGrid() {
   const subpages = Object.entries(meta).filter(([key]) => key !== "index");
 
   return (
-    <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
+    <div className="not-prose mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
       {mcpClients.map((client) => {
         const clientMeta = subpages.find(([key]) => key === client.key);
         if (!clientMeta) {
