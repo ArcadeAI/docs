@@ -108,15 +108,11 @@ export function SubpageList({ basePath }: SubpageListProps) {
   }
 
   return (
-    <ul className="ms-[1.5em] not-first:mt-[1.25em] list-disc [:is(ol,ul)_&]:my-[.75em]">
+    // A plain list: the page's typography (Fumadocs' `prose`) styles it.
+    <ul>
       {links.map((link) => (
-        <li className="my-[.5em]" key={link.url}>
-          <Link
-            className="text-(--x-color-primary-600) underline decoration-from-font [text-underline-position:from-font] hover:no-underline focus-visible:nextra-focus"
-            href={link.url}
-          >
-            {link.name}
-          </Link>
+        <li key={link.url}>
+          <Link href={link.url}>{link.name}</Link>
         </li>
       ))}
     </ul>

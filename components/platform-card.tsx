@@ -49,5 +49,9 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
     </Card>
   );
 
-  return <Link href={link}>{cardContent}</Link>;
+  return (
+    <Link className="not-prose" href={link}>
+      {cardContent}
+    </Link>
+  );
 };

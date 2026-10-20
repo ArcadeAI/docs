@@ -63,29 +63,10 @@ function resolveGlossaryPath(): string {
 
 type ShikiTransformer = NonNullable<RehypeCodeOptions["transformers"]>[number];
 
-const LANGUAGE_CLASS_PREFIX = "language-";
-const COPY_DISABLED_REGEX = /( |^)copy=false($| )/;
 const HIGHLIGHT_GROUP_REGEX = /\B\{(.*?)\}\B/g;
 const SINGLE_NUMBER_REGEX = /^-?\d+$/;
 const NUMBER_RANGE_REGEX = /^(-?\d+)(-|\.\.\.?|\u2025|\u2026|\u22EF)(-?\d+)$/;
 const INCLUSIVE_SEPARATORS = new Set(["-", "..", "\u2025"]);
-
-/** Languages Nextra rendered without token colours. */
-const PLAIN_LANGUAGES = new Set(["plaintext", "text", "txt", "plain"]);
-
-type FenceMeta = {
-  __raw?: string;
-  _fenceLang?: string;
-  "data-line-numbers"?: boolean;
-  title?: string;
-};
-
-function classList(value: unknown): string[] {
-  if (Array.isArray(value)) {
-    return value.map(String);
-  }
-  return typeof value === "string" ? value.split(" ") : [];
-}
 
 /** `parse-numeric-range`, as used by rehype-pretty-code: "1-3, 7" → 1,2,3,7. */
 function parseNumericRange(input: string): number[] {
@@ -113,8 +94,8 @@ function parseNumericRange(input: string): number[] {
 }
 
 /**
- * Lines to highlight: every `{…}` group of the fence meta, the way Nextra's
- * rehype-pretty-code read them (`{1-5} {16}`, `{9-18, 20, 24}` with spaces).
+ * Lines to highlight: every `{…}` group of the fence meta, as the pages write
+ * them (`{1-5} {16}`, `{9-18, 20, 24}` with spaces).
  */
 function highlightedLines(meta: string): Set<number> {
   const lines = new Set<number>();
@@ -126,69 +107,19 @@ function highlightedLines(meta: string): Set<number> {
   return lines;
 }
 
-/** The language written on the fence, before any fallback to plain text. */
-function fenceLanguage(pre: unknown): string | undefined {
-  const code = (
-    pre as { children?: { properties?: { className?: unknown } }[] }
-  ).children?.[0];
-  const languageClass = classList(code?.properties?.className).find((name) =>
-    name.startsWith(LANGUAGE_CLASS_PREFIX)
-  );
-  return languageClass?.slice(LANGUAGE_CLASS_PREFIX.length);
-}
-
 /**
- * Shapes Shiki's output like Nextra's (rehype-pretty-code) so the ported
- * `pre`/`code` components and CSS apply unchanged:
- * `<pre data-language data-copy data-word-wrap [data-filename]>` holding
- * `<code [data-line-numbers]>` with one bare `<span>` per line, highlighted
- * lines marked `data-highlighted-line`. Unknown and plain-text languages keep
- * the fence language as the label and carry no token colours.
+ * Marks the lines named in the fence meta (```python {2-4}) with Fumadocs'
+ * `highlighted` class, the same one its `// [!code highlight]` comments set.
+ * Shiki's own meta transformer reads a single `{…}` group without spaces.
  */
-const transformerNextraShape: ShikiTransformer = {
-  code(node) {
-    const meta = this.options.meta as FenceMeta | undefined;
-    if (meta?.["data-line-numbers"]) {
-      const lines = node.children.filter((child) => child.type === "element");
-      node.properties["data-line-numbers"] = "";
-      node.properties["data-line-numbers-max-digits"] = String(
-        String(lines.length).length
-      );
-    }
-  },
-  enforce: "post",
+const transformerMetaLines: ShikiTransformer = {
   line(node, line) {
-    const meta = this.options.meta as FenceMeta | undefined;
+    const meta = this.options.meta as { __raw?: string } | undefined;
     if (highlightedLines(meta?.__raw ?? "").has(line)) {
-      node.properties["data-highlighted-line"] = "";
-    }
-    node.properties.class = undefined;
-    if (node.children.length === 0) {
-      node.children.push({ type: "text", value: " " });
+      this.addClassToHast(node, "highlighted");
     }
   },
-  name: "arcade:nextra-shape",
-  pre(node) {
-    const meta = this.options.meta as FenceMeta | undefined;
-    const raw = meta?.__raw ?? "";
-    const language = meta?._fenceLang ?? this.options.lang;
-    node.properties = {
-      "data-copy": COPY_DISABLED_REGEX.test(raw) ? undefined : "",
-      "data-filename": meta?.title,
-      "data-language": language || "plaintext",
-      "data-word-wrap": raw.includes("word-wrap=false") ? undefined : "",
-      tabindex: "0",
-    };
-  },
-  span(node) {
-    const meta = this.options.meta as FenceMeta | undefined;
-    const language = meta?._fenceLang ?? this.options.lang;
-    const isFallback =
-      Boolean(meta?._fenceLang) && meta?._fenceLang !== this.options.lang;
-    if (isFallback || PLAIN_LANGUAGES.has(language)) {
-      node.properties.style = undefined;
-    }
-  },
+  name: "arcade:meta-lines",
 };
 
 const glossaryPath = resolveGlossaryPath();
@@ -198,21 +129,13 @@ export default defineConfig({
   mdxOptions: {
     rehypeCodeOptions: {
       ...rehypeCodeDefaultOptions,
-      // Unknown fence languages (for example `env`) render as plain text, as
-      // they did in Nextra, instead of failing the build.
+      // Unknown fence languages (for example `env`) render as plain text
+      // instead of failing the build.
       fallbackLanguage: "plaintext",
-      // Nextra showed no language icon; the header comes from components/mdx/pre.tsx.
-      icon: false,
-      parseMetaString(meta, node, tree) {
-        return {
-          ...rehypeCodeDefaultOptions.parseMetaString?.(meta, node, tree),
-          _fenceLang: fenceLanguage(node),
-        };
-      },
-      tab: false,
-      // Only the Nextra-shaped output; Fumadocs' `// [!code …]` comment
-      // notations are left out because production prints such comments as-is.
-      transformers: [transformerNextraShape],
+      transformers: [
+        ...(rehypeCodeDefaultOptions.transformers ?? []),
+        transformerMetaLines,
+      ],
     },
     remarkPlugins: (plugins) => {
       // remarkMdxMermaid turns ```mermaid fences into <Mermaid chart /> (see

@@ -16,7 +16,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   category,
 }) => (
   <a
-    className="rounded-lg border border-card-border-color p-3 text-center text-inherit no-underline"
+    className="not-prose rounded-lg border border-card-border-color p-3 text-center text-inherit no-underline"
     href={link}
   >
     <div

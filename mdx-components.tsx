@@ -1,6 +1,7 @@
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import Image from "next/image";
+import type { ComponentProps } from "react";
 import { AgentFrameworkTabs } from "@/components/agent-framework-tabs";
 import { SignupLink } from "@/components/analytics";
 import {
@@ -15,50 +16,32 @@ import { GlossaryTerm } from "@/components/glossary-term";
 import { GuideOverview } from "@/components/guide-overview";
 import { Callout } from "@/components/mdx/callout";
 import { Card, Cards } from "@/components/mdx/cards";
-import { Details } from "@/components/mdx/details";
-import {
-  Blockquote,
-  Code,
-  H1,
-  H2,
-  H3,
-  H4,
-  H5,
-  H6,
-  Link,
-  ListItem,
-  OrderedList,
-  Paragraph,
-  Rule,
-  Summary,
-  Table,
-  TableWithParts,
-  Td,
-  Th,
-  Tr,
-  UnorderedList,
-  Wrapper,
-} from "@/components/mdx/elements";
+import { Details, Summary } from "@/components/mdx/details";
+import { Heading } from "@/components/mdx/heading";
 import { ImageZoom } from "@/components/mdx/image-zoom";
 import { Mermaid } from "@/components/mdx/mermaid";
-import { Pre } from "@/components/mdx/pre";
 import { Step, Steps } from "@/components/mdx/steps";
-import { Tabs } from "@/components/mdx/tabs";
-import { Tab } from "@/components/mdx/tabs.client";
+import { Table } from "@/components/mdx/table";
+import { Tab, Tabs } from "@/components/mdx/tabs";
 import { SampleAppCard } from "@/components/sample-app-card";
 import { SubpageList } from "@/components/subpage-list";
 import ToggleContent from "@/components/toggle-content";
 import { ToolCard } from "@/components/tool-card";
 
+type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
+function heading(as: HeadingTag) {
+  return function MdxHeading(props: ComponentProps<"h2">) {
+    return <Heading as={as} {...props} />;
+  };
+}
+
 /**
- * Components available in every MDX page without an import.
- *
- * The lowercase entries are the Nextra docs theme's element renderers, ported
- * in components/mdx so the article looks exactly like the production site.
- * They are applied after `components`: the page passes Fumadocs'
- * relative-file `a` renderer, which the docs do not use (every link is an
- * absolute path) and which would drop the Nextra link style and the
- * external-link arrow.
+ * Components available in every MDX page without an import: Fumadocs' own
+ * (`fumadocs-ui/mdx`: links, headings, code blocks, tables, cards, callouts),
+ * plus thin wrappers in components/mdx that take the props the pages were
+ * written with for Nextra (`<Tabs storageKey>`, `<Cards.Card>`,
+ * `<Callout type="warning">`, numbered `###` inside `<Steps>`).
  *
  * `MCPClientGrid` (components/pages/get-started/mcp-clients/mcp-client-grid.tsx)
  * is page-local and imported explicitly by the page that uses it.
@@ -66,15 +49,14 @@ import { ToolCard } from "@/components/tool-card";
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
-    // Arcade components
     AgentFrameworkTabs,
-    // Nextra-compat components
     Callout,
     Card,
     Cards,
     CheatSheetGrid,
     CheatSheetSection,
-    Code,
+    // Nextra's inline-code component, used as JSX in a few pages
+    Code: (props: ComponentProps<"code">) => <code {...props} />,
     ContactEmail,
     DashboardLink,
     ErrorHierarchy,
@@ -89,35 +71,20 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Steps,
     SubpageList,
     Tab,
-    Table: TableWithParts,
+    Table,
     Tabs,
     ToggleContent,
     ToolCard,
-    ...components,
-    // Nextra element renderers
-    a: Link,
-    blockquote: Blockquote,
-    code: Code,
     details: Details,
-    h1: H1,
-    h2: H2,
-    h3: H3,
-    h4: H4,
-    h5: H5,
-    h6: H6,
-    hr: Rule,
+    h1: heading("h1"),
+    h2: heading("h2"),
+    h3: heading("h3"),
+    h4: heading("h4"),
+    h5: heading("h5"),
+    h6: heading("h6"),
     img: ImageZoom,
-    li: ListItem,
-    ol: OrderedList,
-    p: Paragraph,
-    pre: Pre,
     summary: Summary,
-    table: Table,
-    td: Td,
-    th: Th,
-    tr: Tr,
-    ul: UnorderedList,
-    wrapper: Wrapper,
+    ...components,
   };
 }
 
