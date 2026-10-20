@@ -68,10 +68,15 @@ function TabsRoot({
         ))}
       </TabsList>
       {panels.map((panel, index) =>
-        cloneElement(panel as ReactElement<{ value?: string }>, {
-          key: items[index] ?? index,
-          value: values[index] ?? String(index),
-        })
+        cloneElement(
+          panel as ReactElement<{ "data-tab-value"?: string; value?: string }>,
+          {
+            // Read by SyncedTabs to open the tab a clicked link points into.
+            "data-tab-value": values[index] ?? String(index),
+            key: items[index] ?? index,
+            value: values[index] ?? String(index),
+          }
+        )
       )}
     </SyncedTabs>
   );

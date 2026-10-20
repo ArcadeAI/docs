@@ -2,7 +2,13 @@
 
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Tabs } from "fumadocs-ui/components/ui/tabs";
-import { type ComponentProps, useCallback, useState } from "react";
+import {
+  type ComponentProps,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 type SyncedTabsProps = Omit<
   ComponentProps<typeof Tabs>,
@@ -28,6 +34,7 @@ export function SyncedTabs({
   ...props
 }: SyncedTabsProps) {
   const [value, setValue] = useState(defaultValue);
+  const root = useRef<HTMLDivElement>(null);
   // MDX passes a new array on every render; depend on its content.
   const valuesKey = values.join("\n");
   const onValueChange = useCallback(
@@ -39,6 +46,30 @@ export function SyncedTabs({
     [valuesKey]
   );
 
+  // Fumadocs opens the tab holding the URL's target when the hash changes.
+  // A click on a link to the hash the URL already has (the table of
+  // contents, after the reader switched tabs) changes nothing, so open the
+  // tab here too.
+  useEffect(() => {
+    function onClick(event: MouseEvent) {
+      const link = (event.target as Element | null)?.closest?.("a[href^='#']");
+      const id = decodeURIComponent(link?.getAttribute("href")?.slice(1) ?? "");
+      const target = id ? document.getElementById(id) : null;
+      let panel = target?.closest<HTMLElement>("[role=tabpanel]");
+      while (panel) {
+        const tabValue = panel.dataset.tabValue;
+        if (panel.parentElement === root.current && tabValue) {
+          setValue(tabValue);
+          requestAnimationFrame(() => target?.scrollIntoView());
+          return;
+        }
+        panel = panel.parentElement?.closest<HTMLElement>("[role=tabpanel]");
+      }
+    }
+    document.addEventListener("click", onClick);
+    return () => document.removeEventListener("click", onClick);
+  }, []);
+
   return (
     <Tabs
       {...props}
@@ -48,6 +79,7 @@ export function SyncedTabs({
         props.className
       )}
       onValueChange={onValueChange}
+      ref={root}
       value={value}
     />
   );
