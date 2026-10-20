@@ -189,7 +189,8 @@ function DocSearchDialog({
       {...props}
     >
       <SearchDialogOverlay />
-      <SearchDialogContent>
+      {/* `data-search-dialog`: the brand highlight in app/global.css. */}
+      <SearchDialogContent data-search-dialog="">
         <SearchDialogHeader>
           <SearchDialogIcon />
           <SearchDialogInput />
