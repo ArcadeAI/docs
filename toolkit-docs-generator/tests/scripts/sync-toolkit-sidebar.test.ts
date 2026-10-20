@@ -213,14 +213,19 @@ describe("buildToolkitInfoList", () => {
   });
 
   it("should skip hidden toolkits", () => {
-    createToolkitJson("HiddenToolkit", {
+    createToolkitJson("hiddentoolkit", {
+      id: "HiddenToolkit",
       label: "Hidden",
       metadata: { category: "productivity", isHidden: true },
+    });
+    createToolkitJson("gmail", {
+      label: "Gmail",
+      metadata: { category: "productivity" },
     });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
 
-    expect(result).toHaveLength(0);
+    expect(result.map((item) => item.label)).toEqual(["Gmail"]);
   });
 
   it("uses the label from the toolkit file", () => {
@@ -235,7 +240,8 @@ describe("buildToolkitInfoList", () => {
   });
 
   it("falls back to a readable name when the file has no label", () => {
-    createToolkitJson("GoogleSearch", {
+    createToolkitJson("googlesearch", {
+      id: "GoogleSearch",
       label: null,
       metadata: { category: "search" },
     });
