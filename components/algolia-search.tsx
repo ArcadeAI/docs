@@ -67,6 +67,16 @@ const SECTION_LEVELS: DocSearchLevel[] = [
 ];
 const MARK_SPLIT = /(<mark>[\s\S]*?<\/mark>)/g;
 const MARK_TAGS = /<\/?mark>/g;
+// Algolia HTML-escapes `& < > " '` in highlighted and snippeted text.
+const ENTITY = /&(?:amp|lt|gt|quot|#39|#x27);/g;
+const ENTITIES: Record<string, string> = {
+  "&#39;": "'",
+  "&#x27;": "'",
+  "&amp;": "&",
+  "&gt;": ">",
+  "&lt;": "<",
+  "&quot;": '"',
+};
 
 /** Same-site path of a DocSearch URL, so results navigate without a reload. */
 function sitePath(url: string): string {
@@ -157,6 +167,10 @@ function docSearchClient(client: LiteClient): SearchClient {
   };
 }
 
+function decodeEntities(text: string): string {
+  return text.replace(ENTITY, (entity) => ENTITIES[entity] ?? entity);
+}
+
 /** Plain text with the `<mark>` spans Algolia added around the matches. */
 function withMarks(text: string): ReactNode {
   let offset = 0;
@@ -164,9 +178,9 @@ function withMarks(text: string): ReactNode {
     const start = offset;
     offset += part.length;
     return part.startsWith(`<${MARK}>`) ? (
-      <mark key={start}>{part.replace(MARK_TAGS, "")}</mark>
+      <mark key={start}>{decodeEntities(part.replace(MARK_TAGS, ""))}</mark>
     ) : (
-      part
+      decodeEntities(part)
     );
   });
 }

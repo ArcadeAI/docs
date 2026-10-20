@@ -114,13 +114,12 @@ export async function toolkitRouteMetadata(
 }
 
 /**
- * URL the "Copy page" action requests for a toolkit page. Sent with
- * `Accept: text/markdown`, the data route answers with the full page as
- * Markdown (the page itself loads per-tool detail on demand, so its HTML does
- * not contain it).
+ * URL of a toolkit page as Markdown, for "Copy Markdown" and "View as
+ * Markdown". The data route answers with the full page as Markdown (the page
+ * itself loads per-tool detail on demand, so its HTML does not contain it).
  */
 export function toolkitMarkdownUrl(match: ToolkitRouteMatch): string {
-  return `/api/toolkit-data/${encodeURIComponent(match.toolkitId)}`;
+  return `/api/toolkit-data/${encodeURIComponent(match.toolkitId)}?format=markdown`;
 }
 
 /**
