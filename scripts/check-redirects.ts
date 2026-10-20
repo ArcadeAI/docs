@@ -1,10 +1,10 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Check that deleted/renamed markdown files have corresponding redirects in redirects.ts
  *
  * Usage:
- *   pnpm check-redirects [--auto-fix] [--staged-only] [base_branch]
+ *   bun run check-redirects [--auto-fix] [--staged-only] [base_branch]
  *
  * Features:
  * - Detects deleted AND renamed markdown files without redirects
@@ -18,6 +18,7 @@ import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { redirects as configuredRedirects } from "../redirects";
 import {
+  CONTENT_FILE_REGEX,
   checkWildcardMatch,
   type DynamicRouteMove,
   dynamicRouteExists,
@@ -45,7 +46,6 @@ const baseBranch = args.find((arg) => !arg.startsWith("--")) || "main";
 const REDIRECTS_FILE = "redirects.ts";
 
 // Top-level regex patterns for performance
-const PAGE_FILE_MATCH_REGEX = /page\.mdx?$/;
 const LOCALE_PATH_PREFIX_REGEX = /^\/:locale\//;
 const SPECIAL_REGEX_CHARS_REGEX = /[.*+?^${}()|[\]\\]/g;
 
@@ -67,16 +67,14 @@ function parseGitDiffOutput(
     if (!line) {
       continue;
     }
-    const parts = line.split("\t");
-    const status = parts[0];
-    const filePath = parts[1];
+    const [status, filePath] = line.split("\t");
 
-    if (status === "D" && filePath && PAGE_FILE_MATCH_REGEX.test(filePath)) {
+    if (status === "D" && filePath && CONTENT_FILE_REGEX.test(filePath)) {
       deletedFiles.push(filePath);
     } else if (
       status?.startsWith("R") &&
       filePath &&
-      PAGE_FILE_MATCH_REGEX.test(filePath)
+      CONTENT_FILE_REGEX.test(filePath)
     ) {
       renamedFromFiles.push(filePath);
     }
@@ -223,11 +221,8 @@ function findFinalRedirectDestination(
   const visited = new Set<string>();
   let current = path;
 
-  while (true) {
-    // Prevent infinite loops from circular redirects
-    if (visited.has(current)) {
-      return null;
-    }
+  // Stop when a path repeats: that is a circular redirect, not a destination.
+  while (!visited.has(current)) {
     visited.add(current);
 
     const redirect = redirectList.find((r) => r.source === current);
@@ -238,6 +233,8 @@ function findFinalRedirectDestination(
 
     current = redirect.destination;
   }
+
+  return null;
 }
 
 /**
@@ -408,7 +405,7 @@ const { deleted, renamedFrom } = getDeletedAndRenamedFiles(
   stagedOnly
 );
 const allDeletedOrRenamed = [...deleted, ...renamedFrom].filter((f) =>
-  f.startsWith("app/")
+  CONTENT_FILE_REGEX.test(f)
 );
 
 if (allDeletedOrRenamed.length === 0) {
@@ -435,8 +432,12 @@ for (const file of allDeletedOrRenamed) {
   const hasExactRedirect = latestRedirects.some((r) => r.source === urlPath);
   const hasWildcardRedirect = checkWildcardMatch(urlPath, latestRedirects);
   const servedByDynamicRoute = dynamicRouteExists(urlPath);
+  // A rename between `<slug>.mdx` and `<slug>/index.mdx` keeps the URL.
+  const stillServedByFile = pageExists(urlPath);
 
-  if (hasExactRedirect) {
+  if (stillServedByFile) {
+    console.log(colors.green(`✓ URL still served by a page file: ${urlPath}`));
+  } else if (hasExactRedirect) {
     console.log(colors.green(`✓ Redirect exists for: ${urlPath}`));
   } else if (hasWildcardRedirect) {
     console.log(
@@ -450,10 +451,11 @@ for (const file of allDeletedOrRenamed) {
     console.log(colors.red(`✗ Missing redirect for: ${urlPath}`));
     missingRedirects.push(urlPath);
 
+    // Keys sorted to match the Biome `useSortedKeys` assist applied to redirects.ts.
     suggestedEntries.push(`  {
-    source: "${urlPath}",
     destination: "/:locale/REPLACE_WITH_NEW_PATH",
     permanent: true,
+    source: "${urlPath}",
   },`);
 
     exitCode = 1;
@@ -536,7 +538,7 @@ if (missingRedirects.length > 0) {
     );
     console.log("");
     console.log(
-      "When you delete a markdown file, you must add a redirect in redirects.ts"
+      "When you delete a content/docs page, you must add a redirect in redirects.ts"
     );
     console.log(
       "to prevent broken links for users who have bookmarked the old URL."
@@ -580,7 +582,7 @@ if (invalidRedirects.length > 0) {
   console.log("  1. Open redirects.ts");
   console.log("  2. Find the redirect(s) listed above");
   console.log("  3. Update the destination to a valid page path");
-  console.log("     (Check that the path exists under app/en/)");
+  console.log("     (Check that the path exists under content/docs/)");
 }
 
 // ============================================================
@@ -619,9 +621,9 @@ if (uncoveredMoves.length > 0) {
     console.log("");
     console.log(colors.yellow("  Suggested redirect:"));
     console.log(`  {
-    source: "${move.oldUrl}/:path*",
     destination: "${move.newUrl}/:path*",
     permanent: true,
+    source: "${move.oldUrl}/:path*",
   },`);
     console.log("");
   }

@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { readToolkitData, readToolkitIndex } from "@/app/_lib/toolkit-data";
+import { readToolkitData, readToolkitIndex } from "@/lib/toolkit-data";
 
 const loadFixture = async (fileName: string): Promise<string> => {
   const fixturesDir = new URL(

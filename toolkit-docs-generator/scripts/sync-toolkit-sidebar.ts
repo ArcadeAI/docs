@@ -1,22 +1,24 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * Script to synchronize toolkit sidebar navigation with available JSON data files.
  *
  * This script:
  * 1. Reads all toolkit JSON files from data/toolkits/
  * 2. Maps each toolkit to its category from the design system
- * 3. Adds the partner integrations from app/_data/partner-toolkits.ts, which
+ * 3. Adds the partner integrations from data/partner-toolkits.ts, which
  *    have hand-authored pages and no JSON file of their own
- * 4. Creates/updates _meta.tsx files for each category
+ * 4. Creates/updates the Fumadocs `meta.json` file for each category under
+ *    content/docs/resources/integrations/<category>/
  * 5. Skips toolkits without a recognized category
- * 6. Updates the main integrations _meta.tsx if needed
+ * 6. Checks that the main integrations `meta.json` (owned by the content
+ *    authors, never rewritten here) lists every active category
  *
  * Usage:
- *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
- *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --dry-run
- *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --verbose
- *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections
- *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false
+ *   bun toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
+ *   bun toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --dry-run
+ *   bun toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --verbose
+ *   bun toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections
+ *   bun toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false
  */
 
 import {
@@ -33,7 +35,7 @@ import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/meta
 import {
   PARTNER_TOOLKITS,
   type PartnerToolkit,
-} from "../../app/_data/partner-toolkits";
+} from "../../data/partner-toolkits";
 import { resolveToolkitDataDir } from "../src/shared/toolkit-data-dir";
 import {
   getToolkitSlug,
@@ -68,30 +70,31 @@ const PROJECT_ROOT = resolve(__dirname, "..", "..");
 // Configuration
 const CONFIG = {
   dataDir: resolveToolkitDataDir(),
-  integrationsDir: join(PROJECT_ROOT, "app/en/resources/integrations"),
   integrationsBasePath: "/en/resources/integrations",
+  integrationsDir: join(PROJECT_ROOT, "content/docs/resources/integrations"),
 };
+
+/** File name Fumadocs reads folder navigation from. */
+export const META_FILE_NAME = "meta.json";
 
 // Known categories with display names
-const CATEGORY_NAMES: Record<string, string> = {
-  productivity: "Productivity & Docs",
-  development: "Developer Tools",
-  social: "Social & Communication",
-  databases: "Databases",
+export const CATEGORY_NAMES: Record<string, string> = {
   "customer-support": "Customer Support",
-  search: "Search Tools",
-  sales: "Sales",
+  databases: "Databases",
+  development: "Developer Tools",
   entertainment: "Entertainment",
   payments: "Payments & Finance",
+  productivity: "Productivity & Docs",
+  sales: "Sales",
+  search: "Search Tools",
+  social: "Social & Communication",
 };
-
-// Category order for main _meta.tsx
-const CATEGORY_ORDER: readonly string[] = INTEGRATION_CATEGORIES;
 
 const CAPITAL_LETTER_REGEX = /([A-Z])/g;
 const FIRST_CHARACTER_REGEX = /^./;
-
-const IDENTIFIER_KEY_REGEX = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+const JSON_INDENT = 2;
+const EXTRACT_PREFIX_REGEX = /^\.\.\./;
+const EXCLUDE_PREFIX_REGEX = /^!/;
 
 /**
  * This script only reads a handful of fields off each toolkit JSON file (it
@@ -106,14 +109,6 @@ type ToolkitJson = Partial<Pick<MergedToolkit, "id" | "label">> & {
   >;
 };
 
-function renderObjectKey(key: string): string {
-  if (IDENTIFIER_KEY_REGEX.test(key)) {
-    return key;
-  }
-  const escaped = key.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  return `"${escaped}"`;
-}
-
 export type ToolkitInfo = {
   id: string;
   slug: string;
@@ -126,6 +121,17 @@ export type CategoryData = {
   category: string;
   displayName: string;
   toolkits: ToolkitInfo[];
+};
+
+/**
+ * The shape of a Fumadocs `meta.json` this script writes. `pages` holds, in
+ * order: `---Title---` separators, `[Label](href)` link entries for generated
+ * toolkit pages, and bare slugs for authored MDX pages (partners) that live in
+ * the same folder.
+ */
+export type CategoryMeta = {
+  title: string;
+  pages: string[];
 };
 
 export type SyncResult = {
@@ -277,8 +283,8 @@ function resolveToolkitInfo(
   const jsonData = readToolkitJson(dataDir, slug);
   const toolkitId = jsonData?.id ?? slug;
   const docsSlug = getToolkitSlug({
-    id: toolkitId,
     docsLink: jsonData?.metadata?.docsLink ?? null,
+    id: toolkitId,
   });
   const designSystemToolkit = TOOLKITS.find(
     (t) => t.id.toLowerCase() === toolkitId.toLowerCase()
@@ -305,13 +311,13 @@ function resolveToolkitInfo(
   const typeFromJson = jsonData?.metadata?.type ?? null;
 
   const info: ToolkitInfo = {
+    category,
     id: toolkitId,
-    slug: docsSlug,
     // Prefer the Design System label (has correct spacing/casing), but fall back
     // to JSON label for toolkits not present in the design system.
     label: labelFromDesignSystem ?? labelFromJson ?? getToolkitLabel(toolkitId),
-    category,
     navGroup: inferNavGroup(toolkitId, typeFromJson),
+    slug: docsSlug,
   };
 
   const priority = designSystemToolkit ? 2 : 0;
@@ -351,19 +357,20 @@ export type PartnerNavSource = Pick<
  * Sidebar entries for the partner integrations (remote MCP Servers offered by
  * Arcade partners).
  *
- * Partner pages are hand-authored and have no JSON file in the data directory,
- * so `buildToolkitInfoList` can't see them. This script rewrites every
- * category's `_meta.tsx` from scratch, so an entry typed into that file by hand
- * disappears on the next run. Deriving the entries from `PARTNER_TOOLKITS` — the
- * same list the integrations catalog renders its cards from — keeps the sidebar
- * and the catalog agreeing, and makes adding a partner a one-line change in one
- * file. tests/partner-integration-nav.test.ts holds the two together.
+ * Partner pages are hand-authored MDX files in the category folder and have no
+ * JSON file in the data directory, so `buildToolkitInfoList` can't see them.
+ * This script rewrites every category's `meta.json` from scratch, so an entry
+ * typed into that file by hand disappears on the next run. Deriving the entries
+ * from `PARTNER_TOOLKITS` — the same list the integrations catalog renders its
+ * cards from — keeps the sidebar and the catalog agreeing, and makes adding a
+ * partner a one-line change in one file. tests/partner-integration-nav.test.ts
+ * holds the two together.
  */
 export function buildPartnerToolkitInfoList(
   partners: readonly PartnerNavSource[] = PARTNER_TOOLKITS
 ): ToolkitInfo[] {
   return partners.map((partner) => {
-    const category = partner.category;
+    const { category } = partner;
     if (!(INTEGRATION_CATEGORIES as readonly string[]).includes(category)) {
       throw new Error(
         `Unrecognized integration category "${category}" for partner "${partner.id}".`
@@ -371,23 +378,22 @@ export function buildPartnerToolkitInfoList(
     }
 
     return {
-      id: partner.id,
-      slug: getToolkitSlug({
-        id: partner.id,
-        docsLink: partner.relativeDocsLink,
-      }),
-      label: partner.label,
       category,
+      id: partner.id,
+      label: partner.label,
       navGroup: "partner" as const,
+      slug: getToolkitSlug({
+        docsLink: partner.relativeDocsLink,
+        id: partner.id,
+      }),
     };
   });
 }
 
 /**
  * A partner and a JSON-backed toolkit that resolve to the same slug in the same
- * category would render two `_meta.tsx` entries under one key. Fail here, naming
- * both, rather than write a file that tsc rejects with a line number and no
- * explanation of where the second entry came from.
+ * category would claim one URL for two pages. Fail here, naming both, rather
+ * than write a sidebar whose link and MDX entry point at the same path.
  */
 export function mergeToolkitAndPartnerInfo(
   toolkits: ToolkitInfo[],
@@ -406,7 +412,7 @@ export function mergeToolkitAndPartnerInfo(
     if (toolkitId) {
       throw new Error(
         `Partner "${partner.id}" and toolkit "${toolkitId}" both resolve to ${key}. ` +
-          "Give one of them a different slug, or drop the partner from app/_data/partner-toolkits.ts."
+          "Give one of them a different slug, or drop the partner from data/partner-toolkits.ts."
       );
     }
   }
@@ -423,7 +429,7 @@ export function groupByCategory(
   const grouped = new Map<string, ToolkitInfo[]>();
 
   for (const toolkit of toolkits) {
-    const category = toolkit.category;
+    const { category } = toolkit;
     if (!grouped.has(category)) {
       grouped.set(category, []);
     }
@@ -443,14 +449,36 @@ export function groupByCategory(
   return grouped;
 }
 
+/** Fumadocs separator entry: `---Title---`. */
+export const renderSeparatorEntry = (title: string): string => `---${title}---`;
+
 /**
- * Generate _meta.tsx content for a category
+ * Fumadocs link entry: `[Label](href)`. The parser reads the label up to the
+ * first `]`, so a label containing one cannot round-trip; fail loudly instead
+ * of writing an entry Fumadocs would silently drop.
  */
-export function generateCategoryMeta(
+export const renderLinkEntry = (label: string, href: string): string => {
+  if (label.includes("]")) {
+    throw new Error(
+      `Sidebar label "${label}" contains "]", which Fumadocs link entries cannot encode.`
+    );
+  }
+  return `[${label}](${href})`;
+};
+
+/**
+ * Build the Fumadocs `meta.json` object for a category.
+ *
+ * Generated toolkit pages are not MDX files in the folder, so they are listed
+ * as `[Label](href)` links. Partner pages are authored MDX files in the same
+ * folder, so they are listed by bare slug and Fumadocs reads their title from
+ * the page's frontmatter.
+ */
+export function buildCategoryMeta(
   toolkits: ToolkitInfo[],
   category: string,
   integrationsBasePath: string
-): string {
+): CategoryMeta {
   const byLabel = (a: ToolkitInfo, b: ToolkitInfo) =>
     a.label.localeCompare(b.label);
 
@@ -464,128 +492,201 @@ export function generateCategoryMeta(
     .filter((t) => t.navGroup === "partner")
     .sort(byLabel);
 
-  const renderEntry = (t: ToolkitInfo) => {
-    // Escape any quotes in the label
-    const escapedLabel = t.label.replace(/"/g, '\\"');
-    return `  ${renderObjectKey(t.slug)}: {
-    title: "${escapedLabel}",
-    href: "${integrationsBasePath}/${category}/${t.slug}",
-  }`;
-  };
+  const renderLink = (t: ToolkitInfo) =>
+    renderLinkEntry(t.label, `${integrationsBasePath}/${category}/${t.slug}`);
 
-  const renderSeparator = (title: string) => {
-    const key = `-- ${title}`;
-    return `  ${renderObjectKey(key)}: {
-    type: "separator",
-    title: "${title}",
-  }`;
-  };
-
-  const sections: string[] = [];
+  const pages: string[] = [];
   if (optimized.length > 0) {
-    sections.push(renderSeparator("Optimized"));
-    sections.push(...optimized.map(renderEntry));
+    pages.push(renderSeparatorEntry("Optimized"));
+    pages.push(...optimized.map(renderLink));
   }
   if (starter.length > 0) {
-    sections.push(renderSeparator("Starter"));
-    sections.push(...starter.map(renderEntry));
+    pages.push(renderSeparatorEntry("Starter"));
+    pages.push(...starter.map(renderLink));
   }
   if (partners.length > 0) {
-    sections.push(renderSeparator("Partners"));
-    sections.push(...partners.map(renderEntry));
+    pages.push(renderSeparatorEntry("Partners"));
+    pages.push(...partners.map((t) => t.slug));
   }
 
-  const entries = sections.join(",\n");
-
-  return `import type { MetaRecord } from "nextra";
-
-const meta: MetaRecord = {
-${entries},
-};
-
-export default meta;
-`;
+  return { pages, title: CATEGORY_NAMES[category] ?? category };
 }
 
 /**
- * Generate main integrations _meta.tsx content
+ * Generate `meta.json` content for a category
  */
-export function generateMainMeta(activeCategories: string[]): string {
-  const supportedCategories = activeCategories.filter((category) =>
-    (INTEGRATION_CATEGORIES as readonly string[]).includes(category)
+export function generateCategoryMeta(
+  toolkits: ToolkitInfo[],
+  category: string,
+  integrationsBasePath: string
+): string {
+  const meta = buildCategoryMeta(toolkits, category, integrationsBasePath);
+  return `${JSON.stringify(meta, null, JSON_INDENT)}\n`;
+}
+
+/**
+ * The main integrations `meta.json` is authored by hand (it also carries the
+ * overview page and the feedback section), so this script never rewrites it.
+ * It does check that every active category is reachable from it: a category
+ * folder that the parent `pages` list omits renders no sidebar entries at all,
+ * which is exactly the silent 404 class of bug the sync exists to prevent.
+ *
+ * Returns the active categories missing from `pages`. A `pages` list that
+ * contains the `...` rest marker includes every folder, so nothing is missing.
+ */
+export function findMissingMainMetaCategories(
+  mainMeta: { pages?: unknown } | null,
+  activeCategories: readonly string[]
+): string[] {
+  const pages = Array.isArray(mainMeta?.pages)
+    ? mainMeta.pages.filter(
+        (entry): entry is string => typeof entry === "string"
+      )
+    : [];
+
+  if (pages.includes("...") || pages.includes("z...a")) {
+    return [];
+  }
+
+  const listed = new Set(
+    pages.map((entry) =>
+      entry.replace(EXTRACT_PREFIX_REGEX, "").replace(EXCLUDE_PREFIX_REGEX, "")
+    )
   );
+  return activeCategories.filter(
+    (category) =>
+      (INTEGRATION_CATEGORIES as readonly string[]).includes(category) &&
+      !listed.has(category)
+  );
+}
 
-  // Sort categories by defined order
-  const sortedCategories = [...supportedCategories].sort((a, b) => {
-    const indexA = CATEGORY_ORDER.indexOf(a);
-    const indexB = CATEGORY_ORDER.indexOf(b);
-    if (indexA === -1 && indexB === -1) {
-      return a.localeCompare(b);
-    }
-    if (indexA === -1) {
-      return 1;
-    }
-    if (indexB === -1) {
-      return -1;
-    }
-    return indexA - indexB;
-  });
+function readMainMeta(metaPath: string): { pages?: unknown } | null {
+  if (!existsSync(metaPath)) {
+    return null;
+  }
+  try {
+    return JSON.parse(readFileSync(metaPath, "utf-8")) as { pages?: unknown };
+  } catch (error) {
+    throw new Error(
+      `Main integrations ${META_FILE_NAME} at ${metaPath} is not valid JSON: ${String(error)}`,
+      { cause: error }
+    );
+  }
+}
 
-  const categoryEntries = sortedCategories
-    .map((cat) => {
-      const displayName = CATEGORY_NAMES[cat] || cat;
-      return `  ${renderObjectKey(cat)}: {
-    title: "${displayName}",
-  }`;
-    })
-    .join(",\n");
-
-  return `import type { MetaRecord } from "nextra";
-
-const meta: MetaRecord = {
-  "*": {
-    theme: {
-      breadcrumb: true,
-      toc: true,
-      copyPage: true,
-    },
-  },
-  index: {
-    title: "Overview",
-    theme: {
-      toc: false,
-      copyPage: false,
-    },
-  },
-${categoryEntries},
-  "-- Feedback": {
-    type: "separator",
-    title: "Feedback",
-  },
-  "tool-feedback": {
-    title: "Tool Feedback",
-  },
+type SyncContext = {
+  dryRun: boolean;
+  log: (msg: string) => void;
+  result: SyncResult;
 };
 
-export default meta;
-`;
+function writeCategoryMeta(
+  category: string,
+  categoryToolkits: ToolkitInfo[],
+  { dryRun, log, result }: SyncContext
+): void {
+  const categoryDir = join(CONFIG.integrationsDir, category);
+  const metaPath = join(categoryDir, META_FILE_NAME);
+  const metaContent = generateCategoryMeta(
+    categoryToolkits,
+    category,
+    CONFIG.integrationsBasePath
+  );
+
+  if (!existsSync(categoryDir)) {
+    log(`Creating category directory: ${category}`);
+    if (!dryRun) {
+      mkdirSync(categoryDir, { recursive: true });
+    }
+    result.categoriesCreated.push(category);
+  }
+
+  // Check if content changed
+  const contentChanged = existsSync(metaPath)
+    ? readFileSync(metaPath, "utf-8") !== metaContent
+    : true;
+
+  if (!contentChanged) {
+    log(`No changes for: ${category}`);
+    return;
+  }
+
+  log(
+    `Updating ${META_FILE_NAME} for: ${category} (${categoryToolkits.length} toolkits)`
+  );
+  if (!dryRun) {
+    writeFileSync(metaPath, metaContent);
+  }
+  if (!result.categoriesCreated.includes(category)) {
+    result.categoriesUpdated.push(category);
+  }
+}
+
+/**
+ * Category directories under the integrations folder: every directory whose
+ * name is an integration category (current or former — a stale `others/`
+ * folder is still a category directory this script once wrote).
+ */
+function listExistingCategoryDirs(): string[] {
+  if (!existsSync(CONFIG.integrationsDir)) {
+    return [];
+  }
+  return readdirSync(CONFIG.integrationsDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+    .filter(
+      (name) =>
+        name in CATEGORY_NAMES ||
+        (INTEGRATION_CATEGORIES as readonly string[]).includes(name)
+    );
+}
+
+/**
+ * Remove a category folder that no longer has toolkits. Only a folder holding
+ * nothing but the generated `meta.json` is deleted: authored MDX next to it is
+ * someone's content, so that folder is left alone and reported instead.
+ */
+function removeEmptyCategoryDirs(
+  existingDirs: string[],
+  activeCategories: string[],
+  { dryRun, log, result }: SyncContext
+): void {
+  for (const existingDir of existingDirs) {
+    if (activeCategories.includes(existingDir)) {
+      continue;
+    }
+    const categoryDir = join(CONFIG.integrationsDir, existingDir);
+    const leftovers = readdirSync(categoryDir).filter(
+      (name) => name !== META_FILE_NAME
+    );
+    if (leftovers.length > 0) {
+      result.errors.push(
+        `Category "${existingDir}" has no toolkits but still contains authored files (${leftovers.join(", ")}); not removing it.`
+      );
+      continue;
+    }
+    log(`Removing empty category: ${existingDir}`);
+    if (!dryRun) {
+      rmSync(categoryDir, { recursive: true });
+    }
+    result.categoriesRemoved.push(existingDir);
+  }
 }
 
 /**
  * Sync toolkit sidebar with available JSON files
  */
-// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Main orchestration function requires multiple steps
 export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
   const { dryRun = false, verbose = false } = options;
   const removeEmptySections = resolveRemoveEmptySections(options);
 
   const result: SyncResult = {
-    categoriesUpdated: [],
     categoriesCreated: [],
     categoriesRemoved: [],
-    toolkitCount: 0,
-    partnerCount: 0,
+    categoriesUpdated: [],
     errors: [],
+    partnerCount: 0,
+    toolkitCount: 0,
   };
 
   const log = (msg: string) => {
@@ -593,6 +694,7 @@ export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
       console.log(msg);
     }
   };
+  const context: SyncContext = { dryRun, log, result };
 
   try {
     // Build toolkit info from JSON files
@@ -611,93 +713,35 @@ export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
     const activeCategories = Array.from(grouped.keys());
     log(`Active categories: ${activeCategories.join(", ")}`);
 
-    // Get existing category directories
-    const existingDirs = existsSync(CONFIG.integrationsDir)
-      ? readdirSync(CONFIG.integrationsDir, { withFileTypes: true })
-          .filter((d) => d.isDirectory())
-          .filter(
-            (d) => !["components", "tool-feedback", "_lib"].includes(d.name)
-          )
-          .map((d) => d.name)
-      : [];
+    // Snapshot existing category directories before writing new ones
+    const existingDirs = listExistingCategoryDirs();
 
-    // Create/update category directories
+    // Create/update category meta.json files
     for (const [category, categoryToolkits] of grouped) {
-      const categoryDir = join(CONFIG.integrationsDir, category);
-      const metaPath = join(categoryDir, "_meta.tsx");
-      const metaContent = generateCategoryMeta(
-        categoryToolkits,
-        category,
-        CONFIG.integrationsBasePath
-      );
-
-      const dirExists = existsSync(categoryDir);
-      const metaExists = existsSync(metaPath);
-
-      if (!dirExists) {
-        log(`Creating category directory: ${category}`);
-        if (!dryRun) {
-          mkdirSync(categoryDir, { recursive: true });
-        }
-        result.categoriesCreated.push(category);
-      }
-
-      // Check if content changed
-      let contentChanged = true;
-      if (metaExists) {
-        const existingContent = readFileSync(metaPath, "utf-8");
-        contentChanged = existingContent !== metaContent;
-      }
-
-      if (contentChanged) {
-        log(
-          `Updating _meta.tsx for: ${category} (${categoryToolkits.length} toolkits)`
-        );
-        if (!dryRun) {
-          writeFileSync(metaPath, metaContent);
-        }
-        if (!result.categoriesCreated.includes(category)) {
-          result.categoriesUpdated.push(category);
-        }
-      } else {
-        log(`No changes for: ${category}`);
-      }
+      writeCategoryMeta(category, categoryToolkits, context);
     }
 
     // Remove category directories only when explicitly enabled.
     // This prevents automatic route removals during regular sync runs.
     if (removeEmptySections) {
-      for (const existingDir of existingDirs) {
-        if (!activeCategories.includes(existingDir)) {
-          const categoryDir = join(CONFIG.integrationsDir, existingDir);
-          log(`Removing empty category: ${existingDir}`);
-          if (!dryRun) {
-            rmSync(categoryDir, { recursive: true });
-          }
-          result.categoriesRemoved.push(existingDir);
-        }
-      }
+      removeEmptyCategoryDirs(existingDirs, activeCategories, context);
     } else {
       log("Skipping empty category removal (--remove-empty-sections=false)");
     }
 
-    // Update main _meta.tsx
-    const mainMetaPath = join(CONFIG.integrationsDir, "_meta.tsx");
-    const mainMetaContent = generateMainMeta(activeCategories);
-
-    if (existsSync(mainMetaPath)) {
-      const existingMainMeta = readFileSync(mainMetaPath, "utf-8");
-      if (existingMainMeta !== mainMetaContent) {
-        log("Updating main _meta.tsx");
-        if (!dryRun) {
-          writeFileSync(mainMetaPath, mainMetaContent);
-        }
+    // Check the hand-authored main meta.json lists every active category
+    const mainMetaPath = join(CONFIG.integrationsDir, META_FILE_NAME);
+    const mainMeta = readMainMeta(mainMetaPath);
+    if (mainMeta) {
+      const missing = findMissingMainMetaCategories(mainMeta, activeCategories);
+      if (missing.length > 0) {
+        result.errors.push(
+          `Main integrations ${META_FILE_NAME} (${mainMetaPath}) does not list: ${missing.join(", ")}. ` +
+            "Add each category to its `pages` array so the sidebar can reach it."
+        );
       }
     } else {
-      log("Creating main _meta.tsx");
-      if (!dryRun) {
-        writeFileSync(mainMetaPath, mainMetaContent);
-      }
+      log(`No main ${META_FILE_NAME} at ${mainMetaPath}; skipping check`);
     }
   } catch (error) {
     result.errors.push(String(error));
@@ -763,7 +807,7 @@ if (isMainModule) {
     console.log("Running in dry-run mode (no changes will be made)\n");
   }
 
-  const result = syncToolkitSidebar({ dryRun, verbose, removeEmptySections });
+  const result = syncToolkitSidebar({ dryRun, removeEmptySections, verbose });
   printResults(result);
 
   if (result.errors.length > 0) {

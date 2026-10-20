@@ -1,14 +1,26 @@
 # Arcade Documentation
 
-Documentation for Arcade
+Documentation for Arcade, built with [Next.js](https://nextjs.org/) and [Fumadocs](https://fumadocs.dev/). Content is MDX under `content/docs/`.
 
 ## Local Development
 
-See the `package.json` for the dependencies required.
+Requires [bun](https://bun.sh) (see `packageManager` in `package.json`).
 
-First, run `pnpm install` to install the dependencies.
+```bash
+bun install      # install dependencies
+bun run dev      # start the dev server at http://localhost:3000
+```
 
-Then, run `pnpm dev` to start the development server and visit localhost:3000.
+Other useful commands:
+
+```bash
+bun run build          # production build
+bun run lint           # Ultracite (Biome) lint
+bun run typecheck      # TypeScript across root, scripts/, toolkit-docs-generator/
+bun run test           # Vitest
+bun run check-meta     # validate meta.json sidebar entries
+bun run check-redirects
+```
 
 ### Environment Variables
 
@@ -22,6 +34,14 @@ cp .env.local.example .env.local
 |----------|----------|---------|
 | `OPENAI_API_KEY` | Yes | Generates llms.txt with AI-powered summaries |
 | `ANTHROPIC_API_KEY` | No | Enables AI-powered style fixes (local and CI) |
+
+## Writing docs
+
+- Pages are `content/docs/**/*.mdx`; `content/docs/a/b.mdx` and `content/docs/a/b/index.mdx` both serve `/en/a/b`.
+- Each folder's `meta.json` sets the sidebar title, icon, and `pages` order.
+- Every page needs frontmatter `title` (rendered as the heading) and should have `description`.
+
+See [AUTHORING.md](./AUTHORING.md) for frontmatter fields, `meta.json` format, components, and code-fence options, and [STYLEGUIDE.md](./STYLEGUIDE.md) for voice and tone.
 
 ## Style Guide & Linting
 
@@ -39,12 +59,13 @@ Both are powered by Vale + LLM and require `ANTHROPIC_API_KEY` (or `OPENAI_API_K
 
 ### Local Development
 
-First, [install the Vale CLI](https://vale.sh/docs/install) for your platform.
+First, [install the Vale CLI](https://vale.sh/docs/install) for your platform, then fetch the style packages:
 
 ```bash
-pnpm vale:check           # Check all docs for style issues
-pnpm vale app/en/path/    # Check specific path
-pnpm vale:fix <file>      # Interactive AI-powered fixes (optional)
+bun run vale:sync
+bun run vale:check                 # Check all docs for style issues
+bun run vale content/docs/build/   # Check a specific path
+bun run vale:fix <file>            # Interactive AI-powered fixes (optional)
 ```
 
 The `vale:fix` command requires an API key in `.env.local`. Without one, you can fix issues manually using `vale <file>` to see detailed output.
@@ -52,21 +73,16 @@ The `vale:fix` command requires an API key in `.env.local`. Without one, you can
 ### Style resources
 
 - [STYLEGUIDE.md](./STYLEGUIDE.md) - Writing standards for voice, tone, and structure
+- [AUTHORING.md](./AUTHORING.md) - Page structure, frontmatter, meta.json, components
 - [AGENTS.md](./AGENTS.md) - Instructions for AI assistants working on docs
 
 ## llms.txt Generation
 
-The project includes a Next.js plugin that automatically generates an `llms.txt` file following the [llms.txt specification](https://llmstxt.org/). This file helps LLMs understand and navigate the documentation.
+`scripts/generate-llmstxt.ts` produces `public/llms.txt` following the [llms.txt specification](https://llmstxt.org/) from every page under `content/docs` plus the generated toolkit pages. It runs in CI (`.github/workflows/llmstxt.yml`) when content changes; run `bun run llmstxt` to regenerate it locally (needs `OPENAI_API_KEY`).
 
-**Automatic generation**: Runs during production builds (`pnpm build`)
+## Callouts
 
-**Manual generation**: Run `pnpm llmstxt` to regenerate the file
-
-See [`scripts/README-llmstxt.md`](./scripts/README-llmstxt.md) for detailed documentation.
-
-## Styling
-
-We use Nextra's built-in Callout component for callouts in MDX:
+Use the `Callout` component (available in every MDX file without an import):
 
 ```mdx
 <Callout>A general callout. Use sparingly.</Callout>
@@ -82,8 +98,6 @@ We use Nextra's built-in Callout component for callouts in MDX:
 </Callout>
 ```
 
-## Generate documentation for a MCP Server toolkit
+## Toolkit (MCP server) pages
 
-Run `make toolkit-docs` and follow the instructions in the terminal. This command
-will automatically generate documentation for the tools in a specified Arcade MCP
-Server Python package.
+Toolkit reference pages at `/en/resources/integrations/<category>/<toolkit>` are generated from `toolkit-docs-generator/data/toolkits/*.json`, not from MDX. See [`toolkit-docs-generator/README.md`](./toolkit-docs-generator/README.md) for the generator and [`toolkit-docs-generator/CURATION.md`](./toolkit-docs-generator/CURATION.md) for hand-authored prose. Sidebar entries for them are produced by `bun run sync-toolkit-sidebar`.

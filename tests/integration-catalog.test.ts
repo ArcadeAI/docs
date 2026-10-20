@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
-import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
-import type { PartnerToolkit } from "@/app/_data/partner-toolkits";
-import { toIntegrationCatalog } from "@/app/_lib/integration-catalog";
+import type { ToolkitData } from "@/components/toolkit-docs/types";
+import type { PartnerToolkit } from "@/data/partner-toolkits";
+import { toIntegrationCatalog } from "@/lib/integration-catalog";
 
 const INTEGRATIONS = "https://docs.arcade.dev/en/resources/integrations";
 

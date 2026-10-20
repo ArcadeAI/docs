@@ -5,7 +5,7 @@ import {
   rehypeNeutralizeEmails,
   splitEmails,
   splitEmailText,
-} from "@/app/_components/toolkit-docs/lib/neutralize-emails";
+} from "@/components/toolkit-docs/lib/neutralize-emails";
 
 /**
  * MARTECH-17: Cloudflare's Email Obfuscation rewrites any contiguous email-like

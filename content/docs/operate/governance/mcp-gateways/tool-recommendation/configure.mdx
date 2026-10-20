@@ -1,0 +1,98 @@
+---
+title: Configure Tool Recommendation
+sidebarTitle: Configure
+description: Turn Tool Recommendation on or off for an MCP Gateway, and understand how it interacts with the gateway's allowed tools
+---
+
+This page is for platform operators who manage MCP Gateways. It shows how to turn [Tool Recommendation](/en/operate/governance/mcp-gateways/tool-recommendation) on or off for a gateway, how it interacts with the gateway's allowed tools, and what a caller gets when it is off. Use it when a gateway has grown past the point where an agent can hold every tool in context.
+
+Tool Recommendation is a setting on each gateway. Turning it on for one gateway does not change any other gateway in the project.
+
+New gateways have Tool Recommendation on by default for organizations with Tool Recommendation, whether you create them in the dashboard or through the API. Gateways that already exist keep their current setting. Arcade does not turn Tool Recommendation on for them, so turn it on yourself for each existing gateway that should use it.
+
+## Prerequisites
+
+- An MCP Gateway, or permission to create one. See [Create via Dashboard](/en/operate/governance/mcp-gateways/create-via-dashboard).
+- Tool Recommendation enabled for your deployment.
+  - **Arcade Cloud:** Tool Recommendation is enabled by default for organizations. If the **Tool Recommendations** option does not appear on the gateway form, [contact Arcade](/en/resources/contact-us) to enable it for your organization.
+  - **Self-hosted:** Tool Recommendation needs to be enabled for your deployment. [Contact sales](https://www.arcade.dev/meet/contact-sales) to enable it.
+
+## Turn it on in the dashboard
+
+1. Open the [MCP Gateways dashboard](https://api.arcade.dev/dashboard/mcp-gateways).
+2. Create a gateway, or open an existing gateway and edit it.
+3. In the **Select apps** step, select the **Tool Recommendations** card so that it shows as on.
+4. Save the gateway.
+
+The **Tool Recommendations** card is on by default when you create a gateway. An existing gateway shows the setting it already has. To turn Tool Recommendation off, clear the card, and then save the gateway.
+
+## Turn it on with the API
+
+Send a `PATCH` request to the gateway with `tool_filter.discovery.enabled` set to `true`:
+
+```bash
+curl -X PATCH \
+  "https://api.arcade.dev/v1/orgs/{org_id}/projects/{project_id}/gateways/{gateway_id}" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"tool_filter": {"discovery": {"enabled": true}}}'
+```
+
+Set `enabled` to `false` to turn it off. A `PATCH` that leaves out `discovery` keeps the current setting, and a `PATCH` that leaves out `allowed_tools` keeps the current allowed tools.
+
+The gateway response reports the current setting in `tool_filter.discovery.enabled`. In an organization with Tool Recommendation, gateways that you create through the API start with Tool Recommendation on. A create request that sets `tool_filter.discovery.enabled` gets the value it sets.
+
+<Callout type="warning">
+  A `PUT` request replaces the whole gateway. If the body includes a
+  `tool_filter` without a `discovery` block, Tool Recommendation turns off.
+  Include `"discovery": {"enabled": true}` in every `PUT` to a gateway that
+  should keep it on, or use `PATCH`.
+</Callout>
+
+The gateway accepts this setting even when Tool Recommendation is off for your organization. In that case the setting has no effect, and the gateway behaves as if it were off.
+
+See the [Arcade API reference](/en/references/api) for the full gateway schema.
+
+## Choose which tools Arcade can recommend
+
+Tool Recommendation searches only the tools the gateway allows. To make a tool recommendable, allow it on the gateway. To keep Arcade from ever recommending a tool or running it through the gateway, don't allow it.
+
+<Callout type="info">
+  Tool Recommendation lets your agent work with a much larger set of tools
+  without loading all their definitions into its context at once. In **Select
+  Apps**, you can click **Select all** to include all available tools, and Arcade
+  will recommend relevant tools for each task.
+</Callout>
+
+## Opt out for one connection
+
+A single MCP client can opt out of Tool Recommendation without changing the gateway. Add a query parameter to the gateway URL the client connects to:
+
+| URL | Effect |
+| --- | --- |
+| `https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}?tool_recommendation=false` | The tool list contains every allowed tool, as if Tool Recommendation were off. |
+| `https://api.arcade.dev/mcp/{YOUR-GATEWAY-SLUG}?arcade_tools=false` | The tool list contains every allowed tool and none of the Arcade tools. |
+
+These parameters can only narrow what a connection gets. `?tool_recommendation=true` does not turn Tool Recommendation on for a gateway that has it off.
+
+## What a caller gets when it is off
+
+When Tool Recommendation is off for a gateway, or is off for your organization:
+
+- The tool list contains every allowed tool.
+- `Arcade.SelectTools` and `Arcade.UseTool` do not appear in the tool list. Calling either of them returns the error `tool not enabled for this gateway`.
+
+## Check that it works
+
+Connect an MCP client to the gateway and list its tools. With Tool Recommendation on, the list contains `Arcade.SelectTools` and `Arcade.UseTool` instead of your allowed tools, and it stays that way after the agent selects tools. Ask the agent to do something that one of your allowed tools handles, and confirm that it calls `Arcade.SelectTools` and then `Arcade.UseTool`.
+
+If the list still shows every allowed tool:
+
+- Confirm that the **Tool Recommendations** card is on for this gateway.
+- Confirm that the client URL does not include `?tool_recommendation=false` or `?arcade_tools=false`.
+- Reconnect the client. Some MCP clients cache the tool list from an earlier session.
+
+## Next steps
+
+- Read [Tool Recommendation limitations](/en/operate/governance/mcp-gateways/tool-recommendation/limitations) before you turn it on for every gateway.
+- Improve recommendation quality for your own tools. See [What makes recommendations good](/en/operate/governance/mcp-gateways/tool-recommendation#what-makes-recommendations-good).

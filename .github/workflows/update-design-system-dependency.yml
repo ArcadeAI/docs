@@ -24,18 +24,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: "22"
-          cache: pnpm
+          bun-version-file: package.json
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
+      # `--exact` keeps the pinned-version policy (no caret ranges); bunfig's
+      # minimumReleaseAge still rejects a release younger than three days.
       # The monorepo dispatches this workflow seconds after `bun publish`
       # returns, but the npm registry takes several minutes to serve the new
       # version. Resolving `latest` right away picks up the previous release,
@@ -63,12 +61,12 @@ jobs:
       - name: Update @arcadeai/design-system
         env:
           VERSION: ${{ inputs.version || 'latest' }}
-        run: pnpm install "@arcadeai/design-system@$VERSION"
+        run: bun add --exact "@arcadeai/design-system@$VERSION"
 
       - name: Check for changes
         id: check-changes
         run: |
-          if [ -n "$(git status --porcelain package.json pnpm-lock.yaml)" ]; then
+          if [ -n "$(git status --porcelain package.json bun.lock)" ]; then
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
@@ -77,8 +75,8 @@ jobs:
       - name: Run design-system compatibility tests
         if: steps.check-changes.outputs.has_changes == 'true'
         run: |
-          pnpm vitest run toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts toolkit-docs-generator/tests/sources/oauth-provider-resolver.test.ts
-          pnpm run build
+          bunx vitest run toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts toolkit-docs-generator/tests/sources/oauth-provider-resolver.test.ts
+          bun run build
 
       # Compatibility tests and a production build run above, so this workflow
       # does not depend on Test starting on the opened PR.
@@ -103,7 +101,7 @@ jobs:
             - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           add-paths: |
             package.json
-            pnpm-lock.yaml
+            bun.lock
           branch: automation/update-design-system-dependency
           delete-branch: true
 

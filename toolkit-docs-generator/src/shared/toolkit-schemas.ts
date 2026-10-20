@@ -1,12 +1,12 @@
 /**
  * Zod schemas for the merged toolkit JSON contract, shared by the Next.js
- * docs app (app/_lib and app/_components/toolkit-docs) and
+ * docs app (lib/ and components/toolkit-docs) and
  * toolkit-docs-generator. The generator validates its own output against
  * these schemas on write (see src/generator/json-generator.ts); the app
- * validates on read (see app/_lib/toolkit-data.ts) so a file that doesn't
+ * validates on read (see lib/toolkit-data.ts) so a file that doesn't
  * match this shape is rejected instead of crashing mid-render.
  *
- * This lives under toolkit-docs-generator/src/ (not app/_lib or a repo-root
+ * This lives under toolkit-docs-generator/src/ (not lib/ or a repo-root
  * shared/ directory) because the generator's tsconfig pins `rootDir` to its
  * own `src/`, so a shared module outside that directory fails the
  * generator's build (`TS6059: File '...' is not under 'rootDir'`). The app

@@ -1,29 +1,22 @@
-import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { getAuthProviderDocsUrl } from "@/app/_components/toolkit-docs/constants";
+import { getAuthProviderDocsUrl } from "@/components/toolkit-docs/constants";
 import { redirects } from "@/redirects";
 import {
   AUTH_PROVIDER_PAGE_IDS,
   REDIRECTED_AUTH_PROVIDER_IDS,
 } from "@/toolkit-docs-generator/src/shared/auth-provider-pages";
+import { CONTENT_ROOT, listChildSlugs } from "./helpers/content-paths";
 
-const AUTH_PROVIDERS_DIR = join(
-  process.cwd(),
-  "app",
-  "en",
-  "references",
-  "auth-providers"
-);
+const AUTH_PROVIDERS_DIR = join(CONTENT_ROOT, "references", "auth-providers");
 
 describe("AUTH_PROVIDER_PAGE_IDS", () => {
-  it("matches the page directories under app/en/references/auth-providers", () => {
-    const pageDirs = readdirSync(AUTH_PROVIDERS_DIR, { withFileTypes: true })
-      .filter((entry) => entry.isDirectory())
-      .map((entry) => entry.name)
-      .sort();
+  it("matches the pages under content/docs/references/auth-providers", () => {
+    // Each provider page is `<id>.mdx` (or `<id>/index.mdx`); the folder's own
+    // `index.mdx` is the section overview, not a provider.
+    const pageSlugs = listChildSlugs(AUTH_PROVIDERS_DIR);
 
-    expect([...AUTH_PROVIDER_PAGE_IDS].sort()).toEqual(pageDirs);
+    expect([...AUTH_PROVIDER_PAGE_IDS].sort()).toEqual(pageSlugs);
   });
 });
 

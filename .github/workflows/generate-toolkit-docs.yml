@@ -2,7 +2,7 @@ name: Generate toolkit docs
 # Description: Generate toolkit JSON from the public tool catalog, then sync sidebar navigation.
 # Flow:
 # 1) Generate toolkit JSON into toolkit-docs-generator/data/toolkits
-# 2) Sync integrations sidebar _meta.tsx from toolkit-docs-generator/data/toolkits
+# 2) Sync integrations sidebar meta.json files from toolkit-docs-generator/data/toolkits
 # 3) Regenerate public/llms.txt so the automation PR is self-contained
 # 4) Create or update a PR if changes were produced
 #
@@ -52,22 +52,25 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
 
+      # The generator runs on Node through tsx: Bun resolves the design system's
+      # `bun` export condition, which points at sources the package does not ship.
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: pnpm
+          node-version-file: .nvmrc
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Generate toolkit docs
         id: generate-docs
-        # Invoked by path rather than through `pnpm exec`, which would reset the
-        # working directory to the repo root and break the relative paths below.
+        # Invoked by path from the generator directory so the relative paths
+        # below resolve against it.
         run: |
           ../node_modules/.bin/tsx src/cli/index.ts generate \
             --all \
@@ -99,12 +102,12 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Sync toolkit sidebar navigation
-        run: pnpm exec tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
+        run: bun run sync-toolkit-sidebar --remove-empty-sections=false --verbose
 
       # GITHUB_TOKEN PRs do not start llmstxt.yml, so generate the file here.
       # The toolkit generator CLI still does not write llms.txt.
       - name: Generate llms.txt
-        run: pnpm llmstxt
+        run: bun run llmstxt
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 

@@ -47,7 +47,7 @@ import {
 // Merger Configuration
 // ============================================================================
 
-export interface DataMergerConfig {
+export type DataMergerConfig = {
   toolkitDataSource: ToolkitDataSource;
   customSectionsSource: ICustomSectionsSource;
   toolExampleGenerator?: ToolExampleGenerator;
@@ -87,16 +87,16 @@ export interface DataMergerConfig {
   preserveLastKnownGood?: boolean;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
   resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
-}
+};
 
-export interface FailedTool {
+export type FailedTool = {
   readonly toolkitId: string;
   readonly toolName: string;
   readonly qualifiedName: string;
   readonly reason: string;
-}
+};
 
-export interface MergeResult {
+export type MergeResult = {
   toolkit: MergedToolkit;
   warnings: string[];
   failedTools: FailedTool[];
@@ -112,20 +112,20 @@ export interface MergeResult {
    * since that's easy to miss in a warnings list read only on failure.
    */
   usedDefaultMetadata: boolean;
-}
+};
 
-export interface ToolExampleResult {
+export type ToolExampleResult = {
   codeExample: ToolCodeExample;
   secretsInfo: MergedTool["secretsInfo"];
-}
+};
 
-export interface ToolExampleGenerator {
+export type ToolExampleGenerator = {
   generate: (tool: ToolDefinition) => Promise<ToolExampleResult>;
-}
+};
 
-export interface ToolkitSummaryGenerator {
+export type ToolkitSummaryGenerator = {
   generate: (toolkit: MergedToolkit) => Promise<string>;
-}
+};
 
 /**
  * Under `--require-complete`, every toolkit must have design-system metadata.
@@ -146,13 +146,13 @@ export const assertRequireCompleteMetadata = (
   }
 };
 
-interface MergeToolkitOptions {
+type MergeToolkitOptions = {
   previousToolkit?: MergedToolkit | undefined;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
   resolveProviderId?: (toolkitId: string) => string | null;
-}
+};
 
 // ============================================================================
 // Pure Functions for Data Transformation
@@ -167,7 +167,7 @@ export const groupToolsByToolkit = (
   const groups = new Map<string, ToolDefinition[]>();
 
   for (const tool of tools) {
-    const toolkitName = tool.qualifiedName.split(".")[0];
+    const [toolkitName] = tool.qualifiedName.split(".");
     if (!toolkitName) continue;
 
     const existing = groups.get(toolkitName) ?? [];
@@ -499,7 +499,7 @@ const DEFAULT_METADATA_CATEGORY: MergedToolkitMetadata["category"] =
  * closed enum with no catch-all — so a wrong-but-valid category would
  * otherwise file the toolkit under the wrong sidebar section with a
  * canonical URL nobody chose. `isHidden: true` is what actually neutralizes
- * that: `app/_lib/toolkit-static-params.ts` drops hidden toolkits from
+ * that: `lib/toolkit-static-params.ts` drops hidden toolkits from
  * routing entirely, so this placeholder record can exist on disk (and keep
  * CI green when metadata truly is optional) without ever rendering under
  * the wrong category. Real metadata — pulled in the next successful design
@@ -697,14 +697,14 @@ const appendMergeWarnings = (
 };
 
 const getToolkitVersion = (tools: readonly ToolDefinition[]): string => {
-  const firstTool = tools[0];
+  const [firstTool] = tools;
   return firstTool ? extractVersion(firstTool.fullyQualifiedName) : "0.0.0";
 };
 
 const getToolkitDescription = (
   tools: readonly ToolDefinition[]
 ): string | null => {
-  const firstTool = tools[0];
+  const [firstTool] = tools;
   return firstTool?.toolkitDescription ?? firstTool?.description ?? null;
 };
 
@@ -994,7 +994,8 @@ export const mergeToolkit = async (
     options.resolveProviderId &&
     tools.some(
       (tool) =>
-        tool.auth?.providerType === "oauth2" && tool.auth.providerId == null
+        tool.auth?.providerType === "oauth2" &&
+        (tool.auth.providerId === null || tool.auth.providerId === undefined)
     )
       ? options.resolveProviderId(toolkitId)
       : null;
@@ -1004,7 +1005,8 @@ export const mergeToolkit = async (
       ? tools.map((tool) => {
           if (
             tool.auth?.providerType === "oauth2" &&
-            tool.auth.providerId == null
+            (tool.auth.providerId === null ||
+              tool.auth.providerId === undefined)
           ) {
             return {
               ...tool,
@@ -1477,7 +1479,7 @@ export class DataMerger {
     if (!editor) {
       return;
     }
-    const summary = result.toolkit.summary;
+    const { summary } = result.toolkit;
     if (!summary) {
       return;
     }
