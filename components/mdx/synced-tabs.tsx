@@ -21,6 +21,26 @@ type SyncedTabsProps = Omit<
   values: string[];
 };
 
+/** The element a click on a link to the URL's current hash points at. */
+function sameHashTarget(event: MouseEvent): HTMLElement | null {
+  const link = (event.target as Element | null)?.closest?.("a[href^='#']");
+  const id = decodeURIComponent(link?.getAttribute("href")?.slice(1) ?? "");
+  if (!id || id !== decodeURIComponent(window.location.hash.slice(1))) {
+    return null;
+  }
+  return document.getElementById(id);
+}
+
+/** The panel of the tab group `root` that holds `target`, if any. */
+function ownPanel(target: HTMLElement, root: HTMLElement | null) {
+  let panel = target.closest<HTMLElement>("[role=tabpanel]");
+  while (panel && panel.parentElement !== root) {
+    panel =
+      panel.parentElement?.closest<HTMLElement>("[role=tabpanel]") ?? null;
+  }
+  return panel;
+}
+
 /**
  * Fumadocs' tabs, holding the open tab itself so that a pick from another
  * group (or an earlier visit) that this group has no tab for is ignored
@@ -49,26 +69,28 @@ export function SyncedTabs({
   // Fumadocs opens the tab holding the URL's target when the hash changes.
   // A click on a link to the hash the URL already has (the table of
   // contents, after the reader switched tabs) changes nothing, so open the
-  // tab here too.
+  // tab here, and scroll once it shows: the browser's own jump would aim at
+  // the hidden heading.
+  const pending = useRef<HTMLElement | null>(null);
   useEffect(() => {
     function onClick(event: MouseEvent) {
-      const link = (event.target as Element | null)?.closest?.("a[href^='#']");
-      const id = decodeURIComponent(link?.getAttribute("href")?.slice(1) ?? "");
-      const target = id ? document.getElementById(id) : null;
-      let panel = target?.closest<HTMLElement>("[role=tabpanel]");
-      while (panel) {
-        const tabValue = panel.dataset.tabValue;
-        if (panel.parentElement === root.current && tabValue) {
-          setValue(tabValue);
-          requestAnimationFrame(() => target?.scrollIntoView());
-          return;
-        }
-        panel = panel.parentElement?.closest<HTMLElement>("[role=tabpanel]");
+      const target = sameHashTarget(event);
+      const panel = target && ownPanel(target, root.current);
+      if (panel?.dataset.tabValue && panel.dataset.state !== "active") {
+        event.preventDefault();
+        pending.current = target;
+        setValue(panel.dataset.tabValue);
       }
     }
     document.addEventListener("click", onClick);
     return () => document.removeEventListener("click", onClick);
   }, []);
+  useEffect(() => {
+    if (pending.current && value) {
+      pending.current.scrollIntoView();
+      pending.current = null;
+    }
+  }, [value]);
 
   return (
     <Tabs
