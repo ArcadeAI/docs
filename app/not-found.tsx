@@ -1,23 +1,14 @@
+import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { Suspense } from "react";
-import { ChromeLayout } from "@/components/chrome/docs-layout";
-import { NotFoundContent } from "@/components/chrome/not-found-content";
-import { buildSidebarModel } from "@/components/chrome/sidebar-model";
-import { SiteFooter } from "@/components/chrome/site-footer";
-import { source } from "@/lib/source";
+import { NotFoundContent } from "@/components/not-found-content";
+import { SiteFooter } from "@/components/site-footer";
+import { baseOptions } from "@/lib/layout.shared";
 
-/**
- * 404 page: the navbar and footer of the docs, without the sidebar. The
- * mobile menu still lists the docs so a reader can find their way back.
- */
+/** 404 page: the docs navbar and footer, without the sidebar. */
 export default function NotFound() {
-  const tree = source.getPageTree();
   return (
     <>
-      <ChromeLayout
-        bare
-        directories={buildSidebarModel(tree, "/en")}
-        tree={tree}
-      >
+      <HomeLayout {...baseOptions()}>
         <Suspense
           fallback={
             <div className="flex items-center justify-center py-16">
@@ -27,7 +18,7 @@ export default function NotFound() {
         >
           <NotFoundContent />
         </Suspense>
-      </ChromeLayout>
+      </HomeLayout>
       <SiteFooter />
     </>
   );
