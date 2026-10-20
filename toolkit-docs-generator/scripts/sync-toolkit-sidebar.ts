@@ -31,7 +31,6 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import {
   PARTNER_TOOLKITS,
   type PartnerToolkit,
@@ -49,20 +48,6 @@ import type {
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-// Import design system toolkits
-type DesignSystemToolkit = {
-  id: string;
-  label: string;
-  category?: string;
-  isHidden?: boolean;
-};
-let TOOLKITS: DesignSystemToolkit[] =
-  DESIGN_SYSTEM_TOOLKITS as DesignSystemToolkit[];
-
-export function setToolkitsForTesting(toolkits: DesignSystemToolkit[]): void {
-  TOOLKITS = toolkits;
-}
 
 // Get project root (two levels up from toolkit-docs-generator/scripts)
 const PROJECT_ROOT = resolve(__dirname, "..", "..");
@@ -187,33 +172,9 @@ export function getToolkitFiles(dataDir: string): string[] {
 }
 
 /**
- * Get category for a toolkit ID from design system
- */
-export function getToolkitCategory(toolkitId: string): string | null {
-  const toolkit = TOOLKITS.find(
-    (t) => t.id.toLowerCase() === toolkitId.toLowerCase()
-  );
-
-  if (toolkit && !toolkit.isHidden) {
-    return toolkit.category || null;
-  }
-
-  return null;
-}
-
-/**
- * Get label for a toolkit ID from design system
+ * A readable label from a toolkit ID, for a toolkit file with no label.
  */
 export function getToolkitLabel(toolkitId: string): string {
-  const toolkit = TOOLKITS.find(
-    (t) => t.id.toLowerCase() === toolkitId.toLowerCase()
-  );
-
-  if (toolkit) {
-    return toolkit.label;
-  }
-
-  // Fallback: Convert ID to readable label
   return toolkitId
     .replace(CAPITAL_LETTER_REGEX, " $1")
     .replace(FIRST_CHARACTER_REGEX, (str) => str.toUpperCase())
@@ -269,35 +230,21 @@ export function inferNavGroup(
 }
 
 /**
- * Build toolkit info from available JSON files
+ * Build a sidebar entry from a toolkit's generated JSON file, or `null` when
+ * the toolkit is hidden or has no category.
  */
-type ToolkitInfoEntry = {
-  info: ToolkitInfo;
-  priority: number;
-};
-
-function resolveToolkitInfo(
-  dataDir: string,
-  slug: string
-): ToolkitInfoEntry | null {
+function resolveToolkitInfo(dataDir: string, slug: string): ToolkitInfo | null {
   const jsonData = readToolkitJson(dataDir, slug);
   const toolkitId = jsonData?.id ?? slug;
   const docsSlug = getToolkitSlug({
     docsLink: jsonData?.metadata?.docsLink ?? null,
     id: toolkitId,
   });
-  const designSystemToolkit = TOOLKITS.find(
-    (t) => t.id.toLowerCase() === toolkitId.toLowerCase()
-  );
-  const isHidden = jsonData?.metadata?.isHidden ?? false;
-  if (designSystemToolkit?.isHidden || isHidden) {
+  if (jsonData?.metadata?.isHidden) {
     return null;
   }
 
-  // Keep sidebar routes aligned with static params: toolkit JSON is source of
-  // truth for category, with design system as fallback when JSON is missing.
-  const category =
-    jsonData?.metadata?.category ?? designSystemToolkit?.category;
+  const category = jsonData?.metadata?.category;
   if (!category) {
     return null;
   }
@@ -306,41 +253,30 @@ function resolveToolkitInfo(
       `Unrecognized integration category "${category}" for toolkit "${toolkitId}".`
     );
   }
-  const labelFromDesignSystem = designSystemToolkit?.label ?? null;
   const labelFromJson = jsonData?.label ?? jsonData?.name ?? null;
   const typeFromJson = jsonData?.metadata?.type ?? null;
 
-  const info: ToolkitInfo = {
+  return {
     category,
     id: toolkitId,
-    // Prefer the Design System label (has correct spacing/casing), but fall back
-    // to JSON label for toolkits not present in the design system.
-    label: labelFromDesignSystem ?? labelFromJson ?? getToolkitLabel(toolkitId),
+    label: labelFromJson ?? getToolkitLabel(toolkitId),
     navGroup: inferNavGroup(toolkitId, typeFromJson),
     slug: docsSlug,
   };
-
-  const priority = designSystemToolkit ? 2 : 0;
-  return { info, priority };
 }
 
 export function buildToolkitInfoList(dataDir: string): ToolkitInfo[] {
   const files = getToolkitFiles(dataDir);
-  const toolkitsBySlug = new Map<string, ToolkitInfoEntry>();
+  const toolkitsBySlug = new Map<string, ToolkitInfo>();
 
   for (const slug of files) {
-    const entry = resolveToolkitInfo(dataDir, slug);
-    if (!entry) {
-      continue;
-    }
-
-    const existing = toolkitsBySlug.get(entry.info.slug);
-    if (!existing || entry.priority > existing.priority) {
-      toolkitsBySlug.set(entry.info.slug, entry);
+    const info = resolveToolkitInfo(dataDir, slug);
+    if (info && !toolkitsBySlug.has(info.slug)) {
+      toolkitsBySlug.set(info.slug, info);
     }
   }
 
-  return Array.from(toolkitsBySlug.values()).map((entry) => entry.info);
+  return Array.from(toolkitsBySlug.values());
 }
 
 /**

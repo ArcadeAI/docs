@@ -4,16 +4,6 @@ import { resolveToolkitDataDir } from "@/toolkit-docs-generator/src/shared/toolk
 import { loadAllToolkitData } from "./toolkit-data";
 import type { ToolkitWithDocsLink } from "./toolkit-slug";
 
-/**
- * Engine plumbing the public catalog lists like any other toolkit. Nothing in
- * the catalog separates these from a product, so they are named here. Keep in
- * step with arcade.dev/tools, which hides the same set.
- */
-const INTERNAL_TOOLKIT_IDS: ReadonlySet<string> = new Set([
-  "Math",
-  "ArcadeEngineApi",
-]);
-
 const toCatalogToolkit = ({
   id,
   label,
@@ -44,9 +34,7 @@ export const toIntegrationCatalog = (
   generated: Iterable<ToolkitData>,
   partners: readonly ToolkitWithDocsLink[]
 ): ToolkitWithDocsLink[] => [
-  ...[...generated]
-    .filter((toolkit) => !INTERNAL_TOOLKIT_IDS.has(toolkit.id))
-    .map(toCatalogToolkit),
+  ...[...generated].map(toCatalogToolkit),
   ...partners,
 ];
 

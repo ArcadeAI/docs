@@ -74,19 +74,6 @@ describe("toIntegrationCatalog", () => {
     expect(ids).toEqual(["Slack", "SlackApi"]);
   });
 
-  test("leaves out the platform's own toolkits", () => {
-    const ids = toIntegrationCatalog(
-      [
-        makeGenerated("Math"),
-        makeGenerated("ArcadeEngineApi"),
-        makeGenerated("Slack"),
-      ],
-      []
-    ).map((toolkit) => toolkit.id);
-
-    expect(ids).toEqual(["Slack"]);
-  });
-
   test("appends partner toolkits after the published ones", () => {
     const ids = toIntegrationCatalog([makeGenerated("Slack")], [partner]).map(
       (toolkit) => toolkit.id
