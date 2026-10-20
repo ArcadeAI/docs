@@ -5,51 +5,52 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
+import {
+  CONTENT_ROOT,
+  readFrontmatterValue,
+  readMetaPages,
+  resolveContentFile,
+} from "./helpers/content-paths";
 
-// Key and title asserted together, not as two unrelated substrings.
-const META_KEY_RE = /copilotkit:\s*\{\s*title:\s*"CopilotKit"/;
-// Frontmatter keys must carry real values, not just be present.
-const FRONTMATTER_TITLE_RE = /title:\s*"[^"]+"/;
-const FRONTMATTER_DESCRIPTION_RE = /description:\s*"[^"]+"/;
 // The install step must pull in zod — the code samples import it, and it
 // otherwise resolves only as a transitive/peer dep. Matches `npm install … zod`
 // or `pnpm add … zod`.
 const INSTALL_ZOD_RE = /(?:install|add)\b[^\n]*\bzod\b/;
 
-const GUIDE_PAGE = "app/en/get-started/agent-frameworks/copilotkit/page.mdx";
+const FRAMEWORKS_DIR = join(CONTENT_ROOT, "get-started", "agent-frameworks");
+const GUIDE_URL = "/en/get-started/agent-frameworks/copilotkit";
 
 function read(p: string): string {
   return existsSync(p) ? readFileSync(p, "utf-8") : "";
 }
 
 describe("CopilotKit agent-framework guide", () => {
-  test("_meta.tsx registers a copilotkit key titled CopilotKit", () => {
-    const content = read(
-      join(process.cwd(), "app/en/get-started/agent-frameworks/_meta.tsx")
-    );
-    expect(content).toMatch(META_KEY_RE);
+  test("meta.json lists the copilotkit page", () => {
+    expect(readMetaPages(FRAMEWORKS_DIR)).toContain("copilotkit");
   });
 
   test("agent-framework-tabs.tsx has a CopilotKit PlatformCard linking to the guide", () => {
     const content = read(
-      join(process.cwd(), "app/_components/agent-framework-tabs.tsx")
+      join(process.cwd(), "components/agent-framework-tabs.tsx")
     );
     expect(content).toContain("PlatformCard");
     expect(content).toContain('name="CopilotKit"');
-    expect(content).toContain(
-      'link="/en/get-started/agent-frameworks/copilotkit"'
-    );
+    expect(content).toContain(`link="${GUIDE_URL}"`);
   });
 
-  test("the copilotkit page exists with a non-empty title and description", () => {
-    const filePath = join(
-      process.cwd(),
-      "app/en/get-started/agent-frameworks/copilotkit/page.mdx"
-    );
-    expect(existsSync(filePath)).toBe(true);
-    const content = read(filePath);
-    expect(content).toMatch(FRONTMATTER_TITLE_RE);
-    expect(content).toMatch(FRONTMATTER_DESCRIPTION_RE);
+  test("the copilotkit page exists, is labelled CopilotKit in the sidebar, and has a description", () => {
+    const filePath = resolveContentFile(GUIDE_URL);
+    expect(filePath, `Expected a content page for ${GUIDE_URL}`).not.toBeNull();
+    const content = read(filePath ?? "");
+    // Frontmatter keys must carry real values, not just be present.
+    // Fumadocs reads the sidebar label from `sidebarTitle` (falling back to
+    // `title`).
+    expect(readFrontmatterValue(content, "title")).toBeTruthy();
+    const sidebarLabel =
+      readFrontmatterValue(content, "sidebarTitle") ??
+      readFrontmatterValue(content, "title");
+    expect(sidebarLabel).toBe("CopilotKit");
+    expect(readFrontmatterValue(content, "description")).toBeTruthy();
   });
 
   test("the CopilotKit icon exists and is a well-formed SVG", () => {
@@ -65,7 +66,7 @@ describe("CopilotKit agent-framework guide", () => {
 // scaffold path must be one that actually exists, the code samples must be the
 // versions verified to typecheck/lint, and the prose-only steps must ship code.
 describe("CopilotKit guide content reflects the validated fixes", () => {
-  const content = read(join(process.cwd(), GUIDE_PAGE));
+  const content = read(resolveContentFile(GUIDE_URL) ?? "");
 
   test("scaffolds with create-next-app, not the interactive copilotkit CLI", () => {
     expect(content).toContain("create-next-app");
@@ -82,7 +83,8 @@ describe("CopilotKit guide content reflects the validated fixes", () => {
   });
 
   test("shows the client-side CopilotKit provider wiring", () => {
-    expect(content).toContain('filename="app/providers.tsx"');
+    // Fumadocs code-fence meta names the file with `title=`.
+    expect(content).toContain('title="app/providers.tsx"');
     expect(content).toContain("useSingleEndpoint");
   });
 });

@@ -6,7 +6,7 @@ import {
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
   type ToolkitCatalogEntry,
-} from "@/app/_lib/toolkit-static-params";
+} from "@/lib/toolkit-static-params";
 import { normalizeToolkitId } from "@/toolkit-docs-generator/src/shared/toolkit-primitives";
 
 const INVALID_TOOLKIT_INDEX_SCHEMA_ERROR = /Invalid toolkit index schema/;

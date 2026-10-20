@@ -1,5 +1,5 @@
 /**
- * Toolkit primitives shared by the Next.js docs app (app/_lib and its
+ * Toolkit primitives shared by the Next.js docs app (lib/ and its
  * consumers) and toolkit-docs-generator. Both halves need the same toolkit
  * ID/slug/category logic, but the generator's tsconfig pins `rootDir` to its
  * own `src/`, so a module outside that directory fails its build
@@ -99,13 +99,14 @@ export function getToolkitSlug({ id, docsLink }: ToolkitSlugSource): string {
 
 /**
  * The docs-generation category buckets. Each value corresponds to exactly
- * one `app/en/resources/integrations/<category>/[toolkitId]` route directory
+ * one generated `content/docs/resources/integrations/<category>/meta.json`
+ * sidebar folder, is served by `lib/toolkit-route.tsx`
  * (see tests/integration-category-routes.test.ts) and to the design system's
  * own `ToolkitCategory` union (minus its "all" filter meta-value) — see
- * app/en/resources/integrations/components/filter-params.ts. There is
+ * components/pages/integrations/filter-params.ts. There is
  * deliberately no "others" catch-all: a toolkit whose category doesn't match
  * one of these has no page to render, so `normalizeCategory` in
- * app/_lib/toolkit-static-params.ts throws instead of bucketing it here.
+ * lib/toolkit-static-params.ts throws instead of bucketing it here.
  *
  * `ToolkitCategorySchema` in ./toolkit-schemas.ts is built from this array,
  * so the generator's contract and the docs app's route set can't drift

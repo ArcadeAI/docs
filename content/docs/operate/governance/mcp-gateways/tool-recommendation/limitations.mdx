@@ -1,0 +1,46 @@
+---
+title: Tool Recommendation limitations
+sidebarTitle: Limitations
+description: Cases where Tool Recommendation does not help, and the limits to plan around when you turn it on
+---
+
+[Tool Recommendation](/en/operate/governance/mcp-gateways/tool-recommendation) helps when a gateway has more tools than an agent can reasonably hold in context. It is not the right choice for every gateway. This page is for platform operators and agent developers deciding whether to turn it on. It covers the cases where it costs more than it saves, and the limits to plan around when you do use it.
+
+## When to turn it off
+
+### Gateways with few tools
+
+As a rule of thumb, a gateway with fewer than about ten tools gains little from Tool Recommendation. The agent spends a round trip calling `Arcade.SelectTools` to learn about tools that would have fit in its context from the start, and every new task adds another call before any work happens.
+
+For a small gateway, turn Tool Recommendation off and let the MCP client list every tool directly. Revisit the choice as the gateway grows.
+
+### Agents that already know their tools
+
+Some agents run a fixed workflow using a small, known set of tools. If those tool definitions already fit comfortably in the model's context, discovering them through Tool Recommendation can add an unnecessary round trip. Providing the tools directly may be simpler and faster.
+
+For those agents, either use a gateway with Tool Recommendation off, or connect that one agent with `?tool_recommendation=false` on the gateway URL so that its tool list contains every allowed tool. See [Opt out for one connection](/en/operate/governance/mcp-gateways/tool-recommendation/configure#opt-out-for-one-connection).
+
+### Tools with thin descriptions
+
+Arcade recommends tools by matching a task against each tool's name and the first line of its description. A toolset with short, vague, or near-identical descriptions produces poor recommendations: the right tool ranks low, or a similar-sounding tool outranks it.
+
+If a gateway depends on tools like that, improve the descriptions before you turn Tool Recommendation on. See [What makes recommendations good](/en/operate/governance/mcp-gateways/tool-recommendation#what-makes-recommendations-good).
+
+## Limits to plan around
+
+### New custom and remote tools take a moment to become recommendable
+
+Arcade indexes your own tools and tools from [remote MCP servers](/en/operate/governance/remote-mcp-servers) in the background. A tool of either kind that you just added can be missing from recommendations for a short time.
+
+### Each task returns a limited number of tools
+
+`Arcade.SelectTools` returns up to five tools for each task. Callers of the `POST /v1/tools/select` endpoint in the [Arcade API](/en/references/api) can change that count with `top_k`, up to 20. A request that bundles more than one action into one task can miss tools that fit only part of it. Agents get better results when they pass each action as a separate entry in `tasks`. The description of the `tasks` parameter asks the model to do this, but an agent with its own tool-calling prompt may need the same instruction.
+
+### Recommendations only cover allowed tools
+
+Tool Recommendation searches the tools the gateway allows and nothing else. It does not suggest tools that exist elsewhere in your project or in the Arcade catalog. If an agent keeps failing to find a tool, check that the tool is on the gateway before you look at the descriptions.
+
+## Next steps
+
+- [Configure Tool Recommendation](/en/operate/governance/mcp-gateways/tool-recommendation/configure) for a gateway.
+- Learn how to [create tools](/en/build/create-tools) with descriptions that recommend well.

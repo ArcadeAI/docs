@@ -119,7 +119,7 @@ type: environment-variables
       `---
 type: import
 ---
-import StarterToolInfo from "@/app/_components/starter-tool-info";
+import StarterToolInfo from "@/components/starter-tool-info";
 `
     );
 
@@ -127,7 +127,7 @@ import StarterToolInfo from "@/app/_components/starter-tool-info";
       await createMarkdownCurationSource(tempDir).getCustomSections("Github");
 
     expect(sections.customImports).toEqual([
-      'import StarterToolInfo from "@/app/_components/starter-tool-info";',
+      'import StarterToolInfo from "@/components/starter-tool-info";',
     ]);
   });
 

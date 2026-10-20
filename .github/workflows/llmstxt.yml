@@ -6,15 +6,15 @@ on:
     branches:
       - main
     paths:
-      - "app/en/**/*.mdx"
-      - "app/en/**/_meta.tsx"
+      - "content/docs/**/*.mdx"
+      - "content/docs/**/meta.json"
       - "scripts/generate-llmstxt.ts"
       - "toolkit-docs-generator/data/toolkits/**"
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - "app/en/**/*.mdx"
-      - "app/en/**/_meta.tsx"
+      - "content/docs/**/*.mdx"
+      - "content/docs/**/meta.json"
       - "scripts/generate-llmstxt.ts"
       - "toolkit-docs-generator/data/toolkits/**"
 
@@ -28,24 +28,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22.x"
-
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref || github.ref }}
 
-      - name: Install dependencies
-        run: npm install -g pnpm
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
 
-      - name: Install pnpm
-        run: pnpm install
+      # The script runs on Node through tsx: Bun resolves the design system's
+      # `bun` export condition, which points at sources the package does not ship.
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
       - name: generate LLMs.txt
-        run: pnpm llmstxt
+        run: bun run llmstxt
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 

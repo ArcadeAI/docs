@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Vale + AI Fix Script (Interactive)
@@ -7,9 +7,9 @@
  * with AI assistance. Supports feedback loops for iterative refinement.
  *
  * Usage:
- *   pnpm vale:fix [files...]        # Fix specific files
- *   pnpm vale:fix --staged          # Fix staged files only
- *   pnpm vale:fix app/en/guides/    # Fix all files in directory
+ *   bun run vale:fix [files...]        # Fix specific files
+ *   bun run vale:fix --staged          # Fix staged files only
+ *   bun run vale:fix content/docs/guides/    # Fix all files in directory
  */
 
 import { execSync, spawnSync } from "node:child_process";
@@ -426,7 +426,7 @@ function getFilesToCheck(args: string[]): string[] {
       .filter(Boolean);
   }
   if (args.length === 0) {
-    console.log("Usage: pnpm vale:fix [--staged | files...]");
+    console.log("Usage: bun run vale:fix [--staged | files...]");
     process.exit(0);
   }
   return args;
@@ -556,8 +556,8 @@ async function processIssue(
 
   showIssueDiff(currentContent, fixed, issue);
 
-  const iterating = true;
-  while (iterating) {
+  // Loops until the user picks an action that resolves the issue.
+  for (;;) {
     const answer = await prompt(
       `\n   ${colors.green}[y]es${colors.reset} / ${colors.red}[n]o${colors.reset} / ${colors.blue}[e]dit${colors.reset} / ${colors.yellow}[f]eedback${colors.reset} / ${colors.dim}[s]kip file${colors.reset}: `
     );
@@ -579,8 +579,6 @@ async function processIssue(
         return { content: currentContent, action: "skipped" };
     }
   }
-
-  return { content: currentContent, action: "skipped" };
 }
 
 /**

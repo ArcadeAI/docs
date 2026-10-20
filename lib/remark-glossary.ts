@@ -1,4 +1,4 @@
-import type { Paragraph, PhrasingContent, Root, Text } from "mdast";
+import type { Paragraph, Parent, PhrasingContent, Root, Text } from "mdast";
 import { SKIP, visit } from "unist-util-visit";
 import {
   type GlossaryTerm,
@@ -12,63 +12,162 @@ type RemarkGlossaryOptions = {
   caseSensitive?: boolean;
 };
 
+/** The subset of a `VFile` this plugin reads. */
+type FileLike = {
+  history?: string[];
+  path?: string;
+};
+
+/** Minimal shape of an `mdxJsxTextElement` (from mdast-util-mdx-jsx). */
+type MdxJsxTextElement = {
+  attributes: { type: "mdxJsxAttribute"; name: string; value: string }[];
+  children: PhrasingContent[];
+  name: string;
+  type: "mdxJsxTextElement";
+};
+
 // Cache for parsed glossary terms
 let cachedTerms: GlossaryTerm[] | null = null;
 let cachedGlossaryPath: string | null = null;
 
+const SPECIAL_REGEX_CHARS = /[.*+?^${}()|[\]\\]/g;
+
+function normalize(filePath: string): string {
+  return filePath.replaceAll("\\", "/");
+}
+
+/**
+ * Pages that must not get glossary links:
+ * - the glossary page itself (`resources/glossary.mdx` or `resources/glossary/index.mdx`)
+ * - the many MCP server pages under `resources/integrations/`
+ * - User Source per-provider pages: they discuss Microsoft, Auth0, Okta, etc.
+ *   concepts (account, tenant, realm) that collide with Arcade glossary terms
+ *   in ways that mislead readers. The User Sources overview itself stays opted-in.
+ */
+export function shouldSkipGlossary(filePath: string | undefined): boolean {
+  if (!filePath) {
+    return false;
+  }
+  const p = normalize(filePath);
+  if (
+    p.endsWith("/resources/glossary.mdx") ||
+    p.endsWith("/resources/glossary/index.mdx")
+  ) {
+    return true;
+  }
+  if (p.includes("/resources/integrations/")) {
+    return true;
+  }
+  if (
+    p.includes("/operate/identity/user-sources/") &&
+    !p.endsWith("/operate/identity/user-sources/index.mdx")
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function getTerms(glossaryPath: string): GlossaryTerm[] {
+  if (!cachedTerms || cachedGlossaryPath !== glossaryPath) {
+    cachedTerms = sortTermsByLength(parseGlossary(glossaryPath));
+    cachedGlossaryPath = glossaryPath;
+  }
+  return cachedTerms;
+}
+
+function glossaryNode(
+  term: GlossaryTerm,
+  matchedText: string
+): PhrasingContent {
+  const node: MdxJsxTextElement = {
+    attributes: [
+      { name: "term", type: "mdxJsxAttribute", value: term.term },
+      { name: "definition", type: "mdxJsxAttribute", value: term.definition },
+      { name: "link", type: "mdxJsxAttribute", value: term.link },
+    ],
+    children: [{ type: "text", value: matchedText }],
+    name: "GlossaryTerm",
+    type: "mdxJsxTextElement",
+  };
+  // mdast's PhrasingContent union does not include MDX JSX nodes; remark-mdx adds them.
+  return node as unknown as PhrasingContent;
+}
+
+type Match = {
+  index: number;
+  length: number;
+  term: GlossaryTerm;
+};
+
+/** Split `textNode` around `match`: text before, the GlossaryTerm element, text after. */
+function splitTextNode(textNode: Text, match: Match): PhrasingContent[] {
+  const text = textNode.value;
+  const beforeText = text.slice(0, match.index);
+  const matchedText = text.slice(match.index, match.index + match.length);
+  const afterText = text.slice(match.index + match.length);
+
+  const newNodes: PhrasingContent[] = [];
+  if (beforeText) {
+    newNodes.push({ type: "text", value: beforeText });
+  }
+  newNodes.push(glossaryNode(match.term, matchedText));
+  if (afterText) {
+    newNodes.push({ type: "text", value: afterText });
+  }
+  return newNodes;
+}
+
+/** Find the first (longest-term-first) unmarked glossary term in `text`. */
+function findMatch(
+  text: string,
+  terms: GlossaryTerm[],
+  markedTerms: Set<string>,
+  caseSensitive: boolean
+): Match | null {
+  const flags = caseSensitive ? "g" : "gi";
+  for (const term of terms) {
+    if (markedTerms.has(term.term)) {
+      continue;
+    }
+    for (const alias of term.aliases) {
+      const pattern = new RegExp(`\\b${escapeRegex(alias)}\\b`, flags);
+      const match = pattern.exec(text);
+      if (match) {
+        return { index: match.index, length: match[0].length, term };
+      }
+    }
+  }
+  return null;
+}
+
 /**
  * Remark plugin to automatically detect and link glossary terms
  */
-export function remarkGlossary(options: RemarkGlossaryOptions) {
+export function remarkGlossary(
+  options: RemarkGlossaryOptions
+): (tree: Root, file: FileLike) => void {
   const { glossaryPath, caseSensitive = false } = options;
 
-  // biome-ignore lint/suspicious/noExplicitAny: unist file types are not fully typed
-  return (tree: Root, file: any) => {
-    // Don't process the glossary page itself
-    if (file.history?.[0]?.includes("glossary/page.mdx")) {
+  return (tree: Root, file: FileLike) => {
+    const filePath = file.history?.[0] ?? file.path;
+    if (shouldSkipGlossary(filePath)) {
       return;
     }
 
-    // don't process the many MCP tool pages
-    if (file.history?.[0]?.includes("/resources/integrations/")) {
-      return;
-    }
-
-    // Don't process User Source per-provider pages — they discuss
-    // Microsoft, Auth0, Okta, etc. concepts (account, tenant, realm)
-    // that collide with Arcade glossary terms in ways that mislead
-    // readers. The User Sources overview itself stays opted-in.
-    const filePath = file.history?.[0];
-    if (
-      filePath?.includes("/operate/identity/user-sources/") &&
-      !filePath.endsWith("/operate/identity/user-sources/page.mdx")
-    ) {
-      return;
-    }
-
-    // Lazy-load and cache glossary terms
-    if (!cachedTerms || cachedGlossaryPath !== glossaryPath) {
-      cachedTerms = sortTermsByLength(parseGlossary(glossaryPath));
-      cachedGlossaryPath = glossaryPath;
-    }
-
-    const terms = cachedTerms;
-
-    // Track which terms have been marked (per paragraph)
-    // biome-ignore lint/suspicious/noExplicitAny: mdast node types are complex
-    const markedTermsPerParagraph = new Map<any, Set<string>>();
+    const terms = getTerms(glossaryPath);
 
     visit(tree, "paragraph", (paragraphNode: Paragraph) => {
-      markedTermsPerParagraph.set(paragraphNode, new Set());
+      // Track which terms have been marked in this paragraph
+      const markedTerms = new Set<string>();
 
-      // Process text nodes within the paragraph
       visit(
         paragraphNode,
         "text",
-        // biome-ignore lint/suspicious/noExplicitAny: unist parent nodes are not fully typed
-        // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: necessary for term matching logic
-        (textNode: Text, index: number | undefined, parent: any) => {
-          // Skip if we don't have parent or index
+        (
+          textNode: Text,
+          index: number | undefined,
+          parent: Parent | undefined
+        ) => {
           if (!parent || index === undefined) {
             return;
           }
@@ -78,108 +177,26 @@ export function remarkGlossary(options: RemarkGlossaryOptions) {
             parent.type === "link" ||
             parent.type === "inlineCode" ||
             (parent.type === "mdxJsxTextElement" &&
+              "name" in parent &&
               parent.name === "GlossaryTerm")
           ) {
             return SKIP;
           }
 
-          const markedTerms =
-            markedTermsPerParagraph.get(paragraphNode) || new Set();
-          let text = textNode.value;
-          let modified = false;
-          const newNodes: PhrasingContent[] = [];
-
-          // Try to match terms in order of length (longest first)
-          for (const term of terms) {
-            // Skip if we've already marked this term in this paragraph
-            if (markedTerms.has(term.term)) {
-              continue;
-            }
-
-            // Try each alias
-            for (const alias of term.aliases) {
-              // Build regex with word boundaries
-              const flags = caseSensitive ? "g" : "gi";
-              const pattern = new RegExp(`\\b${escapeRegex(alias)}\\b`, flags);
-              const match = pattern.exec(text);
-
-              if (match && match.index !== undefined) {
-                // Found a match! Split the text and insert the glossary term component
-                modified = true;
-                markedTerms.add(term.term);
-
-                const beforeText = text.slice(0, match.index);
-                const matchedText = match[0];
-                const afterText = text.slice(match.index + matchedText.length);
-
-                // Add text before match
-                if (beforeText) {
-                  newNodes.push({
-                    type: "text",
-                    value: beforeText,
-                  });
-                }
-
-                // Add glossary term component
-                newNodes.push({
-                  type: "mdxJsxTextElement",
-                  name: "GlossaryTerm",
-                  attributes: [
-                    {
-                      type: "mdxJsxAttribute",
-                      name: "term",
-                      value: term.term,
-                    },
-                    {
-                      type: "mdxJsxAttribute",
-                      name: "definition",
-                      value: term.definition,
-                    },
-                    {
-                      type: "mdxJsxAttribute",
-                      name: "link",
-                      value: term.link,
-                    },
-                  ],
-                  children: [
-                    {
-                      type: "text",
-                      value: matchedText,
-                    },
-                  ],
-                  // biome-ignore lint/suspicious/noExplicitAny: mdxJsxTextElement not in base mdast types
-                } as any);
-
-                // Continue with the remaining text
-                text = afterText;
-
-                // Stop after first match for this term
-                break;
-              }
-            }
-
-            // If we modified the text, stop trying other terms for this node
-            if (modified) {
-              break;
-            }
+          const match = findMatch(
+            textNode.value,
+            terms,
+            markedTerms,
+            caseSensitive
+          );
+          if (!match) {
+            return;
           }
 
-          // If we modified the text, replace the node
-          if (modified) {
-            // Add any remaining text
-            if (text) {
-              newNodes.push({
-                type: "text",
-                value: text,
-              });
-            }
-
-            // Replace the text node with our new nodes
-            parent.children.splice(index, 1, ...newNodes);
-
-            // Return SKIP to avoid re-processing the nodes we just added
-            return SKIP;
-          }
+          markedTerms.add(match.term.term);
+          // Replace the text node with the split nodes and skip re-processing them
+          parent.children.splice(index, 1, ...splitTextNode(textNode, match));
+          return SKIP;
         }
       );
     });
@@ -190,5 +207,5 @@ export function remarkGlossary(options: RemarkGlossaryOptions) {
  * Escape special regex characters in a string
  */
 function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return str.replace(SPECIAL_REGEX_CHARS, "\\$&");
 }

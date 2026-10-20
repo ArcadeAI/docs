@@ -1,0 +1,745 @@
+---
+title: Calling tools in your agent with Arcade
+metaTitle: Calling tools in your agent
+sidebarTitle: Call tools in agents
+description: Learn how to call tools in your agent
+---
+
+import { SignupLink } from "@/components/analytics";
+import { AgentFrameworkTabs } from "@/components/agent-framework-tabs";
+
+Arcade gives your AI agents the power to act. With Arcade-hosted tools, your AI-powered apps can send Gmail, update Notion, message in Slack, and more.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Install and use the Arcade client to call Arcade Hosted Tools.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:call-tools-directly" utmCampaign="docs-quickstart-call-tool-agent">Arcade account</SignupLink>
+- An [Arcade API key](/en/get-started/setup/api-keys)
+- The [`uv` package manager](https://docs.astral.sh/uv/getting-started/installation/) if you are using Python
+- The [`bun` runtime](https://bun.com/) if you are using TypeScript
+- [Apache Maven](https://maven.apache.org/) or [Gradle](https://gradle.org/) if you are using Java
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Install the Arcade client
+- Build a workflow that uses tools to:
+  - search for news with Google News
+  - Create a Google Doc with the news
+  - Email a link to the Google Doc to the user
+- Present an OAuth URL to the user when the tool requires authorization
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+<Steps>
+
+
+### Install the Arcade client
+
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
+
+  <Tabs.Tab>
+  In your terminal, run the following command to create a new `uv` project:
+
+  ```bash
+  mkdir arcade-quickstart
+  cd arcade-quickstart
+  uv init
+  ```
+
+  Then, run the following command to create and activate a new virtual environment, isolating the project dependencies from your system:
+
+
+  ```bash
+  uv venv
+  ```
+
+  <Tabs items={["Bash/Zsh (macOS/Linux)", "PowerShell (Windows)"]}>
+    <Tabs.Tab>
+
+    ```bash
+    source .venv/bin/activate
+    ```
+
+    </Tabs.Tab>
+    <Tabs.Tab>
+
+    ```powershell
+    . ".venv\Scripts\Activate.ps1"
+    ```
+
+    </Tabs.Tab>
+  </Tabs>
+
+  Then, run the following command to install the Python client package `arcadepy`:
+
+  ```bash
+  uv add arcadepy
+  ```
+
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+  In your terminal, run the following command to install the JavaScript client package `@arcadeai/arcadejs`:
+
+```bash
+bun install @arcadeai/arcadejs
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+Create a new Maven or Gradle project with the following dependency:
+
+
+#### Gradle:
+
+```groovy title="build.gradle.kts"
+implementation("dev.arcade:arcade-java:${arcade-java-version}")
+```
+
+#### Maven:
+
+```xml title="pom.xml"
+<dependency>
+    <groupId>dev.arcade</groupId>
+    <artifactId>arcade-java</artifactId>
+    <version>${arcade-java-version}</version>
+</dependency>
+```
+
+See the [Arcade Java SDK docs](https://github.com/ArcadeAI/arcade-java?tab=readme-ov-file#installation) for the latest version.
+
+  </Tabs.Tab>
+</Tabs>
+
+### Setup the client
+
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
+
+<Tabs.Tab>
+
+Open the `main.py` file and replace the content with the following:
+
+```python title="main.py"
+from arcadepy import Arcade
+
+# You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
+client = Arcade(api_key="{arcade_api_key}")
+
+# Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
+# In this example, use the email you used to sign up for Arcade.dev:
+user_id = "{arcade_user_id}"
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Create a new script called `example.ts`:
+
+```typescript title="example.ts"
+import Arcade from "@arcadeai/arcadejs";
+
+// You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
+const client = new Arcade({
+  apiKey: "{arcade_api_key}",
+});
+
+// Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
+// In this example, use the email you used to sign up for Arcade.dev:
+let userId = "{arcade_user_id}";
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+```java
+// You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a
+// parameter by using ArcadeOkHttpClient.fromEnv().
+ArcadeClient client = ArcadeOkHttpClient.builder().apiKey("{arcade_api_key}").build();
+
+// Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
+// In this example, use the email you used to sign up for Arcade.dev:
+String userId = "{arcade_user_id}";
+```
+</Tabs.Tab>
+</Tabs>
+
+### Write a helper function to authorize and run tools
+
+This helper function will check if a tool requires authorization and if so, it will print the authorization URL and wait for the user to authorize the tool call. If the tool does not require authorization, it will run the tool directly without interrupting the flow.
+
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
+
+<Tabs.Tab>
+
+```python title="main.py"
+# Helper function to authorize and run any tool
+def authorize_and_run_tool(tool_name, input, user_id):
+    # Start the authorization process
+    auth_response = client.tools.authorize(
+        tool_name=tool_name,
+        user_id=user_id,
+    )
+
+    # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+    # Tools that do not require authorization will have the status "completed" already.
+    if auth_response.status != "completed":
+        print(f"Click this link to authorize {tool_name}:\n{auth_response.url}.\nThe process will continue once you have authorized the app.")
+        client.auth.wait_for_completion(auth_response.id)
+
+    # Run the tool
+    return client.tools.execute(tool_name=tool_name, input=input, user_id=user_id)
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript title="example.ts"
+// Helper function to authorize and run any tool
+async function authorize_and_run_tool({
+  tool_name,
+  input,
+  user_id,
+}: {
+  tool_name: string;
+  input: any;
+  user_id: string;
+}) {
+  // Start the authorization process
+  const authResponse = await client.tools.authorize({
+    tool_name: tool_name,
+    user_id: user_id,
+  });
+
+  // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app. Tools that do not require authorization will have the status "completed" already.
+  if (authResponse.status !== "completed") {
+    console.log(
+      `Click this link to authorize ${tool_name}:\n${authResponse.url}.\nThe process will continue once you have authorized the app.`
+    );
+    // Wait for the user to authorize the app
+    await client.auth.waitForCompletion(authResponse.id);
+  }
+
+  // Run the tool
+  const response = await client.tools.execute({
+    tool_name: tool_name,
+    input: input,
+    user_id: user_id,
+  });
+  return response;
+}
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+```java title="App.java"
+    public static Map<String, JsonValue> authorizeAndRunTool(ArcadeClient client,
+                                                             String toolName,
+                                                             Map<String, Object> input,
+                                                             String userId) {
+    // Start the authorization process
+    AuthorizationResponse authResponse = client.tools().authorize(
+        AuthorizeToolRequest.builder()
+            .toolName(toolName)
+            .userId(userId)
+            .build());
+
+    // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+    // Tools that do not require authorization will have the status "completed" already.
+    authResponse
+        .status()
+        .filter(status -> status != AuthorizationResponse.Status.COMPLETED)
+        .flatMap(status -> authResponse.url())
+        .ifPresent(url -> logger.info(
+            """
+            Click this link to authorize {}:
+            {}.
+            The process will continue once you have authorized the app.
+            """, toolName, url));
+    client.auth().waitForCompletion(authResponse);
+
+    // Execute the tool and extract the output as a Map
+    return client.tools().execute(ExecuteToolRequest.builder()
+            .toolName(toolName)
+            .input(input)
+            .userId(userId)
+            .includeErrorStacktrace(true)
+            .build())
+        .output()
+        .flatMap(Output::valueAsObject)
+        .orElse(Map.of());
+}
+```
+</Tabs.Tab>
+</Tabs>
+
+### Implement the workflow
+
+In this example workflow, we:
+
+- Get the latest news about MCP URL mode elicitation
+- Create a Google Doc with the news
+- Send a link to the Google Doc to the user
+
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
+
+<Tabs.Tab>
+
+```python title="main.py"
+# This tool does not require authorization, so it will return the results
+# without prompting the user to authorize the tool call.
+response_search = authorize_and_run_tool(
+    tool_name="GoogleNews.SearchNewsStories",
+    input={
+        "keywords": "MCP URL mode elicitation",
+    },
+    user_id=user_id,
+)
+
+# Get the news results from the response
+news = response_search.output.value["news_results"]
+
+# Format the news results into a string
+output = "latest news about MCP URL mode elicitation:\n"
+for search_result in news:
+    output += f"{search_result['source']} - {search_result['title']}\n"
+    output += f"{search_result['link']}\n\n"
+
+# Create a Google Doc with the news results
+# If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
+response_create_doc = authorize_and_run_tool(
+    tool_name="GoogleDocs.CreateDocumentFromText",
+    input={
+        "title": "News about MCP URL mode elicitation",
+        "text_content": output,
+    },
+    user_id=user_id,
+)
+
+# Get the Google Doc from the response
+google_doc = response_create_doc.output.value
+
+email_body = f"You can find the news about MCP URL mode elicitation in the following Google Doc: {google_doc['documentUrl']}"
+
+# Send an email with the link to the Google Doc
+response_send_email = authorize_and_run_tool(
+    tool_name="Gmail.SendEmail",
+    input={
+        "recipient": user_id,
+        "subject": "News about MCP URL mode elicitation",
+        "body": email_body,
+    },
+    user_id=user_id,
+)
+
+# Print the response from the tool call
+print(f"Success! Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
+print(response_send_email.output.value)
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript title="example.ts"
+// This tool does not require authorization, so it will return the results
+// without prompting the user to authorize the app.
+const response_search = await authorize_and_run_tool({
+  tool_name: "GoogleNews.SearchNewsStories",
+  input: {
+    keywords: "MCP URL mode elicitation",
+  },
+  user_id: userId,
+});
+
+// Get the news results from the response
+const news = response_search.output?.value?.news_results;
+
+// Format the news results into a string
+let output = "latest news about MCP URL mode elicitation:\n";
+for (const search_result of news) {
+  output += "--------------------------------\n";
+  output += `${search_result.source} - ${search_result.title}\n`;
+  output += `${search_result.link ?? ""}\n`;
+}
+
+// Create a Google Doc with the news results
+// If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
+const respose_create_doc = await authorize_and_run_tool({
+  tool_name: "GoogleDocs.CreateDocumentFromText",
+  input: {
+    title: "News about MCP URL mode elicitation",
+    text_content: output,
+  },
+  user_id: userId,
+});
+
+const google_doc = respose_create_doc.output?.value;
+
+// Send an email with the link to the Google Doc
+const email_body = `You can find the news about MCP URL mode elicitation in the following Google Doc: ${google_doc.documentUrl}`;
+
+// Here again, if the user has not previously authorized the Gmail tool, they will be prompted to authorize the tool call.
+const respose_send_email = await authorize_and_run_tool({
+  tool_name: "Gmail.SendEmail",
+  input: {
+    recipient: userId,
+    subject: "News about MCP URL mode elicitation",
+    body: email_body,
+  },
+  user_id: userId,
+});
+
+// Print the response from the tool call
+console.log(
+  `Success! Check your email at ${userId}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:`
+);
+console.log(respose_send_email.output?.value);
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+```java title="App.java"
+Map<String, JsonValue> searchResult = authorizeAndRunTool(
+            client,
+            "GoogleNews.SearchNewsStories",
+            Map.of("keywords", "MCP URL mode elicitation"),
+            userId);
+
+// Extract the list of news results from the tool output
+List<JsonValue> news = searchResult
+    .getOrDefault("news_results", JsonValue.from(List.of()))
+    .toListOrEmpty();
+
+String output = "latest news about MCP URL mode elicitation:\n"
+    + news.stream()
+        .map(item -> {
+            Map<String, JsonValue> newsItem = item.toMapOrEmpty();
+            return newsItem.get("source").asStringOrThrow() + " - "
+                + newsItem.get("title").asStringOrThrow() + "\n"
+                + newsItem.get("link").asStringOrThrow() + "\n\n";
+        })
+        .collect(Collectors.joining("\n"));
+
+// Create a Google Doc with the news results
+// If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool
+// call.
+Map<String, JsonValue> createDocResult = authorizeAndRunTool(
+    client,
+    "GoogleDocs.CreateDocumentFromText",
+    Map.of("title", "News about MCP URL mode elicitation", "text_content", output),
+    userId);
+
+String googleDocUrl = createDocResult.get("documentUrl").asStringOrThrow();
+
+String emailBody =
+    "You can find the news about MCP URL mode elicitation in the following Google Doc: " + googleDocUrl;
+
+Map<String, JsonValue> sendEmailResult = authorizeAndRunTool(
+    client,
+    "Gmail.SendEmail",
+    Map.of("recipient", userId, "subject", "News about MCP URL mode elicitation", "body", emailBody),
+    userId);
+
+// Print the response from the tool call
+logger.info(
+    """
+    Success! Check your email at {}
+
+    You just chained 3 tools together:
+      1. Searched Google News for stories about MCP URL mode elicitation
+      2. Created a Google Doc with the results
+      3. Sent yourself an email with the document link
+
+    Email metadata: {}
+    """,
+    userId,
+    sendEmailResult);
+```
+</Tabs.Tab>
+</Tabs>
+
+### Run the code
+
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
+
+  <Tabs.Tab>
+
+    ```bash
+    uv run main.py
+    ```
+
+    ```text
+    Success! Check your email at {arcade_user_id}
+
+    You just chained 3 tools together:
+      1. Searched Google News for stories about MCP URL mode elicitation
+      2. Created a Google Doc with the results
+      3. Sent yourself an email with the document link
+
+    Email metadata:
+    {'id': '19ba...', 'label_ids': ['UNREAD', 'SENT', 'INBOX'], 'thread_id': '19ba...', 'url': 'https://mail.google.com/mail/u/0/#sent/19ba...'}
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    bun run example.ts
+    ```
+
+    ```text
+    Success! Check your email at {arcade_user_id}
+
+    You just chained 3 tools together:
+      1. Searched Google News for stories about MCP URL mode elicitation
+      2. Created a Google Doc with the results
+      3. Sent yourself an email with the document link
+
+    Email metadata:
+    {
+      id: "19ba...",
+      label_ids: [ "UNREAD", "SENT", "INBOX" ],
+      thread_id: "19ba...",
+      url: "https://mail.google.com/mail/u/0/#sent/19ba...",
+    }
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    Run your Java application, you should see output similar to:
+
+    ```text
+    Success! Check your inbox
+
+    You just chained 3 tools together:
+      1. Searched Google News for stories about MCP URL mode elicitation
+      2. Created a Google Doc with the results
+      3. Sent yourself an email with the document link
+
+    Email metadata: {id=19ba..., label_ids=[UNREAD, SENT, INBOX], thread_id=19ba..., url=https://mail.google.com/mail/u/0/#sent/19ba...}
+    ```
+
+    For a full example, see the [Arcade Java SDK project](https://github.com/ArcadeAI/arcade-java/tree/main/arcade-java-example);
+  </Tabs.Tab>
+</Tabs>
+
+</Steps>
+
+## Next Steps
+
+In this example, we call the tool methods directly. In your real applications and agents, you'll likely be letting the LLM decide which tools to call. Learn more about using Arcade with Frameworks in the [Frameworks](/en/get-started/agent-frameworks) section, or [how to build your own tools](/en/build/create-tools/tool-basics/build-mcp-server).
+
+<AgentFrameworkTabs />
+
+## Full Example Code
+
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
+
+  <Tabs.Tab>
+
+<details>
+<summary>**main.py** (full file)</summary>
+```python title="example.py"
+from arcadepy import Arcade
+
+# You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
+client = Arcade(api_key="{arcade_api_key}")
+
+# Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
+# In this example, use the email you used to sign up for Arcade.dev:
+user_id = "{arcade_user_id}"
+
+
+# Helper function to authorize and run any tool
+def authorize_and_run_tool(tool_name, input, user_id):
+    # Start the authorization process
+    auth_response = client.tools.authorize(
+        tool_name=tool_name,
+        user_id=user_id,
+    )
+
+    # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+    # Tools that do not require authorization will have the status "completed" already.
+    if auth_response.status != "completed":
+        print(f"Click this link to authorize {tool_name}:\n{auth_response.url}.\nThe process will continue once you have authorized the app.")
+        client.auth.wait_for_completion(auth_response.id)
+
+    # Run the tool
+    return client.tools.execute(tool_name=tool_name, input=input, user_id=user_id)
+
+# This tool does not require authorization, so it will return the results
+# without prompting the user to authorize the tool call.
+response_search = authorize_and_run_tool(
+    tool_name="GoogleNews.SearchNewsStories",
+    input={
+        "keywords": "MCP URL mode elicitation",
+    },
+    user_id=user_id,
+)
+
+# Get the news results from the response
+news = response_search.output.value["news_results"]
+
+# Format the news results into a string
+output = "latest news about MCP URL mode elicitation:\n"
+for search_result in news:
+    output += "----------------------------\n"
+    output += f"{search_result['source']} - {search_result['title']}\n"
+    output += f"{search_result['link']}\n"
+
+# Create a Google Doc with the news results
+# If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
+response_create_doc = authorize_and_run_tool(
+    tool_name="GoogleDocs.CreateDocumentFromText",
+    input={
+        "title": "News about MCP URL mode elicitation",
+        "text_content": output,
+    },
+    user_id=user_id,
+)
+
+# Get the Google Doc from the response
+google_doc = response_create_doc.output.value
+
+email_body = f"You can find the news about MCP URL mode elicitation in the following Google Doc: {google_doc['documentUrl']}"
+
+# Send an email with the link to the Google Doc
+response_send_email = authorize_and_run_tool(
+    tool_name="Gmail.SendEmail",
+    input={
+        "recipient": user_id,
+        "subject": "News about MCP URL mode elicitation",
+        "body": email_body,
+    },
+    user_id=user_id,
+)
+
+# Print the response from the tool call
+print(f"Success! Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
+print(response_send_email.output.value)
+```
+</details>
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+<details>
+<summary>**example.ts** (full file)</summary>
+```typescript title="example.ts"
+import Arcade from "@arcadeai/arcadejs";
+
+// You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
+const client = new Arcade(
+  apiKey: "{arcade_api_key}",
+);
+
+// Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
+// In this example, use the email you used to sign up for Arcade.dev:
+let userId = "{arcade_user_id}";
+
+
+// Helper function to authorize and run any tool
+async function authorize_and_run_tool({
+  tool_name,
+  input,
+  user_id,
+}: {
+  tool_name: string,
+  input: any,
+  user_id: string,
+}) {
+
+
+  // Start the authorization process
+  const authResponse = await client.tools.authorize({
+    tool_name: tool_name,
+    user_id: user_id,
+  });
+
+  // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app. Tools that do not require authorization will have the status "completed" already.
+  if (authResponse.status !== "completed") {
+    console.log(
+      `Click this link to authorize ${tool_name}:\n${authResponse.url}.\nThe process will continue once you have authorized the app.`
+    );
+    // Wait for the user to authorize the app
+    await client.auth.waitForCompletion(authResponse.id);
+  }
+
+  // Run the tool
+  const response = await client.tools.execute({
+    tool_name: tool_name,
+    input: input,
+    user_id: user_id,
+  });
+  return response;
+}
+
+// This tool does not require authorization, so it will return the results
+// without prompting the user to authorize the app.
+const response_search = await authorize_and_run_tool({
+  tool_name: "GoogleNews.SearchNewsStories",
+  input: {
+    keywords: "MCP URL mode elicitation",
+  },
+  user_id: userId,
+});
+
+// Get the news results from the response
+const news = response_search.output?.value?.news_results;
+
+// Format the news results into a string
+let output = "latest news about MCP URL mode elicitation:\n";
+for (const search_result of news) {
+  output += "--------------------------------\n";
+  output += `${search_result.source} - ${search_result.title}\n`;
+  output += `${search_result.link ?? ""}\n`;
+}
+
+// Create a Google Doc with the news results
+// If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
+const respose_create_doc = await authorize_and_run_tool({
+  tool_name: "GoogleDocs.CreateDocumentFromText",
+  input: {
+    title: "News about MCP URL mode elicitation",
+    text_content: output,
+  },
+  user_id: userId,
+});
+
+const google_doc = respose_create_doc.output?.value;
+
+// Send an email with the link to the Google Doc
+const email_body = `You can find the news about MCP URL mode elicitation in the following Google Doc: ${google_doc.documentUrl}`;
+
+// Here again, if the user has not previously authorized the Gmail tool, they will be prompted to authorize the tool call.
+const respose_send_email = await authorize_and_run_tool({
+  tool_name: "Gmail.SendEmail",
+  input: {
+    recipient: userId,
+    subject: "News about MCP URL mode elicitation",
+    body: email_body,
+  },
+  user_id: userId,
+});
+
+// Print the response from the tool call
+console.log(
+  `Success! Check your email at ${userId}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:`
+);
+console.log(respose_send_email.output?.value);
+```
+</details>
+
+  </Tabs.Tab>
+</Tabs>

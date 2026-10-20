@@ -108,15 +108,14 @@ export function escapeMdx(markdown: string): string {
 
 export function renderValuesPage(version: string, markdown: string): string {
   return `---
-title: "Helm values reference"
-description: "Every configurable value in the Arcade Helm chart, generated from chart version ${version}"
+title: Helm values reference
+sidebarTitle: Values reference
+description: Every configurable value in the Arcade Helm chart, generated from chart version ${version}
 ---
-
-# Helm values reference
 
 This reference is generated from Arcade Helm chart version \`${version}\`.
 
-Set these values in a \`values.yaml\` file, or pass them with \`--set\`, when you install or upgrade the chart. For installation steps, see [Self-host Arcade with Helm](/operate/deploy/helm).
+Set these values in a \`values.yaml\` file, or pass them with \`--set\`, when you install or upgrade the chart. For installation steps, see [Self-host Arcade with Helm](/en/operate/deploy/helm).
 
 ${escapeMdx(markdown)}
 `;
@@ -127,17 +126,18 @@ export type SyncResult = {
 };
 
 export function syncHelmChartDocs(options: {
+  archiveDir: string;
   chartDir: string;
   docsDir: string;
   version: string;
 }): SyncResult {
-  const { chartDir, docsDir, version } = options;
+  const { archiveDir, chartDir, docsDir, version } = options;
   if (!isValidVersion(version)) {
     throw new Error(`Invalid version: ${version}`);
   }
   const markdown = readValuesMarkdown(chartDir);
 
-  const versionDir = join(docsDir, "_chart", version);
+  const versionDir = join(archiveDir, version);
   mkdirSync(versionDir, { recursive: true });
   writeFileSync(join(versionDir, "values.md"), `${markdown}\n`);
 
@@ -154,10 +154,9 @@ export function syncHelmChartDocs(options: {
     }
   }
 
-  const pageDir = join(docsDir, "values-reference");
-  mkdirSync(pageDir, { recursive: true });
+  mkdirSync(docsDir, { recursive: true });
   writeFileSync(
-    join(pageDir, "page.mdx"),
+    join(docsDir, "values-reference.mdx"),
     renderValuesPage(version, markdown)
   );
 

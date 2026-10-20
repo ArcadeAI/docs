@@ -1,19 +1,21 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Sync the generated Helm values reference for a released chart version.
  *
  * Usage:
- *   pnpm exec tsx scripts/sync-helm-chart-docs.ts --chart-dir <dir> --version <x.y.z>
+ *   bun scripts/sync-helm-chart-docs.ts --chart-dir <dir> --version <x.y.z>
  *
  * <dir> is the unpacked chart (`helm pull ... --untar`). Writes the values
- * reference page and raw copies under app/en/operate/deploy/helm.
+ * reference page under content/docs/operate/deploy/helm and raw copies under
+ * content/helm-chart, outside the docs source so they are not built as pages.
  */
 
 import { parseArgs } from "node:util";
 import { syncHelmChartDocs } from "./lib/helm-chart-docs";
 
-const DOCS_DIR = "app/en/operate/deploy/helm";
+const DOCS_DIR = "content/docs/operate/deploy/helm";
+const ARCHIVE_DIR = "content/helm-chart";
 
 const { values } = parseArgs({
   options: {
@@ -31,6 +33,7 @@ if (!(chartDir && version)) {
 
 try {
   const { exampleCount } = syncHelmChartDocs({
+    archiveDir: ARCHIVE_DIR,
     chartDir,
     docsDir: DOCS_DIR,
     version,

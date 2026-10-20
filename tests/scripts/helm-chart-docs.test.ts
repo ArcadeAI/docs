@@ -99,19 +99,22 @@ describe("syncHelmChartDocs", () => {
       "examples/notes.txt": "skip",
     });
     const docsDir = mkdtempSync(join(tmpdir(), "helm-docs-"));
-    const result = syncHelmChartDocs({ chartDir, docsDir, version: "1.12.0" });
+    const archiveDir = mkdtempSync(join(tmpdir(), "helm-archive-"));
+    const result = syncHelmChartDocs({
+      archiveDir,
+      chartDir,
+      docsDir,
+      version: "1.12.0",
+    });
 
     expect(result.exampleCount).toBe(1);
     expect(
-      readFileSync(join(docsDir, "_chart/1.12.0/values.md"), "utf-8")
+      readFileSync(join(archiveDir, "1.12.0/values.md"), "utf-8")
     ).toContain("| a |");
     expect(
-      readFileSync(join(docsDir, "_chart/1.12.0/examples/small.yaml"), "utf-8")
+      readFileSync(join(archiveDir, "1.12.0/examples/small.yaml"), "utf-8")
     ).toBe("a: 1\n");
-    const page = readFileSync(
-      join(docsDir, "values-reference/page.mdx"),
-      "utf-8"
-    );
+    const page = readFileSync(join(docsDir, "values-reference.mdx"), "utf-8");
     expect(page).toContain("chart version `1.12.0`");
     await expect(compile(page)).resolves.toBeDefined();
   });
@@ -119,11 +122,13 @@ describe("syncHelmChartDocs", () => {
   it("treats zero examples as fine and rejects bad versions", () => {
     const chartDir = makeChart({ "README.md": README });
     const docsDir = mkdtempSync(join(tmpdir(), "helm-docs-"));
+    const archiveDir = mkdtempSync(join(tmpdir(), "helm-archive-"));
     expect(
-      syncHelmChartDocs({ chartDir, docsDir, version: "1.12.0" }).exampleCount
+      syncHelmChartDocs({ archiveDir, chartDir, docsDir, version: "1.12.0" })
+        .exampleCount
     ).toBe(0);
     expect(() =>
-      syncHelmChartDocs({ chartDir, docsDir, version: "../x" })
+      syncHelmChartDocs({ archiveDir, chartDir, docsDir, version: "../x" })
     ).toThrow("Invalid version");
   });
 });

@@ -449,7 +449,7 @@ describe("mergeToolkit", () => {
     // isHidden neutralizes it until real design-system metadata arrives.
     expect(result.toolkit.metadata.isHidden).toBe(true);
     // Must match the real integration route shape (see
-    // app/_lib/toolkit-static-params.ts getToolkitCanonicalPath), never the
+    // lib/toolkit-static-params.ts getToolkitCanonicalPath), never the
     // retired /en/mcp-servers/ prefix.
     expect(result.toolkit.metadata.docsLink).toBe(
       "https://docs.arcade.dev/en/resources/integrations/development/unknown"
@@ -2052,7 +2052,9 @@ describe("DataMerger", () => {
               content: "Critical: GitHub Apps only.",
             },
           ],
-          customImports: ['import { Callout } from "nextra/components";'],
+          customImports: [
+            'import { Callout } from "@/components/mdx/callout";',
+          ],
           subPages: ["setup-guide"],
         }),
         createStubGenerator()

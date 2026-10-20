@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { readToolkitData } from "@/app/_lib/toolkit-data";
-import { toToolkitMarkdown } from "@/app/_lib/toolkit-markdown";
+import { readToolkitData } from "@/lib/toolkit-data";
+import { toToolkitMarkdown } from "@/lib/toolkit-markdown";
 
 // Cache headers for toolkit data responses. This route content-negotiates on
 // Accept (JSON vs. text/markdown), so Vary: Accept is required — without it a

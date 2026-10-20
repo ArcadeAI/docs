@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
-import { toToolkitMarkdown } from "@/app/_lib/toolkit-markdown";
+import type { ToolkitData } from "@/components/toolkit-docs/types";
+import { toToolkitMarkdown } from "@/lib/toolkit-markdown";
 
 /**
  * MARTECH-17 follow-up: toolkit pages render per-tool detail client-only, so the

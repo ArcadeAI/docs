@@ -1,57 +1,59 @@
 {
   "name": "arcade-docs",
-  "version": "0.0.1",
-  "description": "Arcade Documentation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Arcade Documentation (Fumadocs)",
+  "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "next build",
+    "check-meta": "bun scripts/check-meta-keys.ts",
+    "check-redirects": "bun scripts/check-redirects.ts",
+    "dev": "next dev",
+    "format": "bunx ultracite fix",
+    "postinstall": "fumadocs-mdx",
+    "lint": "bunx ultracite check",
+    "llmstxt": "tsx scripts/generate-llmstxt.ts",
+    "metadata-report": "bun toolkit-docs-generator/scripts/report-tool-metadata.ts",
+    "prepare": "husky",
     "start": "next start",
-    "lint": "pnpm exec ultracite check",
-    "format": "pnpm exec ultracite fix",
+    "sync-crawler-config": "bun scripts/sync-crawler-config.ts",
+    "sync-toolkit-sidebar": "tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts",
+    "test": "bunx vitest --run",
+    "test:external-urls": "bunx vitest run --config vitest.external-urls.config.ts",
+    "test:watch": "bunx vitest --watch",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p scripts/tsconfig.json --noEmit && tsc -p toolkit-docs-generator/tsconfig.json --noEmit",
-    "prepare": "husky install",
-    "llmstxt": "pnpm exec tsx scripts/generate-llmstxt.ts",
-    "test": "vitest --run",
-    "test:watch": "vitest --watch",
+    "update-links": "bun scripts/update-internal-links.ts",
     "vale": "vale",
-    "vale:check": "vale app/en/",
-    "vale:fix": "pnpm exec tsx scripts/vale-fix.ts",
-    "vale:review": "pnpm exec tsx scripts/vale-style-review.ts",
-    "vale:editorial": "pnpm exec tsx scripts/vale-editorial.ts",
-    "vale:sync": "vale sync",
-    "check-redirects": "pnpm exec tsx scripts/check-redirects.ts",
-    "update-links": "pnpm exec tsx scripts/update-internal-links.ts",
-    "check-meta": "pnpm exec tsx scripts/check-meta-keys.ts",
-    "sync-crawler-config": "pnpm exec tsx scripts/sync-crawler-config.ts",
-    "metadata-report": "pnpm exec tsx toolkit-docs-generator/scripts/report-tool-metadata.ts"
+    "vale:check": "vale content/docs/",
+    "vale:editorial": "bun scripts/vale-editorial.ts",
+    "vale:fix": "bun scripts/vale-fix.ts",
+    "vale:review": "bun scripts/vale-style-review.ts",
+    "vale:sync": "vale sync"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ArcadeAI/arcade-ai.git"
+  "lint-staged": {
+    "!(examples)/**/*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
+      "bunx ultracite fix"
+    ]
   },
-  "authors": [
-    "Sam Partee <sam@arcade.dev>",
-    "Nate Barbettini <nate@arcade.dev>"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/ArcadeAI/arcade-ai/issues"
-  },
-  "homepage": "https://arcade.dev/",
   "dependencies": {
     "@arcadeai/design-system": "7.11.0",
     "@arcadeai/ui-kit": "0.14.0",
     "@mdx-js/mdx": "3.1.1",
     "@next/third-parties": "16.3.8",
     "@ory/client": "1.22.37",
+    "@shikijs/transformers": "4.5.0",
     "@uidotdev/usehooks": "2.4.1",
     "algoliasearch": "5.53.0",
+    "fumadocs-core": "16.15.18",
+    "fumadocs-mdx": "15.4.6",
+    "fumadocs-ui": "16.15.18",
+    "github-slugger": "2.0.0",
     "lucide-react": "0.577.0",
+    "mermaid": "11.17.2",
     "motion": "12.40.0",
     "next": "16.3.8",
-    "nextra": "4.6.1",
-    "nextra-theme-docs": "4.6.1",
+    "next-themes": "0.4.6",
     "posthog-js": "1.379.0",
     "posthog-node": "5.35.12",
     "react": "19.2.7",
@@ -73,6 +75,7 @@
     "@octokit/rest": "22.0.1",
     "@tailwindcss/postcss": "4.3.0",
     "@tailwindcss/typography": "0.5.19",
+    "@types/bun": "1.4.2",
     "@types/hast": "3.0.5",
     "@types/mdast": "4.0.4",
     "@types/mdx": "2.0.13",
@@ -87,6 +90,7 @@
     "fast-glob": "3.3.3",
     "husky": "9.1.7",
     "lint-staged": "16.4.0",
+    "mdast-util-to-string": "4.0.0",
     "next-validate-link": "1.6.6",
     "openai": "6.41.0",
     "ora": "9.4.0",
@@ -98,14 +102,28 @@
     "vite": "7.3.5",
     "vitest": "4.1.8"
   },
+  "overrides": {
+    "postcss": "8.5.26",
+    "@xmldom/xmldom": ">=0.9.12",
+    "esbuild": "0.28.1",
+    "form-data": "4.0.6",
+    "dompurify": ">=3.4.13 <4",
+    "protobufjs": ">=7.6.3 <8",
+    "axios": ">=1.19.0 <2",
+    "brace-expansion": ">=5.0.12 <6",
+    "seroval": "1.6.8",
+    "seroval-plugins": "1.6.8",
+    "source-map-js": "1.2.2",
+    "sharp": "0.35.5",
+    "js-yaml": ">=4.3.1 <5",
+    "@opentelemetry/core": ">=2.8.0 <2.11.0",
+    "nanoid": ">=3.3.18 <4",
+    "fflate": ">=0.4.9 <0.5",
+    "qs": ">=6.16.0 <7"
+  },
+  "packageManager": "bun@1.4.2",
   "engines": {
     "node": "22.x",
-    "pnpm": ">=9.15.4"
-  },
-  "lint-staged": {
-    "!(examples)/**/*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
-      "pnpm exec ultracite fix"
-    ]
-  },
-  "packageManager": "pnpm@10.11.0"
+    "bun": ">=1.4.0"
+  }
 }

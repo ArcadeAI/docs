@@ -1,99 +1,134 @@
+/**
+ * Unit tests for scripts/lib/check-redirects-utils.ts.
+ *
+ * These cover the pure path/URL helpers behind `bun run check-redirects`, so
+ * the mapping between `content/docs/**` files and `/:locale/...` URLs is
+ * pinned down without shelling out to git or touching the real filesystem.
+ */
+
 import { describe, expect, it, vi } from "vitest";
 import {
+  CONTENT_FILE_REGEX,
   checkWildcardMatch,
-  type DynamicRouteMove,
   dynamicFileToUrlPattern,
   dynamicRouteExists,
   fileToUrl,
   isMoveCoveredByRedirect,
   pageExists,
   parseDynamicRouteMoves,
-  type Redirect,
+  TOOLKIT_ROUTE_MODULE,
   urlToFile,
+  urlToFileCandidates,
 } from "../../scripts/lib/check-redirects-utils";
 
+describe("CONTENT_FILE_REGEX", () => {
+  it("matches content/docs markdown files only", () => {
+    expect(CONTENT_FILE_REGEX.test("content/docs/guides/foo.mdx")).toBe(true);
+    expect(CONTENT_FILE_REGEX.test("content/docs/guides/foo/index.mdx")).toBe(
+      true
+    );
+    expect(CONTENT_FILE_REGEX.test("content/docs/guides/foo.md")).toBe(true);
+    expect(CONTENT_FILE_REGEX.test("content/docs/guides/meta.json")).toBe(
+      false
+    );
+    expect(CONTENT_FILE_REGEX.test("components/foo.tsx")).toBe(false);
+    expect(CONTENT_FILE_REGEX.test("README.md")).toBe(false);
+  });
+});
+
 describe("fileToUrl", () => {
-  it("converts file path to URL path", () => {
-    expect(fileToUrl("app/en/guides/foo/page.mdx")).toBe("/:locale/guides/foo");
+  it("converts a flat content file to a locale URL", () => {
+    expect(fileToUrl("content/docs/guides/foo.mdx")).toBe(
+      "/:locale/guides/foo"
+    );
+  });
+
+  it("converts a folder index file to the folder URL", () => {
+    expect(fileToUrl("content/docs/guides/foo/index.mdx")).toBe(
+      "/:locale/guides/foo"
+    );
   });
 
   it("handles nested paths", () => {
     expect(
-      fileToUrl("app/en/resources/integrations/productivity/gmail/page.mdx")
+      fileToUrl("content/docs/resources/integrations/productivity/gmail.mdx")
     ).toBe("/:locale/resources/integrations/productivity/gmail");
   });
 
-  it("handles root page", () => {
-    expect(fileToUrl("app/en/page.mdx")).toBe("/:locale");
+  it("maps the root index page to the bare locale", () => {
+    expect(fileToUrl("content/docs/index.mdx")).toBe("/:locale");
   });
 
-  it("handles .md extension", () => {
-    expect(fileToUrl("app/en/guides/foo/page.md")).toBe("/:locale/guides/foo");
+  it("handles .md files", () => {
+    expect(fileToUrl("content/docs/guides/foo.md")).toBe("/:locale/guides/foo");
   });
 
-  it("handles different locales", () => {
-    expect(fileToUrl("app/pt/guides/foo/page.mdx")).toBe("/:locale/guides/foo");
+  it("does not treat a page named index-like as the index", () => {
+    expect(fileToUrl("content/docs/guides/index-page.mdx")).toBe(
+      "/:locale/guides/index-page"
+    );
   });
 });
 
-describe("urlToFile", () => {
-  it("converts URL path to file path", () => {
-    expect(urlToFile("/:locale/guides/foo")).toBe("app/en/guides/foo/page.mdx");
+describe("urlToFile / urlToFileCandidates", () => {
+  it("prefers the flat <path>.mdx form", () => {
+    expect(urlToFile("/:locale/guides/foo")).toBe(
+      "content/docs/guides/foo.mdx"
+    );
+  });
+
+  it("lists the flat file, the folder index, and their .md variants", () => {
+    expect(urlToFileCandidates("/:locale/guides/foo")).toEqual([
+      "content/docs/guides/foo.mdx",
+      "content/docs/guides/foo/index.mdx",
+      "content/docs/guides/foo.md",
+      "content/docs/guides/foo/index.md",
+    ]);
   });
 
   it("handles nested paths", () => {
     expect(
       urlToFile("/:locale/resources/integrations/productivity/gmail")
-    ).toBe("app/en/resources/integrations/productivity/gmail/page.mdx");
+    ).toBe("content/docs/resources/integrations/productivity/gmail.mdx");
   });
 
-  it("handles root URL", () => {
-    expect(urlToFile("/:locale")).toBe("app/en/page.mdx");
-    expect(urlToFile("/:locale/")).toBe("app/en/page.mdx");
+  it("maps the bare locale to the root index page", () => {
+    expect(urlToFile("/:locale")).toBe("content/docs/index.mdx");
+    expect(urlToFile("/:locale/")).toBe("content/docs/index.mdx");
   });
 });
 
 describe("dynamicFileToUrlPattern", () => {
-  it("converts dynamic route to URL pattern", () => {
+  it("converts [param] to :param", () => {
     expect(
       dynamicFileToUrlPattern(
-        "app/en/resources/integrations/productivity/[toolkitId]/page.mdx"
+        "content/docs/resources/integrations/productivity/[toolkitId].mdx"
       )
     ).toBe("/:locale/resources/integrations/productivity/:toolkitId");
   });
 
-  it("handles catch-all routes", () => {
-    expect(dynamicFileToUrlPattern("app/en/docs/[...slug]/page.mdx")).toBe(
-      "/:locale/docs/:slug*"
-    );
+  it("converts [...param] to :param*", () => {
+    expect(
+      dynamicFileToUrlPattern("content/docs/docs/[...slug]/index.mdx")
+    ).toBe("/:locale/docs/:slug*");
   });
 
   it("handles multiple dynamic segments", () => {
-    expect(dynamicFileToUrlPattern("app/en/[category]/[id]/page.mdx")).toBe(
-      "/:locale/:category/:id"
-    );
+    expect(
+      dynamicFileToUrlPattern("content/docs/[category]/[id]/index.mdx")
+    ).toBe("/:locale/:category/:id");
   });
 
-  it("handles static paths", () => {
-    expect(dynamicFileToUrlPattern("app/en/about/page.mdx")).toBe(
+  it("returns a plain URL when there are no dynamic segments", () => {
+    expect(dynamicFileToUrlPattern("content/docs/about.mdx")).toBe(
       "/:locale/about"
-    );
-  });
-
-  it("handles root with dynamic segment", () => {
-    expect(dynamicFileToUrlPattern("app/en/[slug]/page.mdx")).toBe(
-      "/:locale/:slug"
     );
   });
 });
 
 describe("dynamicRouteExists", () => {
-  it("returns true when dynamic route exists", () => {
-    const mockExists = vi.fn(
-      (path: string) =>
-        path ===
-        "app/en/resources/integrations/productivity/[toolkitId]/page.mdx"
-    );
+  it("recognizes a toolkit URL when the toolkit route module exists", () => {
+    const mockExists = vi.fn((path: string) => path === TOOLKIT_ROUTE_MODULE);
 
     expect(
       dynamicRouteExists(
@@ -101,154 +136,127 @@ describe("dynamicRouteExists", () => {
         mockExists
       )
     ).toBe(true);
+    expect(mockExists).toHaveBeenCalledWith("lib/toolkit-route.tsx");
   });
 
-  it("returns false when no dynamic route exists", () => {
-    const mockExists = vi.fn(() => false);
-
+  it("returns false for a toolkit URL when the route module is missing", () => {
     expect(
-      dynamicRouteExists("/:locale/some/nonexistent/path", mockExists)
+      dynamicRouteExists(
+        "/:locale/resources/integrations/productivity/gmail",
+        () => false
+      )
     ).toBe(false);
   });
 
-  it("checks multiple dynamic patterns", () => {
-    const checkedPaths: string[] = [];
-    const mockExists = vi.fn((path: string) => {
-      checkedPaths.push(path);
-      return false;
-    });
-
-    dynamicRouteExists("/:locale/docs/page", mockExists);
-
-    // Should check [toolkitId], [slug], [id], [...slug] for each segment
-    expect(checkedPaths).toContain("app/en/docs/[toolkitId]/page.mdx");
-    expect(checkedPaths).toContain("app/en/docs/[slug]/page.mdx");
-    expect(checkedPaths).toContain("app/en/[toolkitId]/page/page.mdx");
-  });
-
-  it("also checks .md extension", () => {
-    const mockExists = vi.fn(
-      (path: string) => path === "app/en/docs/[slug]/page.md"
-    );
-
-    expect(dynamicRouteExists("/:locale/docs/intro", mockExists)).toBe(true);
-  });
-
-  it("returns true when nested dynamic route exists", () => {
-    const mockExists = vi.fn((path: string) => {
-      // The function checks [toolkitId], [slug], [id], [...slug] patterns
-      return path === "app/en/[slug]/test/page.mdx";
-    });
-
-    // It should check multiple positions, including replacing the first segment
-    expect(dynamicRouteExists("/:locale/guides/test", mockExists)).toBe(true);
+  it("returns false for URLs outside resources/integrations/<category>/<id>", () => {
+    const always = () => true;
+    expect(dynamicRouteExists("/:locale/guides/foo", always)).toBe(false);
+    expect(
+      dynamicRouteExists("/:locale/resources/integrations/productivity", always)
+    ).toBe(false);
+    expect(
+      dynamicRouteExists(
+        "/:locale/resources/integrations/productivity/gmail/extra",
+        always
+      )
+    ).toBe(false);
   });
 });
 
 describe("pageExists", () => {
-  it("returns true for paths with :path* wildcard", () => {
-    const mockExists = vi.fn(() => false);
-    expect(pageExists("/:locale/api/:path*", mockExists)).toBe(true);
-    expect(mockExists).not.toHaveBeenCalled();
+  it("returns true for wildcard paths", () => {
+    expect(pageExists("/:locale/guides/:path*", () => false)).toBe(true);
+    expect(pageExists("/:locale/guides/:path", () => false)).toBe(true);
   });
 
-  it("returns true for paths with :path parameter", () => {
-    const mockExists = vi.fn(() => false);
-    expect(pageExists("/:locale/docs/:path", mockExists)).toBe(true);
-  });
-
-  it("returns true when static page exists", () => {
+  it("returns true when the flat .mdx file exists", () => {
     const mockExists = vi.fn(
-      (path: string) => path === "app/en/about/page.mdx"
+      (path: string) => path === "content/docs/about.mdx"
     );
-
     expect(pageExists("/:locale/about", mockExists)).toBe(true);
   });
 
-  it("returns true when .md page exists", () => {
-    const mockExists = vi.fn((path: string) => path === "app/en/about/page.md");
-
+  it("returns true when the folder index.mdx exists", () => {
+    const mockExists = vi.fn(
+      (path: string) => path === "content/docs/about/index.mdx"
+    );
     expect(pageExists("/:locale/about", mockExists)).toBe(true);
   });
 
-  it("returns true when dynamic route serves the path", () => {
+  it("returns true when the .md file exists", () => {
     const mockExists = vi.fn(
-      (path: string) => path === "app/en/resources/[toolkitId]/page.mdx"
+      (path: string) => path === "content/docs/about.md"
     );
-
-    expect(pageExists("/:locale/resources/gmail", mockExists)).toBe(true);
+    expect(pageExists("/:locale/about", mockExists)).toBe(true);
   });
 
-  it("returns false when no page serves the path", () => {
-    const mockExists = vi.fn(() => false);
-    expect(pageExists("/:locale/nonexistent", mockExists)).toBe(false);
+  it("falls back to the toolkit route for toolkit URLs", () => {
+    const mockExists = vi.fn((path: string) => path === TOOLKIT_ROUTE_MODULE);
+    expect(
+      pageExists(
+        "/:locale/resources/integrations/development/github",
+        mockExists
+      )
+    ).toBe(true);
+  });
+
+  it("returns false when nothing matches", () => {
+    expect(pageExists("/:locale/nonexistent", () => false)).toBe(false);
   });
 });
 
 describe("parseDynamicRouteMoves", () => {
-  it("detects renamed dynamic route files", () => {
+  it("detects a renamed dynamic route content file", () => {
     const gitDiff =
-      "R100\tapp/en/old/[toolkitId]/page.mdx\tapp/en/new/[toolkitId]/page.mdx";
-
+      "R100\tcontent/docs/old/[toolkitId].mdx\tcontent/docs/new/[toolkitId].mdx";
     const moves = parseDynamicRouteMoves(gitDiff);
 
     expect(moves).toHaveLength(1);
     expect(moves[0]).toEqual({
-      oldPath: "app/en/old/[toolkitId]/page.mdx",
-      newPath: "app/en/new/[toolkitId]/page.mdx",
+      newPath: "content/docs/new/[toolkitId].mdx",
+      oldPath: "content/docs/old/[toolkitId].mdx",
       oldUrl: "/:locale/old/:toolkitId",
       newUrl: "/:locale/new/:toolkitId",
     });
   });
 
-  it("ignores moves where URL pattern stays the same", () => {
-    // Renaming [id] to [toolkitId] in same location doesn't change URL
+  it("detects a changed parameter name", () => {
     const gitDiff =
-      "R100\tapp/en/resources/[id]/page.mdx\tapp/en/resources/[toolkitId]/page.mdx";
-
+      "R100\tcontent/docs/resources/[id].mdx\tcontent/docs/resources/[toolkitId].mdx";
     const moves = parseDynamicRouteMoves(gitDiff);
 
-    // Both result in /:locale/resources/:id and /:locale/resources/:toolkitId
-    // These are different, so it should be detected
     expect(moves).toHaveLength(1);
+    expect(moves[0].oldUrl).toBe("/:locale/resources/:id");
+    expect(moves[0].newUrl).toBe("/:locale/resources/:toolkitId");
   });
 
-  it("ignores non-page files", () => {
+  it("ignores non-content renames", () => {
     const gitDiff =
-      "R100\tapp/en/old/[toolkitId]/index.ts\tapp/en/new/[toolkitId]/index.ts";
-
-    const moves = parseDynamicRouteMoves(gitDiff);
-
-    expect(moves).toHaveLength(0);
+      "R100\tcomponents/old/[toolkitId]/index.ts\tcomponents/new/[toolkitId]/index.ts";
+    expect(parseDynamicRouteMoves(gitDiff)).toHaveLength(0);
   });
 
-  it("ignores deleted files (D status)", () => {
-    const gitDiff = "D\tapp/en/old/[toolkitId]/page.mdx";
-
-    const moves = parseDynamicRouteMoves(gitDiff);
-
-    expect(moves).toHaveLength(0);
+  it("ignores deletions", () => {
+    const gitDiff = "D\tcontent/docs/old/[toolkitId].mdx";
+    expect(parseDynamicRouteMoves(gitDiff)).toHaveLength(0);
   });
 
-  it("handles multiple moves", () => {
+  it("handles multiple renames", () => {
     const gitDiff = [
-      "R100\tapp/en/old1/[id]/page.mdx\tapp/en/new1/[id]/page.mdx",
-      "R095\tapp/en/old2/[slug]/page.mdx\tapp/en/new2/[slug]/page.mdx",
+      "R100\tcontent/docs/old1/[id].mdx\tcontent/docs/new1/[id].mdx",
+      "R095\tcontent/docs/old2/[slug].mdx\tcontent/docs/new2/[slug].mdx",
+      "M\tcontent/docs/other.mdx",
     ].join("\n");
-
     const moves = parseDynamicRouteMoves(gitDiff);
 
     expect(moves).toHaveLength(2);
+    expect(moves[0].oldUrl).toBe("/:locale/old1/:id");
+    expect(moves[1].oldUrl).toBe("/:locale/old2/:slug");
   });
 
-  it("handles empty output", () => {
-    expect(parseDynamicRouteMoves("")).toHaveLength(0);
-  });
-
-  it("detects when static page moves to dynamic route location", () => {
+  it("detects a static page moving under a dynamic route", () => {
     const gitDiff =
-      "R100\tapp/en/tools/gmail/page.mdx\tapp/en/tools/[toolkitId]/page.mdx";
-
+      "R100\tcontent/docs/tools/gmail.mdx\tcontent/docs/tools/[toolkitId].mdx";
     const moves = parseDynamicRouteMoves(gitDiff);
 
     expect(moves).toHaveLength(1);
@@ -258,94 +266,59 @@ describe("parseDynamicRouteMoves", () => {
 });
 
 describe("isMoveCoveredByRedirect", () => {
-  const move: DynamicRouteMove = {
-    oldPath: "app/en/old/[toolkitId]/page.mdx",
-    newPath: "app/en/new/[toolkitId]/page.mdx",
+  const move = {
+    newPath: "content/docs/new/[toolkitId].mdx",
+    oldPath: "content/docs/old/[toolkitId].mdx",
     oldUrl: "/:locale/old/:toolkitId",
     newUrl: "/:locale/new/:toolkitId",
   };
 
-  it("returns true for exact match", () => {
-    const redirects: Redirect[] = [
-      {
-        source: "/:locale/old/:toolkitId",
-        destination: "/:locale/new/:toolkitId",
-      },
-    ];
-
-    expect(isMoveCoveredByRedirect(move, redirects)).toBe(true);
+  it("matches an exact source", () => {
+    expect(
+      isMoveCoveredByRedirect(move, [
+        { destination: "/:locale/new", source: "/:locale/old/:toolkitId" },
+      ])
+    ).toBe(true);
   });
 
-  it("returns true when wildcard covers the path", () => {
-    const redirects: Redirect[] = [
-      { source: "/:locale/old/:path*", destination: "/:locale/new/:path*" },
-    ];
-
-    expect(isMoveCoveredByRedirect(move, redirects)).toBe(true);
+  it("matches a wildcard covering the old path", () => {
+    expect(
+      isMoveCoveredByRedirect(move, [
+        { destination: "/:locale/new/:path*", source: "/:locale/old/:path*" },
+      ])
+    ).toBe(true);
   });
 
   it("returns false when no redirect covers the move", () => {
-    const redirects: Redirect[] = [
-      {
-        source: "/:locale/other/:path*",
-        destination: "/:locale/somewhere/:path*",
-      },
-    ];
-
-    expect(isMoveCoveredByRedirect(move, redirects)).toBe(false);
-  });
-
-  it("returns false for empty redirects", () => {
-    expect(isMoveCoveredByRedirect(move, [])).toBe(false);
-  });
-
-  it("handles multiple redirects", () => {
-    const redirects: Redirect[] = [
-      { source: "/:locale/unrelated", destination: "/:locale/other" },
-      {
-        source: "/:locale/old/:toolkitId",
-        destination: "/:locale/new/:toolkitId",
-      },
-    ];
-
-    expect(isMoveCoveredByRedirect(move, redirects)).toBe(true);
+    expect(
+      isMoveCoveredByRedirect(move, [
+        { destination: "/:locale/x/:path*", source: "/:locale/other/:path*" },
+      ])
+    ).toBe(false);
   });
 });
 
 describe("checkWildcardMatch", () => {
-  it("returns true when wildcard prefix matches", () => {
-    const redirects: Redirect[] = [
-      { source: "/:locale/old/:path*", destination: "/:locale/new/:path*" },
-    ];
+  const redirects = [
+    { destination: "/:locale/build/:path*", source: "/:locale/guides/:path*" },
+    { destination: "/:locale/other", source: "/:locale/exact" },
+  ];
 
-    expect(checkWildcardMatch("/:locale/old/foo/bar", redirects)).toBe(true);
+  it("matches a path under a wildcard prefix", () => {
+    expect(checkWildcardMatch("/:locale/guides/foo/bar", redirects)).toBe(true);
   });
 
-  it("returns true for exact prefix match", () => {
-    const redirects: Redirect[] = [
-      { source: "/:locale/old/:path*", destination: "/:locale/new/:path*" },
-    ];
-
-    expect(checkWildcardMatch("/:locale/old", redirects)).toBe(true);
+  it("matches the wildcard prefix itself", () => {
+    expect(checkWildcardMatch("/:locale/guides", redirects)).toBe(true);
   });
 
-  it("returns false when no wildcard matches", () => {
-    const redirects: Redirect[] = [
-      { source: "/:locale/other/:path*", destination: "/:locale/new/:path*" },
-    ];
-
-    expect(checkWildcardMatch("/:locale/old/foo", redirects)).toBe(false);
+  it("does not match exact (non-wildcard) redirects", () => {
+    expect(checkWildcardMatch("/:locale/exact", redirects)).toBe(false);
   });
 
-  it("ignores non-wildcard redirects", () => {
-    const redirects: Redirect[] = [
-      { source: "/:locale/old", destination: "/:locale/new" },
-    ];
-
-    expect(checkWildcardMatch("/:locale/old/foo", redirects)).toBe(false);
-  });
-
-  it("returns false for empty redirects", () => {
-    expect(checkWildcardMatch("/:locale/anything", [])).toBe(false);
+  it("does not match a sibling prefix", () => {
+    expect(checkWildcardMatch("/:locale/guides-old/foo", redirects)).toBe(
+      false
+    );
   });
 });

@@ -1,4 +1,4 @@
-#!/usr/bin/env npx tsx
+#!/usr/bin/env bun
 
 /**
  * Vale Style Review for Pull Requests
@@ -7,9 +7,9 @@
  * and posts suggestions as GitHub PR review comments.
  *
  * Usage:
- *   pnpm vale:review --pr 123
- *   GITHUB_TOKEN=xxx ANTHROPIC_API_KEY=xxx pnpm vale:review --pr 123
- *   GITHUB_TOKEN=xxx OPENAI_API_KEY=xxx pnpm vale:review --pr 123
+ *   bun run vale:review --pr 123
+ *   GITHUB_TOKEN=xxx ANTHROPIC_API_KEY=xxx bun run vale:review --pr 123
+ *   GITHUB_TOKEN=xxx OPENAI_API_KEY=xxx bun run vale:review --pr 123
  *
  * Prefers Anthropic (Claude) if ANTHROPIC_API_KEY is set, falls back to OpenAI.
  */
@@ -161,7 +161,7 @@ async function getChangedFiles(
   });
 
   return files
-    .filter((f) => f.filename.startsWith("app/en/"))
+    .filter((f) => f.filename.startsWith("content/docs/"))
     .filter((f) => f.filename.endsWith(".md") || f.filename.endsWith(".mdx"))
     .filter((f) => f.status !== "removed")
     .slice(0, MAX_FILES)
@@ -354,11 +354,8 @@ async function getSuggestionsFromAnthropic(
   }
 
   // Extract JSON from response (may be wrapped in markdown code blocks)
-  let jsonText = textBlock.text;
-  const jsonMatch = jsonText.match(JSON_CODE_BLOCK_REGEX);
-  if (jsonMatch) {
-    jsonText = jsonMatch[1];
-  }
+  const [, fencedJson] = textBlock.text.match(JSON_CODE_BLOCK_REGEX) ?? [];
+  const jsonText = fencedJson ?? textBlock.text;
 
   const parsed = JSON.parse(jsonText);
   return Array.isArray(parsed.suggestions) ? parsed.suggestions : [];
@@ -430,7 +427,7 @@ function countLeadingFenceChars(trimmedLine: string): {
   count: number;
   char: string;
 } {
-  const firstChar = trimmedLine[0];
+  const [firstChar] = trimmedLine;
   if (firstChar !== "`" && firstChar !== "~") {
     return { count: 0, char: "" };
   }

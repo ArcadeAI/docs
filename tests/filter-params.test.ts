@@ -8,7 +8,7 @@ import {
   isToolkitType,
   parseFiltersFromParams,
   serializeFiltersToParams,
-} from "../app/en/resources/integrations/components/filter-params";
+} from "../components/pages/integrations/filter-params";
 
 describe("isToolkitType", () => {
   test("accepts known toolkit types", () => {
