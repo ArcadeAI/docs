@@ -1,7 +1,7 @@
 {
   "id": "Posthog",
   "label": "PostHog",
-  "version": "1.0.3",
+  "version": "2.0.1",
   "description": "Arcade.dev LLM tools for PostHog analytics",
   "metadata": {
     "category": "development",
@@ -18,7 +18,7 @@
     {
       "name": "AddInsightToDashboard",
       "qualifiedName": "Posthog.AddInsightToDashboard",
-      "fullyQualifiedName": "Posthog.AddInsightToDashboard@1.0.3",
+      "fullyQualifiedName": "Posthog.AddInsightToDashboard@2.0.1",
       "description": "Pin an existing insight as a tile on a dashboard.",
       "parameters": [
         {
@@ -107,9 +107,165 @@
       }
     },
     {
+      "name": "ArchiveExperiment",
+      "qualifiedName": "Posthog.ArchiveExperiment",
+      "fullyQualifiedName": "Posthog.ArchiveExperiment@2.0.1",
+      "description": "Archive an experiment by ID; PostHog can restore an archived experiment.\n\nArchiving hides the experiment from the default list and leaves its\nfeature flag as it is.",
+      "parameters": [
+        {
+          "name": "experiment_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric experiment ID to archive",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "POSTHOG_SERVER_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "POSTHOG_PERSONAL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Posthog.ArchiveExperiment",
+        "parameters": {
+          "experiment_id": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "project_id": {
+            "value": "project_abc123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ArchiveSurvey",
+      "qualifiedName": "Posthog.ArchiveSurvey",
+      "fullyQualifiedName": "Posthog.ArchiveSurvey@2.0.1",
+      "description": "Archive a survey by ID; PostHog can restore an archived survey.",
+      "parameters": [
+        {
+          "name": "survey_id",
+          "type": "string",
+          "required": true,
+          "description": "Survey ID (UUID string) to archive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "POSTHOG_SERVER_URL",
+          "type": "unknown"
+        },
+        {
+          "name": "POSTHOG_PERSONAL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Posthog.ArchiveSurvey",
+        "parameters": {
+          "survey_id": {
+            "value": "a3f1c2d4-58e7-4b19-9c02-d6e3f7a85b21",
+            "type": "string",
+            "required": true
+          },
+          "project_id": {
+            "value": "phc_ABC123XYZ456def789",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ComparePeriods",
       "qualifiedName": "Posthog.ComparePeriods",
-      "fullyQualifiedName": "Posthog.ComparePeriods@1.0.3",
+      "fullyQualifiedName": "Posthog.ComparePeriods@2.0.1",
       "description": "Compare the same metric across two date ranges side-by-side.",
       "parameters": [
         {
@@ -148,7 +304,7 @@
           "name": "previous_date_from",
           "type": "string",
           "required": false,
-          "description": "Start of comparison period in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset. Default auto-calculates same duration before current period.",
+          "description": "Start of comparison period in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset. Defaults to the same duration right before the current period.",
           "enum": null,
           "inferrable": true
         },
@@ -261,7 +417,7 @@
     {
       "name": "CreateDashboard",
       "qualifiedName": "Posthog.CreateDashboard",
-      "fullyQualifiedName": "Posthog.CreateDashboard@1.0.3",
+      "fullyQualifiedName": "Posthog.CreateDashboard@2.0.1",
       "description": "Create a new empty dashboard. Insights can be pinned to it as tiles afterward.",
       "parameters": [
         {
@@ -284,7 +440,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "What this dashboard tracks",
+          "description": "What this dashboard tracks. Defaults to no description.",
           "enum": null,
           "inferrable": true
         },
@@ -301,7 +457,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Tags for organization.",
+          "description": "Tags for organization. Defaults to no tags.",
           "enum": null,
           "inferrable": true
         }
@@ -383,8 +539,8 @@
     {
       "name": "CreateExperiment",
       "qualifiedName": "Posthog.CreateExperiment",
-      "fullyQualifiedName": "Posthog.CreateExperiment@1.0.3",
-      "description": "Create an A/B test experiment.\n\nBefore creating, verify the feature_flag_key is not already in\nuse and confirm the event names for metrics are valid.\n\nNote: PostHog does not enforce unique feature_flag_key values\nacross experiments. Duplicate keys will not error but will cause\nunpredictable behavior.",
+      "fullyQualifiedName": "Posthog.CreateExperiment@2.0.1",
+      "description": "Create an A/B test experiment as a draft, with its feature flag.\n\nThe flag stays off and nobody is enrolled until the experiment is\nlaunched. Before creating, verify the feature_flag_key is not\nalready used by another experiment and that the metrics' event\nnames exist.",
       "parameters": [
         {
           "name": "name",
@@ -398,7 +554,7 @@
           "name": "feature_flag_key",
           "type": "string",
           "required": true,
-          "description": "Feature flag key for this experiment. Lowercase letters, numbers, hyphens, and underscores only.",
+          "description": "Key of the experiment's feature flag. Lowercase letters, numbers, hyphens, and underscores only. When no flag has this key, PostHog creates one; when a flag already has it, the experiment uses that flag as it is, and variants and rollout_percentage must be omitted.",
           "enum": null,
           "inferrable": true
         },
@@ -414,7 +570,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "Detailed hypothesis and expected outcome",
+          "description": "Detailed hypothesis and expected outcome. Defaults to no description.",
           "enum": null,
           "inferrable": true
         },
@@ -422,7 +578,7 @@
           "name": "experiment_type",
           "type": "string",
           "required": false,
-          "description": "Experiment type.",
+          "description": "Experiment type. Defaults to PostHog's default type.",
           "enum": [
             "product",
             "web"
@@ -434,7 +590,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Primary success metrics to measure.",
+          "description": "Judge the experiment by these metrics. Defaults to no primary metrics.",
           "enum": null,
           "inferrable": true
         },
@@ -443,7 +599,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Secondary metrics to monitor for side effects",
+          "description": "Also track these metrics to watch for side effects. Defaults to no secondary metrics.",
           "enum": null,
           "inferrable": true
         },
@@ -452,15 +608,15 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Variant definitions (default: 50/50 control/test)",
+          "description": "Split users between these variants. Their rollout percentages must add up to 100. Defaults to a 50/50 split between control and test.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "draft",
-          "type": "boolean",
+          "name": "rollout_percentage",
+          "type": "integer",
           "required": false,
-          "description": "Create as draft (true) or launch immediately (false). Defaults to true.",
+          "description": "Enroll this percentage of users (0-100) in the experiment. Defaults to 100.",
           "enum": null,
           "inferrable": true
         }
@@ -473,7 +629,7 @@
       "secretsInfo": [
         {
           "name": "POSTHOG_SERVER_URL",
-          "type": "api_key"
+          "type": "unknown"
         },
         {
           "name": "POSTHOG_PERSONAL_API_KEY",
@@ -489,12 +645,12 @@
         "toolName": "Posthog.CreateExperiment",
         "parameters": {
           "name": {
-            "value": "Homepage CTA Button Color Test",
+            "value": "Checkout Button Color Test",
             "type": "string",
             "required": true
           },
           "feature_flag_key": {
-            "value": "homepage-cta-button-color",
+            "value": "checkout-button-color-experiment",
             "type": "string",
             "required": true
           },
@@ -504,7 +660,7 @@
             "required": true
           },
           "description": {
-            "value": "Testing whether a green CTA button increases click-through rate compared to the current blue button. Hypothesis: green color creates stronger visual contrast and urgency, expected to improve CTR by 10-15%.",
+            "value": "Hypothesis: Changing the checkout button from gray to green will increase click-through rates by 15% due to higher visual contrast and positive color association.",
             "type": "string",
             "required": false
           },
@@ -516,8 +672,8 @@
           "primary_metrics": {
             "value": [
               {
-                "event": "cta_button_clicked",
-                "type": "conversion"
+                "event": "checkout_clicked",
+                "math": "total"
               }
             ],
             "type": "array",
@@ -526,12 +682,8 @@
           "secondary_metrics": {
             "value": [
               {
-                "event": "page_bounced",
-                "type": "conversion"
-              },
-              {
-                "event": "signup_completed",
-                "type": "conversion"
+                "event": "purchase_completed",
+                "math": "total"
               }
             ],
             "type": "array",
@@ -544,200 +696,16 @@
                 "rollout_percentage": 50
               },
               {
-                "key": "test",
+                "key": "green-button",
                 "rollout_percentage": 50
               }
             ],
             "type": "array",
             "required": false
           },
-          "draft": {
-            "value": true,
-            "type": "boolean",
-            "required": false
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "product_analytics"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "CreateExperimentWithFlag",
-      "qualifiedName": "Posthog.CreateExperimentWithFlag",
-      "fullyQualifiedName": "Posthog.CreateExperimentWithFlag@1.0.3",
-      "description": "Create a feature flag and an experiment in one step.\n\nThe flag is created with the specified rollout_percentage, then\nthe experiment is linked to it.\n\nNote: PostHog does not enforce unique feature_flag_key values\nacross experiments. Duplicate keys will not error but will cause\nunpredictable behavior.",
-      "parameters": [
-        {
-          "name": "name",
-          "type": "string",
-          "required": true,
-          "description": "Experiment name describing the hypothesis.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "feature_flag_key",
-          "type": "string",
-          "required": true,
-          "description": "Feature flag key. Lowercase letters, numbers, hyphens, and underscores only.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "project_id",
-          "type": "string",
-          "required": true,
-          "description": "PostHog project ID.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "description",
-          "type": "string",
-          "required": false,
-          "description": "Detailed hypothesis and expected outcome",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "experiment_type",
-          "type": "string",
-          "required": false,
-          "description": "Experiment type.",
-          "enum": [
-            "product",
-            "web"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "primary_metrics",
-          "type": "array",
-          "innerType": "json",
-          "required": false,
-          "description": "Primary success metrics.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "secondary_metrics",
-          "type": "array",
-          "innerType": "json",
-          "required": false,
-          "description": "Secondary metrics to monitor for side effects",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "rollout_percentage",
-          "type": "integer",
-          "required": false,
-          "description": "Percentage of users who see the experiment (0-100). Default 100.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "draft",
-          "type": "boolean",
-          "required": false,
-          "description": "Create as draft (true) or launch immediately (false). Defaults to true.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "POSTHOG_SERVER_URL",
-        "POSTHOG_PERSONAL_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "POSTHOG_SERVER_URL",
-          "type": "api_key"
-        },
-        {
-          "name": "POSTHOG_PERSONAL_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Posthog.CreateExperimentWithFlag",
-        "parameters": {
-          "name": {
-            "value": "Checkout Button Color Test",
-            "type": "string",
-            "required": true
-          },
-          "feature_flag_key": {
-            "value": "checkout-button-color-test",
-            "type": "string",
-            "required": true
-          },
-          "project_id": {
-            "value": "12345",
-            "type": "string",
-            "required": true
-          },
-          "description": {
-            "value": "Testing whether changing the checkout button from grey to green increases conversion rate by at least 5%.",
-            "type": "string",
-            "required": false
-          },
-          "experiment_type": {
-            "value": "product",
-            "type": "string",
-            "required": false
-          },
-          "primary_metrics": {
-            "value": [
-              {
-                "event": "checkout_completed",
-                "type": "conversion"
-              }
-            ],
-            "type": "array",
-            "required": false
-          },
-          "secondary_metrics": {
-            "value": [
-              {
-                "event": "cart_abandoned",
-                "type": "conversion"
-              }
-            ],
-            "type": "array",
-            "required": false
-          },
           "rollout_percentage": {
-            "value": 50,
+            "value": 80,
             "type": "integer",
-            "required": false
-          },
-          "draft": {
-            "value": true,
-            "type": "boolean",
             "required": false
           }
         },
@@ -765,7 +733,7 @@
     {
       "name": "CreateFeatureFlag",
       "qualifiedName": "Posthog.CreateFeatureFlag",
-      "fullyQualifiedName": "Posthog.CreateFeatureFlag@1.0.3",
+      "fullyQualifiedName": "Posthog.CreateFeatureFlag@2.0.1",
       "description": "Create a new feature flag.\n\nVerify the key is not already in use to avoid duplicates. After\ncreation, consult PostHog SDK documentation for the user's\nlanguage/framework to integrate the flag.",
       "parameters": [
         {
@@ -788,7 +756,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "Human-readable display name",
+          "description": "Human-readable display name. Defaults to no display name.",
           "enum": null,
           "inferrable": true
         },
@@ -796,7 +764,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "What this flag controls and why",
+          "description": "What this flag controls and why. Defaults to no description.",
           "enum": null,
           "inferrable": true
         },
@@ -812,7 +780,7 @@
           "name": "filters",
           "type": "json",
           "required": false,
-          "description": "Rollout and targeting rules.",
+          "description": "Rollout and targeting rules. Defaults to PostHog's default rules.",
           "enum": null,
           "inferrable": true
         }
@@ -895,14 +863,14 @@
     {
       "name": "CreateInsightFromQuery",
       "qualifiedName": "Posthog.CreateInsightFromQuery",
-      "fullyQualifiedName": "Posthog.CreateInsightFromQuery@1.0.3",
-      "description": "Save a tested query as a reusable insight.\n\nAlways verify the query produces expected results before saving\nit as an insight. The query_id is not validated by PostHog —\nensure it is a valid cache_key from a previously executed query.\nPassing an invalid query_id will create a broken insight.",
+      "fullyQualifiedName": "Posthog.CreateInsightFromQuery@2.0.1",
+      "description": "Save a tested query as a reusable insight.\n\nRun the query first and confirm it returns the expected results.",
       "parameters": [
         {
-          "name": "query_id",
-          "type": "string",
+          "name": "query",
+          "type": "json",
           "required": true,
-          "description": "Query identifier or cache_key from a previously executed query result. Not validated by PostHog — ensure it is a valid cache_key from a previously executed query. Passing an invalid query_id will create a broken insight.",
+          "description": "The PostHog query object the insight runs, with a 'kind' field: an analytics query such as TrendsQuery, FunnelsQuery, or RetentionQuery, or a HogQLQuery whose 'query' field holds the SQL string.",
           "enum": null,
           "inferrable": true
         },
@@ -926,7 +894,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "What this insight measures",
+          "description": "What this insight measures. Defaults to no description.",
           "enum": null,
           "inferrable": true
         }
@@ -954,13 +922,26 @@
       "codeExample": {
         "toolName": "Posthog.CreateInsightFromQuery",
         "parameters": {
-          "query_id": {
-            "value": "cache_abc123xyz789def456",
+          "query": {
+            "value": {
+              "kind": "TrendsQuery",
+              "series": [
+                {
+                  "kind": "EventsNode",
+                  "event": "user_signed_up",
+                  "name": "User Signed Up"
+                }
+              ],
+              "interval": "day",
+              "dateRange": {
+                "date_from": "-30d"
+              }
+            },
             "type": "string",
             "required": true
           },
           "name": {
-            "value": "Weekly Active Users by Browser",
+            "value": "Daily Sign-Ups (Last 30 Days)",
             "type": "string",
             "required": true
           },
@@ -970,7 +951,7 @@
             "required": true
           },
           "description": {
-            "value": "Measures the number of unique weekly active users segmented by browser type over the last 90 days.",
+            "value": "Tracks the number of new user sign-up events per day over the past 30 days.",
             "type": "string",
             "required": false
           }
@@ -999,7 +980,7 @@
     {
       "name": "CreateSurvey",
       "qualifiedName": "Posthog.CreateSurvey",
-      "fullyQualifiedName": "Posthog.CreateSurvey@1.0.3",
+      "fullyQualifiedName": "Posthog.CreateSurvey@2.0.1",
       "description": "Create a new survey.\n\nVerify the name is not already in use to avoid duplicates. After\ncreation, consult PostHog SDK documentation to integrate the\nsurvey into the user's application.",
       "parameters": [
         {
@@ -1022,7 +1003,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "Internal description of the survey's purpose",
+          "description": "Internal description of the survey's purpose. Defaults to no description.",
           "enum": null,
           "inferrable": true
         },
@@ -1030,7 +1011,7 @@
           "name": "survey_type",
           "type": "string",
           "required": false,
-          "description": "Survey display type.",
+          "description": "Survey display type. Defaults to PostHog's default display type.",
           "enum": [
             "popover",
             "api",
@@ -1044,7 +1025,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "List of survey questions.",
+          "description": "List of survey questions. Defaults to no questions.",
           "enum": null,
           "inferrable": true
         }
@@ -1141,8 +1122,8 @@
     {
       "name": "DeleteDashboard",
       "qualifiedName": "Posthog.DeleteDashboard",
-      "fullyQualifiedName": "Posthog.DeleteDashboard@1.0.3",
-      "description": "Soft-delete a dashboard by ID. The dashboard is marked as deleted but can be restored.",
+      "fullyQualifiedName": "Posthog.DeleteDashboard@2.0.1",
+      "description": "Delete a dashboard by ID. This toolkit cannot restore a deleted dashboard.",
       "parameters": [
         {
           "name": "dashboard_id",
@@ -1217,88 +1198,10 @@
       }
     },
     {
-      "name": "DeleteExperiment",
-      "qualifiedName": "Posthog.DeleteExperiment",
-      "fullyQualifiedName": "Posthog.DeleteExperiment@1.0.3",
-      "description": "Soft-delete an experiment by ID (marks as archived).\n\nImportant: archiving an experiment does NOT unlink its feature\nflag. PostHog still considers the flag as linked to an \"active\"\nexperiment, blocking flag deletion. To fully clean up, delete\nthe flag separately after the experiment is archived.",
-      "parameters": [
-        {
-          "name": "experiment_id",
-          "type": "integer",
-          "required": true,
-          "description": "Numeric experiment ID to delete",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "project_id",
-          "type": "string",
-          "required": true,
-          "description": "PostHog project ID.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "POSTHOG_SERVER_URL",
-        "POSTHOG_PERSONAL_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "POSTHOG_SERVER_URL",
-          "type": "api_key"
-        },
-        {
-          "name": "POSTHOG_PERSONAL_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Posthog.DeleteExperiment",
-        "parameters": {
-          "experiment_id": {
-            "value": 42731,
-            "type": "integer",
-            "required": true
-          },
-          "project_id": {
-            "value": "phc_ABC123xyz789DEF456",
-            "type": "string",
-            "required": true
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "product_analytics"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "delete"
-          ],
-          "readOnly": false,
-          "destructive": true,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "DeleteFeatureFlag",
       "qualifiedName": "Posthog.DeleteFeatureFlag",
-      "fullyQualifiedName": "Posthog.DeleteFeatureFlag@1.0.3",
-      "description": "Soft-delete a feature flag by numeric ID or key. Provide one of flag_id or flag_key.\n\nNote: flags linked to an experiment cannot be deleted until the\nexperiment is concluded and deleted first. PostHog considers even\narchived experiments as \"active\" for flag linkage purposes.",
+      "fullyQualifiedName": "Posthog.DeleteFeatureFlag@2.0.1",
+      "description": "Soft-delete a feature flag by numeric ID or key. Provide one of flag_id or flag_key.\n\nPostHog refuses while a running experiment or an early access\nfeature uses the flag; a draft, ended, or archived experiment does\nnot block deletion.",
       "parameters": [
         {
           "name": "project_id",
@@ -1312,7 +1215,7 @@
           "name": "flag_id",
           "type": "integer",
           "required": false,
-          "description": "Numeric flag ID.",
+          "description": "Numeric flag ID. Defaults to using flag_key.",
           "enum": null,
           "inferrable": true
         },
@@ -1320,7 +1223,7 @@
           "name": "flag_key",
           "type": "string",
           "required": false,
-          "description": "Flag key string.",
+          "description": "Flag key string. Defaults to using flag_id.",
           "enum": null,
           "inferrable": true
         }
@@ -1388,7 +1291,7 @@
     {
       "name": "DeleteInsight",
       "qualifiedName": "Posthog.DeleteInsight",
-      "fullyQualifiedName": "Posthog.DeleteInsight@1.0.3",
+      "fullyQualifiedName": "Posthog.DeleteInsight@2.0.1",
       "description": "Soft-delete an insight by ID.",
       "parameters": [
         {
@@ -1464,152 +1367,9 @@
       }
     },
     {
-      "name": "DeleteSurvey",
-      "qualifiedName": "Posthog.DeleteSurvey",
-      "fullyQualifiedName": "Posthog.DeleteSurvey@1.0.3",
-      "description": "Soft-delete a survey by ID (marks as archived).",
-      "parameters": [
-        {
-          "name": "survey_id",
-          "type": "string",
-          "required": true,
-          "description": "Survey ID (UUID string) to delete.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "project_id",
-          "type": "string",
-          "required": true,
-          "description": "PostHog project ID.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "POSTHOG_SERVER_URL",
-        "POSTHOG_PERSONAL_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "POSTHOG_SERVER_URL",
-          "type": "unknown"
-        },
-        {
-          "name": "POSTHOG_PERSONAL_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Posthog.DeleteSurvey",
-        "parameters": {
-          "survey_id": {
-            "value": "a3f7c2d1-84be-4e10-9b2f-123456789abc",
-            "type": "string",
-            "required": true
-          },
-          "project_id": {
-            "value": "12345",
-            "type": "string",
-            "required": true
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "product_analytics"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetAllSurveyActivity",
-      "qualifiedName": "Posthog.GetAllSurveyActivity",
-      "fullyQualifiedName": "Posthog.GetAllSurveyActivity@1.0.3",
-      "description": "Get the activity log across all surveys.\n\nReturns a chronological list of changes made to any survey\n(created, updated, archived, etc.), not response metrics.",
-      "parameters": [
-        {
-          "name": "project_id",
-          "type": "string",
-          "required": true,
-          "description": "PostHog project ID.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "POSTHOG_SERVER_URL",
-        "POSTHOG_PERSONAL_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "POSTHOG_SERVER_URL",
-          "type": "unknown"
-        },
-        {
-          "name": "POSTHOG_PERSONAL_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Posthog.GetAllSurveyActivity",
-        "parameters": {
-          "project_id": {
-            "value": "12345",
-            "type": "string",
-            "required": true
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "product_analytics"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "GetDashboard",
       "qualifiedName": "Posthog.GetDashboard",
-      "fullyQualifiedName": "Posthog.GetDashboard@1.0.3",
+      "fullyQualifiedName": "Posthog.GetDashboard@2.0.1",
       "description": "Get a dashboard's full configuration including all insight tiles.\n\nProvide dashboard_id or dashboard_name.",
       "parameters": [
         {
@@ -1624,7 +1384,7 @@
           "name": "dashboard_id",
           "type": "integer",
           "required": false,
-          "description": "Numeric dashboard ID to retrieve",
+          "description": "Numeric dashboard ID to retrieve. Defaults to using dashboard_name.",
           "enum": null,
           "inferrable": true
         },
@@ -1632,7 +1392,7 @@
           "name": "dashboard_name",
           "type": "string",
           "required": false,
-          "description": "Dashboard name (case-insensitive exact match).",
+          "description": "Dashboard name (case-insensitive exact match). Defaults to using dashboard_id.",
           "enum": null,
           "inferrable": true
         }
@@ -1698,16 +1458,16 @@
       }
     },
     {
-      "name": "GetErrorDetails",
-      "qualifiedName": "Posthog.GetErrorDetails",
-      "fullyQualifiedName": "Posthog.GetErrorDetails@1.0.3",
-      "description": "Get stack trace, occurrence count, and affected users/sessions for a specific error.",
+      "name": "GetErrorIssue",
+      "qualifiedName": "Posthog.GetErrorIssue",
+      "fullyQualifiedName": "Posthog.GetErrorIssue@2.0.1",
+      "description": "Get an error tracking issue: status, severity, name, description, first seen, assignee.",
       "parameters": [
         {
           "name": "issue_id",
           "type": "string",
           "required": true,
-          "description": "Error issue fingerprint (the 'fingerprint' field of an error tracking issue).",
+          "description": "The issue's ID: the UUID in the id field an issue listing returns, not its fingerprint.",
           "enum": null,
           "inferrable": true
         },
@@ -1741,10 +1501,10 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Posthog.GetErrorDetails",
+        "toolName": "Posthog.GetErrorIssue",
         "parameters": {
           "issue_id": {
-            "value": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4",
+            "value": "a3f1c2d4-8e5b-4f7a-9c0d-1b2e3f4a5678",
             "type": "string",
             "required": true
           },
@@ -1776,10 +1536,205 @@
       }
     },
     {
+      "name": "GetEventTrend",
+      "qualifiedName": "Posthog.GetEventTrend",
+      "fullyQualifiedName": "Posthog.GetEventTrend@2.0.1",
+      "description": "Get a time-series trend for one or more events over a date range.\n\nReturns one series per event, and one per breakdown value when a breakdown property is\nset. Unknown event names return zero counts rather than errors.",
+      "parameters": [
+        {
+          "name": "events",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The names of the events to trend, one series per event.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_from",
+          "type": "string",
+          "required": false,
+          "description": "Start date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Defaults to '-8w'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_to",
+          "type": "string",
+          "required": false,
+          "description": "End date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Future dates are clamped to now. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "time_grouping",
+          "type": "string",
+          "required": false,
+          "description": "Time interval for grouping data points. Defaults to WEEK.",
+          "enum": [
+            "day",
+            "week",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "breakdown_property",
+          "type": "string",
+          "required": false,
+          "description": "Property to break down by (e.g., '$initial_utm_source', '$browser'). Defaults to a single series.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "breakdown_type",
+          "type": "string",
+          "required": false,
+          "description": "Breakdown type. Defaults to EVENT.",
+          "enum": [
+            "event",
+            "person",
+            "session"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "math",
+          "type": "string",
+          "required": false,
+          "description": "Aggregation method. Defaults to TOTAL (count).",
+          "enum": [
+            "total",
+            "dau",
+            "weekly_active",
+            "monthly_active"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "property_filters",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Property filters to narrow results. Defaults to no filters.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "POSTHOG_SERVER_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "POSTHOG_PERSONAL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Posthog.GetEventTrend",
+        "parameters": {
+          "events": {
+            "value": [
+              "pageview",
+              "button_clicked",
+              "user_signed_up"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "project_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "date_from": {
+            "value": "-4w",
+            "type": "string",
+            "required": false
+          },
+          "date_to": {
+            "value": "2024-06-30",
+            "type": "string",
+            "required": false
+          },
+          "time_grouping": {
+            "value": "DAY",
+            "type": "string",
+            "required": false
+          },
+          "breakdown_property": {
+            "value": "$browser",
+            "type": "string",
+            "required": false
+          },
+          "breakdown_type": {
+            "value": "EVENT",
+            "type": "string",
+            "required": false
+          },
+          "math": {
+            "value": "TOTAL",
+            "type": "string",
+            "required": false
+          },
+          "property_filters": {
+            "value": [
+              {
+                "key": "$os",
+                "value": "Windows",
+                "operator": "exact",
+                "type": "event"
+              }
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "GetExperiment",
       "qualifiedName": "Posthog.GetExperiment",
-      "fullyQualifiedName": "Posthog.GetExperiment@1.0.3",
-      "description": "Get an experiment's full configuration.\n\nIncludes variants, metrics, and current status. Provide either\nthe numeric ID or the name.",
+      "fullyQualifiedName": "Posthog.GetExperiment@2.0.1",
+      "description": "Get an experiment's full configuration.\n\nIncludes status, variants, rollout, and metrics. Provide either\nthe numeric ID or the name.",
       "parameters": [
         {
           "name": "project_id",
@@ -1793,7 +1748,7 @@
           "name": "experiment_id",
           "type": "integer",
           "required": false,
-          "description": "Numeric experiment ID.",
+          "description": "Numeric experiment ID. Defaults to using experiment_name.",
           "enum": null,
           "inferrable": true
         },
@@ -1801,7 +1756,7 @@
           "name": "experiment_name",
           "type": "string",
           "required": false,
-          "description": "Experiment name (case-insensitive exact match).",
+          "description": "Experiment name (case-insensitive exact match). Defaults to using experiment_id.",
           "enum": null,
           "inferrable": true
         }
@@ -1867,10 +1822,10 @@
       }
     },
     {
-      "name": "GetExperimentResults",
-      "qualifiedName": "Posthog.GetExperimentResults",
-      "fullyQualifiedName": "Posthog.GetExperimentResults@1.0.3",
-      "description": "Get experiment results including metric data and exposure counts.\n\nOnly available for launched experiments that have collected data.\nDraft, not-yet-launched, or legacy experiments return 404.",
+      "name": "GetExperimentResult",
+      "qualifiedName": "Posthog.GetExperimentResult",
+      "fullyQualifiedName": "Posthog.GetExperimentResult@2.0.1",
+      "description": "Get a launched experiment's results: exposures per variant and each metric's statistics.\n\nEach metric reports the baseline and every other variant with its\nsample count, chance to win, and credible interval. A metric whose\nquery failed carries an error instead.",
       "parameters": [
         {
           "name": "experiment_id",
@@ -1910,15 +1865,15 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Posthog.GetExperimentResults",
+        "toolName": "Posthog.GetExperimentResult",
         "parameters": {
           "experiment_id": {
-            "value": 42,
+            "value": 42781,
             "type": "integer",
             "required": true
           },
           "project_id": {
-            "value": "project_ABC123xyz",
+            "value": "proj_aBcDeFgHiJkLmNoP",
             "type": "string",
             "required": true
           }
@@ -1947,7 +1902,7 @@
     {
       "name": "GetFeatureFlag",
       "qualifiedName": "Posthog.GetFeatureFlag",
-      "fullyQualifiedName": "Posthog.GetFeatureFlag@1.0.3",
+      "fullyQualifiedName": "Posthog.GetFeatureFlag@2.0.1",
       "description": "Get a feature flag's full definition including rollout rules.\n\nProvide either the numeric ID or the flag key.",
       "parameters": [
         {
@@ -1962,7 +1917,7 @@
           "name": "flag_id",
           "type": "integer",
           "required": false,
-          "description": "Numeric flag ID.",
+          "description": "Numeric flag ID. Defaults to using flag_key.",
           "enum": null,
           "inferrable": true
         },
@@ -1970,7 +1925,7 @@
           "name": "flag_key",
           "type": "string",
           "required": false,
-          "description": "Flag key string.",
+          "description": "Flag key string. Defaults to using flag_id.",
           "enum": null,
           "inferrable": true
         }
@@ -2038,7 +1993,7 @@
     {
       "name": "GetFunnel",
       "qualifiedName": "Posthog.GetFunnel",
-      "fullyQualifiedName": "Posthog.GetFunnel@1.0.3",
+      "fullyQualifiedName": "Posthog.GetFunnel@2.0.1",
       "description": "Build a multi-step conversion funnel with optional property breakdowns.",
       "parameters": [
         {
@@ -2078,7 +2033,7 @@
           "name": "breakdown_property",
           "type": "string",
           "required": false,
-          "description": "Property to break down funnel by (e.g., '$initial_utm_source'). Shows conversion per segment.",
+          "description": "Property to break down funnel by (e.g., '$initial_utm_source'). Shows conversion per segment. Defaults to no breakdown.",
           "enum": null,
           "inferrable": true
         },
@@ -2107,7 +2062,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Property filters applied to all steps.",
+          "description": "Property filters applied to all steps. Defaults to no filters.",
           "enum": null,
           "inferrable": true
         }
@@ -2212,7 +2167,7 @@
     {
       "name": "GetInsight",
       "qualifiedName": "Posthog.GetInsight",
-      "fullyQualifiedName": "Posthog.GetInsight@1.0.3",
+      "fullyQualifiedName": "Posthog.GetInsight@2.0.1",
       "description": "Get an insight's full configuration and current query results.\n\nProvide either the numeric ID or the name.",
       "parameters": [
         {
@@ -2227,7 +2182,7 @@
           "name": "insight_id",
           "type": "integer",
           "required": false,
-          "description": "Numeric insight ID.",
+          "description": "Numeric insight ID. Defaults to using insight_name.",
           "enum": null,
           "inferrable": true
         },
@@ -2235,7 +2190,7 @@
           "name": "insight_name",
           "type": "string",
           "required": false,
-          "description": "Insight name (case-insensitive exact match).",
+          "description": "Insight name (case-insensitive exact match). Defaults to using insight_id.",
           "enum": null,
           "inferrable": true
         }
@@ -2303,7 +2258,7 @@
     {
       "name": "GetRetention",
       "qualifiedName": "Posthog.GetRetention",
-      "fullyQualifiedName": "Posthog.GetRetention@1.0.3",
+      "fullyQualifiedName": "Posthog.GetRetention@2.0.1",
       "description": "Get cohort retention data showing what percentage of users return.\n\nShows return rates after a user's initial event.",
       "parameters": [
         {
@@ -2382,7 +2337,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Property filters for the cohort.",
+          "description": "Property filters for the cohort. Defaults to no filters.",
           "enum": null,
           "inferrable": true
         }
@@ -2487,7 +2442,7 @@
     {
       "name": "GetSurvey",
       "qualifiedName": "Posthog.GetSurvey",
-      "fullyQualifiedName": "Posthog.GetSurvey@1.0.3",
+      "fullyQualifiedName": "Posthog.GetSurvey@2.0.1",
       "description": "Get a survey's full configuration.\n\nIncludes questions, targeting rules, and scheduling. Provide\neither the numeric ID or the name.",
       "parameters": [
         {
@@ -2502,7 +2457,7 @@
           "name": "survey_id",
           "type": "string",
           "required": false,
-          "description": "Survey ID (UUID string).",
+          "description": "Survey ID (UUID string). Defaults to using survey_name.",
           "enum": null,
           "inferrable": true
         },
@@ -2510,7 +2465,7 @@
           "name": "survey_name",
           "type": "string",
           "required": false,
-          "description": "Survey name (case-insensitive exact match).",
+          "description": "Survey name (case-insensitive exact match). Defaults to using survey_id.",
           "enum": null,
           "inferrable": true
         }
@@ -2576,422 +2531,9 @@
       }
     },
     {
-      "name": "GetSurveyActivity",
-      "qualifiedName": "Posthog.GetSurveyActivity",
-      "fullyQualifiedName": "Posthog.GetSurveyActivity@1.0.3",
-      "description": "Get the activity log for a survey.\n\nReturns a chronological list of changes made to the survey\n(created, updated, archived, etc.), not response metrics.",
-      "parameters": [
-        {
-          "name": "survey_id",
-          "type": "string",
-          "required": true,
-          "description": "Survey ID (UUID string) to get activity for.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "project_id",
-          "type": "string",
-          "required": true,
-          "description": "PostHog project ID.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "POSTHOG_SERVER_URL",
-        "POSTHOG_PERSONAL_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "POSTHOG_SERVER_URL",
-          "type": "api_key"
-        },
-        {
-          "name": "POSTHOG_PERSONAL_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Posthog.GetSurveyActivity",
-        "parameters": {
-          "survey_id": {
-            "value": "a3f8c2d1-7b45-4e89-b012-9f3e6c1d4a27",
-            "type": "string",
-            "required": true
-          },
-          "project_id": {
-            "value": "12345",
-            "type": "string",
-            "required": true
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "product_analytics"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetTrend",
-      "qualifiedName": "Posthog.GetTrend",
-      "fullyQualifiedName": "Posthog.GetTrend@1.0.3",
-      "description": "Get a time-series trend for an event over a date range.\n\nOptionally broken down by a property.",
-      "parameters": [
-        {
-          "name": "event",
-          "type": "string",
-          "required": true,
-          "description": "Event name to trend.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "project_id",
-          "type": "string",
-          "required": true,
-          "description": "PostHog project ID.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "date_from",
-          "type": "string",
-          "required": false,
-          "description": "Start date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Defaults to '-8w'.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "date_to",
-          "type": "string",
-          "required": false,
-          "description": "End date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Future dates are clamped to now. Defaults to now.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "time_grouping",
-          "type": "string",
-          "required": false,
-          "description": "Time interval for grouping data points. Defaults to WEEK.",
-          "enum": [
-            "day",
-            "week",
-            "month"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "breakdown_property",
-          "type": "string",
-          "required": false,
-          "description": "Property to break down by (e.g., '$initial_utm_source', '$browser'). Omit for a single series.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "breakdown_type",
-          "type": "string",
-          "required": false,
-          "description": "Breakdown type. Defaults to EVENT.",
-          "enum": [
-            "event",
-            "person",
-            "session"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "math",
-          "type": "string",
-          "required": false,
-          "description": "Aggregation method. Defaults to TOTAL (count).",
-          "enum": [
-            "total",
-            "dau",
-            "weekly_active",
-            "monthly_active"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "property_filters",
-          "type": "array",
-          "innerType": "json",
-          "required": false,
-          "description": "Property filters to narrow results.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "POSTHOG_SERVER_URL",
-        "POSTHOG_PERSONAL_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "POSTHOG_SERVER_URL",
-          "type": "api_key"
-        },
-        {
-          "name": "POSTHOG_PERSONAL_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Posthog.GetTrend",
-        "parameters": {
-          "event": {
-            "value": "page_view",
-            "type": "string",
-            "required": true
-          },
-          "project_id": {
-            "value": "12345",
-            "type": "string",
-            "required": true
-          },
-          "date_from": {
-            "value": "-4w",
-            "type": "string",
-            "required": false
-          },
-          "date_to": {
-            "value": "2024-06-30",
-            "type": "string",
-            "required": false
-          },
-          "time_grouping": {
-            "value": "WEEK",
-            "type": "string",
-            "required": false
-          },
-          "breakdown_property": {
-            "value": "$browser",
-            "type": "string",
-            "required": false
-          },
-          "breakdown_type": {
-            "value": "EVENT",
-            "type": "string",
-            "required": false
-          },
-          "math": {
-            "value": "TOTAL",
-            "type": "string",
-            "required": false
-          },
-          "property_filters": {
-            "value": [
-              {
-                "key": "$os",
-                "value": "Windows",
-                "operator": "exact",
-                "type": "event"
-              }
-            ],
-            "type": "array",
-            "required": false
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "product_analytics"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetTrends",
-      "qualifiedName": "Posthog.GetTrends",
-      "fullyQualifiedName": "Posthog.GetTrends@1.0.3",
-      "description": "Batch trend query: get time-series data for multiple events.\n\nReturns a time-series for each event. Unknown event names return\nzero counts rather than errors.",
-      "parameters": [
-        {
-          "name": "events",
-          "type": "array",
-          "innerType": "string",
-          "required": true,
-          "description": "List of event names to trend.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "project_id",
-          "type": "string",
-          "required": true,
-          "description": "PostHog project ID.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "date_from",
-          "type": "string",
-          "required": false,
-          "description": "Start date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Defaults to '-8w'.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "date_to",
-          "type": "string",
-          "required": false,
-          "description": "End date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Future dates are clamped to now. Defaults to now.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "time_grouping",
-          "type": "string",
-          "required": false,
-          "description": "Time interval for grouping data points. Defaults to WEEK.",
-          "enum": [
-            "day",
-            "week",
-            "month"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "math",
-          "type": "string",
-          "required": false,
-          "description": "Aggregation method. Defaults to TOTAL (count).",
-          "enum": [
-            "total",
-            "dau",
-            "weekly_active",
-            "monthly_active"
-          ],
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "POSTHOG_SERVER_URL",
-        "POSTHOG_PERSONAL_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "POSTHOG_SERVER_URL",
-          "type": "unknown"
-        },
-        {
-          "name": "POSTHOG_PERSONAL_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Posthog.GetTrends",
-        "parameters": {
-          "events": {
-            "value": [
-              "pageview",
-              "signup",
-              "purchase",
-              "button_clicked"
-            ],
-            "type": "array",
-            "required": true
-          },
-          "project_id": {
-            "value": "12345",
-            "type": "string",
-            "required": true
-          },
-          "date_from": {
-            "value": "-4w",
-            "type": "string",
-            "required": false
-          },
-          "date_to": {
-            "value": "2024-06-30",
-            "type": "string",
-            "required": false
-          },
-          "time_grouping": {
-            "value": "DAY",
-            "type": "string",
-            "required": false
-          },
-          "math": {
-            "value": "TOTAL",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "product_analytics"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "ListDashboards",
       "qualifiedName": "Posthog.ListDashboards",
-      "fullyQualifiedName": "Posthog.ListDashboards@1.0.3",
+      "fullyQualifiedName": "Posthog.ListDashboards@2.0.1",
       "description": "List all dashboards in the project.\n\nReturns summaries (id, name, pinned, tags, created_at). Use a\ndashboard's ID to get its full configuration and insight tiles.",
       "parameters": [
         {
@@ -3022,7 +2564,7 @@
           "name": "search",
           "type": "string",
           "required": false,
-          "description": "Filter dashboards by name (case-insensitive substring match)",
+          "description": "Only include dashboards whose name contains this text (case-insensitive). Defaults to any name.",
           "enum": null,
           "inferrable": true
         },
@@ -3030,7 +2572,7 @@
           "name": "pinned",
           "type": "boolean",
           "required": false,
-          "description": "Filter to only pinned (true) or unpinned (false) dashboards",
+          "description": "Filter to only pinned (true) or unpinned (false) dashboards. Defaults to both pinned and unpinned.",
           "enum": null,
           "inferrable": true
         }
@@ -3106,10 +2648,10 @@
       }
     },
     {
-      "name": "ListErrors",
-      "qualifiedName": "Posthog.ListErrors",
-      "fullyQualifiedName": "Posthog.ListErrors@1.0.3",
-      "description": "List error tracking issues.\n\nReturns summaries (id, fingerprint, status, occurrences, users,\nfirst_seen, last_seen). Use an error's fingerprint to fetch its full\nstack trace.",
+      "name": "ListErrorIssues",
+      "qualifiedName": "Posthog.ListErrorIssues",
+      "fullyQualifiedName": "Posthog.ListErrorIssues@2.0.1",
+      "description": "List error tracking issues.\n\nReturns each issue's id, status, severity, name, description,\nfirst_seen, and assignee. Use an issue's id to get it on its own.",
       "parameters": [
         {
           "name": "project_id",
@@ -3144,7 +2686,7 @@
       "secretsInfo": [
         {
           "name": "POSTHOG_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         },
         {
           "name": "POSTHOG_PERSONAL_API_KEY",
@@ -3157,7 +2699,7 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Posthog.ListErrors",
+        "toolName": "Posthog.ListErrorIssues",
         "parameters": {
           "project_id": {
             "value": "12345",
@@ -3199,7 +2741,7 @@
     {
       "name": "ListEventDefinitions",
       "qualifiedName": "Posthog.ListEventDefinitions",
-      "fullyQualifiedName": "Posthog.ListEventDefinitions@1.0.3",
+      "fullyQualifiedName": "Posthog.ListEventDefinitions@2.0.1",
       "description": "List all tracked event names in the project.\n\nThis is the discovery starting point -- use it to find valid\nevent names, then look up an event's properties to discover\navailable filters and breakdowns.",
       "parameters": [
         {
@@ -3214,7 +2756,7 @@
           "name": "search",
           "type": "string",
           "required": false,
-          "description": "Filter events by name (server-side, case-insensitive substring match).",
+          "description": "Only include events whose name contains this text (case-insensitive). Defaults to all events.",
           "enum": null,
           "inferrable": true
         },
@@ -3303,7 +2845,7 @@
     {
       "name": "ListExperiments",
       "qualifiedName": "Posthog.ListExperiments",
-      "fullyQualifiedName": "Posthog.ListExperiments@1.0.3",
+      "fullyQualifiedName": "Posthog.ListExperiments@2.0.1",
       "description": "List all A/B test experiments.\n\nReturns summaries (id, name, feature_flag_key, start_date,\nend_date). Use an experiment's ID or name to get its full\nconfiguration.",
       "parameters": [
         {
@@ -3394,7 +2936,7 @@
     {
       "name": "ListFeatureFlags",
       "qualifiedName": "Posthog.ListFeatureFlags",
-      "fullyQualifiedName": "Posthog.ListFeatureFlags@1.0.3",
+      "fullyQualifiedName": "Posthog.ListFeatureFlags@2.0.1",
       "description": "List all feature flags.\n\nReturns summaries (id, key, name, active). Use a flag's ID or\nkey to get its full rollout rules and targeting detail.",
       "parameters": [
         {
@@ -3485,7 +3027,7 @@
     {
       "name": "ListInsights",
       "qualifiedName": "Posthog.ListInsights",
-      "fullyQualifiedName": "Posthog.ListInsights@1.0.3",
+      "fullyQualifiedName": "Posthog.ListInsights@2.0.1",
       "description": "List all saved insights.\n\nReturns summaries (id, name, description, last_modified_at).\nUse an insight's ID or name to get its full configuration and\nquery results.",
       "parameters": [
         {
@@ -3500,7 +3042,7 @@
           "name": "search",
           "type": "string",
           "required": false,
-          "description": "Filter insights by name (case-insensitive substring match).",
+          "description": "Only include insights whose name contains this text (case-insensitive). Defaults to any name.",
           "enum": null,
           "inferrable": true
         },
@@ -3589,7 +3131,7 @@
     {
       "name": "ListProperties",
       "qualifiedName": "Posthog.ListProperties",
-      "fullyQualifiedName": "Posthog.ListProperties@1.0.3",
+      "fullyQualifiedName": "Posthog.ListProperties@2.0.1",
       "description": "List property definitions with names, types, and example values.\n\nUse this as a schema exploration step: after identifying tracked\nevent names, query with event_name to discover its properties\nfor use in filters and breakdowns.",
       "parameters": [
         {
@@ -3604,7 +3146,7 @@
           "name": "event_name",
           "type": "string",
           "required": false,
-          "description": "Event name to get properties for (required when type is 'event').",
+          "description": "Event name to get properties for (required when type is 'event'). Defaults to properties of any event.",
           "enum": null,
           "inferrable": true
         },
@@ -3612,7 +3154,7 @@
           "name": "property_type",
           "type": "string",
           "required": false,
-          "description": "Property type. When set to 'event', event_name is required.",
+          "description": "Only include properties of this type. When set to 'event', event_name is required. Defaults to all property types.",
           "enum": [
             "event",
             "person"
@@ -3707,9 +3249,87 @@
       }
     },
     {
+      "name": "ListSurveyActivities",
+      "qualifiedName": "Posthog.ListSurveyActivities",
+      "fullyQualifiedName": "Posthog.ListSurveyActivities@2.0.1",
+      "description": "List the activity log of changes made to surveys.\n\nReturns a chronological list of changes (created, updated, archived, etc.),\nnot response metrics.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "survey_id",
+          "type": "string",
+          "required": false,
+          "description": "Only include changes to the survey with this ID (UUID string). Defaults to changes to every survey.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "POSTHOG_SERVER_URL",
+          "type": "api_key"
+        },
+        {
+          "name": "POSTHOG_PERSONAL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Posthog.ListSurveyActivities",
+        "parameters": {
+          "project_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "survey_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListSurveys",
       "qualifiedName": "Posthog.ListSurveys",
-      "fullyQualifiedName": "Posthog.ListSurveys@1.0.3",
+      "fullyQualifiedName": "Posthog.ListSurveys@2.0.1",
       "description": "List all surveys.\n\nReturns summaries (id, name, type, created_at). Use a survey's\nID or name to get its full configuration.",
       "parameters": [
         {
@@ -3724,7 +3344,7 @@
           "name": "search",
           "type": "string",
           "required": false,
-          "description": "Filter surveys by name (case-insensitive substring match)",
+          "description": "Only include surveys whose name contains this text (case-insensitive). Defaults to any name.",
           "enum": null,
           "inferrable": true
         },
@@ -3811,16 +3431,16 @@
       }
     },
     {
-      "name": "RunQuery",
-      "qualifiedName": "Posthog.RunQuery",
-      "fullyQualifiedName": "Posthog.RunQuery@1.0.3",
-      "description": "Execute a raw PostHog query.\n\nFor common analytics patterns (trends, funnels, retention),\nprefer purpose-built tools if available. Use this for custom\nquery shapes. Discover valid event names before constructing\na query.\n\nFor the full query schema and supported kinds, see\nhttps://posthog.com/docs/api/queries",
+      "name": "QueryRows",
+      "qualifiedName": "Posthog.QueryRows",
+      "fullyQualifiedName": "Posthog.QueryRows@2.0.1",
+      "description": "Run a HogQL query and return its rows, each keyed by column name.\n\nFor trends, funnels, and retention, prefer the purpose-built\ntools. Discover valid event and property names before writing\nthe query.",
       "parameters": [
         {
-          "name": "query",
-          "type": "json",
+          "name": "sql",
+          "type": "string",
           "required": true,
-          "description": "PostHog query object. Must include a 'kind' field that determines the query type (TrendsQuery, FunnelsQuery, RetentionQuery, EventsQuery, HogQLQuery, etc.). Common optional fields: 'dateRange' (object with 'date_from' and/or 'date_to' strings), 'series' (list of event node objects with 'event' and 'kind' fields), 'properties' (filter object). For HogQL queries, include a 'query' field with the SQL string. For common analytics patterns, prefer purpose-built tools instead.",
+          "description": "The HogQL SELECT query to run. HogQL is PostHog's SQL dialect over tables such as events, persons, and sessions; filter events by timestamp to keep the scan small. Without a LIMIT clause, PostHog returns at most 100 rows; page further with LIMIT and OFFSET.",
           "enum": null,
           "inferrable": true
         },
@@ -3854,17 +3474,10 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Posthog.RunQuery",
+        "toolName": "Posthog.QueryRows",
         "parameters": {
-          "query": {
-            "value": {
-              "kind": "HogQLQuery",
-              "query": "SELECT event, count() AS total FROM events WHERE timestamp >= '2024-01-01' AND timestamp <= '2024-03-31' GROUP BY event ORDER BY total DESC LIMIT 20",
-              "dateRange": {
-                "date_from": "2024-01-01",
-                "date_to": "2024-03-31"
-              }
-            },
+          "sql": {
+            "value": "SELECT event, properties.$browser, count() AS event_count FROM events WHERE timestamp >= now() - INTERVAL 7 DAY GROUP BY event, properties.$browser ORDER BY event_count DESC LIMIT 50",
             "type": "string",
             "required": true
           },
@@ -3898,7 +3511,7 @@
     {
       "name": "UpdateDashboard",
       "qualifiedName": "Posthog.UpdateDashboard",
-      "fullyQualifiedName": "Posthog.UpdateDashboard@1.0.3",
+      "fullyQualifiedName": "Posthog.UpdateDashboard@2.0.1",
       "description": "Update a dashboard's name, description, pinned status, or tags.\n\nReview the dashboard's current values before updating.",
       "parameters": [
         {
@@ -3921,7 +3534,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "New dashboard name",
+          "description": "New dashboard name. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -3929,7 +3542,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "New dashboard description",
+          "description": "New dashboard description. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -3937,7 +3550,7 @@
           "name": "pinned",
           "type": "boolean",
           "required": false,
-          "description": "Pin or unpin the dashboard",
+          "description": "Pin or unpin the dashboard. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -3946,7 +3559,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Replace tags.",
+          "description": "Replace tags. Defaults to leaving them unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -4033,8 +3646,8 @@
     {
       "name": "UpdateExperiment",
       "qualifiedName": "Posthog.UpdateExperiment",
-      "fullyQualifiedName": "Posthog.UpdateExperiment@1.0.3",
-      "description": "Update an experiment's properties or lifecycle state.\n\nReview the experiment's current state before updating.\nTo launch: set launch=true. To conclude: set\nconclude='winning_variant_name'. To restart: set restart=true.",
+      "fullyQualifiedName": "Posthog.UpdateExperiment@2.0.1",
+      "description": "Update an experiment's name, description, or metrics, or change its lifecycle state.\n\nReview the experiment's current state before updating.",
       "parameters": [
         {
           "name": "experiment_id",
@@ -4056,7 +3669,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "New experiment name",
+          "description": "New experiment name. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4064,7 +3677,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "New experiment description",
+          "description": "New experiment description. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4073,7 +3686,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Replace primary metrics.",
+          "description": "Replace the primary metrics with these. Defaults to leaving them unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4082,31 +3695,41 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Replace secondary metrics",
+          "description": "Replace the secondary metrics with these. Defaults to leaving them unchanged.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "launch",
-          "type": "boolean",
-          "required": false,
-          "description": "Set true to launch a draft experiment. Defaults to false.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "conclude",
+          "name": "lifecycle_action",
           "type": "string",
           "required": false,
-          "description": "Conclusion result string to end the experiment",
-          "enum": null,
+          "description": "Change the experiment's state after applying the other changes: launch a draft, which turns its feature flag on; end a running experiment, which freezes its results but keeps serving variants; or reset it to a draft. Defaults to leaving the state unchanged.",
+          "enum": [
+            "launch",
+            "end",
+            "reset_to_draft"
+          ],
           "inferrable": true
         },
         {
-          "name": "restart",
-          "type": "boolean",
+          "name": "conclusion",
+          "type": "string",
           "required": false,
-          "description": "Set true to restart a concluded experiment. Defaults to false.",
+          "description": "Record this outcome when ending the experiment. Only used with lifecycle_action 'end'. Defaults to recording no outcome.",
+          "enum": [
+            "won",
+            "lost",
+            "inconclusive",
+            "stopped_early",
+            "invalid"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "conclusion_comment",
+          "type": "string",
+          "required": false,
+          "description": "Record this note on the outcome when ending the experiment. Only used with lifecycle_action 'end'. Defaults to no note.",
           "enum": null,
           "inferrable": true
         }
@@ -4119,7 +3742,7 @@
       "secretsInfo": [
         {
           "name": "POSTHOG_SERVER_URL",
-          "type": "unknown"
+          "type": "api_key"
         },
         {
           "name": "POSTHOG_PERSONAL_API_KEY",
@@ -4135,31 +3758,30 @@
         "toolName": "Posthog.UpdateExperiment",
         "parameters": {
           "experiment_id": {
-            "value": 42731,
+            "value": 4821,
             "type": "integer",
             "required": true
           },
           "project_id": {
-            "value": "proj_AbCdEf123456",
+            "value": "proj_abc123XYZ",
             "type": "string",
             "required": true
           },
           "name": {
-            "value": "Homepage CTA Button Color Test",
+            "value": "Homepage CTA Button Color Test v2",
             "type": "string",
             "required": false
           },
           "description": {
-            "value": "Testing the impact of button color on conversion rates for the primary call-to-action on the homepage.",
+            "value": "Testing the impact of button color on click-through rate for the primary CTA on the homepage.",
             "type": "string",
             "required": false
           },
           "primary_metrics": {
             "value": [
               {
-                "kind": "ExperimentMetric",
-                "metric_type": "mean",
-                "event_name": "purchase_completed"
+                "type": "trend",
+                "event": "cta_clicked"
               }
             ],
             "type": "array",
@@ -4168,27 +3790,26 @@
           "secondary_metrics": {
             "value": [
               {
-                "kind": "ExperimentMetric",
-                "metric_type": "funnel",
-                "event_name": "add_to_cart"
+                "type": "trend",
+                "event": "signup_completed"
               }
             ],
             "type": "array",
             "required": false
           },
-          "launch": {
-            "value": false,
-            "type": "boolean",
-            "required": false
-          },
-          "conclude": {
-            "value": "variant_blue_button",
+          "lifecycle_action": {
+            "value": "end",
             "type": "string",
             "required": false
           },
-          "restart": {
-            "value": false,
-            "type": "boolean",
+          "conclusion": {
+            "value": "significant_win",
+            "type": "string",
+            "required": false
+          },
+          "conclusion_comment": {
+            "value": "Variant B showed a 12% uplift in CTA clicks with 95% statistical significance. Recommending full rollout.",
+            "type": "string",
             "required": false
           }
         },
@@ -4207,7 +3828,7 @@
           ],
           "readOnly": false,
           "destructive": false,
-          "idempotent": true,
+          "idempotent": false,
           "openWorld": true
         },
         "extras": null
@@ -4216,7 +3837,7 @@
     {
       "name": "UpdateFeatureFlag",
       "qualifiedName": "Posthog.UpdateFeatureFlag",
-      "fullyQualifiedName": "Posthog.UpdateFeatureFlag@1.0.3",
+      "fullyQualifiedName": "Posthog.UpdateFeatureFlag@2.0.1",
       "description": "Update a feature flag's properties or rollout rules.\n\nProvide one of flag_id or flag_key. Review the flag's current\nstate before updating. To enable: set active=true and\nrollout_percentage=100. To disable: set active=false.",
       "parameters": [
         {
@@ -4231,7 +3852,7 @@
           "name": "flag_id",
           "type": "integer",
           "required": false,
-          "description": "Numeric flag ID.",
+          "description": "Numeric flag ID. Defaults to using flag_key.",
           "enum": null,
           "inferrable": true
         },
@@ -4239,7 +3860,7 @@
           "name": "flag_key",
           "type": "string",
           "required": false,
-          "description": "Flag key string.",
+          "description": "Key of the flag to update. Defaults to using flag_id.",
           "enum": null,
           "inferrable": true
         },
@@ -4247,7 +3868,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "New display name",
+          "description": "New display name. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4255,7 +3876,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "New description",
+          "description": "New description. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4263,7 +3884,7 @@
           "name": "active",
           "type": "boolean",
           "required": false,
-          "description": "Set active (true) or inactive (false)",
+          "description": "Set active (true) or inactive (false). Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4271,7 +3892,7 @@
           "name": "filters",
           "type": "json",
           "required": false,
-          "description": "New rollout and targeting rules for the flag.",
+          "description": "New rollout and targeting rules for the flag. Defaults to leaving them unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -4359,8 +3980,8 @@
     {
       "name": "UpdateInsight",
       "qualifiedName": "Posthog.UpdateInsight",
-      "fullyQualifiedName": "Posthog.UpdateInsight@1.0.3",
-      "description": "Update an insight's name, description, or query filters.\n\nReview the insight's current query structure first and only\nmodify the parts you need to change.",
+      "fullyQualifiedName": "Posthog.UpdateInsight@2.0.1",
+      "description": "Update an insight's name, description, or query.\n\nReview the insight's current query structure first and only\nmodify the parts you need to change.",
       "parameters": [
         {
           "name": "insight_id",
@@ -4382,7 +4003,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "New insight name",
+          "description": "New insight name. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4390,15 +4011,15 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "New insight description",
+          "description": "New insight description. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "filters",
+          "name": "query",
           "type": "json",
           "required": false,
-          "description": "New query filters (overwrites existing). Review the insight's current structure before overwriting.",
+          "description": "Replace the insight's query with this PostHog query object, which has a 'kind' field: an analytics query such as TrendsQuery, FunnelsQuery, or RetentionQuery, or a HogQLQuery whose 'query' field holds the SQL string. Defaults to leaving the query unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -4427,12 +4048,12 @@
         "toolName": "Posthog.UpdateInsight",
         "parameters": {
           "insight_id": {
-            "value": 4821,
+            "value": 42,
             "type": "integer",
             "required": true
           },
           "project_id": {
-            "value": "phc_ABC123xyz789",
+            "value": "phc_ABC123XYZ",
             "type": "string",
             "required": true
           },
@@ -4442,23 +4063,24 @@
             "required": false
           },
           "description": {
-            "value": "Tracks the number of unique active users on a weekly basis for Q1 2024",
+            "value": "Tracks the number of weekly active users over the past 90 days.",
             "type": "string",
             "required": false
           },
-          "filters": {
+          "query": {
             "value": {
-              "events": [
+              "kind": "TrendsQuery",
+              "series": [
                 {
-                  "id": "$pageview",
-                  "type": "events",
-                  "order": 0
+                  "kind": "EventsNode",
+                  "event": "$pageview",
+                  "name": "Pageviews"
                 }
               ],
-              "date_from": "-30d",
               "interval": "week",
-              "display": "ActionsLineGraph",
-              "insight": "TRENDS"
+              "dateRange": {
+                "date_from": "-90d"
+              }
             },
             "type": "string",
             "required": false
@@ -4488,7 +4110,7 @@
     {
       "name": "UpdateSurvey",
       "qualifiedName": "Posthog.UpdateSurvey",
-      "fullyQualifiedName": "Posthog.UpdateSurvey@1.0.3",
+      "fullyQualifiedName": "Posthog.UpdateSurvey@2.0.1",
       "description": "Update a survey's name, description, or questions.\n\nReview the survey's current configuration before updating.",
       "parameters": [
         {
@@ -4511,7 +4133,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "New survey name",
+          "description": "New survey name. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4519,7 +4141,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "New survey description",
+          "description": "New survey description. Defaults to leaving it unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -4528,7 +4150,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Replacement question list (overwrites existing questions)",
+          "description": "Replacement question list (overwrites existing questions). Defaults to leaving them unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -4630,7 +4252,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Posthog.WhoAmI",
-      "fullyQualifiedName": "Posthog.WhoAmI@1.0.3",
+      "fullyQualifiedName": "Posthog.WhoAmI@2.0.1",
       "description": "Return the authenticated user's identity, organizations, and projects.\n\nCall this first to confirm credentials and discover available\norganization and project IDs.",
       "parameters": [],
       "auth": null,
@@ -4682,6 +4304,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:25:54.386Z",
-  "summary": "PostHog is a product analytics and experimentation platform. The Arcade PostHog toolkit lets agents query analytics, manage experiments, and curate insights directly from a PostHog project.\n\n**Capabilities**\n\n- Build and manage dashboards, insights, funnels, trends, and retention views.\n- Create and iterate on experiments, feature flags, and surveys with full CRUD support.\n- Inspect event and property definitions, investigate errors, and compare time periods.\n- Run ad-hoc HogQL or insight queries and retrieve results for downstream analysis.\n\n**OAuth**\n\nNo OAuth — authentication uses a PostHog personal API key passed as a secret.\n\n**Secrets**\n\n- `POSTHOG_PERSONAL_API_KEY` — PostHog personal API key created under Account Settings → Personal API Keys.\n- `POSTHOG_SERVER_URL` — target PostHog region or self-hosted instance URL (e.g. `https://us.posthog.com`).\n\nConfigure both in the [Arcade Dashboard](https://api.arcade.dev/dashboard/auth/secrets) per the [Arcade secret setup guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+  "generatedAt": "2026-10-21T22:05:30.075Z",
+  "summary": "## PostHog Toolkit for Arcade\n\nEnables LLM-powered interaction with [PostHog](https://posthog.com) analytics — querying events, managing feature flags, experiments, surveys, dashboards, insights, and error tracking via the PostHog API.\n\n## Capabilities\n\n- **Event & data exploration:** List event definitions and properties, run HogQL queries, fetch time-series trends, funnels, and cohort retention data, and compare metrics across date ranges.\n- **Dashboards & insights:** Create, read, update, and delete dashboards; create, pin, update, and soft-delete saved insights.\n- **Feature flags:** Create, read, update, and soft-delete flags; control rollout rules and targeting; validate key uniqueness before creation.\n- **A/B experiments:** Create draft experiments with linked feature flags, launch and archive them, retrieve per-variant statistical results (chance to win, credible intervals, exposures).\n- **Surveys:** Create, read, update, archive, and list surveys; review activity logs of survey changes.\n- **Error tracking:** List and retrieve error issues with status, severity, and assignee detail.\n\n## Secrets\n\nThis toolkit requires two secrets. Set them via the [Arcade secrets dashboard](https://api.arcade.dev/dashboard/auth/secrets) or through the API.\n\n- **`POSTHOG_PERSONAL_API_KEY`** — A PostHog Personal API Key used to authenticate all API requests. Generate one in your PostHog account under **Settings → Personal API keys** (top-right user menu → *Your profile → Personal API keys*). The key must have access to the project(s) you intend to query. See [PostHog docs on personal API keys](https://posthog.com/docs/api#private-endpoint-authentication) for details on creating and scoping them.\n\n- **`POSTHOG_SERVER_URL`** — The base URL of your PostHog instance. For PostHog Cloud US this is `https://us.posthog.com`; for EU Cloud it is `https://eu.posthog.com`; for self-hosted deployments, use your own domain (e.g., `https://posthog.example.com`). This tells the toolkit which instance to route requests to.\n\nFor general guidance on configuring secrets in Arcade, see the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
 }

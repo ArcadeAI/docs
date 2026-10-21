@@ -1,7 +1,7 @@
 {
   "id": "Fireflies",
   "label": "Fireflies",
-  "version": "1.0.2",
+  "version": "2.0.1",
   "description": "Arcade.dev tools for interacting with Fireflies",
   "metadata": {
     "category": "productivity",
@@ -18,7 +18,7 @@
     {
       "name": "AddNotetakerToLiveMeeting",
       "qualifiedName": "Fireflies.AddNotetakerToLiveMeeting",
-      "fullyQualifiedName": "Fireflies.AddNotetakerToLiveMeeting@1.0.2",
+      "fullyQualifiedName": "Fireflies.AddNotetakerToLiveMeeting@2.0.1",
       "description": "Send the Fireflies notetaker into a live meeting to capture it.\n\nThe bot can take up to a minute to join after a successful dispatch.",
       "parameters": [
         {
@@ -115,9 +115,9 @@
       }
     },
     {
-      "name": "AnalyzeTeamMeetings",
-      "qualifiedName": "Fireflies.AnalyzeTeamMeetings",
-      "fullyQualifiedName": "Fireflies.AnalyzeTeamMeetings@1.0.2",
+      "name": "AggregateMeetingAnalytics",
+      "qualifiedName": "Fireflies.AggregateMeetingAnalytics",
+      "fullyQualifiedName": "Fireflies.AggregateMeetingAnalytics@2.0.1",
       "description": "Aggregate team conversation metrics and a per-speaker breakdown over a date range.\n\nUse this to spot team-level trends across meetings in a window no wider than 30 days.\nAggregates are rolled up from each meeting's own analytics, so the sentiment and\ntalk-time reflect every call in the window (not just the calls of mapped team users).\nThe most recent 50 meetings in the range are aggregated; when more fall in the range the\nresult's ``truncated`` flag is set so partial aggregates are not read as complete.",
       "parameters": [
         {
@@ -153,7 +153,7 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Fireflies.AnalyzeTeamMeetings",
+        "toolName": "Fireflies.AggregateMeetingAnalytics",
         "parameters": {
           "from_date": {
             "value": "2024-06-01",
@@ -188,10 +188,10 @@
       }
     },
     {
-      "name": "AskAboutMeeting",
-      "qualifiedName": "Fireflies.AskAboutMeeting",
-      "fullyQualifiedName": "Fireflies.AskAboutMeeting@1.0.2",
-      "description": "Ask a grounded question about a meeting and get an AI answer with suggested follow-ups.\n\nPrefer this over reading the full transcript when the user has a specific question.\nPass the returned thread id back as thread_id to continue the same conversation.",
+      "name": "CreateMeetingQuestion",
+      "qualifiedName": "Fireflies.CreateMeetingQuestion",
+      "fullyQualifiedName": "Fireflies.CreateMeetingQuestion@2.0.1",
+      "description": "Ask AskFred a question about a meeting and get its answer and suggested follow-ups.\n\nAskFred saves each question and its answer to the user's AskFred threads in Fireflies.\nPrefer this over reading the full transcript when the user has a specific question.\nPass the returned thread id back as thread_id to continue the same conversation.",
       "parameters": [
         {
           "name": "question",
@@ -202,7 +202,7 @@
           "inferrable": true
         },
         {
-          "name": "transcript_id",
+          "name": "meeting_id",
           "type": "string",
           "required": false,
           "description": "The meeting to ask about. Required when starting a new conversation. Defaults to an empty string, which is only valid when continuing an existing thread.",
@@ -234,20 +234,20 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Fireflies.AskAboutMeeting",
+        "toolName": "Fireflies.CreateMeetingQuestion",
         "parameters": {
           "question": {
-            "value": "What were the main action items discussed in the meeting?",
+            "value": "What were the main action items discussed during the meeting?",
             "type": "string",
             "required": true
           },
-          "transcript_id": {
-            "value": "trans_a1b2c3d4e5f6",
+          "meeting_id": {
+            "value": "mtg_4f8a2b1c9d3e7f0a",
             "type": "string",
             "required": false
           },
           "thread_id": {
-            "value": "thread_9z8y7x6w5v4u",
+            "value": "thrd_7c2e5d8b1a4f6e9c",
             "type": "string",
             "required": false
           }
@@ -276,14 +276,14 @@
     {
       "name": "CreateSoundbite",
       "qualifiedName": "Fireflies.CreateSoundbite",
-      "fullyQualifiedName": "Fireflies.CreateSoundbite@1.0.2",
+      "fullyQualifiedName": "Fireflies.CreateSoundbite@2.0.1",
       "description": "Clip a soundbite from a time range within a recorded meeting.\n\nThe new clip processes asynchronously; the result reports its initial processing\nstate. Use the soundbite read tools to retrieve it once ready.",
       "parameters": [
         {
-          "name": "transcript_id",
+          "name": "meeting_id",
           "type": "string",
           "required": true,
-          "description": "The meeting's transcript id to clip from.",
+          "description": "The meeting's id to clip from.",
           "enum": null,
           "inferrable": true
         },
@@ -315,7 +315,7 @@
           "name": "media_type",
           "type": "string",
           "required": false,
-          "description": "Format of the clip. Defaults to video. A video clip requested from an audio-only recording is automatically created as audio instead (the result detail notes the switch), so the clip never silently fails to process.",
+          "description": "Format of the clip. A video clip requested from an audio-only recording is automatically created as audio instead (the result detail notes the switch), so the clip never silently fails to process. Defaults to video.",
           "enum": [
             "audio",
             "video"
@@ -341,23 +341,23 @@
       "codeExample": {
         "toolName": "Fireflies.CreateSoundbite",
         "parameters": {
-          "transcript_id": {
-            "value": "abc123xyz789",
+          "meeting_id": {
+            "value": "abc123xyz456",
             "type": "string",
             "required": true
           },
           "start_time": {
-            "value": 142.5,
+            "value": 312.5,
             "type": "integer",
             "required": true
           },
           "end_time": {
-            "value": 187,
+            "value": 457.8,
             "type": "integer",
             "required": true
           },
           "name": {
-            "value": "Key Product Decision",
+            "value": "Key Product Announcement",
             "type": "string",
             "required": false
           },
@@ -391,14 +391,14 @@
     {
       "name": "GetMeetingAnalytics",
       "qualifiedName": "Fireflies.GetMeetingAnalytics",
-      "fullyQualifiedName": "Fireflies.GetMeetingAnalytics@1.0.2",
+      "fullyQualifiedName": "Fireflies.GetMeetingAnalytics@2.0.1",
       "description": "Get per-speaker talk-time and pace plus the sentiment breakdown for one meeting.\n\nUse this to gauge how a call went -- who dominated, speaking pace, and overall\nsentiment. Analytics may be sparse or empty for very short calls.",
       "parameters": [
         {
-          "name": "transcript_id",
+          "name": "meeting_id",
           "type": "string",
           "required": true,
-          "description": "The meeting's transcript id.",
+          "description": "The meeting's id.",
           "enum": null,
           "inferrable": true
         }
@@ -421,8 +421,8 @@
       "codeExample": {
         "toolName": "Fireflies.GetMeetingAnalytics",
         "parameters": {
-          "transcript_id": {
-            "value": "tr_4f8a2b1c9e3d7f06",
+          "meeting_id": {
+            "value": "meet_4f7a2c91b3e85d06",
             "type": "string",
             "required": true
           }
@@ -451,14 +451,14 @@
     {
       "name": "GetMeetingSummary",
       "qualifiedName": "Fireflies.GetMeetingSummary",
-      "fullyQualifiedName": "Fireflies.GetMeetingSummary@1.0.2",
+      "fullyQualifiedName": "Fireflies.GetMeetingSummary@2.0.1",
       "description": "Get Fireflies' AI-generated notes for a meeting: overview, action items, keywords, outline.\n\nUse this single call to answer \"what were the takeaways / action items from this\ncall?\"; it is far cheaper and more reliable than reading the verbatim transcript.",
       "parameters": [
         {
-          "name": "transcript_id",
+          "name": "meeting_id",
           "type": "string",
           "required": true,
-          "description": "The meeting's transcript id.",
+          "description": "The meeting's id.",
           "enum": null,
           "inferrable": true
         }
@@ -481,8 +481,8 @@
       "codeExample": {
         "toolName": "Fireflies.GetMeetingSummary",
         "parameters": {
-          "transcript_id": {
-            "value": "tr_a1b2c3d4e5f67890",
+          "meeting_id": {
+            "value": "abc123xyz456",
             "type": "string",
             "required": true
           }
@@ -511,14 +511,14 @@
     {
       "name": "GetMeetingTranscript",
       "qualifiedName": "Fireflies.GetMeetingTranscript",
-      "fullyQualifiedName": "Fireflies.GetMeetingTranscript@1.0.2",
+      "fullyQualifiedName": "Fireflies.GetMeetingTranscript@2.0.1",
       "description": "Get the verbatim spoken lines of a meeting, in chronological order with speaker attribution.\n\nFireflies serves a meeting's lines only as a whole, so each call retrieves the full\ntranscript; limit, offset, and the from_time/to_time window then bound what is returned\nto keep the response small (they do not reduce what is fetched upstream). Transcripts can\nrun to thousands of lines, so request a narrow window. To quote a moment found via the AI\nquestion or notes tools (which report timestamps in seconds), pass from_time and/or to_time;\noffset and limit then apply within that window. For takeaways or action items, prefer the AI\nmeeting-notes tool over reading raw lines.",
       "parameters": [
         {
-          "name": "transcript_id",
+          "name": "meeting_id",
           "type": "string",
           "required": true,
-          "description": "The meeting's transcript id.",
+          "description": "The meeting's id.",
           "enum": null,
           "inferrable": true
         },
@@ -542,7 +542,7 @@
           "name": "from_time",
           "type": "number",
           "required": false,
-          "description": "Only return lines spoken at or after this many seconds into the recording. Leave unset for no lower bound.",
+          "description": "Only return lines spoken at or after this many seconds into the recording. Defaults to no lower bound.",
           "enum": null,
           "inferrable": true
         },
@@ -550,7 +550,7 @@
           "name": "to_time",
           "type": "number",
           "required": false,
-          "description": "Only return lines spoken at or before this many seconds into the recording. Leave unset for no upper bound.",
+          "description": "Only return lines spoken at or before this many seconds into the recording. Defaults to no upper bound.",
           "enum": null,
           "inferrable": true
         }
@@ -573,8 +573,8 @@
       "codeExample": {
         "toolName": "Fireflies.GetMeetingTranscript",
         "parameters": {
-          "transcript_id": {
-            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+          "meeting_id": {
+            "value": "meet_4a7f2c91b83e5d06",
             "type": "string",
             "required": true
           },
@@ -594,7 +594,7 @@
             "required": false
           },
           "to_time": {
-            "value": 600,
+            "value": 480,
             "type": "integer",
             "required": false
           }
@@ -623,11 +623,11 @@
     {
       "name": "GetSoundbite",
       "qualifiedName": "Fireflies.GetSoundbite",
-      "fullyQualifiedName": "Fireflies.GetSoundbite@1.0.2",
+      "fullyQualifiedName": "Fireflies.GetSoundbite@2.0.1",
       "description": "Get a single soundbite by id.\n\nReturns a graceful not-found result instead of raising for an unknown or\ninaccessible id, so lookups compose like the list/search tools.",
       "parameters": [
         {
-          "name": "bite_id",
+          "name": "soundbite_id",
           "type": "string",
           "required": true,
           "description": "The soundbite's id.",
@@ -653,8 +653,8 @@
       "codeExample": {
         "toolName": "Fireflies.GetSoundbite",
         "parameters": {
-          "bite_id": {
-            "value": "sb_a1b2c3d4e5f6",
+          "soundbite_id": {
+            "value": "sb_4f3a2d1e9c87b654",
             "type": "string",
             "required": true
           }
@@ -683,7 +683,7 @@
     {
       "name": "ListActionItems",
       "qualifiedName": "Fireflies.ListActionItems",
-      "fullyQualifiedName": "Fireflies.ListActionItems@1.0.2",
+      "fullyQualifiedName": "Fireflies.ListActionItems@2.0.1",
       "description": "Gather follow-ups from recent meetings into one flat list to answer \"what do I owe?\".\n\nEach meeting's AI action-items notes are flattened into individual, owner-attributed\nitems so the caller's outstanding follow-ups across many calls surface in one request\nrather than by opening each meeting. Prefer this over reading each call's notes\nseparately when triaging open commitments; set assigned_to_me to narrow to the caller's\nown follow-ups, or assignee_email to narrow to a specific teammate's.",
       "parameters": [
         {
@@ -714,7 +714,7 @@
           "name": "assignee_email",
           "type": "string",
           "required": false,
-          "description": "Only include follow-ups attributed to this person, matched by their email handle and name (so 'shawnee@acme.com' matches items owned by 'Shawnee'). Use this to triage what a specific teammate owes. Defaults to an empty string, which applies no assignee filter.",
+          "description": "Only include follow-ups attributed to this person, matched by the part of their address before the @, ignoring case: a handle such as first.last matches items owned by 'First Last' or 'First'. Use this to triage what a specific teammate owes. Defaults to an empty string, which applies no assignee filter.",
           "enum": null,
           "inferrable": true
         },
@@ -808,7 +808,7 @@
     {
       "name": "ListChannels",
       "qualifiedName": "Fireflies.ListChannels",
-      "fullyQualifiedName": "Fireflies.ListChannels@1.0.2",
+      "fullyQualifiedName": "Fireflies.ListChannels@2.0.1",
       "description": "List the channels meetings are filed into.\n\nA channel's id can be passed to a meeting search to narrow results to that channel, so\nthis is the lookup behind that filter as well as a view of how the account organizes\nits calls.",
       "parameters": [
         {
@@ -881,7 +881,7 @@
     {
       "name": "ListContacts",
       "qualifiedName": "Fireflies.ListContacts",
-      "fullyQualifiedName": "Fireflies.ListContacts@1.0.2",
+      "fullyQualifiedName": "Fireflies.ListContacts@2.0.1",
       "description": "List the people the caller has met with, most recent first.",
       "parameters": [
         {
@@ -954,7 +954,7 @@
     {
       "name": "ListSoundbites",
       "qualifiedName": "Fireflies.ListSoundbites",
-      "fullyQualifiedName": "Fireflies.ListSoundbites@1.0.2",
+      "fullyQualifiedName": "Fireflies.ListSoundbites@2.0.1",
       "description": "List soundbites, optionally scoped to your own, your team's, or a single meeting's.",
       "parameters": [
         {
@@ -974,7 +974,7 @@
           "inferrable": true
         },
         {
-          "name": "transcript_id",
+          "name": "meeting_id",
           "type": "string",
           "required": false,
           "description": "Keep only soundbites clipped from this meeting, applied to each fetched page. Defaults to an empty string, which does not filter by meeting.",
@@ -1026,8 +1026,8 @@
             "type": "boolean",
             "required": false
           },
-          "transcript_id": {
-            "value": "trans_4f8a2b1c9e3d7056",
+          "meeting_id": {
+            "value": "mtg_a1b2c3d4e5f6",
             "type": "string",
             "required": false
           },
@@ -1066,14 +1066,14 @@
     {
       "name": "RevokeMeetingAccess",
       "qualifiedName": "Fireflies.RevokeMeetingAccess",
-      "fullyQualifiedName": "Fireflies.RevokeMeetingAccess@1.0.2",
+      "fullyQualifiedName": "Fireflies.RevokeMeetingAccess@2.0.1",
       "description": "Remove a previously granted teammate's access to a meeting.\n\nYou can only manage sharing on a meeting you own or manage. Revoking an email that\ndoes not currently have access is not a silent no-op: Fireflies may return a\n``failed`` status, so treat a failed result as \"no change was made\" rather than a hard\nerror.",
       "parameters": [
         {
-          "name": "transcript_id",
+          "name": "meeting_id",
           "type": "string",
           "required": true,
-          "description": "The meeting's transcript id to revoke access to.",
+          "description": "The meeting's id to revoke access to.",
           "enum": null,
           "inferrable": true
         },
@@ -1104,8 +1104,8 @@
       "codeExample": {
         "toolName": "Fireflies.RevokeMeetingAccess",
         "parameters": {
-          "transcript_id": {
-            "value": "tr_9f3kLmX2pQw8vYcN",
+          "meeting_id": {
+            "value": "abc123xyz789",
             "type": "string",
             "required": true
           },
@@ -1139,7 +1139,7 @@
     {
       "name": "SearchMeetings",
       "qualifiedName": "Fireflies.SearchMeetings",
-      "fullyQualifiedName": "Fireflies.SearchMeetings@1.0.2",
+      "fullyQualifiedName": "Fireflies.SearchMeetings@2.0.1",
       "description": "Find a recorded meeting by its title, the people on it, when it happened, or its topic.\n\nUse this single call to locate a past call; results are newest first. By default the\nkeyword matches the meeting title only; switch match to content to find a call by its\nspoken topics -- that scans each recent meeting's AI notes (gist, summary, keywords,\ntopics, action items) and keeps the ones whose notes or title contain the keyword.\nEach result carries a one-line AI gist for triage; set include_notes to also pull each\ncall's short summary and action items in the same request (the standup-prep digest).",
       "parameters": [
         {
@@ -1210,7 +1210,7 @@
           "name": "match",
           "type": "string",
           "required": false,
-          "description": "How the keyword is matched. Defaults to matching the meeting title (fast, exact, across all history). Switch to content matching to find a call by what was discussed when the title is generic or unknown; content matching scans the AI notes of the most recent meetings in the requested window.",
+          "description": "How the keyword is matched. Switch to content matching to find a call by what was discussed when the title is generic or unknown; content matching scans the AI notes of the most recent meetings in the requested window. Defaults to title, which matches the meeting title (fast, exact, across all history).",
           "enum": [
             "title",
             "content"
@@ -1345,14 +1345,14 @@
     {
       "name": "ShareMeeting",
       "qualifiedName": "Fireflies.ShareMeeting",
-      "fullyQualifiedName": "Fireflies.ShareMeeting@1.0.2",
+      "fullyQualifiedName": "Fireflies.ShareMeeting@2.0.1",
       "description": "Grant one or more teammates access to a meeting's notes and recording.\n\nYou can only share a meeting you own or manage. Re-sharing an email that already has\naccess is not a silent no-op: Fireflies may return a ``failed`` status, so treat a\nfailed result as \"no change was made\" rather than relying on this call to idempotently\nensure access.",
       "parameters": [
         {
-          "name": "transcript_id",
+          "name": "meeting_id",
           "type": "string",
           "required": true,
-          "description": "The meeting's transcript id to share.",
+          "description": "The meeting's id to share.",
           "enum": null,
           "inferrable": true
         },
@@ -1392,8 +1392,8 @@
       "codeExample": {
         "toolName": "Fireflies.ShareMeeting",
         "parameters": {
-          "transcript_id": {
-            "value": "trans_4f8a2b1c9d3e7f05",
+          "meeting_id": {
+            "value": "meet_8f3k2p9qLmNxT7vB",
             "type": "string",
             "required": true
           },
@@ -1401,7 +1401,7 @@
             "value": [
               "alice@example.com",
               "bob@example.com",
-              "carol@teamname.org"
+              "carol@teamwork.io"
             ],
             "type": "array",
             "required": true
@@ -1436,7 +1436,7 @@
     {
       "name": "UploadRecording",
       "qualifiedName": "Fireflies.UploadRecording",
-      "fullyQualifiedName": "Fireflies.UploadRecording@1.0.2",
+      "fullyQualifiedName": "Fireflies.UploadRecording@2.0.1",
       "description": "Queue an already-recorded audio or video file for Fireflies transcription.\n\nUse this for a recording that exists elsewhere; use the live-notetaker tool to\ncapture a meeting happening now. Transcription runs asynchronously after queuing.",
       "parameters": [
         {
@@ -1535,7 +1535,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Fireflies.WhoAmI",
-      "fullyQualifiedName": "Fireflies.WhoAmI@1.0.2",
+      "fullyQualifiedName": "Fireflies.WhoAmI@2.0.1",
       "description": "Get the caller's own Fireflies identity and usage summary.",
       "parameters": [],
       "auth": null,
@@ -1582,6 +1582,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:24:59.832Z",
-  "summary": "## Fireflies Toolkit for Arcade\n\nArcade toolkit for interacting with the [Fireflies](https://fireflies.ai) meeting intelligence API. Enables agents and tools to record, search, analyze, and manage meetings, transcripts, and follow-ups programmatically.\n\n## Capabilities\n\n- **Meeting capture & ingestion:** Dispatch the Fireflies notetaker bot into a live meeting or queue an existing audio/video file for async transcription.\n- **Search & retrieval:** Find past meetings by title, participants, date, or spoken topic; retrieve AI-generated summaries, action items, keywords, and outlines in a single call.\n- **Transcript access:** Fetch verbatim, speaker-attributed transcripts with time-window and offset filtering to keep responses manageable on long calls.\n- **Analytics & AI Q&A:** Pull per-speaker talk-time, pace, and sentiment for individual meetings or aggregated across a team over a rolling 30-day window; ask grounded natural-language questions about a meeting with threaded follow-up support.\n- **Soundbites & sharing:** Clip time-ranged soundbites from recordings; share or revoke teammate access to meeting notes and recordings.\n- **Account & organization utilities:** List channels, contacts, and soundbites; inspect caller identity and usage quota.\n\n## Secrets\n\n`FIREFLIES_API_KEY` — A Fireflies API key that authenticates all requests to the Fireflies GraphQL API. To obtain one, log in to your Fireflies account, go to **Integrations → API Key** (or navigate directly to [https://app.fireflies.ai/integrations/custom/fireflies](https://app.fireflies.ai/integrations/custom/fireflies)), and generate or copy your personal API key. The key is tied to your Fireflies account identity — `WhoAmI` and all meeting-management operations (sharing, revoking, uploading) act as that user. A paid or trial Fireflies plan may be required to access API features; check your plan's API entitlements in the Fireflies dashboard.\n\nFor guidance on storing secrets in Arcade, see the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-21T22:04:10.850Z",
+  "summary": "## Fireflies Toolkit\n\nArcade toolkit for interacting with [Fireflies](https://fireflies.ai), enabling programmatic access to meeting recordings, transcripts, AI-generated notes, analytics, and team collaboration features.\n\n## Capabilities\n\n- **Meeting discovery & access control** — search meetings by title, participants, date, or spoken content; list organizing channels; share or revoke teammate access to recordings.\n- **Transcripts & AI notes** — retrieve verbatim transcripts with speaker attribution and time windowing; pull AI-generated summaries, action items, keywords, and outlines without reading raw lines.\n- **Analytics** — per-speaker talk-time, speaking pace, and sentiment for individual meetings; aggregate team-level conversation metrics across date ranges up to 30 days.\n- **Live capture & upload** — dispatch the Fireflies notetaker bot into a live meeting or queue an existing audio/video file for async transcription.\n- **Soundbites** — clip time-range segments from recordings, retrieve individual clips, and list soundbites scoped by owner, team, or meeting.\n- **Contacts, identity & Q&A** — list people met with; resolve the caller's own identity and usage; ask AskFred questions about a specific meeting with threaded follow-up support.\n\n## Secrets\n\n`FIREFLIES_API_KEY` — A personal API key issued by Fireflies. To obtain one, log in to your Fireflies account, navigate to **Integrations → API Key** (or visit [app.fireflies.ai/login](https://app.fireflies.ai/login) then go to your profile settings), and generate or copy your API key. No special account tier is documented as required, but access to analytics and AI features depends on your Fireflies subscription plan. Treat this key as a credential — it authenticates all requests on behalf of your Fireflies user account.\n\nFor configuring secrets in Arcade, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }
