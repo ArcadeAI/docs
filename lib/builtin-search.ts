@@ -6,8 +6,8 @@ import { loadAllToolkitData } from "./toolkit-data";
 import { getToolkitCanonicalPath } from "./toolkit-static-params";
 
 /**
- * Experimental: Fumadocs' built-in search (ZBSearch), set up so it can be
- * compared against Algolia on /en/search-compare.
+ * Docs search: Fumadocs' built-in search (ZBSearch), served at /api/search and
+ * used by the search dialog.
  *
  * - "simple" mode returns one result per page and boosts page titles, which
  *   ranks the page named after the query above long pages that mention it.

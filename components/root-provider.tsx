@@ -5,15 +5,12 @@ import type { ReactNode } from "react";
 
 /**
  * Fumadocs root provider with the site defaults: dark theme by default and no
- * theme hotkey. Fumadocs' own search is off; the docs search lives in
- * components/algolia-search.tsx and handles its own shortcut.
+ * theme hotkey. Search uses Fumadocs' built-in dialog (Cmd/Ctrl + K), backed
+ * by the /api/search route in lib/builtin-search.ts.
  */
 export function AppRootProvider({ children }: { children: ReactNode }) {
   return (
-    <RootProvider
-      search={{ enabled: false }}
-      theme={{ defaultTheme: "dark", hotKey: false }}
-    >
+    <RootProvider theme={{ defaultTheme: "dark", hotKey: false }}>
       {children}
     </RootProvider>
   );

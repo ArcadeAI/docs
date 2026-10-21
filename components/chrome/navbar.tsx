@@ -5,10 +5,10 @@ import { cn } from "@arcadeai/design-system/lib/utils";
 import { useSidebar } from "fumadocs-ui/components/sidebar/base";
 import Link from "next/link";
 import { useCallback } from "react";
-import { AlgoliaSearch } from "@/components/algolia-search";
 import { MenuIcon } from "@/components/chrome/icons";
 import { Logo } from "@/components/logo";
 import { NavLinks } from "@/components/nav-links";
+import { SearchButton } from "@/components/search-button";
 import { DISCORD_URL, GITHUB_REPO_URL, LOGO_URL } from "@/lib/layout.shared";
 
 /**
@@ -52,7 +52,7 @@ export function Navbar() {
         </Link>
         <div className="nextra-scrollbar flex gap-4 overflow-x-auto py-1.5 max-md:hidden" />
         <div className="max-md:hidden">
-          <AlgoliaSearch />
+          <SearchButton />
         </div>
         <a
           className="focus-visible:nextra-focus"

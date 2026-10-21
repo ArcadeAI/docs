@@ -133,14 +133,10 @@ statically render the toolkit routes at build time from the committed JSON.
 
 ## Search indexing
 
-Search uses an external Algolia crawler. There is no Pagefind or local search
-index build step in this repository. After deployment, the crawler indexes the
-rendered site. `components/algolia-search.tsx` queries that index with the
-public, read-only values configured through these Vercel environment variables:
-
-- `NEXT_PUBLIC_ALGOLIA_APP_ID`
-- `NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY`
-- `NEXT_PUBLIC_ALGOLIA_INDEX_NAME`
+Search uses Fumadocs' built-in search. `lib/builtin-search.ts` builds the index
+when the `/api/search` route is first called: MDX pages come from the Fumadocs
+source and toolkit pages come from the toolkit JSON. There is no external
+crawler or reindex step, so new pages appear in search as soon as they deploy.
 
 ## Key files
 
