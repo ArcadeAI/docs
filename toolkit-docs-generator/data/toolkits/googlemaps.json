@@ -1,7 +1,7 @@
 {
   "id": "GoogleMaps",
   "label": "Google Maps",
-  "version": "3.3.1",
+  "version": "5.0.1",
   "description": "Arcade.dev LLM tools for getting directions via Google Maps",
   "metadata": {
     "category": "search",
@@ -16,24 +16,24 @@
   "auth": null,
   "tools": [
     {
-      "name": "GetDirectionsBetweenAddresses",
-      "qualifiedName": "GoogleMaps.GetDirectionsBetweenAddresses",
-      "fullyQualifiedName": "GoogleMaps.GetDirectionsBetweenAddresses@3.3.1",
-      "description": "Get directions from Google Maps.",
+      "name": "GetDirections",
+      "qualifiedName": "GoogleMaps.GetDirections",
+      "fullyQualifiedName": "GoogleMaps.GetDirections@5.0.1",
+      "description": "Get directions between two places from Google Maps.",
       "parameters": [
         {
-          "name": "origin_address",
+          "name": "origin",
           "type": "string",
           "required": true,
-          "description": "The origin address. Example: '123 Main St, New York, NY 10001'",
+          "description": "Start the trip at this place: a street address, or a latitude and longitude written as 'LATITUDE,LONGITUDE'.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "destination_address",
+          "name": "destination",
           "type": "string",
           "required": true,
-          "description": "The destination address. Example: '456 Main St, New York, NY 10001'",
+          "description": "End the trip at this place, written the same way as origin: a street address when origin is an address, or 'LATITUDE,LONGITUDE' when origin is coordinates.",
           "enum": null,
           "inferrable": true
         },
@@ -49,7 +49,7 @@
           "name": "country",
           "type": "string",
           "required": false,
-          "description": "2-character country code to use in the Google Maps search. Defaults to 'None'.",
+          "description": "2-character country code to use in the Google Maps search. Defaults to no country, which leaves the region to Google Maps.",
           "enum": null,
           "inferrable": true
         },
@@ -97,14 +97,14 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "GoogleMaps.GetDirectionsBetweenAddresses",
+        "toolName": "GoogleMaps.GetDirections",
         "parameters": {
-          "origin_address": {
+          "origin": {
             "value": "1600 Amphitheatre Parkway, Mountain View, CA 94043",
             "type": "string",
             "required": true
           },
-          "destination_address": {
+          "destination": {
             "value": "1 Infinite Loop, Cupertino, CA 95014",
             "type": "string",
             "required": true
@@ -115,174 +115,12 @@
             "required": false
           },
           "country": {
-            "value": "US",
+            "value": "us",
             "type": "string",
             "required": false
           },
           "distance_unit": {
-            "value": "GoogleMapsDistanceUnit.MI",
-            "type": "string",
-            "required": false
-          },
-          "travel_mode": {
-            "value": "GoogleMapsTravelMode.DRIVING",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "geospatial"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetDirectionsBetweenCoordinates",
-      "qualifiedName": "GoogleMaps.GetDirectionsBetweenCoordinates",
-      "fullyQualifiedName": "GoogleMaps.GetDirectionsBetweenCoordinates@3.3.1",
-      "description": "Get directions from Google Maps.",
-      "parameters": [
-        {
-          "name": "origin_latitude",
-          "type": "string",
-          "required": true,
-          "description": "The origin latitude. E.g. '40.7128'",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "origin_longitude",
-          "type": "string",
-          "required": true,
-          "description": "The origin longitude. E.g. '-74.0060'",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "destination_latitude",
-          "type": "string",
-          "required": true,
-          "description": "The destination latitude. E.g. '40.7128'",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "destination_longitude",
-          "type": "string",
-          "required": true,
-          "description": "The destination longitude. E.g. '-74.0060'",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "language",
-          "type": "string",
-          "required": false,
-          "description": "2-letter language code to use in the Google Maps search. Defaults to 'en'.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "country",
-          "type": "string",
-          "required": false,
-          "description": "2-letter country code to use in the Google Maps search. Defaults to 'None'.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "distance_unit",
-          "type": "string",
-          "required": false,
-          "description": "Distance unit to use in the Google Maps search. Defaults to 'GoogleMapsDistanceUnit.KM'.",
-          "enum": [
-            "km",
-            "mi"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "travel_mode",
-          "type": "string",
-          "required": false,
-          "description": "Travel mode to use in the Google Maps search. Defaults to 'GoogleMapsTravelMode.BEST'.",
-          "enum": [
-            "best",
-            "driving",
-            "motorcycle",
-            "public_transportation",
-            "walking",
-            "bicycle",
-            "flight"
-          ],
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "SERP_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "SERP_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "The directions from Google Maps"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "GoogleMaps.GetDirectionsBetweenCoordinates",
-        "parameters": {
-          "origin_latitude": {
-            "value": "40.7128",
-            "type": "string",
-            "required": true
-          },
-          "origin_longitude": {
-            "value": "-74.0060",
-            "type": "string",
-            "required": true
-          },
-          "destination_latitude": {
-            "value": "34.0522",
-            "type": "string",
-            "required": true
-          },
-          "destination_longitude": {
-            "value": "-118.2437",
-            "type": "string",
-            "required": true
-          },
-          "language": {
-            "value": "en",
-            "type": "string",
-            "required": false
-          },
-          "country": {
-            "value": "US",
-            "type": "string",
-            "required": false
-          },
-          "distance_unit": {
-            "value": "GoogleMapsDistanceUnit.MI",
+            "value": "GoogleMapsDistanceUnit.KM",
             "type": "string",
             "required": false
           },
@@ -333,6 +171,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "0f6bc60003fed5bc20cc736d998e8a8ebe8d7c231aaca1c87b167fcff266d70d",
-  "generatedAt": "2026-10-07T21:25:21.917Z",
-  "summary": "Arcade.dev provides a toolkit for integrating Google Maps functionalities, enabling developers to obtain directions seamlessly. This toolkit simplifies the process of accessing vital navigation data through an easy-to-use API.\n\n**Capabilities**  \n- Retrieve directions between addresses or coordinates  \n- Access detailed route information including estimated travel time and distance  \n- Integrate with existing applications to enhance location-based services  \n\n**OAuth**  \n- This toolkit does not require OAuth authorization; however, it uses an API key for access.\n\n**Secrets**  \n- **Secret Type:** API Key  \n  **Example:** `SERP_API_KEY`  \n  `SERP_API_KEY` is an API key issued by [SerpApi](https://serpapi.com/). To obtain it, create an account at SerpApi, then retrieve your private API key from the [SerpApi dashboard](https://serpapi.com/manage-api-key). The key grants access to SerpApi's search result endpoints, which this toolkit uses to query Google Maps data. Free and paid tiers are available; the tier you select determines your monthly request quota. Developers must securely store the API key to authenticate their requests. For guidance on configuring secrets in Arcade, see the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets)."
+  "generatedAt": "2026-10-21T22:04:40.359Z",
+  "summary": "Google Maps provides routes and travel directions. This toolkit lets agents get directions between two places through [SerpApi](https://serpapi.com/).\n\n## Capabilities\n\n- **Directions**: get a route between an origin and a destination, each given as a street address or as `LATITUDE,LONGITUDE` coordinates.\n- **Travel modes**: choose driving, walking, bicycle, public transportation, motorcycle, or flight, or let Google pick the best mode.\n- **Localization**: set the language, the country, and the distance unit (kilometers or miles).\n\n## Secrets\n\n- `SERP_API_KEY`: a SerpApi API key. SerpApi runs the Google Maps queries for this toolkit. Create a SerpApi account, then copy your private key from the [SerpApi API key page](https://serpapi.com/manage-api-key). Queries count against your SerpApi plan's monthly quota, and the free plan includes a limited number.\n\nStore the secret in Arcade as described in the [Arcade secrets docs](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets), or manage it in the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
 }
