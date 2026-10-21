@@ -11,7 +11,6 @@
  * prerendered; `toolkitRouteMetadata` builds the per-toolkit metadata (title,
  * description, canonical, and `noindex` for hidden toolkits).
  */
-import { DocsPage } from "fumadocs-ui/layouts/notebook/page";
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { ToolkitPage } from "@/components/toolkit-docs";
@@ -115,22 +114,22 @@ export async function toolkitRouteMetadata(
 }
 
 /**
- * URL the "Copy page" action requests for a toolkit page. Sent with
- * `Accept: text/markdown`, the data route answers with the full page as
- * Markdown (the page itself loads per-tool detail on demand, so its HTML does
- * not contain it).
+ * URL of a toolkit page as Markdown, for "Copy Markdown" and "View as
+ * Markdown". The data route answers with the full page as Markdown (the page
+ * itself loads per-tool detail on demand, so its HTML does not contain it).
  */
 export function toolkitMarkdownUrl(match: ToolkitRouteMatch): string {
-  return `/api/toolkit-data/${encodeURIComponent(match.toolkitId)}`;
+  return `/api/toolkit-data/${encodeURIComponent(match.toolkitId)}?format=markdown`;
 }
 
 /**
- * Renders the full toolkit page (DocsPage chrome included), or null when the
- * toolkit does not exist. `ToolkitPage` is a client component that ships its
- * own "On this page" sidebar and scroll controls, so Fumadocs' table of
- * contents is disabled and the page takes the full content width.
+ * Renders the toolkit page content, or null when the toolkit does not exist.
+ * `ToolkitPage` is a client component that ships its own breadcrumb, "On this
+ * page" panel and scroll controls, so the docs page around it shows neither.
  */
 export async function ToolkitRoutePage(props: {
+  /** Page actions shown in the toolkit's own actions row. */
+  actions?: ReactNode;
   match: ToolkitRouteMatch;
 }): Promise<ReactNode | null> {
   const data = await readToolkitData(props.match.toolkitId);
@@ -140,15 +139,5 @@ export async function ToolkitRoutePage(props: {
 
   // Pass a summary (per-tool detail stripped) so the heavy fields never enter
   // the initial Flight payload — detail is fetched on expand. See MARTECH-17.
-  return (
-    <DocsPage
-      // ToolkitPage renders its own breadcrumb and table of contents.
-      breadcrumb={{ enabled: false }}
-      full
-      tableOfContent={{ enabled: false }}
-      toc={[]}
-    >
-      <ToolkitPage data={toToolkitSummary(data)} />
-    </DocsPage>
-  );
+  return <ToolkitPage actions={props.actions} data={toToolkitSummary(data)} />;
 }

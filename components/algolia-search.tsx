@@ -1,266 +1,224 @@
 "use client";
 
-import { liteClient as algoliasearch } from "algoliasearch/lite";
-import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { type LiteClient, liteClient } from "algoliasearch/lite";
+import type { SortedResult } from "fumadocs-core/search";
+import { type SearchClient, useDocsSearch } from "fumadocs-core/search/client";
 import {
-  Configure,
-  Highlight,
-  Hits,
-  InstantSearch,
-  SearchBox,
-  Snippet,
-  useInstantSearch,
-} from "react-instantsearch";
+  SearchDialog,
+  SearchDialogClose,
+  SearchDialogContent,
+  SearchDialogHeader,
+  SearchDialogIcon,
+  SearchDialogInput,
+  SearchDialogList,
+  SearchDialogListItem,
+  SearchDialogOverlay,
+  type SearchItemType,
+  type SharedProps,
+} from "fumadocs-ui/components/dialog/search";
+import { type ReactNode, useMemo } from "react";
 
-type DocSearchHierarchy = {
-  lvl0: string | null;
-  lvl1: string | null;
-  lvl2: string | null;
-  lvl3: string | null;
-  lvl4: string | null;
-  lvl5: string | null;
-};
+/**
+ * Docs search: Fumadocs' search dialog on top of the Algolia DocSearch index
+ * built by the crawler (algolia/crawler-config.js).
+ *
+ * Results are grouped by page, like Fumadocs' own Algolia client does, but
+ * read from DocSearch records: a short snippet of the matching text, and the
+ * section path of each hit. The text is shown as plain text with the matches
+ * highlighted, so code samples in the index are not rendered as Markdown.
+ */
 
-type DocSearchRecord = {
-  objectID: string;
-  type?: "lvl0" | "lvl1" | "lvl2" | "lvl3" | "lvl4" | "lvl5" | "content";
-  hierarchy: DocSearchHierarchy;
-  content: string | null;
-  url: string;
+type DocSearchLevel = "lvl0" | "lvl1" | "lvl2" | "lvl3" | "lvl4" | "lvl5";
+
+type Highlighted = { value: string };
+
+type DocSearchHit = {
+  _highlightResult?: {
+    hierarchy?: Partial<Record<DocSearchLevel, Highlighted>>;
+  };
+  _snippetResult?: { content?: Highlighted };
   anchor: string | null;
-  // Legacy flat fields from non-docsearch indexes
-  title?: string;
-  description?: string;
+  hierarchy: Partial<Record<DocSearchLevel, string | null>>;
+  objectID: string;
+  type?: DocSearchLevel | "content";
+  url: string;
 };
 
 const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
 const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
-const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME;
+const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME ?? "";
 
-const searchClient =
-  appId && searchKey ? algoliasearch(appId, searchKey) : null;
+/** True when every Algolia env var is present (inlined at build time). */
+export const isSearchConfigured = Boolean(appId && searchKey && indexName);
 
-function safeHref(url: string | undefined): string {
-  if (!url) {
+// Created only when configured: the Algolia client throws without an app ID.
+const algolia = isSearchConfigured
+  ? liteClient(appId ?? "", searchKey ?? "")
+  : null;
+
+const MARK = "mark";
+/** Heading levels below the page title (`lvl0` is the page's H1). */
+const SECTION_LEVELS: DocSearchLevel[] = [
+  "lvl1",
+  "lvl2",
+  "lvl3",
+  "lvl4",
+  "lvl5",
+];
+const MARK_SPLIT = /(<mark>[\s\S]*?<\/mark>)/g;
+const MARK_TAGS = /<\/?mark>/g;
+// Algolia HTML-escapes `& < > " '` in highlighted and snippeted text.
+const ENTITY = /&(?:amp|lt|gt|quot|#39|#x27);/g;
+const ENTITIES: Record<string, string> = {
+  "&#39;": "'",
+  "&#x27;": "'",
+  "&amp;": "&",
+  "&gt;": ">",
+  "&lt;": "<",
+  "&quot;": '"',
+};
+
+/** Same-site path of a DocSearch URL, so results navigate without a reload. */
+function sitePath(url: string): string {
+  try {
+    return new URL(url, "https://docs.arcade.dev").pathname;
+  } catch {
     return "/";
   }
-  if (
-    url.startsWith("https://") ||
-    (url.startsWith("/") && !url.startsWith("//"))
-  ) {
-    return url;
-  }
-  return "/";
 }
 
-function getHitUrl(hit: DocSearchRecord): string {
-  // DocSearch records include full URLs; make them relative for same-site nav
-  try {
-    const parsed = new URL(hit.url);
-    return safeHref(parsed.pathname + parsed.hash);
-  } catch {
-    return safeHref(hit.url);
-  }
-}
-
-function SectionPath({ hit }: { hit: DocSearchRecord }) {
-  if (!hit.hierarchy) {
-    return null;
-  }
-
-  const castHit = hit as unknown as Parameters<typeof Highlight>[0]["hit"];
-  const levelKeys = ["lvl1", "lvl2", "lvl3", "lvl4", "lvl5"] as const;
-  const sectionLevels = levelKeys.filter((key) => hit.hierarchy?.[key]);
-
-  if (sectionLevels.length === 0) {
-    return null;
-  }
-
+function highlighted(hit: DocSearchHit, level: DocSearchLevel): string {
   return (
-    <div className="mt-0.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-      {sectionLevels.map((key, i) => (
-        <span className="flex items-center gap-1" key={key}>
-          {i > 0 && (
-            <span aria-hidden="true" className="text-muted-foreground/50">
-              ›
-            </span>
-          )}
-          <span className="truncate">
-            <Highlight attribute={["hierarchy", key]} hit={castHit} />
-          </span>
-        </span>
-      ))}
-    </div>
+    hit._highlightResult?.hierarchy?.[level]?.value ??
+    hit.hierarchy[level] ??
+    ""
   );
 }
 
-function HitTitle({ hit }: { hit: DocSearchRecord }) {
-  const castHit = hit as unknown as Parameters<typeof Highlight>[0]["hit"];
-
-  // lvl0 is the page title in DocSearch hierarchy
-  if (hit.hierarchy?.lvl0) {
-    return <Highlight attribute={["hierarchy", "lvl0"]} hit={castHit} />;
-  }
-
-  // Fallback for legacy flat records
-  if (hit.title) {
-    return <Highlight attribute="title" hit={castHit} />;
-  }
-
-  return <span>Untitled</span>;
+/** The deepest heading of a heading hit, with its highlight tags. */
+function heading(hit: DocSearchHit): string {
+  const level = [...SECTION_LEVELS].reverse().find((l) => hit.hierarchy[l]);
+  return level ? highlighted(hit, level) : "";
 }
 
-function SearchHit({ hit }: { hit: DocSearchRecord }) {
-  const castHit = hit as unknown as Parameters<typeof Snippet>[0]["hit"];
-  const isContentHit = hit.type === "content";
+/** Section headings above the hit, without the highlight tags. */
+function sectionPath(hit: DocSearchHit): string[] {
+  const path = SECTION_LEVELS.map((level) => hit.hierarchy[level]).filter(
+    (title): title is string => Boolean(title)
+  );
+  // A heading hit is its own row: its path ends at its parent.
+  return hit.type === "content" ? path : path.slice(0, -1);
+}
 
+function toResults(hits: DocSearchHit[]): SortedResult[] {
+  const results: SortedResult[] = [];
+  const pages = new Set<string>();
+  for (const hit of hits) {
+    const page = sitePath(hit.url);
+    if (!pages.has(page)) {
+      pages.add(page);
+      results.push({
+        content: highlighted(hit, "lvl0") || page,
+        id: page,
+        type: "page",
+        url: page,
+      });
+    }
+    if (hit.type === "lvl0") {
+      continue;
+    }
+    const isText = hit.type === "content";
+    results.push({
+      breadcrumbs: sectionPath(hit),
+      content: isText
+        ? (hit._snippetResult?.content?.value ?? "")
+        : heading(hit),
+      id: hit.objectID,
+      type: isText ? "text" : "heading",
+      url: hit.anchor ? `${page}#${hit.anchor}` : page,
+    });
+  }
+  return results;
+}
+
+function docSearchClient(client: LiteClient): SearchClient {
+  return {
+    deps: [client],
+    async search(query) {
+      if (query.trim().length === 0) {
+        return [];
+      }
+      const response = await client.searchForHits<DocSearchHit>({
+        requests: [
+          {
+            attributesToSnippet: ["content:20"],
+            distinct: true,
+            highlightPostTag: `</${MARK}>`,
+            highlightPreTag: `<${MARK}>`,
+            hitsPerPage: 15,
+            indexName,
+            query,
+            snippetEllipsisText: "…",
+          },
+        ],
+      });
+      return toResults(response.results[0]?.hits ?? []);
+    },
+  };
+}
+
+function decodeEntities(text: string): string {
+  return text.replace(ENTITY, (entity) => ENTITIES[entity] ?? entity);
+}
+
+/** Plain text with the `<mark>` spans Algolia added around the matches. */
+function withMarks(text: string): ReactNode {
+  let offset = 0;
+  return text.split(MARK_SPLIT).map((part) => {
+    const start = offset;
+    offset += part.length;
+    return part.startsWith(`<${MARK}>`) ? (
+      <mark key={start}>{decodeEntities(part.replace(MARK_TAGS, ""))}</mark>
+    ) : (
+      decodeEntities(part)
+    );
+  });
+}
+
+function SearchItem(props: { item: SearchItemType; onClick: () => void }) {
+  return <SearchDialogListItem {...props} renderMarkdown={withMarks} />;
+}
+
+function DocSearchDialog({
+  client,
+  ...props
+}: SharedProps & { client: LiteClient }) {
+  const searchClient = useMemo(() => docSearchClient(client), [client]);
+  const { search, setSearch, query } = useDocsSearch({ client: searchClient });
   return (
-    <a
-      className="block rounded-lg px-4 py-3 hover:bg-neutral-100 dark:hover:bg-white/5"
-      href={getHitUrl(hit)}
+    <SearchDialog
+      isLoading={query.isLoading}
+      onSearchChange={setSearch}
+      search={search}
+      {...props}
     >
-      <div className="truncate text-sm font-medium text-foreground">
-        <HitTitle hit={hit} />
-      </div>
-      <SectionPath hit={hit} />
-      {isContentHit && hit.content && (
-        <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
-          <Snippet attribute="content" hit={castHit} />
-        </div>
-      )}
-      {!isContentHit && hit.description && (
-        <div className="mt-0.5 truncate text-xs text-muted-foreground">
-          <Highlight attribute="description" hit={castHit} />
-        </div>
-      )}
-    </a>
+      <SearchDialogOverlay />
+      {/* `data-search-dialog`: the brand highlight in app/global.css. */}
+      <SearchDialogContent data-search-dialog="">
+        <SearchDialogHeader>
+          <SearchDialogIcon />
+          <SearchDialogInput />
+          <SearchDialogClose />
+        </SearchDialogHeader>
+        <SearchDialogList
+          Item={SearchItem}
+          items={query.data === "empty" ? null : query.data}
+        />
+      </SearchDialogContent>
+    </SearchDialog>
   );
 }
 
-function EmptyQuery() {
-  const { indexUiState } = useInstantSearch();
-  if (indexUiState.query) {
-    return null;
-  }
-  return (
-    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-      Start typing to search the docs…
-    </p>
-  );
-}
-
-function NoResults() {
-  const { results } = useInstantSearch();
-  if (!results?.query || results.nbHits > 0) {
-    return null;
-  }
-  return (
-    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-      No results for{" "}
-      <strong className="text-foreground">"{results.query}"</strong>
-    </p>
-  );
-}
-
-function SearchUnavailable() {
-  return (
-    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-      Add <code className="text-xs">NEXT_PUBLIC_ALGOLIA_APP_ID</code>,{" "}
-      <code className="text-xs">NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY</code>, and{" "}
-      <code className="text-xs">NEXT_PUBLIC_ALGOLIA_INDEX_NAME</code> to your
-      environment to enable search.
-    </p>
-  );
-}
-
-export function AlgoliaSearch() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setIsOpen((prev) => !prev);
-      }
-      if (e.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
-
-  return (
-    <>
-      <button
-        aria-label="Search docs"
-        className="algolia-search-button flex w-56 items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-100 px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-neutral-200 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10"
-        onClick={() => setIsOpen(true)}
-        type="button"
-      >
-        <Search className="size-3.5 shrink-0" />
-        <span className="flex-1 text-left">Search</span>
-        <kbd className="flex items-center gap-0.5 rounded border border-border px-1 text-xs text-muted-foreground">
-          <span>⌘</span>K
-        </kbd>
-      </button>
-
-      {isOpen && (
-        <div
-          aria-label="Search"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[10vh]"
-          role="dialog"
-        >
-          <button
-            aria-label="Close search"
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm dark:bg-black/50"
-            onClick={() => setIsOpen(false)}
-            type="button"
-          />
-          <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-popover shadow-2xl">
-            {searchClient && indexName ? (
-              <InstantSearch indexName={indexName} searchClient={searchClient}>
-                <Configure
-                  attributesToSnippet={["content:20"]}
-                  distinct={true}
-                  hitsPerPage={15}
-                  snippetEllipsisText="…"
-                />
-                <div className="flex items-center border-b border-border px-4">
-                  <Search className="size-4 shrink-0 text-muted-foreground" />
-                  <SearchBox
-                    autoFocus
-                    classNames={{
-                      form: "flex flex-1",
-                      input:
-                        "w-full bg-transparent px-3 py-4 text-sm text-foreground placeholder:text-muted-foreground outline-none",
-                      loadingIndicator: "hidden",
-                      reset: "hidden",
-                      root: "flex-1",
-                      submit: "hidden",
-                    }}
-                    placeholder="Search docs…"
-                  />
-                </div>
-                <div className="max-h-[60vh] overflow-y-auto p-2">
-                  <EmptyQuery />
-                  <NoResults />
-                  <Hits
-                    classNames={{ item: "", list: "space-y-0.5", root: "" }}
-                    hitComponent={({ hit }) => (
-                      <SearchHit hit={hit as unknown as DocSearchRecord} />
-                    )}
-                  />
-                </div>
-              </InstantSearch>
-            ) : (
-              <SearchUnavailable />
-            )}
-          </div>
-        </div>
-      )}
-    </>
-  );
+export function AlgoliaSearch(props: SharedProps) {
+  return algolia ? <DocSearchDialog {...props} client={algolia} /> : null;
 }

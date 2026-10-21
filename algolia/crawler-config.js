@@ -40,8 +40,10 @@ export const crawlerConfig = {
       pathsToMatch: ["https://docs.arcade.dev/**"],
       recordExtractor: ({ $, helpers }) => {
         // Strip site chrome so nav/sidebar/toc are not indexed as content.
+        // `[data-search-exclude]` marks the parts of the page around the
+        // content (previous/next links, "Last updated").
         $(
-          "nav, header, footer, aside, .nextra-navbar, .nextra-sidebar, .nextra-toc, .nextra-banner, .nextra-mobile-nav, .nextra-skip-nav"
+          "nav, header, footer, aside, #nd-sidebar, #nd-subnav, #nd-toc, [data-search-exclude], .nextra-navbar, .nextra-sidebar, .nextra-toc, .nextra-banner, .nextra-mobile-nav, .nextra-skip-nav"
         ).remove();
 
         return helpers.docsearch({

@@ -55,50 +55,21 @@
 }
 
 /*
- * Docs chrome (navbar, sidebar, table of contents, page shell, footer band).
- *
- * The chrome components in components/chrome/ are a port of the previous docs
- * theme and keep its measurements: a 64px navbar, 256px sidebar and table of
- * contents columns, and a 90rem content width. The variables and helper
- * classes below are the ones that theme defined.
+ * Docs navbar (Fumadocs' notebook layout). At the end of a page the footer
+ * band pushes the sticky sidebar up; the navbar stays above it and opaque so
+ * the sidebar never shows through.
  */
-:root {
-  --nextra-navbar-height: 64px;
-  --nextra-content-width: 90rem;
-  --nextra-bg: 255, 255, 255;
-
-  /*
-   * Primary scale derived from the design-system --primary token. Light mode:
-   * lower shades fade toward white, higher shades toward black so they stay
-   * readable as text. Dark mode: lower shades fade toward black, higher shades
-   * stay near full primary.
-   */
-  --x-color-primary-50: color-mix(in oklch, var(--primary) 12%, white);
-  --x-color-primary-100: color-mix(in oklch, var(--primary) 22%, white);
-  --x-color-primary-200: color-mix(in oklch, var(--primary) 40%, white);
-  --x-color-primary-300: color-mix(in oklch, var(--primary) 60%, white);
-  --x-color-primary-400: color-mix(in oklch, var(--primary) 80%, white);
-  --x-color-primary-500: var(--primary);
-  --x-color-primary-600: color-mix(in oklch, var(--primary) 70%, black);
-  --x-color-primary-700: color-mix(in oklch, var(--primary) 55%, black);
-  --x-color-primary-800: color-mix(in oklch, var(--primary) 45%, black);
+#nd-subnav {
+  z-index: 30;
+  background-color: var(--color-fd-background);
 }
 
-.dark {
-  --nextra-bg: 10, 10, 10;
-  --x-color-primary-50: color-mix(in oklch, var(--primary) 12%, black);
-  --x-color-primary-100: color-mix(in oklch, var(--primary) 22%, black);
-  --x-color-primary-200: color-mix(in oklch, var(--primary) 35%, black);
-  --x-color-primary-300: color-mix(in oklch, var(--primary) 55%, black);
-  --x-color-primary-400: var(--primary);
-  --x-color-primary-500: var(--primary);
-  --x-color-primary-600: var(--primary);
-  --x-color-primary-700: color-mix(in oklch, var(--primary) 85%, white);
-  --x-color-primary-800: color-mix(in oklch, var(--primary) 70%, white);
-}
-
+/*
+ * Nextra's primary scale as Tailwind colours (`text-primary-600` and the
+ * focus ring), used by the content components in components/mdx. The scale
+ * itself is defined in the content section below.
+ */
 @theme inline {
-  --color-nextra-bg: rgb(var(--nextra-bg));
   --color-primary-50: var(--x-color-primary-50);
   --color-primary-100: var(--x-color-primary-100);
   --color-primary-200: var(--x-color-primary-200);
@@ -108,37 +79,6 @@
   --color-primary-600: var(--x-color-primary-600);
   --color-primary-700: var(--x-color-primary-700);
   --color-primary-800: var(--x-color-primary-800);
-}
-
-@layer base {
-  html {
-    font-feature-settings:
-      "rlig" 1,
-      "calt" 1,
-      "ss01" 1;
-    color: #000;
-    background: rgb(var(--nextra-bg));
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  html.dark {
-    color: #fff;
-  }
-
-  body {
-    color: inherit;
-    background: transparent;
-  }
-}
-
-@utility nextra-focus {
-  @apply ring-2 ring-primary-200 ring-offset-1 ring-offset-primary-300 dark:ring-primary-800;
-
-  &:focus-visible {
-    outline-style: none;
-  }
 }
 
 /* Nextra had no default border colour (Tailwind's `currentColor`); Fumadocs
@@ -157,149 +97,6 @@
 
   input[type="checkbox"] {
     margin-inline-end: 0.25rem;
-  }
-}
-
-.nextra-border {
-  border-color: var(--color-gray-200);
-
-  @media (prefers-contrast: more) {
-    border-color: var(--color-neutral-400) !important;
-  }
-
-  &:where(.dark *) {
-    border-color: var(--color-neutral-800);
-  }
-}
-
-.nextra-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-gutter: stable;
-}
-
-/* Doubled selector: must win over later `.nextra-scrollbar` rules. */
-.no-scrollbar,
-.nextra-scrollbar.no-scrollbar {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
-.nextra-mask {
-  mask-image:
-    linear-gradient(to bottom, transparent, #000 20px, transparent 100%),
-    linear-gradient(to top, transparent, #000 20px, transparent 100%);
-
-  @media (prefers-contrast: more) {
-    mask-image: none;
-  }
-}
-
-.nextra-breadcrumb {
-  margin-bottom: 1.5rem;
-}
-
-/* "Skip to Content" is only visible while it has keyboard focus. */
-.nextra-skip-nav:not(:focus-visible) {
-  @apply sr-only;
-}
-
-.nextra-skip-nav:focus-visible {
-  @apply nextra-focus fixed z-50 mx-4 my-3 rounded-[8px] border border-current bg-nextra-bg px-3 py-2 font-bold text-sm;
-}
-
-.nextra-hamburger svg {
-  --animation: transform 0.15s cubic-bezier(0.25, 1, 0.5, 1);
-
-  g,
-  path {
-    @media (prefers-reduced-motion: reduce) {
-      transition-property: none !important;
-    }
-  }
-
-  g {
-    transform-origin: center;
-    transition: var(--animation);
-  }
-
-  path {
-    opacity: 1;
-    transition:
-      var(--animation) 0.15s,
-      opacity 0.15s ease 0.15s;
-  }
-
-  &.open {
-    path {
-      transition:
-        var(--animation),
-        opacity 0s ease 0.15s;
-    }
-
-    & > path {
-      opacity: 0;
-    }
-
-    g {
-      transition: var(--animation) 0.15s;
-
-      &:nth-of-type(1) {
-        transform: rotate(45deg);
-
-        path {
-          transform: translate3d(0, 6px, 0);
-        }
-      }
-
-      &:nth-of-type(2) {
-        transform: rotate(-45deg);
-
-        path {
-          transform: translate3d(0, -6px, 0);
-        }
-      }
-    }
-  }
-}
-
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-@keyframes fade-in2 {
-  0% {
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Position search next to logo */
-.nextra-navbar nav > a[aria-label="Home page"] {
-  order: -2;
-  margin-inline-end: 3.5rem !important;
-}
-
-.nextra-navbar nav > div:has(.algolia-search-button) {
-  order: -1;
-  margin-inline: 1rem auto;
-}
-
-@media (max-width: 1024px) {
-  .nextra-navbar nav > a[aria-label="Home page"] {
-    margin-inline-end: auto !important;
   }
 }
 
@@ -419,8 +216,6 @@ html.dark[data-page-kind="toolkit"] [data-callout][data-type="idea"] {
 }
 
 /* Algolia search hit highlight — brand color */
-.ais-Highlight-highlighted,
-.ais-Snippet-highlighted,
 [data-search-dialog] mark {
   font-style: normal;
   font-weight: 600;
@@ -429,8 +224,6 @@ html.dark[data-page-kind="toolkit"] [data-callout][data-type="idea"] {
   border-radius: 2px;
 }
 
-.dark .ais-Highlight-highlighted,
-.dark .ais-Snippet-highlighted,
 .dark [data-search-dialog] mark {
   background: color-mix(in oklch, var(--primary) 20%, transparent);
 }
@@ -461,11 +254,19 @@ html.dark[data-page-kind="toolkit"] [data-callout][data-type="idea"] {
 
 /*
  * Anchor scroll offset. Set it unconditionally, with room to breathe, so a
- * heading never lands hidden under the sticky navbar. Headings and sections
- * should not add their own `scroll-mt-*`; it stacks on top of this.
+ * heading never lands hidden under the sticky navbar (3.5rem). Below `xl`,
+ * pages with an "On this page" bar (2.5rem) have it under the navbar too.
+ * Headings and sections should not add their own `scroll-mt-*`; it stacks on
+ * top of this.
  */
 html:root {
-  scroll-padding-top: calc(var(--nextra-navbar-height) + 1.5rem);
+  scroll-padding-top: 5rem;
+
+  @media (width < 80rem) {
+    &:has([data-toc-popover]) {
+      scroll-padding-top: 7.5rem;
+    }
+  }
 }
 
 /*
@@ -529,16 +330,16 @@ html {
  * meant to be drawn in the text colour. Fumadocs' preset changes the default
  * to its own border token, which makes them near-invisible. `.preflight-borders`
  * restores the preflight default for a subtree. MDX content rendered inside
- * `.tk-prose` (callouts, tabs, code blocks) is left alone: those components
- * rely on the Fumadocs default.
+ * `.tk-prose` (callouts, tabs, code blocks) and the Fumadocs page actions
+ * ("Copy Markdown", "Open") are left alone: they rely on the Fumadocs default.
  *
  * The rule is in the components layer so colour utilities still win.
  */
 @layer components {
   .preflight-borders,
-  .preflight-borders *:not(.tk-prose *),
-  .preflight-borders *:not(.tk-prose *)::before,
-  .preflight-borders *:not(.tk-prose *)::after {
+  .preflight-borders *:not(.tk-prose *, [data-toolkit-page-actions] *),
+  .preflight-borders *:not(.tk-prose *, [data-toolkit-page-actions] *)::before,
+  .preflight-borders *:not(.tk-prose *, [data-toolkit-page-actions] *)::after {
     border-color: currentcolor;
   }
 }
@@ -971,34 +772,3 @@ html [data-rmiz-modal-img] {
 }
 
 /* content parity — END */
-
-/*
- * Sidebar rows are flex, with the disclosure icon beside the label. Nextra's
- * word-break: break-word then splits a word when that column is a character
- * short. Reserve room for the icon and wrap ordinary words at spaces.
- */
-.nextra-sidebar :is(a, button)[class*="word-break"],
-.nextra-mobile-nav :is(a, button)[class*="word-break"] {
-  display: block;
-  position: relative;
-  word-break: normal;
-  overflow-wrap: break-word;
-}
-
-.nextra-sidebar :is(a, button)[class*="word-break"]:has(> svg),
-.nextra-mobile-nav :is(a, button)[class*="word-break"]:has(> svg) {
-  padding-inline-end: 1.75rem;
-}
-
-.nextra-sidebar :is(a, button)[class*="word-break"] > svg,
-.nextra-mobile-nav :is(a, button)[class*="word-break"] > svg {
-  position: absolute;
-  inset-inline-end: 0.5rem;
-  top: 0.375rem;
-}
-
-.nextra-sidebar li,
-.nextra-mobile-nav li {
-  word-break: normal;
-  overflow-wrap: break-word;
-}

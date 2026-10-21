@@ -13,6 +13,7 @@
  * component prop types) is app-specific shaping of that data for React
  * props and has no generator equivalent.
  */
+import type { ReactNode } from "react";
 import type { z } from "zod";
 import type {
   DocumentationChunkSchema,
@@ -288,6 +289,8 @@ export type AvailableToolsTableProps = {
  * Props for ToolkitPage component
  */
 export type ToolkitPageProps = {
+  /** Page actions shown before "Edit content in GitHub" ("Copy Markdown"…). */
+  actions?: ReactNode;
   /** Toolkit data with per-tool detail stripped (fetched lazily on expand) */
   data: ToolkitSummary;
 };

@@ -5,7 +5,8 @@ import { toToolkitMarkdown } from "@/lib/toolkit-markdown";
 // Cache headers for toolkit data responses. This route content-negotiates on
 // Accept (JSON vs. text/markdown), so Vary: Accept is required — without it a
 // shared cache/CDN could serve one representation for a request that asked for
-// the other.
+// the other. `?format=markdown` asks for Markdown too, for callers that cannot
+// set headers (the page's "Copy Markdown" and "View as Markdown" links).
 const CACHE_HEADERS = {
   "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
   Vary: "Accept",
@@ -38,7 +39,10 @@ export async function GET(
     // Content-negotiate markdown: the toolkit page renders per-tool detail
     // client-only, so the "copy as markdown" / agent view builds full markdown
     // straight from the data here instead of from the slimmed HTML.
-    if ((request.headers.get("accept") ?? "").includes("text/markdown")) {
+    const wantsMarkdown =
+      (request.headers.get("accept") ?? "").includes("text/markdown") ||
+      new URL(request.url).searchParams.get("format") === "markdown";
+    if (wantsMarkdown) {
       return new NextResponse(toToolkitMarkdown(data), {
         headers: {
           ...CACHE_HEADERS,

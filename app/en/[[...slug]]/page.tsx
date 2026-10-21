@@ -1,11 +1,18 @@
+import {
+  DocsPage,
+  DocsTitle,
+  EditOnGitHub,
+  MarkdownCopyButton,
+  ViewOptionsPopover,
+} from "fumadocs-ui/layouts/notebook/page";
 import type { MDXComponents } from "mdx/types";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Children, cloneElement, isValidElement, type ReactNode } from "react";
-import { DocsPageShell } from "@/components/chrome/page";
-import type { TocEntry } from "@/components/chrome/stores";
+import type { ReactNode } from "react";
+import { PageFooter } from "@/components/page-footer";
 import { pageLastModified, toolkitPageLastModified } from "@/lib/last-modified";
 import { DOCS_REPOSITORY_BASE } from "@/lib/layout.shared";
+import { findNeighbours } from "@/lib/page-neighbours";
 import { smartypants } from "@/lib/remark-smartypants";
 import { source } from "@/lib/source";
 import {
@@ -79,38 +86,54 @@ function inlineCode(
   return nodes;
 }
 
-/**
- * Table-of-contents titles come from the headings as plain elements. Inline
- * code in them is rendered with the content's own `code` component, so an
- * entry shows the same boxed code as the heading it points to.
- */
-function tocTitle(node: ReactNode, Code: MDXComponents["code"]): ReactNode {
-  if (typeof Code !== "function") {
-    return node;
-  }
-  return Children.map(node, (child) => {
-    if (!isValidElement<{ children?: ReactNode }>(child)) {
-      return child;
-    }
-    if (child.type === "code") {
-      return <Code>{child.props.children}</Code>;
-    }
-    // Fragments and other inline wrappers: look inside them.
-    return child.props.children === undefined
-      ? child
-      : cloneElement(child, undefined, tocTitle(child.props.children, Code));
-  });
+/** "Copy Markdown" and the "Open" menu (GitHub, ChatGPT, Claude…). */
+function PageActions({ editUrl, url }: { editUrl?: string; url: string }) {
+  return (
+    <>
+      <MarkdownCopyButton markdownUrl={url} />
+      <ViewOptionsPopover githubUrl={editUrl} markdownUrl={url} />
+    </>
+  );
 }
 
+const DATE_FORMAT = new Intl.DateTimeFormat("en", {
+  day: "numeric",
+  month: "long",
+  // Rendered once at build time, so the date never depends on the reader.
+  timeZone: "UTC",
+  year: "numeric",
+});
+
 /**
- * Children of the element returned by `ToolkitRoutePage`. Its own page
- * wrapper is replaced by the docs shell.
+ * "Edit on GitHub" and the date of the last change, under the page. Skipped
+ * by the search crawler, like the previous/next links.
  */
-function innerChildren(node: ReactNode): ReactNode {
-  if (isValidElement<{ children?: ReactNode }>(node)) {
-    return node.props.children;
+function PageMeta({
+  editUrl,
+  lastModified,
+}: {
+  editUrl?: string;
+  lastModified: string | null;
+}) {
+  if (!(editUrl || lastModified)) {
+    return null;
   }
-  return node;
+  return (
+    <div
+      className="flex flex-row flex-wrap items-center justify-between gap-4"
+      data-search-exclude=""
+    >
+      {editUrl ? <EditOnGitHub href={editUrl} /> : null}
+      {lastModified ? (
+        <p className="text-fd-muted-foreground text-sm">
+          Last updated on{" "}
+          <time dateTime={lastModified}>
+            {DATE_FORMAT.format(new Date(lastModified))}
+          </time>
+        </p>
+      ) : null}
+    </div>
+  );
 }
 
 // Every route is known at build time (MDX pages + generated toolkit pages);
@@ -124,20 +147,32 @@ export default async function Page(props: Props) {
   if (!page) {
     const match = matchToolkitRoute(params.slug);
     if (match) {
-      const toolkitPage = await ToolkitRoutePage({ match });
+      const toolkitPage = await ToolkitRoutePage({
+        actions: <PageActions url={toolkitMarkdownUrl(match)} />,
+        match,
+      });
       if (toolkitPage) {
-        // Toolkit pages list their tools in their own panel: the shell keeps
-        // the table of contents column but has no headings to show in it.
-        // The sidebar breadcrumb stays above the toolkit's own breadcrumb, as
-        // on production.
+        // Toolkit pages show their own breadcrumb and list their tools in a
+        // fixed 20rem panel on the right (components/toolkit-docs), so the
+        // page has no breadcrumb or table of contents and leaves room for it.
         return (
-          <DocsPageShell
-            breadcrumb
-            lastModified={toolkitPageLastModified()}
-            markdownUrl={toolkitMarkdownUrl(match)}
+          <DocsPage
+            breadcrumb={{ enabled: false }}
+            className="xl:pe-80"
+            footer={{
+              items: findNeighbours(
+                source.getPageTree(),
+                `/en/${(params.slug ?? []).join("/")}`
+              ),
+            }}
+            slots={{ footer: PageFooter }}
+            tableOfContent={{ enabled: false }}
+            tableOfContentPopover={{ enabled: false }}
+            toc={[]}
           >
-            {innerChildren(toolkitPage)}
-          </DocsPageShell>
+            {toolkitPage}
+            <PageMeta lastModified={toolkitPageLastModified()} />
+          </DocsPage>
         );
       }
     }
@@ -146,56 +181,43 @@ export default async function Page(props: Props) {
 
   const { body: MDX, full, breadcrumb, landing, title } = page.data;
   const components = getMDXComponents();
-  const Wrapper = components.wrapper;
-  const Heading = components.h1;
-  // A `toc: false` frontmatter value replaces the generated heading list.
-  const headings: unknown = page.data.toc;
-  const showToc = headings !== false && !landing;
-  const showTitle =
-    !(landing || PAGES_WITHOUT_TITLE.has(page.slugs.join("/"))) &&
-    typeof Heading === "function";
-
-  const tocItems: TocEntry[] = Array.isArray(headings)
-    ? (headings as typeof page.data.toc).map((item) => ({
-        depth: item.depth,
-        id: item.url.slice(1),
-        title: tocTitle(item.title, components.code),
-      }))
-    : [];
-
-  // The page title is the first element of the content, so the spacing rules
-  // between it and what follows are the content's own.
-  const content = (children: ReactNode) => (
-    <>
-      {showTitle ? (
-        <Heading>{inlineCode(title, components.code)}</Heading>
-      ) : null}
-      {children}
-    </>
-  );
+  // A `toc: false` frontmatter value hides the table of contents.
+  const showToc = page.data.toc !== false && !landing;
+  const showTitle = !(landing || PAGES_WITHOUT_TITLE.has(page.slugs.join("/")));
+  const editUrl = githubEditUrl(page.path);
 
   return (
-    <DocsPageShell
-      breadcrumb={breadcrumb !== false && !landing}
-      editUrl={githubEditUrl(page.path)}
-      lastModified={pageLastModified(page.path, lastModifiedDate(page.data))}
-      layout={full || landing ? "full" : "default"}
-      markdownUrl={showToc ? markdownUrl(params.slug) : undefined}
-      toc={showToc}
-      tocItems={tocItems}
+    <DocsPage
+      breadcrumb={{ enabled: breadcrumb !== false && !landing }}
+      footer={{
+        enabled: !landing,
+        items: findNeighbours(source.getPageTree(), page.url),
+      }}
+      full={Boolean(full || landing)}
+      slots={{ footer: PageFooter }}
+      tableOfContent={{ enabled: showToc }}
+      tableOfContentPopover={{ enabled: showToc }}
+      toc={Array.isArray(page.data.toc) ? page.data.toc : []}
     >
-      <MDX
-        components={{
-          ...components,
-          wrapper: ({ children }: { children?: ReactNode }) =>
-            typeof Wrapper === "function" ? (
-              <Wrapper>{content(children)}</Wrapper>
-            ) : (
-              content(children)
-            ),
-        }}
-      />
-    </DocsPageShell>
+      {showTitle ? (
+        <DocsTitle>{inlineCode(title, components.code)}</DocsTitle>
+      ) : null}
+      {showToc ? (
+        <div className="flex flex-row flex-wrap items-center gap-2 border-fd-border border-b pb-6">
+          <PageActions editUrl={editUrl} url={markdownUrl(params.slug)} />
+        </div>
+      ) : null}
+      <MDX components={components} />
+      {landing ? null : (
+        <PageMeta
+          editUrl={editUrl}
+          lastModified={pageLastModified(
+            page.path,
+            lastModifiedDate(page.data)
+          )}
+        />
+      )}
+    </DocsPage>
   );
 }
 

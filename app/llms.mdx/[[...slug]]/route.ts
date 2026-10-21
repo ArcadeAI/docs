@@ -10,7 +10,7 @@ const GLOSSARY_TERM_REGEX = /<GlossaryTerm\b[^>]*>([\s\S]*?)<\/GlossaryTerm>/g;
 /**
  * Serves a docs page as processed Markdown (`/llms.mdx/<slug>`), used by the
  * "Copy page" / "Open in ..." actions and by agents. Toolkit pages are served
- * by `/api/toolkit-data/<id>` with `Accept: text/markdown` instead.
+ * by `/api/toolkit-data/<id>?format=markdown` instead.
  */
 export async function GET(
   _req: NextRequest,

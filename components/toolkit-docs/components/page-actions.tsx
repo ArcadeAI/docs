@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
+import type { ReactNode } from "react";
 
 const GITHUB_JSON_BASE_URL =
   "https://github.com/ArcadeAI/docs/blob/main/toolkit-docs-generator/data/toolkits";
@@ -32,15 +33,18 @@ export function EditJsonOnGithub({ toolkitId }: EditJsonOnGithubProps) {
 }
 
 type PageActionsBarProps = {
+  /** The docs page actions ("Copy Markdown", "Open"), shown first. */
+  children?: ReactNode;
   toolkitId: string;
 };
 
-export function PageActionsBar({ toolkitId }: PageActionsBarProps) {
+export function PageActionsBar({ children, toolkitId }: PageActionsBarProps) {
   return (
     <div
       className="mb-4 flex flex-wrap items-center justify-end gap-4"
       data-toolkit-page-actions
     >
+      {children}
       <EditJsonOnGithub toolkitId={toolkitId} />
     </div>
   );
