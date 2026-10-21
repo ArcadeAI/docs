@@ -210,7 +210,11 @@ export function SearchCompare() {
           }
         });
       searchBuiltin(query, controller.signal)
-        .then(setBuiltin)
+        .then((outcome) => {
+          if (!controller.signal.aborted) {
+            setBuiltin(outcome);
+          }
+        })
         .catch((error: unknown) => {
           if (!controller.signal.aborted) {
             setBuiltin({ results: [], ms: 0, error: String(error) });
