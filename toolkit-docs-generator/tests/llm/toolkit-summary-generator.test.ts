@@ -51,19 +51,42 @@ const createToolkit = (
 });
 
 describe("LlmToolkitSummaryGenerator", () => {
-  it("parses summary from a JSON response", async () => {
+  const generateFrom = (response: string): Promise<string> => {
     const client: LlmClient = {
-      provider: "openai",
-      generateText: async () => '```json\n{"summary":"Concise summary."}\n```',
+      provider: "anthropic",
+      generateText: async () => response,
     };
     const generator = new LlmToolkitSummaryGenerator({
       client,
       model: "test-model",
     });
+    return generator.generate(createToolkit());
+  };
 
-    const summary = await generator.generate(createToolkit());
+  it("uses a bare Markdown response as the summary", async () => {
+    const markdown =
+      "GitHub lets agents manage issues.\n\n**Capabilities**\n- Create issues";
 
-    expect(summary).toBe("Concise summary.");
+    expect(await generateFrom(`\n${markdown}\n`)).toBe(markdown);
+  });
+
+  it("strips a code fence that wraps the whole response", async () => {
+    expect(await generateFrom("```markdown\nConcise summary.\n```")).toBe(
+      "Concise summary."
+    );
+  });
+
+  it("keeps code blocks inside the summary", async () => {
+    const markdown =
+      "GitHub lets agents manage issues.\n\n```bash\nexport GITHUB_API_KEY=...\n```\n\nSee the docs.";
+
+    expect(await generateFrom(markdown)).toBe(markdown);
+  });
+
+  it("rejects an empty response", async () => {
+    await expect(generateFrom("```\n\n```")).rejects.toThrow(
+      "LLM response missing summary"
+    );
   });
 
   it("includes tool descriptions and auth info in the prompt", async () => {
@@ -72,7 +95,7 @@ describe("LlmToolkitSummaryGenerator", () => {
       provider: "openai",
       generateText: async ({ prompt }) => {
         capturedPrompt = prompt;
-        return '{"summary":"OK"}';
+        return "OK";
       },
     };
     const generator = new LlmToolkitSummaryGenerator({
@@ -95,7 +118,7 @@ describe("LlmToolkitSummaryGenerator", () => {
       provider: "openai",
       generateText: async ({ prompt }) => {
         capturedPrompt = prompt;
-        return '{"summary":"OK"}';
+        return "OK";
       },
     };
     const generator = new LlmToolkitSummaryGenerator({
