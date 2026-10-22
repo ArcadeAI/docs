@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftWord",
   "label": "Microsoft Word",
-  "version": "1.0.2",
+  "version": "2.0.2",
   "description": "Arcade.dev LLM tools for Microsoft Word",
   "metadata": {
     "category": "productivity",
@@ -24,9 +24,95 @@
   },
   "tools": [
     {
+      "name": "AddTextToDocument",
+      "qualifiedName": "MicrosoftWord.AddTextToDocument",
+      "fullyQualifiedName": "MicrosoftWord.AddTextToDocument@2.0.2",
+      "description": "Append text to the end of a Word document (supports only `.docx`, 4MB limit).",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Word document to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": true,
+          "description": "The text content to append to the document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Drive ID for shared items. Defaults to the user's default drive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated Word document metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftWord.AddTextToDocument",
+        "parameters": {
+          "item_id": {
+            "value": "01BYE5RZ6QN3ZWBTUFOFD3GSPGOHDJD36K",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "This is the additional text that will be appended to the end of the Word document.",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "b!dGVzdERyaXZlSWQxMjM0NTY3ODkwQUJDREVG",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "CreateDocument",
       "qualifiedName": "MicrosoftWord.CreateDocument",
-      "fullyQualifiedName": "MicrosoftWord.CreateDocument@1.0.2",
+      "fullyQualifiedName": "MicrosoftWord.CreateDocument@2.0.2",
       "description": "Create a new Word document in OneDrive (4MB upload limit).\n\nOptionally include text content.",
       "parameters": [
         {
@@ -41,7 +127,7 @@
           "name": "text_content",
           "type": "string",
           "required": false,
-          "description": "Optional text content to include in the new document. If omitted, an empty document is created.",
+          "description": "Text content to include in the new document. Defaults to an empty document.",
           "enum": null,
           "inferrable": true
         },
@@ -49,7 +135,7 @@
           "name": "folder_id",
           "type": "string",
           "required": false,
-          "description": "Optional parent folder ID. If omitted, the document is created in the root.",
+          "description": "Parent folder ID. Defaults to the root of the user's OneDrive.",
           "enum": null,
           "inferrable": true
         },
@@ -57,7 +143,7 @@
           "name": "conflict_behavior",
           "type": "string",
           "required": false,
-          "description": "Optional conflict behavior when a file with the same name exists. One of: fail, rename, replace.",
+          "description": "Conflict behavior when a file with the same name exists. One of: fail, rename, replace. Defaults to replacing the existing file.",
           "enum": null,
           "inferrable": true
         }
@@ -125,7 +211,7 @@
     {
       "name": "GetDocument",
       "qualifiedName": "MicrosoftWord.GetDocument",
-      "fullyQualifiedName": "MicrosoftWord.GetDocument@1.0.2",
+      "fullyQualifiedName": "MicrosoftWord.GetDocument@2.0.2",
       "description": "Get a Word document's metadata and content (`.docx` only).\n\nReturns the document content as Markdown by default.\nReturns only metadata when metadata_only is True.",
       "parameters": [
         {
@@ -140,7 +226,7 @@
           "name": "drive_id",
           "type": "string",
           "required": false,
-          "description": "Optional drive ID for shared items. If omitted, uses the user's default drive.",
+          "description": "Drive ID for shared items. Defaults to the user's default drive.",
           "enum": null,
           "inferrable": true
         },
@@ -209,95 +295,9 @@
       }
     },
     {
-      "name": "InsertTextAtEnd",
-      "qualifiedName": "MicrosoftWord.InsertTextAtEnd",
-      "fullyQualifiedName": "MicrosoftWord.InsertTextAtEnd@1.0.2",
-      "description": "Append text to the end of a Word document (supports only `.docx`, 4MB limit).",
-      "parameters": [
-        {
-          "name": "item_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the Word document to update.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "text_content",
-          "type": "string",
-          "required": true,
-          "description": "The text content to append to the document.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "drive_id",
-          "type": "string",
-          "required": false,
-          "description": "Optional drive ID for shared items. If omitted, uses the user's default drive.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "microsoft",
-        "providerType": "oauth2",
-        "scopes": [
-          "Files.ReadWrite"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The updated Word document metadata."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "MicrosoftWord.InsertTextAtEnd",
-        "parameters": {
-          "item_id": {
-            "value": "1a2b3c4d-5e6f-7g8h-9i0j-abcdef012345",
-            "type": "string",
-            "required": true
-          },
-          "text_content": {
-            "value": "Append this text to the document.\n\n- Added by automation on 2026-02-21\n- Please review and approve.",
-            "type": "string",
-            "required": true
-          },
-          "drive_id": {
-            "value": "b!A0B1C2D3E4F5G6H7I8J9K",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "microsoft",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "documents"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftWord.WhoAmI",
-      "fullyQualifiedName": "MicrosoftWord.WhoAmI@1.0.2",
+      "fullyQualifiedName": "MicrosoftWord.WhoAmI@2.0.2",
       "description": "Get information about the current user and their Microsoft Word environment.",
       "parameters": [],
       "auth": {
@@ -351,6 +351,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "44af96f542d0824138491334d94af59c3accc71532a9ccbfd642b763a4346acd",
-  "generatedAt": "2026-10-07T21:25:45.898Z",
-  "summary": "Arcade's Microsoft Word toolkit lets developers create, read, and update Word documents stored in OneDrive through Microsoft Graph.\n\n**Capabilities**\n- Create `.docx` documents with optional initial text, automatic `.docx` extension handling, folder targeting, and configurable filename conflict behavior: fail, rename, or replace.\n- Retrieve Word document metadata and Markdown content, or request metadata only.\n- Append text to existing `.docx` documents within the 4 MB upload limit.\n- Fetch authenticated user profile and Microsoft Word environment information.\n\n**OAuth**\n- **Provider**: Microsoft\n- **Scopes**: Files.Read, Files.ReadWrite, User.Read\n\n**Secrets**\n- No secret types required for toolkit operation."
+  "generatedAt": "2026-10-21T22:05:18.454Z",
+  "summary": "## Microsoft Word Toolkit\n\nThe Microsoft Word toolkit connects Arcade to a user's OneDrive-hosted Word documents, enabling LLMs to create, read, and edit `.docx` files programmatically.\n\n## Capabilities\n\n- **Document creation & upload**: Create new `.docx` files in OneDrive with optional initial text content (4 MB upload limit).\n- **Document reading**: Retrieve document metadata and/or full content; content is returned as Markdown by default for easy downstream processing.\n- **Document editing**: Append text to the end of existing `.docx` files (4 MB limit; `.docx` format only).\n- **User/environment inspection**: Fetch information about the authenticated user and their Microsoft Word environment.\n\n## OAuth\n\nThis toolkit uses **OAuth 2.0** via the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup instructions, required scopes, and configuration details."
 }

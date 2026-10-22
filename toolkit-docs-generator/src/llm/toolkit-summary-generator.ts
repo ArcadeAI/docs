@@ -17,7 +17,7 @@ export interface LlmToolkitSummaryGeneratorConfig {
 }
 
 const defaultSystemPrompt =
-  "Return only valid JSON. No markdown, no extra text.";
+  "Return only the summary Markdown. No preamble, no closing remarks, and no code fence around the whole response.";
 
 const formatToolLines = (tools: MergedTool[]): string => {
   if (tools.length === 0) {
@@ -83,7 +83,7 @@ const buildPrompt = (toolkit: MergedToolkit): string => {
 
   return [
     "Write a summary for Arcade toolkit docs.",
-    'Return JSON: {"summary": "<markdown>"}',
+    "Return the summary as Markdown. The whole response is used as the summary verbatim.",
     "",
     "Goals: compact but complete. No fixed word limit — use as many words as needed to cover every current capability and every current secret, and no more. Prefer scannable structure over prose padding.",
     "",
@@ -107,23 +107,14 @@ const buildPrompt = (toolkit: MergedToolkit): string => {
   ].join("\n");
 };
 
-const extractJson = (text: string): string => {
-  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fenced?.[1]) {
-    return fenced[1].trim();
-  }
-  return text.trim();
-};
+// Matches only a fence that wraps the entire response, so code blocks inside
+// the summary survive.
+const WRAPPING_FENCE = /^```(?:markdown|md)?[ \t]*\n([\s\S]*?)\n```$/;
 
-const parseJsonObject = (text: string): Record<string, unknown> => {
-  const jsonText = extractJson(text);
-  const parsed = JSON.parse(jsonText) as unknown;
-
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw new Error("LLM response is not a JSON object");
-  }
-
-  return parsed as Record<string, unknown>;
+const unwrapMarkdown = (text: string): string => {
+  const trimmed = text.trim();
+  const fenced = trimmed.match(WRAPPING_FENCE);
+  return (fenced?.[1] ?? trimmed).trim();
 };
 
 export class LlmToolkitSummaryGenerator implements ToolkitSummaryGenerator {
@@ -153,13 +144,12 @@ export class LlmToolkitSummaryGenerator implements ToolkitSummaryGenerator {
       ...(this.maxTokens !== undefined ? { maxTokens: this.maxTokens } : {}),
     });
 
-    const payload = parseJsonObject(response);
-    const summary = payload.summary;
+    const summary = unwrapMarkdown(response);
 
-    if (typeof summary !== "string" || summary.trim().length === 0) {
+    if (summary.length === 0) {
       throw new Error("LLM response missing summary");
     }
 
-    return summary.trim();
+    return summary;
   }
 }

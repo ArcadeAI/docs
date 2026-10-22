@@ -1,7 +1,7 @@
 {
   "id": "X",
   "label": "X",
-  "version": "2.0.2",
+  "version": "3.0.1",
   "description": "Arcade.dev LLM tools for X (Twitter).",
   "metadata": {
     "category": "social",
@@ -29,9 +29,9 @@
   },
   "tools": [
     {
-      "name": "AddListMember",
-      "qualifiedName": "X.AddListMember",
-      "fullyQualifiedName": "X.AddListMember@2.0.2",
+      "name": "AddMembersToList",
+      "qualifiedName": "X.AddMembersToList",
+      "fullyQualifiedName": "X.AddMembersToList@3.0.1",
       "description": "Add one or more users to an X List owned by the authenticated user.\n\nProvide ``user_ids``, ``usernames``, or both. Adding a user who is already\na member is treated as success.\n\nOn a mid-loop rate-limit, the run short-circuits and remaining targets\nare marked as not attempted. On retry, drop the targets that already\nsucceeded; otherwise polling re-arms X's bucket and extends the lockout.\n\nX is eventually consistent on list membership: a success status here\ndoes not mean a subsequent read of the list's members will immediately\nreturn the new member. Allow a few seconds before relying on the read\nendpoint to reflect the mutation.\n\nSerialize dependent list mutations: do not add members in parallel with\ndeleting the list, removing its members, or updating it against the\nsame ``list_id``. Concurrent dependent mutations race and surface\nspurious ``not_found`` errors when the member call lands after the list\nis gone. Await each mutation before issuing the next one on the same\nlist.",
       "parameters": [
         {
@@ -47,7 +47,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Numeric X user ids (snowflake ids, 1-19 digits) of the members to add. Up to 100 targets per call (combined with ``usernames``). Prefer this over ``usernames`` when you already have stable ids — the toolkit skips the username-resolution hop, which is rate-limited by X. Defaults to None.",
+          "description": "Numeric X user ids (snowflake ids, 1-19 digits) of the members to add. Up to 100 targets per call (combined with ``usernames``). Prefer this over ``usernames`` when you already have stable ids — the toolkit skips the username-resolution hop, which is rate-limited by X. Defaults to no ids.",
           "enum": null,
           "inferrable": true
         },
@@ -56,7 +56,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Handles of the members to add. Leading '@' is optional and stripped automatically. Up to 100 targets per call (combined with ``user_ids``). Handles are resolved to ids in batched ``/2/users/by`` calls (one round-trip per 100 handles) instead of one resolve-per-target. Defaults to None.",
+          "description": "Handles of the members to add. Leading '@' is optional and stripped automatically. Up to 100 targets per call (combined with ``user_ids``). Handles are resolved to ids in batched ``/2/users/by`` calls (one round-trip per 100 handles) instead of one resolve-per-target. Defaults to no handles.",
           "enum": null,
           "inferrable": true
         }
@@ -79,10 +79,10 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.AddListMember",
+        "toolName": "X.AddMembersToList",
         "parameters": {
           "list_id": {
-            "value": "1674392847561023489",
+            "value": "1674392803847561216",
             "type": "string",
             "required": true
           },
@@ -90,7 +90,7 @@
             "value": [
               "783214",
               "6253282",
-              "17919972"
+              "17874544"
             ],
             "type": "array",
             "required": false
@@ -98,7 +98,7 @@
           "usernames": {
             "value": [
               "elonmusk",
-              "@jack",
+              "jack",
               "TwitterDev"
             ],
             "type": "array",
@@ -130,7 +130,7 @@
     {
       "name": "CreateList",
       "qualifiedName": "X.CreateList",
-      "fullyQualifiedName": "X.CreateList@2.0.2",
+      "fullyQualifiedName": "X.CreateList@3.0.1",
       "description": "Create a new X List owned by the authenticated user.",
       "parameters": [
         {
@@ -217,9 +217,295 @@
       }
     },
     {
+      "name": "CreateThread",
+      "qualifiedName": "X.CreateThread",
+      "fullyQualifiedName": "X.CreateThread@3.0.1",
+      "description": "Post a multi-tweet thread as the authenticated user.\n\nPosts the first tweet, then chains every subsequent entry as a reply to\nthe prior tweet's id. ``tweets`` must contain 2-25 entries when posting a\nnew thread, or 1-25 entries when resuming an existing thread via\n``parent_tweet_id`` (the 1-entry case lets a caller append one more reply\nto the tail of a prior thread).\n``poll_options`` / ``poll_duration_minutes`` / ``quote_tweet_id`` /\n``reply_settings`` apply to the head tweet only.\n\nPre-flight validation runs on every entry before any post is created. If\nany entry fails validation, the call posts nothing.\n\nOn a mid-thread interruption, ``posted`` carries the rows that landed\nand ``next_position`` is the 1-based index of the first non-posted\nentry (0 when every entry posted). Resume the chain with::\n\n    tweets = (tweets[next_position - 1 :],)\n    parent_tweet_id = posted[-1][\"tweet_id\"]  # from the prior call\n\nWithout ``parent_tweet_id``, a resume call would re-create a fresh head\ntweet and silently split the thread into two disconnected chains.\n\nX also rejects mid-thread entries with ``status='invalid_input'`` when\nthe text passes local validation but contains codepoints that X counts\nas multiple weighted characters (emoji, many CJK glyphs) pushing the\nweighted total above 280, or when the text contains control characters\nX disallows. Simplify the entry at ``tweets[next_position - 1]`` (plain\nASCII is the safest reset) and resume.",
+      "parameters": [
+        {
+          "name": "tweets",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Ordered list of tweets to post as a thread. Allowed length is 2-25 entries when posting a new thread; 1-25 entries when resuming an existing thread via ``parent_tweet_id`` (the single-entry case lets a caller append one more reply to the prior thread tail). Each entry is an object with required ``text`` (1-280 chars). The first entry is the head tweet (or the resume entry when ``parent_tweet_id`` is set); each subsequent entry is posted as a reply to the prior entry's id. Empty/whitespace-only text fails validation per-entry and aborts the thread before any post is created.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "quote_tweet_id",
+          "type": "string",
+          "required": false,
+          "description": "Tweet id quoted by the head tweet only (subsequent thread entries cannot quote). Defaults to no quote.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_settings",
+          "type": "string",
+          "required": false,
+          "description": "Reply restriction applied to the head tweet only (X applies the head's setting to the entire thread). Defaults to no reply restriction.",
+          "enum": [
+            "everyone",
+            "mentionedUsers",
+            "following",
+            "subscribers"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "poll_options",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Attach a poll to the head tweet only (subsequent thread entries cannot include a poll). When set, must be 2-4 short answer options (each <=25 chars) and ``poll_duration_minutes`` must also be set. Polls are incompatible with ``quote_tweet_id`` (X rejects the combination). Defaults to no poll.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "poll_duration_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "How long the head poll stays open, in minutes (5-10080). Required when ``poll_options`` is set; ignored otherwise. Defaults to no poll duration.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_tweet_id",
+          "type": "string",
+          "required": false,
+          "description": "Numeric tweet id to chain the first ``tweets`` entry under as a reply (snowflake id, 1-19 digits). Use this to resume an interrupted thread: pass the ``tweet_id`` of the last entry that successfully posted (i.e. ``posted[-1].tweet_id`` from the prior call). When set, every entry chains as a reply (no head tweet is created), so head-only options (``quote_tweet_id``, ``poll_options`` / ``poll_duration_minutes``, ``reply_settings``) cannot be combined with this parameter. Defaults to starting a new thread.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "tweet.read",
+          "tweet.write",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.CreateThread",
+        "parameters": {
+          "tweets": {
+            "value": [
+              {
+                "text": "🧵 1/3 Just wrapped up a deep dive into async Python patterns — here's what I learned (thread):"
+              },
+              {
+                "text": "2/3 Using asyncio.gather() lets you run multiple coroutines concurrently. Huge speed boost for I/O-bound tasks like API calls or DB queries."
+              },
+              {
+                "text": "3/3 The key takeaway: async doesn't mean parallel — it means non-blocking. Pair it with proper error handling and you're golden. Thanks for reading! 🙏"
+              }
+            ],
+            "type": "array",
+            "required": true
+          },
+          "quote_tweet_id": {
+            "value": "1748392847561203712",
+            "type": "string",
+            "required": false
+          },
+          "reply_settings": {
+            "value": "mentionedUsers",
+            "type": "string",
+            "required": false
+          },
+          "poll_options": {
+            "value": [
+              "Strongly agree",
+              "Somewhat agree",
+              "Neutral",
+              "Disagree"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "poll_duration_minutes": {
+            "value": 1440,
+            "type": "integer",
+            "required": false
+          },
+          "parent_tweet_id": {
+            "value": "1748500923847163904",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateTweet",
+      "qualifiedName": "X.CreateTweet",
+      "fullyQualifiedName": "X.CreateTweet@3.0.1",
+      "description": "Post a new tweet as the authenticated user.\n\nThe same tool covers top-level posts, replies, and quote tweets. Supply\n``reply_to_tweet_id`` to post the new tweet as a reply; supply\n``quote_tweet_id`` to quote another tweet; supply both to post a reply\nthat also quotes a tweet. Pass ``reply_settings`` to restrict who can\nreply. Pass ``poll_options`` plus ``poll_duration_minutes`` to attach a\npoll (polls cannot be combined with ``quote_tweet_id``).\n\nFor multi-tweet threads, use the post-thread tool.",
+      "parameters": [
+        {
+          "name": "tweet_text",
+          "type": "string",
+          "required": true,
+          "description": "The text content of the tweet you want to post. Must be non-empty. Standard X accounts have a 280 character limit, which this toolkit enforces; Premium accounts can post longer text but the toolkit conservatively rejects anything over 280 characters.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_tweet_id",
+          "type": "string",
+          "required": false,
+          "description": "The id of an existing tweet to reply to. When set, the new tweet is posted as a reply in that conversation. Defaults to posting a top-level tweet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "quote_tweet_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the tweet you want to quote. It must be a valid integer as a string. Defaults to no quote.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_settings",
+          "type": "string",
+          "required": false,
+          "description": "Restrict who can reply to the new tweet. Defaults to no reply restriction.",
+          "enum": [
+            "everyone",
+            "mentionedUsers",
+            "following",
+            "subscribers"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "poll_options",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Attach a poll to the new tweet. When provided, must be a list of 2-4 short answer options; each option is at most 25 characters (X API limit). When set, ``poll_duration_minutes`` must also be set. Polls are incompatible with ``quote_tweet_id`` (X rejects the combination). Defaults to no poll.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "poll_duration_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "How long the poll stays open, in minutes. Required when ``poll_options`` is set; ignored otherwise. Must be between 5 and 10080 (7 days), per X's API limits. Defaults to no poll duration.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "tweet.read",
+          "tweet.write",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The id, URL, and status of the new tweet"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.CreateTweet",
+        "parameters": {
+          "tweet_text": {
+            "value": "Just launched our new open-source project! 🚀 Check it out and let us know what you think. Contributions welcome! #OpenSource #Dev",
+            "type": "string",
+            "required": true
+          },
+          "reply_to_tweet_id": {
+            "value": "1748293847561234567",
+            "type": "string",
+            "required": false
+          },
+          "quote_tweet_id": {
+            "value": "1748100293847561234",
+            "type": "string",
+            "required": false
+          },
+          "reply_settings": {
+            "value": "mentionedUsers",
+            "type": "string",
+            "required": false
+          },
+          "poll_options": {
+            "value": [
+              "Strongly agree",
+              "Somewhat agree",
+              "Disagree"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "poll_duration_minutes": {
+            "value": 1440,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "DeleteList",
       "qualifiedName": "X.DeleteList",
-      "fullyQualifiedName": "X.DeleteList@2.0.2",
+      "fullyQualifiedName": "X.DeleteList@3.0.1",
       "description": "Delete an X List owned by the authenticated user.\n\nThe list and its memberships are removed. The tool distinguishes \"I just\ndeleted it\" from \"it was already gone\" rather than collapsing both into\nthe same idempotent-success envelope.\n\nSerialize dependent list mutations: do not delete a list in parallel\nwith adding or removing its members, updating it, or pinning it. The\nlist-membership endpoints will race against the delete and surface a\nspurious ``not_found`` when the member call lands after the list is\ngone. Await each mutation before issuing the next one on the same list.",
       "parameters": [
         {
@@ -280,9 +566,9 @@
       }
     },
     {
-      "name": "DeleteTweetById",
-      "qualifiedName": "X.DeleteTweetById",
-      "fullyQualifiedName": "X.DeleteTweetById@2.0.2",
+      "name": "DeleteTweet",
+      "qualifiedName": "X.DeleteTweet",
+      "fullyQualifiedName": "X.DeleteTweet@3.0.1",
       "description": "Delete one of the authenticated user's tweets.\n\nThe tool distinguishes \"I just deleted it\" from \"it was already gone\"\nrather than collapsing both into the same idempotent-success envelope.",
       "parameters": [
         {
@@ -311,10 +597,10 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.DeleteTweetById",
+        "toolName": "X.DeleteTweet",
         "parameters": {
           "tweet_id": {
-            "value": "1234567890123456789",
+            "value": "1748293847561029384",
             "type": "string",
             "required": true
           }
@@ -344,7 +630,7 @@
     {
       "name": "GetConversation",
       "qualifiedName": "X.GetConversation",
-      "fullyQualifiedName": "X.GetConversation@2.0.2",
+      "fullyQualifiedName": "X.GetConversation@3.0.1",
       "description": "Fetch the conversation thread containing ``tweet_id``.\n\nReturns every tweet that shares the same ``conversation_id`` as the\ngiven tweet, ordered oldest-first so a caller can render the thread top\nto bottom. The conversation root sits at position 0 whenever accessible.\n\nReplies are pulled from the recent-search index (~7-day window) which\ncan lag real time by several minutes. To verify a specific reply, look\nit up by id instead.",
       "parameters": [
         {
@@ -367,7 +653,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -431,7 +717,7 @@
     {
       "name": "GetHomeTimeline",
       "qualifiedName": "X.GetHomeTimeline",
-      "fullyQualifiedName": "X.GetHomeTimeline@2.0.2",
+      "fullyQualifiedName": "X.GetHomeTimeline@3.0.1",
       "description": "Fetch the authenticated user's reverse-chronological home timeline.\n\nReturns recent tweets from accounts the user follows.",
       "parameters": [
         {
@@ -446,7 +732,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -503,643 +789,16 @@
       }
     },
     {
-      "name": "GetListMembers",
-      "qualifiedName": "X.GetListMembers",
-      "fullyQualifiedName": "X.GetListMembers@2.0.2",
-      "description": "List members of an X List.\n\nThe members endpoint is eventually consistent: after members are added\nto or removed from a list, the membership read endpoints (this list's\nmembers and a user's list memberships) can take several seconds to\nsurface the change. The list-tweets endpoint is typically refreshed\nfaster than the members endpoint, so an empty page immediately after an\nadd is more likely a consistency window than a genuine empty list.\nRe-query after a brief wait when verifying a just-applied mutation.",
+      "name": "GetSpace",
+      "qualifiedName": "X.GetSpace",
+      "fullyQualifiedName": "X.GetSpace@3.0.1",
+      "description": "Look up a single X Space by its id.\n\nReturns the Space's lifecycle state, title, creator, host and speaker\nids, language, and participant and subscriber counts.\n\nX gates several Space metadata fields behind ownership: most non-host\ncallers cannot read a Space's full metadata, even when the Space surfaces\nin a search or by-creator listing.",
       "parameters": [
         {
-          "name": "list_id",
+          "name": "space_id",
           "type": "string",
           "required": true,
-          "description": "The ID of the list whose members you want to fetch.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "The maximum number of members to return per page. The X API enforces a minimum of 1 and a maximum of 100; values below 1 are silently raised to 1 and values above 100 are silently lowered to 100. Defaults to 100.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "list.read",
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Members of the list. ``next_token`` is null when there are no more pages; ``result_count`` is always the count on this page."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetListMembers",
-        "parameters": {
-          "list_id": {
-            "value": "1234567890123456789",
-            "type": "string",
-            "required": true
-          },
-          "max_results": {
-            "value": 50,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "7140dibdnow9c7btw421dyz6jism75z99gyxd8egarsc4",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetListMembershipsForUser",
-      "qualifiedName": "X.GetListMembershipsForUser",
-      "fullyQualifiedName": "X.GetListMembershipsForUser@2.0.2",
-      "description": "List the X Lists the target user is a member of.\n\nPass ``user_id`` or ``username`` (exactly one). With ``username``, the\nhandle is resolved to a numeric id first; passing ``user_id`` skips\nthat hop.",
-      "parameters": [
-        {
-          "name": "username",
-          "type": "string",
-          "required": false,
-          "description": "The username (handle) whose list memberships to fetch. Leading '@' is optional and stripped automatically. Provide exactly one of ``user_id`` or ``username``. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "user_id",
-          "type": "string",
-          "required": false,
-          "description": "The numeric X user id (snowflake id, 1-19 digits) whose list memberships to fetch. Provide exactly one of ``user_id`` or ``username``. Prefer this when you already have a stable id — it avoids a username-to-id lookup hop, which is rate-limited by X. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "The maximum number of memberships to return per page. The X API enforces a minimum of 1 and a maximum of 100; values below 1 are silently raised to 1 and values above 100 are silently lowered to 100. Defaults to 100.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "list.read",
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Lists the user belongs to. ``next_token`` is null when there are no more pages; ``result_count`` is always the count on this page."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetListMembershipsForUser",
-        "parameters": {
-          "username": {
-            "value": "elonmusk",
-            "type": "string",
-            "required": false
-          },
-          "user_id": {
-            "value": "44196397",
-            "type": "string",
-            "required": false
-          },
-          "max_results": {
-            "value": 25,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "7140dibdnow9c7btw421dz57xs3b2z9gk4k4h25tkf9oc",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetListTweets",
-      "qualifiedName": "X.GetListTweets",
-      "fullyQualifiedName": "X.GetListTweets@2.0.2",
-      "description": "List recent tweets from members of an X List, newest first.",
-      "parameters": [
-        {
-          "name": "list_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the list whose tweets you want to fetch.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "The maximum number of tweets to return per page. The X API enforces a minimum of 1 and a maximum of 100; values below 1 are silently raised to 1 and values above 100 are silently lowered to 100. Defaults to 50.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "list.read",
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Tweets from members of the list, ordered most-recent first. ``next_token`` is null when there are no more pages."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetListTweets",
-        "parameters": {
-          "list_id": {
-            "value": "1234567890123456789",
-            "type": "string",
-            "required": true
-          },
-          "max_results": {
-            "value": 25,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "avdjfk47sksl99dkslf0q",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetMyMentions",
-      "qualifiedName": "X.GetMyMentions",
-      "fullyQualifiedName": "X.GetMyMentions@2.0.2",
-      "description": "Fetch recent @-mentions of the authenticated user, newest first.",
-      "parameters": [
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "The maximum number of mentions to return (1-100). Values above 100 are lowered to 100. Defaults to 10.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Mentions of the authenticated user, ordered most-recent first. ``next_token`` is null when there are no more pages."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetMyMentions",
-        "parameters": {
-          "max_results": {
-            "value": 25,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "7140dibdnow9c7btw3w29n4v1mtag9kd0s6v7t4yz8w",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetOwnedLists",
-      "qualifiedName": "X.GetOwnedLists",
-      "fullyQualifiedName": "X.GetOwnedLists@2.0.2",
-      "description": "List the X Lists a user owns.\n\nOmitting both ``user_id`` and ``username`` defaults to the authenticated\nuser (the common \"show me my lists\" workflow after creating a list).\nEach list record carries ``id``, ``name``, ``private``, ``description``,\n``member_count``, ``follower_count``, ``owner_id``, and ``created_at``.",
-      "parameters": [
-        {
-          "name": "user_id",
-          "type": "string",
-          "required": false,
-          "description": "Numeric X user id whose owned lists to fetch (snowflake id, 1-19 digits). Provide at most one of ``user_id`` or ``username``; omit both to default to the authenticated user — the common 'show me my lists' workflow. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "username",
-          "type": "string",
-          "required": false,
-          "description": "Handle whose owned lists to fetch. Leading '@' is optional and stripped automatically. Provide at most one of ``user_id`` or ``username``; omit both to default to the authenticated user. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "Maximum number of lists to return per page. The X API enforces a minimum of 1 and a maximum of 100; values outside that range are silently clamped. Defaults to 100.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "list.read",
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Lists the target user owns (newest-first). ``next_token`` is null when there are no more pages; ``result_count`` is always the count on this page. ``errors`` carries a structured envelope when the target user is missing or the input is malformed."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetOwnedLists",
-        "parameters": {
-          "user_id": {
-            "value": "1234567890123456789",
-            "type": "string",
-            "required": false
-          },
-          "username": {
-            "value": "@johndoe",
-            "type": "string",
-            "required": false
-          },
-          "max_results": {
-            "value": 25,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "7140dibdnow9c7btw422dl6zl",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetQuoteTweets",
-      "qualifiedName": "X.GetQuoteTweets",
-      "fullyQualifiedName": "X.GetQuoteTweets@2.0.2",
-      "description": "Fetch public quote tweets of the given tweet.",
-      "parameters": [
-        {
-          "name": "tweet_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the tweet whose quote tweets you want to fetch.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "The maximum number of quote tweets to return (1-100). Values above 100 are lowered to 100. Defaults to 20.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Public quote tweets of the given tweet."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetQuoteTweets",
-        "parameters": {
-          "tweet_id": {
-            "value": "1748293847562910720",
-            "type": "string",
-            "required": true
-          },
-          "max_results": {
-            "value": 50,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "7140dibdnow9c7btw423b4zcwf9lc7btw9c7btw",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetRepliesToTweet",
-      "qualifiedName": "X.GetRepliesToTweet",
-      "fullyQualifiedName": "X.GetRepliesToTweet@2.0.2",
-      "description": "Fetch public DIRECT replies to a given tweet (last ~7 days).\n\nReturns only tweets whose ``referenced_tweets`` carry a ``replied_to``\nedge pointing at ``tweet_id`` -- not the whole conversation thread.\nSibling replies and nested replies further down the tree are filtered\nout so the result reflects what a reader would see when expanding\n\"replies to this tweet\" in the X UI. Use the conversation tool to get\nthe full thread surrounding a tweet instead.\n\nThe recent-search index can lag real time by several minutes, so a\njust-posted reply may not appear yet. To verify a reply you just\nposted, look it up by id instead.\n\nPagination note: each page is fetched as ``max_results`` from X's\nrecent-search index, then locally filtered down to direct replies.\nPages where every tweet is an indirect reply (sibling or nested) come\nback with ``data=[]`` plus a ``next_token`` -- continue paginating to\nsurface the direct replies further into the conversation.",
-      "parameters": [
-        {
-          "name": "tweet_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the tweet whose direct replies you want to fetch.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "Upper bound on the upstream search page size (1-100; values above 100 are lowered to 100). The X recent-search endpoint enforces a per-page minimum of 10, so values below 10 are raised to 10 for the upstream call. Each page is filtered locally to direct replies, so the actual returned count can be lower than this bound (some tweets on the page may be sibling or nested replies) or, for sub-10 values, slightly higher when the filter happens to surface more direct replies on the page. Defaults to 20.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Public direct replies to the given tweet, restricted to the last ~7 days by X's recent-search endpoint."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetRepliesToTweet",
-        "parameters": {
-          "tweet_id": {
-            "value": "1782345678901234567",
-            "type": "string",
-            "required": true
-          },
-          "max_results": {
-            "value": 25,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "7140dibdnow9c7btw423z8k5j9tr9",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetSpacesByCreator",
-      "qualifiedName": "X.GetSpacesByCreator",
-      "fullyQualifiedName": "X.GetSpacesByCreator@2.0.2",
-      "description": "List the live or scheduled X Spaces created by a set of users.\n\nUseful for monitoring whether a set of accounts has any Space currently\nairing or queued. Ended Spaces are not returned.",
-      "parameters": [
-        {
-          "name": "user_ids",
-          "type": "array",
-          "innerType": "string",
-          "required": true,
-          "description": "Numeric X user ids (snowflake ids) whose live or scheduled Spaces to list. Up to 100 ids per call. Ids that don't match X's snowflake format are reported per-id in ``errors`` rather than aborting the call.",
+          "description": "The id of the X Space to look up. X Space ids are 13-character alphanumeric strings (e.g. '1OdJrBZNNOPGB').",
           "enum": null,
           "inferrable": true
         }
@@ -1157,275 +816,16 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Live or scheduled Spaces created by any of the supplied user ids. ``result_count`` is the number of Spaces returned (always present, even when zero)."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetSpacesByCreator",
-        "parameters": {
-          "user_ids": {
-            "value": [
-              "44196397",
-              "783214",
-              "6253282",
-              "17919972",
-              "1339835893"
-            ],
-            "type": "array",
-            "required": true
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetUserLikedTweets",
-      "qualifiedName": "X.GetUserLikedTweets",
-      "fullyQualifiedName": "X.GetUserLikedTweets@2.0.2",
-      "description": "List tweets a user has liked, newest-liked first.\n\nOmitting both ``user_id`` and ``username`` defaults to the authenticated\nuser. Each tweet carries ``tweet_url``, ``author_username``,\n``author_name``, and any media or poll enrichment.\n\nWhen the target user's likes are private, the response is an empty page\nindistinguishable from \"no liked tweets.\"",
-      "parameters": [
-        {
-          "name": "user_id",
-          "type": "string",
-          "required": false,
-          "description": "Numeric X user id whose liked-tweets you want to list (snowflake id, 1-19 digits). Provide at most one of ``user_id`` or ``username``; omit both to default to the authenticated user. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "username",
-          "type": "string",
-          "required": false,
-          "description": "Handle of the user whose liked-tweets you want to list. Leading '@' is optional and stripped automatically. Provide at most one of ``user_id`` or ``username``; omit both to default to the authenticated user. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "Maximum number of liked tweets to return per page (1-100). Values above 100 are lowered to 100. Defaults to 20.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "tweet.read",
-          "users.read",
-          "like.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
         "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.GetUserLikedTweets",
+        "toolName": "X.GetSpace",
         "parameters": {
-          "user_id": {
-            "value": "783214",
+          "space_id": {
+            "value": "1OdJrBZNNOPGB",
             "type": "string",
-            "required": false
-          },
-          "username": {
-            "value": "@elonmusk",
-            "type": "string",
-            "required": false
-          },
-          "max_results": {
-            "value": 50,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "avdjfk34kdf93kd0293kdlw",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetUserTweets",
-      "qualifiedName": "X.GetUserTweets",
-      "fullyQualifiedName": "X.GetUserTweets@2.0.2",
-      "description": "Fetch tweets authored by a specific X user, newest first.\n\nPaginates through the author's full tweet history (no 7-day window).\nResults include original tweets, replies (unless ``exclude_replies=True``),\nretweets (unless ``exclude_retweets=True``), and quote tweets. Author\nhandle, name, and media or poll details are flattened onto each tweet.",
-      "parameters": [
-        {
-          "name": "user_id",
-          "type": "string",
-          "required": false,
-          "description": "Numeric X user id of the author whose tweets you want to fetch (snowflake id, 1-19 digits). Provide exactly one of ``user_id`` or ``username``. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "username",
-          "type": "string",
-          "required": false,
-          "description": "Handle of the author whose tweets you want to fetch. Leading '@' is optional and stripped automatically. Provide exactly one of ``user_id`` or ``username``. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "max_results",
-          "type": "integer",
-          "required": false,
-          "description": "The maximum number of tweets to return per page (1-100). Values above 100 are lowered to 100. Defaults to 20.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_token",
-          "type": "string",
-          "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "exclude_replies",
-          "type": "boolean",
-          "required": false,
-          "description": "When true, excludes tweets the author posted as replies to other tweets. Defaults to false.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "exclude_retweets",
-          "type": "boolean",
-          "required": false,
-          "description": "When true, excludes retweets the author has performed (only original tweets and quote tweets remain). Defaults to false.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "start_time",
-          "type": "string",
-          "required": false,
-          "description": "Lower bound (inclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Leave None for no lower bound. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "end_time",
-          "type": "string",
-          "required": false,
-          "description": "Upper bound (exclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Leave None for no upper bound. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "A user's authored tweets, newest first. ``next_token`` is null when there are no more pages."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.GetUserTweets",
-        "parameters": {
-          "user_id": {
-            "value": "783214",
-            "type": "string",
-            "required": false
-          },
-          "username": {
-            "value": "TwitterDev",
-            "type": "string",
-            "required": false
-          },
-          "max_results": {
-            "value": 50,
-            "type": "integer",
-            "required": false
-          },
-          "next_token": {
-            "value": "7140dibdnow9c7btw3w29n4v1mtf9",
-            "type": "string",
-            "required": false
-          },
-          "exclude_replies": {
-            "value": true,
-            "type": "boolean",
-            "required": false
-          },
-          "exclude_retweets": {
-            "value": false,
-            "type": "boolean",
-            "required": false
-          },
-          "start_time": {
-            "value": "2024-01-01T00:00:00Z",
-            "type": "string",
-            "required": false
-          },
-          "end_time": {
-            "value": "2024-06-30T23:59:59Z",
-            "type": "string",
-            "required": false
+            "required": true
           }
         },
         "requiresAuth": true,
@@ -1453,7 +853,7 @@
     {
       "name": "LikeTweet",
       "qualifiedName": "X.LikeTweet",
-      "fullyQualifiedName": "X.LikeTweet@2.0.2",
+      "fullyQualifiedName": "X.LikeTweet@3.0.1",
       "description": "Like a tweet as the authenticated user.\n\nIdempotent: liking an already-liked tweet succeeds.",
       "parameters": [
         {
@@ -1513,71 +913,9 @@
       }
     },
     {
-      "name": "LookupSpaceById",
-      "qualifiedName": "X.LookupSpaceById",
-      "fullyQualifiedName": "X.LookupSpaceById@2.0.2",
-      "description": "Look up a single X Space by its id.\n\nReturns the Space's lifecycle state, title, creator, host and speaker\nids, language, and participant and subscriber counts.\n\nX gates several Space metadata fields behind ownership: most non-host\ncallers cannot read a Space's full metadata, even when the Space surfaces\nin a search or by-creator listing.",
-      "parameters": [
-        {
-          "name": "space_id",
-          "type": "string",
-          "required": true,
-          "description": "The id of the X Space to look up. X Space ids are 13-character alphanumeric strings (e.g. '1OdJrBZNNOPGB').",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "space.read",
-          "tweet.read",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.LookupSpaceById",
-        "parameters": {
-          "space_id": {
-            "value": "1OdJrBZNNOPGB",
-            "type": "string",
-            "required": true
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "LookupTweetEngagers",
-      "qualifiedName": "X.LookupTweetEngagers",
-      "fullyQualifiedName": "X.LookupTweetEngagers@2.0.2",
+      "name": "ListEngagers",
+      "qualifiedName": "X.ListEngagers",
+      "fullyQualifiedName": "X.ListEngagers@3.0.1",
       "description": "List the users who liked or retweeted a tweet.\n\nEach user record carries the standard handle, name, and profile metadata so\ncallers can render an engager row without a follow-up lookup.\n\nWhen the tweet shows non-zero engagement in ``public_metrics`` but X's\nengagers endpoint returns zero users on the first page, the call returns\nan ``errors[0].type = \"data_unavailable\"`` envelope. This signals that\nthe account's X access tier does not expose engager lists for this\ntweet; treat ``public_metrics.like_count`` / ``retweet_count`` from\n``LookupTweetById`` as the authoritative engagement total in that case.",
       "parameters": [
         {
@@ -1611,7 +949,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -1633,10 +971,10 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.LookupTweetEngagers",
+        "toolName": "X.ListEngagers",
         "parameters": {
           "tweet_id": {
-            "value": "1674837291048734720",
+            "value": "1748293847561029483",
             "type": "string",
             "required": true
           },
@@ -1651,7 +989,7 @@
             "required": false
           },
           "next_token": {
-            "value": "7140dibdnow9c7btw423r74yz8ama",
+            "value": "avdjfk3920dkQpBz",
             "type": "string",
             "required": false
           }
@@ -1679,9 +1017,805 @@
       }
     },
     {
-      "name": "LookupTweets",
-      "qualifiedName": "X.LookupTweets",
-      "fullyQualifiedName": "X.LookupTweets@2.0.2",
+      "name": "ListLikedTweets",
+      "qualifiedName": "X.ListLikedTweets",
+      "fullyQualifiedName": "X.ListLikedTweets@3.0.1",
+      "description": "List tweets a user has liked, newest-liked first.\n\nOmitting both ``user_id`` and ``username`` defaults to the authenticated\nuser. Each tweet carries ``tweet_url``, ``author_username``,\n``author_name``, and any media or poll enrichment.\n\nWhen the target user's likes are private, the response is an empty page\nindistinguishable from \"no liked tweets.\"",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "Numeric X user id whose liked-tweets you want to list (snowflake id, 1-19 digits). Provide at most one of ``user_id`` or ``username``. Defaults to the authenticated user.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "username",
+          "type": "string",
+          "required": false,
+          "description": "Handle of the user whose liked-tweets you want to list. Leading '@' is optional and stripped automatically. Provide at most one of ``user_id`` or ``username``. Defaults to the authenticated user.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of liked tweets to return per page (1-100). Values above 100 are lowered to 100. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "tweet.read",
+          "users.read",
+          "like.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListLikedTweets",
+        "parameters": {
+          "user_id": {
+            "value": "783214",
+            "type": "string",
+            "required": false
+          },
+          "username": {
+            "value": "@TwitterDev",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "7140dibdnow9c7btw423a6lnzfnvtmzn3vu4o42g6",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListListTweets",
+      "qualifiedName": "X.ListListTweets",
+      "fullyQualifiedName": "X.ListListTweets@3.0.1",
+      "description": "List recent tweets from members of an X List, newest first.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the list whose tweets you want to fetch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of tweets to return per page. The X API enforces a minimum of 1 and a maximum of 100; values below 1 are silently raised to 1 and values above 100 are silently lowered to 100. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "list.read",
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Tweets from members of the list, ordered most-recent first. ``next_token`` is null when there are no more pages."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListListTweets",
+        "parameters": {
+          "list_id": {
+            "value": "1234567890123456789",
+            "type": "string",
+            "required": true
+          },
+          "max_results": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "7140dibdnow9c7btw422dyz6zrehandltoken",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListMembers",
+      "qualifiedName": "X.ListMembers",
+      "fullyQualifiedName": "X.ListMembers@3.0.1",
+      "description": "List members of an X List.\n\nThe members endpoint is eventually consistent: after members are added\nto or removed from a list, the membership read endpoints (this list's\nmembers and a user's list memberships) can take several seconds to\nsurface the change. The list-tweets endpoint is typically refreshed\nfaster than the members endpoint, so an empty page immediately after an\nadd is more likely a consistency window than a genuine empty list.\nRe-query after a brief wait when verifying a just-applied mutation.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the list whose members you want to fetch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of members to return per page. The X API enforces a minimum of 1 and a maximum of 100; values below 1 are silently raised to 1 and values above 100 are silently lowered to 100. Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "list.read",
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Members of the list. ``next_token`` is null when there are no more pages; ``result_count`` is always the count on this page."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListMembers",
+        "parameters": {
+          "list_id": {
+            "value": "1234567890123456789",
+            "type": "string",
+            "required": true
+          },
+          "max_results": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "7140dibdnow9c7btw421dyz6jism75z99gyxd8egarsc4",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListMemberships",
+      "qualifiedName": "X.ListMemberships",
+      "fullyQualifiedName": "X.ListMemberships@3.0.1",
+      "description": "List the X Lists the target user is a member of.\n\nPass ``user_id`` or ``username`` (exactly one). With ``username``, the\nhandle is resolved to a numeric id first; passing ``user_id`` skips\nthat hop.",
+      "parameters": [
+        {
+          "name": "username",
+          "type": "string",
+          "required": false,
+          "description": "The username (handle) whose list memberships to fetch. Leading '@' is optional and stripped automatically. Provide exactly one of ``user_id`` or ``username``. Defaults to looking up by ``user_id``.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "The numeric X user id (snowflake id, 1-19 digits) whose list memberships to fetch. Provide exactly one of ``user_id`` or ``username``. Prefer this when you already have a stable id — it avoids a username-to-id lookup hop, which is rate-limited by X. Defaults to looking up by ``username``.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of memberships to return per page. The X API enforces a minimum of 1 and a maximum of 100; values below 1 are silently raised to 1 and values above 100 are silently lowered to 100. Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "list.read",
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Lists the user belongs to. ``next_token`` is null when there are no more pages; ``result_count`` is always the count on this page."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListMemberships",
+        "parameters": {
+          "username": {
+            "value": "elonmusk",
+            "type": "string",
+            "required": false
+          },
+          "user_id": {
+            "value": "44196397",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "7140dibdnow9c7btw3w29n4v1mtf9",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListMyMentions",
+      "qualifiedName": "X.ListMyMentions",
+      "fullyQualifiedName": "X.ListMyMentions@3.0.1",
+      "description": "Fetch recent @-mentions of the authenticated user, newest first.",
+      "parameters": [
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of mentions to return (1-100). Values above 100 are lowered to 100. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Mentions of the authenticated user, ordered most-recent first. ``next_token`` is null when there are no more pages."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListMyMentions",
+        "parameters": {
+          "max_results": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "7140dibdnow9c7btw3w29n4v1mtag9kpos26kwtnl0",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListOwnedLists",
+      "qualifiedName": "X.ListOwnedLists",
+      "fullyQualifiedName": "X.ListOwnedLists@3.0.1",
+      "description": "List the X Lists a user owns.\n\nOmitting both ``user_id`` and ``username`` defaults to the authenticated\nuser (the common \"show me my lists\" workflow after creating a list).\nEach list record carries ``id``, ``name``, ``private``, ``description``,\n``member_count``, ``follower_count``, ``owner_id``, and ``created_at``.",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "Numeric X user id whose owned lists to fetch (snowflake id, 1-19 digits). Provide at most one of ``user_id`` or ``username``. Defaults to the authenticated user.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "username",
+          "type": "string",
+          "required": false,
+          "description": "Handle whose owned lists to fetch. Leading '@' is optional and stripped automatically. Provide at most one of ``user_id`` or ``username``. Defaults to the authenticated user.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of lists to return per page. The X API enforces a minimum of 1 and a maximum of 100; values outside that range are silently clamped. Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "list.read",
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Lists the target user owns (newest-first). ``next_token`` is null when there are no more pages; ``result_count`` is always the count on this page. ``errors`` carries a structured envelope when the target user is missing or the input is malformed."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListOwnedLists",
+        "parameters": {
+          "user_id": {
+            "value": "1234567890123456789",
+            "type": "string",
+            "required": false
+          },
+          "username": {
+            "value": "@janedoe",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "avdjfk4wnksdj3k2ndf9s",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListQuotes",
+      "qualifiedName": "X.ListQuotes",
+      "fullyQualifiedName": "X.ListQuotes@3.0.1",
+      "description": "Fetch public quote tweets of the given tweet.",
+      "parameters": [
+        {
+          "name": "tweet_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the tweet whose quote tweets you want to fetch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of quote tweets to return (1-100). Values above 100 are lowered to 100. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Public quote tweets of the given tweet."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListQuotes",
+        "parameters": {
+          "tweet_id": {
+            "value": "1674865172781506560",
+            "type": "string",
+            "required": true
+          },
+          "max_results": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "avdjfk9834hfksdf7234hk",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListReplies",
+      "qualifiedName": "X.ListReplies",
+      "fullyQualifiedName": "X.ListReplies@3.0.1",
+      "description": "Fetch public DIRECT replies to a given tweet (last ~7 days).\n\nReturns only tweets whose ``referenced_tweets`` carry a ``replied_to``\nedge pointing at ``tweet_id`` -- not the whole conversation thread.\nSibling replies and nested replies further down the tree are filtered\nout so the result reflects what a reader would see when expanding\n\"replies to this tweet\" in the X UI. Use the conversation tool to get\nthe full thread surrounding a tweet instead.\n\nThe recent-search index can lag real time by several minutes, so a\njust-posted reply may not appear yet. To verify a reply you just\nposted, look it up by id instead.\n\nPagination note: each page is fetched as ``max_results`` from X's\nrecent-search index, then locally filtered down to direct replies.\nPages where every tweet is an indirect reply (sibling or nested) come\nback with ``data=[]`` plus a ``next_token`` -- continue paginating to\nsurface the direct replies further into the conversation.",
+      "parameters": [
+        {
+          "name": "tweet_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the tweet whose direct replies you want to fetch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "Upper bound on the upstream search page size (1-100; values above 100 are lowered to 100). The X recent-search endpoint enforces a per-page minimum of 10, so values below 10 are raised to 10 for the upstream call. Each page is filtered locally to direct replies, so the actual returned count can be lower than this bound (some tweets on the page may be sibling or nested replies) or, for sub-10 values, slightly higher when the filter happens to surface more direct replies on the page. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Public direct replies to the given tweet, restricted to the last ~7 days by X's recent-search endpoint."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListReplies",
+        "parameters": {
+          "tweet_id": {
+            "value": "1234567890123456789",
+            "type": "string",
+            "required": true
+          },
+          "max_results": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "7140dibdnow9c7btw3w29n4v1mtag9kd7qkpxcsik7utc",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListSpaces",
+      "qualifiedName": "X.ListSpaces",
+      "fullyQualifiedName": "X.ListSpaces@3.0.1",
+      "description": "List the live or scheduled X Spaces created by a set of users.\n\nUseful for monitoring whether a set of accounts has any Space currently\nairing or queued. Ended Spaces are not returned.",
+      "parameters": [
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Numeric X user ids (snowflake ids) whose live or scheduled Spaces to list. Up to 100 ids per call. Ids that don't match X's snowflake format are reported per-id in ``errors`` rather than aborting the call.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "space.read",
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Live or scheduled Spaces created by any of the supplied user ids. ``result_count`` is the number of Spaces returned (always present, even when zero)."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListSpaces",
+        "parameters": {
+          "user_ids": {
+            "value": [
+              "44196397",
+              "783214",
+              "6253282",
+              "2244994945",
+              "1526228120"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListTweets",
+      "qualifiedName": "X.ListTweets",
+      "fullyQualifiedName": "X.ListTweets@3.0.1",
       "description": "Look up tweets by id (single or batched) on X.\n\nPass one id or up to 100 ids; the response is always a list. Each entry\ncarries ``referenced_tweets`` (``type`` of ``replied_to``, ``quoted``, or\n``retweeted`` plus the parent ``id``), ``conversation_id``, and the\nconvenience fields ``tweet_url`` / ``author_username`` / ``author_name``.\n\nSet ``include_author_only_metrics=True`` to retrieve ``non_public_metrics``\n(impressions, user_profile_clicks, url_link_clicks) and ``organic_metrics``\nfor tweets the authenticated caller authored. X drops third-party tweets\nfrom ``data`` when those fields are requested, so leave the flag false\nunless every id in the batch is known to be authored by the caller.",
       "parameters": [
         {
@@ -1718,13 +1852,13 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.LookupTweets",
+        "toolName": "X.ListTweets",
         "parameters": {
           "tweet_ids": {
             "value": [
-              "1547898732145602560",
-              "1623456789012345678",
-              "920999516662317056"
+              "1234567890123456789",
+              "9876543210987654321",
+              "1122334455667788990"
             ],
             "type": "array",
             "required": true
@@ -1758,9 +1892,9 @@
       }
     },
     {
-      "name": "LookupUsers",
-      "qualifiedName": "X.LookupUsers",
-      "fullyQualifiedName": "X.LookupUsers@2.0.2",
+      "name": "ListUsers",
+      "qualifiedName": "X.ListUsers",
+      "fullyQualifiedName": "X.ListUsers@3.0.1",
       "description": "Look up X (Twitter) users by handle and/or numeric user id.\n\nProvide ``usernames``, ``user_ids``, or both. Up to 100 of each per call.",
       "parameters": [
         {
@@ -1768,7 +1902,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "X (Twitter) handles to look up. Leading '@' is optional and stripped automatically. Empty entries are ignored. Handles that don't match X's syntax (1-15 letters, digits, or underscores) are reported per-handle in ``errors`` rather than aborting the call. Up to 100 handles per call (combined with ``user_ids``). Defaults to None.",
+          "description": "X (Twitter) handles to look up. Leading '@' is optional and stripped automatically. Empty entries are ignored. Handles that don't match X's syntax (1-15 letters, digits, or underscores) are reported per-handle in ``errors`` rather than aborting the call. Up to 100 handles per call (combined with ``user_ids``). Defaults to no handles.",
           "enum": null,
           "inferrable": true
         },
@@ -1777,7 +1911,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Numeric X user ids (snowflake ids) to look up. Empty entries are ignored. Ids that don't match X's snowflake format are reported per-id in ``errors`` rather than aborting the call. Up to 100 ids per call (combined with ``usernames``). Defaults to None.",
+          "description": "Numeric X user ids (snowflake ids) to look up. Empty entries are ignored. Ids that don't match X's snowflake format are reported per-id in ``errors`` rather than aborting the call. Up to 100 ids per call (combined with ``usernames``). Defaults to no ids.",
           "enum": null,
           "inferrable": true
         }
@@ -1798,14 +1932,14 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.LookupUsers",
+        "toolName": "X.ListUsers",
         "parameters": {
           "usernames": {
             "value": [
               "elonmusk",
-              "jack",
-              "TwitterDev",
               "NASA",
+              "OpenAI",
+              "@jack",
               "BBCBreaking"
             ],
             "type": "array",
@@ -1814,10 +1948,10 @@
           "user_ids": {
             "value": [
               "44196397",
-              "12",
-              "2244994945",
               "11348282",
-              "742143"
+              "2244994945",
+              "6253282",
+              "759251"
             ],
             "type": "array",
             "required": false
@@ -1846,9 +1980,161 @@
       }
     },
     {
+      "name": "ListUserTweets",
+      "qualifiedName": "X.ListUserTweets",
+      "fullyQualifiedName": "X.ListUserTweets@3.0.1",
+      "description": "Fetch tweets authored by a specific X user, newest first.\n\nPaginates through the author's full tweet history (no 7-day window).\nResults include original tweets, replies (unless ``exclude_replies=True``),\nretweets (unless ``exclude_retweets=True``), and quote tweets. Author\nhandle, name, and media or poll details are flattened onto each tweet.",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "Numeric X user id of the author whose tweets you want to fetch (snowflake id, 1-19 digits). Provide exactly one of ``user_id`` or ``username``. Defaults to looking up by ``username``.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "username",
+          "type": "string",
+          "required": false,
+          "description": "Handle of the author whose tweets you want to fetch. Leading '@' is optional and stripped automatically. Provide exactly one of ``user_id`` or ``username``. Defaults to looking up by ``user_id``.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of tweets to return per page (1-100). Values above 100 are lowered to 100. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_token",
+          "type": "string",
+          "required": false,
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "exclude_replies",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, excludes tweets the author posted as replies to other tweets. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "exclude_retweets",
+          "type": "boolean",
+          "required": false,
+          "description": "When true, excludes retweets the author has performed (only original tweets and quote tweets remain). Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": false,
+          "description": "Lower bound (inclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Defaults to no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": false,
+          "description": "Upper bound (exclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Defaults to no upper bound.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "tweet.read",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A user's authored tweets, newest first. ``next_token`` is null when there are no more pages."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.ListUserTweets",
+        "parameters": {
+          "user_id": {
+            "value": "783214",
+            "type": "string",
+            "required": false
+          },
+          "username": {
+            "value": "TwitterDev",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_token": {
+            "value": "7140dibdnow9c7btw422dq8m2sxz9pnkrq6vbz0j",
+            "type": "string",
+            "required": false
+          },
+          "exclude_replies": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "exclude_retweets": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "start_time": {
+            "value": "2024-01-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "end_time": {
+            "value": "2024-06-30T23:59:59Z",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "PinList",
       "qualifiedName": "X.PinList",
-      "fullyQualifiedName": "X.PinList@2.0.2",
+      "fullyQualifiedName": "X.PinList@3.0.1",
       "description": "Pin an X List to the authenticated user's profile.\n\nIdempotent: pinning an already-pinned list succeeds.",
       "parameters": [
         {
@@ -1908,299 +2194,9 @@
       }
     },
     {
-      "name": "PostThread",
-      "qualifiedName": "X.PostThread",
-      "fullyQualifiedName": "X.PostThread@2.0.2",
-      "description": "Post a multi-tweet thread as the authenticated user.\n\nPosts the first tweet, then chains every subsequent entry as a reply to\nthe prior tweet's id. ``tweets`` must contain 2-25 entries when posting a\nnew thread, or 1-25 entries when resuming an existing thread via\n``parent_tweet_id`` (the 1-entry case lets a caller append one more reply\nto the tail of a prior thread).\n``poll_options`` / ``poll_duration_minutes`` / ``quote_tweet_id`` /\n``reply_settings`` apply to the head tweet only.\n\nPre-flight validation runs on every entry before any post is created. If\nany entry fails validation, the call posts nothing.\n\nOn a mid-thread interruption, ``posted`` carries the rows that landed\nand ``next_position`` is the 1-based index of the first non-posted\nentry (0 when every entry posted). Resume the chain with::\n\n    tweets = (tweets[next_position - 1 :],)\n    parent_tweet_id = posted[-1][\"tweet_id\"]  # from the prior call\n\nWithout ``parent_tweet_id``, a resume call would re-create a fresh head\ntweet and silently split the thread into two disconnected chains.\n\nX also rejects mid-thread entries with ``status='invalid_input'`` when\nthe text passes local validation but contains codepoints that X counts\nas multiple weighted characters (emoji, many CJK glyphs) pushing the\nweighted total above 280, or when the text contains control characters\nX disallows. Simplify the entry at ``tweets[next_position - 1]`` (plain\nASCII is the safest reset) and resume.",
-      "parameters": [
-        {
-          "name": "tweets",
-          "type": "array",
-          "innerType": "json",
-          "required": true,
-          "description": "Ordered list of tweets to post as a thread. Allowed length is 2-25 entries when posting a new thread; 1-25 entries when resuming an existing thread via ``parent_tweet_id`` (the single-entry case lets a caller append one more reply to the prior thread tail). Each entry is an object with required ``text`` (1-280 chars). The first entry is the head tweet (or the resume entry when ``parent_tweet_id`` is set); each subsequent entry is posted as a reply to the prior entry's id. Empty/whitespace-only text fails validation per-entry and aborts the thread before any post is created.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "quote_tweet_id",
-          "type": "string",
-          "required": false,
-          "description": "Tweet id quoted by the head tweet only (subsequent thread entries cannot quote). Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "reply_settings",
-          "type": "string",
-          "required": false,
-          "description": "Reply restriction applied to the head tweet only (X applies the head's setting to the entire thread). Leave None for X's default (everyone). Defaults to None.",
-          "enum": [
-            "everyone",
-            "mentionedUsers",
-            "following",
-            "subscribers"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "poll_options",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Attach a poll to the head tweet only (subsequent thread entries cannot include a poll). When set, must be 2-4 short answer options (each <=25 chars) and ``poll_duration_minutes`` must also be set. Polls are incompatible with ``quote_tweet_id`` (X rejects the combination). Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "poll_duration_minutes",
-          "type": "integer",
-          "required": false,
-          "description": "How long the head poll stays open, in minutes (5-10080). Required when ``poll_options`` is set; ignored otherwise. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "parent_tweet_id",
-          "type": "string",
-          "required": false,
-          "description": "Numeric tweet id to chain the first ``tweets`` entry under as a reply (snowflake id, 1-19 digits). Use this to resume an interrupted thread: pass the ``tweet_id`` of the last entry that successfully posted (i.e. ``posted[-1].tweet_id`` from the prior call). When set, every entry chains as a reply (no head tweet is created), so head-only options (``quote_tweet_id``, ``poll_options`` / ``poll_duration_minutes``, ``reply_settings``) cannot be combined with this parameter. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "tweet.read",
-          "tweet.write",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.PostThread",
-        "parameters": {
-          "tweets": {
-            "value": [
-              {
-                "text": "🧵 Let's talk about the future of AI and how it's reshaping the way we work. Thread incoming! (1/4)"
-              },
-              {
-                "text": "First, AI is automating repetitive tasks — freeing up humans to focus on creativity and critical thinking. This shift is already happening across industries. (2/4)"
-              },
-              {
-                "text": "Second, AI-powered tools are lowering the barrier to entry for developers, designers, and entrepreneurs. Building sophisticated products no longer requires massive teams. (3/4)"
-              },
-              {
-                "text": "Finally, the ethical implications matter more than ever. Transparency, fairness, and accountability in AI systems must be a priority — not an afterthought. (4/4) What do you think?"
-              }
-            ],
-            "type": "array",
-            "required": true
-          },
-          "quote_tweet_id": {
-            "value": "1778234567890123456",
-            "type": "string",
-            "required": false
-          },
-          "reply_settings": {
-            "value": "mentionedUsers",
-            "type": "string",
-            "required": false
-          },
-          "poll_options": {
-            "value": [
-              "Strongly agree",
-              "Somewhat agree",
-              "Neutral",
-              "Disagree"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "poll_duration_minutes": {
-            "value": 1440,
-            "type": "integer",
-            "required": false
-          },
-          "parent_tweet_id": {
-            "value": null,
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "PostTweet",
-      "qualifiedName": "X.PostTweet",
-      "fullyQualifiedName": "X.PostTweet@2.0.2",
-      "description": "Post a new tweet as the authenticated user.\n\nThe same tool covers top-level posts, replies, and quote tweets. Supply\n``reply_to_tweet_id`` to post the new tweet as a reply; supply\n``quote_tweet_id`` to quote another tweet; supply both to post a reply\nthat also quotes a tweet. Pass ``reply_settings`` to restrict who can\nreply. Pass ``poll_options`` plus ``poll_duration_minutes`` to attach a\npoll (polls cannot be combined with ``quote_tweet_id``).\n\nFor multi-tweet threads, use the post-thread tool.",
-      "parameters": [
-        {
-          "name": "tweet_text",
-          "type": "string",
-          "required": true,
-          "description": "The text content of the tweet you want to post. Must be non-empty. Standard X accounts have a 280 character limit, which this toolkit enforces; Premium accounts can post longer text but the toolkit conservatively rejects anything over 280 characters.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "reply_to_tweet_id",
-          "type": "string",
-          "required": false,
-          "description": "The id of an existing tweet to reply to. When set, the new tweet is posted as a reply in that conversation. Leave None to post a top-level tweet. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "quote_tweet_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the tweet you want to quote. It must be a valid integer as a string. Default is None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "reply_settings",
-          "type": "string",
-          "required": false,
-          "description": "Restrict who can reply to the new tweet. Leave None for X's default (everyone). Defaults to None.",
-          "enum": [
-            "everyone",
-            "mentionedUsers",
-            "following",
-            "subscribers"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "poll_options",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "Attach a poll to the new tweet. When provided, must be a list of 2-4 short answer options; each option is at most 25 characters (X API limit). When set, ``poll_duration_minutes`` must also be set. Polls are incompatible with ``quote_tweet_id`` (X rejects the combination). Leave None for no poll. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "poll_duration_minutes",
-          "type": "integer",
-          "required": false,
-          "description": "How long the poll stays open, in minutes. Required when ``poll_options`` is set; ignored otherwise. Must be between 5 and 10080 (7 days), per X's API limits. Defaults to None.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "tweet.read",
-          "tweet.write",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The id, URL, and status of the new tweet"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.PostTweet",
-        "parameters": {
-          "tweet_text": {
-            "value": "Just discovered an amazing new coffee shop downtown — the cold brew is absolutely incredible! ☕ #CoffeeLovers #MondayVibes",
-            "type": "string",
-            "required": true
-          },
-          "reply_to_tweet_id": {
-            "value": "1782345678901234567",
-            "type": "string",
-            "required": false
-          },
-          "quote_tweet_id": {
-            "value": "1781234567890123456",
-            "type": "string",
-            "required": false
-          },
-          "reply_settings": {
-            "value": "mentionedUsers",
-            "type": "string",
-            "required": false
-          },
-          "poll_options": {
-            "value": [
-              "Absolutely yes!",
-              "Probably not",
-              "Need more info",
-              "No opinion"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "poll_duration_minutes": {
-            "value": 1440,
-            "type": "integer",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "RemoveListMember",
-      "qualifiedName": "X.RemoveListMember",
-      "fullyQualifiedName": "X.RemoveListMember@2.0.2",
+      "name": "RemoveMembersFromList",
+      "qualifiedName": "X.RemoveMembersFromList",
+      "fullyQualifiedName": "X.RemoveMembersFromList@3.0.1",
       "description": "Remove one or more users from an X List owned by the authenticated user.\n\nProvide ``user_ids``, ``usernames``, or both. Removing a user who is not\na member is treated as success.\n\nOn a mid-loop rate-limit, the run short-circuits and remaining targets\nare marked as not attempted. On retry, drop the targets that already\nsucceeded; otherwise polling re-arms X's bucket and extends the lockout.\n\nX is eventually consistent on list membership: a success status here\ndoes not mean a subsequent read of the list's members will immediately\nstop returning the removed member. Allow a few seconds before relying\non the read endpoint to reflect the mutation.\n\nSerialize dependent list mutations: do not remove members in parallel\nwith deleting the same ``list_id`` (a known race that produces spurious\n``not_found`` when the remove lands after the delete). Await each\nmutation before issuing the next one on the same list.",
       "parameters": [
         {
@@ -2216,7 +2212,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Numeric X user ids (snowflake ids, 1-19 digits) of the members to remove. Up to 100 targets per call (combined with ``usernames``). Prefer this over ``usernames`` when you already have stable ids — the toolkit skips the username-resolution hop, which is rate-limited by X. Defaults to None.",
+          "description": "Numeric X user ids (snowflake ids, 1-19 digits) of the members to remove. Up to 100 targets per call (combined with ``usernames``). Prefer this over ``usernames`` when you already have stable ids — the toolkit skips the username-resolution hop, which is rate-limited by X. Defaults to no ids.",
           "enum": null,
           "inferrable": true
         },
@@ -2225,7 +2221,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Handles of the members to remove. Leading '@' is optional and stripped automatically. Up to 100 targets per call (combined with ``user_ids``). Handles are resolved to ids in batched ``/2/users/by`` calls (one round-trip per 100 handles) instead of one resolve-per-target. Defaults to None.",
+          "description": "Handles of the members to remove. Leading '@' is optional and stripped automatically. Up to 100 targets per call (combined with ``user_ids``). Handles are resolved to ids in batched ``/2/users/by`` calls (one round-trip per 100 handles) instead of one resolve-per-target. Defaults to no handles.",
           "enum": null,
           "inferrable": true
         }
@@ -2248,10 +2244,10 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.RemoveListMember",
+        "toolName": "X.RemoveMembersFromList",
         "parameters": {
           "list_id": {
-            "value": "1623489012345678901",
+            "value": "1648234567890123456",
             "type": "string",
             "required": true
           },
@@ -2259,7 +2255,8 @@
             "value": [
               "783214",
               "6253282",
-              "17874544"
+              "17874544",
+              "123456789"
             ],
             "type": "array",
             "required": false
@@ -2267,8 +2264,9 @@
           "usernames": {
             "value": [
               "elonmusk",
-              "@jack",
-              "biz"
+              "jack",
+              "TwitterDev",
+              "@TwitterAPI"
             ],
             "type": "array",
             "required": false
@@ -2297,9 +2295,9 @@
       }
     },
     {
-      "name": "Retweet",
-      "qualifiedName": "X.Retweet",
-      "fullyQualifiedName": "X.Retweet@2.0.2",
+      "name": "RepostTweet",
+      "qualifiedName": "X.RepostTweet",
+      "fullyQualifiedName": "X.RepostTweet@3.0.1",
       "description": "Retweet a tweet as the authenticated user.\n\nIdempotent: retweeting an already-retweeted tweet succeeds.",
       "parameters": [
         {
@@ -2328,10 +2326,10 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.Retweet",
+        "toolName": "X.RepostTweet",
         "parameters": {
           "tweet_id": {
-            "value": "1649857302948765184",
+            "value": "1234567890123456789",
             "type": "string",
             "required": true
           }
@@ -2361,7 +2359,7 @@
     {
       "name": "SearchSpaces",
       "qualifiedName": "X.SearchSpaces",
-      "fullyQualifiedName": "X.SearchSpaces@2.0.2",
+      "fullyQualifiedName": "X.SearchSpaces@3.0.1",
       "description": "Search live and scheduled X Spaces by title.\n\nMatches the query against Space titles only (not transcripts). Filter\n``state`` controls whether to return live, scheduled, or both.\n\nThis endpoint does not paginate; ``max_results`` is the maximum page\nsize.",
       "parameters": [
         {
@@ -2376,7 +2374,7 @@
           "name": "state",
           "type": "string",
           "required": false,
-          "description": "Filter results by Space lifecycle state — currently-live, scheduled upcoming, or both. Defaults to all.",
+          "description": "Only include Spaces in this lifecycle state: live (happening now), scheduled (upcoming), or all for both. Defaults to all.",
           "enum": [
             "live",
             "scheduled",
@@ -2451,9 +2449,9 @@
       }
     },
     {
-      "name": "SearchTweetsByKeywords",
-      "qualifiedName": "X.SearchTweetsByKeywords",
-      "fullyQualifiedName": "X.SearchTweetsByKeywords@2.0.2",
+      "name": "SearchTweets",
+      "qualifiedName": "X.SearchTweets",
+      "fullyQualifiedName": "X.SearchTweets@3.0.1",
       "description": "Search tweets on X by structured filters across X's recent ~7-day index.\n\nSearches the last ~7 days of public tweets. For deeper historical\nwindows, X gates the full-archive search endpoint behind a paid plan;\nthis toolkit only offers the recent variant.\n\nAll supplied filters are ANDed together. At least one positive filter\nis required: a non-empty keyword or phrase, a non-empty\n``from_username`` / ``to_username``, or a ``has_*`` / ``is_*`` flag set\nto True. ``lang``, ``exclude_replies``, ``sort_order``, ``start_time`` /\n``end_time``, and False-valued flags are qualifiers, not positive filters.\n\nPagination: X's cursor is inclusive at the boundary, so consecutive\npages may overlap by one tweet. De-duplicate by tweet id when merging\npages. X's sharded search backend sometimes returns ``data=[]`` with a\nnon-null ``next_token`` when the slice it scanned produced no hits;\n``auto_follow_empty_pages`` controls how many such empty pages the tool\nfollows internally before returning, and ``pages_scanned`` in the\nresponse reports how far it scanned.",
       "parameters": [
         {
@@ -2461,7 +2459,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Single keywords that must ALL be present in matching tweets (AND semantics). Example: ['anthropic', 'claude'] matches tweets containing both words. Defaults to None.",
+          "description": "Single keywords that must ALL be present in matching tweets (AND semantics). Example: ['anthropic', 'claude'] matches tweets containing both words. Defaults to no keywords.",
           "enum": null,
           "inferrable": true
         },
@@ -2470,7 +2468,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Multi-word phrases that must ALL be present in matching tweets (AND semantics). Each phrase is matched as a contiguous quoted string. Defaults to None.",
+          "description": "Multi-word phrases that must ALL be present in matching tweets (AND semantics). Each phrase is matched as a contiguous quoted string. Defaults to no phrases.",
           "enum": null,
           "inferrable": true
         },
@@ -2486,7 +2484,7 @@
           "name": "next_token",
           "type": "string",
           "required": false,
-          "description": "Pagination token from a prior response's ``next_token``. Leave None to start at the first page. Defaults to None.",
+          "description": "Pagination token from a prior response's ``next_token``. Defaults to the first page.",
           "enum": null,
           "inferrable": true
         },
@@ -2502,7 +2500,7 @@
           "name": "lang",
           "type": "string",
           "required": false,
-          "description": "BCP-47 language code (e.g. 'en', 'ja', 'es') to restrict matches to tweets X classified as that language. Leave None for no language filter. Defaults to None.",
+          "description": "BCP-47 language code (e.g. 'en', 'ja', 'es') to restrict matches to tweets X classified as that language. Defaults to any language.",
           "enum": null,
           "inferrable": true
         },
@@ -2518,7 +2516,7 @@
           "name": "from_username",
           "type": "string",
           "required": false,
-          "description": "Restrict to tweets authored by this handle. Leading '@' is optional and stripped automatically. Leave None for no author restriction. Defaults to None.",
+          "description": "Restrict to tweets authored by this handle. Leading '@' is optional and stripped automatically. Defaults to any author.",
           "enum": null,
           "inferrable": true
         },
@@ -2526,7 +2524,7 @@
           "name": "to_username",
           "type": "string",
           "required": false,
-          "description": "Restrict to tweets that reply to this handle. Leading '@' is optional and stripped automatically. Leave None for no recipient restriction. Defaults to None.",
+          "description": "Restrict to tweets that reply to this handle. Leading '@' is optional and stripped automatically. Defaults to any recipient.",
           "enum": null,
           "inferrable": true
         },
@@ -2534,7 +2532,7 @@
           "name": "has_media",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain any media attachment. True requires media; False excludes media; None leaves the filter unset. Defaults to None.",
+          "description": "Only include tweets with any media attachment when true, or without one when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2542,7 +2540,7 @@
           "name": "has_images",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain image attachments. True requires images; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Only include tweets with image attachments when true, or without them when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2550,7 +2548,7 @@
           "name": "has_videos",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain native (non-GIF) videos. True requires videos; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Only include tweets with native (non-GIF) videos when true, or without them when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2558,7 +2556,7 @@
           "name": "has_links",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain links/URLs. True requires links; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Only include tweets with links/URLs when true, or without them when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2566,7 +2564,7 @@
           "name": "has_mentions",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets mention at least one user. True requires mentions; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Only include tweets that mention at least one user when true, or that mention no one when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2574,7 +2572,7 @@
           "name": "has_hashtags",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether tweets contain at least one hashtag. True requires hashtags; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Only include tweets with at least one hashtag when true, or with none when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2582,7 +2580,7 @@
           "name": "is_verified",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether the tweet author is verified. True requires verified authors; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Only include tweets from verified authors when true, or from unverified authors when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2590,7 +2588,7 @@
           "name": "is_retweet",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether the tweet is a retweet. True requires retweets; False excludes retweets; None leaves the filter unset. Defaults to None.",
+          "description": "Only include retweets when true, or tweets that are not retweets when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2598,7 +2596,7 @@
           "name": "is_quote",
           "type": "boolean",
           "required": false,
-          "description": "Filter on whether the tweet is a quote tweet. True requires quote tweets; False excludes them; None leaves the filter unset. Defaults to None.",
+          "description": "Only include quote tweets when true, or tweets that are not quote tweets when false. Defaults to not filtering on it.",
           "enum": null,
           "inferrable": true
         },
@@ -2606,7 +2604,7 @@
           "name": "start_time",
           "type": "string",
           "required": false,
-          "description": "Lower bound (inclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Must fall within X's ~7-day recent index window; values older than 7 days surface as ``invalid_input``. Leave None for no lower bound. Defaults to None.",
+          "description": "Lower bound (inclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Must fall within X's ~7-day recent index window; values older than 7 days surface as ``invalid_input``. Defaults to no lower bound.",
           "enum": null,
           "inferrable": true
         },
@@ -2614,7 +2612,7 @@
           "name": "end_time",
           "type": "string",
           "required": false,
-          "description": "Upper bound (exclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Must fall within X's ~7-day recent index window. Leave None for no upper bound. Defaults to None.",
+          "description": "Upper bound (exclusive) on tweet creation time, in ISO-8601 / RFC-3339 UTC format (YYYY-MM-DDTHH:MM:SSZ). Must fall within X's ~7-day recent index window. Defaults to no upper bound.",
           "enum": null,
           "inferrable": true
         },
@@ -2646,20 +2644,20 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "X.SearchTweetsByKeywords",
+        "toolName": "X.SearchTweets",
         "parameters": {
           "keywords": {
             "value": [
-              "AI",
-              "machinelearning"
+              "climate",
+              "renewable"
             ],
             "type": "array",
             "required": false
           },
           "phrases": {
             "value": [
-              "large language model",
-              "generative AI"
+              "solar energy",
+              "carbon neutral"
             ],
             "type": "array",
             "required": false
@@ -2670,7 +2668,7 @@
             "required": false
           },
           "next_token": {
-            "value": "7140dibdnow9c7btw422kk1bksxgj7nl8vy9en7z9w9c",
+            "value": "7140dibdnow9c7btw423z1bxcpsdq9rz43j9y15s",
             "type": "string",
             "required": false
           },
@@ -2690,7 +2688,7 @@
             "required": false
           },
           "from_username": {
-            "value": "OpenAI",
+            "value": "NASA",
             "type": "string",
             "required": false
           },
@@ -2720,7 +2718,7 @@
             "required": false
           },
           "has_mentions": {
-            "value": true,
+            "value": false,
             "type": "boolean",
             "required": false
           },
@@ -2745,17 +2743,17 @@
             "required": false
           },
           "start_time": {
-            "value": "2025-01-20T00:00:00Z",
+            "value": "2024-06-01T00:00:00Z",
             "type": "string",
             "required": false
           },
           "end_time": {
-            "value": "2025-01-27T23:59:59Z",
+            "value": "2024-06-07T23:59:59Z",
             "type": "string",
             "required": false
           },
           "sort_order": {
-            "value": "relevancy",
+            "value": "relevance",
             "type": "string",
             "required": false
           }
@@ -2783,71 +2781,9 @@
       }
     },
     {
-      "name": "UndoRetweet",
-      "qualifiedName": "X.UndoRetweet",
-      "fullyQualifiedName": "X.UndoRetweet@2.0.2",
-      "description": "Undo a previous retweet by the authenticated user.\n\nIdempotent: undoing a retweet that doesn't exist succeeds.",
-      "parameters": [
-        {
-          "name": "tweet_id",
-          "type": "string",
-          "required": true,
-          "description": "The ID of the original tweet whose retweet you want to undo.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "x",
-        "providerType": "oauth2",
-        "scopes": [
-          "tweet.read",
-          "tweet.write",
-          "users.read"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The id of the original tweet and a status string."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "X.UndoRetweet",
-        "parameters": {
-          "tweet_id": {
-            "value": "1234567890123456789",
-            "type": "string",
-            "required": true
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "x",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "social_media"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "UnlikeTweet",
       "qualifiedName": "X.UnlikeTweet",
-      "fullyQualifiedName": "X.UnlikeTweet@2.0.2",
+      "fullyQualifiedName": "X.UnlikeTweet@3.0.1",
       "description": "Remove the authenticated user's like from a tweet.\n\nThe tweet itself is unaffected; only the like relationship is removed.\nIdempotent: unliking a tweet that isn't liked succeeds.",
       "parameters": [
         {
@@ -2909,7 +2845,7 @@
     {
       "name": "UnpinList",
       "qualifiedName": "X.UnpinList",
-      "fullyQualifiedName": "X.UnpinList@2.0.2",
+      "fullyQualifiedName": "X.UnpinList@3.0.1",
       "description": "Unpin an X List from the authenticated user's profile.\n\nIdempotent: unpinning a list that isn't pinned succeeds.",
       "parameters": [
         {
@@ -2970,9 +2906,71 @@
       }
     },
     {
+      "name": "UnrepostTweet",
+      "qualifiedName": "X.UnrepostTweet",
+      "fullyQualifiedName": "X.UnrepostTweet@3.0.1",
+      "description": "Undo a previous retweet by the authenticated user.\n\nIdempotent: undoing a retweet that doesn't exist succeeds.",
+      "parameters": [
+        {
+          "name": "tweet_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the original tweet whose retweet you want to undo.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "x",
+        "providerType": "oauth2",
+        "scopes": [
+          "tweet.read",
+          "tweet.write",
+          "users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The id of the original tweet and a status string."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "X.UnrepostTweet",
+        "parameters": {
+          "tweet_id": {
+            "value": "1743210987654321098",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "x",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "social_media"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "UpdateList",
       "qualifiedName": "X.UpdateList",
-      "fullyQualifiedName": "X.UpdateList@2.0.2",
+      "fullyQualifiedName": "X.UpdateList@3.0.1",
       "description": "Rename a list, edit its description, or toggle its visibility.\n\nAt least one of ``name``, ``description``, or ``private`` must be\nprovided. Unchanged fields keep their pre-existing values.\n\nSerialize dependent list mutations: do not update a list in parallel\nwith deleting it, adding or removing its members, or another update to\nthe same ``list_id``. Concurrent dependent mutations race against X's\ndistributed state and surface spurious ``not_found`` errors. Await each\nmutation before issuing the next one on the same list.",
       "parameters": [
         {
@@ -2987,7 +2985,7 @@
           "name": "name",
           "type": "string",
           "required": false,
-          "description": "New display name for the list. Provide a non-empty string of at most 25 characters to rename. Leave None to leave the existing name unchanged. Defaults to None.",
+          "description": "New display name for the list. Provide a non-empty string of at most 25 characters to rename. Defaults to leaving the name unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -2995,7 +2993,7 @@
           "name": "description",
           "type": "string",
           "required": false,
-          "description": "New description for the list. Provide any string (including empty) to overwrite the existing description; an empty string clears it. Leave None to leave the existing description unchanged. Defaults to None.",
+          "description": "New description for the list. Provide any string (including empty) to overwrite the existing description; an empty string clears it. Defaults to leaving the description unchanged.",
           "enum": null,
           "inferrable": true
         },
@@ -3003,7 +3001,7 @@
           "name": "private",
           "type": "boolean",
           "required": false,
-          "description": "Visibility flag. True makes the list private (only visible to its owner); False makes it public. Leave None to leave the existing visibility unchanged. Defaults to None.",
+          "description": "Make the list private (only visible to its owner) when true, or public when false. Defaults to leaving the visibility unchanged.",
           "enum": null,
           "inferrable": true
         }
@@ -3074,7 +3072,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "X.WhoAmI",
-      "fullyQualifiedName": "X.WhoAmI@2.0.2",
+      "fullyQualifiedName": "X.WhoAmI@3.0.1",
       "description": "Get the authenticated X (Twitter) user's profile.",
       "parameters": [],
       "auth": {
@@ -3122,6 +3120,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:26:06.954Z",
-  "summary": "## X (Twitter) Toolkit\n\nArcade's X toolkit provides LLM-callable tools for interacting with the X (Twitter) API on behalf of an authenticated user, covering tweets, timelines, lists, likes, retweets, spaces, and user lookups.\n\n## Capabilities\n\n- **Tweet lifecycle** — post top-level tweets, replies, quote tweets, and polls; post multi-tweet threads (including mid-thread resume); delete tweets; like/unlike and retweet/undo-retweet.\n- **Reading & searching tweets** — fetch home timeline, mentions, user tweet history, conversations, direct replies, quote tweets, recent keyword search (~7-day index), and batch tweet lookups (up to 100 ids); retrieve engagement lists (likers, retweeters).\n- **X Lists** — create, update, delete, pin, unpin, and read owned lists; add/remove members with eventual-consistency and serialization guidance; fetch list tweets and member roster.\n- **Users & profiles** — look up users by handle or numeric id (batch up to 100); get the authenticated user's own profile; retrieve a user's list memberships and liked tweets.\n- **Spaces** — look up a Space by id, list live/scheduled Spaces by creator, and search Spaces by title.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **X** provider. See the [Arcade X auth provider docs](https://docs.arcade.dev/en/references/auth-providers/x) for setup details."
+  "generatedAt": "2026-10-21T22:06:02.183Z",
+  "summary": "## X Toolkit\n\nArcade's X toolkit provides LLM-callable tools for the X (Twitter) API, enabling agents to read and write tweets, manage lists, explore Spaces, and interact with user data on behalf of an authenticated user.\n\n## Capabilities\n\n- **Tweeting & threads:** Create, delete, like, unlike, repost, and unrepost tweets; post multi-tweet threads with resume support; attach polls, quotes, and reply restrictions.\n- **Search & retrieval:** Search recent tweets (~7-day window) with structured filters; fetch home timelines, mentions, conversation threads, direct replies, and quote tweets; look up tweets by ID in batches up to 100.\n- **User & profile data:** Look up users by handle or numeric ID (up to 100 per call); retrieve the authenticated user's own profile.\n- **List management:** Create, update, delete, pin, and unpin lists; add and remove members; list members, memberships, owned lists, and tweets from a list — with consistency and serialization guidance throughout.\n- **Spaces:** Look up a Space by ID, list live or scheduled Spaces by creator, and search Spaces by title.\n- **Engagement insights:** Fetch users who liked or retweeted a tweet; list tweets a user has liked; retrieve non-public and organic metrics for tweets the caller authored.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **X** provider. See the [Arcade X auth provider docs](https://docs.arcade.dev/en/references/auth-providers/x) for setup details."
 }

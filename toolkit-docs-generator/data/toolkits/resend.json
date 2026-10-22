@@ -1,7 +1,7 @@
 {
   "id": "Resend",
   "label": "Resend",
-  "version": "1.0.2",
+  "version": "2.0.1",
   "description": "Arcade.dev LLM tools for sending and managing transactional email via Resend",
   "metadata": {
     "category": "productivity",
@@ -18,7 +18,7 @@
     {
       "name": "CancelEmail",
       "qualifiedName": "Resend.CancelEmail",
-      "fullyQualifiedName": "Resend.CancelEmail@1.0.2",
+      "fullyQualifiedName": "Resend.CancelEmail@2.0.1",
       "description": "Cancel a scheduled, not-yet-sent email.",
       "parameters": [
         {
@@ -78,7 +78,7 @@
     {
       "name": "GetEmail",
       "qualifiedName": "Resend.GetEmail",
-      "fullyQualifiedName": "Resend.GetEmail@1.0.2",
+      "fullyQualifiedName": "Resend.GetEmail@2.0.1",
       "description": "Retrieve a single email by its Resend ID, including current delivery status.",
       "parameters": [
         {
@@ -136,89 +136,16 @@
       }
     },
     {
-      "name": "RescheduleEmail",
-      "qualifiedName": "Resend.RescheduleEmail",
-      "fullyQualifiedName": "Resend.RescheduleEmail@1.0.2",
-      "description": "Reschedule a not-yet-sent email by updating its scheduled_at timestamp.",
-      "parameters": [
-        {
-          "name": "email_id",
-          "type": "string",
-          "required": true,
-          "description": "Identifier of the scheduled email to reschedule.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "scheduled_at",
-          "type": "string",
-          "required": true,
-          "description": "New send time as ISO 8601 (YYYY-MM-DDTHH:MM:SSZ) or natural language ('in 1 hour'). Only emails that have not yet been sent can be rescheduled.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "RESEND_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "RESEND_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "Confirmation of the rescheduled email."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Resend.RescheduleEmail",
-        "parameters": {
-          "email_id": {
-            "value": "49a3999c-0ce1-4ea6-ab68-afcd6dc2e794",
-            "type": "string",
-            "required": true
-          },
-          "scheduled_at": {
-            "value": "2024-06-15T14:30:00Z",
-            "type": "string",
-            "required": true
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "email"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "SendEmail",
       "qualifiedName": "Resend.SendEmail",
-      "fullyQualifiedName": "Resend.SendEmail@1.0.2",
+      "fullyQualifiedName": "Resend.SendEmail@2.0.1",
       "description": "Send a transactional email through Resend.\n\nReturns the Resend-assigned email_id. When scheduled_at is provided, the email is\nqueued for later delivery instead of sent immediately.",
       "parameters": [
         {
           "name": "from_address",
           "type": "string",
           "required": true,
-          "description": "Sender address as a bare email or formatted display name plus email, e.g. 'Acme <onboarding@example.com>'. The sender domain must be verified in Resend.",
+          "description": "Sender address as a bare email or formatted display name plus email, e.g. 'Acme <user@example.com>'. The sender domain must be verified in Resend.",
           "enum": null,
           "inferrable": true
         },
@@ -260,7 +187,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "CC recipients. Omit for none.",
+          "description": "CC recipients. Defaults to no CC recipients.",
           "enum": null,
           "inferrable": true
         },
@@ -269,7 +196,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "BCC recipients. Omit for none.",
+          "description": "BCC recipients. Defaults to no BCC recipients.",
           "enum": null,
           "inferrable": true
         },
@@ -278,7 +205,7 @@
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "Reply-To addresses. Replies from recipients are directed here instead of the sender. Omit to use the sender as the reply target.",
+          "description": "Reply-To addresses. Replies from recipients are directed here instead of the sender. Defaults to the sender.",
           "enum": null,
           "inferrable": true
         },
@@ -295,7 +222,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Files to attach, each fetched by Resend from a remote URL. Every attachment needs a 'filename' and a 'url' pointing to a publicly accessible file (not a local path). Optional 'content_type' overrides MIME detection. Omit for none.",
+          "description": "Files to attach, each fetched by Resend from a remote URL. Every attachment needs a 'filename' and a 'url' pointing to a publicly accessible file (not a local path). Optional 'content_type' overrides MIME detection. Defaults to no attachments.",
           "enum": null,
           "inferrable": true
         },
@@ -304,7 +231,7 @@
           "type": "array",
           "innerType": "json",
           "required": false,
-          "description": "Custom tags for analytics or filtering. Each entry has a 'name' and a 'value'.",
+          "description": "Custom tags for analytics or filtering. Each entry has a 'name' and a 'value'. Defaults to no tags.",
           "enum": null,
           "inferrable": true
         },
@@ -312,7 +239,7 @@
           "name": "headers",
           "type": "json",
           "required": false,
-          "description": "Additional RFC 822 headers as a flat key/value mapping (e.g. {'X-Entity-Ref-ID': '...'}). Omit for none.",
+          "description": "Additional RFC 822 headers as a flat key/value mapping (e.g. {'X-Entity-Ref-ID': '...'}). Defaults to no extra headers.",
           "enum": null,
           "inferrable": true
         }
@@ -443,12 +370,85 @@
         },
         "extras": null
       }
+    },
+    {
+      "name": "UpdateEmail",
+      "qualifiedName": "Resend.UpdateEmail",
+      "fullyQualifiedName": "Resend.UpdateEmail@2.0.1",
+      "description": "Reschedule a not-yet-sent email by updating its scheduled_at timestamp.",
+      "parameters": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the scheduled email to reschedule.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scheduled_at",
+          "type": "string",
+          "required": true,
+          "description": "New send time as ISO 8601 (YYYY-MM-DDTHH:MM:SSZ) or natural language ('in 1 hour'). Only emails that have not yet been sent can be rescheduled.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "RESEND_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "RESEND_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the rescheduled email."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Resend.UpdateEmail",
+        "parameters": {
+          "email_id": {
+            "value": "49a3999c-0ce1-4ea6-ab68-afcd6dc2e794",
+            "type": "string",
+            "required": true
+          },
+          "scheduled_at": {
+            "value": "2024-11-15T14:30:00Z",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
     }
   ],
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-07T21:25:57.061Z",
-  "summary": "Resend is a transactional email platform; this toolkit lets agents send, schedule, reschedule, cancel, and inspect emails via the Resend API.\n\n## Capabilities\n\n- **Sending & scheduling** — send emails immediately or queue them for future delivery using a `scheduled_at` timestamp; returns a Resend-assigned `email_id`\n- **Lifecycle management** — cancel or reschedule queued (not-yet-sent) emails by ID\n- **Status inspection** — retrieve a single email record by its Resend ID, including current delivery status\n\n## Secrets\n\n`RESEND_API_KEY` — A Resend API key used to authenticate all requests. Obtain it from the [Resend dashboard](https://resend.com/api-keys) under **API Keys** → **Create API Key**. Grant the key at minimum **Sending access**; for cancel/reschedule/get operations, **Full access** is required. Free-tier accounts can generate keys immediately after verifying a sending domain.\n\nStore the key in Arcade as a secret. See the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for setup instructions, or manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-21T22:05:34.989Z",
+  "summary": "The Resend toolkit integrates Arcade with [Resend](https://resend.com) to send and manage transactional email via LLM-callable tools.\n\n## Capabilities\n\n- **Send & schedule email**: Send transactional email immediately or queue it for future delivery using a `scheduled_at` timestamp; returns the Resend-assigned `email_id`.\n- **Manage scheduled email**: Reschedule or cancel queued (not-yet-sent) emails by their ID.\n- **Email status inspection**: Retrieve a single email record by ID, including its current delivery status.\n\n## Secrets\n\n`RESEND_API_KEY` — A Resend API key used to authenticate all requests. Generate one in the [Resend dashboard under API Keys](https://resend.com/api-keys). Create a key with **Full access** (or at minimum **Sending access**) for the domains you intend to use; note that cancellation and rescheduling require the key to have permission to manage emails. Free-tier Resend accounts can generate API keys but are limited to sending from `onboarding@resend.dev` until a custom domain is verified.\n\nStore this secret in Arcade and reference it in your tool configuration. See the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) for setup instructions, or manage secrets directly at https://api.arcade.dev/dashboard/auth/secrets."
 }
