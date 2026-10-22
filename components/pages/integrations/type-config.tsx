@@ -1,6 +1,7 @@
 import type { ToolkitType } from "@arcadeai/design-system";
 import { BadgeCheck, CheckCircle, Key, Terminal, Users } from "lucide-react";
 import type React from "react";
+import { isToolkitType, type ListedToolkitType } from "./filter-params";
 
 export const TYPE_CONFIG: Record<
   ToolkitType,
@@ -32,6 +33,12 @@ export const TYPE_CONFIG: Record<
     color: "text-indigo-500",
   },
 };
+
+/** The designations the index lists. No toolkit is assigned `community`. */
+export const LISTED_TYPE_CONFIG = Object.entries(TYPE_CONFIG).filter(
+  (entry): entry is [ListedToolkitType, (typeof TYPE_CONFIG)[ToolkitType]] =>
+    isToolkitType(entry[0])
+);
 
 export const TOOL_CARD_TYPE_CONFIG: Record<
   ToolkitType,
@@ -74,7 +81,7 @@ export const TOOL_CARD_TYPE_CONFIG: Record<
   },
 };
 
-export const TYPE_DESCRIPTIONS: Record<ToolkitType, React.ReactNode> = {
+export const TYPE_DESCRIPTIONS: Record<ListedToolkitType, React.ReactNode> = {
   arcade: (
     <>
       Official MCP Servers hand-crafted by Arcade that are ready for use and
@@ -101,9 +108,6 @@ export const TYPE_DESCRIPTIONS: Record<ToolkitType, React.ReactNode> = {
       .
     </>
   ),
-  verified:
-    "Community-created MCP Servers, thoroughly tested and verified by Arcade.",
-  community:
-    "Created and maintained by the Arcade community, offering a wide range of MCP Servers.",
+  verified: "MCP Servers built outside Arcade, tested and verified by Arcade.",
   auth: "Auth integrations allow you to develop custom tools that connect your agent APIs and services.",
 };

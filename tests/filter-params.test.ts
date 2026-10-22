@@ -15,12 +15,12 @@ describe("isToolkitType", () => {
     expect(isToolkitType("arcade")).toBe(true);
     expect(isToolkitType("arcade_starter")).toBe(true);
     expect(isToolkitType("verified")).toBe(true);
-    expect(isToolkitType("community")).toBe(true);
     expect(isToolkitType("auth")).toBe(true);
   });
 
   test("rejects unknown values", () => {
     expect(isToolkitType("bogus")).toBe(false);
+    expect(isToolkitType("community")).toBe(false);
     expect(isToolkitType("ARCADE")).toBe(false);
     expect(isToolkitType("")).toBe(false);
   });
@@ -269,7 +269,7 @@ describe("round-trip", () => {
   test("serialize then parse produces equivalent filters", () => {
     const state: FilterState = {
       selectedCategory: "social",
-      selectedType: "community",
+      selectedType: "auth",
       filterByPro: true,
       filterByByoc: false,
       searchQuery: "twitter",

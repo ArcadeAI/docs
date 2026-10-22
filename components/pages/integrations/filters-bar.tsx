@@ -11,11 +11,10 @@ import {
   DropdownMenuTrigger,
   Input,
   Separator,
-  type ToolkitType,
 } from "@arcadeai/design-system";
 import { Check, Filter, FolderOpen, Layers, Search, X } from "lucide-react";
 import type React from "react";
-import { TYPE_CONFIG } from "./type-config";
+import { LISTED_TYPE_CONFIG, TYPE_CONFIG } from "./type-config";
 import { useFilters } from "./use-filters";
 
 type FiltersBarProps = {
@@ -138,21 +137,19 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
                   )}
                   All Types
                 </DropdownMenuItem>
-                {Object.entries(TYPE_CONFIG).map(
-                  ([key, { label, icon: Icon }]) => (
-                    <DropdownMenuItem
-                      key={key}
-                      onClick={() => setSelectedType(key as ToolkitType)}
-                    >
-                      {selectedType === key ? (
-                        <Check className="mr-2 h-3.5 w-3.5" />
-                      ) : (
-                        <Icon className="mr-2 h-3.5 w-3.5" />
-                      )}
-                      {label}
-                    </DropdownMenuItem>
-                  )
-                )}
+                {LISTED_TYPE_CONFIG.map(([key, { label, icon: Icon }]) => (
+                  <DropdownMenuItem
+                    key={key}
+                    onClick={() => setSelectedType(key)}
+                  >
+                    {selectedType === key ? (
+                      <Check className="mr-2 h-3.5 w-3.5" />
+                    ) : (
+                      <Icon className="mr-2 h-3.5 w-3.5" />
+                    )}
+                    {label}
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
 
@@ -254,7 +251,7 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
             )}
             {selectedType !== "all" && (
               <Badge className="gap-1" variant="secondary">
-                {TYPE_CONFIG[selectedType as ToolkitType].label}
+                {TYPE_CONFIG[selectedType].label}
                 <button
                   aria-label="Remove type filter"
                   className="hover:opacity-70"

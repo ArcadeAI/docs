@@ -11,7 +11,7 @@ import {
 } from "@/lib/integration-index";
 import { FiltersBar } from "./filters-bar";
 import { ToolCard } from "./tool-card";
-import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
+import { LISTED_TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilters } from "./use-filters";
 import { useToolkitFilters } from "./use-toolkit-filters";
 
@@ -64,30 +64,25 @@ export default function ToolkitsClient({ toolkits }: ToolkitsClientProps) {
               MCP Servers
             </h1>
             <p className="text-gray-600 text-sm leading-relaxed sm:text-base dark:text-gray-400">
-              There are 5 designations for Arcade MCP Servers:
+              There are {LISTED_TYPE_CONFIG.length} designations for Arcade MCP
+              Servers:
             </p>
             <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-3">
-              {Object.entries(TYPE_CONFIG).map(
-                ([key, { label, icon: Icon, color }]) => (
-                  <div className="flex items-start space-x-3" key={key}>
-                    <div className="mt-1">
-                      <Icon className={cn("h-5 w-5", color)} />
-                    </div>
-                    <div>
-                      <h2 className="font-semibold text-gray-800 text-sm sm:text-base dark:text-gray-200">
-                        {label}
-                      </h2>
-                      <p className="mt-1 text-gray-600 text-xs leading-relaxed sm:text-sm dark:text-gray-400">
-                        {
-                          TYPE_DESCRIPTIONS[
-                            key as keyof typeof TYPE_DESCRIPTIONS
-                          ]
-                        }
-                      </p>
-                    </div>
+              {LISTED_TYPE_CONFIG.map(([key, { label, icon: Icon, color }]) => (
+                <div className="flex items-start space-x-3" key={key}>
+                  <div className="mt-1">
+                    <Icon className={cn("h-5 w-5", color)} />
                   </div>
-                )
-              )}
+                  <div>
+                    <h2 className="font-semibold text-gray-800 text-sm sm:text-base dark:text-gray-200">
+                      {label}
+                    </h2>
+                    <p className="mt-1 text-gray-600 text-xs leading-relaxed sm:text-sm dark:text-gray-400">
+                      {TYPE_DESCRIPTIONS[key]}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
 
             {/* Don't see what you need? Two paths to fix that. */}
