@@ -5,10 +5,11 @@ import { Search } from "lucide-react";
 
 /**
  * Search trigger for the navbar and mobile menu. It opens Fumadocs' search
- * dialog, which also handles the Cmd/Ctrl + K shortcut.
+ * dialog, which also handles the shortcut. The hint comes from Fumadocs'
+ * hotkey config, so it reads "⌘ K" on Mac and "Ctrl K" elsewhere.
  */
 export function SearchButton() {
-  const { setOpenSearch } = useSearchContext();
+  const { hotKey, setOpenSearch } = useSearchContext();
 
   return (
     <button
@@ -20,7 +21,11 @@ export function SearchButton() {
       <Search className="size-3.5 shrink-0" />
       <span className="flex-1 text-left">Search</span>
       <kbd className="flex items-center gap-0.5 rounded border border-border px-1 text-xs text-muted-foreground">
-        <span>⌘</span>K
+        {hotKey.map((key) => (
+          <span key={typeof key.key === "string" ? key.key : "modifier"}>
+            {key.display}
+          </span>
+        ))}
       </kbd>
     </button>
   );

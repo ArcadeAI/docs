@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
+import { GET } from "@/app/api/search/route";
 import { builtinSearch } from "@/lib/builtin-search";
+import { SEARCH_SUGGESTIONS } from "@/lib/search-suggestions";
+import { source } from "@/lib/source";
 
 // lib/source.ts compiles every MDX page, which Vitest can't do cheaply (see
 // tests/helpers/fs-source.ts). Index the pages from disk instead, using each
@@ -60,5 +63,41 @@ describe("builtin search", () => {
 
   it("returns no results for an empty query", async () => {
     expect(await search("")).toEqual([]);
+  });
+});
+
+describe("search suggestions", () => {
+  it("link to pages that exist", () => {
+    const urls = new Set(source.getPages().map((page) => page.url));
+    for (const [, url] of SEARCH_SUGGESTIONS) {
+      expect(urls.has(url), `${url} is not a docs page`).toBe(true);
+    }
+  });
+});
+
+describe("/api/search route", () => {
+  const get = (query: string) =>
+    GET(
+      new Request(
+        `http://localhost/api/search?query=${encodeURIComponent(query)}`
+      )
+    );
+
+  it("lets a CDN cache responses", async () => {
+    const response = await get("gmail");
+    expect(response.headers.get("Cache-Control")).toContain("s-maxage");
+  });
+
+  it("cuts very long queries instead of rejecting them", async () => {
+    const question = "how do I send an email from my agent with gmail ";
+    const longQuery = question.repeat(100);
+    const response = await get(longQuery);
+    expect(response.status).toBe(200);
+
+    // The same results as the first 200 characters on their own.
+    const expected = await (
+      await get(longQuery.slice(0, 200).trimEnd())
+    ).json();
+    expect(await response.json()).toEqual(expected);
   });
 });
