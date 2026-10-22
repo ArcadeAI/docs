@@ -23,8 +23,6 @@ const SETTLE_MS = 1000;
 const MIN_TRACKED_QUERY_LENGTH = 2;
 const MAX_TRACKED_QUERY_LENGTH = 200;
 
-type SeenResults = { query: string; count: number };
-
 type DocsSearchDialogProps = SharedProps & { links?: SearchLink[] };
 
 /**
@@ -42,7 +40,9 @@ export default function DocsSearchDialog({
   onOpenChange,
   ...props
 }: DocsSearchDialogProps) {
-  const [seen, setSeen] = useState<SeenResults | null>(null);
+  // Result count per query. Keyed by query so a slow earlier request finishing
+  // after a newer one can't hide the newer query's count.
+  const [resultCounts, setResultCounts] = useState<Record<string, number>>({});
   const lastTracked = useRef("");
 
   // Wrap the fetch client to learn how many results each query returned.
@@ -52,7 +52,10 @@ export default function DocsSearchDialog({
       deps: base.deps,
       async search(text: string) {
         const results = await base.search(text);
-        setSeen({ query: text, count: results.length });
+        setResultCounts((counts) => ({
+          ...counts,
+          [text.trim()]: results.length,
+        }));
         return results;
       },
     };
@@ -78,19 +81,23 @@ export default function DocsSearchDialog({
     if (term.length < MIN_TRACKED_QUERY_LENGTH) {
       return;
     }
+    const count = resultCounts[term];
+    if (count === undefined) {
+      return;
+    }
     const timer = setTimeout(() => {
-      if (seen?.query.trim() !== term || lastTracked.current === term) {
+      if (lastTracked.current === term) {
         return;
       }
       lastTracked.current = term;
       posthog.capture("Docs search", {
         query: term.slice(0, MAX_TRACKED_QUERY_LENGTH),
-        result_count: seen.count,
-        has_results: seen.count > 0,
+        result_count: count,
+        has_results: count > 0,
       });
     }, SETTLE_MS);
     return () => clearTimeout(timer);
-  }, [search, seen]);
+  }, [search, resultCounts]);
 
   const handleSelect = (item: SearchItemType) => {
     if (item.type === "action") {
@@ -105,6 +112,7 @@ export default function DocsSearchDialog({
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       lastTracked.current = "";
+      setResultCounts({});
     }
     onOpenChange(open);
   };
