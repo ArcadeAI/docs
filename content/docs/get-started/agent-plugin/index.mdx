@@ -1,7 +1,7 @@
 ---
 title: Install the Arcade agent plugin
 sidebarTitle: Install
-description: Install Arcade in Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, ChatGPT, or Claude Desktop. Connect your agent to apps through Arcade with browser sign-in.
+description: Install Arcade in Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, ChatGPT, Claude Desktop, or Grok Bot. Connect your agent to apps through Arcade with browser sign-in.
 ---
 
 import { SignupLink } from "@/components/analytics";
@@ -17,7 +17,7 @@ Install the Arcade agent plugin in a supported client and connect to its hosted 
 
 <GuideOverview.Prerequisites>
 
-- A [supported client](/en/get-started/agent-plugin/whats-included#client-support): Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, or Claude Desktop. ChatGPT on the web uses the upload steps in the Codex tab.
+- A [supported client](/en/get-started/agent-plugin/whats-included#client-support): Cursor, Claude Code, VS Code, GitHub Copilot CLI, Codex, Claude Desktop, or Grok Bot. ChatGPT on the web uses the upload steps in the Codex tab.
 - An <SignupLink linkLocation="docs:agent-plugin-install">Arcade account</SignupLink>
 - For Claude Code, Claude Cowork, Cursor CLI, GitHub Copilot CLI, and VS Code Copilot sessions: [Node.js](https://nodejs.org/) on the host's `PATH`
 
@@ -27,7 +27,7 @@ Install the Arcade agent plugin in a supported client and connect to its hosted 
 
 ## Install
 
-<Tabs items={["Claude Code", "Codex", "Cursor", "VS Code", "Copilot CLI", "Claude Desktop", "Other"]}>
+<Tabs items={["Claude Code", "Codex", "Cursor", "VS Code", "Copilot CLI", "Claude Desktop", "Grok Bot", "Other"]}>
 <Tabs.Tab>
 
 1. Add the Arcade marketplace and install the plugin:
@@ -91,10 +91,13 @@ See [Cursor's marketplace instructions](https://cursor.com/docs/plugins#add-a-te
 
 For an individual plan, or a Teams or Enterprise plan with **Allow Local Plugin Imports** enabled:
 
+Cursor loads each folder under `~/.cursor/plugins/local` as a plugin root. The repository's root `.cursor-plugin/plugin.json` points skills, agents, commands, rules, and the logo into `plugin/`.
+
 1. Clone the plugin into Cursor's local plugin directory:
 
    ```bash
-   git clone https://github.com/ArcadeAI/arcade-plugin ~/.cursor/plugins/local/arcade-plugin
+   mkdir -p ~/.cursor/plugins/local
+   git clone https://github.com/ArcadeAI/arcade-plugin.git ~/.cursor/plugins/local/arcade-plugin
    ```
 
 2. Run **Developer: Reload Window**.
@@ -150,6 +153,29 @@ Requires a [paid Claude plan](https://support.claude.com/en/articles/13837440-us
 On Team or Enterprise, an Owner may need to [add the connector for your organization](https://claude.com/docs/plugins/overview#bundled-connectors) before you can connect it with your account.
 
 Use this flow for Desktop Chat and Cowork. [Installing from the Claude Code command line does not add the plugin to your Claude account](https://claude.com/docs/plugins/overview#find-the-plugin-in-each-app).
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+Grok Bot loads the `try-arcade` and `scale-arcade` skills and the Arcade MCP server as a connector. Hooks, commands, and the `arcade-operator` subagent do not run.
+
+```text
+https://api.arcade.dev/mcp/arcade
+```
+
+The connector namespace does not always use the name `arcade`. A team connector can use another name, such as `Arcade Full-Suite`. `try-arcade` calls `Arcade_SelectTools` and `Arcade_UseTool` on the namespace that exposes those tools.
+
+Sign in to Arcade in the browser when a task needs an app that is not connected. Each app has its own sign-in. On a Team Bot, a plugin that signs in with an account uses the person talking to the Bot. Each teammate connects their own account the first time they need it.
+
+Grok Bot's docs cover connecting an app, installed plugins, team connector policy, Team Bot sign-in, and authentication problems:
+
+- [Use the computer and apps](https://docs.x.ai/grok-bot/computer-and-apps): connect an app
+- [Settings and notifications](https://docs.x.ai/grok-bot/settings-and-notifications): installed plugins
+- [Grok Bot for teams and enterprises](https://docs.x.ai/grok-bot/teams-and-enterprises): team connector policy
+- [Team Bots](https://docs.x.ai/grok-bot/team-bots): account sign-in on a Team Bot
+- [Troubleshooting](https://docs.x.ai/grok-bot/troubleshooting): a plugin that does not install or authenticate
+
+Ask "What apps can Arcade use?" to start.
 
 </Tabs.Tab>
 <Tabs.Tab>
