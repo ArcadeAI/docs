@@ -14,7 +14,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { AlgoliaSearch } from "@/components/algolia-search";
 import { Collapse } from "@/components/chrome/collapse";
 import {
   ArrowRightIcon,
@@ -28,6 +27,7 @@ import type {
 } from "@/components/chrome/sidebar-model";
 import { setFocusedRoute, useFocusedRoute } from "@/components/chrome/stores";
 import { LocaleSwitch, ThemeSwitch } from "@/components/chrome/switchers";
+import { SearchButton } from "@/components/search-button";
 
 /** Folders below this level start closed. */
 const DEFAULT_MENU_COLLAPSE_LEVEL = 2;
@@ -293,7 +293,7 @@ export function MobileNav({ directories }: { directories: SidebarNode[] }) {
       )}
     >
       <div className="px-4 pt-4">
-        <AlgoliaSearch />
+        <SearchButton />
       </div>
       <Menu
         className={classes.wrapper}

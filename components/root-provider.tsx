@@ -1,17 +1,22 @@
 "use client";
 
 import { RootProvider } from "fumadocs-ui/provider/next";
-import type { ReactNode } from "react";
+import { lazy, type ReactNode } from "react";
+import { SEARCH_SUGGESTIONS } from "@/lib/search-suggestions";
+
+// Loaded on first use, like Fumadocs' own default dialog.
+const SearchDialog = lazy(() => import("./search-dialog"));
 
 /**
  * Fumadocs root provider with the site defaults: dark theme by default and no
- * theme hotkey. Fumadocs' own search is off; the docs search lives in
- * components/algolia-search.tsx and handles its own shortcut.
+ * theme hotkey. Search uses a Fumadocs search dialog (Cmd/Ctrl + K, see
+ * components/search-dialog.tsx) backed by the /api/search route in
+ * lib/builtin-search.ts.
  */
 export function AppRootProvider({ children }: { children: ReactNode }) {
   return (
     <RootProvider
-      search={{ enabled: false }}
+      search={{ SearchDialog, links: SEARCH_SUGGESTIONS }}
       theme={{ defaultTheme: "dark", hotKey: false }}
     >
       {children}
