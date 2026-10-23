@@ -31,9 +31,10 @@ Connect Cursor to an Arcade MCP Gateway.
 </GuideOverview>
 
 <Callout type="info">
-  Cursor currently does not refresh the MCP OAuth tokens automatically. To set a
-  persistent connection between Cursor and your MCP Gateway, you should set the
-  `Authorization` field to "Arcade Headers" in the dashboard.
+  Cursor renews an expired MCP access token when the server issued a refresh
+  token. If the connection still drops after the token expires, set the
+  gateway's **Authorization** field to **Arcade Headers** and pass the headers
+  below.
 </Callout>
 
 <Callout type="info">
@@ -42,10 +43,10 @@ Connect Cursor to an Arcade MCP Gateway.
 
 ### Set up Cursor
 
-1. Open the Command Palette (`Cmd + Shift + P` on macOS, `Ctrl + Shift + P` on Windows/Linux) and select **Open MCP Settings**
-1. Click on the "New MCP Server" button
+1. Open **Customize** in the sidebar, then select **MCPs**.
+2. Select **Add New MCP Server**. Choose the HTTP transport, paste your MCP Gateway URL, and name the server. Cursor writes the entry in `mcp.json`.
 
-Cursor will open the MCP settings file, and you can add a new entry to the `mcpServers` object:
+You can also edit the file directly. Use `~/.cursor/mcp.json` for every project, or `.cursor/mcp.json` in one project. Add an entry to `mcpServers`:
 
 <Tabs items={["Arcade Auth", "Arcade Headers"]} storageKey="preferredMCPAuthMode">
 <Tabs.Tab>

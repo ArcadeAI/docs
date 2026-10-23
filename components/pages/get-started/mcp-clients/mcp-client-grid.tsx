@@ -5,6 +5,11 @@ import meta from "./client-titles";
 // MCP Client data with logos and descriptions
 const mcpClients = [
   {
+    key: "chatgpt",
+    name: "ChatGPT",
+    description: "OpenAI's chat app with custom MCP servers",
+  },
+  {
     key: "cursor",
     name: "Cursor",
     description: "AI-powered code editor with built-in MCP support",
@@ -36,6 +41,7 @@ const mcpClients = [
 
 // Logo mapping
 const logoSrc = {
+  chatgpt: "/images/icons/openai.png",
   cursor: "/images/icons/cursor.png",
   "claude-desktop": "/images/icons/claude.png",
   "claude-code": "/images/icons/claude.png",
