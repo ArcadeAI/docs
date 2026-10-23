@@ -1,5 +1,8 @@
 // Display titles for the MCP client pages, keyed by page slug.
 const meta: Record<string, { title?: string }> = {
+  chatgpt: {
+    title: "ChatGPT",
+  },
   "claude-code": {
     title: "Claude Code",
   },

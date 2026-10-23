@@ -1,0 +1,182 @@
+---
+title: Add an MCP App to a tool
+sidebarTitle: Add an MCP App
+description: Publish an HTML UI with your MCP server, deploy the server to Arcade, and call tools from the UI.
+---
+
+For agent developers who build MCP servers, MCP Apps let you show an HTML UI inside an MCP client. A tool can show a chart, a result view, or an editor that calls the same tool again or another tool in the same gateway. This guide shows how to attach a UI to a tool and publish the UI with Arcade Deploy.
+
+## Prerequisites
+
+- An [Arcade MCP server](/en/build/create-tools/tool-basics/build-mcp-server).
+- `arcade-mcp-server` version 1.32.1 or later and the [Arcade CLI](/en/references/arcade-cli).
+- An Arcade account and project for [Arcade Deploy](/en/build/arcade-deploy).
+- An MCP client that supports the MCP Apps extension. A client that only supports tool calls does not render the UI.
+
+## Start with the runnable example
+
+The [MCP Apps example server](https://github.com/ArcadeAI/arcade-mcp/tree/main/examples/mcp_servers/tools_with_mcp_apps) includes a greeting editor, tools that the editor calls, and a text resource. Run the example from its project directory:
+
+```bash
+git clone https://github.com/ArcadeAI/arcade-mcp.git
+cd arcade-mcp/examples/mcp_servers/tools_with_mcp_apps
+uv sync --extra dev
+uv run python src/tools_with_mcp_apps/server.py
+```
+
+The server runs over stdio. Connect an MCP Apps client to the server to test the UI locally. Opening `editor.html` in a browser does not test the host connection: the UI needs the MCP client's message bridge.
+
+The preview and uppercase tools need no third-party authorization. The Google profile tool is an optional, read-only example of authorization from an open App.
+
+## Attach an HTML resource to a tool
+
+Declare the UI with `resource` from the public `arcade_mcp_server` package. Keep the HTML file beside the Python module that declares the resource:
+
+```python title="src/tools_with_mcp_apps/ui.py"
+from arcade_mcp_server import resource
+
+
+@resource(file="editor.html", title="Greeting editor")
+def editor() -> None:
+    """Edit a greeting and call tools through the connected MCP client."""
+```
+
+The example's UI-linked tool imports the resource declaration and passes the declaration to `@tool(ui=...)`. The following excerpt omits the example's other tools:
+
+```python title="src/tools_with_mcp_apps/tools.py"
+from typing import Annotated
+
+from arcade_mcp_server import tool
+
+from tools_with_mcp_apps.ui import editor
+
+
+@tool(ui=editor)
+def preview_greeting(name: Annotated[str, "The name to greet"]) -> str:
+    """Show a greeting editor."""
+    return f"Hello, {name}!"
+```
+
+Load the package's tools in the server entrypoint:
+
+```python title="src/tools_with_mcp_apps/server.py"
+from importlib.metadata import version
+
+from arcade_mcp_server import MCPApp
+
+import tools_with_mcp_apps
+
+app = MCPApp(name="tools_with_mcp_apps", version=version("tools_with_mcp_apps"))
+app.add_tools_from_module(tools_with_mcp_apps)
+
+if __name__ == "__main__":
+    app.run()
+```
+
+Include `editor.html` in the Python package you deploy. The example's wheel configuration includes the HTML file in `src/tools_with_mcp_apps/`.
+
+The framework publishes the resource with the `ui://` scheme and the `text/html;profile=mcp-app` MIME type. The framework also sets the tool's `_meta.ui.resourceUri`. Do not construct that metadata by hand. Use the standalone `@resource` declaration for Arcade Deploy, rather than the native-MCP-only `@app.resource` API.
+
+The MCP client reads the linked resource and renders the HTML in a sandbox. Tool execution and UI loading are separate requests. Keep end-user data in tool results, not in the published HTML: the same HTML document serves different end-users.
+
+## Deploy and connect through a gateway
+
+From the example's directory containing `pyproject.toml`, run:
+
+```bash
+uv run arcade login
+uv run arcade deploy -e src/tools_with_mcp_apps/server.py
+```
+
+Before deploying a changed release, increase `project.version` in `pyproject.toml` and run `uv sync --extra dev`. When you change the HTML, also update the App's `appInfo.version` in `editor.html`.
+
+After deployment:
+
+1. [Create an MCP gateway](/en/operate/governance/mcp-gateways/create-via-dashboard) in the same project.
+2. Select `ToolsWithMcpApps.PreviewGreeting` and `ToolsWithMcpApps.UppercaseGreeting`. Add `ToolsWithMcpApps.GoogleProfile` if you want to test authorization.
+3. Connect your MCP Apps client to the gateway URL from the Dashboard.
+4. Ask the client to call `ToolsWithMcpApps_PreviewGreeting` with `name` set to `Ada`.
+5. Change the name in the editor and select **Uppercase greeting**. The editor calls the other tool and shows the updated greeting.
+
+You do not add the HTML as a separate server or select a resource in the Dashboard. The tool already points to the UI resource. The gateway gives the resource a unique address. Use the exact address returned by the gateway, rather than constructing an address from the toolkit name or version.
+
+For a self-hosted Arcade installation, use an Arcade Engine release and deployment runtime that support managed-server resources. Ask your platform operator to confirm that support. See [Arcade Deploy on your own cluster](/en/operate/deploy/helm-arcade-deploy) for the deployment setup.
+
+## Call another tool from the App
+
+App JavaScript sends tool calls through the MCP client's existing gateway connection. Do not put an Arcade API key or OAuth token in the HTML, or call the Arcade Engine API from the iframe to execute tools.
+
+In the example's `editor.html`, `request` handles the MCP Apps message bridge and `available` maps tool identities to the names returned by discovery. The cross-tool call uses:
+
+```javascript title="editor.html"
+const name = available.get("ToolsWithMcpApps.UppercaseGreeting");
+const result = await request("tools/call", {
+  name,
+  arguments: { name: document.getElementById("name").value },
+});
+```
+
+Call the exact discovered name. The greeting editor checks availability before enabling the editor and before each action. An App does not gain permission to call a tool because the App references the tool.
+
+### Check availability before the user starts editing
+
+An action's tool may be absent from the gateway or unavailable to the connected end-user. Hide the action or keep the action's button inactive before the end-user spends time editing inputs for an action that cannot run.
+
+The example first tries App-to-host `tools/list`, which is in the [draft MCP Apps specification](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx#standard-mcp-messages). The example reads every page and respects the tool's App visibility.
+
+If the host returns method-not-found, or tool recommendations replace the complete tool list, the example asks the host to read Arcade's availability resource:
+
+```text
+arcade://gateway/tool-availability/v1?tool=ToolsWithMcpApps.PreviewGreeting&tool=ToolsWithMcpApps.UppercaseGreeting&request=<fresh-uuid>
+```
+
+This temporary Arcade-specific fallback requires host support for server resource reads. It returns the exact MCP names of the requested tools available to the end-user in the gateway. Keep the native-first check and fallback when adapting the example. Treat a failed check as unknown availability, not as confirmation that a tool is absent.
+
+Test the missing-tool case with a second gateway that excludes `ToolsWithMcpApps.UppercaseGreeting`. The editor must not show the uppercase button.
+
+### Handle authorization without losing edits
+
+Availability does not mean that OAuth consent or required secrets are ready. Let the ordinary tool call check those requirements. Do not execute a tool to probe availability.
+
+The MCP host may handle URL elicitation during a call. If the host instead forwards an unresolved authorization requirement, the example shows an authorization prompt and keeps the edited inputs. After authorization, the end-user selects **Retry action**. Completing OAuth does not trigger another tool call from the App.
+
+For an initial tool call that has not executed, show the authorization prompt instead of an empty editor. The host must retry the original call after authorization. An error about a missing secret is not an OAuth authorization prompt.
+
+## Configure external assets and requests
+
+The bundled greeting editor uses inline JavaScript and CSS, with no direct network requests. If you add external scripts, styles, images, or fonts, declare the origins in the resource's `meta` argument. Direct API requests also need declared origins. Replace the existing resource declaration with a declaration such as:
+
+```python title="ui.py"
+@resource(
+    file="editor.html",
+    meta={
+        "ui": {
+            "csp": {
+                "resourceDomains": ["https://cdn.example.com"],
+                "connectDomains": ["https://api.example.com"],
+            }
+        }
+    },
+)
+def editor() -> None:
+    """Show the greeting editor."""
+```
+
+Use `resourceDomains` and `connectDomains`, not browser directive names such as `script-src` and `connect-src`. The MCP host reads `_meta.ui.csp` from the resource-read response. Putting the policy only on the tool does not configure the resource.
+
+For local assets, include each origin's scheme and port, such as `http://localhost:5173`. `localhost` and `127.0.0.1` are different origins. Remove development origins before deployment. The host's message bridge does not need a `connectDomains` entry.
+
+## Troubleshoot a missing UI
+
+| Symptom | Check |
+| --- | --- |
+| The tool returns text, but no UI appears | Use a client with MCP Apps support. Confirm that the tool definition includes `_meta.ui.resourceUri`. |
+| The client reports resource-not-found | Read the exact linked URI from the current tool definition. Confirm that the deployed package includes the HTML file and uses the standalone `@resource` declaration. |
+| The UI is blank | Check the host's browser console for blocked assets. Check `resourceDomains` and `connectDomains` on the resource. |
+| An action is missing or inactive | Check tool availability for the connected end-user and gateway. A failed discovery request is not an authorization check. |
+
+## Next steps
+
+- Adapt the [complete example server and HTML](https://github.com/ArcadeAI/arcade-mcp/tree/main/examples/mcp_servers/tools_with_mcp_apps).
+- [Add authorization to a tool](/en/build/create-tools/tool-basics/create-tool-auth).
+- Read the [official MCP Apps documentation](https://apps.extensions.modelcontextprotocol.io/) for frontend SDK APIs and host requirements.
