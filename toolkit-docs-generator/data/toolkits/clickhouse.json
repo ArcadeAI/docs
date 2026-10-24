@@ -1,7 +1,7 @@
 {
   "id": "Clickhouse",
   "label": "Clickhouse",
-  "version": "1.0.2",
+  "version": "2.0.1",
   "description": "Tools to query and explore a ClickHouse database",
   "metadata": {
     "category": "databases",
@@ -16,11 +16,28 @@
   "auth": null,
   "tools": [
     {
-      "name": "DiscoverDatabases",
-      "qualifiedName": "Clickhouse.DiscoverDatabases",
-      "fullyQualifiedName": "Clickhouse.DiscoverDatabases@1.0.2",
-      "description": "Discover all the databases in the ClickHouse database.",
-      "parameters": [],
+      "name": "ListColumns",
+      "qualifiedName": "Clickhouse.ListColumns",
+      "fullyQualifiedName": "Clickhouse.ListColumns@2.0.1",
+      "description": "Get the schema/structure of a ClickHouse table in the ClickHouse database\nwhen the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.\nAll tables in the query must be discovered first,\nso that their exact names are known.",
+      "parameters": [
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": true,
+          "description": "The schema to get the table schema of",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table_name",
+          "type": "string",
+          "required": true,
+          "description": "The table to get the schema of",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
       "auth": null,
       "secrets": [
         "CLICKHOUSE_DATABASE_CONNECTION_STRING"
@@ -32,12 +49,66 @@
         }
       ],
       "output": {
-        "type": "array",
-        "description": "No description provided."
+        "type": "json",
+        "description": "The table's columns"
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Clickhouse.DiscoverDatabases",
+        "toolName": "Clickhouse.ListColumns",
+        "parameters": {
+          "schema_name": {
+            "value": "default",
+            "type": "string",
+            "required": true
+          },
+          "table_name": {
+            "value": "user_events",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListDatabases",
+      "qualifiedName": "Clickhouse.ListDatabases",
+      "fullyQualifiedName": "Clickhouse.ListDatabases@2.0.1",
+      "description": "Discover all the databases in the ClickHouse database.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CLICKHOUSE_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The databases on the ClickHouse server"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickhouse.ListDatabases",
         "parameters": {},
         "requiresAuth": false,
         "tabLabel": "Call the Tool"
@@ -59,9 +130,9 @@
       }
     },
     {
-      "name": "DiscoverSchemas",
-      "qualifiedName": "Clickhouse.DiscoverSchemas",
-      "fullyQualifiedName": "Clickhouse.DiscoverSchemas@1.0.2",
+      "name": "ListSchemas",
+      "qualifiedName": "Clickhouse.ListSchemas",
+      "fullyQualifiedName": "Clickhouse.ListSchemas@2.0.1",
       "description": "Discover all the schemas in the ClickHouse database.\n\nNote: ClickHouse doesn't have schemas like PostgreSQL, so this returns a default schema name.",
       "parameters": [],
       "auth": null,
@@ -75,12 +146,12 @@
         }
       ],
       "output": {
-        "type": "array",
-        "description": "No description provided."
+        "type": "json",
+        "description": "The schemas in the ClickHouse database"
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Clickhouse.DiscoverSchemas",
+        "toolName": "Clickhouse.ListSchemas",
         "parameters": {},
         "requiresAuth": false,
         "tabLabel": "Call the Tool"
@@ -102,9 +173,9 @@
       }
     },
     {
-      "name": "DiscoverTables",
-      "qualifiedName": "Clickhouse.DiscoverTables",
-      "fullyQualifiedName": "Clickhouse.DiscoverTables@1.0.2",
+      "name": "ListTables",
+      "qualifiedName": "Clickhouse.ListTables",
+      "fullyQualifiedName": "Clickhouse.ListTables@2.0.1",
       "description": "Discover all the tables in the ClickHouse database when the list of tables is not known.\n\nALWAYS use this tool before any other tool that requires a table name.",
       "parameters": [],
       "auth": null,
@@ -118,12 +189,12 @@
         }
       ],
       "output": {
-        "type": "array",
-        "description": "No description provided."
+        "type": "json",
+        "description": "The tables in the default database"
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Clickhouse.DiscoverTables",
+        "toolName": "Clickhouse.ListTables",
         "parameters": {},
         "requiresAuth": false,
         "tabLabel": "Call the Tool"
@@ -145,9 +216,9 @@
       }
     },
     {
-      "name": "ExecuteSelectQuery",
-      "qualifiedName": "Clickhouse.ExecuteSelectQuery",
-      "fullyQualifiedName": "Clickhouse.ExecuteSelectQuery@1.0.2",
+      "name": "QueryRows",
+      "qualifiedName": "Clickhouse.QueryRows",
+      "fullyQualifiedName": "Clickhouse.QueryRows@2.0.1",
       "description": "You have a connection to a ClickHouse database.\nExecute a SELECT query and return the results against the ClickHouse database.\nNo other queries (INSERT, UPDATE, DELETE, etc.) are allowed.\n\nONLY use this tool if you have already loaded the schema of the tables you need to query.\n\nThe final query will be constructed as follows:\nSELECT {select_query_part} FROM {from_clause} JOIN {join_clause}\nWHERE {where_clause} HAVING {having_clause}\nORDER BY {order_by_clause} LIMIT {limit} OFFSET {offset}\n\nWhen running queries, follow these rules which will help avoid errors:\n* Never \"select *\" from a table. Always select the columns you need.\n* Always order your results. Use the most important columns or the primary key if you're unsure.\n* Always use case-insensitive queries to match strings in the query.\n* Always trim strings in the query.\n* Prefer LIKE queries over direct string matches or regex queries.\n* Only join on columns that are indexed or the primary key. Do not join on arbitrary columns.\n* ClickHouse is case-sensitive, so be careful with table and column names.",
       "parameters": [
         {
@@ -238,29 +309,29 @@
       "secretsInfo": [
         {
           "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
-          "type": "password"
+          "type": "unknown"
         }
       ],
       "output": {
-        "type": "array",
-        "description": "No description provided."
+        "type": "json",
+        "description": "The rows the query returned"
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Clickhouse.ExecuteSelectQuery",
+        "toolName": "Clickhouse.QueryRows",
         "parameters": {
           "select_clause": {
-            "value": "e.event_id, e.user_id, lower(trim(e.event_type)) AS event_type, e.event_time, lower(trim(u.country)) AS country",
+            "value": "user_id, trim(user_name) AS user_name, email, created_at, total_orders",
             "type": "string",
             "required": true
           },
           "from_clause": {
-            "value": "analytics.events AS e",
+            "value": "orders_summary",
             "type": "string",
             "required": true
           },
           "limit": {
-            "value": 100,
+            "value": 50,
             "type": "integer",
             "required": false
           },
@@ -270,105 +341,34 @@
             "required": false
           },
           "join_clause": {
-            "value": "analytics.users AS u ON e.user_id = u.id",
+            "value": "users ON orders_summary.user_id = users.id",
             "type": "string",
             "required": false
           },
           "where_clause": {
-            "value": "lower(trim(e.event_type)) LIKE 'purchase%' AND lower(trim(u.country)) = 'us' AND e.event_time >= toDateTime('2026-01-01 00:00:00')",
+            "value": "LOWER(trim(status)) LIKE '%active%' AND created_at >= '2024-01-01'",
             "type": "string",
             "required": false
           },
           "having_clause": {
-            "value": "",
+            "value": "total_orders > 5",
             "type": "string",
             "required": false
           },
           "group_by_clause": {
-            "value": "",
+            "value": "user_id, user_name, email, created_at, total_orders",
             "type": "string",
             "required": false
           },
           "order_by_clause": {
-            "value": "e.event_time DESC, e.event_id ASC",
+            "value": "total_orders DESC, created_at ASC",
             "type": "string",
             "required": false
           },
           "with_clause": {
-            "value": "",
+            "value": "ranked_users AS (SELECT user_id, COUNT(*) AS total_orders FROM orders GROUP BY user_id)",
             "type": "string",
             "required": false
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": []
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetTableSchema",
-      "qualifiedName": "Clickhouse.GetTableSchema",
-      "fullyQualifiedName": "Clickhouse.GetTableSchema@1.0.2",
-      "description": "Get the schema/structure of a ClickHouse table in the ClickHouse database\nwhen the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.\nAll tables in the query must be discovered first,\nso that their exact names are known.",
-      "parameters": [
-        {
-          "name": "schema_name",
-          "type": "string",
-          "required": true,
-          "description": "The schema to get the table schema of",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "table_name",
-          "type": "string",
-          "required": true,
-          "description": "The table to get the schema of",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "CLICKHOUSE_DATABASE_CONNECTION_STRING"
-      ],
-      "secretsInfo": [
-        {
-          "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
-          "type": "unknown"
-        }
-      ],
-      "output": {
-        "type": "array",
-        "description": "No description provided."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Clickhouse.GetTableSchema",
-        "parameters": {
-          "schema_name": {
-            "value": "analytics",
-            "type": "string",
-            "required": true
-          },
-          "table_name": {
-            "value": "user_events",
-            "type": "string",
-            "required": true
           }
         },
         "requiresAuth": false,
@@ -395,6 +395,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-21T22:03:50.238Z",
-  "summary": "## ClickHouse Toolkit\n\nArcade's ClickHouse toolkit connects agents to a ClickHouse database, enabling schema discovery and read-only SQL querying.\n\n## Capabilities\n\n- **Database & table discovery:** List all databases, enumerate tables when names are unknown, and retrieve per-table schemas before constructing queries.\n- **Schema introspection:** Returns a default schema name for ClickHouse (which lacks PostgreSQL-style schemas), keeping tool interfaces consistent across database toolkits.\n- **Read-only querying:** Execute `SELECT` statements with structured clause inputs (select, from, join, where, having, order by, limit, offset); insert/update/delete operations are blocked.\n- **Query safety guardrails:** Enforces best practices at the tool level — no `SELECT *`, mandatory ordering, case-insensitive string matching, trimming, `LIKE` over regex, and index-only joins.\n\n## Secrets\n\n`CLICKHOUSE_DATABASE_CONNECTION_STRING` — The full connection string used to authenticate and connect to your ClickHouse instance. This typically takes the form of a DSN or URL that includes the protocol, username, password, host, port, and target database (e.g., `clickhouse://user:password@host:8123/database`). You obtain this by locating or creating a ClickHouse user with appropriate read permissions in your ClickHouse environment — either via [ClickHouse Cloud](https://clickhouse.com/docs/en/cloud/get-started/connect-an-external-datasource) or a self-hosted instance — then assembling the connection string from those credentials and your instance's host/port details. Ensure the user has at least `SELECT` privileges on the target database and tables.\n\nFor guidance on storing secrets in Arcade, see [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can manage your secrets at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-24T11:12:19.546Z",
+  "summary": "The Clickhouse toolkit for Arcade connects to a ClickHouse database and enables agents to explore its structure and query its data via a structured, read-only interface.\n\n## Capabilities\n\n- **Schema discovery**: List all databases, schemas (returns a default placeholder, as ClickHouse lacks PostgreSQL-style schemas), tables, and column-level structure before executing any query.\n- **Read-only querying**: Execute `SELECT` statements with explicit support for filtering, joining (on indexed/primary-key columns), ordering, pagination (`LIMIT`/`OFFSET`), and aggregation (`HAVING`). Write operations (`INSERT`, `UPDATE`, `DELETE`) are not permitted.\n- **Query safety guardrails**: Built-in rules enforce column-explicit selects, case-insensitive string matching, string trimming, `LIKE`-based matching, and indexed-only joins to reduce runtime errors.\n\n## Secrets\n\n`CLICKHOUSE_DATABASE_CONNECTION_STRING`\n\nA ClickHouse connection string that encodes the host, port, database name, username, and password needed to reach your ClickHouse instance. The exact format depends on your client driver (e.g., `clickhouse://user:password@host:port/database` for HTTP-based clients). Obtain the values from your ClickHouse deployment:\n\n- **ClickHouse Cloud**: Navigate to your service in the [ClickHouse Cloud console](https://clickhouse.cloud/), click **Connect**, and copy the connection details shown for your preferred client.\n- **Self-hosted**: Use the host/port configured in your `config.xml` (default HTTP port `8123`, native port `9000`), along with the credentials of a user that has at minimum `SELECT` and `SHOW` privileges on the target database.\n\nEnsure the user account has read-only access restricted to the intended database to limit exposure.\n\nFor guidance on storing secrets in Arcade, see the [Arcade secrets documentation](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can manage secret values at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

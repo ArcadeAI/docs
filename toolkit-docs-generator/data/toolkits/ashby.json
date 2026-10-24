@@ -1,7 +1,7 @@
 {
   "id": "Ashby",
   "label": "Ashby",
-  "version": "1.0.4",
+  "version": "3.0.1",
   "description": "Arcade.dev tools for interacting with Ashby",
   "metadata": {
     "category": "productivity",
@@ -16,93 +16,9 @@
   "auth": null,
   "tools": [
     {
-      "name": "AddCandidateNote",
-      "qualifiedName": "Ashby.AddCandidateNote",
-      "fullyQualifiedName": "Ashby.AddCandidateNote@1.0.4",
-      "description": "Add a plain-text note to a candidate (e.g. an agent handoff or summary).\n\nCreates a new note each time it runs. Requires the Candidates write permission\non the API key.",
-      "parameters": [
-        {
-          "name": "candidate_id",
-          "type": "string",
-          "required": true,
-          "description": "The id of the candidate to add the note to.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "note",
-          "type": "string",
-          "required": true,
-          "description": "The note text to add. Sent as plain text; do not pass HTML markup.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "send_notifications",
-          "type": "boolean",
-          "required": false,
-          "description": "Whether users subscribed to the candidate are notified of the note. Defaults to False.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "ASHBY_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "ASHBY_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "The created note."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Ashby.AddCandidateNote",
-        "parameters": {
-          "candidate_id": {
-            "value": "cand_01HABCDE1234FGHIJ5678KLMN",
-            "type": "string",
-            "required": true
-          },
-          "note": {
-            "value": "Candidate spoke with recruiter on initial screening call. Strong background in backend engineering with 5+ years of experience. Recommended to move forward to technical interview stage.",
-            "type": "string",
-            "required": true
-          },
-          "send_notifications": {
-            "value": true,
-            "type": "boolean",
-            "required": false
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": []
-        },
-        "behavior": {
-          "operations": [
-            "create"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "ArchiveApplication",
       "qualifiedName": "Ashby.ArchiveApplication",
-      "fullyQualifiedName": "Ashby.ArchiveApplication@1.0.4",
+      "fullyQualifiedName": "Ashby.ArchiveApplication@3.0.1",
       "description": "Archive (reject) an application, recording why.\n\nThis is how Ashby rejects a candidate for a job: the application moves to its\ninterview plan's archived stage with an archive reason. Resolves the reason name\nto the organization's configured reason id for you — an unknown name errors with\nthe available reasons, and an ambiguous one errors rather than guessing. Does NOT\nemail the candidate. The application's data is preserved, and it can later be\nmoved back to an active stage to un-archive it — though anything the rejection\nalready triggered (notifications, a status visible to humans) is not undone.\nRequires the Candidates write, Interviews read, and hiring-process-metadata read\npermissions on the API key.",
       "parameters": [
         {
@@ -171,24 +87,32 @@
       }
     },
     {
-      "name": "ChangeApplicationStage",
-      "qualifiedName": "Ashby.ChangeApplicationStage",
-      "fullyQualifiedName": "Ashby.ChangeApplicationStage@1.0.4",
-      "description": "Move an application to a named interview stage, in either direction.\n\nResolves the stage name to its id inside the application's own interview plan,\nthen moves the application — you do not look up stage ids yourself. Works to\nadvance or to move a candidate back; if the name does not match, the error lists\nthe plan's available stage names, and an ambiguous name (two stages share it)\nerrors rather than guessing. Records a transition each time it runs. It cannot\nmove an application into an archived/rejected stage (Ashby requires an archive\nreason this tool does not collect). Requires the Candidates write and Interviews\nread permissions on the API key.",
+      "name": "CreateCandidateNote",
+      "qualifiedName": "Ashby.CreateCandidateNote",
+      "fullyQualifiedName": "Ashby.CreateCandidateNote@3.0.1",
+      "description": "Add a plain-text note to a candidate (e.g. an agent handoff or summary).\n\nCreates a new note each time it runs. Requires the Candidates write permission\non the API key.",
       "parameters": [
         {
-          "name": "application_id",
+          "name": "candidate_id",
           "type": "string",
           "required": true,
-          "description": "The id of the application to move.",
+          "description": "The id of the candidate to add the note to.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "to_stage",
+          "name": "note",
           "type": "string",
           "required": true,
-          "description": "The NAME of the destination interview stage, e.g. 'Onsite'. Resolved to the stage id for you within the application's interview plan.",
+          "description": "The note text to add. Sent as plain text; do not pass HTML markup.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_notifications",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether users subscribed to the candidate are notified of the note. Defaults to False.",
           "enum": null,
           "inferrable": true
         }
@@ -205,21 +129,26 @@
       ],
       "output": {
         "type": "json",
-        "description": "The application after the stage change."
+        "description": "The created note."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Ashby.ChangeApplicationStage",
+        "toolName": "Ashby.CreateCandidateNote",
         "parameters": {
-          "application_id": {
-            "value": "app_3f8a92c1-4b7e-4d21-9e6f-bc012345abcd",
+          "candidate_id": {
+            "value": "a3f2c1d4-8b7e-4f6a-9c2d-1e5b0a3f7d8c",
             "type": "string",
             "required": true
           },
-          "to_stage": {
-            "value": "Onsite Interview",
+          "note": {
+            "value": "Candidate completed a preliminary phone screen with the recruiting team. Strong communication skills noted. Recommended to move forward to the technical interview stage.",
             "type": "string",
             "required": true
+          },
+          "send_notifications": {
+            "value": true,
+            "type": "boolean",
+            "required": false
           }
         },
         "requiresAuth": false,
@@ -231,7 +160,7 @@
         },
         "behavior": {
           "operations": [
-            "update"
+            "create"
           ],
           "readOnly": false,
           "destructive": false,
@@ -244,7 +173,7 @@
     {
       "name": "GetCandidate",
       "qualifiedName": "Ashby.GetCandidate",
-      "fullyQualifiedName": "Ashby.GetCandidate@1.0.4",
+      "fullyQualifiedName": "Ashby.GetCandidate@3.0.1",
       "description": "Get a candidate's profile and the ids of their applications.\n\nUse the returned application ids with feedback or application tools; the Ashby\nAPI does not list a candidate's applications directly. Requires the Candidates\nread permission on the API key.",
       "parameters": [
         {
@@ -302,7 +231,7 @@
     {
       "name": "GetCandidateDebrief",
       "qualifiedName": "Ashby.GetCandidateDebrief",
-      "fullyQualifiedName": "Ashby.GetCandidateDebrief@1.0.4",
+      "fullyQualifiedName": "Ashby.GetCandidateDebrief@3.0.1",
       "description": "Gather everything about a candidate for a debrief in one call.\n\nPulls the candidate's profile, the notes on file, and the interview feedback and\nscorecards across each of their applications, then returns them together — you do\nnot chain the candidate, note, and feedback reads yourself. Feedback covers up to\nthe candidate's first applications when there are many; an application whose\nfeedback can't be read is counted in `feedback_failed` rather than failing the\nwhole call. Requires the Candidates read permission on the API key.",
       "parameters": [
         {
@@ -360,7 +289,7 @@
     {
       "name": "ListApplicationFeedback",
       "qualifiedName": "Ashby.ListApplicationFeedback",
-      "fullyQualifiedName": "Ashby.ListApplicationFeedback@1.0.4",
+      "fullyQualifiedName": "Ashby.ListApplicationFeedback@3.0.1",
       "description": "Read the feedback and interview scorecards submitted on an application.\n\nUseful for synthesizing what reviewers said about a candidate before a debrief.\nRequires the Candidates read permission on the API key.",
       "parameters": [
         {
@@ -444,7 +373,7 @@
     {
       "name": "ListApplications",
       "qualifiedName": "Ashby.ListApplications",
-      "fullyQualifiedName": "Ashby.ListApplications@1.0.4",
+      "fullyQualifiedName": "Ashby.ListApplications@3.0.1",
       "description": "List the organization's applications, optionally filtered by job and/or status.\n\nThe Ashby API does not filter applications by candidate; to find a specific\ncandidate's applications, read the candidate first and use its application ids.\nRequires the Candidates read permission on the API key.",
       "parameters": [
         {
@@ -546,7 +475,7 @@
     {
       "name": "ListCandidateNotes",
       "qualifiedName": "Ashby.ListCandidateNotes",
-      "fullyQualifiedName": "Ashby.ListCandidateNotes@1.0.4",
+      "fullyQualifiedName": "Ashby.ListCandidateNotes@3.0.1",
       "description": "Read the notes recorded on a candidate, paginated via the cursor.\n\nRequires the Candidates read permission on the API key.",
       "parameters": [
         {
@@ -630,7 +559,7 @@
     {
       "name": "ListJobs",
       "qualifiedName": "Ashby.ListJobs",
-      "fullyQualifiedName": "Ashby.ListJobs@1.0.4",
+      "fullyQualifiedName": "Ashby.ListJobs@3.0.1",
       "description": "List the organization's jobs (roles), optionally filtered by status.\n\nA job is the role record; headcount slots (\"openings\") are a separate concept\nnot exposed here. Requires the Jobs read permission on the API key.",
       "parameters": [
         {
@@ -723,7 +652,7 @@
     {
       "name": "SearchCandidates",
       "qualifiedName": "Ashby.SearchCandidates",
-      "fullyQualifiedName": "Ashby.SearchCandidates@1.0.4",
+      "fullyQualifiedName": "Ashby.SearchCandidates@3.0.1",
       "description": "Search the organization's candidates by name and/or email.\n\nIntended for narrowing to a small set of known candidates (e.g. re-engaging a\npast applicant). Returns at most 100 matches; provide at least one of name or\nemail, each at least 3 characters. Requires the Candidates read permission on\nthe API key.",
       "parameters": [
         {
@@ -790,12 +719,83 @@
         },
         "extras": null
       }
+    },
+    {
+      "name": "TransitionApplication",
+      "qualifiedName": "Ashby.TransitionApplication",
+      "fullyQualifiedName": "Ashby.TransitionApplication@3.0.1",
+      "description": "Move an application to a named interview stage, in either direction.\n\nResolves the stage name to its id inside the application's own interview plan,\nthen moves the application — you do not look up stage ids yourself. Works to\nadvance or to move a candidate back; if the name does not match, the error lists\nthe plan's available stage names, and an ambiguous name (two stages share it)\nerrors rather than guessing. Records a transition each time it runs. It cannot\nmove an application into an archived/rejected stage (Ashby requires an archive\nreason this tool does not collect). Requires the Candidates write and Interviews\nread permissions on the API key.",
+      "parameters": [
+        {
+          "name": "application_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the application to move.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_stage",
+          "type": "string",
+          "required": true,
+          "description": "The NAME of the destination interview stage, e.g. 'Onsite'. Resolved to the stage id for you within the application's interview plan.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ASHBY_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ASHBY_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The application after the stage change."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Ashby.TransitionApplication",
+        "parameters": {
+          "application_id": {
+            "value": "app_3f8a21c7-94b0-4e12-b5d6-7c3a9e1d0f45",
+            "type": "string",
+            "required": true
+          },
+          "to_stage": {
+            "value": "Onsite Interview",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
     }
   ],
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-21T22:03:50.237Z",
-  "summary": "Arcade toolkit for [Ashby](https://www.ashbyhq.com/), an ATS platform. Enables agents and automations to read and write recruiting data — candidates, applications, jobs, notes, feedback, and stage transitions — directly against the Ashby API.\n\n## Capabilities\n\n- **Candidate lookup & search:** Find candidates by name/email, retrieve full profiles (including application IDs), and paginate through notes on file.\n- **Application management:** List applications across the org (filtered by job or status), move applications forward or backward through interview stages, and archive/reject applications with a resolved reason.\n- **Feedback & debriefs:** Read interview scorecards and feedback per application; pull a full debrief bundle (profile + notes + all feedback) in a single call.\n- **Annotations:** Append plain-text notes to candidates (e.g. agent handoff summaries).\n- **Job listings:** List open or filtered job records across the organization.\n\n## Secrets\n\n`ASHBY_API_KEY` — An Ashby API key used to authenticate every request. Generate one in your Ashby account under **Settings → Integrations → API Keys**. The key must be scoped with the permissions required by the tools you use:\n\n- **Candidates read** — `GetCandidate`, `GetCandidateDebrief`, `ListApplicationFeedback`, `ListApplications`, `ListCandidateNotes`, `SearchCandidates`\n- **Candidates write** — `AddCandidateNote`, `ArchiveApplication`, `ChangeApplicationStage`\n- **Interviews read** — `ArchiveApplication`, `ChangeApplicationStage`\n- **Hiring-process-metadata read** — `ArchiveApplication`\n- **Jobs read** — `ListJobs`\n\nScope the key to only the permissions your agent actually needs. Ashby API keys are organization-scoped; refer to [Ashby's API documentation](https://developers.ashbyhq.com/docs/authentication) for details on creating and scoping keys.\n\nStore the secret in Arcade at https://api.arcade.dev/dashboard/auth/secrets. For general guidance on secrets in Arcade tools, see https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets."
+  "generatedAt": "2026-10-24T11:12:15.715Z",
+  "summary": "Arcade's Ashby toolkit enables agents and tools to read and manage recruiting data in [Ashby](https://www.ashbyhq.com/) — covering candidates, applications, jobs, notes, feedback, and stage transitions.\n\n## Capabilities\n\n- **Candidate management:** Search candidates by name/email, retrieve full profiles (including application IDs), and add plain-text notes for handoffs or summaries.\n- **Application lifecycle:** List and filter applications by job or status, transition applications between interview stages (forward or backward), and archive/reject applications with a resolved reason — all without manual ID lookups.\n- **Feedback and debriefs:** Read interview scorecards and feedback on individual applications, or pull a full debrief bundle (profile + notes + all feedback) in a single call.\n- **Job discovery:** List the organization's job/role records, optionally filtered by status.\n\n## Secrets\n\n**`ASHBY_API_KEY`** — An API key generated from your Ashby account, scoped with the permissions required by the tools you use. Different tools require different permission sets:\n\n- **Candidates read** — required by `GetCandidate`, `GetCandidateDebrief`, `ListApplicationFeedback`, `ListApplications`, `ListCandidateNotes`, `SearchCandidates`\n- **Candidates write** — required by `ArchiveApplication`, `CreateCandidateNote`, `TransitionApplication`\n- **Interviews read** — required by `ArchiveApplication`, `TransitionApplication`, `GetCandidateDebrief`\n- **Jobs read** — required by `ListJobs`\n- **hiring-process-metadata read** — required by `ArchiveApplication`\n\nTo create an API key, go to **Admin → API Keys** in your Ashby workspace and generate a new key with the permission scopes your use case needs. See [Ashby's API key documentation](https://developers.ashbyhq.com/docs/authentication) for details.\n\nStore the key as an Arcade secret by following the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets), or add it directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }
