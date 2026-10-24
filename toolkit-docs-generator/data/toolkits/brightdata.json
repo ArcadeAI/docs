@@ -1,7 +1,7 @@
 {
   "id": "Brightdata",
   "label": "Bright Data",
-  "version": "1.0.2",
+  "version": "2.0.1",
   "description": "Search, Crawl and Scrape any site, at scale, without getting blocked",
   "metadata": {
     "category": "development",
@@ -16,10 +16,139 @@
   "auth": null,
   "tools": [
     {
-      "name": "ScrapeAsMarkdown",
-      "qualifiedName": "Brightdata.ScrapeAsMarkdown",
-      "fullyQualifiedName": "Brightdata.ScrapeAsMarkdown@1.0.2",
-      "description": "    Scrape a webpage and return content in Markdown format using Bright Data.\n\n    Examples:\n        scrape_as_markdown(\"https://example.com\") -> \"# Example Page\n\nContent...\"\n        scrape_as_markdown(\"https://news.ycombinator.com\") -> \"# Hacker News\n...\"\n    ",
+      "name": "ExtractWebPageFields",
+      "qualifiedName": "Brightdata.ExtractWebPageFields",
+      "fullyQualifiedName": "Brightdata.ExtractWebPageFields@2.0.1",
+      "description": "Extract structured data from various websites like LinkedIn, Amazon, Instagram, etc.\nNEVER MAKE UP LINKS. IF LINKS ARE NEEDED, FIND THEM WITH A WEB SEARCH FIRST.\nSupported source types:\n- amazon_product, amazon_product_reviews\n- linkedin_person_profile, linkedin_company_profile\n- zoominfo_company_profile\n- instagram_profiles, instagram_posts, instagram_reels, instagram_comments\n- facebook_posts, facebook_marketplace_listings, facebook_company_reviews\n- x_posts\n- zillow_properties_listing\n- booking_hotel_listings\n- youtube_videos\n\nExamples:\n    extract_web_page_fields(\"amazon_product\", \"https://amazon.com/dp/B08N5WRWNW\")\n        -> {\"source_type\": \"amazon_product\", \"url\": \"...\", \"records\": [{\"title\": ...}]}\n    extract_web_page_fields(\n        \"facebook_company_reviews\", \"https://facebook.com/company\", num_of_reviews=50\n    ) -> {\"source_type\": \"facebook_company_reviews\", \"url\": \"...\", \"records\": [...]}",
+      "parameters": [
+        {
+          "name": "source_type",
+          "type": "string",
+          "required": true,
+          "description": "Type of data source",
+          "enum": [
+            "amazon_product",
+            "amazon_product_reviews",
+            "linkedin_person_profile",
+            "linkedin_company_profile",
+            "zoominfo_company_profile",
+            "instagram_profiles",
+            "instagram_posts",
+            "instagram_reels",
+            "instagram_comments",
+            "facebook_posts",
+            "facebook_marketplace_listings",
+            "facebook_company_reviews",
+            "x_posts",
+            "zillow_properties_listing",
+            "booking_hotel_listings",
+            "youtube_videos"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "url",
+          "type": "string",
+          "required": true,
+          "description": "URL of the web resource to extract data from",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "num_of_reviews",
+          "type": "integer",
+          "required": false,
+          "description": "Number of reviews to retrieve. Only applicable for facebook_company_reviews. Defaults to the Bright Data default number of reviews.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timeout",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum time in seconds to wait for data retrieval, at most 50. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "polling_interval",
+          "type": "integer",
+          "required": false,
+          "description": "Time in seconds between polling attempts. Defaults to 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "BRIGHTDATA_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "BRIGHTDATA_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Structured records from the requested source"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Brightdata.ExtractWebPageFields",
+        "parameters": {
+          "source_type": {
+            "value": "amazon_product",
+            "type": "string",
+            "required": true
+          },
+          "url": {
+            "value": "https://www.amazon.com/dp/B08N5WRWNW",
+            "type": "string",
+            "required": true
+          },
+          "num_of_reviews": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "timeout": {
+            "value": 40,
+            "type": "integer",
+            "required": false
+          },
+          "polling_interval": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetWebPage",
+      "qualifiedName": "Brightdata.GetWebPage",
+      "fullyQualifiedName": "Brightdata.GetWebPage@2.0.1",
+      "description": "    Scrape a webpage and return content in Markdown format using Bright Data.\n\n    Examples:\n        get_web_page(\"https://example.com\")\n            -> {\"url\": \"https://example.com\", \"markdown\": \"# Example Page\n\nContent...\"}\n    ",
       "parameters": [
         {
           "name": "url",
@@ -42,19 +171,19 @@
         },
         {
           "name": "BRIGHTDATA_ZONE",
-          "type": "token"
+          "type": "unknown"
         }
       ],
       "output": {
-        "type": "string",
-        "description": "Scraped webpage content as Markdown"
+        "type": "json",
+        "description": "The web page's content as Markdown"
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Brightdata.ScrapeAsMarkdown",
+        "toolName": "Brightdata.GetWebPage",
         "parameters": {
           "url": {
-            "value": "https://news.ycombinator.com",
+            "value": "https://www.example.com/blog/article-1",
             "type": "string",
             "required": true
           }
@@ -81,10 +210,10 @@
       }
     },
     {
-      "name": "SearchEngine",
-      "qualifiedName": "Brightdata.SearchEngine",
-      "fullyQualifiedName": "Brightdata.SearchEngine@1.0.2",
-      "description": "    Search using Google, Bing, or Yandex with advanced parameters using Bright Data.\n\n    Examples:\n        search_engine(\"climate change\") -> \"# Search Results\n\n## Climate Change - Wikipedia\n...\"\n        search_engine(\"Python tutorials\", engine=\"bing\", num_results=5) -> \"# Bing Results\n...\"\n        search_engine(\"cats\", search_type=\"images\", country_code=\"us\") -> \"# Image Results\n...\"\n    ",
+      "name": "SearchWebPages",
+      "qualifiedName": "Brightdata.SearchWebPages",
+      "fullyQualifiedName": "Brightdata.SearchWebPages@2.0.1",
+      "description": "    Search using Google, Bing, or Yandex with advanced parameters using Bright Data.\n\n    Examples:\n        search_web_pages(\"climate change\")\n            -> {\"query\": \"climate change\", \"content\": \"# Search Results\n\n## Climate...\"}\n        search_web_pages(\"Python tutorials\", engine=\"bing\", num_results=5)\n        search_web_pages(\"cats\", search_type=\"images\", country_code=\"us\")\n    ",
       "parameters": [
         {
           "name": "query",
@@ -195,24 +324,24 @@
         },
         {
           "name": "BRIGHTDATA_ZONE",
-          "type": "token"
+          "type": "unknown"
         }
       ],
       "output": {
-        "type": "string",
-        "description": "Search results as Markdown or JSON"
+        "type": "json",
+        "description": "The search results page as Markdown or JSON"
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Brightdata.SearchEngine",
+        "toolName": "Brightdata.SearchWebPages",
         "parameters": {
           "query": {
-            "value": "climate change effects",
+            "value": "best machine learning frameworks 2024",
             "type": "string",
             "required": true
           },
           "engine": {
-            "value": "google",
+            "value": "bing",
             "type": "string",
             "required": false
           },
@@ -237,12 +366,12 @@
             "required": false
           },
           "num_results": {
-            "value": 10,
+            "value": 5,
             "type": "integer",
             "required": false
           },
           "location": {
-            "value": "San Francisco, CA",
+            "value": "New York, USA",
             "type": "string",
             "required": false
           },
@@ -252,7 +381,7 @@
             "required": false
           },
           "return_json": {
-            "value": true,
+            "value": false,
             "type": "boolean",
             "required": false
           }
@@ -277,135 +406,6 @@
         },
         "extras": null
       }
-    },
-    {
-      "name": "WebDataFeed",
-      "qualifiedName": "Brightdata.WebDataFeed",
-      "fullyQualifiedName": "Brightdata.WebDataFeed@1.0.2",
-      "description": "Extract structured data from various websites like LinkedIn, Amazon, Instagram, etc.\nNEVER MAKE UP LINKS. IF LINKS ARE NEEDED, FIND THEM WITH A WEB SEARCH FIRST.\nSupported source types:\n- amazon_product, amazon_product_reviews\n- linkedin_person_profile, linkedin_company_profile\n- zoominfo_company_profile\n- instagram_profiles, instagram_posts, instagram_reels, instagram_comments\n- facebook_posts, facebook_marketplace_listings, facebook_company_reviews\n- x_posts\n- zillow_properties_listing\n- booking_hotel_listings\n- youtube_videos\n\nExamples:\n    web_data_feed(\"amazon_product\", \"https://amazon.com/dp/B08N5WRWNW\")\n        -> \"{\"title\": \"Product Name\", ...}\"\n    web_data_feed(\"linkedin_person_profile\", \"https://linkedin.com/in/johndoe\")\n        -> \"{\"name\": \"John Doe\", ...}\"\n    web_data_feed(\n        \"facebook_company_reviews\", \"https://facebook.com/company\", num_of_reviews=50\n    ) -> \"[{\"review\": \"...\", ...}]\"",
-      "parameters": [
-        {
-          "name": "source_type",
-          "type": "string",
-          "required": true,
-          "description": "Type of data source",
-          "enum": [
-            "amazon_product",
-            "amazon_product_reviews",
-            "linkedin_person_profile",
-            "linkedin_company_profile",
-            "zoominfo_company_profile",
-            "instagram_profiles",
-            "instagram_posts",
-            "instagram_reels",
-            "instagram_comments",
-            "facebook_posts",
-            "facebook_marketplace_listings",
-            "facebook_company_reviews",
-            "x_posts",
-            "zillow_properties_listing",
-            "booking_hotel_listings",
-            "youtube_videos"
-          ],
-          "inferrable": true
-        },
-        {
-          "name": "url",
-          "type": "string",
-          "required": true,
-          "description": "URL of the web resource to extract data from",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "num_of_reviews",
-          "type": "integer",
-          "required": false,
-          "description": "Number of reviews to retrieve. Only applicable for facebook_company_reviews. Defaults to the Bright Data default number of reviews.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "timeout",
-          "type": "integer",
-          "required": false,
-          "description": "Maximum time in seconds to wait for data retrieval, at most 50. Defaults to 50.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "polling_interval",
-          "type": "integer",
-          "required": false,
-          "description": "Time in seconds between polling attempts. Defaults to 1.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": null,
-      "secrets": [
-        "BRIGHTDATA_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "BRIGHTDATA_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "string",
-        "description": "Structured data from the requested source as JSON"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Brightdata.WebDataFeed",
-        "parameters": {
-          "source_type": {
-            "value": "linkedin_person_profile",
-            "type": "string",
-            "required": true
-          },
-          "url": {
-            "value": "https://www.linkedin.com/in/{profile_id}",
-            "type": "string",
-            "required": true
-          },
-          "num_of_reviews": {
-            "value": null,
-            "type": "integer",
-            "required": false
-          },
-          "timeout": {
-            "value": 120,
-            "type": "integer",
-            "required": false
-          },
-          "polling_interval": {
-            "value": 5,
-            "type": "integer",
-            "required": false
-          }
-        },
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "web_scraping"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": false,
-          "openWorld": true
-        },
-        "extras": null
-      }
     }
   ],
   "documentationChunks": [
@@ -420,6 +420,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "e6e82b574ca7ab28710647b1a4a14ff532600f472f9c1b9019d8caf61538b941",
-  "generatedAt": "2026-10-21T22:03:50.237Z",
-  "summary": "Bright Data is a web data platform; this toolkit enables scraping, searching, and structured data extraction from any site at scale without being blocked.\n\n## Capabilities\n\n- **Web scraping**: Fetch any webpage and return its content as clean Markdown.\n- **Multi-engine search**: Query Google, Bing, or Yandex with controls for result count, search type (web/images), and country targeting.\n- **Structured data feeds**: Extract typed JSON records from 20+ source types across Amazon, LinkedIn, Instagram, Facebook, X, YouTube, Zillow, Booking.com, and ZoomInfo — no custom parsing required.\n\n## Secrets\n\nBoth secrets are required to authenticate requests to Bright Data.\n\n- `BRIGHTDATA_API_KEY` — Your Bright Data API key. Obtain it from the [Bright Data control panel](https://brightdata.com/cp/setting) under **Account Settings → API Token**. A paid or trial Bright Data account is required; the key grants programmatic access to all Bright Data services.\n\n- `BRIGHTDATA_ZONE` — The name of a Bright Data proxy/scraping zone. Zones are created in the [Bright Data control panel](https://brightdata.com/cp/zones) under **Proxies & Scraping Infrastructure**. Each zone defines the proxy type (e.g., datacenter, residential, Web Unlocker) and its configuration. Create or select an existing zone and copy its exact zone name (not the zone ID) into this secret.\n\nFor help configuring secrets in Arcade, see the [Arcade secrets guide](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets). You can also manage secrets directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-24T11:12:14.921Z",
+  "summary": "Arcade's Bright Data toolkit enables web search, full-page scraping, and structured data extraction at scale across major platforms, without bot-blocking interference.\n\n## Capabilities\n\n- **Structured extraction from major platforms**: Pull typed records from Amazon (products, reviews), LinkedIn (people, companies), Instagram (profiles, posts, reels, comments), Facebook (posts, marketplace listings, company reviews), X (posts), ZoomInfo (company profiles), Zillow (property listings), Booking.com (hotel listings), and YouTube (videos).\n- **General-purpose web scraping**: Fetch any public webpage and receive its content rendered as Markdown for downstream processing.\n- **Multi-engine web search**: Query Google, Bing, or Yandex with control over result count, search type (e.g., images), and country targeting.\n\n## Secrets\n\nThis toolkit requires two secrets configured in your Arcade environment.\n\n- **`BRIGHTDATA_API_KEY`**: Your Bright Data account API key. Obtain it from the Bright Data dashboard under **Account Settings → API Tokens**. The key authenticates all requests to Bright Data's APIs. See [Bright Data API documentation](https://docs.brightdata.com/api-reference/introduction) for details.\n\n- **`BRIGHTDATA_ZONE`**: The name of a Bright Data [zone](https://docs.brightdata.com/scraping-infrastructure/web-data-platform/zones/overview) (a proxy/scraping configuration) associated with your account. Zones define the scraping infrastructure (e.g., residential proxies, datacenter proxies) used for requests. Create and name a zone in the Bright Data control panel under **Proxies & Scraping Infrastructure**, then provide that zone name here.\n\nConfigure secrets at [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or via the Arcade dashboard at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
 }

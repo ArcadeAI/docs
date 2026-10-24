@@ -1,7 +1,7 @@
 {
   "id": "Slack",
   "label": "Slack",
-  "version": "3.0.1",
+  "version": "4.0.0",
   "description": "Arcade.dev LLM tools for Slack",
   "metadata": {
     "category": "social",
@@ -17,70 +17,65 @@
     "type": "oauth2",
     "providerId": "slack",
     "allScopes": [
+      "canvases:read",
+      "canvases:write",
       "channels:history",
       "channels:read",
+      "channels:write",
       "channels:write.invites",
       "chat:write",
+      "emoji:read",
+      "files:read",
+      "files:write",
       "groups:history",
       "groups:read",
+      "groups:write",
       "groups:write.invites",
       "im:history",
       "im:read",
       "im:write",
+      "lists:read",
+      "lists:write",
       "mpim:history",
       "mpim:read",
+      "mpim:write",
+      "pins:read",
+      "reactions:read",
       "reactions:write",
+      "remote_files:share",
+      "search:read",
+      "search:read.files",
+      "search:read.im",
+      "search:read.mpim",
+      "search:read.private",
+      "search:read.public",
+      "search:read.users",
+      "team:read",
+      "users.profile:read",
       "users:read",
       "users:read.email"
     ]
   },
   "tools": [
     {
-      "name": "GetConversationMetadata",
-      "qualifiedName": "Slack.GetConversationMetadata",
-      "fullyQualifiedName": "Slack.GetConversationMetadata@3.0.1",
-      "description": "Get metadata of a Channel, a Direct Message (IM / DM) or a Multi-Person (MPIM) conversation.\n\nUse this tool to retrieve metadata about a conversation with a conversation_id, a channel name,\nor by the user_id(s), username(s), and/or email(s) of the user(s) in the conversation.\n\nThis tool does not return the messages in a conversation.\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.",
+      "name": "CancelScheduledMessage",
+      "qualifiedName": "Slack.CancelScheduledMessage",
+      "fullyQualifiedName": "Slack.CancelScheduledMessage@4.0.0",
+      "description": "Cancel an undelivered API-scheduled message using its schedule identifier. Delivered\nmessages require message deletion; inspect pending schedules if cancellation has an unknown\noutcome.",
       "parameters": [
         {
-          "name": "conversation_id",
+          "name": "conversation",
           "type": "string",
-          "required": false,
-          "description": "The ID of the conversation to get metadata for. Defaults to identifying the conversation another way.",
+          "required": true,
+          "description": "The pending schedule's existing C-, G- or D-prefixed conversation ID or exact #channel name, matching the conversation in the schedule result.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "channel_name",
+          "name": "scheduled_message_id",
           "type": "string",
-          "required": false,
-          "description": "The name of the channel to get metadata for. Prefer providing a conversation_id, when available, since the performance is better. Defaults to identifying the conversation another way.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "usernames",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The names of the users to get the conversation metadata, each matched case-insensitively against the Slack handle, real name, and display name. A value matching several people, or only a real or display name, is not acted on directly; the tool returns the matching users so the call can be retried with the user ID or email. Prefer user_ids and/or emails when available, since the performance is better. Defaults to no usernames.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "emails",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The emails of the users to get the conversation metadata. Defaults to no emails.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "user_ids",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The IDs of the users to get the conversation metadata. Defaults to no user IDs.",
+          "required": true,
+          "description": "The opaque scheduled_message_id returned when creating or listing pending schedules, up to 200 characters; this is not a message reference or timestamp.",
           "enum": null,
           "inferrable": true
         }
@@ -89,10 +84,330 @@
         "providerId": "slack",
         "providerType": "oauth2",
         "scopes": [
+          "chat:write",
           "channels:read",
+          "groups:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.CancelScheduledMessage",
+        "parameters": {
+          "conversation": {
+            "value": "C04NJ8GLKR2",
+            "type": "string",
+            "required": true
+          },
+          "scheduled_message_id": {
+            "value": "Q1234ABCD5678",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CheckAccess",
+      "qualifiedName": "Slack.CheckAccess",
+      "fullyQualifiedName": "Slack.CheckAccess@4.0.0",
+      "description": "Check the connected Slack account with broad access prepared up front.\n\nUse when the user wants one authorization for all supported Slack features.\nIndividual task tools request fewer permissions. This check requires combined\nread and write scopes for conversations, messages, reactions, search, files,\ncanvases, lists and profiles, then validates the token with Slack and returns\nthe connected user and workspace IDs. It changes no Slack content. Required\nscopes are not a live grant inventory; workspace app approval, membership,\nplan limits and private-search consent still apply.",
+      "parameters": [],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "channels:history",
+          "channels:read",
+          "channels:write",
+          "channels:write.invites",
+          "groups:history",
           "groups:read",
-          "mpim:read",
+          "groups:write",
+          "groups:write.invites",
+          "im:history",
           "im:read",
+          "im:write",
+          "mpim:history",
+          "mpim:read",
+          "mpim:write",
+          "chat:write",
+          "emoji:read",
+          "reactions:read",
+          "reactions:write",
+          "pins:read",
+          "search:read",
+          "search:read.public",
+          "search:read.private",
+          "search:read.im",
+          "search:read.mpim",
+          "search:read.files",
+          "search:read.users",
+          "files:read",
+          "files:write",
+          "remote_files:share",
+          "canvases:read",
+          "canvases:write",
+          "lists:read",
+          "lists:write",
+          "users:read",
+          "users:read.email",
+          "users.profile:read",
+          "team:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Verified Slack account IDs and the permissions required for this access check."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.CheckAccess",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateCanvas",
+      "qualifiedName": "Slack.CreateCanvas",
+      "fullyQualifiedName": "Slack.CreateCanvas@4.0.0",
+      "description": "Create a new canvas and optionally tab it in a channel or send it to people. Returns\ncanvas_id even if direct sharing fails; finish sharing that existing ID instead of creating\na duplicate. For an unknown creation, inspect Slack before retrying.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Set the new canvas's nonempty title.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "markdown",
+          "type": "string",
+          "required": true,
+          "description": "Set the initial Markdown body, up to 1,048,576 characters; an empty string creates an empty canvas.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": false,
+          "description": "Tab the canvas in this regular channel ID beginning with C or G, with channel write access. Names and DM IDs are not accepted; omit user_ids when set. Defaults to a standalone canvas.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Send a link in a DM and grant access to 1-20 Slack user IDs beginning with U or W; names/emails are not resolved. Omit channel_id when set. Defaults to no direct sharing; owner access accepts exactly one user.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_access",
+          "type": "string",
+          "required": false,
+          "description": "Grant this access to direct recipients; owner transfers ownership and requires one user. This setting does not change a channel-tabbed canvas's write access. Defaults to read access.",
+          "enum": [
+            "read",
+            "write",
+            "owner"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "share_comment",
+          "type": "string",
+          "required": false,
+          "description": "Append this text after the link sent to direct recipients, up to 4,000 characters. Requires direct sharing. Defaults to an empty comment.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "canvases:write",
+          "chat:write",
+          "im:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.CreateCanvas",
+        "parameters": {
+          "title": {
+            "value": "Q3 Product Roadmap",
+            "type": "string",
+            "required": true
+          },
+          "markdown": {
+            "value": "# Q3 Product Roadmap\n\n## Goals\n- Launch new onboarding flow\n- Improve API response times by 20%\n\n## Timeline\n| Month | Milestone |\n|-------|-----------|\n| July  | Design complete |\n| August | Development |\n| September | Launch |\n\n## Notes\nAll teams should review and comment by end of week.",
+            "type": "string",
+            "required": true
+          },
+          "channel_id": {
+            "value": "C04AB12XYZ9",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": [
+              "U03MNPQRST1",
+              "U07WXYZ4567",
+              "W01ABCDE890"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "user_access": {
+            "value": "write",
+            "type": "string",
+            "required": false
+          },
+          "share_comment": {
+            "value": "Hey team! Here's the updated Q3 roadmap canvas. Please review and add your feedback by Friday EOD. 🚀",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateConversation",
+      "qualifiedName": "Slack.CreateConversation",
+      "fullyQualifiedName": "Slack.CreateConversation@4.0.0",
+      "description": "Create a channel with invitations and topic/purpose setup, or explicitly open/resume a DM or\ngroup DM. Returns conversation_id even if later setup is partial.\n\nReuse a returned ID as a message destination; do not recreate a channel after partial\nsuccess. Inspect existing conversation memberships before retrying an unknown creation.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Create a channel with this name: 1-80 lowercase letters, digits, hyphens or underscores; a leading # is ignored. Defaults to an empty string, opening or resuming a DM/group DM using users.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "users",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Select people by U/W user IDs, exact emails, or unique case-insensitive names/handles; leading @ is accepted. Supply up to 20 channel invitees, or 1-8 selected participants when name is empty. All resolve before creation. Defaults to no channel invitees; DM mode needs users.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "private",
+          "type": "boolean",
+          "required": false,
+          "description": "Create a named channel as private when true, public when false. Defaults to false; leave false when opening a DM or group DM.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "topic",
+          "type": "string",
+          "required": false,
+          "description": "Set the new named channel's topic, up to 250 characters. Defaults to an empty topic; leave empty in DM mode.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "purpose",
+          "type": "string",
+          "required": false,
+          "description": "Set the new named channel's purpose, up to 250 characters. Defaults to an empty purpose; leave empty in DM mode.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "channels:write",
+          "groups:write",
+          "im:write",
+          "mpim:write",
+          "channels:write.invites",
+          "groups:write.invites",
           "users:read",
           "users:read.email"
         ]
@@ -101,35 +416,767 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The conversation metadata."
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Slack.GetConversationMetadata",
+        "toolName": "Slack.CreateConversation",
         "parameters": {
-          "conversation_id": {
-            "value": "C012AB3CDE",
+          "name": {
+            "value": "project-alpha-dev",
             "type": "string",
             "required": false
           },
-          "channel_name": {
-            "value": null,
+          "users": {
+            "value": [
+              "U012AB3CD",
+              "user@example.com",
+              "@jane.doe",
+              "W987XY6ZT"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "private": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "topic": {
+            "value": "Discussion and updates for Project Alpha development sprint",
             "type": "string",
             "required": false
           },
-          "usernames": {
-            "value": null,
+          "purpose": {
+            "value": "Coordinate daily standups, code reviews, and release planning for the Alpha team",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateFileUpload",
+      "qualifiedName": "Slack.CreateFileUpload",
+      "fullyQualifiedName": "Slack.CreateFileUpload@4.0.0",
+      "description": "Allocate a temporary upload_url and file_id for a client to upload bytes. POST exactly\nlength bytes to the URL without an Authorization header, then finalize the file ID;\nallocation alone does not make the file visible.\n\nA one-step upload accepts supplied text/base64 or opens a local file picker instead. Keep\nany returned file_id when allocation is partial, and check it before allocating again.",
+      "parameters": [
+        {
+          "name": "filename",
+          "type": "string",
+          "required": true,
+          "description": "Name the file whose bytes will be uploaded, 1-255 characters without path separators or control characters; this is a filename, not a local path.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "length",
+          "type": "integer",
+          "required": true,
+          "description": "Allocate for exactly this many raw file bytes, from 1 to 1,073,741,824 (1 GiB), before base64 encoding. The client must upload the same byte length.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "alt_text",
+          "type": "string",
+          "required": false,
+          "description": "Set an image accessibility description, up to 1,000 characters. Defaults to omitted, leaving no description override.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "files:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.CreateFileUpload",
+        "parameters": {
+          "filename": {
+            "value": "quarterly_report.pdf",
+            "type": "string",
+            "required": true
+          },
+          "length": {
+            "value": 204800,
+            "type": "integer",
+            "required": true
+          },
+          "alt_text": {
+            "value": "Bar chart showing Q3 revenue growth across four product lines",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateList",
+      "qualifiedName": "Slack.CreateList",
+      "fullyQualifiedName": "Slack.CreateList@4.0.0",
+      "description": "Create a new list with typed columns and choices, returning its F-prefixed list ID. Read the\nlist's schema if Slack has not returned assigned column IDs. For an unknown creation,\ninspect Slack before retrying to avoid a duplicate list.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Set the new list's nonempty display name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "columns",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Define 1-100 typed columns with unique keys; the first text column becomes primary unless one is selected explicitly. Omit todo_* columns, which task mode adds automatically.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Set the list's plain-text description. Defaults to an empty string, which leaves the description empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "todo_mode",
+          "type": "boolean",
+          "required": false,
+          "description": "Include Slack's task-tracking columns. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "lists:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.CreateList",
+        "parameters": {
+          "name": {
+            "value": "Project Task Tracker",
+            "type": "string",
+            "required": true
+          },
+          "columns": {
+            "value": [
+              {
+                "key": "col_title",
+                "name": "Task Title",
+                "type": "text",
+                "is_primary": true
+              },
+              {
+                "key": "col_status",
+                "name": "Status",
+                "type": "select",
+                "choices": [
+                  "Not Started",
+                  "In Progress",
+                  "Completed",
+                  "Blocked"
+                ]
+              },
+              {
+                "key": "col_due_date",
+                "name": "Due Date",
+                "type": "date"
+              },
+              {
+                "key": "col_priority",
+                "name": "Priority",
+                "type": "select",
+                "choices": [
+                  "Low",
+                  "Medium",
+                  "High",
+                  "Critical"
+                ]
+              },
+              {
+                "key": "col_assignee",
+                "name": "Assignee",
+                "type": "person"
+              }
+            ],
             "type": "array",
+            "required": true
+          },
+          "description": {
+            "value": "A list to track all active project tasks, their statuses, priorities, and assignees across the team.",
+            "type": "string",
             "required": false
           },
-          "emails": {
-            "value": null,
+          "todo_mode": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateListRecord",
+      "qualifiedName": "Slack.CreateListRecord",
+      "fullyQualifiedName": "Slack.CreateListRecord@4.0.0",
+      "description": "Create one typed list record or subtask and return its new Rec-prefixed record ID. Updating\nan existing record is a separate action; after an unknown creation, inspect the list before\ncreating another row.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "Add a record to this F-prefixed Slack list ID; names and URLs are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cells",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Set 0-100 initial cells using existing column IDs, keys or unambiguous names from the list's schema. Each cell supplies one typed value field; an empty array creates a record without explicit values.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_record_id",
+          "type": "string",
+          "required": false,
+          "description": "Nest the new record under this existing Rec-prefixed record ID in the same list. Defaults to creating a top-level record.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "lists:read",
+          "lists:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.CreateListRecord",
+        "parameters": {
+          "list_id": {
+            "value": "F08ABCD1234",
+            "type": "string",
+            "required": true
+          },
+          "cells": {
+            "value": [
+              {
+                "column_id": "Col001",
+                "value": "Q3 Marketing Campaign"
+              },
+              {
+                "column_id": "Col002",
+                "value": "In Progress"
+              },
+              {
+                "column_id": "Col003",
+                "value": "2024-09-30"
+              }
+            ],
             "type": "array",
+            "required": true
+          },
+          "parent_record_id": {
+            "value": "Rec07XYZ9876",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateScheduledMessage",
+      "qualifiedName": "Slack.CreateScheduledMessage",
+      "fullyQualifiedName": "Slack.CreateScheduledMessage@4.0.0",
+      "description": "Schedule a future message or thread reply and return the scheduled_message_id used for\ncancellation. For an unknown outcome, inspect pending schedules before creating another.",
+      "parameters": [
+        {
+          "name": "conversation",
+          "type": "string",
+          "required": true,
+          "description": "Deliver to an existing C-, G- or D-prefixed conversation ID or exact #channel name. Explicitly open a DM first; user IDs, names and emails are not destinations.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "Deliver this nonempty Slack mrkdwn message, up to 40,000 characters. Link and media unfurls are disabled.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "post_at",
+          "type": "string",
+          "required": true,
+          "description": "Deliver at this future ISO 8601 date and time with an explicit UTC offset or Z, within 120 days. Precision is whole seconds; Unix timestamps and timezone-free dates are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to",
+          "type": "string",
+          "required": false,
+          "description": "The parent conversation_id:timestamp reference or HTTPS Slack message permalink in the same destination conversation. Defaults to an empty string, scheduling a top-level message.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "chat:write",
+          "channels:read",
+          "groups:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.CreateScheduledMessage",
+        "parameters": {
+          "conversation": {
+            "value": "C04ABCD1234",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "👋 *Reminder:* Don't forget the team standup at 10 AM tomorrow! Please update your progress in the project tracker before joining.",
+            "type": "string",
+            "required": true
+          },
+          "post_at": {
+            "value": "2025-09-15T09:00:00Z",
+            "type": "string",
+            "required": true
+          },
+          "reply_to": {
+            "value": "C04ABCD1234:1694123456.789012",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteCanvas",
+      "qualifiedName": "Slack.DeleteCanvas",
+      "fullyQualifiedName": "Slack.DeleteCanvas@4.0.0",
+      "description": "Permanently delete an entire canvas. A targeted section edit can delete one section instead;\nverify an uncertain deletion before repeating it.",
+      "parameters": [
+        {
+          "name": "canvas_id",
+          "type": "string",
+          "required": true,
+          "description": "Permanently delete this F-prefixed canvas ID; URLs and titles are not accepted.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "canvases:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.DeleteCanvas",
+        "parameters": {
+          "canvas_id": {
+            "value": "F0123ABCDEF",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteListRecords",
+      "qualifiedName": "Slack.DeleteListRecords",
+      "fullyQualifiedName": "Slack.DeleteListRecords@4.0.0",
+      "description": "Permanently delete list records, with one confirmed, rejected or unknown outcome per ID.\nRead the list to check uncertain outcomes before repeating a deletion.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "Delete records from this F-prefixed Slack list ID; names and URLs are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Permanently delete 1-10 distinct Rec-prefixed record IDs in this list. Each ID may appear only once; this does not delete the list itself.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "lists:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.DeleteListRecords",
+        "parameters": {
+          "list_id": {
+            "value": "F08ABCD1234",
+            "type": "string",
+            "required": true
+          },
+          "record_ids": {
+            "value": [
+              "Rec001ABC",
+              "Rec002DEF",
+              "Rec003GHI",
+              "Rec004JKL"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteMessage",
+      "qualifiedName": "Slack.DeleteMessage",
+      "fullyQualifiedName": "Slack.DeleteMessage@4.0.0",
+      "description": "Permanently delete an existing message the authenticated account may delete. Undelivered\nscheduled messages must be cancelled by their schedule identifier instead.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Delete this exact conversation_id:timestamp message reference or HTTPS Slack message permalink. Slack must allow the authenticated account to delete it.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "chat:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.DeleteMessage",
+        "parameters": {
+          "message": {
+            "value": "https://myworkspace.slack.com/archives/C04AB1234XY/p1698765432123456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DownloadFile",
+      "qualifiedName": "Slack.DownloadFile",
+      "fullyQualifiedName": "Slack.DownloadFile@4.0.0",
+      "description": "Read bounded private file text and open a preview/download App.\n\nOrdinary results omit file bytes. The App fetches them itself for supported image/text\npreview and exact-byte saving, up to 8 MiB. Non-App clients can explicitly request\ninclude_binary=True for client code; direct SDK MCP transports attach supported native\nimage/PDF content. Encoded JSON and a private URL alone do not give model vision.",
+      "parameters": [
+        {
+          "name": "file",
+          "type": "string",
+          "required": true,
+          "description": "Read this F-prefixed Slack file ID or HTTPS Slack file permalink at /files/USER_ID/FILE_ID. Private download URLs and local paths are not accepted; use file IDs from messages or search.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from DownloadFile for this file's exact content revision. Defaults to an empty string for the beginning; restart without it if the bytes changed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_characters",
+          "type": "integer",
+          "required": false,
+          "description": "Return at most this many extracted text characters, from 1 to 12,000. Defaults to 12,000; PDF results are also limited to three pages per part.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_binary",
+          "type": "boolean",
+          "required": false,
+          "description": "Return original bytes as base64 on the first page for App preview/download or client code. Direct SDK MCP clients also receive supported native image/PDF media. Encoded JSON alone does not give an assistant vision. Defaults to False, which omits bytes.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "files:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.DownloadFile",
+        "parameters": {
+          "file": {
+            "value": "F08ABC123XY",
+            "type": "string",
+            "required": true
+          },
+          "cursor": {
+            "value": "dXNlcjpVMDYxTkZUVDI=",
+            "type": "string",
             "required": false
           },
-          "user_ids": {
-            "value": null,
-            "type": "array",
+          "max_characters": {
+            "value": 5000,
+            "type": "integer",
+            "required": false
+          },
+          "include_binary": {
+            "value": false,
+            "type": "boolean",
             "required": false
           }
         },
@@ -156,51 +1203,869 @@
       }
     },
     {
-      "name": "InviteUsersToChannel",
-      "qualifiedName": "Slack.InviteUsersToChannel",
-      "fullyQualifiedName": "Slack.InviteUsersToChannel@3.0.1",
-      "description": "Invite users to a Slack channel or MPIM (multi-person direct message).\n\nThis tool invites specified users to join a Slack conversation. It works with:\n- Public channels\n- Private channels\n- MPIMs (multi-person direct messages / group DMs)\n\nYou can specify users by their user IDs, usernames, or email addresses.\n\nProvide exactly one of channel_id or channel_name, and at least one of user_ids, usernames,\nor emails.\n\nThe tool will resolve usernames and emails to user IDs before inviting them.\nUp to 100 users may be invited at once.",
+      "name": "FinalizeFileUpload",
+      "qualifiedName": "Slack.FinalizeFileUpload",
+      "fullyQualifiedName": "Slack.FinalizeFileUpload@4.0.0",
+      "description": "Complete previously uploaded file bytes and optionally share the files in a conversation or\nthread. This does not upload bytes itself. Inspect stage, file_ids and\nlast_operation_status; check the existing files before retrying an unknown finalization.",
       "parameters": [
         {
-          "name": "channel_id",
+          "name": "files",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Finalize 1-10 distinct allocated files after their bytes have been uploaded; retain the IDs from upload allocation and supply each only once.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conversation",
           "type": "string",
           "required": false,
-          "description": "The ID of the Slack channel or MPIM (multi-person direct message) to invite users to. Provide exactly one of channel_id OR channel_name. Defaults to identifying the channel another way.",
+          "description": "Share in an existing C-, G- or D-prefixed conversation ID or exact channel name with or without #. User selectors do not open DMs. Defaults to an empty string, keeping files private; thread_ts/comment need a conversation.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "channel_name",
+          "name": "thread_ts",
           "type": "string",
           "required": false,
-          "description": "The name of the channel to invite users to. Prefer providing a channel_id when available for better performance. Note: MPIMs don't have names, so use channel_id for MPIMs. Defaults to identifying the channel another way.",
+          "description": "Share under this parent Slack timestamp in seconds.microseconds format, in conversation. Do not supply a permalink or conversation_id:timestamp reference. Defaults to an empty string, sharing outside a thread.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "user_ids",
-          "type": "array",
-          "innerType": "string",
+          "name": "comment",
+          "type": "string",
           "required": false,
-          "description": "The Slack user IDs of the people to invite. Up to 100 users may be listed. Provide at least one of user_ids, usernames, or emails. Defaults to no user IDs.",
+          "description": "Post this initial comment with the files, up to 4,000 characters; requires conversation. Defaults to an empty string, posting no comment.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "files:write",
+          "channels:read",
+          "groups:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.FinalizeFileUpload",
+        "parameters": {
+          "files": {
+            "value": [
+              {
+                "id": "F08ABC123DE",
+                "title": "Q3 Sales Report"
+              },
+              {
+                "id": "F09XYZ456FG",
+                "title": "Project Roadmap"
+              }
+            ],
+            "type": "array",
+            "required": true
+          },
+          "conversation": {
+            "value": "C04N8RJKL12",
+            "type": "string",
+            "required": false
+          },
+          "thread_ts": {
+            "value": "1715789023.004500",
+            "type": "string",
+            "required": false
+          },
+          "comment": {
+            "value": "Here are the files for this week's review. Please take a look and share your feedback!",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ForwardMessage",
+      "qualifiedName": "Slack.ForwardMessage",
+      "fullyQualifiedName": "Slack.ForwardMessage@4.0.0",
+      "description": "Post an attributed text copy with a link to the original message. Files remain linked and\nreactions are not copied.\n\nThe returned fidelity is attributed_copy. Inspect the destination before retrying an unknown\noutcome to avoid a duplicate copy.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "string",
+          "required": true,
+          "description": "Copy this exact conversation_id:timestamp source message reference or HTTPS Slack message permalink; the authorized account must be able to read it.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "usernames",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The names of the people to invite, each matched case-insensitively against the Slack handle, real name, and display name. A value matching several people, or only a real or display name, is not acted on directly; the tool returns the matching users so the call can be retried with the user ID or email. Prefer user_ids and/or emails when available, since the performance is better. Defaults to no usernames.",
+          "name": "conversation",
+          "type": "string",
+          "required": true,
+          "description": "Post the copy to an existing C-, G- or D-prefixed conversation ID or exact #channel name. Explicitly open a DM first; do not supply a user selector.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "emails",
+          "name": "comment",
+          "type": "string",
+          "required": false,
+          "description": "Append this Slack mrkdwn comment after the attributed copy. The combined post must fit 40,000 characters. Defaults to an empty string, adding no comment.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to",
+          "type": "string",
+          "required": false,
+          "description": "Post the copy under this destination parent's conversation_id:timestamp reference or HTTPS Slack message permalink in the same conversation. Defaults to an empty string, posting at the root.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "chat:write",
+          "reactions:read",
+          "users:read",
+          "channels:read",
+          "groups:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.ForwardMessage",
+        "parameters": {
+          "source": {
+            "value": "C04AB1XYZ89:1713890123.456789",
+            "type": "string",
+            "required": true
+          },
+          "conversation": {
+            "value": "C08MNPQR345",
+            "type": "string",
+            "required": true
+          },
+          "comment": {
+            "value": "Sharing this update from the engineering team for your awareness. Please review and let us know if you have questions.",
+            "type": "string",
+            "required": false
+          },
+          "reply_to": {
+            "value": "C08MNPQR345:1713885600.123456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GenerateMessageDraft",
+      "qualifiedName": "Slack.GenerateMessageDraft",
+      "fullyQualifiedName": "Slack.GenerateMessageDraft@4.0.0",
+      "description": "Prepare a local draft from supplied Slack mrkdwn text and return its targeting fields.\nNothing is sent or saved; posting or scheduling is a separate action.",
+      "parameters": [
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "Prepare this nonempty Slack mrkdwn text, up to 40,000 characters. Use <@USER_ID> for mentions.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conversation",
+          "type": "string",
+          "required": false,
+          "description": "The planned existing conversation ID beginning with C, G or D, or exact #channel name; no access lookup is performed. Defaults to an empty string, leaving the destination undecided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to",
+          "type": "string",
+          "required": false,
+          "description": "The planned parent conversation_id:timestamp reference or HTTPS Slack message permalink, in the destination conversation. Defaults to an empty string, preparing a top-level draft.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.GenerateMessageDraft",
+        "parameters": {
+          "text": {
+            "value": "Hey <@U04ABCD1234>, just a reminder that the *sprint review* is scheduled for tomorrow at 3 PM. Please make sure your demos are ready and all tickets are updated. Here's the agenda:\n1. Feature walkthrough\n2. Bug triage\n3. Retrospective\n\n_Feel free to reach out if you have questions!_",
+            "type": "string",
+            "required": true
+          },
+          "conversation": {
+            "value": "#engineering-team",
+            "type": "string",
+            "required": false
+          },
+          "reply_to": {
+            "value": "C01ABC12345:1698765432.000100",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": false
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCanvas",
+      "qualifiedName": "Slack.GetCanvas",
+      "fullyQualifiedName": "Slack.GetCanvas@4.0.0",
+      "description": "Read a known canvas as Markdown in bounded parts. Follow next_cursor until null for its\ncomplete body; section lookup finds IDs for targeted edits.",
+      "parameters": [
+        {
+          "name": "canvas_id",
+          "type": "string",
+          "required": true,
+          "description": "Read this F-prefixed canvas ID; URLs and titles are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Return up to this many Markdown characters per part, from 1 to 50,000. Defaults to 12,000; the response may be shorter to fit its byte budget.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from GetCanvas for the same canvas revision. Defaults to no cursor, reading from the beginning; restart if the canvas changed.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "canvases:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.GetCanvas",
+        "parameters": {
+          "canvas_id": {
+            "value": "F08AB3CD4EF",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 8000,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJwYWdlIjoyLCJyZXZpc2lvbiI6MTd9",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetConversationMetadata",
+      "qualifiedName": "Slack.GetConversationMetadata",
+      "fullyQualifiedName": "Slack.GetConversationMetadata@4.0.0",
+      "description": "Read one conversation's topic, purpose, membership and available activity/read-state\nmetadata. Unavailable fields remain null; message history is a separate read.",
+      "parameters": [
+        {
+          "name": "conversation",
+          "type": "string",
+          "required": true,
+          "description": "Read an existing C-, G- or D-prefixed conversation ID or exact channel name with or without #. User selectors are not accepted and no DM is opened.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "channels:read",
+          "groups:read",
+          "im:read",
+          "mpim:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.GetConversationMetadata",
+        "parameters": {
+          "conversation": {
+            "value": "C04NX8ZQEAB",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetList",
+      "qualifiedName": "Slack.GetList",
+      "fullyQualifiedName": "Slack.GetList@4.0.0",
+      "description": "Read a list's metadata, typed column schema and records in Slack's row order, or one exact\nrecord. Follow next_cursor for more records. Unavailable description/task-mode metadata\nremain null; use returned column selectors with record mutations.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "Read this F-prefixed Slack list ID from a list creation result or Slack; names and URLs are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_id",
+          "type": "string",
+          "required": false,
+          "description": "Read one exact Rec-prefixed record ID in this list; omit cursor in this mode. Defaults to reading a page of records instead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Return at most this many records per page, from 1 to 100. Defaults to 20; ignored for a single-record read.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from GetList with the same list_id and archived filter. Defaults to no cursor for the first page; do not combine with record_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Read archived records instead of active records when listing a page. Defaults to false; a single record_id lookup selects the record directly.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "lists:read",
+          "files:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.GetList",
+        "parameters": {
+          "list_id": {
+            "value": "F0823ABCDEF",
+            "type": "string",
+            "required": true
+          },
+          "record_id": {
+            "value": "Rec04XYZ7890",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "dXNlcjpVMDYxNTU0NTI=",
+            "type": "string",
+            "required": false
+          },
+          "archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetMessage",
+      "qualifiedName": "Slack.GetMessage",
+      "fullyQualifiedName": "Slack.GetMessage@4.0.0",
+      "description": "Read one exact message's complete text, including forwarded text, in bounded parts with file\nIDs and a permalink. Follow next_cursor until empty. Read its thread for surrounding\nreplies; attached file IDs can be used to download file content.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Read this exact conversation_id:timestamp message reference or HTTPS Slack message permalink, including a reply. This selects one message without expanding its surrounding thread.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_characters",
+          "type": "integer",
+          "required": false,
+          "description": "Text characters per page, 1-24000. Defaults to 12000.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timezone",
+          "type": "string",
+          "required": false,
+          "description": "IANA output timezone. Defaults to empty (your Slack timezone, else UTC).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass content_cursor from a truncated history/thread item, or next_cursor from this exact-message read, for the same message revision. Restart after an edit. Defaults to an empty string for its beginning.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "reactions:read",
+          "users:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Message text without gaps, stable file references and continuation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.GetMessage",
+        "parameters": {
+          "message": {
+            "value": "https://myworkspace.slack.com/archives/C04AB1XYZ/p1713456789123456",
+            "type": "string",
+            "required": true
+          },
+          "max_characters": {
+            "value": 8000,
+            "type": "integer",
+            "required": false
+          },
+          "timezone": {
+            "value": "America/New_York",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJuZXh0IjogMX0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetThread",
+      "qualifiedName": "Slack.GetThread",
+      "fullyQualifiedName": "Slack.GetThread@4.0.0",
+      "description": "Read a thread's parent and replies, including a parent with no replies. Follow next_cursor\nfor remaining messages; continue an exact-message read for truncated text.\n\nSlack controls page order; use posted_at for chronology. Conversation-wide history is a\nseparate listing.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Identify a thread by its parent or any reply's conversation_id:timestamp reference or HTTPS Slack message permalink. A reply resolves to its parent; a bare timestamp is not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Messages per page, 1-20. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timezone",
+          "type": "string",
+          "required": false,
+          "description": "IANA output timezone. Defaults to empty (your Slack timezone, else UTC).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "after",
+          "type": "string",
+          "required": false,
+          "description": "Only include thread messages at or after this ISO 8601 date and time with an explicit UTC offset or Z. Must not exceed before. Defaults to an empty string, with no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "before",
+          "type": "string",
+          "required": false,
+          "description": "Only include thread messages at or before this ISO 8601 date and time with an explicit UTC offset or Z. Defaults to an empty string, letting Slack use the current time.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from GetThread with the same message, limit, timezone and time bounds. Defaults to an empty string for the first page; restart if the page changed.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "channels:history",
+          "groups:history",
+          "im:history",
+          "mpim:history",
+          "reactions:read",
+          "users:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Parent and replies once, in bounded pages with continuation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.GetThread",
+        "parameters": {
+          "message": {
+            "value": "https://myworkspace.slack.com/archives/C04AB12XYZ/p1712345678901234",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "timezone": {
+            "value": "America/New_York",
+            "type": "string",
+            "required": false
+          },
+          "after": {
+            "value": "2024-04-05T09:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "before": {
+            "value": "2024-04-05T18:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "dXNlcjpVMDYxTkZUVDI=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetUserProfile",
+      "qualifiedName": "Slack.GetUserProfile",
+      "fullyQualifiedName": "Slack.GetUserProfile@4.0.0",
+      "description": "Read one person's detailed profile, including status, pronouns, timezone and labeled custom\nfields. Search people first to disambiguate a name, or inspect the authenticated identity\nfor your own account.",
+      "parameters": [
+        {
+          "name": "user",
+          "type": "string",
+          "required": true,
+          "description": "Identify one person by a U- or W-prefixed Slack user ID, exact email, or unique name/handle, with optional leading @. Name matching ignores case and prefers exact matches; search people first if ambiguous.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "users:read",
+          "users:read.email",
+          "users.profile:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.GetUserProfile",
+        "parameters": {
+          "user": {
+            "value": "U04MXKJ8P2Q",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "InviteUsersToConversation",
+      "qualifiedName": "Slack.InviteUsersToConversation",
+      "fullyQualifiedName": "Slack.InviteUsersToConversation@4.0.0",
+      "description": "Invite people to an existing channel and report per-person outcomes. Already-present members\nsucceed with changed=false; inspect channel membership to check uncertain invitations before\nretrying.",
+      "parameters": [
+        {
+          "name": "conversation",
+          "type": "string",
+          "required": true,
+          "description": "Invite people to this existing C- or G-prefixed channel ID, or exact channel name with or without #. Opening a DM with participants is a separate action.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "users",
           "type": "array",
           "innerType": "string",
-          "required": false,
-          "description": "The email addresses of the people to invite. Defaults to no emails.",
+          "required": true,
+          "description": "Invite 1-20 people by U/W user IDs, exact emails, or unique case-insensitive names/handles, with optional leading @. All selectors resolve before any invitation; ambiguous names require choosing a user ID.",
           "enum": null,
           "inferrable": true
         }
@@ -221,45 +2086,26 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The response from inviting users to the conversation"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Slack.InviteUsersToChannel",
+        "toolName": "Slack.InviteUsersToConversation",
         "parameters": {
-          "channel_id": {
-            "value": "C04AB1XYZ23",
+          "conversation": {
+            "value": "C04ABCDE123",
             "type": "string",
-            "required": false
+            "required": true
           },
-          "channel_name": {
-            "value": "project-alpha",
-            "type": "string",
-            "required": false
-          },
-          "user_ids": {
+          "users": {
             "value": [
-              "U01ABCDEF12",
-              "U02GHIJKL34"
+              "U01XYZ7890",
+              "jane.doe@example.com",
+              "@john_smith",
+              "W02QRS4567"
             ],
             "type": "array",
-            "required": false
-          },
-          "usernames": {
-            "value": [
-              "jane.doe",
-              "john.smith"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "emails": {
-            "value": [
-              "alice@example.com",
-              "bob@example.com"
-            ],
-            "type": "array",
-            "required": false
+            "required": true
           }
         },
         "requiresAuth": true,
@@ -285,83 +2131,24 @@
       }
     },
     {
-      "name": "ListConversationMessages",
-      "qualifiedName": "Slack.ListConversationMessages",
-      "fullyQualifiedName": "Slack.ListConversationMessages@3.0.1",
-      "description": "Get messages in a Slack Channel, DM (direct message) or MPIM (multi-person) conversation.\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.\n\nTo filter messages by an absolute datetime, use 'oldest_datetime' and/or 'latest_datetime'. If\nonly 'oldest_datetime' is provided, it will return messages from the oldest_datetime to the\ncurrent time. If only 'latest_datetime' is provided, it will return messages since the\nbeginning of the conversation to the latest_datetime.\n\nTo filter messages by a relative datetime, use 'oldest_relative' and/or 'latest_relative'\nwith numeric `DD:HH:MM` offsets only. Convert relative phrases to `DD:HH:MM` before calling\nthis tool. If only 'oldest_relative' is provided, it will return messages from the\noldest_relative to the current time. If only 'latest_relative' is provided, it will return\nmessages from the current time to the latest_relative.\n\nDo not provide both 'oldest_datetime' and 'oldest_relative' or both 'latest_datetime' and\n'latest_relative'.\n\nLeave all arguments with the default None to get messages without date/time filtering",
+      "name": "ListConversationMembers",
+      "qualifiedName": "Slack.ListConversationMembers",
+      "fullyQualifiedName": "Slack.ListConversationMembers@4.0.0",
+      "description": "List a conversation's member identities in Slack's order, retaining inaccessible profiles as\nunresolved user IDs. Follow next_cursor for more; request a selected member's profile for\ndetailed fields.",
       "parameters": [
         {
-          "name": "conversation_id",
+          "name": "conversation",
           "type": "string",
-          "required": false,
-          "description": "The ID of the conversation to get messages from. Provide exactly one of conversation_id OR any combination of user_ids, usernames, and/or emails. Defaults to identifying the conversation another way.",
+          "required": true,
+          "description": "List members of this existing C-, G- or D-prefixed conversation ID or exact channel name with or without #. This does not open a DM from a user selector.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "channel_name",
-          "type": "string",
+          "name": "include_bots",
+          "type": "boolean",
           "required": false,
-          "description": "The name of the channel to get messages from. Prefer providing a conversation_id, when available, since the performance is better. Defaults to identifying the conversation another way.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "user_ids",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The IDs of the users in the conversation to get messages from. Defaults to no user IDs.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "usernames",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The names of the users in the conversation to get messages from, each matched case-insensitively against the Slack handle, real name, and display name. A value matching several people, or only a real or display name, is not acted on directly; the tool returns the matching users so the call can be retried with the user ID or email. Prefer user_ids and/or emails when available, since the performance is better. Defaults to no usernames.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "emails",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The emails of the users in the conversation to get messages from. Defaults to no emails.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "oldest_relative",
-          "type": "string",
-          "required": false,
-          "description": "The oldest message to include in the results, specified as a time offset from the current time. Use only the numeric 'DD:HH:MM' format; convert relative phrases to that format before calling this tool. Defaults to no lower bound.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "latest_relative",
-          "type": "string",
-          "required": false,
-          "description": "The latest message to include in the results, specified as a time offset from the current time. Use only the numeric 'DD:HH:MM' format; convert relative phrases to that format before calling this tool. Defaults to no upper bound.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "oldest_datetime",
-          "type": "string",
-          "required": false,
-          "description": "The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS' or ISO 8601. Defaults to no lower bound.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "latest_datetime",
-          "type": "string",
-          "required": false,
-          "description": "The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS' or ISO 8601. Defaults to no upper bound.",
+          "description": "Include bot accounts; unresolved identities remain visible by ID. Defaults to true.",
           "enum": null,
           "inferrable": true
         },
@@ -369,15 +2156,15 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of messages to return. Maximum is 100. Defaults to 20.",
+          "description": "Return up to this many members, from 1 to 100. Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "next_cursor",
+          "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The cursor to use for pagination. Defaults to the first page.",
+          "description": "Pass next_cursor unchanged from ListConversationMembers with the same conversation and include_bots filter. Defaults to an empty string for the first page; an empty returned cursor ends the listing.",
           "enum": null,
           "inferrable": true
         }
@@ -388,87 +2175,39 @@
         "scopes": [
           "channels:read",
           "groups:read",
-          "mpim:read",
           "im:read",
+          "mpim:read",
           "users:read",
-          "users:read.email",
-          "channels:history",
-          "groups:history",
-          "mpim:history",
-          "im:history"
+          "users:read.email"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The messages in a Slack Channel, DM (direct message) or MPIM (multi-person) conversation."
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Slack.ListConversationMessages",
+        "toolName": "Slack.ListConversationMembers",
         "parameters": {
-          "conversation_id": {
-            "value": "C04NJ8GEXAMPLE",
+          "conversation": {
+            "value": "C04NJ8LEXAMPLE",
             "type": "string",
-            "required": false
+            "required": true
           },
-          "channel_name": {
-            "value": "general",
-            "type": "string",
-            "required": false
-          },
-          "user_ids": {
-            "value": [
-              "U01ABC12345",
-              "U02DEF67890"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "usernames": {
-            "value": [
-              "jane.doe",
-              "john_smith"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "emails": {
-            "value": [
-              "jane.doe@example.com",
-              "john.smith@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "oldest_relative": {
-            "value": "07:12:30",
-            "type": "string",
-            "required": false
-          },
-          "latest_relative": {
-            "value": "00:02:00",
-            "type": "string",
-            "required": false
-          },
-          "oldest_datetime": {
-            "value": "2024-03-01 08:00:00",
-            "type": "string",
-            "required": false
-          },
-          "latest_datetime": {
-            "value": "2024-03-15 17:30:00",
-            "type": "string",
+          "include_bots": {
+            "value": false,
+            "type": "boolean",
             "required": false
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "next_cursor": {
-            "value": "dXNlcjpVMDYxTkZUVDI=",
+          "cursor": {
+            "value": "dXNlcjpVMEc5V0ZYTlo=",
             "type": "string",
             "required": false
           }
@@ -498,20 +2237,56 @@
     {
       "name": "ListConversations",
       "qualifiedName": "Slack.ListConversations",
-      "fullyQualifiedName": "Slack.ListConversations@3.0.1",
-      "description": "List metadata for Slack conversations (channels, DMs, MPIMs) the user is a member of.\n\nThis tool does not return the messages in a conversation. The listing does not include\nmember counts, so num_members is null for every conversation returned.",
+      "fullyQualifiedName": "Slack.ListConversations@4.0.0",
+      "description": "List conversations the authenticated user belongs to, in Slack's order, including archived\nmemberships by default. Follow next_cursor for more. Real-time content search can discover\naccessible unjoined channels; a known conversation can be read for detailed metadata.",
       "parameters": [
         {
           "name": "conversation_types",
           "type": "array",
           "innerType": "string",
           "required": false,
-          "description": "The type(s) of conversations to list. Defaults to all types.",
+          "description": "Only include memberships of these conversation types; this does not discover unjoined channels. Defaults to all types when omitted or given an empty array.",
           "enum": [
             "public_channel",
             "private_channel",
-            "multi_person_direct_message",
-            "direct_message"
+            "im",
+            "mpim"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Include archived conversations in your memberships. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name_prefix",
+          "type": "string",
+          "required": false,
+          "description": "Only include conversation names beginning with this case-insensitive prefix, up to 80 characters; a leading # is ignored. Defaults to an empty string, including unnamed DMs and all names.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": false,
+          "description": "For an organization-wide token, select the workspace by its T-prefixed Slack workspace ID. Defaults to an empty string, using the token's workspace.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "projection",
+          "type": "string",
+          "required": false,
+          "description": "Choose detailed metadata, compact ID/name pairs, or IDs alone. Defaults to details, whose pages are capped at 20 conversations; names and IDs can return up to limit.",
+          "enum": [
+            "details",
+            "names",
+            "ids"
           ],
           "inferrable": true
         },
@@ -519,15 +2294,15 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of conversations to list. Maximum is 500. Defaults to 200.",
+          "description": "Return up to this many conversations, from 1 to 100; details pages contain at most 20. Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "next_cursor",
+          "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The cursor to use for pagination. Defaults to the first page.",
+          "description": "Pass next_cursor unchanged from ListConversations with the same filters and projection. Continue even after a partial-page warning when a cursor is returned. Defaults to an empty string for the first page.",
           "enum": null,
           "inferrable": true
         }
@@ -546,7 +2321,7 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The list of conversations found with metadata"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -556,18 +2331,37 @@
             "value": [
               "public_channel",
               "private_channel",
-              "im",
-              "mpim"
+              "im"
             ],
             "type": "array",
             "required": false
           },
+          "include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "name_prefix": {
+            "value": "eng-",
+            "type": "string",
+            "required": false
+          },
+          "team_id": {
+            "value": "T01ABC1234",
+            "type": "string",
+            "required": false
+          },
+          "projection": {
+            "value": "details",
+            "type": "string",
+            "required": false
+          },
           "limit": {
-            "value": 100,
+            "value": 20,
             "type": "integer",
             "required": false
           },
-          "next_cursor": {
+          "cursor": {
             "value": "dXNlcjpVMEc5V0ZYTlo=",
             "type": "string",
             "required": false
@@ -596,195 +2390,16 @@
       }
     },
     {
-      "name": "ListConversationUsers",
-      "qualifiedName": "Slack.ListConversationUsers",
-      "fullyQualifiedName": "Slack.ListConversationUsers@3.0.1",
-      "description": "Get the users in a Slack conversation (Channel, DM/IM, or MPIM) by its ID or by channel name.\n\nProvide exactly one of conversation_id or channel_name. Prefer providing a conversation_id,\nwhen available, since the performance is better.",
+      "name": "ListMessages",
+      "qualifiedName": "Slack.ListMessages",
+      "fullyQualifiedName": "Slack.ListMessages@4.0.0",
+      "description": "Read conversation history newest first, with message references, author names, file IDs and\ncompact text excerpts. Read an individual thread for its replies. When text_complete is\nfalse, continue an exact-message read using that message_ref and content_cursor. Follow\nnext_cursor for older messages.",
       "parameters": [
         {
-          "name": "conversation_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the conversation to get users in. Defaults to identifying the conversation another way.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "channel_name",
-          "type": "string",
-          "required": false,
-          "description": "The name of the channel to get users in. Prefer providing a conversation_id, when available, since the performance is better. Defaults to identifying the conversation another way.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "limit",
-          "type": "integer",
-          "required": false,
-          "description": "The maximum number of users to return. Maximum is 500. Defaults to 200.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "next_cursor",
-          "type": "string",
-          "required": false,
-          "description": "The cursor to use for pagination. Defaults to the first page.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "slack",
-        "providerType": "oauth2",
-        "scopes": [
-          "channels:read",
-          "groups:read",
-          "im:read",
-          "mpim:read",
-          "users:read",
-          "users:read.email"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Information about each user in the conversation"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Slack.ListConversationUsers",
-        "parameters": {
-          "conversation_id": {
-            "value": "C04NP7C1234",
-            "type": "string",
-            "required": false
-          },
-          "channel_name": {
-            "value": "general",
-            "type": "string",
-            "required": false
-          },
-          "limit": {
-            "value": 100,
-            "type": "integer",
-            "required": false
-          },
-          "next_cursor": {
-            "value": "dXNlcjpVMEc5V0ZYTlo=",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "slack",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "messaging"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "ListThreadMessages",
-      "qualifiedName": "Slack.ListThreadMessages",
-      "fullyQualifiedName": "Slack.ListThreadMessages@3.0.1",
-      "description": "Get messages in a Slack thread.\n\nA thread is a collection of messages grouped together as replies to a parent message.\nThis tool retrieves all messages in a specific thread, identified by the parent message's\ntimestamp (thread_ts).\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.\n\nTo filter messages by an absolute datetime, use 'oldest_datetime' and/or 'latest_datetime'. If\nonly 'oldest_datetime' is provided, it will return messages from the oldest_datetime to the\ncurrent time. If only 'latest_datetime' is provided, it will return messages since the\nbeginning of the thread to the latest_datetime.\n\nTo filter messages by a relative datetime, use 'oldest_relative' and/or 'latest_relative'\nwith numeric `DD:HH:MM` offsets only. Convert relative phrases to `DD:HH:MM` before calling\nthis tool. If only 'oldest_relative' is provided, it will return messages from the\noldest_relative to the current time. If only 'latest_relative' is provided, it will return\nmessages from the current time to the latest_relative.\n\nDo not provide both 'oldest_datetime' and 'oldest_relative' or both 'latest_datetime' and\n'latest_relative'.\n\nLeave all datetime arguments with the default None to get all thread messages without\ndate/time filtering.",
-      "parameters": [
-        {
-          "name": "thread_ts",
+          "name": "conversation",
           "type": "string",
           "required": true,
-          "description": "The timestamp of the parent message that starts the thread. This is the 'ts' field from the parent message.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "conversation_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the conversation containing the thread. Provide exactly one of conversation_id OR channel_name OR any combination of user_ids, usernames, and/or emails. Defaults to identifying the conversation another way.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "channel_name",
-          "type": "string",
-          "required": false,
-          "description": "The name of the channel containing the thread. Prefer providing a conversation_id, when available, since the performance is better. Defaults to identifying the conversation another way.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "user_ids",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The IDs of the users in the conversation containing the thread. Defaults to no user IDs.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "usernames",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The names of the users in the conversation containing the thread, each matched case-insensitively against the Slack handle, real name, and display name. A value matching several people, or only a real or display name, is not acted on directly; the tool returns the matching users so the call can be retried with the user ID or email. Prefer user_ids and/or emails when available, since the performance is better. Defaults to no usernames.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "emails",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The emails of the users in the conversation containing the thread. Defaults to no emails.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "oldest_relative",
-          "type": "string",
-          "required": false,
-          "description": "The oldest message to include in the results, specified as a time offset from the current time. Use only the numeric 'DD:HH:MM' format; convert relative phrases to that format before calling this tool. Defaults to no lower bound.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "latest_relative",
-          "type": "string",
-          "required": false,
-          "description": "The latest message to include in the results, specified as a time offset from the current time. Use only the numeric 'DD:HH:MM' format; convert relative phrases to that format before calling this tool. Defaults to no upper bound.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "oldest_datetime",
-          "type": "string",
-          "required": false,
-          "description": "The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS' or ISO 8601. Defaults to no lower bound.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "latest_datetime",
-          "type": "string",
-          "required": false,
-          "description": "The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS' or ISO 8601. Defaults to no upper bound.",
+          "description": "Read an existing conversation ID beginning with C, G or D, or an exact channel name with or without #. User IDs, names and emails are not accepted; explicitly open a DM first.",
           "enum": null,
           "inferrable": true
         },
@@ -792,15 +2407,39 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of messages to return. Maximum is 100. Defaults to 20.",
+          "description": "Messages per page, 1-20. Defaults to 20.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "next_cursor",
+          "name": "timezone",
           "type": "string",
           "required": false,
-          "description": "The cursor to use for pagination. Defaults to the first page.",
+          "description": "IANA output timezone. Defaults to empty (your Slack timezone, else UTC).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "after",
+          "type": "string",
+          "required": false,
+          "description": "Only include messages at or after this ISO 8601 date and time with an explicit UTC offset or Z. Must not exceed before. Defaults to an empty string, with no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "before",
+          "type": "string",
+          "required": false,
+          "description": "Only include messages at or before this ISO 8601 date and time with an explicit UTC offset or Z. Defaults to an empty string, letting Slack use the current time.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from ListMessages with the same conversation, limit, timezone and time bounds. Defaults to an empty string for the first page; restart if the page changed.",
           "enum": null,
           "inferrable": true
         }
@@ -809,94 +2448,301 @@
         "providerId": "slack",
         "providerType": "oauth2",
         "scopes": [
-          "channels:read",
-          "groups:read",
-          "mpim:read",
-          "im:read",
-          "users:read",
-          "users:read.email",
           "channels:history",
           "groups:history",
+          "im:history",
           "mpim:history",
-          "im:history"
+          "channels:read",
+          "groups:read",
+          "users:read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The messages in a Slack thread within a Channel, DM (direct message) or MPIM (multi-person) conversation."
+        "description": "Compact newest-first messages, file references and continuation."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Slack.ListThreadMessages",
+        "toolName": "Slack.ListMessages",
         "parameters": {
-          "thread_ts": {
-            "value": "1698765432.123456",
+          "conversation": {
+            "value": "C04ABCD1234",
             "type": "string",
             "required": true
           },
-          "conversation_id": {
-            "value": "C04AB1XYZ78",
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "timezone": {
+            "value": "America/New_York",
             "type": "string",
             "required": false
           },
-          "channel_name": {
-            "value": "general",
+          "after": {
+            "value": "2024-06-01T09:00:00Z",
             "type": "string",
             "required": false
           },
-          "user_ids": {
-            "value": [
-              "U01ABC1234",
-              "U02DEF5678"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "usernames": {
-            "value": [
-              "john.doe",
-              "jane_smith"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "emails": {
-            "value": [
-              "john.doe@example.com",
-              "jane.smith@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "oldest_relative": {
-            "value": "02:08:30",
+          "before": {
+            "value": "2024-06-30T17:00:00-05:00",
             "type": "string",
             "required": false
           },
-          "latest_relative": {
-            "value": "00:01:00",
+          "cursor": {
+            "value": "dXNlcjpVMDYxTkZUVDI=",
             "type": "string",
             "required": false
-          },
-          "oldest_datetime": {
-            "value": "2024-03-01 09:00:00",
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPinnedMessages",
+      "qualifiedName": "Slack.ListPinnedMessages",
+      "fullyQualifiedName": "Slack.ListPinnedMessages@4.0.0",
+      "description": "List compact pinned messages and files in Slack's order, with references for reading their\ncontent. Follow next_cursor until empty; this does not pin or unpin anything.",
+      "parameters": [
+        {
+          "name": "conversation",
+          "type": "string",
+          "required": true,
+          "description": "Read pins in this existing C-, G- or D-prefixed conversation ID or exact #channel name; user names and emails do not open a DM.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Return at most this many pinned items, from 1 to 50. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from this conversation's previous pinned listing. Restart without it if the pinned set changed. Defaults to an empty string for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "pins:read",
+          "channels:read",
+          "groups:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.ListPinnedMessages",
+        "parameters": {
+          "conversation": {
+            "value": "C04AB123XYZ",
             "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
             "required": false
           },
-          "latest_datetime": {
-            "value": "2024-03-15 17:30:00",
+          "cursor": {
+            "value": "dXNlcjpVMDYxTkZUVDI=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListReactions",
+      "qualifiedName": "Slack.ListReactions",
+      "fullyQualifiedName": "Slack.ListReactions@4.0.0",
+      "description": "Read a message's reaction names, authoritative counts and optional user samples.\nusers_complete reports whether each sample covers its count; adding or removing your own\nreactions is a separate action.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Read reactions on this exact conversation_id:timestamp message reference or HTTPS Slack message permalink, including a thread reply.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_users",
+          "type": "boolean",
+          "required": false,
+          "description": "Include up to 20 visible user references per reaction; Slack may omit other users. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "reactions:read",
+          "users:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.ListReactions",
+        "parameters": {
+          "message": {
+            "value": "https://myworkspace.slack.com/archives/C04AB1XYZ/p1712345678901234",
+            "type": "string",
+            "required": true
+          },
+          "include_users": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListScheduledMessages",
+      "qualifiedName": "Slack.ListScheduledMessages",
+      "fullyQualifiedName": "Slack.ListScheduledMessages@4.0.0",
+      "description": "List pending schedules visible to this API/token, with each page sorted by delivery time,\nearliest first. Slack UI schedules are excluded; the returned schedule identifiers can be\nused to cancel pending delivery.",
+      "parameters": [
+        {
+          "name": "conversation",
+          "type": "string",
+          "required": false,
+          "description": "Only include schedules for this existing C-, G- or D-prefixed conversation ID or exact #channel name. Defaults to an empty string, including all accessible API/token schedules.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Return at most this many schedules, from 1 to 50. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from ListScheduledMessages with the same conversation filter. Defaults to an empty string for the first page; an empty returned cursor ends the listing.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "channels:read",
+          "groups:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.ListScheduledMessages",
+        "parameters": {
+          "conversation": {
+            "value": "C01234ABCDE",
             "type": "string",
             "required": false
           },
           "limit": {
-            "value": 50,
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "next_cursor": {
-            "value": "dXNlcjpVMDYxNTU3MjAw",
+          "cursor": {
+            "value": "dXNlcjpVMDYxTkZUVDI=",
             "type": "string",
             "required": false
           }
@@ -926,41 +2772,22 @@
     {
       "name": "ListUsers",
       "qualifiedName": "Slack.ListUsers",
-      "fullyQualifiedName": "Slack.ListUsers@3.0.1",
-      "description": "List all users in the authenticated user's Slack team, or look up specific users by their\nIDs, usernames, and/or emails. To look up several users, DO NOT CALL THE TOOL MULTIPLE\nTIMES; call it once with all of their user_ids, usernames, and/or emails. Do not retrieve\nusers first to get the metadata or messages of a conversation, as it is inefficient:\nconversations can be looked up by user_ids, usernames, and/or emails directly.",
+      "fullyQualifiedName": "Slack.ListUsers@4.0.0",
+      "description": "List workspace accounts with compact identity fields in Slack's order. Follow next_cursor\nfor more accounts; search people to find a name/email or request one person's detailed\nprofile after choosing their user ID.",
       "parameters": [
         {
-          "name": "user_ids",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The IDs of the users to get. Defaults to no user IDs.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "usernames",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The names of the users to get, each matched case-insensitively against the Slack handle, real name, and display name. A name can match several people, and every match is returned. Prefer user_ids and/or emails when available, since the performance is better. Defaults to no usernames.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "emails",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The emails of the users to get. Defaults to no emails.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "exclude_bots",
+          "name": "include_bots",
           "type": "boolean",
           "required": false,
-          "description": "Whether to exclude bots from the results. Applies only when no user_ids, usernames, or emails are given. Defaults to True.",
+          "description": "Include bot and app accounts. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_deleted",
+          "type": "boolean",
+          "required": false,
+          "description": "Include deactivated accounts. Defaults to false.",
           "enum": null,
           "inferrable": true
         },
@@ -968,15 +2795,15 @@
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The maximum number of users to return. Maximum is 500. Applies only when no user_ids, usernames, or emails are given. Defaults to 200.",
+          "description": "Return up to this many users, from 1 to 100. Defaults to 50.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "next_cursor",
+          "name": "cursor",
           "type": "string",
           "required": false,
-          "description": "The next cursor token to use for pagination. Applies only when no user_ids, usernames, or emails are given. Defaults to the first page.",
+          "description": "Pass next_cursor unchanged from ListUsers with the same include_bots and include_deleted filters. Defaults to an empty string for the first page; an empty returned cursor ends the listing.",
           "enum": null,
           "inferrable": true
         }
@@ -993,47 +2820,28 @@
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The users' info"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
         "toolName": "Slack.ListUsers",
         "parameters": {
-          "user_ids": {
-            "value": [
-              "U012AB3CD",
-              "U098ZY7WX"
-            ],
-            "type": "array",
+          "include_bots": {
+            "value": false,
+            "type": "boolean",
             "required": false
           },
-          "usernames": {
-            "value": [
-              "john.doe",
-              "Jane Smith"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "emails": {
-            "value": [
-              "alice@example.com",
-              "bob@example.com"
-            ],
-            "type": "array",
-            "required": false
-          },
-          "exclude_bots": {
+          "include_deleted": {
             "value": true,
             "type": "boolean",
             "required": false
           },
           "limit": {
-            "value": 100,
+            "value": 25,
             "type": "integer",
             "required": false
           },
-          "next_cursor": {
+          "cursor": {
             "value": "dXNlcjpVMDYxTkZUVDI=",
             "type": "string",
             "required": false
@@ -1062,51 +2870,404 @@
       }
     },
     {
-      "name": "ReactToMessage",
-      "qualifiedName": "Slack.ReactToMessage",
-      "fullyQualifiedName": "Slack.ReactToMessage@3.0.1",
-      "description": "Add or remove the user's emoji reaction on a message in a Slack conversation.\n\nProvide exactly one of conversation_id or channel_name.\n\nOnly the user's own reaction is added or removed; other people's reactions are left\nuntouched. Adding a reaction the user already left, or removing one they have not left,\nchanges nothing and is reported with changed set to false.",
+      "name": "MarkReadMessages",
+      "qualifiedName": "Slack.MarkReadMessages",
+      "fullyQualifiedName": "Slack.MarkReadMessages@4.0.0",
+      "description": "Mark conversations read through the supplied messages for the authenticated user, returning\nan outcome for every input. This changes Slack read state; it does not retrieve message\ntext.",
       "parameters": [
         {
-          "name": "message_ts",
+          "name": "messages",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Set read markers to 1-20 exact conversation_id:timestamp message references or HTTPS Slack message permalinks, in input order. Later items for the same conversation set the marker again.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "channels:write",
+          "groups:write",
+          "im:write",
+          "mpim:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.MarkReadMessages",
+        "parameters": {
+          "messages": {
+            "value": [
+              "C01234ABCDE:1698765432.000100",
+              "https://myworkspace.slack.com/archives/C09876ZYXWV/p1698765500000200",
+              "D0ABCDEF123:1698765600.000300",
+              "C05555MNOPQ:1698765700.000400",
+              "https://myworkspace.slack.com/archives/G0GHIJKLMNO/p1698765800000500"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ReactToMessage",
+      "qualifiedName": "Slack.ReactToMessage",
+      "fullyQualifiedName": "Slack.ReactToMessage@4.0.0",
+      "description": "Add or remove your own reactions with per-item outcomes. An already-present add or\nalready-absent remove succeeds with changed=false. Read the message's current reactions to\ncheck an unknown outcome before retrying.",
+      "parameters": [
+        {
+          "name": "reactions",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Apply 1-20 changes in input order to the authenticated user's reactions. Each item identifies an exact message and emoji; inspect every indexed result.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "reactions:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.ReactToMessage",
+        "parameters": {
+          "reactions": {
+            "value": [
+              {
+                "action": "add",
+                "channel": "C04AB123XYZ",
+                "timestamp": "1698765432.123456",
+                "emoji": "thumbsup"
+              },
+              {
+                "action": "add",
+                "channel": "C04AB123XYZ",
+                "timestamp": "1698765432.123456",
+                "emoji": "rocket"
+              },
+              {
+                "action": "remove",
+                "channel": "C07QR456DEF",
+                "timestamp": "1698700000.654321",
+                "emoji": "eyes"
+              }
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ReplaceListSchema",
+      "qualifiedName": "Slack.ReplaceListSchema",
+      "fullyQualifiedName": "Slack.ReplaceListSchema@4.0.0",
+      "description": "Create a replacement list schema and copy active typed records incrementally, retaining the\nsource and archived records. The replacement gets new list, column and row IDs; sharing,\nhistory, reminders and ordering are not copied.\n\nFollow next_cursor and retain copied_rows. When reconciliation or parent mappings are\nrequested, continue the same replacement with those inputs; restarting without its cursor\ncreates another list.",
+      "parameters": [
+        {
+          "name": "source_list_id",
           "type": "string",
           "required": true,
-          "description": "The timestamp of the message to react to. This is the 'ts' field of the message. To react to a reply in a thread, use the reply's own 'ts'.",
+          "description": "Copy active records from this F-prefixed Slack list ID and retain the original list. Names and URLs are not accepted.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "emoji",
+          "name": "columns",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Define 1-100 replacement columns with unique keys and a primary text column. Mapped populated columns must retain compatible types. Omit todo_* columns; the replacement inherits source task mode.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "column_mapping",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Override unchanged-key matches with up to 100 source-to-replacement column selectors. Defaults to matching unchanged keys; unmatched source columns are omitted and reported in unmapped_source_columns.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Name the replacement. Defaults to the source name with a schema-replacement suffix.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Copy at most this many active source rows in this call, from 1 to 10. Defaults to 10; retain this value across continuation calls.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass the latest next_cursor unchanged to resume the existing replacement, keeping source_list_id, columns, column_mapping, name and limit unchanged. Defaults to no cursor, creating a new replacement; never restart creation after partial progress.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_row_mappings",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Supply up to 10 verified source-to-replacement parent ID pairs from prior copied_rows results when required_parent_record_ids asks for them. Defaults to no prior-page parent mappings; retain all copied_rows results for later pages.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "resolution",
+          "type": "json",
+          "required": false,
+          "description": "With the latest cursor, reconcile pending_source_record_id after an unknown row write, using its verified replacement ID or null only after confirming no row was created. Defaults to no resolution, pausing ambiguous writes rather than duplicating them.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "lists:read",
+          "lists:write",
+          "files:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.ReplaceListSchema",
+        "parameters": {
+          "source_list_id": {
+            "value": "F012AB3CD45",
+            "type": "string",
+            "required": true
+          },
+          "columns": {
+            "value": [
+              {
+                "key": "title",
+                "name": "Title",
+                "type": "text",
+                "is_primary": true
+              },
+              {
+                "key": "status",
+                "name": "Status",
+                "type": "select",
+                "options": [
+                  "Open",
+                  "In Progress",
+                  "Done"
+                ]
+              },
+              {
+                "key": "due_date",
+                "name": "Due Date",
+                "type": "date"
+              }
+            ],
+            "type": "array",
+            "required": true
+          },
+          "column_mapping": {
+            "value": [
+              {
+                "source_column_key": "old_title",
+                "replacement_column_key": "title"
+              },
+              {
+                "source_column_key": "old_status",
+                "replacement_column_key": "status"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "name": {
+            "value": "Project Tasks - Schema Replacement",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "dXNlcjpVMEc5V0ZYTlo=",
+            "type": "string",
+            "required": false
+          },
+          "parent_row_mappings": {
+            "value": [
+              {
+                "source_row_id": "R001ABC",
+                "replacement_row_id": "R099XYZ"
+              },
+              {
+                "source_row_id": "R002DEF",
+                "replacement_row_id": "R100UVW"
+              }
+            ],
+            "type": "array",
+            "required": false
+          },
+          "resolution": {
+            "value": {
+              "pending_source_record_id": "R003GHI",
+              "verified_replacement_record_id": "R101RST"
+            },
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchCanvasSections",
+      "qualifiedName": "Slack.SearchCanvasSections",
+      "fullyQualifiedName": "Slack.SearchCanvasSections@4.0.0",
+      "description": "Look up section IDs inside one canvas for targeted content edits. This locates edit targets;\nreading the canvas body or searching content across Slack are separate actions.",
+      "parameters": [
+        {
+          "name": "canvas_id",
           "type": "string",
           "required": true,
-          "description": "The Slack name of the emoji, with or without the surrounding colons. Custom workspace emoji are referenced by name the same way.",
+          "description": "Search within this F-prefixed canvas ID; URLs and titles are not accepted.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "conversation_id",
+          "name": "contains_text",
           "type": "string",
           "required": false,
-          "description": "The ID of the conversation (Channel, DM/IM, or MPIM) containing the message. Defaults to identifying the conversation another way.",
+          "description": "Only include sections containing this text. Defaults to no text filter; combine with section_types to narrow the match.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "channel_name",
-          "type": "string",
+          "name": "section_types",
+          "type": "array",
+          "innerType": "string",
           "required": false,
-          "description": "The name of the channel containing the message. Prefer providing a conversation_id, when available, since the performance is better. Defaults to identifying the conversation another way.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "action",
-          "type": "string",
-          "required": false,
-          "description": "Whether to add or remove the reaction. Defaults to 'add'.",
+          "description": "Only include sections of these types, combined with contains_text when supplied. Defaults to no type filter; omit rather than send an empty array.",
           "enum": [
-            "add",
-            "remove"
+            "any_header",
+            "blockquote",
+            "callout",
+            "canvas_unfurl",
+            "chart",
+            "citation",
+            "file_unfurl",
+            "flexbox",
+            "h1",
+            "h2",
+            "h3",
+            "horizontal_line",
+            "list",
+            "message_unfurl",
+            "sfdc_record_mention",
+            "sfdc_record_unfurl",
+            "table",
+            "user_mention",
+            "user_unfurl"
           ],
           "inferrable": true
         }
@@ -1115,44 +3276,1129 @@
         "providerId": "slack",
         "providerType": "oauth2",
         "scopes": [
-          "channels:read",
-          "groups:read",
-          "reactions:write"
+          "canvases:read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The result of the reaction change"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Slack.ReactToMessage",
+        "toolName": "Slack.SearchCanvasSections",
         "parameters": {
-          "message_ts": {
-            "value": "1713984052.473920",
+          "canvas_id": {
+            "value": "F07ABC123DE",
             "type": "string",
             "required": true
           },
-          "emoji": {
-            "value": "thumbsup",
-            "type": "string",
-            "required": true
-          },
-          "conversation_id": {
-            "value": "C04NJ8XERQZ",
+          "contains_text": {
+            "value": "quarterly goals",
             "type": "string",
             "required": false
           },
-          "channel_name": {
+          "section_types": {
+            "value": [
+              "paragraph",
+              "heading"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchContent",
+      "qualifiedName": "Slack.SearchContent",
+      "fullyQualifiedName": "Slack.SearchContent@4.0.0",
+      "description": "Search accessible Slack messages, files, channels or people, including unjoined channels,\nthrough Slack real-time search. Requires Slack AI availability.\n\nClassic message/file search works without that feature. Follow next_cursor for more matches;\nselected references can be used to read exact messages, threads, files or profiles.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Search nonempty text or Slack modifiers such as in:channel, from:user and has:file, up to 5,000 characters. Use Slack channel/user names or IDs inside modifiers rather than JSON field names.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timezone",
+          "type": "string",
+          "required": false,
+          "description": "IANA zone for posted_at values. Defaults to UTC.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content_types",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Only return matches of these resource types. Defaults to messages when omitted; an empty array is not accepted.",
+          "enum": [
+            "messages",
+            "files",
+            "channels",
+            "users"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "channel_types",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Only search conversations of these types. Defaults to all conversation types when omitted; an empty array is not accepted.",
+          "enum": [
+            "public_channel",
+            "private_channel",
+            "im",
+            "mpim"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "include_bots",
+          "type": "boolean",
+          "required": false,
+          "description": "Include bot messages and users. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_deleted_users",
+          "type": "boolean",
+          "required": false,
+          "description": "Include deactivated users. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Search archived channels. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "Rank by relevance score or message time. Defaults to score; use order for the direction.",
+          "enum": [
+            "score",
+            "timestamp"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "order",
+          "type": "string",
+          "required": false,
+          "description": "Order the chosen ranking from highest/newest to lowest/oldest when descending, or the reverse when ascending. Defaults to descending.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "after",
+          "type": "string",
+          "required": false,
+          "description": "Only include results after this ISO 8601 date and time with an explicit UTC offset or Z; must not exceed before. Defaults to an empty string, with no lower bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "before",
+          "type": "string",
+          "required": false,
+          "description": "Only include results before this ISO 8601 date and time with an explicit UTC offset or Z. Defaults to an empty string, with no upper bound.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Results per Slack page, 1-20. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from SearchContent with every other search input unchanged, including limit and timezone. Defaults to an empty string for the first page; restart if the result set changed.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "search:read.public",
+          "search:read.private",
+          "search:read.im",
+          "search:read.mpim",
+          "search:read.files",
+          "search:read.users"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Accessible message, file, channel and user matches with source references."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.SearchContent",
+        "parameters": {
+          "query": {
+            "value": "in:general from:alice has:file deployment report",
+            "type": "string",
+            "required": true
+          },
+          "timezone": {
+            "value": "America/New_York",
+            "type": "string",
+            "required": false
+          },
+          "content_types": {
+            "value": [
+              "messages",
+              "files"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "channel_types": {
+            "value": [
+              "public_channel",
+              "private_channel"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "include_bots": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "include_deleted_users": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "include_archived": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "sort": {
+            "value": "score",
+            "type": "string",
+            "required": false
+          },
+          "order": {
+            "value": "descending",
+            "type": "string",
+            "required": false
+          },
+          "after": {
+            "value": "2024-01-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "before": {
+            "value": "2024-06-30T23:59:59Z",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
             "value": "",
             "type": "string",
             "required": false
-          },
-          "action": {
-            "value": "add",
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchEmojis",
+      "qualifiedName": "Slack.SearchEmojis",
+      "fullyQualifiedName": "Slack.SearchEmojis@4.0.0",
+      "description": "Find workspace custom emoji names and aliases, sorted by name, for use when adding\nreactions. Follow next_cursor until empty. Standard Unicode emoji are not listed; unresolved\nor cyclic aliases have a null URL.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Only include custom emoji names containing this case-insensitive substring, up to 100 characters; surrounding colons are ignored. Defaults to an empty string, listing all custom emojis.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Return up to this many custom emojis, from 1 to 100. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from SearchEmojis with the same query. Restart without it if the workspace's emoji set changed. Defaults to an empty string for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "emoji:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.SearchEmojis",
+        "parameters": {
+          "query": {
+            "value": "rocket",
             "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "dXNlcjpVMDYxTkZUVDI=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchFiles",
+      "qualifiedName": "Slack.SearchFiles",
+      "fullyQualifiedName": "Slack.SearchFiles@4.0.0",
+      "description": "Find files by classic Slack search with short excerpts, file IDs and permalinks, including\nwhen Slack AI real-time search is unavailable. Results follow sort/order; download a\nselected file ID for content or follow next_cursor for more matches.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Search files with a nonempty classic Slack query, up to 5,000 characters. Supports type:, in:channel, from:user and date modifiers such as after:YYYY-MM-DD.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "Rank matching files by relevance score or time. Defaults to score; use order for the direction.",
+          "enum": [
+            "score",
+            "timestamp"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "order",
+          "type": "string",
+          "required": false,
+          "description": "Order the chosen ranking from highest/newest to lowest/oldest when descending, or the reverse when ascending. Defaults to descending.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Results per page, 1-20. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from SearchFiles with the same query, sort, order and limit. Defaults to an empty string for the first page; narrow the query if classic search reaches its 100-page ceiling.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "search:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Classic file references with short excerpts and continuation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.SearchFiles",
+        "parameters": {
+          "query": {
+            "value": "project roadmap type:pdf in:general from:alice after:2024-01-01",
+            "type": "string",
+            "required": true
+          },
+          "sort": {
+            "value": "timestamp",
+            "type": "string",
+            "required": false
+          },
+          "order": {
+            "value": "descending",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "dXNlcjpVMEc5V0ZYTlo=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchMessages",
+      "qualifiedName": "Slack.SearchMessages",
+      "fullyQualifiedName": "Slack.SearchMessages@4.0.0",
+      "description": "Search message text with classic Slack search, including when Slack AI real-time search is\nunavailable. Results use the selected sort/order and contain bounded excerpts with message\nreferences. Follow next_cursor for more; read an exact message or its thread for full\ncontext.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Search messages with a nonempty classic Slack query, up to 5,000 characters. Supports in:channel, from:user, after:YYYY-MM-DD and before:YYYY-MM-DD modifiers.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timezone",
+          "type": "string",
+          "required": false,
+          "description": "IANA zone for posted_at values. Defaults to UTC.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "Rank matching messages by relevance score or message time. Defaults to score; use order for the direction.",
+          "enum": [
+            "score",
+            "timestamp"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "order",
+          "type": "string",
+          "required": false,
+          "description": "Order the chosen ranking from highest/newest to lowest/oldest when descending, or the reverse when ascending. Defaults to descending.",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Results per page, 1-20. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from SearchMessages with the same query, sort, order, limit and timezone. Defaults to an empty string for the first page; narrow the query if classic search reaches its 100-page ceiling.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "search:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Classic message matches and bounded continuation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.SearchMessages",
+        "parameters": {
+          "query": {
+            "value": "deployment failed in:#devops from:@john.doe after:2024-01-01 before:2024-06-30",
+            "type": "string",
+            "required": true
+          },
+          "timezone": {
+            "value": "America/New_York",
+            "type": "string",
+            "required": false
+          },
+          "sort": {
+            "value": "timestamp",
+            "type": "string",
+            "required": false
+          },
+          "order": {
+            "value": "descending",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "eyJwYWdlIjoyLCJxdWVyeSI6ImRlcGxveW1lbnQgZmFpbGVkIn0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchUsers",
+      "qualifiedName": "Slack.SearchUsers",
+      "fullyQualifiedName": "Slack.SearchUsers@4.0.0",
+      "description": "Find matching people and return all visible candidates rather than choosing an ambiguous\nname. Text matches keep Slack's order and may span next_cursor; an exact ID/email lookup\nreturns at most one account. A selected user ID can identify a profile or participants when\nopening a conversation.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Match a U- or W-prefixed user ID, exact email, or case-insensitive substring in names, handles and email, up to 300 characters; a leading @ is ignored. Text search excludes deactivated users.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_bots",
+          "type": "boolean",
+          "required": false,
+          "description": "Include bot and app accounts. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Return up to this many matches, from 1 to 100. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pass next_cursor unchanged from a text SearchUsers call with the same query and include_bots filter. Exact ID/email lookups do not accept a cursor. Defaults to an empty string for the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "users:read",
+          "users:read.email"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.SearchUsers",
+        "parameters": {
+          "query": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "include_bots": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "dXNlcjpVMDYxTkZUVDI=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SendMessage",
+      "qualifiedName": "Slack.SendMessage",
+      "fullyQualifiedName": "Slack.SendMessage@4.0.0",
+      "description": "Send messages now, including thread replies, and return each posted reference or failure.\n\nFor later delivery, schedule a message instead. For outcome_unknown, read destination\nhistory or the target thread before resending; retrying the whole batch can duplicate\nsuccessful posts.",
+      "parameters": [
+        {
+          "name": "messages",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Send 1-20 messages in input order, each with its own destination, text and optional thread parent. Inspect every indexed result; one failure does not stop later items.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "chat:write",
+          "channels:read",
+          "groups:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.SendMessage",
+        "parameters": {
+          "messages": {
+            "value": [
+              {
+                "destination": "#general",
+                "text": "Hey team, the weekly sync is starting in 10 minutes! Please join the call.",
+                "thread_parent": null
+              },
+              {
+                "destination": "@jane.doe",
+                "text": "Hi Jane, could you review the pull request I submitted this morning? Thanks!",
+                "thread_parent": null
+              },
+              {
+                "destination": "#engineering",
+                "text": "Deployment to production was successful. All services are running normally.",
+                "thread_parent": "1692453600.000100"
+              }
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ShareCanvas",
+      "qualifiedName": "Slack.ShareCanvas",
+      "fullyQualifiedName": "Slack.ShareCanvas@4.0.0",
+      "description": "Share an existing canvas by posting its link before granting access, with an outcome per\ndestination. A link may have posted even when access failed; inspect message_reference and\nthe destination before retrying to avoid duplicate posts.",
+      "parameters": [
+        {
+          "name": "canvas_id",
+          "type": "string",
+          "required": true,
+          "description": "Share the existing F-prefixed canvas ID returned when creating a canvas or by Slack; a canvas URL is not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Post a link and grant access to 1-20 regular channel IDs beginning with C or G. Do not supply names, DM IDs, or user_ids. Defaults to no channel sharing; provide these or user_ids.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Open/resume DMs, post a link and grant access to 1-20 U/W user IDs. Do not supply names/emails or channel_ids. Defaults to no direct sharing; provide these or channel_ids.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "access_level",
+          "type": "string",
+          "required": false,
+          "description": "Grant this access to recipients. Defaults to read access; owner transfers ownership and accepts exactly one user, never a channel.",
+          "enum": [
+            "read",
+            "write",
+            "owner"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "share_comment",
+          "type": "string",
+          "required": false,
+          "description": "Append this text after each shared link, up to 4,000 characters. Defaults to an empty comment.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "canvases:write",
+          "chat:write",
+          "im:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.ShareCanvas",
+        "parameters": {
+          "canvas_id": {
+            "value": "F0123456789",
+            "type": "string",
+            "required": true
+          },
+          "channel_ids": {
+            "value": [
+              "C01ABC1234",
+              "C09XYZ5678",
+              "G02DEF3456"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "user_ids": {
+            "value": [
+              "U03GHI7890",
+              "W04JKL1234"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "access_level": {
+            "value": "read",
+            "type": "string",
+            "required": false
+          },
+          "share_comment": {
+            "value": "Please review this canvas and share your feedback by end of week. Let me know if you have any questions!",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateCanvas",
+      "qualifiedName": "Slack.UpdateCanvas",
+      "fullyQualifiedName": "Slack.UpdateCanvas@4.0.0",
+      "description": "Apply one canvas content edit or rename. Section deletion and replacement remove content;\nread the canvas body after an uncertain insertion before retrying, since the inserted\ncontent may already exist.",
+      "parameters": [
+        {
+          "name": "canvas_id",
+          "type": "string",
+          "required": true,
+          "description": "Edit this F-prefixed canvas ID; URLs and titles are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "operation",
+          "type": "string",
+          "required": true,
+          "description": "Apply one edit: relative insertions and section deletion need section_id; replacement may target a section or the whole body; start/end insertion and rename do not accept section_id.",
+          "enum": [
+            "insert_after",
+            "insert_before",
+            "insert_at_start",
+            "insert_at_end",
+            "replace",
+            "delete",
+            "rename"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "markdown",
+          "type": "string",
+          "required": false,
+          "description": "Supply Markdown content for insertion/replacement or the new nonempty title for rename, up to 1,048,576 characters. Defaults to omitted and must stay omitted for section deletion; an empty string clears replacement content.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "section_id",
+          "type": "string",
+          "required": false,
+          "description": "Use an exact nonempty section ID from a canvas section lookup for relative insertion, deletion or targeted replacement. Defaults to no section target, valid for whole-canvas replacement, start/end insertion or rename.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "canvases:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.UpdateCanvas",
+        "parameters": {
+          "canvas_id": {
+            "value": "F06ABCD1234",
+            "type": "string",
+            "required": true
+          },
+          "operation": {
+            "value": "replace",
+            "type": "string",
+            "required": true
+          },
+          "markdown": {
+            "value": "## Updated Section\n\nThis is the updated content for the canvas section.",
+            "type": "string",
+            "required": false
+          },
+          "section_id": {
+            "value": "temp:C:abc123def456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateList",
+      "qualifiedName": "Slack.UpdateList",
+      "fullyQualifiedName": "Slack.UpdateList@4.0.0",
+      "description": "Update an existing list's name, description or task mode without replacing its column\nschema. Schema replacement creates a new list, while updating a record changes selected cell\nvalues.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "Update this F-prefixed Slack list ID from a list creation or read result; names and URLs are not accepted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Replace the display name with a nonempty name. Defaults to retaining the current name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Replace the description; an empty string clears it. Defaults to retaining the description.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "todo_mode",
+          "type": "boolean",
+          "required": false,
+          "description": "Show or hide Slack's task-tracking columns; provide at least one metadata field to change. Defaults to retaining the setting.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "lists:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.UpdateList",
+        "parameters": {
+          "list_id": {
+            "value": "F08AB3XYZ12",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Q3 Project Tracker",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Tracks all deliverables and owners for Q3 initiatives.",
+            "type": "string",
+            "required": false
+          },
+          "todo_mode": {
+            "value": true,
+            "type": "boolean",
             "required": false
           }
         },
@@ -1179,75 +4425,33 @@
       }
     },
     {
-      "name": "SendMessage",
-      "qualifiedName": "Slack.SendMessage",
-      "fullyQualifiedName": "Slack.SendMessage@3.0.1",
-      "description": "Send a message to a Channel, Direct Message (IM/DM), or Multi-Person (MPIM) conversation.\n\nCan send top-level messages or reply to an existing thread.\n\nProvide exactly one of:\n- channel_name; or\n- conversation_id; or\n- any combination of user_ids, usernames, and/or emails.\n\nIn case multiple user_ids, usernames, and/or emails are provided, the tool will open a\nmulti-person conversation with the specified people and send the message to it.\n\nTo reply to a thread, also provide thread_ts (the 'ts' field of the parent message).\nOptionally set reply_broadcast to true to also post the reply to the main conversation.",
+      "name": "UpdateListRecord",
+      "qualifiedName": "Slack.UpdateListRecord",
+      "fullyQualifiedName": "Slack.UpdateListRecord@4.0.0",
+      "description": "Update selected typed cells in one existing record, preserving omitted cells. Creating a row\nor changing list-level metadata are separate actions; verify an uncertain write by reading\nthis exact record_id.",
       "parameters": [
         {
-          "name": "message",
+          "name": "list_id",
           "type": "string",
           "required": true,
-          "description": "The content of the message to send.",
+          "description": "Update a record in this F-prefixed Slack list ID; names and URLs are not accepted.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "channel_name",
+          "name": "record_id",
           "type": "string",
-          "required": false,
-          "description": "The channel name to send the message to. Prefer providing a conversation_id, when available, since the performance is better. Defaults to identifying the conversation another way.",
+          "required": true,
+          "description": "Update this existing Rec-prefixed record ID in the selected list; this does not create a row.",
           "enum": null,
           "inferrable": true
         },
         {
-          "name": "conversation_id",
-          "type": "string",
-          "required": false,
-          "description": "The conversation ID to send the message to. Defaults to identifying the conversation another way.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "user_ids",
+          "name": "cells",
           "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The Slack user IDs of the people to message. Defaults to no user IDs.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "emails",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The emails of the people to message. Defaults to no emails.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "usernames",
-          "type": "array",
-          "innerType": "string",
-          "required": false,
-          "description": "The names of the people to message, each matched case-insensitively against the Slack handle, real name, and display name. A value matching several people, or only a real or display name, is not acted on directly; the tool returns the matching users so the call can be retried with the user ID or email. Prefer user_ids and/or emails when available, since the performance is better. Defaults to no usernames.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "thread_ts",
-          "type": "string",
-          "required": false,
-          "description": "The timestamp of the parent message to reply to in a thread. Use the 'ts' field from the parent message (the first message in the thread), not from a reply. Get this value from previously retrieved conversation or thread messages. Defaults to sending a new top-level message.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "reply_broadcast",
-          "type": "boolean",
-          "required": false,
-          "description": "When replying to a thread (thread_ts is set), set to true to also post the reply to the main conversation. Only valid when thread_ts is provided. Defaults to False",
+          "innerType": "json",
+          "required": true,
+          "description": "Update 1-100 cells, each with one column selector and one typed value field or clear=true. Omitted columns retain their values; read the list's schema to obtain column IDs, keys, types and choices.",
           "enum": null,
           "inferrable": true
         }
@@ -1256,64 +4460,247 @@
         "providerId": "slack",
         "providerType": "oauth2",
         "scopes": [
-          "channels:read",
-          "groups:read",
-          "mpim:read",
-          "im:read",
-          "users:read",
-          "users:read.email",
-          "chat:write",
-          "im:write"
+          "lists:read",
+          "lists:write"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "The response from the Slack API"
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Slack.SendMessage",
+        "toolName": "Slack.UpdateListRecord",
         "parameters": {
-          "message": {
-            "value": "Hi team — quick update: deployment to production is scheduled for 2026-02-28 at 10:00 UTC. Please review the release notes in #release-notes and confirm readiness.",
+          "list_id": {
+            "value": "F0123456789",
             "type": "string",
             "required": true
           },
-          "channel_name": {
-            "value": null,
+          "record_id": {
+            "value": "Rec0987654321",
+            "type": "string",
+            "required": true
+          },
+          "cells": {
+            "value": [
+              {
+                "column_id": "Col001",
+                "value": "Updated Project Name"
+              },
+              {
+                "column_id": "Col002",
+                "value": "In Progress"
+              },
+              {
+                "column_id": "Col003",
+                "clear": true
+              }
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateMessage",
+      "qualifiedName": "Slack.UpdateMessage",
+      "fullyQualifiedName": "Slack.UpdateMessage@4.0.0",
+      "description": "Replace an editable message's text and retain its reference. Read that exact message to\nverify an uncertain edit before retrying.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Edit this exact conversation_id:timestamp message reference or HTTPS Slack message permalink. Slack must allow the authenticated account to edit it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "Replace the entire message body with this nonempty Slack mrkdwn text, up to 40,000 characters; this is not an appended comment.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "chat:write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.UpdateMessage",
+        "parameters": {
+          "message": {
+            "value": "C04AB1XY23Z:1698765432.109872",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "*Project Update* :rocket:\nThe deployment to production has been completed successfully.\n• All services are running smoothly\n• Downtime: 0 minutes\ncc: <@U01ABCDEF> <@U02GHIJKL>",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "messaging"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UploadFile",
+      "qualifiedName": "Slack.UploadFile",
+      "fullyQualifiedName": "Slack.UploadFile@4.0.0",
+      "description": "Upload supplied content or open a local file picker without uploading anything.\n\nOmit text and content_base64 to choose a file in an App-capable client. FileReader sends\nits bytes directly to this tool after the user confirms; the model receives only the\nresult references. Client code may supply text or base64 explicitly, up to 8 MiB.\nOpening or cancelling the picker creates no Slack file and posts no message.",
+      "parameters": [
+        {
+          "name": "filename",
+          "type": "string",
+          "required": false,
+          "description": "Name supplied text/bytes with 1-255 characters and no path separators or control characters. Defaults to an empty string so the App can use the selected local file's name; supplied content needs a filename.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conversation",
+          "type": "string",
+          "required": false,
+          "description": "Share in an existing C-, G- or D-prefixed conversation ID or exact channel name with or without #. User selectors do not open DMs. Defaults to an empty string, keeping the file private; thread_ts/comment need a conversation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "thread_ts",
+          "type": "string",
+          "required": false,
+          "description": "Share under this parent Slack timestamp in seconds.microseconds format, in conversation. Do not supply a permalink or conversation_id:timestamp reference. Defaults to an empty string, sharing outside a thread.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": false,
+          "description": "Upload this UTF-8 text as a file, mutually exclusive with content_base64; encoded size must be 1 byte to 8 MiB. Defaults to omitted; omitting both content fields opens the file picker.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content_base64",
+          "type": "string",
+          "required": false,
+          "description": "Upload these standard base64 bytes, mutually exclusive with text; decoded size must be 1 byte to 8 MiB. Client code must read local bytes; do not invent encoded content. Defaults to omitted; omitting both content fields opens the file picker.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment",
+          "type": "string",
+          "required": false,
+          "description": "Post this initial comment with the file, up to 4,000 characters; requires conversation. Defaults to an empty string, posting no comment.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "files:write",
+          "channels:read",
+          "groups:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.UploadFile",
+        "parameters": {
+          "filename": {
+            "value": "meeting_notes.txt",
             "type": "string",
             "required": false
           },
-          "conversation_id": {
-            "value": "C01ABCDEF2G",
+          "conversation": {
+            "value": "C04ABCD1234",
             "type": "string",
-            "required": false
-          },
-          "user_ids": {
-            "value": null,
-            "type": "array",
-            "required": false
-          },
-          "emails": {
-            "value": null,
-            "type": "array",
-            "required": false
-          },
-          "usernames": {
-            "value": null,
-            "type": "array",
             "required": false
           },
           "thread_ts": {
-            "value": null,
+            "value": "1713984523.004200",
             "type": "string",
             "required": false
           },
-          "reply_broadcast": {
-            "value": null,
-            "type": "boolean",
+          "text": {
+            "value": "Hello team,\n\nHere are the notes from today's meeting:\n1. Review Q2 goals\n2. Discuss roadmap\n3. Action items assigned\n\nThanks!",
+            "type": "string",
+            "required": false
+          },
+          "content_base64": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "comment": {
+            "value": "Here are the meeting notes from today's sync. Please review and add any missing points.",
+            "type": "string",
             "required": false
           }
         },
@@ -1342,22 +4729,23 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Slack.WhoAmI",
-      "fullyQualifiedName": "Slack.WhoAmI@3.0.1",
-      "description": "Get comprehensive user profile and Slack information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, and other important profile details from\nSlack services.",
+      "fullyQualifiedName": "Slack.WhoAmI@4.0.0",
+      "description": "Identify the authenticated Slack account and its workspace, timezone and compact profile.\nLooking up another person's detailed profile requires that person's user selector.",
       "parameters": [],
       "auth": {
         "providerId": "slack",
         "providerType": "oauth2",
         "scopes": [
           "users:read",
-          "users:read.email"
+          "users:read.email",
+          "users.profile:read"
         ]
       },
       "secrets": [],
       "secretsInfo": [],
       "output": {
         "type": "json",
-        "description": "Get comprehensive user profile and Slack information."
+        "description": "No description provided."
       },
       "documentationChunks": [],
       "codeExample": {
@@ -1397,6 +4785,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "5783d6a00a07f257e6cda08dc8852f6df8efa7b9c03f16ae6985527cd52b2d17",
-  "generatedAt": "2026-10-21T22:05:40.137Z",
-  "summary": "The Slack toolkit integrates Arcade with Slack's API, enabling LLMs to read, send, and manage Slack conversations, messages, threads, users, reactions, and channel membership on behalf of an authenticated user.\n\n## Capabilities\n\n- **Conversation discovery & metadata**: List conversations the user belongs to (channels, DMs, MPIMs); retrieve metadata for a specific conversation by ID, channel name, or user identifiers; list members of a conversation.\n- **Message reading**: Fetch messages from channels, DMs, and MPIMs with flexible absolute (`oldest_datetime`/`latest_datetime`) or relative (`DD:HH:MM` offset) time filtering; read full thread reply chains by parent `thread_ts`, also with time filtering.\n- **Messaging & threading**: Send top-level messages or reply to existing threads in any channel, DM, or MPIM, identified by ID, name, or user identifiers; optionally broadcast thread replies to the main channel.\n- **Reactions**: Add or remove the authenticated user's own emoji reaction on any message; idempotent — no error if the reaction state is already correct.\n- **User management**: Look up one or many users by ID, username, or email in a single call; invite up to 100 users at once to public channels, private channels, or MPIMs.\n- **Identity**: Retrieve the authenticated user's full Slack profile (name, email, avatar, and other profile fields).\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 with **Slack** as the identity and permission provider. Arcade handles the OAuth flow automatically. See the [Slack auth provider docs](https://docs.arcade.dev/en/references/auth-providers/slack) for setup instructions."
+  "generatedAt": "2026-10-24T11:12:37.397Z",
+  "summary": "Arcade's Slack toolkit provides LLM-callable tools for interacting with Slack workspaces. It enables agents to read and write messages, threads, files, canvases, lists, reactions, channels, and user profiles through the Slack API.\n\n## Capabilities\n\n- **Messaging & scheduling:** Send, edit, delete, forward, and schedule messages; post thread replies; cancel pending scheduled messages; mark conversations as read.\n- **Channels, DMs & members:** Create and list conversations (channels, DMs, group DMs); invite users; list and resolve members; retrieve conversation metadata.\n- **Files & canvases:** Upload, finalize, download, and search files; create, read, update, delete, and share canvases; search canvas sections for targeted edits.\n- **Lists & records:** Create and update lists with typed column schemas; add, update, and delete records; replace list schemas with incremental record migration.\n- **Search & discovery:** Search messages, files, channels, people, and custom emoji (classic and Slack AI–powered search); look up user profiles with full detail.\n- **Reactions, pins & identity:** Add or remove reactions; list pinned items; check authenticated identity; enumerate workspace users and their profiles.\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Slack** provider. See the [Arcade Slack auth provider docs](https://docs.arcade.dev/en/references/auth-providers/slack) for configuration details."
 }

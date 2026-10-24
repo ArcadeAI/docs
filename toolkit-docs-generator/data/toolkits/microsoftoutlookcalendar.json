@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookCalendar",
   "label": "Microsoft Outlook Calendar",
-  "version": "6.2.2",
+  "version": "6.3.0",
   "description": "Arcade.dev LLM tools for Outlook Calendar",
   "metadata": {
     "category": "productivity",
@@ -29,7 +29,7 @@
     {
       "name": "CancelEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CancelEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CancelEvent@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CancelEvent@6.3.0",
       "description": "Cancel a meeting you organize and email a cancellation to every invitee.\n\nIrreversible. Invitees keep a cancelled copy. Refused when nobody else is\ninvited. A date already called off is reported as already cancelled, and nothing\nis sent for that date. this_and_future ends the series the day before the given\ndate, so invitees get an updated invitation instead, with no note.\n\nUse is_organizer, attendees, event_type and series_master_id from an earlier\nread to choose this tool and scope. Only events in your own mailbox, not\nshared or delegated calendars.",
       "parameters": [
         {
@@ -121,7 +121,7 @@
     {
       "name": "CreateCalendar",
       "qualifiedName": "MicrosoftOutlookCalendar.CreateCalendar",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateCalendar@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateCalendar@6.3.0",
       "description": "Create a new calendar in your mailbox, a container you can later add events to; to put a\nmeeting or appointment on a calendar, create an event instead.\n\nReturns the new calendar.",
       "parameters": [
         {
@@ -205,8 +205,8 @@
     {
       "name": "CreateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.CreateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@6.2.2",
-      "description": "Create an event in the user's default calendar, or in another calendar they can edit\nwhen calendar_id is given. Each attendee is sent a meeting invitation as soon as the event\nis created.\n\nPass calendar_id only when the user names a calendar, never matched from the subject;\notherwise the event goes on the default calendar. With calendar_id, the result echoes it.\nOn a calendar someone else owns, organizer_note names that person as organizer.\n\nSet recurrence for a repeating series: start and end are the first date's, and it\nneeds exactly one of recurrence.end_date, recurrence.occurrence_count or\nrecurrence.never_ends. When the request names no end, ask the user before creating\nanything. If start_date_time is not a day the pattern produces, the series starts on the\nfirst day it does, and first_date_note says so. Every weekday is weekly on monday to\nfriday. A step in working days, such as every third business day, cannot be expressed:\ntell the user instead of creating a nearby pattern.\n\nBook only at a time the user gave or picked, never one you chose. If no time was given,\npropose times and let the user pick first.\n\nbody is stored as plain text unless body_format says html, in which case it is\nstored as markup and rendered rather than shown literally.\n\nCopying a description from an event that was read means passing that event's\nbody_html as body with body_format html. Its body field is the same description\nwith the markup stripped, so an agenda copied from there arrives with its links,\nlists and emphasis gone.\n\nAny timezone offset in start_date_time and end_date_time is ignored. The returned start\nand end are in the mailbox's timezone, and event_time_zone names the zone the event\nruns in.",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@6.3.0",
+      "description": "Create an event in the user's default calendar, or in another calendar they can edit\nwhen calendar_id is given. Each attendee is sent a meeting invitation as soon as the event\nis created.\n\nThe event is created once: repeating a call with the same inputs, as after an error or a\ntimeout, returns the event the first call made, with outcome already_existed, and sends no\ninvitations again. Re-creating an event identical to one that was deleted makes a new event.\n\nPass calendar_id only when the user names a calendar, never matched from the subject;\notherwise the event goes on the default calendar. With calendar_id, the result echoes it.\nOn a calendar someone else owns, organizer_note names that person as organizer.\n\nSet recurrence for a repeating series: start and end are the first date's, and it\nneeds exactly one of recurrence.end_date, recurrence.occurrence_count or\nrecurrence.never_ends. When the request names no end, ask the user before creating\nanything. If start_date_time is not a day the pattern produces, the series starts on the\nfirst day it does, and first_date_note says so. Every weekday is weekly on monday to\nfriday. A step in working days, such as every third business day, cannot be expressed:\ntell the user instead of creating a nearby pattern.\n\nBook only at a time the user gave or picked, never one you chose. If no time was given,\npropose times and let the user pick first.\n\nbody is stored as plain text unless body_format says html, in which case it is\nstored as markup and rendered rather than shown literally.\n\nCopying a description from an event that was read means passing that event's\nbody_html as body with body_format html. Its body field is the same description\nwith the markup stripped, so an agenda copied from there arrives with its links,\nlists and emphasis gone.\n\nAny timezone offset in start_date_time and end_date_time is ignored. The returned start\nand end are in the mailbox's timezone, and event_time_zone names the zone the event\nruns in.",
       "parameters": [
         {
           "name": "subject",
@@ -368,6 +368,14 @@
           "description": "Tag the event with these Outlook categories, each named as it appears in the category list. On a calendar someone else owns, their list applies. A name missing from the list is refused, never created. Defaults to no categories.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "request_id",
+          "type": "string",
+          "required": false,
+          "description": "Identify this request, so repeating it returns the event it made instead of making another. Leave it unset: an identical repeat is then still not duplicated. Set it only to make a second event identical to an existing one, and pass the same value when repeating that call. Defaults to an identity taken from the event's details.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
@@ -389,12 +397,12 @@
         "toolName": "MicrosoftOutlookCalendar.CreateEvent",
         "parameters": {
           "subject": {
-            "value": "Q3 Strategy Planning Meeting",
+            "value": "Q3 Strategy Review Meeting",
             "type": "string",
             "required": true
           },
           "body": {
-            "value": "Please join us to review Q3 goals, discuss department updates, and align on key priorities for the upcoming quarter. Bring your project status reports.",
+            "value": "Please join us for the quarterly strategy review. We will cover OKRs, budget updates, and roadmap planning for the next quarter.",
             "type": "string",
             "required": true
           },
@@ -409,7 +417,7 @@
             "required": true
           },
           "calendar_id": {
-            "value": "AAMkADFkNjQ5ZjM4LTFlODMtNGI2ZS1iNmM0LTZhYjA3ZGQ5ZjE2OABGAAAAAADJ1gKz9kpxT6pNXP4sR3cBBwC3vM2oQpLkRqSEtF2bVXoAAAAAAAEGAAC3vM2oQpLkRqSEtF2bVXoAAABqT7ZGAAA=",
+            "value": "AAMkAGZhYjM4NTctMWU5Ni00ZjFkLWI4NTYtZTYwNDQ4ZTU2NjdhBGAAAAAAADYBuQwMjMBTZJT8MoVBlSQAAAAAAAEGAABTZJT8MoVBlSQAABvqzRMAAA=",
             "type": "string",
             "required": false
           },
@@ -421,8 +429,7 @@
           "attendee_emails": {
             "value": [
               "alice.johnson@example.com",
-              "bob.smith@example.com",
-              "carol.white@example.com"
+              "bob.smith@example.com"
             ],
             "type": "array",
             "required": false
@@ -433,7 +440,7 @@
             "required": false
           },
           "custom_meeting_url": {
-            "value": "https://zoom.us/j/98765432100?pwd=AbCdEfGhIjKlMnOpQrStUv",
+            "value": "https://meet.example.com/q3-strategy-review-abc123",
             "type": "string",
             "required": false
           },
@@ -449,7 +456,7 @@
               "days_of_week": [
                 "monday"
               ],
-              "occurrence_count": 12
+              "occurrence_count": 10
             },
             "type": "string",
             "required": false
@@ -476,8 +483,7 @@
           },
           "optional_attendee_emails": {
             "value": [
-              "david.lee@example.com",
-              "eve.martinez@example.com"
+              "carol.white@example.com"
             ],
             "type": "array",
             "required": false
@@ -489,10 +495,15 @@
           },
           "categories": {
             "value": [
-              "Strategy",
-              "Team Meetings"
+              "Work",
+              "Important"
             ],
             "type": "array",
+            "required": false
+          },
+          "request_id": {
+            "value": "req-q3-strategy-2025-09-15-001",
+            "type": "string",
             "required": false
           }
         },
@@ -521,7 +532,7 @@
     {
       "name": "DeleteCalendar",
       "qualifiedName": "MicrosoftOutlookCalendar.DeleteCalendar",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.DeleteCalendar@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.DeleteCalendar@6.3.0",
       "description": "Delete one of your own calendars and every event on it.\n\nIrreversible: the calendar and its events cannot be recovered. Refused for your main\ncalendar and for calendars someone else owns; to stop seeing someone else's calendar, remove\nit from your list instead. Returns the calendar as it was before deletion.",
       "parameters": [
         {
@@ -581,7 +592,7 @@
     {
       "name": "ForwardEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.ForwardEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ForwardEvent@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ForwardEvent@6.3.0",
       "description": "Send a meeting invitation to someone who is not invited yet; they join the attendee list and the organizer is told.\n\nWorks on a meeting you organize or one you were invited to. The attendee list can be edited\nonly on a meeting you organize, so for someone else's meeting this is the way to bring another\nperson in. One date's event_id invites them to that date only; the series' own event_id (a\ndate's series_master_id) invites them to every date. Any bounce goes to the organizer.\nRefused for a cancelled meeting and an event nobody else is invited to.\n\nName the meeting by event_id or by event_subject. Only events in your own mailbox, and a\nsubject is looked up in your default calendar only.",
       "parameters": [
         {
@@ -711,7 +722,7 @@
     {
       "name": "GetCalendar",
       "qualifiedName": "MicrosoftOutlookCalendar.GetCalendar",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetCalendar@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetCalendar@6.3.0",
       "description": "Read one calendar and what you can do on it: its owner, and whether you can edit its\nevents, share it, and see its private events. Call this before answering whether you can\nshare or edit a calendar; neither a calendar listing nor owning it settles that.\n\nA calendar that does not exist and one not shared with you look the same, so not finding it\nmeans either. Read-only.",
       "parameters": [
         {
@@ -784,7 +795,7 @@
     {
       "name": "GetEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.GetEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@6.3.0",
       "description": "Get one event from any of the user's calendars, with the calendar it is on.\n\nevent carries the subject, full body, times and the zone the event runs in, location,\norganizer, attendees, categories, privacy and reminder, plus change_key (the token\nidentifying which version of the event this is), event_type and series_master_id (which\ntogether say whether this is a one-off event, one date of a recurring series, or the series\nitself), and online_meeting_join_url (the link that joins the online meeting,\ndistinct from web_link, which opens the event in Outlook).\n\nBoth forms of the description come back: body is the plain text with markup\nstripped, and body_html is the stored markup, whole, which a listing row does not\ncarry at all. Take body_html when the formatting, links or lists matter, and\nsupply it as the body of a new event with body_format set to html, or it is\nstored as literal text. An event with no description still returns a non-empty\nbody_html, because Outlook stores an empty scaffold; body being empty is what says\nthere is no agenda.\n\nUse this to read an event in full, or after a listing to see a body the\nlisting only summarised.\n\nstart, end, organizer and response_status always come back, with their own\nfields empty when Microsoft Graph returned no underlying object. An empty\nstart is a value the event is missing, not an event that is missing.",
       "parameters": [
         {
@@ -845,7 +856,7 @@
     {
       "name": "GetSchedule",
       "qualifiedName": "MicrosoftOutlookCalendar.GetSchedule",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetSchedule@6.3.0",
       "description": "Get free/busy and calendar items in a time window for one or more people. Use it to check\na specific time. It does not propose or rank slots across a range, nor count who is free per\nslot.\n\nTimes are in time_zone, the user's mailbox zone, which may be a Windows zone name\n(<Region> Standard Time) rather than an IANA name. On time_zone_source \"mailbox_utc\" or\n\"fallback\", treat times as unconfirmed and check the intended zone before acting.\n\navailability_view has one digit per interval from start_date_time: 0 = free or working\nelsewhere, 1 = tentative, 2 = busy, 3 = out of office. schedule_items can extend past the\nwindow. working_hours are on each person's own clock.\n\nvisibility is \"readable\" (an item overlaps the window), \"free_on_primary_calendar\" (no events\non the primary calendar; secondary calendars are not visible, so not proof of free), \"denied\"\n(no permission), or \"error\" (see the row's error). Subject, location and is_private appear\nonly when shared with you.",
       "parameters": [
         {
@@ -950,7 +961,7 @@
     {
       "name": "ListCalendarAccess",
       "qualifiedName": "MicrosoftOutlookCalendar.ListCalendarAccess",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendarAccess@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendarAccess@6.3.0",
       "description": "List who can see one of your calendars and at what level, including the level everyone in\nyour organization gets on your main calendar.\n\nOnly for calendars you own. Returns one row per person, not what you yourself can do on it:\neveryone in your organization first, then people by address.\nNot needed before sharing with or removing someone; those return the person's access.",
       "parameters": [
         {
@@ -1010,7 +1021,7 @@
     {
       "name": "ListCalendars",
       "qualifiedName": "MicrosoftOutlookCalendar.ListCalendars",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@6.3.0",
       "description": "List all calendars the user has access to.\n\nReturns the user's own calendars plus any shared or delegated calendars. A coworker's\ncalendar missing from this list may still be shared with you; read it by their address.\n\nUse a calendar_id from the results to target a specific calendar\nin other calendar tools. To find which calendar an event is on, read the event instead.",
       "parameters": [
         {
@@ -1083,7 +1094,7 @@
     {
       "name": "ListEventAttachments",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@6.3.0",
       "description": "List attachment metadata for a calendar event.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to a calendar event\nor meeting.\n\nWorks for an event on any of the user's calendars, including shared ones.",
       "parameters": [
         {
@@ -1170,7 +1181,7 @@
     {
       "name": "ListEventChanges",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventChanges",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventChanges@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventChanges@6.3.0",
       "description": "Get the events created, changed, cancelled or deleted on one Outlook calendar by when they\nchanged, not when they happen, since a moment or a checkpoint an earlier read returned.\n\nChanges to events on any date are included; for what is on the calendar during some days,\nlist its events instead. Rows come most recently changed first, deletions last. Pass since\nto answer what changed since a day or time; to start keeping track now, pass now, never the\ncurrent time, and later read with the checkpoint the result returns. A since read cannot see\ndeleted events: only a checkpoint read reports them, by id. Cancelled meetings are left out\nunless include_cancelled is true. The last page of every read returns a checkpoint, which\nreading never uses up; a pagination_token means more changes follow, so read on before\nsummarizing.\n\nEach event appears once, as it is now, not as a record of what changed: it can appear\nbecause only a guest replied, so say only what the row shows. A repeating series appears\nonce, with the dates that now differ from it, moved or cancelled; times are in the\nmailbox time zone.",
       "parameters": [
         {
@@ -1296,7 +1307,7 @@
     {
       "name": "ListEventInstances",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEventInstances",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventInstances@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventInstances@6.3.0",
       "description": "List the dates one recurring series falls on between two times.\n\nDates come back earliest first, a date moved on its own at its new time. To see\neverything on the calendar over a stretch of time, list the calendar for that window\ninstead. An event that does not repeat is refused.\n\nCancelled dates are left out unless include_cancelled is true; pass it to say which\nweeks are skipped. A date moved outside the window is not in it.\n\nA non-empty pagination_token means more dates remain in the window; pass it back to\nread them, and read every page before saying which dates are skipped. On the last page,\nmessage names the series' next date after the window, or says the series has ended.",
       "parameters": [
         {
@@ -1422,7 +1433,7 @@
     {
       "name": "ListEvents",
       "qualifiedName": "MicrosoftOutlookCalendar.ListEvents",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEvents@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEvents@6.3.0",
       "description": "List everything on the user's calendars between two times.\n\nUse this when the request is about a stretch of the calendar -- what is on\ntoday, this week, between two clock times -- rather than about a property of\none particular event, which a filtered search answers better.\n\nReads the default calendar unless calendar_scope is all (every calendar in the list,\nshared ones included) or listed. The same meeting can appear once per calendar it\nsits on.\n\nA pagination_token means more of the window remains; pass it for the next page.\nWith none, the window was read in full on searched_calendars, and an empty list means\nnothing is scheduled there, not on calendars left out: check skipped_calendars or use\ncalendar_scope all before saying the user is free. An empty page reached through a\ntoken means the earlier pages held every event.\n\nTimes are read in the mailbox time zone, or UTC when none is set.",
       "parameters": [
         {
@@ -1569,7 +1580,7 @@
     {
       "name": "ListMeetingTimes",
       "qualifiedName": "MicrosoftOutlookCalendar.ListMeetingTimes",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListMeetingTimes@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListMeetingTimes@6.3.0",
       "description": "Propose times when a group could meet. Books nothing. Use it to find a time, and to set up\nor schedule a meeting when no time is given: offer the slots and let the user pick one.\n\nReturns up to max_candidates slots, best first. Each slot counts how many attendees are free\nand names those whose availability is unknown, so it answers per-slot who can make it.\n\nTimes are in time_zone, the user's mailbox zone. On time_zone_source \"mailbox_utc\" or\n\"fallback\", confirm the zone before stating times.\n\nA slot can include busy or out-of-office attendees; say a time works for everyone only when\navailability_count shows all free. Working elsewhere counts as free.\n\nNo suggestions is not an error; empty_reason and note explain it.",
       "parameters": [
         {
@@ -1743,7 +1754,7 @@
     {
       "name": "ListWorkLocations",
       "qualifiedName": "MicrosoftOutlookCalendar.ListWorkLocations",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListWorkLocations@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListWorkLocations@6.3.0",
       "description": "List where you work each day in a window, oldest day first, from your Outlook work hours\nand location: office, remote, no_location_chosen (a working day with no place picked) or\nno_entry.\n\nUse it for where you are working on given days; it covers only you, not other people.\n\nno_entry means Outlook has no work-plan entry for that day, which happens on non-working\ndays and also when the plan was never set up, so on its own it does not mean you are off.\ntime_off listed on a day means you are off for those hours; a multi-day absence is listed on\neach day it covers.",
       "parameters": [
         {
@@ -1817,7 +1828,7 @@
     {
       "name": "RemoveCalendarFromList",
       "qualifiedName": "MicrosoftOutlookCalendar.RemoveCalendarFromList",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.RemoveCalendarFromList@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.RemoveCalendarFromList@6.3.0",
       "description": "Remove a calendar someone else owns from your calendar list.\n\nTheir calendar, its events and your access stay as they are, and nobody is notified; only\nyour list changes. Refused for your own calendars. To stop someone seeing your calendar,\nrevoke their access instead. Returns the calendar as it was before removal.",
       "parameters": [
         {
@@ -1877,7 +1888,7 @@
     {
       "name": "RemoveEventFromCalendar",
       "qualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromCalendar",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromCalendar@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.RemoveEventFromCalendar@6.3.0",
       "description": "Take an event off your calendar without emailing anyone.\n\nFor a meeting someone else organizes, or your own appointment with no\ninvitees. Other attendees keep their copies. An organizer in your organization\nsees you declined; one outside it is not told. Refused for a meeting you\norganize with invitees. Irreversible.\n\nFor your own repeating appointment, scope this_and_future removes the date given\nand every later one; earlier dates stay.\n\nUse is_organizer, attendees, event_type and series_master_id from an earlier\nread to choose this tool and scope. A cancelled meeting stays on your calendar\nwith is_cancelled true, and listings hide it unless asked. Only events in your\nown mailbox, not shared or delegated calendars.",
       "parameters": [
         {
@@ -1957,7 +1968,7 @@
     {
       "name": "RespondToEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.RespondToEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.RespondToEvent@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.RespondToEvent@6.3.0",
       "description": "Accept, decline or tentatively accept a meeting someone else invited you to, and tell the organizer.\n\nDeclining takes the meeting off your calendar unless Show declined events is turned on in\nOutlook, and once it is gone it cannot be answered again from here. To answer every date of\na repeating meeting, pass the series' own event_id (a date's series_master_id) with scope\nseries; declining the series removes every date from your calendar, including dates already\naccepted. Answering from one date onward is not supported. Refused for a meeting you\norganize and a cancelled meeting.\n\nName the meeting by event_id or by event_subject. Only events in your own mailbox, and a\nsubject is looked up in your default calendar only.",
       "parameters": [
         {
@@ -2142,7 +2153,7 @@
     {
       "name": "RevokeCalendarAccess",
       "qualifiedName": "MicrosoftOutlookCalendar.RevokeCalendarAccess",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.RevokeCalendarAccess@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.RevokeCalendarAccess@6.3.0",
       "description": "Remove a person's access to one of your calendars; removing someone from your calendar means\nthis.\n\nThe result says what everyone in your organization can still see. Only for calendars you own;\nthe access everyone in your organization gets can't be removed here. Returns the access the\nperson had.",
       "parameters": [
         {
@@ -2215,7 +2226,7 @@
     {
       "name": "SearchEvents",
       "qualifiedName": "MicrosoftOutlookCalendar.SearchEvents",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@6.3.0",
       "description": "Find calendar events by what is true about them: words in them, who attends or\norganizes them, importance, or whether they are online, including when the next or last\nsuch event is.\n\nUse this when the request names a property of the event, even within a single day; for\na stretch of the calendar with no such property, such as this week, read the time range\ninstead.\n\nSet direction to upcoming for a next event and to past for a last one, so the answer is\nnever on the wrong side of now. Without dates, upcoming reaches three months ahead and\npast six months back; with dates, only events starting inside them are searched. Search\nthe fewest, most distinctive words of query.\n\nSearches the default calendar unless calendar_scope says otherwise, and the same meeting\ncan appear once per calendar. A pagination_token means more of the search remains: read\nit before saying there are no others. When nothing matches, message says how far the\nsearch reached; tell the user that and offer other dates or words, never that no such\nevent exists.",
       "parameters": [
         {
@@ -2478,7 +2489,7 @@
     {
       "name": "SetWorkLocation",
       "qualifiedName": "MicrosoftOutlookCalendar.SetWorkLocation",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.SetWorkLocation@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.SetWorkLocation@6.3.0",
       "description": "Set your Outlook work location to office or remote for one day or a range of days, or clear\nit back to no location chosen. It changes only where you work each day, not your hours or your\ncalendar.\n\nOnly working days with a work-plan entry can be set; days without one, such as weekends, are\nleft as they are and reported as not changed. Time off is never changed; a working day that\nhas time off is still set.\n\nReturns each day with its outcome; a failed day can be retried on its own.",
       "parameters": [
         {
@@ -2569,7 +2580,7 @@
     {
       "name": "ShareCalendar",
       "qualifiedName": "MicrosoftOutlookCalendar.ShareCalendar",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.ShareCalendar@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ShareCalendar@6.3.0",
       "description": "Share one of your calendars with a person. Sending someone your calendar means sharing it.\n\nEvery new share or level change emails them; sharing again at the same level sends nothing.\nOnly for calendars you own. Returns the person's access before and after, so there is no need\nto look it up first.",
       "parameters": [
         {
@@ -2661,7 +2672,7 @@
     {
       "name": "UpdateCalendar",
       "qualifiedName": "MicrosoftOutlookCalendar.UpdateCalendar",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.UpdateCalendar@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.UpdateCalendar@6.3.0",
       "description": "Rename or recolor one of your calendars.\n\nOn a calendar someone else owns, this changes only how it appears in your list; the owner's\ncalendar stays as it is. To change who can see a calendar, share it instead. Returns the\ncalendar after the change.",
       "parameters": [
         {
@@ -2758,7 +2769,7 @@
     {
       "name": "UpdateEvent",
       "qualifiedName": "MicrosoftOutlookCalendar.UpdateEvent",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.UpdateEvent@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.UpdateEvent@6.3.0",
       "description": "Change one event in the user's calendar, in place.\n\nReturns an UpdateEventResult: the updated event in full, plus changed and\nfields_changed (what was actually written, which is nothing when the event\nalready said what was asked for), change_key, concurrency_checked,\napplied_scope, online_meeting_preserved, attendees_not_found, and the record\nof how the event was resolved.\n\nEveryone invited is mailed an updated invitation for any change this writes. The\nexception is an edit that only changes categories or who is optional or required:\nOutlook applies it without mailing anyone, and notification_note names who was re-typed.\n\nEvery input left out leaves that part of the event alone, so this changes\nonly what is named and never cancels, deletes or re-creates the event.\nEditing the description or location keeps the event's online meeting. When asked\nto remove an online meeting, change nothing and tell the user to remove it in Outlook.\nAdding or dropping a guest is merged over the people already invited rather\nthan replacing them; set_attendee_emails states the whole invitation list and\nreplaces it.\n\nCategories change only this calendar's copy of the event; guests' copies keep their own.\n\nFor a repeating meeting, scope is required; series takes series_master_id. There\nis no scope for this date and later. Changing a series' time, time zone, all-day\nsetting or how often it repeats resets every date changed on its own and brings\nback its cancelled dates, so it is refused while an upcoming date is cancelled;\nchanging only when it ends keeps those dates. recurrence changes only the parts of\nthe repeat rule it names. A meeting that does not repeat takes no scope; there\nrecurrence makes it repeat, keeping its event_id, and needs recurrence.frequency\nand an end.",
       "parameters": [
         {
@@ -3270,7 +3281,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookCalendar.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@6.2.2",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@6.3.0",
       "description": "Get information about the current user and their Outlook Calendar environment.\n\nmailbox_timezone is the time zone this mailbox's dates are expressed in. It may be a\nWindows zone name (<Region> Standard Time) rather than an IANA identifier. A Windows\nname covers its region's daylight saving too, even though it ends in Standard Time.\nmailbox_timezone_source\nsays where it came from: \"mailbox\" and \"mailbox_utc\" mean the mailbox itself names\nthe zone, whereas \"default_not_configured\" (the mailbox names none) and\n\"default_unreadable\" (the setting could not be read) mean UTC is a fallback this\ntoolkit applied, not a zone the mailbox is set to. On either fallback, do not tell\nthe user their mailbox is configured for that zone.\n\nworking_hours, date_format, time_format and mailbox_language come from the mailbox\nsettings. Each is null when the mailbox has none set or the settings could not be read.\nmailbox_language is the mailbox's locale, which can differ from preferred_language on the\nprofile.",
       "parameters": [],
       "auth": {
@@ -3326,6 +3337,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "b7d44fd15d5bc867db3809cdfc3c4bd55fc6c82a4884bfa8d6c79206065bda7f",
-  "generatedAt": "2026-10-21T22:05:14.886Z",
-  "summary": "## Microsoft Outlook Calendar Toolkit\n\nThe Microsoft Outlook Calendar toolkit gives LLMs access to Outlook Calendar via the Microsoft Graph API, enabling agents to read, create, edit, and manage calendars, events, scheduling, and work locations on behalf of a user.\n\n## Capabilities\n\n- **Calendar management:** Create, rename, recolor, delete, share, and revoke access to calendars; list all accessible calendars; inspect per-person sharing permissions.\n- **Event lifecycle:** Create one-off or recurring events with full recurrence rules, update events in place (attendees, time, location, body, categories, scope), cancel meetings with automatic invitee notification, delete or remove events without notification, and respond to invitations (accept / tentative / decline).\n- **Scheduling and availability:** Find meeting times for a group (`ListMeetingTimes`), check free/busy status for one or more people over a window (`GetSchedule`), and list all recurring series instances.\n- **Discovery and search:** List events over a time range across one or all calendars, search events by content or property (attendee, organizer, importance, online status), retrieve detailed single-event data including full HTML body and online meeting URL, and track calendar changes since a timestamp or checkpoint.\n- **Forwarding and invitations:** Forward a meeting invitation to new attendees for meetings you organize or were invited to.\n- **Work location and identity:** Set or clear your daily office/remote work location, list work locations over a range, and retrieve current user and mailbox environment details (timezone, locale, working hours).\n\n## OAuth\n\nThis toolkit uses OAuth 2.0 via the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for setup details."
+  "generatedAt": "2026-10-24T11:12:34.495Z",
+  "summary": "The Microsoft Outlook Calendar toolkit gives LLMs access to a user's Outlook Calendar via the Microsoft Graph API, enabling agents to read, create, update, and manage calendar events, calendars, schedules, and work locations.\n\n## Capabilities\n\n- **Calendar management:** Create, rename, recolor, delete, share, and revoke access on calendars; list all accessible calendars and inspect per-person sharing permissions.\n- **Event lifecycle:** Create (with idempotency), update, cancel, delete, forward, and respond to single and recurring events; scope changes to a single occurrence or an entire series.\n- **Scheduling and availability:** Retrieve free/busy data for one or more people, propose meeting slots ranked by attendee availability, and list event instances within a recurrence series.\n- **Event discovery:** List events over a time window across one or all calendars; search events by content, attendees, organizer, or properties; track calendar changes since a timestamp or checkpoint.\n- **Work location and identity:** Set or clear daily office/remote work locations, list work location plans over a window, and retrieve mailbox identity and timezone configuration.\n- **Attachments and meeting details:** List attachment metadata on events; access full event body (plain text and HTML), online meeting join URLs, attendee status, and organizer details.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Microsoft** provider. See the [Arcade Microsoft auth provider docs](https://docs.arcade.dev/en/references/auth-providers/microsoft) for configuration details."
 }

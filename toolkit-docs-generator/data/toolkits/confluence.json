@@ -1,7 +1,7 @@
 {
   "id": "Confluence",
   "label": "Confluence",
-  "version": "3.1.2",
+  "version": "4.0.1",
   "description": "Arcade.dev LLM tools for Confluence",
   "metadata": {
     "category": "productivity",
@@ -30,7 +30,7 @@
     {
       "name": "CreatePage",
       "qualifiedName": "Confluence.CreatePage",
-      "fullyQualifiedName": "Confluence.CreatePage@3.1.2",
+      "fullyQualifiedName": "Confluence.CreatePage@4.0.1",
       "description": "Create a new page at the root of the given space.",
       "parameters": [
         {
@@ -167,154 +167,9 @@
       }
     },
     {
-      "name": "GetAttachmentsForPage",
-      "qualifiedName": "Confluence.GetAttachmentsForPage",
-      "fullyQualifiedName": "Confluence.GetAttachmentsForPage@3.1.2",
-      "description": "Get attachments for a page by its ID or title.\n\nIf a page title is provided, then the first page with an exact matching title will be returned.",
-      "parameters": [
-        {
-          "name": "page_identifier",
-          "type": "string",
-          "required": true,
-          "description": "The ID or title of the page to get attachments for",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "limit",
-          "type": "integer",
-          "required": false,
-          "description": "The maximum number of attachments to return. Max is 250. Defaults to 25.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "pagination_token",
-          "type": "string",
-          "required": false,
-          "description": "The pagination token to use for the next page of results. Defaults to the first page.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "atlassian_cloud_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the Atlassian Cloud to use. Required when the user has more than one cloud authorized. Defaults to the user's only authorized cloud.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "atlassian",
-        "providerType": "oauth2",
-        "scopes": [
-          "read:attachment:confluence",
-          "read:page:confluence"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The attachments"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Confluence.GetAttachmentsForPage",
-        "parameters": {
-          "page_identifier": {
-            "value": "12345",
-            "type": "string",
-            "required": true
-          },
-          "limit": {
-            "value": 50,
-            "type": "integer",
-            "required": false
-          },
-          "pagination_token": {
-            "value": "xyz123",
-            "type": "string",
-            "required": false
-          },
-          "atlassian_cloud_id": {
-            "value": "abc-de-123456",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "atlassian",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "documents"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
-      "name": "GetAvailableAtlassianClouds",
-      "qualifiedName": "Confluence.GetAvailableAtlassianClouds",
-      "fullyQualifiedName": "Confluence.GetAvailableAtlassianClouds@3.1.2",
-      "description": "Get available Atlassian Clouds.",
-      "parameters": [],
-      "auth": {
-        "providerId": "atlassian",
-        "providerType": "oauth2",
-        "scopes": [
-          "read:page:confluence"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "Available Atlassian Clouds"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Confluence.GetAvailableAtlassianClouds",
-        "parameters": {},
-        "requiresAuth": true,
-        "authProvider": "atlassian",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "documents"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "GetPage",
       "qualifiedName": "Confluence.GetPage",
-      "fullyQualifiedName": "Confluence.GetPage@3.1.2",
+      "fullyQualifiedName": "Confluence.GetPage@4.0.1",
       "description": "Retrieve a SINGLE page's content by its ID or title.\n\nIf a title is provided, then the first page with an exact matching title will be returned.\n\nIMPORTANT: For retrieving MULTIPLE pages, request them by ID in one batch call instead\nfor a massive performance and efficiency boost. If you call this function multiple times\ninstead of making one batch call, then the universe will explode.",
       "parameters": [
         {
@@ -385,89 +240,9 @@
       }
     },
     {
-      "name": "GetPagesById",
-      "qualifiedName": "Confluence.GetPagesById",
-      "fullyQualifiedName": "Confluence.GetPagesById@3.1.2",
-      "description": "Get the content of MULTIPLE pages by their ID in a single efficient request.\n\nIMPORTANT: Always use this function when you need to retrieve content from more than one page,\nrather than fetching pages one at a time, because this function is significantly more\nefficient than multiple single-page requests.",
-      "parameters": [
-        {
-          "name": "page_ids",
-          "type": "array",
-          "innerType": "string",
-          "required": true,
-          "description": "The IDs of the pages to get. IDs are numeric. Titles of pages are NOT supported. Maximum of 250 page ids supported.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "atlassian_cloud_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the Atlassian Cloud to use. Required when the user has more than one cloud authorized. Defaults to the user's only authorized cloud.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "atlassian",
-        "providerType": "oauth2",
-        "scopes": [
-          "read:page:confluence"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The pages"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Confluence.GetPagesById",
-        "parameters": {
-          "page_ids": {
-            "value": [
-              101,
-              202,
-              303,
-              404,
-              505
-            ],
-            "type": "array",
-            "required": true
-          },
-          "atlassian_cloud_id": {
-            "value": "cloud-12345",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "atlassian",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "documents"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "GetSpace",
       "qualifiedName": "Confluence.GetSpace",
-      "fullyQualifiedName": "Confluence.GetSpace@3.1.2",
+      "fullyQualifiedName": "Confluence.GetSpace@4.0.1",
       "description": "Get the details of a space by its ID or key.",
       "parameters": [
         {
@@ -539,9 +314,54 @@
       }
     },
     {
+      "name": "ListAtlassianClouds",
+      "qualifiedName": "Confluence.ListAtlassianClouds",
+      "fullyQualifiedName": "Confluence.ListAtlassianClouds@4.0.1",
+      "description": "Get available Atlassian Clouds.",
+      "parameters": [],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:page:confluence"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Available Atlassian Clouds"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Confluence.ListAtlassianClouds",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListAttachments",
       "qualifiedName": "Confluence.ListAttachments",
-      "fullyQualifiedName": "Confluence.ListAttachments@3.1.2",
+      "fullyQualifiedName": "Confluence.ListAttachments@4.0.1",
       "description": "List attachments in a workspace",
       "parameters": [
         {
@@ -646,7 +466,7 @@
     {
       "name": "ListDirectChildren",
       "qualifiedName": "Confluence.ListDirectChildren",
-      "fullyQualifiedName": "Confluence.ListDirectChildren@3.1.2",
+      "fullyQualifiedName": "Confluence.ListDirectChildren@4.0.1",
       "description": "List one page of direct children for a Confluence content item.\n\nCall this again with a returned child ID to continue exploring that child's children. For\npagination, send only pagination_token and optionally limit.",
       "parameters": [
         {
@@ -788,10 +608,110 @@
       }
     },
     {
+      "name": "ListPageAttachments",
+      "qualifiedName": "Confluence.ListPageAttachments",
+      "fullyQualifiedName": "Confluence.ListPageAttachments@4.0.1",
+      "description": "Get attachments for a page by its ID or title.\n\nIf a page title is provided, then the first page with an exact matching title will be returned.",
+      "parameters": [
+        {
+          "name": "page_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The ID or title of the page to get attachments for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of attachments to return. Max is 250. Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to use for the next page of results. Defaults to the first page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use. Required when the user has more than one cloud authorized. Defaults to the user's only authorized cloud.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:attachment:confluence",
+          "read:page:confluence"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The attachments"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Confluence.ListPageAttachments",
+        "parameters": {
+          "page_identifier": {
+            "value": "Getting Started Guide",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJsaW1pdCI6NTAsInN0YXJ0Ijo1MH0=",
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "ListPages",
       "qualifiedName": "Confluence.ListPages",
-      "fullyQualifiedName": "Confluence.ListPages@3.1.2",
-      "description": "Get the content of multiple pages by their ID",
+      "fullyQualifiedName": "Confluence.ListPages@4.0.1",
+      "description": "List pages with their content, newest first by default, optionally only the pages with\nthe given IDs or in the given spaces.\n\nTo read the content of several pages, list them by their IDs in one call instead of making\none call per page.",
       "parameters": [
         {
           "name": "space_ids",
@@ -799,6 +719,15 @@
           "innerType": "string",
           "required": false,
           "description": "Restrict the response to only include pages in these spaces. Only space IDs are supported. Titles of spaces are NOT supported. Maximum of 100 space ids supported. Defaults to all spaces.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Only include the pages with these IDs. IDs are numeric. Titles of pages are NOT supported. Maximum of 250 page ids supported. Defaults to pages with any ID.",
           "enum": null,
           "inferrable": true
         },
@@ -863,14 +792,25 @@
         "parameters": {
           "space_ids": {
             "value": [
-              "SPACE1",
-              "SPACE2"
+              "~557058:8a6b2e3f",
+              "98765",
+              "112233"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "page_ids": {
+            "value": [
+              "123456",
+              "789012",
+              "345678",
+              "901234"
             ],
             "type": "array",
             "required": false
           },
           "sort_by": {
-            "value": "created-date-ascending",
+            "value": "created-date-newest-to-oldest",
             "type": "string",
             "required": false
           },
@@ -880,12 +820,12 @@
             "required": false
           },
           "pagination_token": {
-            "value": "abc123xyz",
+            "value": "eyJsaW1pdCI6NTAsInN0YXJ0Ijo1MH0=",
             "type": "string",
             "required": false
           },
           "atlassian_cloud_id": {
-            "value": "cloud123",
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
             "type": "string",
             "required": false
           }
@@ -915,7 +855,7 @@
     {
       "name": "ListSpaces",
       "qualifiedName": "Confluence.ListSpaces",
-      "fullyQualifiedName": "Confluence.ListSpaces@3.1.2",
+      "fullyQualifiedName": "Confluence.ListSpaces@4.0.1",
       "description": "List all spaces sorted by name in ascending order.",
       "parameters": [
         {
@@ -1000,96 +940,9 @@
       }
     },
     {
-      "name": "RenamePage",
-      "qualifiedName": "Confluence.RenamePage",
-      "fullyQualifiedName": "Confluence.RenamePage@3.1.2",
-      "description": "Rename a page by changing its title.",
-      "parameters": [
-        {
-          "name": "page_identifier",
-          "type": "string",
-          "required": true,
-          "description": "The ID or title of the page to rename. Numerical titles are NOT supported.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "title",
-          "type": "string",
-          "required": true,
-          "description": "The new title to give the page.",
-          "enum": null,
-          "inferrable": true
-        },
-        {
-          "name": "atlassian_cloud_id",
-          "type": "string",
-          "required": false,
-          "description": "The ID of the Atlassian Cloud to use. Required when the user has more than one cloud authorized. Defaults to the user's only authorized cloud.",
-          "enum": null,
-          "inferrable": true
-        }
-      ],
-      "auth": {
-        "providerId": "atlassian",
-        "providerType": "oauth2",
-        "scopes": [
-          "read:page:confluence",
-          "write:page:confluence"
-        ]
-      },
-      "secrets": [],
-      "secretsInfo": [],
-      "output": {
-        "type": "json",
-        "description": "The page"
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Confluence.RenamePage",
-        "parameters": {
-          "page_identifier": {
-            "value": "Project Overview",
-            "type": "string",
-            "required": true
-          },
-          "title": {
-            "value": "Updated Project Overview",
-            "type": "string",
-            "required": true
-          },
-          "atlassian_cloud_id": {
-            "value": "1234567890abcdef",
-            "type": "string",
-            "required": false
-          }
-        },
-        "requiresAuth": true,
-        "authProvider": "atlassian",
-        "tabLabel": "Call the Tool with User Authorization"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "documents"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "update"
-          ],
-          "readOnly": false,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "SearchContent",
       "qualifiedName": "Confluence.SearchContent",
-      "fullyQualifiedName": "Confluence.SearchContent@3.1.2",
+      "fullyQualifiedName": "Confluence.SearchContent@4.0.1",
       "description": "Search for content in Confluence.\n\nThe search is performed across all content in the authenticated user's Confluence workspace.\nAll search terms in Confluence are case insensitive.\n\nYou can use the parameters in different ways:\n- must_contain_all: For AND logic - content must contain ALL of these\n- can_contain_any: For OR logic - content can contain ANY of these\n- Combine them: must_contain_all=['banana'] AND can_contain_any=['database', 'guide']",
       "parameters": [
         {
@@ -1210,7 +1063,7 @@
     {
       "name": "UpdatePageContent",
       "qualifiedName": "Confluence.UpdatePageContent",
-      "fullyQualifiedName": "Confluence.UpdatePageContent@3.1.2",
+      "fullyQualifiedName": "Confluence.UpdatePageContent@4.0.1",
       "description": "Update a page's content.",
       "parameters": [
         {
@@ -1312,9 +1165,96 @@
       }
     },
     {
+      "name": "UpdatePageTitle",
+      "qualifiedName": "Confluence.UpdatePageTitle",
+      "fullyQualifiedName": "Confluence.UpdatePageTitle@4.0.1",
+      "description": "Rename a page by changing its title.",
+      "parameters": [
+        {
+          "name": "page_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The ID or title of the page to rename. Numerical titles are NOT supported.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The new title to give the page.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use. Required when the user has more than one cloud authorized. Defaults to the user's only authorized cloud.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:page:confluence",
+          "write:page:confluence"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Confluence.UpdatePageTitle",
+        "parameters": {
+          "page_identifier": {
+            "value": "Project Roadmap Overview",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Q3 2024 Project Roadmap Overview",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "documents"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "WhoAmI",
       "qualifiedName": "Confluence.WhoAmI",
-      "fullyQualifiedName": "Confluence.WhoAmI@3.1.2",
+      "fullyQualifiedName": "Confluence.WhoAmI@4.0.1",
       "description": "CALL THIS TOOL FIRST to establish user profile context.\n\nGet information about the currently logged-in user and their available Confluence clouds.",
       "parameters": [],
       "auth": {
@@ -1369,6 +1309,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "306021b59d100f55a2ad1a5485b5f32a158f8159eeefd5475504be6f2bd2d402",
-  "generatedAt": "2026-10-21T22:03:56.364Z",
-  "summary": "## Confluence Toolkit\n\nArcade's Confluence toolkit provides LLM tools for interacting with Atlassian Confluence, enabling agents to read, write, search, and manage pages, spaces, and attachments via the Confluence Cloud REST API.\n\n## Capabilities\n\n- **Page lifecycle**: Create pages in a space, retrieve single or multiple pages by ID or title, update page content, and rename pages.\n- **Efficient bulk retrieval**: Batch-fetch multiple pages in a single request (`GetPagesById`) rather than repeated single calls — strongly preferred for multi-page workflows.\n- **Space and hierarchy navigation**: List all spaces, get space details by ID or key, and walk page trees by listing direct children with cursor-based pagination.\n- **Attachments**: List workspace attachments and fetch attachments for a specific page by ID or title.\n- **Content search**: Full-text search across the authenticated user's Confluence workspace with AND (`must_contain_all`) and OR (`can_contain_any`) logic, case-insensitive.\n- **Identity and cloud discovery**: Resolve the authenticated user's profile and enumerate available Atlassian Cloud instances — recommended as the first call to establish context.\n\n## OAuth\n\nThis toolkit uses **OAuth 2.0** via the **Atlassian** provider. See the [Arcade Atlassian auth provider docs](https://docs.arcade.dev/en/references/auth-providers/atlassian) for setup details."
+  "generatedAt": "2026-10-24T11:12:25.596Z",
+  "summary": "Arcade's Confluence toolkit provides LLM tools for interacting with Atlassian Confluence, enabling agents to read, write, search, and manage pages, spaces, and attachments via the Confluence API.\n\n## Capabilities\n\n- **Page management**: Create pages, retrieve single or batched pages by ID or title, update page content and titles, and explore content hierarchies via direct-children traversal.\n- **Space and cloud discovery**: List all available spaces, retrieve space details by ID or key, and enumerate accessible Atlassian Cloud instances.\n- **Attachment access**: List workspace-level attachments and retrieve attachments scoped to a specific page.\n- **Search**: Full-text search across the authenticated user's Confluence workspace with AND/OR logic combinable across multiple terms.\n- **User context**: Retrieve the current authenticated user's profile and associated Confluence clouds — recommended as the first call in any agent workflow.\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the **Atlassian** provider. See the [Arcade Atlassian auth provider docs](https://docs.arcade.dev/en/references/auth-providers/atlassian) for configuration details."
 }
