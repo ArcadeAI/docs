@@ -1,7 +1,7 @@
 {
   "id": "Apollo",
   "label": "Apollo",
-  "version": "1.0.4",
+  "version": "2.0.1",
   "description": "Arcade tools designed for LLMs to interact with Apollo.io sales intelligence",
   "metadata": {
     "category": "sales",
@@ -16,9 +16,54 @@
   "auth": null,
   "tools": [
     {
-      "name": "EnrichOrganization",
-      "qualifiedName": "Apollo.EnrichOrganization",
-      "fullyQualifiedName": "Apollo.EnrichOrganization@1.0.4",
+      "name": "GetApiUsage",
+      "qualifiedName": "Apollo.GetApiUsage",
+      "fullyQualifiedName": "Apollo.GetApiUsage@2.0.1",
+      "description": "Report per-endpoint rate limits and how many requests remain, so the agent\ncan pace a batch of lookups and avoid being throttled. Requires an Apollo\nmaster API key.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "APOLLO_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "APOLLO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Per-endpoint rate limits and remaining request counts."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Apollo.GetApiUsage",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetOrganization",
+      "qualifiedName": "Apollo.GetOrganization",
+      "fullyQualifiedName": "Apollo.GetOrganization@2.0.1",
       "description": "Turn a company domain into firmographics (industry, size, revenue, funding,\nlocation) so a rep can qualify and size an account. Consumes one enrichment\ncredit on a match; when the plan is out of credits the result reports\nstatus=insufficient_credits rather than failing.",
       "parameters": [
         {
@@ -46,7 +91,7 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Apollo.EnrichOrganization",
+        "toolName": "Apollo.GetOrganization",
         "parameters": {
           "domain": {
             "value": "stripe.com",
@@ -76,9 +121,9 @@
       }
     },
     {
-      "name": "EnrichPerson",
-      "qualifiedName": "Apollo.EnrichPerson",
-      "fullyQualifiedName": "Apollo.EnrichPerson@1.0.4",
+      "name": "GetPerson",
+      "qualifiedName": "Apollo.GetPerson",
+      "fullyQualifiedName": "Apollo.GetPerson@2.0.1",
       "description": "Turn a known person into a verified profile with their current role and,\non request, contact details. Provide at least one identifier: an Apollo person\nID, a name (or first and last name), an email, or a LinkedIn URL; an employer\nname or domain alone is not enough to identify someone. Consumes one enrichment\ncredit on a match; when the plan is out of credits the result reports\nstatus=insufficient_credits rather than failing.",
       "parameters": [
         {
@@ -170,15 +215,15 @@
       },
       "documentationChunks": [],
       "codeExample": {
-        "toolName": "Apollo.EnrichPerson",
+        "toolName": "Apollo.GetPerson",
         "parameters": {
           "person_id": {
-            "value": "583f6b2e7b6b8a1d4e9c0f23",
+            "value": "5f3e2a1b4c8d9e0f1a2b3c4d",
             "type": "string",
             "required": false
           },
           "name": {
-            "value": "Jane Doe",
+            "value": "Jane Holloway",
             "type": "string",
             "required": false
           },
@@ -188,17 +233,17 @@
             "required": false
           },
           "last_name": {
-            "value": "Doe",
+            "value": "Holloway",
             "type": "string",
             "required": false
           },
           "email": {
-            "value": "jane.doe@techcorp.com",
+            "value": "jane.holloway@techcorp.com",
             "type": "string",
             "required": false
           },
           "organization_name": {
-            "value": "TechCorp Inc.",
+            "value": "TechCorp Solutions",
             "type": "string",
             "required": false
           },
@@ -208,7 +253,7 @@
             "required": false
           },
           "linkedin_url": {
-            "value": "https://www.linkedin.com/in/janedoe",
+            "value": "https://www.linkedin.com/in/jane-holloway",
             "type": "string",
             "required": false
           },
@@ -240,54 +285,9 @@
       }
     },
     {
-      "name": "GetApiUsage",
-      "qualifiedName": "Apollo.GetApiUsage",
-      "fullyQualifiedName": "Apollo.GetApiUsage@1.0.4",
-      "description": "Report per-endpoint rate limits and how many requests remain, so the agent\ncan pace a batch of lookups and avoid being throttled. Requires an Apollo\nmaster API key.",
-      "parameters": [],
-      "auth": null,
-      "secrets": [
-        "APOLLO_API_KEY"
-      ],
-      "secretsInfo": [
-        {
-          "name": "APOLLO_API_KEY",
-          "type": "api_key"
-        }
-      ],
-      "output": {
-        "type": "json",
-        "description": "Per-endpoint rate limits and remaining request counts."
-      },
-      "documentationChunks": [],
-      "codeExample": {
-        "toolName": "Apollo.GetApiUsage",
-        "parameters": {},
-        "requiresAuth": false,
-        "tabLabel": "Call the Tool"
-      },
-      "metadata": {
-        "classification": {
-          "serviceDomains": [
-            "crm"
-          ]
-        },
-        "behavior": {
-          "operations": [
-            "read"
-          ],
-          "readOnly": true,
-          "destructive": false,
-          "idempotent": true,
-          "openWorld": true
-        },
-        "extras": null
-      }
-    },
-    {
       "name": "SearchOrganizations",
       "qualifiedName": "Apollo.SearchOrganizations",
-      "fullyQualifiedName": "Apollo.SearchOrganizations@1.0.4",
+      "fullyQualifiedName": "Apollo.SearchOrganizations@2.0.1",
       "description": "Find companies in Apollo's database that match a firmographic profile so a\nrep can prioritize the accounts worth working. Results include firmographics\ninline unless include_firmographics is disabled. Company search consumes plan\ncredits; when the plan is out of credits the result reports\nstatus=insufficient_credits with an empty list rather than failing.",
       "parameters": [
         {
@@ -470,7 +470,7 @@
     {
       "name": "SearchPeople",
       "qualifiedName": "Apollo.SearchPeople",
-      "fullyQualifiedName": "Apollo.SearchPeople@1.0.4",
+      "fullyQualifiedName": "Apollo.SearchPeople@2.0.1",
       "description": "Find people in Apollo's database by role and the firmographics of their\nemployer. Returns lightweight records without email or phone; use person\nenrichment to reveal verified contact details.",
       "parameters": [
         {
@@ -688,6 +688,6 @@
   "customImports": [],
   "subPages": [],
   "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
-  "generatedAt": "2026-10-21T22:03:50.237Z",
-  "summary": "Apollo toolkit for Arcade enables LLMs to interact with the [Apollo.io](https://apollo.io) sales intelligence platform — searching, enriching, and qualifying people and companies programmatically.\n\n## Capabilities\n\n- **Company intelligence**: Search Apollo's database by firmographic filters (industry, size, revenue, location) and enrich a domain into a full company profile including funding and headcount.\n- **People intelligence**: Search contacts by role and employer firmographics, then enrich individual profiles to surface current title and verified contact details using identifiers such as email, LinkedIn URL, or Apollo person ID.\n- **Credit-aware responses**: Enrichment and search operations consume plan credits on a match; when credits are exhausted the toolkit returns `status=insufficient_credits` rather than raising an error, letting agents handle quota gracefully.\n- **Rate-limit introspection**: Retrieve per-endpoint rate limits and remaining request counts so agents can pace batch lookups and avoid throttling.\n\n## Secrets\n\n`APOLLO_API_KEY` — An Apollo.io API key used to authenticate every request. Obtain it from your Apollo account under **Settings → Integrations → API Keys** (requires an Apollo account; key permissions and available endpoints depend on your plan tier). Note that `Apollo.GetApiUsage` specifically requires a *master* API key rather than a restricted key. See [Apollo's API key documentation](https://apolloio.github.io/apollo-api-docs/) for details on key types and plan-level access.\n\nFor how to configure secrets in Arcade, see [Tool Secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets) or manage them directly at [https://api.arcade.dev/dashboard/auth/secrets](https://api.arcade.dev/dashboard/auth/secrets)."
+  "generatedAt": "2026-10-24T11:12:15.166Z",
+  "summary": "Apollo is a sales intelligence platform; this Arcade toolkit enables LLMs to search, enrich, and monitor usage against the Apollo.io API.\n\n## Capabilities\n\n- **Account intelligence:** Convert a company domain into firmographics (industry, size, revenue, funding, location) for account qualification and sizing.\n- **People lookup & enrichment:** Search contacts by role and employer firmographics, then enrich individual records with verified profiles and contact details using identifiers such as name, email, Apollo ID, or LinkedIn URL.\n- **Company search:** Query Apollo's database with firmographic filters to surface and prioritize target accounts; firmographics are included inline by default.\n- **Rate-limit awareness:** Retrieve per-endpoint rate limits and remaining request counts so agents can pace batch operations and avoid throttling.\n- **Credit-safe error handling:** Enrichment and search operations report `status=insufficient_credits` rather than throwing errors when the Apollo plan is out of credits.\n\n## Secrets\n\n`APOLLO_API_KEY`\nYour Apollo master API key, required by all five tools. To obtain it, log in to [Apollo.io](https://app.apollo.io/), navigate to **Settings → Integrations → API**, and copy your API key. A master key (not a limited integration key) is required to access enrichment endpoints and rate-limit reporting. Apollo API access may require a paid plan depending on the endpoints and credit volume you need; check your plan's enrichment credit allowance before running bulk operations.\n\nStore this secret in Arcade using the secrets configuration described at [https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets](https://docs.arcade.dev/en/guides/create-tools/tool-basics/create-tool-secrets), or add it directly via the [Arcade dashboard](https://api.arcade.dev/dashboard/auth/secrets)."
 }

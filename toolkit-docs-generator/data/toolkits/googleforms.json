@@ -1,0 +1,1677 @@
+{
+  "id": "GoogleForms",
+  "label": "Google Forms",
+  "version": "4.0.1",
+  "description": "Arcade.dev LLM tools for Google Forms",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/google-forms.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/google-forms",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "google",
+    "allScopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/forms.body",
+      "https://www.googleapis.com/auth/forms.body.readonly",
+      "https://www.googleapis.com/auth/forms.responses.readonly",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AggregateResponses",
+      "qualifiedName": "GoogleForms.AggregateResponses",
+      "fullyQualifiedName": "GoogleForms.AggregateResponses@4.0.1",
+      "description": "Return aggregate response counts and text-answer distributions for a form.\n\nSamples up to `limit` responses from the first page returned by the Forms\nAPI, which comes back in no guaranteed order. Does not paginate; the counts\nand distributions reflect only that sample and can undercount recent activity\non busy forms, which should rely on the response-listing tool's timestamp\nfilter or the linked response spreadsheet for exhaustive analytics.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum responses to sample for the summary (1-1000). Summaries reflect only the sampled responses, not the full form. Defaults to 500.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.responses.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get text-answer distributions and rolling-window counts over a sampled set of responses. more_responses_available indicates the form has more responses than were included in the summary."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.AggregateResponses",
+        "parameters": {
+          "form_id": {
+            "value": "1FAIpQLSe4xZ8kQwP3mNvBcRtYhDjLuKoWnXqTgAeVsMpCfIbOyHd2rA",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CopyForm",
+      "qualifiedName": "GoogleForms.CopyForm",
+      "fullyQualifiedName": "GoogleForms.CopyForm@4.0.1",
+      "description": "Duplicate an existing Google Form, optionally renaming and targeting a folder.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The source Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_title",
+          "type": "string",
+          "required": false,
+          "description": "Title for the copied form. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Destination folder ID. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Copy a form to create a duplicate."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.CopyForm",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "new_title": {
+            "value": "Customer Feedback Survey - Copy",
+            "type": "string",
+            "required": false
+          },
+          "folder_id": {
+            "value": "1a2B3cD4eF5gH6iJ7kL8mN9oP0qR1sT2u",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read",
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateForm",
+      "qualifiedName": "GoogleForms.CreateForm",
+      "fullyQualifiedName": "GoogleForms.CreateForm@4.0.1",
+      "description": "Create a new Google Form with a title and return its IDs and URLs.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The form title.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "document_title",
+          "type": "string",
+          "required": false,
+          "description": "Drive document title. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "unpublished",
+          "type": "boolean",
+          "required": false,
+          "description": "Create form as unpublished. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Create a new Google Form shell."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.CreateForm",
+        "parameters": {
+          "title": {
+            "value": "Customer Satisfaction Survey",
+            "type": "string",
+            "required": true
+          },
+          "document_title": {
+            "value": "Q4 2024 Customer Feedback Form",
+            "type": "string",
+            "required": false
+          },
+          "unpublished": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateWatch",
+      "qualifiedName": "GoogleForms.CreateWatch",
+      "fullyQualifiedName": "GoogleForms.CreateWatch@4.0.1",
+      "description": "Create a watch that notifies Pub/Sub when the form has new responses or schema changes.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pubsub_topic",
+          "type": "string",
+          "required": true,
+          "description": "Pub/Sub topic in projects/{project}/topics/{topic} format.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "event_type",
+          "type": "string",
+          "required": false,
+          "description": "Watch event type. Defaults to RESPONSES.",
+          "enum": [
+            "RESPONSES",
+            "SCHEMA"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body",
+          "https://www.googleapis.com/auth/forms.responses.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Create a Pub/Sub watch for form changes."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.CreateWatch",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "pubsub_topic": {
+            "value": "projects/my-gcp-project-123/topics/form-responses-topic",
+            "type": "string",
+            "required": true
+          },
+          "event_type": {
+            "value": "RESPONSES",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteWatch",
+      "qualifiedName": "GoogleForms.DeleteWatch",
+      "fullyQualifiedName": "GoogleForms.DeleteWatch@4.0.1",
+      "description": "Delete a form watch, stopping Pub/Sub notifications for that subscription.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "watch_id",
+          "type": "string",
+          "required": true,
+          "description": "The watch ID to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Delete a watch subscription."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.DeleteWatch",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "watch_id": {
+            "value": "watch-7f3a2b1c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GenerateGoogleFilePickerUrl",
+      "qualifiedName": "GoogleForms.GenerateGoogleFilePickerUrl",
+      "fullyQualifiedName": "GoogleForms.GenerateGoogleFilePickerUrl@4.0.1",
+      "description": "Generate a Google File Picker URL for user-driven form selection and authorization.\n\nUseful when a prior Forms tool call failed because a form was not found\nor not accessible under the drive.file scope. Once the user completes\nthe picker flow and grants the app access to the desired form, retry\nthe original tool call.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Google File Picker URL that lets the end user select or grant access to Google Forms in their Drive."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.GenerateGoogleFilePickerUrl",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetForm",
+      "qualifiedName": "GoogleForms.GetForm",
+      "fullyQualifiedName": "GoogleForms.GetForm@4.0.1",
+      "description": "Fetch the normalized form structure including items, settings, and revision info.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get a full normalized form document."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.GetForm",
+        "parameters": {
+          "form_id": {
+            "value": "1FAIpQLSe4XyZ8kQw2mN9vR3jT7uBpLdHcOiWgAsMnYeKfVtXqZrPlow",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetFormSummary",
+      "qualifiedName": "GoogleForms.GetFormSummary",
+      "fullyQualifiedName": "GoogleForms.GetFormSummary@4.0.1",
+      "description": "Return a concise summary of a Google Form for quick triage and discovery.\n\nThe Google Forms API does not expose a total response count and returns\nresponses in no guaranteed order, so `sampled_response_count`,\n`latest_sampled_response_at`, and the 24h/7d counts reflect only the sampled\nfirst page and can undercount recent activity on forms larger than the\nsample. For accurate recency or exhaustive analytics, use the response-\nlisting tool's timestamp filter or the linked response spreadsheet.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sample_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum responses to sample for recent-activity counts (1-200). Defaults to 200.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body.readonly",
+          "https://www.googleapis.com/auth/forms.responses.readonly",
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get a quick read on a form for triage: title, structure counts, publish/response-acceptance state, quiz mode, linked-sheet presence, trashed state, and recent-response counts sampled from the first page."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.GetFormSummary",
+        "parameters": {
+          "form_id": {
+            "value": "1FAIpQLSe4xQ2zM8kVvB3rNpT7wYhDcJgXuL9oAm0sCfREk6iZbWnOdA",
+            "type": "string",
+            "required": true
+          },
+          "sample_limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetResponse",
+      "qualifiedName": "GoogleForms.GetResponse",
+      "fullyQualifiedName": "GoogleForms.GetResponse@4.0.1",
+      "description": "Retrieve a single Google Form response by its response ID.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "response_id",
+          "type": "string",
+          "required": true,
+          "description": "The Form response ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.responses.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get one form response."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.GetResponse",
+        "parameters": {
+          "form_id": {
+            "value": "1FAIpQLSe7x2kQzBPDnj5pZ8fGHmVXqN3RtYwCuOlA9dKsMbTvEhJr",
+            "type": "string",
+            "required": true
+          },
+          "response_id": {
+            "value": "ACYDBNjR5tPqW8mXvLz3oEkHuF6aQsNgYcDb2TiVpMwKr4eJlUhOs",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListForms",
+      "qualifiedName": "GoogleForms.ListForms",
+      "fullyQualifiedName": "GoogleForms.ListForms@4.0.1",
+      "description": "List Google Forms filtered by a discovery mode such as recent, shared, or in_folder.\n\nReturns results newest-first (by Drive modified time). Each call fetches one\nDrive page of up to `limit` forms and returns a `next_page_token` to continue.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "Discovery mode. Defaults to recent.",
+          "enum": [
+            "recent",
+            "shared_with_me",
+            "in_folder",
+            "owned_by_me",
+            "starred",
+            "trashed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Folder ID for in_folder mode. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Search query by form title. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return in one call (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_page_token. Defaults to an empty string, which returns the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List forms with mode-aware discovery filters. Each item exposes the Drive file name (`drive_name`), which is the document title set in Drive, not the in-form title set via Forms UI. Fetch the full form to read its actual title. Under the drive.file OAuth scope, results are limited to forms the app created or the user has opened with it. Pass `next_page_token` back as `page_token` for the next page; an empty `next_page_token` means no more results."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.ListForms",
+        "parameters": {
+          "mode": {
+            "value": "recent",
+            "type": "string",
+            "required": false
+          },
+          "folder_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs",
+            "type": "string",
+            "required": false
+          },
+          "query": {
+            "value": "Customer Feedback",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "page_token": {
+            "value": "CAEQAhgBIKvr7c4GKAEyCxIJcm9vdF9mb2xkZXIYAQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListPermissions",
+      "qualifiedName": "GoogleForms.ListPermissions",
+      "fullyQualifiedName": "GoogleForms.ListPermissions@4.0.1",
+      "description": "Return normalized Drive permissions for a Google Form.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get normalized Drive permissions for a form."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.ListPermissions",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListResponses",
+      "qualifiedName": "GoogleForms.ListResponses",
+      "fullyQualifiedName": "GoogleForms.ListResponses@4.0.1",
+      "description": "List submitted responses for a Google Form.\n\nEach call fetches one Forms page of up to `limit` responses and returns a\n`next_page_token` to continue.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timestamp_filter",
+          "type": "string",
+          "required": false,
+          "description": "Only include responses whose submission time satisfies this filter, written as timestamp >= YYYY-MM-DDThh:mm:ssZ. Defaults to an empty string, which applies no filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum responses to return in one call (1-200). Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Continuation token from a previous call's next_page_token. Defaults to an empty string, which returns the first page.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.responses.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List submitted form responses, up to `limit` per call. Pass `next_page_token` back as `page_token` for the next page; an empty `next_page_token` means no more responses."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.ListResponses",
+        "parameters": {
+          "form_id": {
+            "value": "1FAIpQLSdK2hJ9mNpQwErTyUiOpAsDfGhJkLmNbVcXzQwErTyUiOpAs",
+            "type": "string",
+            "required": true
+          },
+          "timestamp_filter": {
+            "value": "timestamp >= 2024-03-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page_token": {
+            "value": "ChAKCgoIEgYIgICAgIABEAAYASAB",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListWatches",
+      "qualifiedName": "GoogleForms.ListWatches",
+      "fullyQualifiedName": "GoogleForms.ListWatches@4.0.1",
+      "description": "List the Pub/Sub watches currently registered on a form.\n\nThe Forms watches API returns the full set in a single call with no cursor,\nand a form can hold only a few watches, so all of them are returned.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List active watches for a form."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.ListWatches",
+        "parameters": {
+          "form_id": {
+            "value": "1FAIpQLSe4xZ9V3kQmW7tRJu2yHpD8nBcXoLvMsAeKfGwIqTdYrZhNjA",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RestoreForm",
+      "qualifiedName": "GoogleForms.RestoreForm",
+      "fullyQualifiedName": "GoogleForms.RestoreForm@4.0.1",
+      "description": "Restore a trashed Google Form back into the user's Drive.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The trashed Google Form ID to restore.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Restore a form from trash."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.RestoreForm",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SetFormSettings",
+      "qualifiedName": "GoogleForms.SetFormSettings",
+      "fullyQualifiedName": "GoogleForms.SetFormSettings@4.0.1",
+      "description": "Update form-wide settings (quiz mode, email collection) safely.\n\nWraps `batchUpdate` + `updateSettings` with a correct `updateMask` built\nfrom the parameters the caller supplied. At least one of `is_quiz` or\n`email_collection_type` must be set; otherwise this returns a validation\nerror so callers never accidentally submit an empty update.\n\nForm-wide settings that are NOT available in Forms API v1 and must be\ntoggled in the Forms UI (Settings / gear icon):\n\n- \"Limit to 1 response\"\n- \"Shuffle question order\" per respondent\n- Quiz feedback toggles: when to release the grade, whether respondents\n  see missed questions, correct answers, or point values. Only `isQuiz`\n  is exposed here; per-question `Feedback` + `correctAnswers` +\n  `pointValue` still flows through the batch form-update tool.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_quiz",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to enable quiz mode, false to disable. Disabling quiz mode deletes all question grading data per the Forms API. Defaults to leaving the current value unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email_collection_type",
+          "type": "string",
+          "required": false,
+          "description": "Email collection mode: DO_NOT_COLLECT, VERIFIED (Google-account email), or RESPONDER_INPUT (typed by respondent). Defaults to leaving the current value unchanged.",
+          "enum": [
+            "DO_NOT_COLLECT",
+            "VERIFIED",
+            "RESPONDER_INPUT"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update the narrow set of form-wide settings exposed by the Forms API. Sends an explicit updateMask so fields the caller did not touch are preserved. Only the fields supplied here are sent."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.SetFormSettings",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "is_quiz": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "email_collection_type": {
+            "value": "VERIFIED",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SetPublishSettings",
+      "qualifiedName": "GoogleForms.SetPublishSettings",
+      "fullyQualifiedName": "GoogleForms.SetPublishSettings@4.0.1",
+      "description": "Update a form's publish/response-accepting state.\n\nThe Forms API `setPublishSettings` endpoint does not accept an update mask,\nso an incomplete body silently unpublishes the form. This wrapper reads the\nform's current publish state and merges in only the fields the caller\nsupplied, so an unset field is preserved rather than reset.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_published",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the form is published. Providing true publishes the form; providing false unpublishes a live form. Defaults to leaving the current publish state unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_accepting_responses",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the form accepts new responses. Providing true or false sets that state. A form cannot accept responses while unpublished. Defaults to leaving the current value unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update a form's publish state. Each flag left unset is merged from the form's current state, so a caller can change one field without accidentally toggling the other."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.SetPublishSettings",
+        "parameters": {
+          "form_id": {
+            "value": "1FAIpQLSe4xample_FormID_ABC123xyz",
+            "type": "string",
+            "required": true
+          },
+          "is_published": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "is_accepting_responses": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "TrashForm",
+      "qualifiedName": "GoogleForms.TrashForm",
+      "fullyQualifiedName": "GoogleForms.TrashForm@4.0.1",
+      "description": "Move a Google Form to the Drive trash (soft delete).",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID to move to trash.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Soft-delete a form by moving it to trash."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.TrashForm",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateForm",
+      "qualifiedName": "GoogleForms.UpdateForm",
+      "fullyQualifiedName": "GoogleForms.UpdateForm@4.0.1",
+      "description": "Apply a batch of structural updates to a Google Form.\n\nAll structural edits to a form go through this tool. Requests apply\natomically in the given order, so an earlier createItem shifts the indices\nthat later requests address.\n\nupdateItem, updateFormInfo, and updateSettings take an updateMask: only the\nnamed field paths are written, and a field left out of the mask is preserved.\nOmitting the mask makes Google overwrite the entire target object.\n\nForms API v1 limitations to know:\n- `questionGroupItem` (grids) has no per-item `required`; mark each\n  `rowQuestion` required instead.\n- Per-question grading (`pointValue`, `correctAnswers`, `whenRight` /\n  `whenWrong` feedback) IS settable here, but the form-wide quiz release\n  toggles (when grades are released; whether respondents see missed\n  questions, correct answers, or point values) are UI-only.\n- \"Limit to 1 response\" and per-respondent question shuffle are UI-only;\n  `choiceQuestion.shuffle` only shuffles options within one question.\n\nConcurrency: pass `required_revision_id` (the revision id from a prior read\nof the form) to reject writes that would overwrite concurrent edits. The\nreturned `revision_id` is the new post-update revision only when\n`include_form_in_response=True`; otherwise it is empty and must be re-read\nby fetching the form.",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "operations",
+          "type": "array",
+          "innerType": "json",
+          "required": true,
+          "description": "Ordered batchUpdate requests, each object setting exactly one request key. updateItem, updateFormInfo, and updateSettings MUST include an updateMask naming the field paths to change; omitting it makes Google overwrite the entire target object.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "required_revision_id",
+          "type": "string",
+          "required": false,
+          "description": "Strict revision precondition. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_revision_id",
+          "type": "string",
+          "required": false,
+          "description": "Transform target revision. Defaults to empty.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_form_in_response",
+          "type": "boolean",
+          "required": false,
+          "description": "Include updated form in API response. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Apply structural updates to a Google Form. Common recipes below use the exact Forms API v1 request shapes so agents do not have to guess nested field paths or enum names."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.UpdateForm",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "operations": {
+            "value": [
+              {
+                "updateFormInfo": {
+                  "info": {
+                    "title": "Customer Satisfaction Survey",
+                    "description": "Please share your feedback about our service."
+                  },
+                  "updateMask": "title,description"
+                }
+              },
+              {
+                "createItem": {
+                  "item": {
+                    "title": "How satisfied are you with our service?",
+                    "questionItem": {
+                      "question": {
+                        "required": true,
+                        "choiceQuestion": {
+                          "type": "RADIO",
+                          "options": [
+                            {
+                              "value": "Very Satisfied"
+                            },
+                            {
+                              "value": "Satisfied"
+                            },
+                            {
+                              "value": "Neutral"
+                            },
+                            {
+                              "value": "Dissatisfied"
+                            },
+                            {
+                              "value": "Very Dissatisfied"
+                            }
+                          ],
+                          "shuffle": false
+                        }
+                      }
+                    }
+                  },
+                  "location": {
+                    "index": 0
+                  }
+                }
+              },
+              {
+                "createItem": {
+                  "item": {
+                    "title": "Any additional comments?",
+                    "questionItem": {
+                      "question": {
+                        "required": false,
+                        "textQuestion": {
+                          "paragraph": true
+                        }
+                      }
+                    }
+                  },
+                  "location": {
+                    "index": 1
+                  }
+                }
+              },
+              {
+                "updateItem": {
+                  "item": {
+                    "itemId": "3c4d5e6f",
+                    "title": "What is your age range?",
+                    "questionItem": {
+                      "question": {
+                        "required": true,
+                        "choiceQuestion": {
+                          "type": "DROP_DOWN",
+                          "options": [
+                            {
+                              "value": "Under 18"
+                            },
+                            {
+                              "value": "18–24"
+                            },
+                            {
+                              "value": "25–34"
+                            },
+                            {
+                              "value": "35–44"
+                            },
+                            {
+                              "value": "45+"
+                            }
+                          ],
+                          "shuffle": false
+                        }
+                      }
+                    }
+                  },
+                  "location": {
+                    "index": 2
+                  },
+                  "updateMask": "title,questionItem.question.choiceQuestion"
+                }
+              },
+              {
+                "updateSettings": {
+                  "settings": {
+                    "quizSettings": {
+                      "isQuiz": false
+                    }
+                  },
+                  "updateMask": "quizSettings.isQuiz"
+                }
+              }
+            ],
+            "type": "array",
+            "required": true
+          },
+          "required_revision_id": {
+            "value": "00000042",
+            "type": "string",
+            "required": false
+          },
+          "target_revision_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "include_form_in_response": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create",
+            "update",
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateWatch",
+      "qualifiedName": "GoogleForms.UpdateWatch",
+      "fullyQualifiedName": "GoogleForms.UpdateWatch@4.0.1",
+      "description": "Renew a form watch before it expires (watches last up to 7 days).",
+      "parameters": [
+        {
+          "name": "form_id",
+          "type": "string",
+          "required": true,
+          "description": "The Google Form ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "watch_id",
+          "type": "string",
+          "required": true,
+          "description": "The watch ID to renew.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/forms.body",
+          "https://www.googleapis.com/auth/forms.responses.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Renew an expiring watch."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.UpdateWatch",
+        "parameters": {
+          "form_id": {
+            "value": "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms",
+            "type": "string",
+            "required": true
+          },
+          "watch_id": {
+            "value": "watch-7f3a2c1d-4e8b-49f0-b6d5-1a2e3f4c5d6e",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "GoogleForms.WhoAmI",
+      "fullyQualifiedName": "GoogleForms.WhoAmI@4.0.1",
+      "description": "Return the authenticated Google identity (email and display name).",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/userinfo.email",
+          "https://www.googleapis.com/auth/userinfo.profile"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get the authenticated Google account's email and display name."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleForms.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "survey"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "curationSourceHash": "da70ed30d9201488046d1ae1b04dc45cf6378210501e24b53236a4aa02f1ef89",
+  "generatedAt": "2026-10-24T11:12:36.326Z",
+  "summary": "Google Forms toolkit for Arcade enables LLMs to create, read, update, and manage Google Forms and their responses programmatically via the Google Forms and Drive APIs.\n\n## Capabilities\n\n- **Form lifecycle management** — create, copy, rename, trash, restore, and configure form-wide settings (quiz mode, email collection, publish/response-accepting state)\n- **Structural editing** — apply atomic batched updates to form items, settings, and metadata with revision-safe concurrency control\n- **Response access and analysis** — list, retrieve, and aggregate form responses with timestamp filtering; surface per-question answer distributions from sampled data\n- **Discovery and permissions** — list forms by recency, sharing, or folder; inspect and enumerate Drive permissions; generate a Google File Picker URL to resolve access issues\n- **Real-time notifications** — create, list, renew, and delete Pub/Sub watches on forms for new responses or schema changes\n- **Identity and diagnostics** — retrieve the authenticated user's Google identity (email and display name)\n\n## OAuth\n\nAuthentication uses OAuth 2.0 via the Google provider. See the [Arcade Google auth provider docs](https://docs.arcade.dev/en/references/auth-providers/google) for setup details."
+}
