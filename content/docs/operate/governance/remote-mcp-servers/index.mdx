@@ -154,6 +154,17 @@ Authentication to a remote MCP server happens twice, with different credentials 
 
 **At runtime, each end user authenticates.** When an end user's agent first calls a tool on that server, Arcade runs the OAuth flow against the remote server for *that user* and stores their tokens separately. Arcade then re-resolves the tool list for them individually.
 
+<Callout type="warning">
+  [Slack's MCP server](https://docs.slack.dev/ai/slack-mcp-server/) writes the
+  authorizing user's Slack user ID into some tool descriptions, such as
+  `slack_search_public_and_private` and `slack_send_message`. An agent reads
+  that ID as "me", so a description listed with one person's credentials can
+  point another user's agent at the wrong person. Slack can switch these
+  per-user descriptions off for your workspace, but only on request. Contact
+  Slack support and ask them to turn off per-user tool descriptions on the
+  Slack MCP server.
+</Callout>
+
 ## Configure advanced settings
 
 Remote MCP may often require more than a URL. Use **Advanced settings** to configure connection, OAuth, and header details.
