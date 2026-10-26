@@ -16,7 +16,6 @@ import {
   type CategoryMeta,
   findMissingMainMetaCategories,
   generateCategoryMeta,
-  getToolkitCategory,
   getToolkitFiles,
   getToolkitLabel,
   getToolkitLabelFromJson,
@@ -25,30 +24,10 @@ import {
   type PartnerNavSource,
   parseBooleanCliFlag,
   resolveRemoveEmptySections,
-  setToolkitsForTesting,
   syncToolkitSidebar,
   type ToolkitInfo,
 } from "../../scripts/sync-toolkit-sidebar";
 import { INTEGRATION_CATEGORIES } from "../../src/shared/toolkit-primitives";
-
-setToolkitsForTesting([
-  { id: "Gmail", label: "Gmail", category: "productivity" },
-  { id: "Slack", label: "Slack", category: "social" },
-  { id: "Github", label: "GitHub", category: "development" },
-  { id: "Stripe", label: "Stripe", category: "payments" },
-  { id: "Zendesk", label: "Zendesk", category: "customer-support" },
-  { id: "GoogleSearch", label: "Google Search", category: "search" },
-  { id: "Hubspot", label: "HubSpot", category: "sales" },
-  { id: "Spotify", label: "Spotify", category: "entertainment" },
-  { id: "Postgres", label: "Postgres", category: "databases" },
-  { id: "WeaviateApi", label: "Weaviate API", category: "development" },
-  {
-    id: "HiddenToolkit",
-    label: "Hidden",
-    category: "productivity",
-    isHidden: true,
-  },
-]);
 
 // Test directory setup
 const TEST_DIR = join(process.cwd(), ".test-sync-sidebar");
@@ -115,40 +94,10 @@ describe("getToolkitFiles", () => {
 });
 
 // ============================================================================
-// Unit Tests: getToolkitCategory
-// ============================================================================
-
-describe("getToolkitCategory", () => {
-  it("should return category for known toolkit", () => {
-    expect(getToolkitCategory("Gmail")).toBe("productivity");
-    expect(getToolkitCategory("Slack")).toBe("social");
-  });
-
-  it("should return null for unknown toolkit", () => {
-    expect(getToolkitCategory("Unknown")).toBeNull();
-  });
-
-  it("should return null for hidden toolkit", () => {
-    expect(getToolkitCategory("HiddenToolkit")).toBeNull();
-  });
-});
-
-// ============================================================================
 // Unit Tests: getToolkitLabel
 // ============================================================================
 
 describe("getToolkitLabel", () => {
-  it("should return label for known toolkit", () => {
-    expect(getToolkitLabel("Gmail")).toBe("Gmail");
-    expect(getToolkitLabel("Github")).toBe("GitHub");
-    expect(getToolkitLabel("GoogleSearch")).toBe("Google Search");
-  });
-
-  it("should return label for known toolkit regardless of case", () => {
-    expect(getToolkitLabel("gmail")).toBe("Gmail");
-    expect(getToolkitLabel("GITHUB")).toBe("GitHub");
-  });
-
   it("should generate fallback label for unknown toolkit", () => {
     expect(getToolkitLabel("MyCustomToolkit")).toBe("My Custom Toolkit");
     expect(getToolkitLabel("APIHelper")).toBe("A P I Helper");
@@ -234,8 +183,14 @@ describe("buildToolkitInfoList", () => {
   });
 
   it("should build list of toolkits with correct labels and categories", () => {
-    createToolkitJson("gmail", { label: "Gmail" });
-    createToolkitJson("slack", { label: "Slack" });
+    createToolkitJson("gmail", {
+      label: "Gmail",
+      metadata: { category: "productivity" },
+    });
+    createToolkitJson("slack", {
+      label: "Slack",
+      metadata: { category: "social" },
+    });
     createToolkitJson("unknowntoolkit", { label: "Unknown Toolkit" });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
@@ -258,27 +213,42 @@ describe("buildToolkitInfoList", () => {
   });
 
   it("should skip hidden toolkits", () => {
-    createToolkitJson("HiddenToolkit", { label: "Hidden" });
+    createToolkitJson("hiddentoolkit", {
+      id: "HiddenToolkit",
+      label: "Hidden",
+      metadata: { category: "productivity", isHidden: true },
+    });
+    createToolkitJson("gmail", {
+      label: "Gmail",
+      metadata: { category: "productivity" },
+    });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
 
-    expect(result).toHaveLength(0);
+    expect(result.map((item) => item.label)).toEqual(["Gmail"]);
   });
 
-  it("should prefer design system label over JSON", () => {
-    createToolkitJson("gmail", { label: "Custom Gmail Label" });
+  it("uses the label from the toolkit file", () => {
+    createToolkitJson("gmail", {
+      label: "Custom Gmail Label",
+      metadata: { category: "productivity" },
+    });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
 
-    expect(result[0].label).toBe("Gmail");
+    expect(result[0].label).toBe("Custom Gmail Label");
   });
 
-  it("should use design system label as fallback", () => {
-    createToolkitJson("gmail", { label: null });
+  it("falls back to a readable name when the file has no label", () => {
+    createToolkitJson("googlesearch", {
+      id: "GoogleSearch",
+      label: null,
+      metadata: { category: "search" },
+    });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
 
-    expect(result[0].label).toBe("Gmail");
+    expect(result[0].label).toBe("Google Search");
   });
 
   it("should use docsLink slug when available", () => {
