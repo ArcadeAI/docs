@@ -1,0 +1,121 @@
+---
+title: Connect the Slack MCP Server
+sidebarTitle: Slack
+description: Configure a Slack app and Arcade's OAuth 2.0 settings to connect Slack's hosted MCP server
+---
+
+import { SignupLink } from "@/components/analytics";
+
+Slack hosts an [MCP server](https://docs.slack.dev/ai/slack-mcp-server/) at `mcp.slack.com/mcp`, exposing tools for searching, reading, and sending messages, working with canvases, and looking up users. This guide covers the Arcade-side setup for connecting it as a [remote MCP server](/en/operate/governance/remote-mcp-servers), plus the Slack settings that most commonly trip people up.
+
+<Callout type="info">
+  This guide is about connecting to Slack's own MCP server, not the Arcade
+  Slack toolkits. Arcade's [Slack toolkit](/en/resources/integrations/social/slack)
+  and [Slack API toolkit](/en/resources/integrations/social/slack-api) cover
+  Slack with none of the setup below.
+
+  Reach for Slack's server instead when you want the tools Slack itself
+  builds and maintains, with access governed by your own Slack app and the
+  user scopes you grant it.
+</Callout>
+
+<Callout type="info">
+  This guide is sourced from Slack's [MCP server
+  overview](https://docs.slack.dev/ai/slack-mcp-server/) and [sample app
+  guide](https://docs.slack.dev/ai/slack-mcp-server/developing/).
+</Callout>
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Connect Slack's MCP server to Arcade and use its tools in gateways and SDKs.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An <SignupLink linkLocation="docs:remote-mcp-servers-slack">Arcade account</SignupLink>
+- A Slack workspace where you can create and install a Slack app
+- The ability to contact Slack support for your workspace, to turn off [per-user tool descriptions](#per-user-tool-descriptions)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Which Slack app settings matter for Arcade specifically, and why
+- Configure the remote server's OAuth 2.0 settings in Arcade
+- Why Slack's per-user tool descriptions matter in a shared gateway, and how to turn them off
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Set up Slack
+
+Slack's MCP server only accepts clients backed by a registered Slack app. Follow Slack's [sample app guide](https://docs.slack.dev/ai/slack-mcp-server/developing/) to create one. A few settings on that app matter specifically for connecting to Arcade:
+
+- **App type**: only internal apps and apps published in the Slack Marketplace can use the MCP server. An internal app installed to your own workspace is the usual choice for Arcade.
+
+- **Model Context Protocol**: turn on the MCP server feature under **Agents** in the app's settings (or set `settings.is_mcp_enabled` in the app manifest). Without it, the app can't connect to the MCP server.
+
+- **User token scopes**: the MCP server's tools act on behalf of each user, so they need user token scopes, added under **OAuth & Permissions**. Each tool needs its own scopes. For example, searching messages needs `search:read.public` (plus `search:read.private`, `search:read.mpim`, and `search:read.im` for private conversations), and sending messages needs `chat:write`. Check the scope table in Slack's [MCP server overview](https://docs.slack.dev/ai/slack-mcp-server/) and add a scope for every tool you plan to expose.
+
+- **Redirect URLs**: set this once you have the redirect URI Arcade generates (see [Add the redirect URI to your Slack app](#add-the-redirect-uri-to-your-slack-app) below).
+
+## Configure the remote server in Arcade
+
+<Steps>
+
+### Register the server
+
+Go to the [MCP servers dashboard](https://app.arcade.dev/servers), click **Add Server**, choose **Remote MCP**, and enter a server ID and the server URL:
+
+```
+https://mcp.slack.com/mcp
+```
+
+### Configure OAuth2 authorization
+
+Open **Advanced settings → OAuth2 authorization** and enter your Slack app's **Client ID** and **Client Secret**.
+
+<Callout type="info">
+  Slack's MCP server doesn't support Dynamic Client Registration, so you must
+  supply the Client ID and Secret manually. If you leave these blank, Arcade
+  attempts Dynamic Client Registration and the connection fails.
+</Callout>
+
+### Add the redirect URI to your Slack app
+
+Copy the redirect URI Arcade generated and add it under **Redirect URLs** in your Slack app's **OAuth & Permissions** settings.
+
+### Authorize and confirm
+
+Save the server to open the authorization prompt. Sign in with a Slack account in the workspace where you installed the app, and approve the requested scopes.
+
+</Steps>
+
+## Per-user tool descriptions
+
+<Callout type="warning">
+  Slack's MCP server writes the authorizing user's Slack user ID into some
+  tool descriptions, such as `slack_search_public_and_private` and
+  `slack_send_message`. An agent reads that ID as "me", so a description
+  listed with one person's credentials can point another user's agent at the
+  wrong person: searching for someone else's mentions, or sending a message
+  to someone else.
+</Callout>
+
+Arcade fetches a remote server's tool list with the credentials of the admin who authorized it (see [Who authenticates, and when](/en/operate/governance/remote-mcp-servers#who-authenticates-and-when)). With Slack's server, that list can carry the admin's user ID to every user of a gateway, even though each tool call still runs with the calling user's own token.
+
+Slack can switch these per-user descriptions off for your workspace, but only on request. Contact Slack support and ask them to turn off per-user tool descriptions on the Slack MCP server. Do this before you roll the server out beyond a single user.
+
+## Troubleshooting
+
+- **A Dynamic Client Registration error when you save the server**: the Client ID and Client Secret are empty. See [Configure OAuth2 authorization](#configure-oauth2-authorization).
+- **Authorization doesn't complete, or the server never lists tools**: confirm the Model Context Protocol feature is turned on for your Slack app. See [Set up Slack](#set-up-slack).
+- **A tool call fails with `missing_scopes`**: your Slack app doesn't request a user token scope that tool needs. Add the scope under **OAuth & Permissions**, then have the affected user authorize again so their token picks it up.
+- **An agent acts on the wrong person when asked about "me"**: the tool descriptions name a different user. See [Per-user tool descriptions](#per-user-tool-descriptions).
+
+## Next steps
+
+- [Create an MCP Gateway](/en/operate/governance/mcp-gateways/create-via-dashboard) to expose this server's tools.
+- [Connect to MCP clients](/en/get-started/mcp-clients).
