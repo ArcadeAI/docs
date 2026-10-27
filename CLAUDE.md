@@ -36,7 +36,7 @@ Run a script directly with `bun scripts/<name>.ts` (never `tsx`, `npx`, `pnpm`, 
 - **`lib/`** — fumadocs source/layout config, toolkit data/slug/static-param helpers, integration catalog, glossary remark plugin, `remark-nextra-compat`, config and dictionaries.
 - **`data/partner-toolkits.ts`** — Hand-authored partner integrations (no toolkit JSON).
 - **`toolkit-docs-generator/`** — Generates MCP toolkit JSON into `toolkit-docs-generator/data/toolkits/`; `scripts/sync-toolkit-sidebar.ts` emits the nine integration category `meta.json` files.
-- **`scripts/`** — Build/CI scripts (Vale style fixes/reviews, redirect checking, meta.json validation, internal link updates, llms.txt generation, Algolia crawler config sync).
+- **`scripts/`** — Build/CI scripts (Vale style fixes/reviews, redirect checking, meta.json validation, internal link updates, llms.txt generation).
 - **`tests/`** — Vitest tests (broken links, internal links, frontmatter, sitemap, toolkit data, navigation contracts). `tests/helpers/content-paths.ts` maps content files ↔ URLs.
 - **`redirects.ts`** — Redirect data module (~215 rules) imported by `next.config.ts`, the redirect checker, and tests.
 - **`source.config.ts`** — fumadocs-mdx config (frontmatter schema, Shiki transformers). `proxy.ts` redirects locale-less and non-English paths to `/en`.
