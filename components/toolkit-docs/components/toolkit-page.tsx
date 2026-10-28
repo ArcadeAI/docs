@@ -561,7 +561,7 @@ function ToolsOnThisPage({
  *
  * Composes the full toolkit documentation page from JSON data.
  */
-export function ToolkitPage({ data }: ToolkitPageProps) {
+export function ToolkitPage({ actions, data }: ToolkitPageProps) {
   useEffect(() => {
     document.documentElement.dataset.pageKind = "toolkit";
     return () => {
@@ -629,7 +629,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       {/* Overview section */}
       <section id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
         <BreadcrumbBar category={data.metadata?.category} label={data.label} />
-        <PageActionsBar toolkitId={data.id} />
+        <PageActionsBar toolkitId={data.id}>{actions}</PageActionsBar>
         <h1 className="mb-6 font-bold text-4xl text-foreground tracking-tight">
           {data.label}
         </h1>
